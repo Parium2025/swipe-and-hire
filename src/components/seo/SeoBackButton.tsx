@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getFooterRestoreOrigin, requestFooterRestore } from '@/lib/scrollRestoration';
 
 interface SeoBackButtonProps {
   /** Fallback route if there is no history to go back to. */
@@ -19,6 +20,13 @@ const SeoBackButton = ({ fallback = '/jobb', label = 'Tillbaka' }: SeoBackButton
   const navigate = useNavigate();
 
   const handleBack = () => {
+    const footerOrigin = getFooterRestoreOrigin(window.location.pathname);
+    if (footerOrigin) {
+      requestFooterRestore(footerOrigin);
+      navigate(footerOrigin);
+      return;
+    }
+
     if (window.history.length > 1) {
       navigate(-1);
     } else {

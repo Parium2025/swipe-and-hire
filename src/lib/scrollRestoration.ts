@@ -1,6 +1,8 @@
 /** Pure utility functions for scroll-position persistence. */
 
 const SCROLL_STORAGE_KEY = 'parium-scroll-positions';
+const PENDING_FOOTER_RESTORE_KEY = 'parium-pending-footer-restore';
+const LATEST_FOOTER_NAVIGATION_KEY = 'parium-latest-footer-navigation';
 
 export const RESTORE_TOLERANCE_PX = 2;
 export const REQUIRED_STABLE_FRAMES = 2;
@@ -12,6 +14,9 @@ export interface ScrollPosition {
   anchorId?: string;
   anchorOffset?: number;
   scrollHeight?: number;
+  restoreSource?: 'footer';
+  restoreTargetPath?: string;
+  restoreSavedAt?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -20,6 +25,12 @@ export interface ScrollPosition {
 
 export const getManagedScrollContainer = (): HTMLElement | null =>
   document.querySelector('[data-main-scroll-container="true"]');
+
+export const getRestorableScrollContainer = (): HTMLElement | null =>
+  getManagedScrollContainer()
+  ?? document.querySelector<HTMLElement>('[data-landing-scroll-root]')
+  ?? (document.scrollingElement as HTMLElement | null)
+  ?? document.documentElement;
 
 // ---------------------------------------------------------------------------
 // Session-storage read / write with defensive parsing
@@ -44,6 +55,9 @@ const normalizePosition = (value: unknown): ScrollPosition | null => {
     anchorId: typeof candidate.anchorId === 'string' ? candidate.anchorId : undefined,
     anchorOffset: typeof candidate.anchorOffset === 'number' ? candidate.anchorOffset : undefined,
     scrollHeight: typeof candidate.scrollHeight === 'number' ? candidate.scrollHeight : undefined,
+    restoreSource: candidate.restoreSource === 'footer' ? 'footer' : undefined,
+    restoreTargetPath: typeof candidate.restoreTargetPath === 'string' ? candidate.restoreTargetPath : undefined,
+    restoreSavedAt: typeof candidate.restoreSavedAt === 'number' ? candidate.restoreSavedAt : undefined,
   };
 };
 
@@ -83,8 +97,11 @@ export const writePositions = (positions: Record<string, ScrollPosition>) => {
  * Use this on pointerdown of links/cards so we never lose the exact
  * position to a missed rAF when the user clicks fast.
  */
-export const saveScrollNow = (pathname: string) => {
-  const container = getManagedScrollContainer();
+export const saveScrollNow = (
+  pathname: string,
+  options?: { restoreSource?: 'footer'; restoreTargetPath?: string },
+) => {
+  const container = getRestorableScrollContainer();
   if (!container) return;
   const positions = readPositions();
   const anchor = getAnchorSnapshot(container);
@@ -93,8 +110,94 @@ export const saveScrollNow = (pathname: string) => {
     anchorId: anchor?.anchorId,
     anchorOffset: anchor?.anchorOffset,
     scrollHeight: container.scrollHeight,
+    restoreSource: options?.restoreSource,
+    restoreTargetPath: options?.restoreTargetPath,
+    restoreSavedAt: options?.restoreSource ? Date.now() : undefined,
   };
   writePositions(positions);
+
+  if (options?.restoreSource === 'footer' && options.restoreTargetPath) {
+    try {
+      sessionStorage.setItem(LATEST_FOOTER_NAVIGATION_KEY, JSON.stringify({
+        originPath: pathname,
+        targetPath: options.restoreTargetPath,
+        savedAt: Date.now(),
+      }));
+    } catch { /* ignore */ }
+  }
+};
+
+export const clearFooterRestoreForTarget = (targetPath: string) => {
+  const positions = readPositions();
+  let changed = false;
+
+  for (const [pathname, position] of Object.entries(positions)) {
+    if (position.restoreSource !== 'footer' || position.restoreTargetPath !== targetPath) continue;
+    positions[pathname] = {
+      top: position.top,
+      anchorId: position.anchorId,
+      anchorOffset: position.anchorOffset,
+      scrollHeight: position.scrollHeight,
+    };
+    changed = true;
+  }
+
+  if (changed) writePositions(positions);
+};
+
+export const getFooterRestoreOrigin = (targetPath: string): string | null => {
+  try {
+    const raw = sessionStorage.getItem(LATEST_FOOTER_NAVIGATION_KEY);
+    if (raw) {
+      const latest = JSON.parse(raw) as { originPath?: unknown; targetPath?: unknown; savedAt?: unknown };
+      if (
+        latest.targetPath === targetPath
+        && typeof latest.originPath === 'string'
+        && typeof latest.savedAt === 'number'
+        && Date.now() - latest.savedAt < 30 * 60 * 1000
+      ) {
+        return latest.originPath;
+      }
+    }
+  } catch { /* ignore */ }
+
+  const positions = readPositions();
+  let best: { pathname: string; savedAt: number } | null = null;
+
+  for (const [pathname, position] of Object.entries(positions)) {
+    if (position.restoreSource !== 'footer' || position.restoreTargetPath !== targetPath) continue;
+    const savedAt = position.restoreSavedAt ?? 0;
+    if (!best || savedAt > best.savedAt) best = { pathname, savedAt };
+  }
+
+  return best?.pathname ?? null;
+};
+
+export const requestFooterRestore = (originPath: string) => {
+  try { sessionStorage.setItem(PENDING_FOOTER_RESTORE_KEY, originPath); } catch { /* ignore */ }
+};
+
+export const clearLatestFooterNavigationIfLeavingTarget = (previousPath: string) => {
+  try {
+    const raw = sessionStorage.getItem(LATEST_FOOTER_NAVIGATION_KEY);
+    if (!raw) return;
+    const latest = JSON.parse(raw) as { targetPath?: unknown };
+    if (latest && typeof latest === 'object' && latest.targetPath === previousPath) {
+      sessionStorage.removeItem(LATEST_FOOTER_NAVIGATION_KEY);
+    }
+  } catch {
+    try { sessionStorage.removeItem(LATEST_FOOTER_NAVIGATION_KEY); } catch { /* ignore */ }
+  }
+};
+
+export const consumePendingFooterRestore = (pathname: string): boolean => {
+  try {
+    if (sessionStorage.getItem(PENDING_FOOTER_RESTORE_KEY) !== pathname) return false;
+    sessionStorage.removeItem(PENDING_FOOTER_RESTORE_KEY);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 // ---------------------------------------------------------------------------
