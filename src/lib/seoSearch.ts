@@ -11,6 +11,7 @@
  */
 
 import { jobSearchSynonyms } from '@/lib/smartSearch';
+import { findOccupationAliases } from '@/lib/occupationAliases';
 
 // ─────────────────────────────────────────────────────────────────
 // Normalisering: ta bort diakriter + svenska bokstäver → ASCII.
