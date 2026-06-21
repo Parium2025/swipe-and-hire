@@ -165,21 +165,43 @@ const GuidePage = () => {
               <span className="mx-1.5">/</span>
               <span className="text-white">{guide.category}</span>
             </nav>
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white backdrop-blur">
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white backdrop-blur"
+            >
               {guide.category}
-            </p>
-            <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.05 }}
+              className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
+            >
               {guide.title}
-            </h1>
-            <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white">
+            </motion.h1>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white"
+            >
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="h-4 w-4" /> {guide.readingMinutes} min läsning
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" /> Uppdaterad {guide.updated}
               </span>
-            </div>
-            <p className="mt-6 text-lg text-white">{guide.excerpt}</p>
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.25 }}
+              className="mt-6 text-lg text-white"
+            >
+              {guide.excerpt}
+            </motion.p>
           </div>
 
           {/* Sections */}
