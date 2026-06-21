@@ -35,7 +35,7 @@ const JobbCityYrke = () => {
 
   const canonical = `${BASE}/jobb/${city.slug}/${occ.slug}`;
   const title = `Lediga jobb ${occ.asForm} ${city.inForm} – sök ${occ.plural}jobb | Parium`;
-  const description = `Hitta lediga jobb ${occ.asForm} ${city.inForm}. Se vanliga arbetsuppgifter, krav och lön. Skapa profil gratis i Parium och matcha med arbetsgivare ${city.inForm} på sekunder.`;
+  const description = `Hitta lediga jobb ${occ.asForm} ${city.inForm}. Se vanliga arbetsuppgifter, krav och lön. Skapa profil gratis i Parium och sök jobb ${city.inForm} på sekunder.`;
 
   const jobCount = getJobCount(counts, { citySlug: city.slug, occupationSlug: occ.slug });
   const hasJobs = jobCount > 0;

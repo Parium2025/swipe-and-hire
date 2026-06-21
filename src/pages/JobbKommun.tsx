@@ -348,7 +348,7 @@ const JobbKommun = () => {
             Redo att hitta ditt nästa jobb i {kommun.name} kommun?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white">
-            Skapa min profil idag och börja matcha med arbetsgivare i {kommun.name}.
+            Skapa min profil idag och sök lediga jobb i {kommun.name} kommun.
           </p>
           <div className="mt-7 flex justify-center">
             <SeoCTAButton

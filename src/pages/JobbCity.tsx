@@ -70,7 +70,7 @@ const JobbCity = () => {
 
   const canonical = `${BASE}/jobb/${city.slug}`;
   const title = `Lediga jobb ${city.inForm} – sök jobb snabbt med Parium`;
-  const description = `Hitta lediga jobb ${city.inForm} som passar dig. Skapa min profil idag, matcha med arbetsgivare ${city.inForm} och chatta direkt i jobbappen Parium.`;
+  const description = `Hitta lediga jobb ${city.inForm} som passar dig. Skapa min profil idag och sök jobb ${city.inForm} i jobbappen Parium.`;
 
   const faqs = [
     {
@@ -186,7 +186,7 @@ const JobbCity = () => {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white sm:text-xl"
           >
-            {city.intro} Skapa min profil idag och matcha med arbetsgivare {city.inForm} direkt i appen.
+            {city.intro} Skapa min profil idag och sök lediga jobb {city.inForm} i appen.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -278,7 +278,7 @@ const JobbCity = () => {
             {[
               { icon: Search, title: 'Skapa profil', body: `Ange ${city.name} som plats och vilka yrken du är intresserad av. Gratis och tar någon minut.` },
               { icon: Zap, title: 'Ansök smart', body: `Parium visar lediga jobb i de områden som du har valt.` },
-              { icon: MessageSquare, title: 'Chatta', body: `När du har matchat med en arbetsgivare ${city.inForm} och de väljer att kontakta dig kan ni börja chatta direkt i appen.` },
+              { icon: MessageSquare, title: 'Chatta i appen', body: `När en arbetsgivare matchar med dig kan ni chatta i appen.` },
             ].map(({ icon: Icon, title: t, body }) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.06] p-6">
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 mb-4">
@@ -347,7 +347,7 @@ const JobbCity = () => {
             Redo att hitta ditt nästa jobb {city.inForm}?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white">
-            Skapa min profil idag och börja matcha med arbetsgivare {city.inForm} idag.
+            Skapa min profil idag och sök lediga jobb {city.inForm}.
           </p>
           <div className="mt-7 flex justify-center">
             <SeoCTAButton

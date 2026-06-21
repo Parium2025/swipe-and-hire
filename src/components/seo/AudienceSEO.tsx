@@ -12,7 +12,7 @@ const SEO: Record<AudienceRole, SEOConfig> = {
   job_seeker: {
     title: 'Hitta jobb som passar dig – jobbapp & lediga jobb | Parium',
     description:
-      'Hitta lediga jobb som faktiskt passar dig. Skapa profil gratis, matcha med arbetsgivare och chatta direkt i jobbappen Parium.',
+      'Hitta lediga jobb som faktiskt passar dig. Skapa profil gratis och sök jobb i jobbappen Parium.',
     canonical: 'https://parium.se/jobbsokare',
   },
   employer: {
@@ -26,7 +26,7 @@ const SEO: Record<AudienceRole, SEOConfig> = {
 const faqsJobSeeker = [
   {
     q: 'Är Parium gratis för jobbsökare?',
-    a: 'Ja. Att skapa profil, matcha med arbetsgivare och chatta är helt gratis för dig som söker jobb.',
+    a: 'Ja. Att skapa profil, söka jobb och chatta med arbetsgivare är helt gratis för dig som söker jobb.',
   },
   {
     q: 'Hur hittar jag jobb som passar mig?',

@@ -180,7 +180,7 @@ const YrkenHub = () => {
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base text-white sm:mt-6 sm:text-xl">
               Hitta lediga jobb inom Sveriges mest efterfrågade yrken. Skapa min profil idag och
-              matcha med arbetsgivare över hela landet.
+              sök jobb över hela landet.
             </p>
           </div>
         </section>
@@ -274,7 +274,7 @@ const YrkenHub = () => {
               Hitta ditt nästa jobb idag
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white">
-              Skapa min profil idag – matcha med arbetsgivare i hela Sverige.
+              Skapa min profil idag – sök lediga jobb i hela Sverige.
             </p>
             <div className="mt-8 flex justify-center">
               <SeoCTAButton onClick={() => navigate('/auth')} />
