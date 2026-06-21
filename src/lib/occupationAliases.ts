@@ -153,8 +153,8 @@ export const OCCUPATION_ALIASES: OccupationAlias[] = [
   { alias: 'frisör', canonical: 'Frisör' },
   { alias: 'hårklippare', canonical: 'Frisör' },
   { alias: 'barberare', canonical: 'Frisör' },
-  { alias: 'massör', canonical: 'Massör' },
-  { alias: 'naglar', canonical: 'Hud- och spaterapeut' },
+  { alias: 'massör', canonical: 'Massör och massageterapeut' },
+  { alias: 'naglar', canonical: 'Hudterapeut' },
 
   // ─── Militär ────────────────────────────────────────────
   { alias: 'soldat', canonical: 'Soldat' },
