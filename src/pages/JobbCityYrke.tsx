@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import FaqAccordion from '@/components/seo/FaqAccordion';
