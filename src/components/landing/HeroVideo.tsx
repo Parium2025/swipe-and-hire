@@ -157,7 +157,7 @@ const HeroVideo = () => {
           playsInline
           preload="auto"
           disablePictureInPicture
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover md:scale-[1.35] lg:scale-[1.5] xl:scale-[1.6] origin-center"
         />
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
