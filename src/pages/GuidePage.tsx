@@ -46,7 +46,10 @@ function FaqItem({ q, a }: { q: string; a: string }) {
             }}
             className="overflow-hidden"
           >
-            <p className="px-6 pb-6 text-white leading-relaxed">{a}</p>
+            <p className="px-6 pb-6 text-white leading-relaxed">
+              <span className="font-semibold text-white/90">Svar: </span>
+              {a}
+            </p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -61,7 +64,10 @@ const GuidePage = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-    window.scrollTo(0, 0);
+    // Hoppa direkt upp utan smooth — entrance-animationen ger känslan av att sidan flyger in
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }, [slug]);
 
   if (!guide) return <Navigate to="/guider" replace />;
@@ -129,7 +135,13 @@ const GuidePage = () => {
 
 
         {/* Header */}
-        <article className="relative overflow-hidden px-5 pt-6 pb-12 sm:px-8 md:px-12">
+        <motion.article
+          key={guide.slug}
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease }}
+          className="relative overflow-hidden px-5 pt-6 pb-12 sm:px-8 md:px-12"
+        >
           <SeoBubbles />
           <div className="relative z-10 mx-auto max-w-3xl">
             <nav aria-label="Brödsmulor" className="mb-6 text-xs text-white">
@@ -260,7 +272,7 @@ const GuidePage = () => {
               ))}
             </ul>
           </div>
-        </article>
+        </motion.article>
       </div>
     </>
   );
