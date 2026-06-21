@@ -9,7 +9,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { supabase } from '@/integrations/supabase/client';
-import { MapPin, Briefcase, Building2, Search, Zap, MessageSquare } from 'lucide-react';
+import { MapPin, Briefcase, Building2, Search, Zap, MessageSquare, ArrowUpRight } from 'lucide-react';
 import { KOMMUNER, KOMMUN_BY_SLUG } from '@/data/jobMunicipalities';
 import { CITY_BY_SLUG } from '@/data/jobCities';
 import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
