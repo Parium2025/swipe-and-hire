@@ -64,10 +64,16 @@ const GuidePage = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-    // Hoppa direkt upp utan smooth — entrance-animationen ger känslan av att sidan flyger in
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    // Den faktiska scroll-containern är .seo-scroll-page (position:fixed) — inte window.
+    // Vi måste scrolla den synkront till toppen innan entrance-animationen spelas upp.
+    const scrollToTop = () => {
+      const el = document.querySelector('.seo-scroll-page') as HTMLElement | null;
+      if (el) el.scrollTop = 0;
+      window.scrollTo(0, 0);
+    };
+    scrollToTop();
+    // En extra tick efter mount så vi vinner ev. race mot rendering
+    requestAnimationFrame(scrollToTop);
   }, [slug]);
 
   if (!guide) return <Navigate to="/guider" replace />;
@@ -137,9 +143,9 @@ const GuidePage = () => {
         {/* Header */}
         <motion.article
           key={guide.slug}
-          initial={{ opacity: 0, y: 32 }}
+          initial={{ opacity: 0, y: 64 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease }}
+          transition={{ duration: 0.7, ease }}
           className="relative overflow-hidden px-5 pt-6 pb-12 sm:px-8 md:px-12"
         >
           <SeoBubbles />
