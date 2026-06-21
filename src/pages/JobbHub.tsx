@@ -183,8 +183,8 @@ const JobbHub = () => {
               );
             })}
             {filteredCities.length === 0 && (
-              <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center text-sm text-white/70">
-                Inga städer matchar "{cityQuery}".
+              <li>
+                <SeoEmptyResultCTA query={cityQuery} kind="stad" />
               </li>
             )}
           </ul>
