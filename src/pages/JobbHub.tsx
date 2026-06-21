@@ -6,15 +6,38 @@ import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
 import SeoEmptyResultCTA from '@/components/seo/SeoEmptyResultCTA';
+import SeoSearchBox from '@/components/seo/SeoSearchBox';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
-import { ArrowRight, MapPin, Search, Briefcase } from 'lucide-react';
+import { ArrowRight, MapPin, Briefcase } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { CITIES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 import { smartMatchScore } from '@/lib/seoSearch';
+
+const POPULAR_CITIES = [
+  'Stockholm',
+  'Göteborg',
+  'Malmö',
+  'Uppsala',
+  'Västerås',
+  'Örebro',
+  'Linköping',
+  'Helsingborg',
+];
+
+const POPULAR_OCCUPATIONS = [
+  'Undersköterska',
+  'Lagerarbetare',
+  'Chaufför',
+  'Snickare',
+  'Elektriker',
+  'Lärare',
+  'Servitör',
+  'Kock',
+];
 
 const CANONICAL = 'https://parium.se/jobb';
 const TITLE = 'Lediga jobb i hela Sverige – jobbapp & matchning | Parium';
@@ -142,24 +165,22 @@ const JobbHub = () => {
         <div className="mx-auto max-w-5xl">
           <h2 className="sr-only">Välj stad</h2>
 
-          {/* Sökruta – endast mobil */}
+          {/* Sökruta – endast mobil, med autocomplete + populära */}
           <div className="mb-4 md:hidden">
-            <label className="relative block">
-              <span className="sr-only">Sök stad</span>
-              <Search
-                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60"
-                aria-hidden="true"
-              />
-              <input
-                type="search"
-                inputMode="search"
-                value={cityQuery}
-                onChange={(e) => setCityQuery(e.target.value)}
-                placeholder="Sök stad eller län"
-                className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-4 text-base text-white placeholder:text-white/50 outline-none focus:border-white/30 focus:bg-white/[0.10]"
-                style={{ fontSize: '16px' }}
-              />
-            </label>
+            <SeoSearchBox
+              value={cityQuery}
+              onChange={setCityQuery}
+              placeholder="Sök stad eller län"
+              ariaLabel="Sök stad"
+              storageKey="parium:recent-stader"
+              popular={POPULAR_CITIES}
+              suggestions={filteredCities.slice(0, 8).map((c) => ({
+                label: `Lediga jobb ${c.inForm}`,
+                sub: c.county,
+                to: `/jobb/${c.slug}`,
+                term: c.name,
+              }))}
+            />
           </div>
 
           {/* Mobil: stackad lista med hela titlar */}
@@ -241,24 +262,22 @@ const JobbHub = () => {
             Klicka på ett yrke för att se lediga jobb, lön och vad som krävs.
           </p>
 
-          {/* Sökruta – endast mobil */}
+          {/* Sökruta – endast mobil, med autocomplete + populära */}
           <div className="mt-6 mb-4 md:hidden">
-            <label className="relative block">
-              <span className="sr-only">Sök yrke</span>
-              <Search
-                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60"
-                aria-hidden="true"
-              />
-              <input
-                type="search"
-                inputMode="search"
-                value={occQuery}
-                onChange={(e) => setOccQuery(e.target.value)}
-                placeholder="Sök yrke"
-                className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-4 text-base text-white placeholder:text-white/50 outline-none focus:border-white/30 focus:bg-white/[0.10]"
-                style={{ fontSize: '16px' }}
-              />
-            </label>
+            <SeoSearchBox
+              value={occQuery}
+              onChange={setOccQuery}
+              placeholder="Sök yrke"
+              ariaLabel="Sök yrke"
+              storageKey="parium:recent-yrken"
+              popular={POPULAR_OCCUPATIONS}
+              suggestions={filteredOccupations.slice(0, 8).map((o) => ({
+                label: `Lediga jobb ${o.asForm}`,
+                sub: o.category,
+                to: `/yrke/${o.slug}`,
+                term: o.name,
+              }))}
+            />
           </div>
 
           {/* Mobil: stackad lista med hela titlar */}
