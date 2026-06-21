@@ -90,9 +90,16 @@ const YrkenHub = () => {
   }, []);
 
   const filtered = useMemo(() => {
-    const q = normalize(query.trim());
+    const q = query.trim();
     if (!q) return DIRECTORY;
-    return DIRECTORY.filter((o) => normalize(o.search).includes(q));
+    // Smart sökning: synonymer, fuzzy-matchning, multi-ord (AND).
+    // Sorterar på score så bäst träff hamnar först.
+    const scored = DIRECTORY.map((o) => ({
+      o,
+      score: smartMatchScore(q, [o.title, o.category, o.search]),
+    })).filter((x) => x.score > 0);
+    scored.sort((a, b) => b.score - a.score);
+    return scored.map((x) => x.o);
   }, [query]);
 
   // Desktop (md:grid-cols-3): TRIMMA till multipel av 3 så raden alltid är komplett.
