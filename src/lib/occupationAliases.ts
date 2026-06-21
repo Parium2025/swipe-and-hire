@@ -48,8 +48,8 @@ export const OCCUPATION_ALIASES: OccupationAlias[] = [
   { alias: 'taxiförare', canonical: 'Taxiförare' },
   { alias: 'busschaufför', canonical: 'Bussförare' },
   { alias: 'bussförare', canonical: 'Bussförare' },
-  { alias: 'budbil', canonical: 'Bud- och transportförare' },
-  { alias: 'kurir', canonical: 'Bud- och transportförare' },
+  { alias: 'budbil', canonical: 'Budbilsförare' },
+  { alias: 'kurir', canonical: 'Budbilsförare' },
   { alias: 'pilot', canonical: 'Pilot' },
   { alias: 'flygkapten', canonical: 'Pilot' },
 
