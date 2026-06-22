@@ -301,8 +301,15 @@
           if (path === '/' || path === '') {
             add({ rel: 'preload', as: 'image', href: '/hero-video-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
-            var isLarge = window.matchMedia && window.matchMedia('(min-width: 1800px)').matches;
-            add({ rel: 'preload', as: 'video', href: isLarge ? '/hero-video.mp4' : '/hero-video-720.mp4', type: 'video/mp4', fetchpriority: 'high' });
+            // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
+            var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
+            var saveData = !!(conn && conn.saveData);
+            var slowNet = !!(conn && /(^|-)2g$/.test(conn.effectiveType || ''));
+            if (!saveData && !slowNet) {
+              // Breakpoint MÅSTE matcha <source media> i HeroVideo.tsx för att undvika dubbel-fetch.
+              var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
+              add({ rel: 'preload', as: 'video', href: isDesktop ? '/hero-video.mp4' : '/hero-video-720.mp4', type: 'video/mp4', fetchpriority: 'high' });
+            }
           } else if (path === '/jobbsokare' || path === '/arbetsgivare') {
             add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'high' });
           }

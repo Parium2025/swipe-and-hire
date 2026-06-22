@@ -1,23 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
-// Serve 720p (2.4 MB) på mobil/tablet och 1080p (13 MB) på desktop.
-// Sparar ~10 MB nedladdning på mobil utan synlig kvalitetsskillnad.
-const pickSrc = () => {
-  if (typeof window === 'undefined') return '/hero-video.mp4';
-  return window.innerWidth < 1024 ? '/hero-video-720.mp4' : '/hero-video.mp4';
+// Datasparläge eller 2G → hoppa över videoladdning helt och visa bara poster.
+// Sparar 2,4–13 MB för användare i dåligt nät utan att förändra UX synbart.
+const shouldSkipVideo = () => {
+  if (typeof navigator === 'undefined') return false;
+  const conn = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+  if (!conn) return false;
+  if (conn.saveData) return true;
+  if (typeof conn.effectiveType === 'string' && /(^|-)2g$/.test(conn.effectiveType)) return true;
+  return false;
 };
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [src] = useState<string>(pickSrc);
+  const [skipVideo] = useState<boolean>(shouldSkipVideo);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || skipVideo) return;
 
     // Säkerställ autoplay-krav direkt på DOM-nivå (iOS-kritisk)
     video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
     video.defaultMuted = true;
     video.playsInline = true;
     video.setAttribute('muted', '');
@@ -149,16 +155,25 @@ const HeroVideo = () => {
       >
         <video
           ref={videoRef}
-          src={src}
           poster="/hero-video-poster.jpg"
           muted
           autoPlay
           loop
           playsInline
-          preload="auto"
+          // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
+          // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
+          preload="metadata"
           disablePictureInPicture
           className="absolute inset-0 h-full w-full object-cover"
-        />
+        >
+          {!skipVideo && (
+            <>
+              {/* Browserns preload-scanner ser rätt källa direkt — ingen JS-väntan. */}
+              <source src="/hero-video.mp4" type="video/mp4" media="(min-width: 1024px)" />
+              <source src="/hero-video-720.mp4" type="video/mp4" />
+            </>
+          )}
+        </video>
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
