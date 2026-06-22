@@ -18,10 +18,12 @@ const HeroVideo = () => {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || skipVideo) return;
 
     // Säkerställ autoplay-krav direkt på DOM-nivå (iOS-kritisk)
     video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
     video.defaultMuted = true;
     video.playsInline = true;
     video.setAttribute('muted', '');
