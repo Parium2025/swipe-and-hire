@@ -125,7 +125,7 @@ const SiteFooter = () => {
       <div className="mx-auto w-full max-w-7xl px-6 pb-10 pt-14 sm:px-8 sm:pt-16">
         <div className="grid grid-cols-1 gap-y-10 md:grid-cols-2 md:gap-x-8 md:gap-y-12">
           <ColumnPair
-            leftTitle="Hitta jobb"
+            leftTitle="Hitta jobb i"
             leftLinks={cityLinks}
             rightTitle="Yrken"
             rightLinks={occupationLinks}
