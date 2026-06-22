@@ -168,7 +168,15 @@ const HeroVideo = () => {
         >
           {!skipVideo && (
             <>
-              {/* Browserns preload-scanner ser rätt källa direkt — ingen JS-väntan. */}
+              {/* Browserns preload-scanner ser rätt källa direkt — ingen JS-väntan.
+                  Ordning: AV1 (Chrome/Firefox/Edge, mindre) → HEVC (Safari, mindre)
+                  → H.264 (universell fallback). Inom varje codec: desktop först, mobil sist. */}
+              {/* AV1 — Chrome/Edge/Firefox + Safari 17+ */}
+              <source src="/hero-video.av1.mp4" type='video/mp4; codecs="av01.0.05M.08"' media="(min-width: 1024px)" />
+              {/* HEVC — Safari (alla versioner med iOS 11+) */}
+              <source src="/hero-video.hevc.mp4" type='video/mp4; codecs="hvc1"' media="(min-width: 1024px)" />
+              <source src="/hero-video-720.hevc.mp4" type='video/mp4; codecs="hvc1"' />
+              {/* H.264 — universell fallback */}
               <source src="/hero-video.mp4" type="video/mp4" media="(min-width: 1024px)" />
               <source src="/hero-video-720.mp4" type="video/mp4" />
             </>

@@ -308,7 +308,17 @@
             if (!saveData && !slowNet) {
               // Breakpoint MÅSTE matcha <source media> i HeroVideo.tsx för att undvika dubbel-fetch.
               var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
-              add({ rel: 'preload', as: 'video', href: isDesktop ? '/hero-video.mp4' : '/hero-video-720.mp4', type: 'video/mp4', fetchpriority: 'high' });
+              // Plocka exakt samma codec som <video><source> kommer välja — annars dubbel-laddning.
+              var probe = document.createElement('video');
+              var hasAV1 = probe.canPlayType('video/mp4; codecs="av01.0.05M.08"') !== '';
+              var hasHEVC = probe.canPlayType('video/mp4; codecs="hvc1"') !== '';
+              var videoHref, videoType;
+              if (isDesktop && hasAV1) { videoHref = '/hero-video.av1.mp4'; videoType = 'video/mp4; codecs="av01.0.05M.08"'; }
+              else if (isDesktop && hasHEVC) { videoHref = '/hero-video.hevc.mp4'; videoType = 'video/mp4; codecs="hvc1"'; }
+              else if (isDesktop) { videoHref = '/hero-video.mp4'; videoType = 'video/mp4'; }
+              else if (hasHEVC) { videoHref = '/hero-video-720.hevc.mp4'; videoType = 'video/mp4; codecs="hvc1"'; }
+              else { videoHref = '/hero-video-720.mp4'; videoType = 'video/mp4'; }
+              add({ rel: 'preload', as: 'video', href: videoHref, type: videoType, fetchpriority: 'high' });
             }
           } else if (path === '/jobbsokare' || path === '/arbetsgivare') {
             add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'high' });
