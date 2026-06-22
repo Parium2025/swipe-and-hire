@@ -66,11 +66,23 @@ function FooterLink({ link }: { link: ColLink }) {
 
 function ColumnHeader({ title }: { title: string }) {
   return (
+    <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
+      {title}
+    </h3>
+  );
+}
+
+function MobileSection({ title, links }: { title: string; links: ColLink[] }) {
+  return (
     <div>
-      <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
-        {title}
-      </h3>
-      <div className="mt-2 h-px w-4 bg-white/15 md:hidden" aria-hidden="true" />
+      <ColumnHeader title={title} />
+      <ul className="mt-2 space-y-0">
+        {links.map((link) => (
+          <li key={link.to}>
+            <FooterLink link={link} />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -123,17 +135,23 @@ const SiteFooter = () => {
       <div className="h-px w-full bg-white/10" />
 
       <div className="mx-auto w-full max-w-7xl px-6 pb-10 pt-14 sm:px-8 sm:pt-16">
-        <div className="grid grid-cols-1 gap-y-10 md:grid-cols-2 md:gap-x-8 md:gap-y-12">
+        {/* Mobile: single column, section by section */}
+        <div className="grid grid-cols-1 gap-8 md:hidden">
+          <MobileSection title="Hitta jobb i" links={cityLinks} />
+          <MobileSection title="Yrken" links={occupationLinks} />
+          <div className="h-px bg-white/10" aria-hidden="true" />
+          <MobileSection title="Guider" links={guideLinks} />
+          <MobileSection title="Företaget" links={companyLinks} />
+        </div>
+
+        {/* Desktop: aligned two-column pairs */}
+        <div className="hidden md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-12">
           <ColumnPair
             leftTitle="Hitta jobb i"
             leftLinks={cityLinks}
             rightTitle="Yrken"
             rightLinks={occupationLinks}
           />
-
-          {/* Mobile divider between the two column-pairs */}
-          <div className="h-px bg-white/10 md:hidden" />
-
           <ColumnPair
             leftTitle="Guider"
             leftLinks={guideLinks}
