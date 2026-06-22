@@ -119,7 +119,15 @@ async function bootstrap() {
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
   const isAuthRoute = currentPath === '/auth';
   const isPublicLandingRoute = currentPath === '/';
-  
+
+  // 🚀 Warm up Spline-runtime chunk PARALLELLT med React-bootstrap för routes
+  // som faktiskt visar 3D-telefonen. Utan denna rad startar import först när
+  // SplinePhone-komponenten mountar (efter hydration) → 300–600 ms långsammare
+  // första frame. Ingen UX-ändring — exakt samma kod, bara tidigare i tiden.
+  if (currentPath === '/jobbsokare' || currentPath === '/arbetsgivare') {
+    void import('@splinetool/runtime').catch(() => { /* SplinePhone har egen fallback */ });
+  }
+
   // Start both preloads immediately (parallel)
   const authLogoPromise = preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
   void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
