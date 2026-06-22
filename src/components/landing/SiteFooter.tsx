@@ -103,14 +103,14 @@ function ColumnPair({
       <ColumnHeader title={rightTitle} />
 
       {Array.from({ length: rows }).map((_, i) => (
-        <>
-          <div key={`l-${i}`} className="mt-3 flex items-start md:mt-3.5">
+        <Fragment key={i}>
+          <div className="mt-3 flex items-start md:mt-3.5">
             {leftLinks[i] ? <FooterLink link={leftLinks[i]} /> : null}
           </div>
-          <div key={`r-${i}`} className="mt-3 flex items-start md:mt-3.5">
+          <div className="mt-3 flex items-start md:mt-3.5">
             {rightLinks[i] ? <FooterLink link={rightLinks[i]} /> : null}
           </div>
-        </>
+        </Fragment>
       ))}
     </div>
   );
