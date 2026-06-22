@@ -49,7 +49,7 @@ function Column({ title, links }: { title: string; links: ColLink[] }) {
 
   return (
     <div>
-      <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+      <h3 className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
         {title}
       </h3>
       <ul className="space-y-2.5">
@@ -78,9 +78,13 @@ const SiteFooter = () => {
       <div className="h-px w-full bg-white/10" />
 
       <div className="mx-auto w-full max-w-7xl px-6 pb-10 pt-14 sm:px-8 sm:pt-16">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-4 md:gap-y-12">
           <Column title="Hitta jobb" links={cityLinks} />
           <Column title="Yrken" links={occupationLinks} />
+
+          {/* Mobile divider between the two column-pairs */}
+          <div className="col-span-2 h-px bg-white/10 md:hidden" />
+
           <Column title="Guider" links={guideLinks} />
           <Column title="Företaget" links={companyLinks} />
         </div>
