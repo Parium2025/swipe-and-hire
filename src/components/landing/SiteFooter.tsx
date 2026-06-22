@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { saveScrollNow } from '@/lib/scrollRestoration';
 
@@ -37,8 +38,8 @@ const companyLinks: ColLink[] = [
   { label: 'Lediga jobb', to: '/jobb' },
 ];
 
-function Column({ title, links }: { title: string; links: ColLink[] }) {
-  const rememberFooterOrigin = (to: string) => {
+function useRememberFooterOrigin() {
+  return (to: string) => {
     try {
       saveScrollNow(window.location.pathname, {
         restoreSource: 'footer',
@@ -46,28 +47,71 @@ function Column({ title, links }: { title: string; links: ColLink[] }) {
       });
     } catch { /* ignore */ }
   };
+}
 
+function FooterLink({ link }: { link: ColLink }) {
+  const remember = useRememberFooterOrigin();
+  return (
+    <Link
+      to={link.to}
+      state={typeof window !== 'undefined' ? { footerOriginPath: window.location.pathname } : undefined}
+      onPointerDown={() => remember(link.to)}
+      onClick={() => remember(link.to)}
+      className="flex min-h-[44px] items-start text-[15px] font-medium leading-[1.35] text-white transition-colors hover:text-secondary"
+    >
+      {link.label}
+    </Link>
+  );
+}
+
+function ColumnHeader({ title }: { title: string }) {
   return (
     <div>
-      <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary md:mb-3.5">
+      <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
         {title}
       </h3>
-      <div className="mb-3 h-px w-4 bg-white/15 md:hidden" aria-hidden="true" />
-      <ul className="space-y-2.5">
-        {links.map((l) => (
-          <li key={l.to}>
-            <Link
-              to={l.to}
-              state={typeof window !== 'undefined' ? { footerOriginPath: window.location.pathname } : undefined}
-              onPointerDown={() => rememberFooterOrigin(l.to)}
-              onClick={() => rememberFooterOrigin(l.to)}
-              className="inline-block min-h-touch text-[15px] font-medium leading-6 text-white transition-colors hover:text-secondary"
-            >
-              {l.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-2 h-px w-4 bg-white/15 md:hidden" aria-hidden="true" />
+    </div>
+  );
+}
+
+/**
+ * Row-aligned pair: both columns share the same grid rows, so when one
+ * label wraps to two lines the opposite cell stretches to the same height.
+ * Apple-style symmetry on every screen size.
+ */
+function ColumnPair({
+  leftTitle,
+  leftLinks,
+  rightTitle,
+  rightLinks,
+}: {
+  leftTitle: string;
+  leftLinks: ColLink[];
+  rightTitle: string;
+  rightLinks: ColLink[];
+}) {
+  const rows = Math.max(leftLinks.length, rightLinks.length);
+  return (
+    <div
+      className="grid grid-cols-2 gap-x-8"
+      style={{
+        gridTemplateRows: `auto repeat(${rows}, minmax(0, auto))`,
+      }}
+    >
+      <ColumnHeader title={leftTitle} />
+      <ColumnHeader title={rightTitle} />
+
+      {Array.from({ length: rows }).map((_, i) => (
+        <Fragment key={i}>
+          <div className="mt-3 flex items-start md:mt-3.5">
+            {leftLinks[i] ? <FooterLink link={leftLinks[i]} /> : null}
+          </div>
+          <div className="mt-3 flex items-start md:mt-3.5">
+            {rightLinks[i] ? <FooterLink link={rightLinks[i]} /> : null}
+          </div>
+        </Fragment>
+      ))}
     </div>
   );
 }
@@ -79,15 +123,23 @@ const SiteFooter = () => {
       <div className="h-px w-full bg-white/10" />
 
       <div className="mx-auto w-full max-w-7xl px-6 pb-10 pt-14 sm:px-8 sm:pt-16">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-4 md:gap-y-12">
-          <Column title="Hitta jobb" links={cityLinks} />
-          <Column title="Yrken" links={occupationLinks} />
+        <div className="grid grid-cols-1 gap-y-10 md:grid-cols-2 md:gap-x-8 md:gap-y-12">
+          <ColumnPair
+            leftTitle="Hitta jobb"
+            leftLinks={cityLinks}
+            rightTitle="Yrken"
+            rightLinks={occupationLinks}
+          />
 
           {/* Mobile divider between the two column-pairs */}
-          <div className="col-span-2 h-px bg-white/10 md:hidden" />
+          <div className="h-px bg-white/10 md:hidden" />
 
-          <Column title="Guider" links={guideLinks} />
-          <Column title="Företaget" links={companyLinks} />
+          <ColumnPair
+            leftTitle="Guider"
+            leftLinks={guideLinks}
+            rightTitle="Företaget"
+            rightLinks={companyLinks}
+          />
         </div>
 
         {/* Bottom bar */}
