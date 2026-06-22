@@ -24,8 +24,6 @@ const HeroVideo = () => {
     video.muted = true;
     video.defaultMuted = true;
     video.playsInline = true;
-    video.defaultMuted = true;
-    video.playsInline = true;
     video.setAttribute('muted', '');
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
