@@ -49,9 +49,10 @@ function Column({ title, links }: { title: string; links: ColLink[] }) {
 
   return (
     <div>
-      <h3 className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
+      <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary md:mb-3.5">
         {title}
       </h3>
+      <div className="mb-3 h-px w-4 bg-white/15 md:hidden" aria-hidden="true" />
       <ul className="space-y-2.5">
         {links.map((l) => (
           <li key={l.to}>
