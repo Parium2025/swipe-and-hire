@@ -57,7 +57,7 @@ function FooterLink({ link }: { link: ColLink }) {
       state={typeof window !== 'undefined' ? { footerOriginPath: window.location.pathname } : undefined}
       onPointerDown={() => remember(link.to)}
       onClick={() => remember(link.to)}
-      className="flex min-h-[44px] items-start text-[15px] font-medium leading-[1.35] text-white transition-colors hover:text-secondary"
+      className="flex h-11 items-center whitespace-nowrap text-[15px] font-medium leading-none text-white transition-colors hover:text-secondary"
     >
       {link.label}
     </Link>
@@ -76,9 +76,9 @@ function ColumnHeader({ title }: { title: string }) {
 }
 
 /**
- * Row-aligned pair: both columns share the same grid rows, so when one
- * label wraps to two lines the opposite cell stretches to the same height.
- * Apple-style symmetry on every screen size.
+ * Row-aligned pair: both columns share the same fixed-height grid rows,
+ * so every link sits on the exact same baseline across columns.
+ * Apple-style symmetry — no drift, no asymmetric gaps.
  */
 function ColumnPair({
   leftTitle,
@@ -96,7 +96,7 @@ function ColumnPair({
     <div
       className="grid grid-cols-2 gap-x-8"
       style={{
-        gridTemplateRows: `auto repeat(${rows}, minmax(0, auto))`,
+        gridTemplateRows: `auto repeat(${rows}, 44px)`,
       }}
     >
       <ColumnHeader title={leftTitle} />
@@ -104,10 +104,10 @@ function ColumnPair({
 
       {Array.from({ length: rows }).map((_, i) => (
         <Fragment key={i}>
-          <div className="mt-3 flex items-start md:mt-3.5">
+          <div className="flex items-center">
             {leftLinks[i] ? <FooterLink link={leftLinks[i]} /> : null}
           </div>
-          <div className="mt-3 flex items-start md:mt-3.5">
+          <div className="flex items-center">
             {rightLinks[i] ? <FooterLink link={rightLinks[i]} /> : null}
           </div>
         </Fragment>
