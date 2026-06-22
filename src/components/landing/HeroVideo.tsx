@@ -155,16 +155,25 @@ const HeroVideo = () => {
       >
         <video
           ref={videoRef}
-          src={src}
           poster="/hero-video-poster.jpg"
           muted
           autoPlay
           loop
           playsInline
-          preload="auto"
+          // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
+          // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
+          preload="metadata"
           disablePictureInPicture
           className="absolute inset-0 h-full w-full object-cover"
-        />
+        >
+          {!skipVideo && (
+            <>
+              {/* Browserns preload-scanner ser rätt källa direkt — ingen JS-väntan. */}
+              <source src="/hero-video.mp4" type="video/mp4" media="(min-width: 1024px)" />
+              <source src="/hero-video-720.mp4" type="video/mp4" />
+            </>
+          )}
+        </video>
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
