@@ -23,11 +23,11 @@ const occupationLinks: ColLink[] = [
 ];
 
 const guideLinks: ColLink[] = [
-  { label: 'Genomsnittslön Sverige 2026', to: '/guider/genomsnittslon-sverige-2026' },
-  { label: 'Tips inför anställningsintervjun', to: '/guider/anstallningsintervju-tips' },
-  { label: 'Personligt brev 2026', to: '/guider/personligt-brev-2026' },
-  { label: 'Vanligaste intervjufrågorna', to: '/guider/jobbintervju-fragor-svar' },
-  { label: 'Lönesamtal – så lyckas du', to: '/guider/lonesamtal-tips' },
+  { label: 'Genomsnittslön 2026', to: '/guider/genomsnittslon-sverige-2026' },
+  { label: 'Intervjutips', to: '/guider/anstallningsintervju-tips' },
+  { label: 'Personligt brev', to: '/guider/personligt-brev-2026' },
+  { label: 'Intervjufrågor', to: '/guider/jobbintervju-fragor-svar' },
+  { label: 'Lönesamtal', to: '/guider/lonesamtal-tips' },
   { label: 'Alla guider', to: '/guider' },
 ];
 
