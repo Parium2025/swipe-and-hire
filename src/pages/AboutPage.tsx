@@ -130,7 +130,7 @@ const AboutPage = () => {
       <section className="relative px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
           <div className="rounded-[28px] border border-white/15 bg-white/[0.08] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Insikten
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -147,7 +147,7 @@ const AboutPage = () => {
       <section className="relative px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
           <div className="rounded-[28px] border border-white/15 bg-white/[0.08] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
-            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Vår vision
             </p>
             <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -175,7 +175,7 @@ const AboutPage = () => {
       <section className="relative px-5 py-16 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Hur vi jobbar
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -206,7 +206,7 @@ const AboutPage = () => {
       <section className="relative px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
           <div className="rounded-[28px] border border-white/15 bg-white/[0.08] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Bolaget
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -223,7 +223,7 @@ const AboutPage = () => {
       <section className="relative px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
           <div className="rounded-[28px] border border-white/15 bg-white/[0.08] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Kontakt
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
