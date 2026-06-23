@@ -162,7 +162,7 @@ const JobbKommun = () => {
       <LandingNav onLoginClick={() => navigate('/auth')} />
 
       {/* Hero */}
-      <section className="relative overflow-hidden px-5 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-24 md:px-12">
+      <section className="relative overflow-hidden px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
         <SeoBubbles />
         <div className="mx-auto max-w-5xl text-center">
           <motion.div

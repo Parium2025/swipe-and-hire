@@ -171,7 +171,7 @@ const YrkenHub = () => {
       <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
-        <section className="relative overflow-hidden px-5 pt-6 pb-8 sm:px-8 sm:pb-12 md:px-12">
+        <section className="relative overflow-hidden px-5 pt-32 pb-8 sm:px-8 sm:pb-12 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
             <motion.h1
