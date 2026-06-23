@@ -117,11 +117,11 @@ const AboutPage = () => {
             <p className="mx-auto mt-5 max-w-2xl text-center text-[17px] leading-8 text-white">
               En arbetsmarknad där rätt människa hamnar på rätt plats. Utan gissningar. Utan brus.
             </p>
-            <ul className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3">
+            <ul className="mx-auto mt-8 grid max-w-2xl grid-flow-col gap-2 overflow-x-auto pb-2 snap-x snap-mandatory sm:grid-flow-row sm:grid-cols-3 sm:gap-3 sm:overflow-visible sm:pb-0">
               {visionPoints.map((item) => (
                 <li
                   key={item}
-                  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-[15px] text-white"
+                  className="flex items-center gap-2 snap-start rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-3 text-[15px] text-white sm:gap-3 sm:px-4"
                 >
                   <CheckCircle2 className="h-5 w-5 shrink-0 text-white" aria-hidden="true" />
                   {item}
