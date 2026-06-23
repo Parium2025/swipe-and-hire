@@ -14,13 +14,13 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 const CANONICAL = 'https://parium.se/om-oss';
 const TITLE = 'Om Parium – Jobbappen som samlar allt på ett ställe';
 const DESCRIPTION =
-  'Parium gör jobbsökandet enklare — för både arbetsgivare och kandidater. Allt på ett och samma ställe. Läs om vår vision, vad vi tror på och hur vi jobbar.';
+  'Parium bygger jobbsökandet från grunden — för både arbetsgivare och kandidater. Ett enda flöde. Inga genvägar. Läs om vår vision, vad vi tror på och hur vi jobbar.';
 
 
 const visionPoints = [
   'Schysst för kandidater',
   'Schysst för arbetsgivare',
-  'Bygg för att vara ledande plattformen för jobbsökare och arbetsgivare.\u00a0',
+  'Ärligt för båda',
 ];
 
 const AboutPage = () => {
