@@ -41,24 +41,22 @@ const SeoBackButton = ({ fallback = '/jobb', label = 'Tillbaka', breadcrumb }: S
   };
 
   return (
-    <div className="relative z-30 mx-auto w-full max-w-[1400px] px-3 pt-24 sm:px-5 sm:pt-28 md:px-6 lg:px-24">
-      <div className="mx-[26px] sm:mx-[23px] md:mx-[26px] lg:mx-[29px]">
-        <div className="flex min-h-11 items-center justify-between gap-4">
-          <div className="min-w-0 flex-1 text-[15px] font-medium text-white sm:text-base">
-            {breadcrumb}
-          </div>
-          <button
-            type="button"
-            onPointerDown={handleBack}
-            aria-label={label}
-            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-[15px] font-medium text-white transition-opacity hover:opacity-80 sm:text-base"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            <span>{label}</span>
-          </button>
+    <div className="relative z-30 w-full px-5 pt-24 sm:px-8 sm:pt-28 md:px-12">
+      <div className="flex min-h-11 items-center justify-between gap-4">
+        <div className="min-w-0 flex-1 text-[15px] font-medium text-white sm:text-base">
+          {breadcrumb}
         </div>
-        <div className="mt-3 h-px w-full bg-white/25" aria-hidden="true" />
+        <button
+          type="button"
+          onPointerDown={handleBack}
+          aria-label={label}
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-[15px] font-medium text-white transition-opacity hover:opacity-80 sm:text-base"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          <span>{label}</span>
+        </button>
       </div>
+      <div className="mt-3 h-px w-full bg-white/25" aria-hidden="true" />
     </div>
   );
 };
