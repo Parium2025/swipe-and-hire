@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { saveScrollNow } from '@/lib/scrollRestoration';
 
 type ColLink = { label: string; to: string };
