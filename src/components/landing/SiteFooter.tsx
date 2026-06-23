@@ -57,7 +57,7 @@ function FooterLink({ link }: { link: ColLink }) {
       state={typeof window !== 'undefined' ? { footerOriginPath: window.location.pathname } : undefined}
       onPointerDown={() => remember(link.to)}
       onClick={() => remember(link.to)}
-      className="flex h-11 items-center whitespace-nowrap text-[15px] font-medium leading-none text-white transition-colors hover:text-secondary"
+      className="inline-flex min-h-11 items-center whitespace-nowrap text-[15px] font-medium leading-none text-white transition-colors hover:text-secondary"
     >
       {link.label}
     </Link>
