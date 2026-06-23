@@ -202,56 +202,42 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* BOLAGET — premium kort, vänsterställt */}
+      {/* BOLAGET — symmetriskt centrerat kort */}
       <section className="relative px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-[28px] border border-white/15 bg-white/[0.07] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
-            <div className="flex items-start gap-5">
-              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10">
-                <Building2 className="h-5 w-5 text-white" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
-                  Bolaget
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Litet team. Stora ambitioner.
-                </h2>
-                <p className="mt-4 text-[17px] leading-8 text-white">
-                  Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag med säte i Sverige. Vi är ett litet, fokuserat team som bygger produkten, designen, supporten och koden — tillsammans.
-                </p>
-              </div>
-            </div>
+          <div className="rounded-[28px] border border-white/15 bg-white/[0.08] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+              Bolaget
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Litet team. Stora ambitioner.
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
+              Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag med säte i Sverige. Vi är ett litet, fokuserat team som bygger produkten, designen, supporten och koden — tillsammans.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* KONTAKT — premium kort, vänsterställt */}
+      {/* KONTAKT — symmetriskt centrerat kort */}
       <section className="relative px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-[28px] border border-white/15 bg-white/[0.07] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
-            <div className="flex items-start gap-5">
-              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10">
-                <Mail className="h-5 w-5 text-white" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
-                  Kontakt
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Säg hej.
-                </h2>
-                <p className="mt-4 text-[17px] leading-8 text-white">
-                  Frågor, idéer, samarbeten eller vill du jobba med oss? Vi läser allt — och svarar när vi har något bra att säga.
-                </p>
-                <a
-                  href="mailto:hej@parium.se"
-                  className="mt-5 inline-flex min-h-touch items-center text-lg font-semibold text-white underline-offset-4 hover:underline"
-                >
-                  hej@parium.se
-                </a>
-              </div>
-            </div>
+          <div className="rounded-[28px] border border-white/15 bg-white/[0.08] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+              Kontakt
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Säg hej.
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
+              Frågor, idéer, samarbeten eller vill du jobba med oss? Vi läser allt — och svarar när vi har något bra att säga.
+            </p>
+            <a
+              href="mailto:hej@parium.se"
+              className="mt-6 inline-flex min-h-touch items-center text-lg font-semibold text-white underline-offset-4 hover:underline"
+            >
+              hej@parium.se
+            </a>
           </div>
         </div>
       </section>
