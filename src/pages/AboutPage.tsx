@@ -78,10 +78,10 @@ const AboutPage = () => {
               Om Parium
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold leading-[1.08] tracking-tight text-white sm:text-4xl md:text-5xl">
-              Vi bygger appen som gör jobbsökandet enkelt — för båda sidor.
+              Jobbsökandet, omtänkt från grunden.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              En plats för kandidater. En plats för arbetsgivare. Allt på ett och samma ställe — utan friktion, utan brus, utan onödiga steg.
+              En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
             </p>
           </motion.div>
         </div>
