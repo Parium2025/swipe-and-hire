@@ -101,7 +101,7 @@ const KommunHub = () => {
           <motion.h1
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 0.35 }}
             className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl text-white"
           >
             Lediga jobb i Sveriges kommuner
@@ -109,7 +109,7 @@ const KommunHub = () => {
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
+            transition={{ duration: 0.35, delay: 0.05 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white sm:text-xl"
           >
             Välj din kommun och hitta lediga jobb där du bor. Parium täcker alla 290 kommuner – från storstad till glesbygd.

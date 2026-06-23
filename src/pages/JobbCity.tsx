@@ -166,7 +166,7 @@ const JobbCity = () => {
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
             className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium border border-white/15"
           >
             <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
@@ -175,7 +175,7 @@ const JobbCity = () => {
           <motion.h1
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05 }}
+            transition={{ duration: 0.35 }}
             className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl"
           >
             Lediga jobb {city.inForm}
@@ -183,7 +183,7 @@ const JobbCity = () => {
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
+            transition={{ duration: 0.35, delay: 0.08 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white sm:text-xl"
           >
             {city.intro} Skapa min profil idag och sök lediga jobb {city.inForm} i appen.
@@ -191,7 +191,7 @@ const JobbCity = () => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.25 }}
+            transition={{ duration: 0.35, delay: 0.12 }}
             className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
             <SeoCTAButton
