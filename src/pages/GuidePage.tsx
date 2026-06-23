@@ -169,11 +169,6 @@ const GuidePage = () => {
             innehållet ska bytas in direkt utan att hela sektionen "laddas om". */}
         <article className="relative px-5 pt-6 pb-12 sm:px-8 md:px-12">
           <div className="relative z-10 mx-auto max-w-3xl">
-            <nav aria-label="Brödsmulor" className="mb-6 text-xs text-white">
-              <Link to="/guider" className="hover:opacity-80">Guider</Link>
-              <span className="mx-1.5">/</span>
-              <span className="text-white">{guide.category}</span>
-            </nav>
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
