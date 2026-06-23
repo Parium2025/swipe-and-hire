@@ -120,16 +120,7 @@ const YrkePage = () => {
 
       <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
-        <SeoBackButton
-          fallback="/yrken"
-          breadcrumb={
-            <nav aria-label="Brödsmulor" className="flex items-center gap-1.5 truncate text-white">
-              <Link to="/yrken" className="hover:opacity-80">Yrken</Link>
-              <span className="opacity-60">/</span>
-              <span className="truncate">{occ.name}</span>
-            </nav>
-          }
-        />
+        <SeoBackButton fallback="/yrken" />
 
 
         {/* Hero */}
