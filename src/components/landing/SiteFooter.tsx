@@ -138,9 +138,11 @@ const SiteFooter = () => {
         {/* Mobile: single column, section by section */}
         <div className="grid grid-cols-1 gap-8 md:hidden">
           <MobileSection title="Hitta jobb i" links={cityLinks} />
+          <div className="h-px bg-white/10" aria-hidden="true" />
           <MobileSection title="Yrken" links={occupationLinks} />
           <div className="h-px bg-white/10" aria-hidden="true" />
           <MobileSection title="Guider" links={guideLinks} />
+          <div className="h-px bg-white/10" aria-hidden="true" />
           <MobileSection title="Företaget" links={companyLinks} />
         </div>
 
