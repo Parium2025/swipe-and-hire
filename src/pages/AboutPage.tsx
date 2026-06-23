@@ -117,7 +117,7 @@ const AboutPage = () => {
             <p className="mx-auto mt-5 max-w-2xl text-center text-[17px] leading-8 text-white">
               En arbetsmarknad där rätt människa hamnar på rätt plats. Utan gissningar. Utan brus.
             </p>
-            <ul className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-2">
+            <ul className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3">
               {visionPoints.map((item) => (
                 <li
                   key={item}
