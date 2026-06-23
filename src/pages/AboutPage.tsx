@@ -10,8 +10,6 @@ import {
   HeartHandshake,
   Users,
   CheckCircle2,
-  Building2,
-  Mail,
 } from 'lucide-react';
 import LandingNav from '@/components/LandingNav';
 import SiteFooter from '@/components/landing/SiteFooter';
