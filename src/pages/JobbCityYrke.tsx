@@ -6,7 +6,6 @@ import LandingNav from '@/components/LandingNav';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import FaqAccordion from '@/components/seo/FaqAccordion';
 import SeoBubbles from '@/components/seo/SeoBubbles';
-import SeoBackButton from '@/components/seo/SeoBackButton';
 import {
   SeoOtherOccupationsInCity,
   SeoOccupationInOtherCities,
@@ -137,7 +136,6 @@ const JobbCityYrke = () => {
 
       <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
-        <SeoBackButton fallback={`/jobb/${city.slug}`} />
 
 
 
