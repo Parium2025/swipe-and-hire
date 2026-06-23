@@ -157,7 +157,16 @@ const JobbCity = () => {
       </Helmet>
 
       <LandingNav onLoginClick={() => navigate('/auth')} />
-      <SeoBackButton fallback="/jobb" />
+      <SeoBackButton
+        fallback="/jobb"
+        breadcrumb={
+          <nav aria-label="Brödsmulor" className="flex items-center gap-1.5 truncate text-white">
+            <Link to="/jobb" className="hover:opacity-80">Jobb</Link>
+            <span className="opacity-60">/</span>
+            <span className="truncate">{city.name}</span>
+          </nav>
+        }
+      />
 
       {/* Hero */}
       <section className="relative overflow-hidden px-5 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-24 md:px-12">
