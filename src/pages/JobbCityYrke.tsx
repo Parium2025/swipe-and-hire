@@ -137,7 +137,18 @@ const JobbCityYrke = () => {
 
       <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
-        <SeoBackButton fallback={`/jobb/${city.slug}`} />
+        <SeoBackButton
+          fallback={`/jobb/${city.slug}`}
+          breadcrumb={
+            <nav aria-label="Brödsmulor" className="flex items-center gap-1.5 truncate text-white">
+              <Link to="/jobb" className="hover:opacity-80">Jobb</Link>
+              <span className="opacity-60">/</span>
+              <Link to={`/jobb/${city.slug}`} className="truncate hover:opacity-80">{city.name}</Link>
+              <span className="opacity-60">/</span>
+              <span className="truncate">{occ.name}</span>
+            </nav>
+          }
+        />
 
 
 
@@ -145,13 +156,6 @@ const JobbCityYrke = () => {
         <section className="relative overflow-hidden px-5 pt-6 pb-14 sm:px-8 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
-            <nav aria-label="Brödsmulor" className="mb-4 text-xs text-white">
-              <Link to="/jobb" className="text-white hover:opacity-80">Jobb</Link>
-              <span className="mx-1.5 text-white">/</span>
-              <Link to={`/jobb/${city.slug}`} className="text-white hover:opacity-80">{city.name}</Link>
-              <span className="mx-1.5 text-white">/</span>
-              <span className="text-white">{occ.name}</span>
-            </nav>
 
             <motion.p
               initial={{ opacity: 0, y: 8 }}
