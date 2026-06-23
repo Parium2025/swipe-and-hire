@@ -26,7 +26,7 @@ const principles = [
   {
     icon: Video,
     title: 'Människan först',
-    body: 'Videoprofiler, riktiga röster och äkta personligheter — inte stela CV:n som ingen orkar läsa.',
+    body: 'Kandidater kan skapa videoprofiler där man ser och hör riktiga röster — inte stela CV:n som ingen orkar läsa.',
   },
   {
     icon: Zap,
@@ -137,7 +137,7 @@ const AboutPage = () => {
               Rekrytering har fastnat i gamla vanor.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              Jobbsökandet är trasigt. Kandidater försvinner i CV-högar, arbetsgivare drunknar i ansökningar som inte passar, och de bästa mötena sker av en ren slump. Det ville vi ändra på — på riktigt.
+              Kandidater skickar ansökningar utan svar samt utan återkoppling. Arbetsgivare lägger timmar på CV:n utan framgång. Resultatet blir missade möjligheter på båda sidor. Vi tror att det finns ett bättre sätt.
             </p>
           </div>
         </div>
@@ -154,7 +154,7 @@ const AboutPage = () => {
               Rätt person. Rätt plats. På riktigt.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-center text-[17px] leading-8 text-white">
-              Att varje person ska hitta ett jobb där de blommar — och varje företag ska hitta människor som faktiskt vill vara där. Inga floskler. Inga gissningar. Bara seriösa möten mellan människor.
+              Vi vill skapa en arbetsmarknad där människor hittar jobb de faktiskt trivs i och företag hittar personer som faktiskt vill vara där.{" "}
             </p>
             <ul className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-2">
               {visionPoints.map((item) => (
@@ -179,10 +179,10 @@ const AboutPage = () => {
               Hur vi jobbar
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Sex principer vi inte tummar på
+              Så bygger vi framtidens rekrytering
             </h2>
             <p className="mt-4 text-[16px] leading-7 text-white">
-              Format varje skärm, varje knapp, varje rad i appen.
+              {" "}
             </p>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
@@ -213,7 +213,7 @@ const AboutPage = () => {
               Litet team. Stora ambitioner.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag med säte i Sverige. Vi är ett litet, fokuserat team som bygger produkten, designen, supporten och koden — tillsammans.
+              Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag med säte i Sverige. Vi är ett fokuserat team som utvecklar Parium för att gynna både jobbsökaren och arbetgivaren.{" "}
             </p>
           </div>
         </div>
@@ -227,10 +227,10 @@ const AboutPage = () => {
               Kontakt
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Säg hej.
+              Har du tips, frågor eller förslag?{" "}
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              Frågor, idéer, samarbeten eller vill du jobba med oss? Vi läser allt — och svarar när vi har något bra att säga.
+              Vi läser allt — och svarar inom kort!{" "}
             </p>
             <a
               href="mailto:hej@parium.se"
@@ -246,7 +246,7 @@ const AboutPage = () => {
       <section className="relative px-5 py-20 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
           <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Redo att jobba smartare — på båda sidor?
+            Redo att ta nästa steg?{" "}
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white">
             Skapa min profil idag och upptäck Parium — appen som samlar allt på ett ställe.
