@@ -101,9 +101,11 @@ const AboutPage = () => {
 
       <LandingNav onLoginClick={handleLogin} />
 
+      {/* Globala bubblor – fixed över hela sidan så bakgrunden aldrig klipps */}
+      <SeoBubbles />
+
       {/* HERO — symmetriskt premium kort */}
-      <section className="relative overflow-hidden px-5 pt-32 pb-12 sm:px-8 sm:pt-40 sm:pb-12 md:px-12">
-        <SeoBubbles />
+      <section className="relative px-5 pt-32 pb-12 sm:px-8 sm:pt-40 sm:pb-12 md:px-12">
         <div className="relative mx-auto max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 14 }}
@@ -111,7 +113,7 @@ const AboutPage = () => {
             transition={{ duration: 0.4 }}
             className="rounded-[28px] border border-white/15 bg-white/[0.08] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Om Parium
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold leading-[1.08] tracking-tight text-white sm:text-4xl md:text-5xl">
