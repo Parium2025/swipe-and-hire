@@ -653,7 +653,14 @@ const AuthMobile = ({
                   `w-fit` container can collapse to 0 on mobile otherwise.
                   This mirrors the Home logo structure (fixed box + backgroundImage).
                 */}
-                <AuthLogoInline className="relative h-40 w-[min(400px,90vw)] scale-125" />
+                <button
+                  type="button"
+                  onClick={() => navigate('/')}
+                  aria-label="Gå till startsidan"
+                  className="relative rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.98] transition-transform"
+                >
+                  <AuthLogoInline className="relative h-40 w-[min(400px,90vw)] scale-125" />
+                </button>
               </div>
             </div>
             
