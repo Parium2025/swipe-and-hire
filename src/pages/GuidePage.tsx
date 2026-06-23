@@ -153,18 +153,22 @@ const GuidePage = () => {
             Genom att rendera dem som syskon är de förladdade direkt vid mount. */}
         <SeoBubbles />
         <LandingNav onLoginClick={() => navigate('/auth')} />
-        <SeoBackButton fallback="/guider" />
+        <SeoBackButton
+          fallback="/guider"
+          breadcrumb={
+            <nav aria-label="Brödsmulor" className="flex items-center gap-1.5 truncate text-white">
+              <Link to="/guider" className="hover:opacity-80">Guider</Link>
+              <span className="opacity-60">/</span>
+              <span className="truncate">{guide?.category}</span>
+            </nav>
+          }
+        />
 
 
         {/* Header — ingen mount-animation och ingen key på slug:
             innehållet ska bytas in direkt utan att hela sektionen "laddas om". */}
         <article className="relative px-5 pt-6 pb-12 sm:px-8 md:px-12">
           <div className="relative z-10 mx-auto max-w-3xl">
-            <nav aria-label="Brödsmulor" className="mb-6 text-xs text-white">
-              <Link to="/guider" className="hover:opacity-80">Guider</Link>
-              <span className="mx-1.5">/</span>
-              <span className="text-white">{guide.category}</span>
-            </nav>
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
