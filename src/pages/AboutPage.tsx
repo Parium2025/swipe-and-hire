@@ -4,12 +4,11 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import {
   Sparkles,
-  Users,
   Zap,
   ShieldCheck,
   Video,
   HeartHandshake,
-  AlertTriangle,
+  Users,
   CheckCircle2,
   Building2,
   Mail,
@@ -24,24 +23,6 @@ const CANONICAL = 'https://parium.se/om-oss';
 const TITLE = 'Om Parium – Jobbappen som samlar allt på ett ställe';
 const DESCRIPTION =
   'Parium gör jobbsökandet enklare — för både arbetsgivare och kandidater. Allt på ett och samma ställe. Läs om vår vision, vad vi tror på och hur vi jobbar.';
-
-const problems = [
-  {
-    icon: AlertTriangle,
-    title: 'Ansökningshets utan riktning',
-    body: 'Kandidater spammar hundratals jobb om dagen — utan att vilja ha något av dem. Arbetsgivare drunknar.',
-  },
-  {
-    icon: AlertTriangle,
-    title: 'CV-högar som dödar nyfikenhet',
-    body: 'En pdf säger ingenting om vem du faktiskt är, eller varför just du skulle passa just här.',
-  },
-  {
-    icon: AlertTriangle,
-    title: 'Tysta avslag och svarta hål',
-    body: 'Du söker, väntar, hör inget. Arbetsgivaren hinner inte svara — och båda sidor tappar förtroendet.',
-  },
-];
 
 const principles = [
   {
@@ -67,7 +48,7 @@ const principles = [
   {
     icon: Users,
     title: 'Bygg med användarna',
-    body: 'Varje funktion testas mot riktiga jobbsökare och arbetsgivare. Inte mot antaganden i ett konferensrum.',
+    body: 'Varje funktion testas mot riktiga jobbsökare och arbetsgivare — inte mot antaganden i ett konferensrum.',
   },
   {
     icon: Sparkles,
@@ -91,14 +72,14 @@ const AboutPage = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleSignup = () => {
-    sessionStorage.setItem('parium-skip-splash', '1');
-    navigate('/auth', { state: { mode: 'signup' } });
-  };
-
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth');
+  };
+
+  const handleSignup = () => {
+    sessionStorage.setItem('parium-skip-splash', '1');
+    navigate('/auth', { state: { mode: 'signup' } });
   };
 
   return (
@@ -122,104 +103,57 @@ const AboutPage = () => {
 
       <LandingNav onLoginClick={handleLogin} />
 
-      {/* HERO */}
-      <section className="relative overflow-hidden px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
+      {/* HERO — vänsterställd, lugn, premium */}
+      <section className="relative overflow-hidden px-5 pt-32 pb-12 sm:px-8 sm:pt-40 sm:pb-16 md:px-12">
         <SeoBubbles />
-        <div className="relative mx-auto max-w-5xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
+        <div className="relative mx-auto max-w-3xl">
+          <motion.p
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium border border-white/15"
+            className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70"
           >
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             Om Parium
-          </motion.div>
+          </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-            className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl"
+            transition={{ duration: 0.4 }}
+            className="mt-4 text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl"
           >
             Vi bygger appen som gör jobbsökandet enkelt — för båda sidor.
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.08 }}
-            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white sm:text-xl"
+            transition={{ duration: 0.4, delay: 0.08 }}
+            className="mt-6 max-w-2xl text-lg leading-8 text-white sm:text-xl"
           >
             En plats för kandidater. En plats för arbetsgivare. Allt på ett och samma ställe — utan friktion, utan brus, utan onödiga steg.
           </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.12 }}
-            className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
-          >
-            <SeoCTAButton label="Skapa min profil idag" onClick={handleSignup} />
-            <SeoCTAButton
-              variant="ghost"
-              showArrow={false}
-              label="Logga in"
-              onClick={handleLogin}
-            />
-          </motion.div>
         </div>
       </section>
 
-      {/* INSIKTEN */}
-      <section className="px-5 pb-12 sm:px-8 md:px-12">
+      {/* INSIKTEN — lugn introtext, ingen ikonbubbla */}
+      <section className="relative px-5 pb-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-3xl border border-white/15 bg-white/[0.07] p-8 shadow-[0_18px_50px_rgba(0,0,0,0.18)] sm:p-10">
-            <div className="flex items-start gap-4">
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10">
-                <Sparkles className="h-5 w-5 text-white" aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Parium föddes ur en enkel insikt
-                </h2>
-                <p className="mt-4 text-[17px] leading-8 text-white">
-                  Jobbsökandet är trasigt. Kandidater försvinner i CV-högar, arbetsgivare drunknar i ansökningar som inte passar, och de bästa mötena sker av en ren slump. Det ville vi ändra på — på riktigt.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PROBLEMET */}
-      <section className="px-5 py-16 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl text-white">
-            Dagens jobbsökande är trasigt
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-white">
-            Oseriösa ansökningar har blivit norm. Folk söker jobb de inte vill ha. Arbetsgivare lägger timmar på att sortera bort istället för att hitta rätt.
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
+            Insikten
           </p>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {problems.map(({ icon: Icon, title, body }) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-white/10 bg-white/[0.06] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.18)]"
-              >
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                  <Icon className="h-5 w-5 text-white" aria-hidden="true" />
-                </div>
-                <h3 className="text-lg font-semibold text-white">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white">{body}</p>
-              </div>
-            ))}
-          </div>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Parium föddes ur en enkel insikt.
+          </h2>
+          <p className="mt-5 text-[17px] leading-8 text-white">
+            Jobbsökandet är trasigt. Kandidater försvinner i CV-högar, arbetsgivare drunknar i ansökningar som inte passar, och de bästa mötena sker av en ren slump. Det ville vi ändra på — på riktigt.
+          </p>
         </div>
       </section>
 
-      {/* VÅR VISION */}
-      <section className="px-5 py-16 sm:px-8 md:px-12">
+      {/* VÅR VISION — premium kort */}
+      <section className="relative px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-3xl border border-white/15 bg-white/[0.08] p-8 sm:p-12">
-            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
+          <div className="rounded-[28px] border border-white/15 bg-white/[0.08] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
+            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
               Vår vision
             </p>
             <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -243,42 +177,52 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* HUR VI JOBBAR */}
-      <section className="px-5 py-16 sm:px-8 md:px-12">
+      {/* HUR VI JOBBAR — premium grid */}
+      <section className="relative px-5 py-16 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl">
-          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl text-white">
-            Så jobbar vi på Parium
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-white">
-            Sex principer vi inte tummar på — och som format varje skärm i appen.
-          </p>
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
+              Hur vi jobbar
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Sex principer vi inte tummar på
+            </h2>
+            <p className="mt-4 text-[16px] leading-7 text-white">
+              Format varje skärm, varje knapp, varje rad i appen.
+            </p>
+          </div>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {principles.map(({ icon: Icon, title, body }) => (
               <div
                 key={title}
-                className="rounded-2xl border border-white/10 bg-white/[0.06] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.18)]"
+                className="group rounded-[22px] border border-white/10 bg-white/[0.06] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.09]"
               >
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
                   <Icon className="h-5 w-5 text-white" aria-hidden="true" />
                 </div>
                 <h3 className="text-lg font-semibold text-white">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white">{body}</p>
+                <p className="mt-2 text-[14.5px] leading-7 text-white">{body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* BOLAGET */}
-      <section className="px-5 py-16 sm:px-8 md:px-12">
+      {/* BOLAGET — premium kort, vänsterställt */}
+      <section className="relative px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-8 shadow-[0_18px_50px_rgba(0,0,0,0.18)] sm:p-10">
-            <div className="flex items-start gap-4">
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10">
+          <div className="rounded-[28px] border border-white/15 bg-white/[0.07] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
+            <div className="flex items-start gap-5">
+              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10">
                 <Building2 className="h-5 w-5 text-white" aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Bolaget</h2>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
+                  Bolaget
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                  Litet team. Stora ambitioner.
+                </h2>
                 <p className="mt-4 text-[17px] leading-8 text-white">
                   Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag med säte i Sverige. Vi är ett litet, fokuserat team som bygger produkten, designen, supporten och koden — tillsammans.
                 </p>
@@ -288,16 +232,21 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* KONTAKT */}
-      <section className="px-5 py-16 sm:px-8 md:px-12">
+      {/* KONTAKT — premium kort, vänsterställt */}
+      <section className="relative px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-8 shadow-[0_18px_50px_rgba(0,0,0,0.18)] sm:p-10">
-            <div className="flex items-start gap-4">
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10">
+          <div className="rounded-[28px] border border-white/15 bg-white/[0.07] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-12">
+            <div className="flex items-start gap-5">
+              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10">
                 <Mail className="h-5 w-5 text-white" aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Säg hej</h2>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
+                  Kontakt
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                  Säg hej.
+                </h2>
                 <p className="mt-4 text-[17px] leading-8 text-white">
                   Frågor, idéer, samarbeten eller vill du jobba med oss? Vi läser allt — och svarar när vi har något bra att säga.
                 </p>
@@ -313,10 +262,10 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="px-5 py-20 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] p-10 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
+      {/* CTA — bara här i botten */}
+      <section className="relative px-5 py-20 sm:px-8 md:px-12">
+        <div className="mx-auto max-w-3xl rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
+          <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
             Redo att jobba smartare — på båda sidor?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white">
