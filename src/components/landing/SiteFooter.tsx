@@ -129,6 +129,9 @@ function ColumnPair({
 }
 
 const SiteFooter = () => {
+  const { pathname } = useLocation();
+  const filteredCompanyLinks = companyLinks.filter((l) => l.to !== pathname);
+
   return (
     <footer className="relative w-full bg-primary text-white">
       {/* Hairline top edge */}
@@ -143,7 +146,7 @@ const SiteFooter = () => {
           <div className="h-px bg-white/10" aria-hidden="true" />
           <MobileSection title="Guider" links={guideLinks} />
           <div className="h-px bg-white/10" aria-hidden="true" />
-          <MobileSection title="Företaget" links={companyLinks} />
+          <MobileSection title="Företaget" links={filteredCompanyLinks} />
         </div>
 
         {/* Desktop: aligned two-column pairs */}
@@ -158,7 +161,7 @@ const SiteFooter = () => {
             leftTitle="Guider"
             leftLinks={guideLinks}
             rightTitle="Företaget"
-            rightLinks={companyLinks}
+            rightLinks={filteredCompanyLinks}
           />
         </div>
 
