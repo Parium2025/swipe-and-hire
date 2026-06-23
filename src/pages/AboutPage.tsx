@@ -158,10 +158,10 @@ const AboutPage = () => {
               Kontakt
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Har du tips, frågor eller förslag?{" "}
+              Har du något att säga oss?
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              Vi läser allt — och svarar inom kort!{" "}
+              Tips, frågor, idéer eller bara en tanke — vi läser allt. Och vi svarar.
             </p>
             <a
               href="mailto:hej@parium.se"
