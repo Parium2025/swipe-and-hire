@@ -14,13 +14,13 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 const CANONICAL = 'https://parium.se/om-oss';
 const TITLE = 'Om Parium – Jobbappen som samlar allt på ett ställe';
 const DESCRIPTION =
-  'Parium gör jobbsökandet enklare — för både arbetsgivare och kandidater. Allt på ett och samma ställe. Läs om vår vision, vad vi tror på och hur vi jobbar.';
+  'Parium bygger jobbsökandet från grunden — för både arbetsgivare och kandidater. Ett enda flöde. Inga genvägar. Läs om vår vision, vad vi tror på och hur vi jobbar.';
 
 
 const visionPoints = [
   'Schysst för kandidater',
   'Schysst för arbetsgivare',
-  'Bygg för att vara ledande plattformen för jobbsökare och arbetsgivare.\u00a0',
+  'Ärligt för båda',
 ];
 
 const AboutPage = () => {
@@ -78,10 +78,10 @@ const AboutPage = () => {
               Om Parium
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold leading-[1.08] tracking-tight text-white sm:text-4xl md:text-5xl">
-              Vi bygger appen som gör jobbsökandet enkelt — för båda sidor.
+              Jobbsökandet, omtänkt från grunden.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              En plats för kandidater. En plats för arbetsgivare. Allt på ett och samma ställe — utan friktion, utan brus, utan onödiga steg.
+              En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
             </p>
           </motion.div>
         </div>
@@ -115,7 +115,7 @@ const AboutPage = () => {
               Rätt person. Rätt plats. På riktigt.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-center text-[17px] leading-8 text-white">
-              Vi vill skapa en arbetsmarknad där människor hittar jobb de faktiskt trivs i och företag hittar personer som faktiskt vill vara där.{" "}
+              En arbetsmarknad där rätt människa hamnar på rätt plats. Utan gissningar. Utan brus.
             </p>
             <ul className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-2">
               {visionPoints.map((item) => (
@@ -144,7 +144,7 @@ const AboutPage = () => {
               Litet team. Stora ambitioner.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag med säte i Sverige. Vi är ett fokuserat team som utvecklar Parium för att gynna både jobbsökaren och arbetgivaren.{" "}
+              Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag som bygger för både jobbsökaren och arbetsgivaren. Fokuserat team. Långsiktig plan. Inga genvägar.
             </p>
           </div>
         </div>
@@ -158,10 +158,10 @@ const AboutPage = () => {
               Kontakt
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Har du tips, frågor eller förslag?{" "}
+              Har du något att säga oss?
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              Vi läser allt — och svarar inom kort!{" "}
+              Tips, frågor, idéer eller bara en tanke — vi läser allt. Och vi svarar.
             </p>
             <a
               href="mailto:hej@parium.se"
@@ -177,10 +177,10 @@ const AboutPage = () => {
       <section className="relative px-5 py-20 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
           <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Redo att ta nästa steg?{" "}
+            Redo att ta nästa steg?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white">
-            Skapa min profil idag och upptäck Parium — appen som samlar allt på ett ställe.
+            Skapa din profil idag. Resten sköter Parium.
           </p>
           <div className="mt-7 flex justify-center">
             <SeoCTAButton label="Skapa min profil idag" onClick={handleSignup} />
