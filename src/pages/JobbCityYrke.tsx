@@ -148,7 +148,7 @@ const JobbCityYrke = () => {
               <span className="mx-1.5 text-white">/</span>
               <Link to={`/jobb/${city.slug}`} className="text-white hover:opacity-80">{city.name}</Link>
               <span className="mx-1.5 text-white">/</span>
-              <span className="text-white">{occ.name}</span>
+              <span className="text-primary">{occ.name}</span>
             </nav>
 
             <motion.p
