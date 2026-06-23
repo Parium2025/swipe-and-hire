@@ -3,12 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import {
-  Sparkles,
-  Zap,
-  ShieldCheck,
-  Video,
-  HeartHandshake,
-  Users,
   CheckCircle2,
 } from 'lucide-react';
 import LandingNav from '@/components/LandingNav';
@@ -22,38 +16,6 @@ const TITLE = 'Om Parium – Jobbappen som samlar allt på ett ställe';
 const DESCRIPTION =
   'Parium gör jobbsökandet enklare — för både arbetsgivare och kandidater. Allt på ett och samma ställe. Läs om vår vision, vad vi tror på och hur vi jobbar.';
 
-const principles = [
-  {
-    icon: Video,
-    title: 'Människan först',
-    body: 'Kandidater kan skapa videoprofiler där man ser och hör riktiga röster — inte stela CV:n som ingen orkar läsa.',
-  },
-  {
-    icon: Zap,
-    title: 'Snabbhet utan kompromiss',
-    body: 'Vi bygger som om Apple och Spotify gjort det. Pixel-perfekt, polerat och blixtsnabbt — varje skärm.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Kvalitet före kvantitet',
-    body: 'Vi lovar inte svar inom 24 timmar. Vi lovar att leverera något som faktiskt är bra när vi gör det.',
-  },
-  {
-    icon: HeartHandshake,
-    title: 'Schysst för båda sidor',
-    body: 'Kandidater ska känna sig sedda. Arbetsgivare ska slippa bruset. Båda ska tjäna på att vara här.',
-  },
-  {
-    icon: Users,
-    title: 'Bygg med användarna',
-    body: 'Varje funktion testas mot riktiga jobbsökare och arbetsgivare — inte mot antaganden i ett konferensrum.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Detaljerna avgör',
-    body: 'En app känns inte premium av en logga. Den känns premium av tusen små beslut — vi tar dem ett i taget.',
-  },
-];
 
 const visionPoints = [
   'Schysst för kandidater',
@@ -171,36 +133,6 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* HUR VI JOBBAR — premium grid */}
-      <section className="relative px-5 py-16 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-5xl">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
-              Hur vi jobbar
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Så bygger vi framtidens rekrytering
-            </h2>
-            <p className="mt-4 text-[16px] leading-7 text-white">
-              {" "}
-            </p>
-          </div>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {principles.map(({ icon: Icon, title, body }) => (
-              <div
-                key={title}
-                className="group rounded-[22px] border border-white/10 bg-white/[0.06] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.09]"
-              >
-                <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-                  <Icon className="h-5 w-5 text-white" aria-hidden="true" />
-                </div>
-                <h3 className="text-lg font-semibold text-white">{title}</h3>
-                <p className="mt-2 text-[14.5px] leading-7 text-white">{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* BOLAGET — symmetriskt centrerat kort */}
       <section className="relative px-5 py-12 sm:px-8 md:px-12">
