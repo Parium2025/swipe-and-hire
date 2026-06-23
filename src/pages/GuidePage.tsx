@@ -161,7 +161,7 @@ const GuidePage = () => {
             <nav aria-label="Brödsmulor" className="mb-6 text-xs text-white">
               <Link to="/guider" className="hover:opacity-80">Guider</Link>
               <span className="mx-1.5">/</span>
-              <span className="text-primary">{guide.category}</span>
+              <span className="text-secondary">{guide.category}</span>
             </nav>
             <motion.p
               initial={{ opacity: 0, y: 8 }}
