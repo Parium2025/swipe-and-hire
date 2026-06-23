@@ -144,7 +144,7 @@ const AboutPage = () => {
               Litet team. Stora ambitioner.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag med säte i Sverige. Vi är ett fokuserat team som utvecklar Parium för att gynna både jobbsökaren och arbetgivaren.{" "}
+              Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag som bygger för både jobbsökaren och arbetsgivaren. Fokuserat team. Långsiktig plan. Inga genvägar.
             </p>
           </div>
         </div>
