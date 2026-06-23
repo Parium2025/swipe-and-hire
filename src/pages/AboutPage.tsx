@@ -177,10 +177,10 @@ const AboutPage = () => {
       <section className="relative px-5 py-20 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
           <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Redo att ta nästa steg?{" "}
+            Redo att ta nästa steg?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white">
-            Skapa min profil idag och upptäck Parium — appen som samlar allt på ett ställe.
+            Skapa din profil idag. Resten sköter Parium.
           </p>
           <div className="mt-7 flex justify-center">
             <SeoCTAButton label="Skapa min profil idag" onClick={handleSignup} />
