@@ -115,7 +115,7 @@ const AboutPage = () => {
               Rätt person. Rätt plats. På riktigt.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-center text-[17px] leading-8 text-white">
-              Vi vill skapa en arbetsmarknad där människor hittar jobb de faktiskt trivs i och företag hittar personer som faktiskt vill vara där.{" "}
+              En arbetsmarknad där rätt människa hamnar på rätt plats. Utan gissningar. Utan brus.
             </p>
             <ul className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-2">
               {visionPoints.map((item) => (
