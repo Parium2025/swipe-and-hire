@@ -156,7 +156,7 @@ const GuidePage = () => {
 
         {/* Header — ingen mount-animation och ingen key på slug:
             innehållet ska bytas in direkt utan att hela sektionen "laddas om". */}
-        <article className="relative px-5 pt-6 pb-12 sm:px-8 md:px-12">
+        <article className="relative px-5 pt-32 pb-12 sm:px-8 sm:pt-40 md:px-12">
           <div className="relative z-10 mx-auto max-w-3xl">
             <nav aria-label="Brödsmulor" className="mb-6 text-xs text-white">
               <Link to="/guider" className="hover:opacity-80">Guider</Link>

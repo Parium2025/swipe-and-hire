@@ -64,7 +64,7 @@ const GuiderHub = () => {
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
 
-        <section className="relative overflow-hidden px-5 pt-6 pb-12 sm:px-8 md:px-12">
+        <section className="relative overflow-hidden px-5 pt-32 pb-12 sm:px-8 sm:pt-40 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
             <motion.h1
