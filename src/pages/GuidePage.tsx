@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
-import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
@@ -153,7 +152,6 @@ const GuidePage = () => {
             Genom att rendera dem som syskon är de förladdade direkt vid mount. */}
         <SeoBubbles />
         <LandingNav onLoginClick={() => navigate('/auth')} />
-        <SeoBackButton fallback="/guider" />
 
 
         {/* Header — ingen mount-animation och ingen key på slug:

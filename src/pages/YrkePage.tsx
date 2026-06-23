@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import FaqAccordion from '@/components/seo/FaqAccordion';
 import SeoBubbles from '@/components/seo/SeoBubbles';
-import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
@@ -120,7 +119,6 @@ const YrkePage = () => {
 
       <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
-        <SeoBackButton fallback="/yrken" />
 
 
         {/* Hero */}

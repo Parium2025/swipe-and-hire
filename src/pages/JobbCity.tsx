@@ -6,7 +6,6 @@ import LandingNav from '@/components/LandingNav';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import FaqAccordion from '@/components/seo/FaqAccordion';
 import SeoBubbles from '@/components/seo/SeoBubbles';
-import SeoBackButton from '@/components/seo/SeoBackButton';
 import SeoFooterLinks, {
   SeoOtherOccupationsInCity,
 } from '@/components/seo/SeoFooterLinks';
@@ -157,7 +156,6 @@ const JobbCity = () => {
       </Helmet>
 
       <LandingNav onLoginClick={() => navigate('/auth')} />
-      <SeoBackButton fallback="/jobb" />
 
       {/* Hero */}
       <section className="relative overflow-hidden px-5 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-24 md:px-12">

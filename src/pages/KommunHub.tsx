@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
-import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { MapPin, Search } from 'lucide-react';
 import { KOMMUNER } from '@/data/jobMunicipalities';
@@ -92,7 +91,6 @@ const KommunHub = () => {
       </Helmet>
 
       <LandingNav onLoginClick={() => navigate('/auth')} />
-      <SeoBackButton fallback="/jobb" />
 
       {/* Hero */}
       <section className="relative overflow-hidden px-5 pt-6 pb-10 sm:px-8 sm:pt-8 sm:pb-14 md:px-12">
