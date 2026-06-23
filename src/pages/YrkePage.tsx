@@ -130,7 +130,7 @@ const YrkePage = () => {
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.3 }}
               className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white"
             >
               <Briefcase className="h-3.5 w-3.5" /> {occ.category}
@@ -138,7 +138,7 @@ const YrkePage = () => {
             <motion.h1
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.05 }}
+              transition={{ duration: 0.35 }}
               className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white"
             >
               Lediga jobb <span className="text-white">{occ.asForm}</span>
@@ -146,7 +146,7 @@ const YrkePage = () => {
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15 }}
+              transition={{ duration: 0.35, delay: 0.08 }}
               className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl"
             >
               {occ.intro}
@@ -154,7 +154,7 @@ const YrkePage = () => {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.25 }}
+              transition={{ duration: 0.35, delay: 0.12 }}
               className="mt-10 flex justify-center"
             >
               <SeoCTAButton

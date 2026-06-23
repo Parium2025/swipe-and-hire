@@ -179,7 +179,7 @@ const YrkenHub = () => {
             <motion.h1
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.05 }}
+              transition={{ duration: 0.35 }}
               className="text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white"
             >
               Lediga jobb per yrke
@@ -187,7 +187,7 @@ const YrkenHub = () => {
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15 }}
+              transition={{ duration: 0.35, delay: 0.08 }}
               className="mx-auto mt-5 max-w-2xl text-base text-white sm:mt-6 sm:text-xl"
             >
               Hitta lediga jobb inom Sveriges mest efterfrågade yrken. Skapa min profil idag och

@@ -72,7 +72,7 @@ const GuiderHub = () => {
             <motion.h1
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.05 }}
+              transition={{ duration: 0.35 }}
               className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white"
             >
               Karriärguider & jobbtips
@@ -80,7 +80,7 @@ const GuiderHub = () => {
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15 }}
+              transition={{ duration: 0.35, delay: 0.08 }}
               className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl"
             >
               Allt du behöver för att söka, byta eller förhandla jobb 2026 – skrivet för
