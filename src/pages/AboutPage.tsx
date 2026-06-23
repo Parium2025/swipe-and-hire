@@ -20,8 +20,7 @@ const DESCRIPTION =
 const visionPoints = [
   'Schysst för kandidater',
   'Schysst för arbetsgivare',
-  'Bygg på riktig nyfikenhet',
-  'Tystnad är inte ett svar',
+  'Bygg för att vara ledande plattformen för jobbsökare och arbetsgivare.\u00a0',
 ];
 
 const AboutPage = () => {
