@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getFooterRestoreOrigin, requestFooterRestore } from '@/lib/scrollRestoration';
@@ -6,17 +7,18 @@ interface SeoBackButtonProps {
   /** Fallback route if there is no history to go back to. */
   fallback?: string;
   label?: string;
+  /** Optional breadcrumb shown on the same row, left-aligned. */
+  breadcrumb?: ReactNode;
 }
 
 /**
- * Inline back link for SEO pages — sits inside the content flow,
- * just under the fixed navbar and above the hero. Left-aligned within
- * the same max-w-6xl container as the page content. Discreet, Apple-/
- * Spotify-like text link (no floating pill, no overlap with navbar).
+ * Inline back link for SEO pages — placed on the same horizontal row as
+ * an optional breadcrumb. Breadcrumb left, "Tillbaka" right, hairline
+ * underneath. Pure white, Apple/Spotify-like.
  *
  * Goes back in history when possible, otherwise navigates to fallback.
  */
-const SeoBackButton = ({ fallback = '/jobb', label = 'Tillbaka' }: SeoBackButtonProps) => {
+const SeoBackButton = ({ fallback = '/jobb', label = 'Tillbaka', breadcrumb }: SeoBackButtonProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,18 +41,27 @@ const SeoBackButton = ({ fallback = '/jobb', label = 'Tillbaka' }: SeoBackButton
   };
 
   return (
-    <div className="relative z-30 mx-auto flex w-full max-w-[1400px] justify-end px-3 pt-24 sm:px-5 sm:pt-28 md:px-6 lg:px-24">
-      <button
-        type="button"
-        onPointerDown={handleBack}
-        aria-label={label}
-        className="mr-[26px] inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-white sm:mr-[23px] md:mr-[26px] lg:mr-[29px]"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        <span className="hidden sm:inline">{label}</span>
-      </button>
+    <div className="relative z-30 mx-auto w-full max-w-[1400px] px-3 pt-24 sm:px-5 sm:pt-28 md:px-6 lg:px-24">
+      <div className="mx-[26px] sm:mx-[23px] md:mx-[26px] lg:mx-[29px]">
+        <div className="flex min-h-11 items-center justify-between gap-4">
+          <div className="min-w-0 flex-1 text-[15px] font-medium text-white sm:text-base">
+            {breadcrumb}
+          </div>
+          <button
+            type="button"
+            onPointerDown={handleBack}
+            aria-label={label}
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-[15px] font-medium text-white transition-opacity hover:opacity-80 sm:text-base"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <span>{label}</span>
+          </button>
+        </div>
+        <div className="mt-3 h-px w-full bg-white/25" aria-hidden="true" />
+      </div>
     </div>
   );
 };
 
 export default SeoBackButton;
+
