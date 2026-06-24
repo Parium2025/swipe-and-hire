@@ -98,7 +98,10 @@ const AboutPage = () => {
               Rekrytering har fastnat i gamla vanor.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white">
-              Kandidater skickar ansökningar utan svar samt utan återkoppling. Arbetsgivare lägger timmar på CV:n utan framgång. Resultatet blir missade möjligheter på båda sidor. Vi tror att det finns ett bättre sätt.
+              Kandidater skickar ansökningar utan svar och utan återkoppling. Arbetsgivare lägger timmar på CV:n utan att hitta rätt. Resultatet blir missade möjligheter på båda sidor.
+            </p>
+            <p className="mx-auto mt-4 max-w-2xl text-[17px] leading-8 text-white">
+              Vi tror att det finns ett bättre sätt. Därför har vi byggt en plattform där allt hänger ihop — jobbannonsen, ansökan, dialogen och beslutet. Inga lösa trådar. Inga separata system. Ett enda flöde, byggt för att rätt person ska nå rätt plats.
             </p>
           </div>
         </div>
@@ -117,14 +120,17 @@ const AboutPage = () => {
             <p className="mx-auto mt-5 max-w-2xl text-center text-[17px] leading-8 text-white">
               En arbetsmarknad där rätt människa hamnar på rätt plats. Utan gissningar. Utan brus.
             </p>
-            <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-3 gap-1.5 sm:gap-3">
-              {visionPoints.map((item) => (
+            <ul className="mx-auto mt-8 flex max-w-xl flex-col gap-2.5 sm:gap-3">
+              {visionPoints.map((item, index) => (
                 <li
                   key={item}
-                  className="flex items-center justify-center gap-1.5 rounded-2xl border border-white/10 bg-white/[0.05] px-2 py-3 text-center text-[11px] leading-tight text-white sm:gap-2 sm:px-4 sm:text-[15px]"
+                  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5 text-left text-[15px] leading-tight text-white sm:gap-4 sm:px-5 sm:py-4 sm:text-base"
                 >
-                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-white sm:h-5 sm:w-5" aria-hidden="true" />
-                  <span>{item}</span>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/[0.08] text-[12px] font-semibold tabular-nums text-white sm:h-8 sm:w-8 sm:text-[13px]">
+                    {index + 1}
+                  </span>
+                  <span className="flex-1">{item}</span>
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-white sm:h-5 sm:w-5" aria-hidden="true" />
                 </li>
               ))}
             </ul>
