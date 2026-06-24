@@ -115,10 +115,13 @@ const AboutPage = () => {
               Vår vision
             </p>
             <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Rätt person. Rätt plats. På riktigt.
+              Sveriges ledande jobbsökar- och rekryteringsapp.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-center text-[17px] leading-8 text-white">
-              En arbetsmarknad där rätt människa hamnar på rätt plats. Utan gissningar. Utan brus.
+              Det är den riktning vi bygger mot — inte ett kvartalsmål, utan en långsiktig vision. Vi vill att Parium ska vara det självklara valet för alla som söker jobb och för alla som rekryterar. Oavsett om du är ny på arbetsmarknaden, har lång erfarenhet eller letar efter nästa stjärna till teamet.
+            </p>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-[17px] leading-8 text-white">
+              Tekniken ska göra det möjligt. Strukturen ska göra det tydligt. Och upplevelsen ska göra det så enkelt att varje kandidat kan hitta och söka rätt jobb — på riktigt, och helt själv.
             </p>
             <ul className="mx-auto mt-8 flex max-w-xl flex-col gap-2.5 sm:gap-3">
               {visionPoints.map((item, index) => (
