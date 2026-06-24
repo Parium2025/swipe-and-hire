@@ -134,6 +134,12 @@ const SiteFooter = () => {
 
   return (
     <footer className="relative w-full bg-primary text-white">
+      {/* Solid extension below the footer so the dark blue always reaches the
+          bottom of the viewport, covering any gradient/background behind it. */}
+      <div
+        className="pointer-events-none absolute top-full left-0 right-0 h-[100vh] bg-primary"
+        aria-hidden="true"
+      />
       {/* Hairline top edge */}
       <div className="h-px w-full bg-white/10" />
 
