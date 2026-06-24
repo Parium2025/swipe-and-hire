@@ -118,7 +118,7 @@ const JobbHub = () => {
 
   return (
     <TooltipProvider delayDuration={150} skipDelayDuration={100}>
-    <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+    <div className="seo-scroll-page bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
       <Helmet>
         <title>{TITLE}</title>
         <meta name="description" content={DESCRIPTION} />
