@@ -1218,7 +1218,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             `}</style>
           )}
 
-          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 md:[@media_(orientation:portrait)]:pt-8 lg:px-24 lg:[@media_(orientation:portrait)]:pt-20">
+          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-visible px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 md:[@media_(orientation:portrait)]:pt-8 lg:px-24 lg:[@media_(orientation:portrait)]:pt-20">
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
                 initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
@@ -1269,14 +1269,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease } },
                     }}
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '-48px' : '48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${(i - 1) * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
-                    className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-[border-color,background-color,box-shadow] duration-500 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
+                    className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-[border-color,background-color,box-shadow] duration-500 hover:border-white/30 hover:bg-white/[0.06] hover:shadow-[0_18px_44px_-28px_hsl(var(--secondary)/0.34)]"
                   >
                     <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.12),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
-                      <Icon className="h-5 w-5" strokeWidth={2} />
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
+                        <Icon className="h-5 w-5" strokeWidth={2} />
+                      </div>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-secondary/70">{i}</div>
                     </div>
-                    <div className="mt-3 text-[11px] font-bold uppercase tracking-[0.24em] text-secondary/70">{i}</div>
-                    <h3 className="wave-text mt-1 text-lg font-bold">{feature.title}</h3>
+                    <h3 className="wave-text mt-4 text-lg font-bold">{feature.title}</h3>
                     <p className="wave-text mt-2 text-sm leading-7 text-white">
                       {feature.description}
                     </p>
