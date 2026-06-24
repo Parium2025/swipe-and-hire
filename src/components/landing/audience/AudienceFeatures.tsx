@@ -41,14 +41,12 @@ const AudienceFeatures = ({ role }: { role: AudienceRole }) => {
               <motion.div
                 key={f.title}
                 variants={fadeUp}
-                className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition-all duration-500 ease-out hover:border-secondary/30 hover:bg-white/[0.06] hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-20px_rgba(0,0,0,0.4)]"
+                className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition-colors duration-500 hover:border-secondary/30 hover:bg-white/[0.06]"
               >
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-secondary/25 bg-secondary/[0.08] text-secondary">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <h3 className="wave-text text-lg font-bold leading-tight">{f.title}</h3>
-                </div>
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/25 bg-secondary/[0.08] text-secondary">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <h3 className="wave-text mt-5 text-lg font-bold">{f.title}</h3>
                 <p className="wave-text mt-3 text-sm leading-6 opacity-70">{f.description}</p>
               </motion.div>
             );
