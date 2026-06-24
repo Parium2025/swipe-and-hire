@@ -18,9 +18,9 @@ const DESCRIPTION =
 
 
 const visionPoints = [
-  'Schysst för kandidater',
-  'Schysst för arbetsgivare',
-  'Ärligt för båda',
+  'Sveriges ledande jobbsökarapp',
+  'Sveriges ledande rekryteringsapp',
+  'Så enkelt att varje kandidat kan söka själv',
 ];
 
 const AboutPage = () => {
