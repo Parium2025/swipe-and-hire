@@ -85,11 +85,16 @@ function getQueue(): QueuedApplication[] {
   }
 }
 
-function saveQueue(queue: QueuedApplication[]) {
+function saveQueue(queue: QueuedApplication[]): boolean {
   const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
   if (!saved) {
     console.error('[ApplicationQueue] Failed to save — localStorage full even after eviction');
+    toast.error('Kunde inte spara ansökan lokalt', {
+      description: 'Enhetens lagring är full. Frigör utrymme och försök igen.',
+      duration: 8000,
+    });
   }
+  return saved;
 }
 
 export function useOfflineApplicationQueue(userId: string | undefined) {
