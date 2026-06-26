@@ -110,8 +110,11 @@ const CardItem = ({ item, index }: CardItemProps) => {
           preload="metadata"
           disablePictureInPicture
           disableRemotePlayback
+          controlsList="nodownload noplaybackrate nofullscreen"
+          onContextMenu={(e) => e.preventDefault()}
           onError={() => setFailed(true)}
           style={{ objectPosition: item.position ?? '50% 50%' }}
+          className="pointer-events-none"
         />
       ) : (
         <img
