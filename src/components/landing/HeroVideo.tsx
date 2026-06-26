@@ -192,6 +192,17 @@ const HeroVideo = () => {
             </>
           )}
         </video>
+        {/* Fallback för iOS Lågeffektläge: native play-overlay går inte att
+            dölja på <video>, så vi täcker den med poster-bilden istället. */}
+        {autoplayBlocked && (
+          <img
+            src="/hero-video-poster.jpg"
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
+          />
+        )}
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
