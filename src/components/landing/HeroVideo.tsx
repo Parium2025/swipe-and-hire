@@ -15,6 +15,7 @@ const shouldSkipVideo = () => {
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -33,20 +34,28 @@ const HeroVideo = () => {
 
     let cancelled = false;
     let retryTimer: number | null = null;
+    let failCount = 0;
 
     const tryPlay = () => {
       if (cancelled || !video) return;
       if (!video.paused && !video.ended) return;
       const p = video.play();
       if (p && typeof p.catch === 'function') {
-        p.catch(() => {
-          // Autoplay blocked — retry shortly. När användaren rör skärmen
-          // kommer nästa play()-anrop att lyckas.
+        p.then(() => {
+          failCount = 0;
+          setAutoplayBlocked(false);
+        }).catch(() => {
+          failCount++;
+          // Efter 2 misslyckade försök: dölj <video> och visa poster-bild
+          // istället. Detta tar bort iOS Lågeffektläges native play-overlay
+          // som inte går att dölja med CSS.
+          if (failCount >= 2) setAutoplayBlocked(true);
           if (retryTimer) window.clearTimeout(retryTimer);
-          retryTimer = window.setTimeout(tryPlay, 400);
+          retryTimer = window.setTimeout(tryPlay, 600);
         });
       }
     };
+
 
     // Försök spela direkt — väntar inte på canplay om vi redan har data
     if (video.readyState >= 2) {
@@ -183,6 +192,17 @@ const HeroVideo = () => {
             </>
           )}
         </video>
+        {/* Fallback för iOS Lågeffektläge: native play-overlay går inte att
+            dölja på <video>, så vi täcker den med poster-bilden istället. */}
+        {autoplayBlocked && (
+          <img
+            src="/hero-video-poster.jpg"
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
+          />
+        )}
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
