@@ -34,20 +34,28 @@ const HeroVideo = () => {
 
     let cancelled = false;
     let retryTimer: number | null = null;
+    let failCount = 0;
 
     const tryPlay = () => {
       if (cancelled || !video) return;
       if (!video.paused && !video.ended) return;
       const p = video.play();
       if (p && typeof p.catch === 'function') {
-        p.catch(() => {
-          // Autoplay blocked — retry shortly. När användaren rör skärmen
-          // kommer nästa play()-anrop att lyckas.
+        p.then(() => {
+          failCount = 0;
+          setAutoplayBlocked(false);
+        }).catch(() => {
+          failCount++;
+          // Efter 2 misslyckade försök: dölj <video> och visa poster-bild
+          // istället. Detta tar bort iOS Lågeffektläges native play-overlay
+          // som inte går att dölja med CSS.
+          if (failCount >= 2) setAutoplayBlocked(true);
           if (retryTimer) window.clearTimeout(retryTimer);
-          retryTimer = window.setTimeout(tryPlay, 400);
+          retryTimer = window.setTimeout(tryPlay, 600);
         });
       }
     };
+
 
     // Försök spela direkt — väntar inte på canplay om vi redan har data
     if (video.readyState >= 2) {
