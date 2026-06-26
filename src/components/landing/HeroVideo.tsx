@@ -15,7 +15,6 @@ const shouldSkipVideo = () => {
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
-  const [showPosterOverlay, setShowPosterOverlay] = useState(true);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -43,13 +42,10 @@ const HeroVideo = () => {
       if (p && typeof p.catch === 'function') {
         p.then(() => {
           failCount = 0;
-          setShowPosterOverlay(false);
         }).catch(() => {
           failCount++;
-          // iOS Lågeffektläge kan visa native play-overlay direkt när autoplay
-          // blockas. Därför ligger postern ovanpå från första rendern och
-          // stannar kvar så länge autoplay inte faktiskt spelar.
-          if (failCount >= 1) setShowPosterOverlay(true);
+          // iOS Lågeffektläge kan blockera autoplay helt tills första touch.
+          // Vi döljer native play UI via CSS och försöker igen vid touch/focus.
           if (retryTimer) window.clearTimeout(retryTimer);
           retryTimer = window.setTimeout(tryPlay, 600);
         });
@@ -96,11 +92,9 @@ const HeroVideo = () => {
     };
 
     const handlePlaying = () => {
-      setShowPosterOverlay(false);
       startWatchdog();
     };
     const handleStalled = () => {
-      setShowPosterOverlay(true);
       tryPlay();
     };
     const handleError = () => {
@@ -168,7 +162,6 @@ const HeroVideo = () => {
       >
         <video
           ref={videoRef}
-          poster="/hero-video-poster.jpg"
           muted
           autoPlay
           loop
@@ -180,9 +173,7 @@ const HeroVideo = () => {
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
           onContextMenu={(e) => e.preventDefault()}
-          className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
-            showPosterOverlay ? 'opacity-0' : 'opacity-100'
-          }`}
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
           {!skipVideo && (
             <>
@@ -200,18 +191,6 @@ const HeroVideo = () => {
             </>
           )}
         </video>
-        {/* Ligger ovanpå från första millisekunden så iOS aldrig hinner visa
-            native play-overlay vid Lågeffektläge. Tas bort först när videon
-            faktiskt spelar. */}
-        {showPosterOverlay && (
-          <img
-            src="/hero-video-poster.jpg"
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-            className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover select-none"
-          />
-        )}
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
