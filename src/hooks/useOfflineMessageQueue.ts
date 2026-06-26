@@ -51,11 +51,16 @@ function getQueuedMessages(): QueuedMessage[] {
   }
 }
 
-function saveQueuedMessages(messages: QueuedMessage[]) {
+function saveQueuedMessages(messages: QueuedMessage[]): boolean {
   const saved = safeSetItem(QUEUE_KEY, JSON.stringify(messages));
   if (!saved) {
     console.error('[MessageQueue] Failed to save — localStorage full even after eviction');
+    toast.error('Kunde inte spara meddelandet lokalt', {
+      description: 'Enhetens lagring är full. Frigör utrymme och försök igen.',
+      duration: 8000,
+    });
   }
+  return saved;
 }
 
 export function useOfflineMessageQueue(userId: string | undefined) {
