@@ -20,14 +20,18 @@ let _heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 let _queryClient: QueryClient | null = null;
 let _connectivityCheckVersion = 0;
 let _pendingOfflineTimer: ReturnType<typeof setTimeout> | null = null;
+let _consecutiveFailures = 0;
 
 // ─── Heartbeat ping ──────────────────────────────────────────────
 
 const HEARTBEAT_INTERVAL = 30_000; // 30s when online
-const HEARTBEAT_INTERVAL_OFFLINE = 2_000; // 2s when offline (check more frequently)
-const PING_TIMEOUT = 5_000;
-const OFFLINE_CONFIRMATION_DELAY = 1200;
-const CONNECTIVITY_RETRY_DELAY = 350;
+const HEARTBEAT_INTERVAL_OFFLINE = 3_000; // 3s when offline (check more frequently)
+const PING_TIMEOUT = 8_000; // Generous — mobile networks can be slow
+const OFFLINE_CONFIRMATION_DELAY = 2500; // Wait longer before confirming offline
+const CONNECTIVITY_RETRY_DELAY = 500;
+// Require this many consecutive failed pings before declaring offline
+// (prevents false offline-states from transient mobile network glitches)
+const REQUIRED_FAILURES_TO_GO_OFFLINE = 3;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
