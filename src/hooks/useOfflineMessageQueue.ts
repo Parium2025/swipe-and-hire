@@ -123,12 +123,29 @@ export function useOfflineMessageQueue(userId: string | undefined) {
         message.recipient_id
       );
 
+      // 🛡️ Idempotensskydd: om en tidigare retry redan skrev meddelandet
+      // (nätet dog efter DB-write men före response), finns det med exakt
+      // samma client-genererade created_at. Behandla då som lyckat.
+      const { data: existing } = await supabase
+        .from('conversation_messages')
+        .select('id')
+        .eq('conversation_id', conversationId)
+        .eq('sender_id', message.sender_id)
+        .eq('created_at', message.created_at)
+        .maybeSingle();
+
+      if (existing?.id) {
+        console.log('[MessageQueue] Idempotent skip — message already exists:', message.id);
+        return true;
+      }
+
       const { error } = await supabase
         .from('conversation_messages')
         .insert({
           conversation_id: conversationId,
           sender_id: message.sender_id,
           content: message.content,
+          created_at: message.created_at, // client-genererad → idempotensnyckel
         });
 
       if (error) {
