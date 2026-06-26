@@ -60,11 +60,16 @@ function getQueue(): QueuedProfileUpdate[] {
   }
 }
 
-function saveQueue(queue: QueuedProfileUpdate[]) {
+function saveQueue(queue: QueuedProfileUpdate[]): boolean {
   const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
   if (!saved) {
     console.error('[ProfileQueue] Failed to save — localStorage full even after eviction');
+    toast.error('Kunde inte spara profil-ändringen lokalt', {
+      description: 'Enhetens lagring är full. Frigör utrymme och försök igen.',
+      duration: 8000,
+    });
   }
+  return saved;
 }
 
 export function useOfflineProfileQueue(userId: string | undefined) {
