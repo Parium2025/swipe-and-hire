@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* iOS Safari: dölj native play-button som visas vid blockerad autoplay
+   (t.ex. Low Power Mode). Postern visas tills videon kan spela av sig själv
+   eller efter första user interaction. */
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 @keyframes fadeSlideIn {
   0% { opacity: 0; transform: scale(0.92) translateY(40px); }
   50% { opacity: 1; }
