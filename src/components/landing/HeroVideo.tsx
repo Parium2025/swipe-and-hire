@@ -162,7 +162,10 @@ const HeroVideo = () => {
           // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
           preload="metadata"
           disablePictureInPicture
-          className="absolute inset-0 h-full w-full object-cover"
+          disableRemotePlayback
+          controlsList="nodownload noplaybackrate nofullscreen"
+          onContextMenu={(e) => e.preventDefault()}
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
           {!skipVideo && (
             <>
