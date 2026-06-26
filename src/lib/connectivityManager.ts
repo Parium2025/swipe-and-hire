@@ -20,14 +20,18 @@ let _heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 let _queryClient: QueryClient | null = null;
 let _connectivityCheckVersion = 0;
 let _pendingOfflineTimer: ReturnType<typeof setTimeout> | null = null;
+let _consecutiveFailures = 0;
 
 // ─── Heartbeat ping ──────────────────────────────────────────────
 
 const HEARTBEAT_INTERVAL = 30_000; // 30s when online
-const HEARTBEAT_INTERVAL_OFFLINE = 2_000; // 2s when offline (check more frequently)
-const PING_TIMEOUT = 5_000;
-const OFFLINE_CONFIRMATION_DELAY = 1200;
-const CONNECTIVITY_RETRY_DELAY = 350;
+const HEARTBEAT_INTERVAL_OFFLINE = 3_000; // 3s when offline (check more frequently)
+const PING_TIMEOUT = 8_000; // Generous — mobile networks can be slow
+const OFFLINE_CONFIRMATION_DELAY = 2500; // Wait longer before confirming offline
+const CONNECTIVITY_RETRY_DELAY = 500;
+// Require this many consecutive failed pings before declaring offline
+// (prevents false offline-states from transient mobile network glitches)
+const REQUIRED_FAILURES_TO_GO_OFFLINE = 3;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -87,12 +91,27 @@ async function runConnectivityCheck(): Promise<boolean> {
   }
 
   if (online) {
+    _consecutiveFailures = 0;
     if (_pendingOfflineTimer) {
       clearTimeout(_pendingOfflineTimer);
       _pendingOfflineTimer = null;
     }
     setOnlineState(true);
     return true;
+  }
+
+  // Ping failed. If browser still says it's online, treat this as a transient
+  // glitch unless we've had several consecutive failures in a row.
+  _consecutiveFailures += 1;
+
+  if (navigator.onLine && _consecutiveFailures < REQUIRED_FAILURES_TO_GO_OFFLINE) {
+    // Don't flip to offline yet — schedule another check soon
+    if (_pendingOfflineTimer) clearTimeout(_pendingOfflineTimer);
+    _pendingOfflineTimer = setTimeout(() => {
+      _pendingOfflineTimer = null;
+      void runConnectivityCheck();
+    }, OFFLINE_CONFIRMATION_DELAY);
+    return _isActuallyOnline;
   }
 
   if (!_isActuallyOnline) {
@@ -111,6 +130,9 @@ async function runConnectivityCheck(): Promise<boolean> {
     if (version !== _connectivityCheckVersion) return;
 
     _pendingOfflineTimer = null;
+    if (confirmedOnline) {
+      _consecutiveFailures = 0;
+    }
     setOnlineState(confirmedOnline);
   }, OFFLINE_CONFIRMATION_DELAY);
 
@@ -118,6 +140,9 @@ async function runConnectivityCheck(): Promise<boolean> {
 }
 
 function setOnlineState(online: boolean) {
+  if (online) {
+    _consecutiveFailures = 0;
+  }
   if (online && _pendingOfflineTimer) {
     clearTimeout(_pendingOfflineTimer);
     _pendingOfflineTimer = null;
