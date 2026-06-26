@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { shouldApplyQueuedOp } from '@/lib/offlineSyncEngine';
 import {
   enqueueJobOperation,
   getQueuedJobs,
@@ -78,6 +79,13 @@ export function useOfflineJobQueue(userId: string | undefined) {
           if (error) throw error;
         } else {
           if (!item.jobId) throw new Error('Saknar job ID för update');
+          // 🛡️ Konfliktkontroll: skriv inte över nyare server-data
+          const shouldApply = await shouldApplyQueuedOp('job_postings', item.jobId, item.queuedAt);
+          if (!shouldApply) {
+            console.log(`[jobQueue] Server har nyare data för ${item.jobId} — hoppar över offline-edit`);
+            await removeQueuedJob(item.id);
+            continue;
+          }
           const { error } = await supabase
             .from('job_postings')
             .update(item.payload as never)
