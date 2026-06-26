@@ -15,7 +15,7 @@ const shouldSkipVideo = () => {
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
-  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [showPosterOverlay, setShowPosterOverlay] = useState(true);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -43,13 +43,13 @@ const HeroVideo = () => {
       if (p && typeof p.catch === 'function') {
         p.then(() => {
           failCount = 0;
-          setAutoplayBlocked(false);
+          setShowPosterOverlay(false);
         }).catch(() => {
           failCount++;
-          // Efter 2 misslyckade försök: dölj <video> och visa poster-bild
-          // istället. Detta tar bort iOS Lågeffektläges native play-overlay
-          // som inte går att dölja med CSS.
-          if (failCount >= 2) setAutoplayBlocked(true);
+          // iOS Lågeffektläge kan visa native play-overlay direkt när autoplay
+          // blockas. Därför ligger postern ovanpå från första rendern och
+          // stannar kvar så länge autoplay inte faktiskt spelar.
+          if (failCount >= 1) setShowPosterOverlay(true);
           if (retryTimer) window.clearTimeout(retryTimer);
           retryTimer = window.setTimeout(tryPlay, 600);
         });
@@ -95,8 +95,14 @@ const HeroVideo = () => {
       }, 500);
     };
 
-    const handlePlaying = () => startWatchdog();
-    const handleStalled = () => tryPlay();
+    const handlePlaying = () => {
+      setShowPosterOverlay(false);
+      startWatchdog();
+    };
+    const handleStalled = () => {
+      setShowPosterOverlay(true);
+      tryPlay();
+    };
     const handleError = () => {
       // Försök ladda om källan vid fel
       try {
@@ -174,7 +180,9 @@ const HeroVideo = () => {
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
           onContextMenu={(e) => e.preventDefault()}
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+          className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
+            showPosterOverlay ? 'opacity-0' : 'opacity-100'
+          }`}
         >
           {!skipVideo && (
             <>
@@ -192,15 +200,16 @@ const HeroVideo = () => {
             </>
           )}
         </video>
-        {/* Fallback för iOS Lågeffektläge: native play-overlay går inte att
-            dölja på <video>, så vi täcker den med poster-bilden istället. */}
-        {autoplayBlocked && (
+        {/* Ligger ovanpå från första millisekunden så iOS aldrig hinner visa
+            native play-overlay vid Lågeffektläge. Tas bort först när videon
+            faktiskt spelar. */}
+        {showPosterOverlay && (
           <img
             src="/hero-video-poster.jpg"
             alt=""
             aria-hidden="true"
             draggable={false}
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
+            className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover select-none"
           />
         )}
       </motion.div>
