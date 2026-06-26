@@ -45,11 +45,16 @@ function getQueue(): QueuedAction[] {
   }
 }
 
-function saveQueue(queue: QueuedAction[]) {
+function saveQueue(queue: QueuedAction[]): boolean {
   const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
   if (!saved) {
     console.error('[SavedJobsQueue] Failed to save — localStorage full even after eviction');
+    toast.error('Kunde inte spara jobbet lokalt', {
+      description: 'Enhetens lagring är full. Frigör utrymme och försök igen.',
+      duration: 6000,
+    });
   }
+  return saved;
 }
 
 /**
