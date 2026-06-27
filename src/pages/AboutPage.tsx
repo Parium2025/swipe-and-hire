@@ -117,7 +117,7 @@ const AboutPage = () => {
       {/* INSIKTEN — split: stor rubrik vänster, text höger */}
       <section className="relative px-5 py-24 sm:px-8 sm:py-28 md:px-12">
         <motion.div
-          className="mx-auto grid max-w-6xl gap-12 md:grid-cols-12 md:gap-16"
+          className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-12 lg:gap-16"
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
@@ -125,19 +125,19 @@ const AboutPage = () => {
           transition={revealTransition}
           style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
-          <div className="md:col-span-5">
-            <div className="md:sticky md:top-28">
+          <div className="lg:col-span-5">
+            <div className="lg:sticky lg:top-28">
               <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white/70">
                 Insikten
               </p>
-              <h2 className="mt-5 text-balance text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-6xl md:text-[4.25rem]">
+              <h2 className="mt-5 text-balance text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-6xl lg:text-[4.25rem]">
                 Rekrytering har fastnat i gamla vanor.
               </h2>
               <div className="mt-7 h-px w-20 bg-white/30" />
 
             </div>
           </div>
-          <div className="md:col-span-7">
+          <div className="lg:col-span-7 lg:pt-[3.25rem]">
             <p className="text-[18px] leading-[1.75] text-white sm:text-[19px]">
               Kandidater skickar ansökningar utan svar och utan återkoppling. Arbetsgivare lägger timmar på CV:n utan att hitta rätt. Resultatet blir missade möjligheter på båda sidor.
             </p>
