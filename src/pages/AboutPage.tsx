@@ -61,8 +61,8 @@ const AboutPage = () => {
       <LandingNav onLoginClick={handleLogin} />
       <SeoBubbles />
 
-      {/* HERO — full-bleed banner som tonar ut i sidans bakgrund */}
-      <section className="relative w-full overflow-hidden bg-parium-gradient">
+      {/* HERO — full-bleed banner med mjuk övergång till solid bakgrund */}
+      <section className="relative w-full overflow-hidden bg-[hsl(215_100%_12%)]">
         <div className="relative h-screen min-h-[700px] w-full">
           <img
             src={bannerAsset.url}
@@ -70,14 +70,11 @@ const AboutPage = () => {
             className="absolute inset-0 h-full w-full object-cover object-center"
             loading="eager"
             decoding="async"
-            style={{
-              maskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 95%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 95%)',
-            }}
           />
-          {/* Lätt mörkning för textkontrast — bilden ska fortfarande synas */}
-          <div className="absolute inset-0 bg-black/15" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent" />
+          {/* Mörkningslager — kraftig kontrast så texten alltid är läsbar */}
+          <div className="absolute inset-0 bg-black/45" />
+          {/* Lång fade: bild → sidans mörkblå bakgrund över hela hero-höjden */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 via-40% to-[hsl(215_100%_12%)] to-100%" />
 
           <div className="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
             <div className="mx-auto w-full max-w-4xl">
