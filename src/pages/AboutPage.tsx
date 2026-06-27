@@ -71,8 +71,8 @@ const AboutPage = () => {
             loading="eager"
             decoding="async"
             style={{
-              maskImage: 'linear-gradient(to bottom, black 0%, black 55%, transparent 90%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 55%, transparent 90%)',
+              maskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 95%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 95%)',
             }}
           />
           {/* Lätt mörkning för textkontrast — bilden ska fortfarande synas */}
