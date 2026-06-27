@@ -7,9 +7,15 @@ let aboutAssetsPromise: Promise<void> | null = null;
 const addPreloadLink = (url: string, priority: 'high' | 'low') => {
   if (typeof document === 'undefined') return;
 
-  const existing = document.head.querySelector(
-    `link[rel="preload"][as="image"][href="${url}"]`,
-  );
+  const existing = Array.from(
+    document.head.querySelectorAll<HTMLLinkElement>('link[rel="preload"][as="image"]'),
+  ).some((link) => {
+    try {
+      return new URL(link.href, window.location.origin).pathname === new URL(url, window.location.origin).pathname;
+    } catch {
+      return link.getAttribute('href') === url;
+    }
+  });
 
   if (existing) return;
 
