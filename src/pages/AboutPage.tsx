@@ -63,7 +63,7 @@ const AboutPage = () => {
 
       {/* HERO — full-bleed banner med bild */}
       <section className="relative w-full overflow-hidden">
-        <div className="relative h-[78vh] min-h-[560px] w-full sm:h-[88vh]">
+        <div className="relative h-[82vh] min-h-[600px] w-full sm:h-[90vh]">
           <img
             src={bannerAsset.url}
             alt="Människor från alla yrken samlade på ett torg i Sverige"
@@ -71,11 +71,12 @@ const AboutPage = () => {
             loading="eager"
             decoding="async"
           />
-          {/* lager för läsbarhet + sömlös övergång mot bg */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[hsl(215_100%_12%)]/85 via-[hsl(215_100%_12%)]/55 to-[hsl(215_100%_12%)]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(215_100%_12%)]/70 via-transparent to-[hsl(215_100%_12%)]/40" />
+          {/* Mörkningslager — kraftig kontrast så texten alltid är läsbar */}
+          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/45 to-[hsl(215_100%_12%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[hsl(215_100%_12%)] via-[hsl(215_100%_12%)]/85 to-transparent" />
 
-          <div className="relative z-10 flex h-full items-end pb-16 sm:items-center sm:pb-0">
+          <div className="relative z-10 flex h-full items-end pb-20 sm:pb-28 md:pb-32">
             <div className="mx-auto w-full max-w-6xl px-5 sm:px-8 md:px-12">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -89,7 +90,7 @@ const AboutPage = () => {
                     Om Parium
                   </span>
                 </div>
-                <h1 className="mt-6 text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
+                <h1 className="mt-6 text-balance text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
                   Jobbsökandet,
                   <br />
                   <span className="italic font-light">omtänkt från grunden.</span>
