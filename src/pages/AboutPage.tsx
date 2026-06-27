@@ -149,12 +149,8 @@ const AboutPage = () => {
           {/* visionspunkter — staplade premium-rader */}
           <div className="mx-auto mt-14 grid max-w-3xl gap-3">
             {visionPoints.map((item, index) => (
-              <motion.div
+              <div
                 key={item}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ duration: 0.4, delay: index * 0.08 }}
                 className="flex items-center gap-5 rounded-2xl border border-white/15 bg-white/[0.06] px-6 py-5 text-left backdrop-blur"
               >
                 <span className="text-3xl font-light tabular-nums text-white/90 sm:text-4xl">
@@ -165,7 +161,7 @@ const AboutPage = () => {
                   {item}
                 </span>
                 <ArrowRight className="hidden h-5 w-5 shrink-0 text-white/60 sm:block" aria-hidden="true" />
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
