@@ -127,13 +127,14 @@ const AboutPage = () => {
         >
           <div className="md:col-span-5">
             <div className="md:sticky md:top-28">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white/70">
                 Insikten
               </p>
-              <h2 className="mt-4 text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+              <h2 className="mt-5 text-balance text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-6xl md:text-[4.25rem]">
                 Rekrytering har fastnat i gamla vanor.
               </h2>
-              <div className="mt-6 h-px w-16 bg-white/30" />
+              <div className="mt-7 h-px w-20 bg-white/30" />
+
             </div>
           </div>
           <div className="md:col-span-7">
