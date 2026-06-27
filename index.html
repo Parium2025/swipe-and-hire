@@ -322,6 +322,8 @@
             }
           } else if (path === '/jobbsokare' || path === '/arbetsgivare') {
             add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'high' });
+          } else if (path === '/om-oss') {
+            add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/95a6e9aa-759c-48fc-8a0f-ee4ae6239167/om-oss-banner.png', type: 'image/png', fetchpriority: 'high' });
           }
         } catch (e) { /* never block paint */ }
       })();

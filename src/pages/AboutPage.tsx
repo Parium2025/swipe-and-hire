@@ -8,7 +8,7 @@ import SiteFooter from '@/components/landing/SiteFooter';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import bannerAsset from '@/assets/om-oss-banner.png.asset.json';
+import { ABOUT_BANNER_URL, preloadAboutPageAssets } from '@/lib/aboutPagePreload';
 
 const CANONICAL = 'https://parium.se/om-oss';
 const TITLE = 'Om Parium – Jobbappen som samlar allt på ett ställe';
@@ -21,11 +21,19 @@ const visionPoints = [
   'Så enkelt att varje kandidat kan söka själv',
 ];
 
+const prewarmedViewport = { once: true, amount: 0.08, margin: '0px 0px 320px 0px' };
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0 },
+};
+
 const AboutPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     syncBrowserChrome('/om-oss');
+    void preloadAboutPageAssets('high');
     window.scrollTo(0, 0);
   }, []);
 
@@ -65,11 +73,12 @@ const AboutPage = () => {
       <section className="relative w-full overflow-hidden">
         <div className="relative h-screen min-h-[700px] w-full">
           <img
-            src={bannerAsset.url}
+            src={ABOUT_BANNER_URL}
             alt="Människor från alla yrken samlade på ett torg i Sverige"
             className="absolute inset-0 h-full w-full object-cover object-center"
             loading="eager"
-            decoding="async"
+            decoding="sync"
+            {...({ fetchpriority: 'high' } as any)}
           />
           {/* Mörkningslager — kraftig kontrast så texten alltid är läsbar */}
           <div className="absolute inset-0 bg-black/40" />
@@ -105,7 +114,15 @@ const AboutPage = () => {
 
       {/* INSIKTEN — split: stor rubrik vänster, text höger */}
       <section className="relative px-5 py-24 sm:px-8 sm:py-28 md:px-12">
-        <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-12 md:gap-16">
+        <motion.div
+          className="mx-auto grid max-w-6xl gap-12 md:grid-cols-12 md:gap-16"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={prewarmedViewport}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          style={{ willChange: 'opacity, transform' }}
+        >
           <div className="md:col-span-5">
             <div className="md:sticky md:top-28">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
@@ -125,33 +142,48 @@ const AboutPage = () => {
               Vi tror att det finns ett bättre sätt. Därför har vi byggt en plattform där allt hänger ihop — jobbannonsen, ansökan, dialogen och beslutet. Inga lösa trådar. Inga separata system. Ett enda flöde, byggt för att rätt person ska nå rätt plats.
             </p>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* VÅR VISION — editorial pull-quote stil */}
       <section className="relative px-5 py-24 sm:px-8 sm:py-32 md:px-12">
         <div className="mx-auto max-w-5xl text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
-            Vår vision
-          </p>
-          <h2 className="mx-auto mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl">
-            Sveriges ledande<br className="hidden sm:block" /> jobbsökar- &amp; rekryteringsapp.
-          </h2>
-          <div className="mx-auto mt-10 max-w-2xl space-y-5">
-            <p className="text-[18px] leading-[1.75] text-white">
-              Det är den riktning vi bygger mot — inte ett kvartalsmål, utan en långsiktig vision. Vi vill att Parium ska vara det självklara valet för alla som söker jobb och för alla som rekryterar. Oavsett om du är ny på arbetsmarknaden, har lång erfarenhet eller letar efter nästa stjärna till teamet.
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={prewarmedViewport}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            style={{ willChange: 'opacity, transform' }}
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+              Vår vision
             </p>
-            <p className="text-[18px] leading-[1.75] text-white">
-              Tekniken ska göra det möjligt. Strukturen ska göra det tydligt. Och upplevelsen ska göra det så enkelt att varje kandidat kan hitta och söka rätt jobb — på riktigt, och helt själv.
-            </p>
-          </div>
+            <h2 className="mx-auto mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl">
+              Sveriges ledande<br className="hidden sm:block" /> jobbsökar- &amp; rekryteringsapp.
+            </h2>
+            <div className="mx-auto mt-10 max-w-2xl space-y-5">
+              <p className="text-[18px] leading-[1.75] text-white">
+                Det är den riktning vi bygger mot — inte ett kvartalsmål, utan en långsiktig vision. Vi vill att Parium ska vara det självklara valet för alla som söker jobb och för alla som rekryterar. Oavsett om du är ny på arbetsmarknaden, har lång erfarenhet eller letar efter nästa stjärna till teamet.
+              </p>
+              <p className="text-[18px] leading-[1.75] text-white">
+                Tekniken ska göra det möjligt. Strukturen ska göra det tydligt. Och upplevelsen ska göra det så enkelt att varje kandidat kan hitta och söka rätt jobb — på riktigt, och helt själv.
+              </p>
+            </div>
+          </motion.div>
 
           {/* visionspunkter — staplade premium-rader */}
           <div className="mx-auto mt-14 grid max-w-3xl gap-3">
             {visionPoints.map((item, index) => (
-              <div
+              <motion.div
                 key={item}
                 className="flex items-center gap-5 rounded-2xl border border-white/15 bg-white/[0.06] px-6 py-5 text-left backdrop-blur"
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="show"
+                viewport={prewarmedViewport}
+                transition={{ duration: 0.48, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                style={{ willChange: 'opacity, transform' }}
               >
                 <span className="text-3xl font-light tabular-nums text-white/90 sm:text-4xl">
                   0{index + 1}
@@ -161,7 +193,7 @@ const AboutPage = () => {
                   {item}
                 </span>
                 <ArrowRight className="hidden h-5 w-5 shrink-0 text-white/60 sm:block" aria-hidden="true" />
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -171,7 +203,15 @@ const AboutPage = () => {
       <section className="relative px-5 py-24 sm:px-8 md:px-12">
         <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 md:gap-8">
           {/* Bolaget */}
-          <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 backdrop-blur sm:p-12">
+          <motion.div
+            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 backdrop-blur sm:p-12"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={prewarmedViewport}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            style={{ willChange: 'opacity, transform' }}
+          >
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
               Bolaget
@@ -182,10 +222,18 @@ const AboutPage = () => {
             <p className="mt-6 text-[17px] leading-[1.7] text-white">
               Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag som bygger för både jobbsökaren och arbetsgivaren. Fokuserat team. Långsiktig plan. Inga genvägar.
             </p>
-          </div>
+          </motion.div>
 
           {/* Kontakt */}
-          <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 backdrop-blur sm:p-12">
+          <motion.div
+            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 backdrop-blur sm:p-12"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={prewarmedViewport}
+            transition={{ duration: 0.5, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
+            style={{ willChange: 'opacity, transform' }}
+          >
             <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
               Kontakt
@@ -203,13 +251,21 @@ const AboutPage = () => {
               <Mail className="h-4 w-4" aria-hidden="true" />
               hej@parium.se
             </a>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* CTA */}
       <section className="relative px-5 pb-24 pt-12 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-3xl rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-14">
+        <motion.div
+          className="mx-auto max-w-3xl rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-14"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={prewarmedViewport}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          style={{ willChange: 'opacity, transform' }}
+        >
           <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Redo att ta nästa steg?
           </h2>
@@ -219,7 +275,7 @@ const AboutPage = () => {
           <div className="mt-8 flex justify-center">
             <SeoCTAButton label="Skapa min profil idag" onClick={handleSignup} />
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <SiteFooter />
