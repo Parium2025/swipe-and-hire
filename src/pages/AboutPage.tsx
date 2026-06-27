@@ -75,9 +75,15 @@ const AboutPage = () => {
               WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 65%, transparent 100%)',
             }}
           />
-          {/* Mörkningslager — kraftig kontrast så texten alltid är läsbar */}
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+          {/* Mörkningslager — mest i mitten där texten är, mindre i kanterna */}
+          <div className="absolute inset-0 bg-black/30" />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)',
+            }}
+          />
 
           <div className="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
             <div className="mx-auto w-full max-w-4xl">
