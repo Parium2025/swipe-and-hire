@@ -72,9 +72,9 @@ const AboutPage = () => {
             decoding="async"
           />
           {/* Mörkningslager — kraftig kontrast så texten alltid är läsbar */}
-          <div className="absolute inset-0 bg-black/45" />
+          <div className="absolute inset-0 bg-black/40" />
           {/* Lång, mjuk gradient: bild → mörkblå så övergången till sidan blir sömlös */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 via-30% to-[hsl(215_100%_12%)] to-90%" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 via-35% to-[hsl(215_100%_12%)] to-95%" />
 
           <div className="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
             <div className="mx-auto w-full max-w-4xl">
