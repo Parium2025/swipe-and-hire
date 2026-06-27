@@ -148,7 +148,7 @@ const AboutPage = () => {
       </section>
 
       {/* VÅR VISION — editorial pull-quote stil */}
-      <section className="relative px-5 py-24 sm:px-8 sm:py-32 md:px-12">
+      <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
         <div className="mx-auto max-w-5xl text-center">
           <motion.div
             variants={fadeUp}
