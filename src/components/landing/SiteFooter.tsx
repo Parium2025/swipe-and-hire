@@ -1,7 +1,26 @@
 import { Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { preloadAboutPageAssets } from '@/lib/aboutPagePreload';
 import { saveScrollNow } from '@/lib/scrollRestoration';
+
+// Apple-style premium entry — samma timing/easing som AboutPage så
+// hela sajten har symmetrisk rörelsekänsla.
+const FOOTER_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const footerColumnVariants: Variants = {
+  hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.7, ease: FOOTER_EASE },
+  },
+};
+const footerContainerVariants: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+};
+
 
 type ColLink = { label: string; to: string };
 
