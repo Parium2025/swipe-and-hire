@@ -62,7 +62,7 @@ const AboutPage = () => {
       <SeoBubbles />
 
       {/* HERO — full-bleed banner som tonar ut i sidans egen bakgrund */}
-      <section className="relative w-full overflow-hidden bg-parium-gradient">
+      <section className="relative w-full overflow-hidden bg-parium-gradient bg-fixed">
         <div className="relative h-[85vh] min-h-[620px] w-full sm:h-[90vh]">
           <img
             src={bannerAsset.url}
