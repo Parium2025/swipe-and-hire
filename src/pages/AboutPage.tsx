@@ -61,9 +61,9 @@ const AboutPage = () => {
       <LandingNav onLoginClick={handleLogin} />
       <SeoBubbles />
 
-      {/* HERO — full-bleed banner med bild */}
+      {/* HERO — full-bleed banner med mjuk övergång */}
       <section className="relative w-full overflow-hidden">
-        <div className="relative h-[82vh] min-h-[600px] w-full sm:h-[90vh]">
+        <div className="relative h-screen min-h-[700px] w-full">
           <img
             src={bannerAsset.url}
             alt="Människor från alla yrken samlade på ett torg i Sverige"
@@ -72,30 +72,29 @@ const AboutPage = () => {
             decoding="async"
           />
           {/* Mörkningslager — kraftig kontrast så texten alltid är läsbar */}
-          <div className="absolute inset-0 bg-black/55" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/45 to-[hsl(215_100%_12%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[hsl(215_100%_12%)] via-[hsl(215_100%_12%)]/85 to-transparent" />
+          <div className="absolute inset-0 bg-black/45" />
+          {/* Lång, mjuk gradient: bild → mörkblå så övergången till sidan blir sömlös */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 via-30% to-[hsl(215_100%_12%)] to-90%" />
 
-          <div className="relative z-10 flex h-full items-end pb-20 sm:pb-28 md:pb-32">
-            <div className="mx-auto w-full max-w-6xl px-5 sm:px-8 md:px-12">
+          <div className="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
+            <div className="mx-auto w-full max-w-4xl">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="max-w-3xl"
               >
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 backdrop-blur">
+                <div className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 backdrop-blur">
                   <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
                   <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
                     Om Parium
                   </span>
                 </div>
-                <h1 className="mt-6 text-balance text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
+                <h1 className="mx-auto mt-6 text-balance text-center text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-7xl">
                   Jobbsökandet,
                   <br />
                   <span className="italic font-light">omtänkt från grunden.</span>
                 </h1>
-                <p className="mt-6 max-w-2xl text-[17px] leading-8 text-white sm:text-lg">
+                <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-8 text-white sm:text-lg">
                   En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
                 </p>
               </motion.div>
