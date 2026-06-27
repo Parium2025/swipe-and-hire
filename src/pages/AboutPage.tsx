@@ -64,7 +64,6 @@ const AboutPage = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={TITLE} />
         <meta name="twitter:description" content={DESCRIPTION} />
-        <link rel="preload" as="image" href={ABOUT_BANNER_URL} {...({ fetchpriority: 'high' } as any)} />
       </Helmet>
 
       <LandingNav onLoginClick={handleLogin} />
