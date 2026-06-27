@@ -127,13 +127,14 @@ const AboutPage = () => {
         >
           <div className="md:col-span-5">
             <div className="md:sticky md:top-28">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white/70">
                 Insikten
               </p>
-              <h2 className="mt-4 text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+              <h2 className="mt-5 text-balance text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-6xl md:text-[4.25rem]">
                 Rekrytering har fastnat i gamla vanor.
               </h2>
-              <div className="mt-6 h-px w-16 bg-white/30" />
+              <div className="mt-7 h-px w-20 bg-white/30" />
+
             </div>
           </div>
           <div className="md:col-span-7">
@@ -194,7 +195,7 @@ const AboutPage = () => {
                 <span className="flex-1 text-[16px] font-medium leading-snug text-white sm:text-[17px]">
                   {item}
                 </span>
-                <ArrowRight className="hidden h-5 w-5 shrink-0 text-white/60 sm:block" aria-hidden="true" />
+                
               </motion.div>
             ))}
           </div>
@@ -228,7 +229,7 @@ const AboutPage = () => {
 
           {/* Kontakt */}
           <motion.div
-            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 backdrop-blur sm:p-12"
+            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 text-center backdrop-blur sm:p-12"
             variants={fadeUp}
             initial="hidden"
             whileInView="show"
@@ -243,17 +244,18 @@ const AboutPage = () => {
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Har du något<br />att säga oss?
             </h2>
-            <p className="mt-6 text-[17px] leading-[1.7] text-white">
+            <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white">
               Tips, frågor, idéer eller bara en tanke — vi läser allt. Och vi svarar.
             </p>
             <a
               href="mailto:hej@parium.se"
-              className="mt-7 inline-flex min-h-touch items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-[15px] font-semibold text-white transition hover:bg-white/15"
+              className="mx-auto mt-7 inline-flex min-h-touch items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-[15px] font-semibold text-white transition hover:bg-white/15"
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               hej@parium.se
             </a>
           </motion.div>
+
         </div>
       </section>
 
