@@ -229,7 +229,7 @@ const AboutPage = () => {
 
           {/* Kontakt */}
           <motion.div
-            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 backdrop-blur sm:p-12"
+            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 text-center backdrop-blur sm:p-12"
             variants={fadeUp}
             initial="hidden"
             whileInView="show"
@@ -244,17 +244,18 @@ const AboutPage = () => {
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Har du något<br />att säga oss?
             </h2>
-            <p className="mt-6 text-[17px] leading-[1.7] text-white">
+            <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white">
               Tips, frågor, idéer eller bara en tanke — vi läser allt. Och vi svarar.
             </p>
             <a
               href="mailto:hej@parium.se"
-              className="mt-7 inline-flex min-h-touch items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-[15px] font-semibold text-white transition hover:bg-white/15"
+              className="mx-auto mt-7 inline-flex min-h-touch items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-[15px] font-semibold text-white transition hover:bg-white/15"
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               hej@parium.se
             </a>
           </motion.div>
+
         </div>
       </section>
 
