@@ -115,9 +115,9 @@ const AboutPage = () => {
       </section>
 
       {/* INSIKTEN — split: stor rubrik vänster, text höger */}
-      <section className="relative px-5 py-24 sm:px-8 sm:py-28 md:px-12">
+      <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
         <motion.div
-          className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-12 lg:gap-16"
+          className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-12 lg:gap-16"
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
@@ -126,7 +126,7 @@ const AboutPage = () => {
           style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
           <div className="lg:col-span-5">
-            <div className="lg:sticky lg:top-28">
+            <div>
               <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white/70">
                 Insikten
               </p>
@@ -134,7 +134,6 @@ const AboutPage = () => {
                 Rekrytering har fastnat i gamla vanor.
               </h2>
               <div className="mt-7 h-px w-20 bg-white/30" />
-
             </div>
           </div>
           <div className="lg:col-span-7 lg:pt-[3.25rem]">
@@ -149,7 +148,7 @@ const AboutPage = () => {
       </section>
 
       {/* VÅR VISION — editorial pull-quote stil */}
-      <section className="relative px-5 py-24 sm:px-8 sm:py-32 md:px-12">
+      <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
         <div className="mx-auto max-w-5xl text-center">
           <motion.div
             variants={fadeUp}
@@ -203,7 +202,7 @@ const AboutPage = () => {
       </section>
 
       {/* BOLAGET + KONTAKT — sida vid sida på desktop */}
-      <section className="relative px-5 py-24 sm:px-8 md:px-12">
+      <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
         <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 md:gap-8">
           {/* Bolaget */}
           <motion.div
