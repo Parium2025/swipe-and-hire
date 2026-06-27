@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { preloadAboutPageAssets } from '@/lib/aboutPagePreload';
 import { saveScrollNow } from '@/lib/scrollRestoration';
 
 type ColLink = { label: string; to: string };
@@ -51,11 +52,20 @@ function useRememberFooterOrigin() {
 
 function FooterLink({ link }: { link: ColLink }) {
   const remember = useRememberFooterOrigin();
+  const warmTarget = () => {
+    if (link.to === '/om-oss') void preloadAboutPageAssets('low');
+  };
+
   return (
     <Link
       to={link.to}
       state={typeof window !== 'undefined' ? { footerOriginPath: window.location.pathname } : undefined}
-      onPointerDown={() => remember(link.to)}
+      onPointerEnter={warmTarget}
+      onFocus={warmTarget}
+      onPointerDown={() => {
+        warmTarget();
+        remember(link.to);
+      }}
       onClick={() => remember(link.to)}
       className="inline-flex min-h-11 items-center whitespace-nowrap text-[15px] font-medium leading-none text-white transition-colors hover:text-secondary"
     >
