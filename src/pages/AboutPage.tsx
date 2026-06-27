@@ -21,12 +21,14 @@ const visionPoints = [
   'Så enkelt att varje kandidat kan söka själv',
 ];
 
-const prewarmedViewport = { once: true, amount: 0.08, margin: '0px 0px 320px 0px' };
+const revealViewport = { once: true, amount: 0.22, margin: '0px 0px -12% 0px' };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0.42, y: 34, filter: 'blur(10px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)' },
 };
+
+const revealTransition = { duration: 0.82, ease: [0.16, 1, 0.3, 1] } as const;
 
 const AboutPage = () => {
   const navigate = useNavigate();
@@ -119,9 +121,9 @@ const AboutPage = () => {
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
-          viewport={prewarmedViewport}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          style={{ willChange: 'opacity, transform' }}
+          viewport={revealViewport}
+          transition={revealTransition}
+          style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
           <div className="md:col-span-5">
             <div className="md:sticky md:top-28">
@@ -152,9 +154,9 @@ const AboutPage = () => {
             variants={fadeUp}
             initial="hidden"
             whileInView="show"
-            viewport={prewarmedViewport}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            style={{ willChange: 'opacity, transform' }}
+            viewport={revealViewport}
+            transition={revealTransition}
+            style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
               Vår vision
@@ -181,9 +183,9 @@ const AboutPage = () => {
                 variants={fadeUp}
                 initial="hidden"
                 whileInView="show"
-                viewport={prewarmedViewport}
-                transition={{ duration: 0.48, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
-                style={{ willChange: 'opacity, transform' }}
+                viewport={revealViewport}
+                transition={{ ...revealTransition, delay: index * 0.08 }}
+                style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
               >
                 <span className="text-3xl font-light tabular-nums text-white/90 sm:text-4xl">
                   0{index + 1}
@@ -208,9 +210,9 @@ const AboutPage = () => {
             variants={fadeUp}
             initial="hidden"
             whileInView="show"
-            viewport={prewarmedViewport}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            style={{ willChange: 'opacity, transform' }}
+            viewport={revealViewport}
+            transition={revealTransition}
+            style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
@@ -230,9 +232,9 @@ const AboutPage = () => {
             variants={fadeUp}
             initial="hidden"
             whileInView="show"
-            viewport={prewarmedViewport}
-            transition={{ duration: 0.5, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
-            style={{ willChange: 'opacity, transform' }}
+            viewport={revealViewport}
+            transition={{ ...revealTransition, delay: 0.08 }}
+            style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
             <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
@@ -262,9 +264,9 @@ const AboutPage = () => {
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
-          viewport={prewarmedViewport}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          style={{ willChange: 'opacity, transform' }}
+          viewport={revealViewport}
+          transition={revealTransition}
+          style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
           <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Redo att ta nästa steg?
