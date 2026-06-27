@@ -160,6 +160,17 @@ function ColumnPair({
 const SiteFooter = () => {
   const { pathname } = useLocation();
   const filteredCompanyLinks = companyLinks.filter((l) => l.to !== pathname);
+  const reduce = useReducedMotion();
+
+  const motionProps = reduce
+    ? {}
+    : {
+        initial: 'hidden' as const,
+        whileInView: 'show' as const,
+        viewport: { once: true, margin: '0px 0px -10% 0px' },
+        variants: footerContainerVariants,
+      };
+  const itemVariants = reduce ? undefined : footerColumnVariants;
 
   return (
     <footer className="relative w-full bg-primary text-white">
@@ -168,31 +179,46 @@ const SiteFooter = () => {
 
       <div className="mx-auto w-full max-w-7xl px-6 pb-10 pt-14 sm:px-8 sm:pt-16">
         {/* Mobile: single column, section by section */}
-        <div className="grid grid-cols-1 gap-8 md:hidden">
-          <MobileSection title="Hitta jobb i" links={cityLinks} />
+        <motion.div className="grid grid-cols-1 gap-8 md:hidden" {...motionProps}>
+          <motion.div variants={itemVariants}>
+            <MobileSection title="Hitta jobb i" links={cityLinks} />
+          </motion.div>
           <div className="h-px bg-white/10" aria-hidden="true" />
-          <MobileSection title="Yrken" links={occupationLinks} />
+          <motion.div variants={itemVariants}>
+            <MobileSection title="Yrken" links={occupationLinks} />
+          </motion.div>
           <div className="h-px bg-white/10" aria-hidden="true" />
-          <MobileSection title="Guider" links={guideLinks} />
+          <motion.div variants={itemVariants}>
+            <MobileSection title="Guider" links={guideLinks} />
+          </motion.div>
           <div className="h-px bg-white/10" aria-hidden="true" />
-          <MobileSection title="Företaget" links={filteredCompanyLinks} />
-        </div>
+          <motion.div variants={itemVariants}>
+            <MobileSection title="Företaget" links={filteredCompanyLinks} />
+          </motion.div>
+        </motion.div>
 
         {/* Desktop: aligned two-column pairs */}
-        <div className="hidden md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-12">
-          <ColumnPair
-            leftTitle="Hitta jobb i"
-            leftLinks={cityLinks}
-            rightTitle="Yrken"
-            rightLinks={occupationLinks}
-          />
-          <ColumnPair
-            leftTitle="Guider"
-            leftLinks={guideLinks}
-            rightTitle="Företaget"
-            rightLinks={filteredCompanyLinks}
-          />
-        </div>
+        <motion.div
+          className="hidden md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-12"
+          {...motionProps}
+        >
+          <motion.div variants={itemVariants}>
+            <ColumnPair
+              leftTitle="Hitta jobb i"
+              leftLinks={cityLinks}
+              rightTitle="Yrken"
+              rightLinks={occupationLinks}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <ColumnPair
+              leftTitle="Guider"
+              leftLinks={guideLinks}
+              rightTitle="Företaget"
+              rightLinks={filteredCompanyLinks}
+            />
+          </motion.div>
+        </motion.div>
 
         {/* Bottom bar */}
         <div className="mt-14 border-t border-white/10 pt-6 text-center text-[13px] font-medium text-white">
@@ -202,5 +228,6 @@ const SiteFooter = () => {
     </footer>
   );
 };
+
 
 export default SiteFooter;
