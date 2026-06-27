@@ -195,7 +195,7 @@ const AboutPage = () => {
                 <span className="flex-1 text-[16px] font-medium leading-snug text-white sm:text-[17px]">
                   {item}
                 </span>
-                <ArrowRight className="hidden h-5 w-5 shrink-0 text-white/60 sm:block" aria-hidden="true" />
+                
               </motion.div>
             ))}
           </div>
