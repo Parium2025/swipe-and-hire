@@ -270,7 +270,7 @@ const AboutPage = () => {
             Redo att ta nästa steg?
           </h2>
           <p className="relative mx-auto mt-4 max-w-xl text-[17px] leading-7 text-white lg:text-[19px]">
-            Skapa din profil idag. Resten sköter Parium.
+            Skapa din profil i dag. Resten sköter Parium, oavsett om du är jobbsökare eller om du är en arbetsgivare.
           </p>
           <div className="relative mt-8 flex justify-center">
             <SeoCTAButton label="Skapa min profil idag" onClick={handleSignup} />
