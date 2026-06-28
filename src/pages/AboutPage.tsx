@@ -166,10 +166,10 @@ const AboutPage = () => {
             </h2>
             <div className="mx-auto mt-10 max-w-2xl space-y-5">
               <p className="text-[18px] leading-[1.75] text-white">
-                Det är den riktning vi bygger mot — inte ett kvartalsmål, utan en långsiktig vision. Vi vill att Parium ska vara det självklara valet för alla som söker jobb och för alla som rekryterar. Oavsett om du är ny på arbetsmarknaden, har lång erfarenhet eller letar efter nästa stjärna till teamet.
+                Vi bygger mot ett självklart mål: att Parium ska vara det naturliga valet för alla som söker jobb och för alla som rekryterar. En plattform som är lika enkel för kandidaten som den är kraftfull för arbetsgivaren.
               </p>
               <p className="text-[18px] leading-[1.75] text-white">
-                Tekniken ska göra det möjligt. Strukturen ska göra det tydligt. Och upplevelsen ska göra det så enkelt att varje kandidat kan hitta och söka rätt jobb — på riktigt, och helt själv.
+                Tekniken skapar möjligheterna. Strukturen ger tydligheten. Och upplevelsen gör att varje kandidat kan hitta och söka rätt jobb — helt på egen hand.
               </p>
             </div>
           </motion.div>
