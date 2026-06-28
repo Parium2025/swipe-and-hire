@@ -240,7 +240,7 @@ const AboutPage = () => {
               Har du något<br />att säga oss?
             </h2>
             <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white lg:text-[19px]">
-              Tips, frågor, idéer eller bara en tanke — vi läser allt. Och vi svarar.
+              Tips, frågor, idéer eller bara en tanke — vi läser allt. Och vi svarar!
             </p>
             <a
               href="mailto:hej@parium.se"
