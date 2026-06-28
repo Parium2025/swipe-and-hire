@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { ArrowRight, Mail, Sparkles } from 'lucide-react';
+import { Mail, Sparkles } from 'lucide-react';
 import LandingNav from '@/components/LandingNav';
 import SiteFooter from '@/components/landing/SiteFooter';
 import SeoBubbles from '@/components/seo/SeoBubbles';
