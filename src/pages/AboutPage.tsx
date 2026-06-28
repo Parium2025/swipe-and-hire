@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { Mail, Sparkles } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import LandingNav from '@/components/LandingNav';
 import SiteFooter from '@/components/landing/SiteFooter';
 import SeoBubbles from '@/components/seo/SeoBubbles';
@@ -94,16 +94,10 @@ const AboutPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 backdrop-blur">
-                  <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[13px]">
-                    Om Parium
-                  </span>
-                </div>
-                <h1 className="mx-auto mt-6 text-balance text-center text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-7xl">
-                  Jobbsökandet,
+                <h1 className="mx-auto text-balance text-center text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-7xl">
+                  Byggt i Sverige.
                   <br />
-                  <span className="italic font-light">omtänkt från grunden.</span>
+                  <span className="italic font-light">För hur jobbsökandet borde fungera.</span>
                 </h1>
                 <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-8 text-white sm:text-lg lg:text-xl">
                   En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
@@ -112,6 +106,32 @@ const AboutPage = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* VEM VI ÄR — kort, personlig intro */}
+      <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
+        <motion.div
+          className="mx-auto max-w-3xl text-center"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={revealViewport}
+          transition={revealTransition}
+          style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
+        >
+          <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[14px]">
+            Vem vi är
+          </p>
+          <h2 className="mt-5 text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.75rem]">
+            Ett litet team. En ärlig idé.
+          </h2>
+          <p className="mx-auto mt-8 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
+            Parium grundades i Sverige av ett litet team som tröttnade på hur rekrytering fungerar. Vi kommer från produktutveckling, design och rekrytering — och vi bygger det vi själva alltid önskat fanns.
+          </p>
+          <p className="mx-auto mt-6 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
+            Långsamt. Noggrant. Utan kompromisser.
+          </p>
+        </motion.div>
       </section>
 
       {/* INSIKTEN — split: stor rubrik vänster, text höger */}
