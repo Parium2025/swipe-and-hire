@@ -98,13 +98,13 @@ const AboutPage = () => {
               style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
             >
               <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[14px]">
-                Vem vi är
+                Vilka är vi?
               </p>
               <h2 className="mt-5 text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.75rem]">
                 Ett team, en idé.
               </h2>
               <p className="mx-auto mt-8 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
-                Parium grundades i Sverige av ett team som tröttnade på hur rekryteringen fungerar i dagsläget. Vi kommer från produktutveckling, design och rekrytering och vi bygger det som vi själva alltid önskat att fanns.
+                Parium grundades i Sverige av ett team som tröttnade på hur rekrytering fungerar i dagsläget. Vi kommer från olika delar, från olika branscher, men där det alltid fanns rekrytering i centrum. Och därför har vi byggt något som vi alltid önskat att fanns.
               </p>
             </motion.div>
           </div>
