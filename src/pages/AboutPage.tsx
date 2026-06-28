@@ -127,7 +127,7 @@ const AboutPage = () => {
         >
           <div className="lg:col-span-5">
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[13px]">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[14px]">
                 Insikten
               </p>
               <h2 className="mt-5 text-balance text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-6xl lg:text-[4.25rem]">
