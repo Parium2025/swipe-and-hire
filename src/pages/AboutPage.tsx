@@ -214,10 +214,10 @@ const AboutPage = () => {
               Bolaget
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Litet team.<br />Stora ambitioner.
+              Ett team, stora ambitioner.
             </h2>
             <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white lg:text-[19px]">
-              Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag som bygger för både jobbsökaren och arbetsgivaren. Fokuserat team. Långsiktig plan. Inga genvägar.
+              Parium drivs av Parium AB, ett svenskt bolag som bygger för både jobbsökaren och arbetsgivaren. Enkel för kandidaten, kraftfull för arbetsgivare.
             </p>
           </motion.div>
 
