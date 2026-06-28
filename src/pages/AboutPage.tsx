@@ -94,14 +94,9 @@ const AboutPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <h1 className="mx-auto text-balance text-center text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-7xl">
-                  Byggt i Sverige.
-                  <br />
-                  <span className="italic font-light">För hur jobbsökandet borde fungera.</span>
-                </h1>
-                <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-8 text-white sm:text-lg lg:text-xl">
+                <h1 className="mx-auto text-balance text-center text-[2rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl">
                   En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
-                </p>
+                </h1>
               </motion.div>
             </div>
           </div>
