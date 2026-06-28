@@ -18,7 +18,6 @@ const DESCRIPTION =
 const visionPoints = [
   'Sveriges ledande jobbsökarapp',
   'Sveriges ledande rekryteringsapp',
-  'Så enkelt att varje kandidat kan söka själv',
 ];
 
 const revealViewport = { once: true, amount: 0.22, margin: '0px 0px -12% 0px' };
@@ -143,7 +142,7 @@ const AboutPage = () => {
               Kandidater skickar ansökningar utan svar och utan återkoppling. Arbetsgivare lägger timmar på CV:n utan att hitta rätt. Resultatet blir missade möjligheter.
             </p>
             <p className="mt-6 text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
-              Vi tror att det finns ett bättre sätt. Därför har vi byggt en plattform där allt hänger ihop — jobbannonsen, ansökan och dialogen. Ett enda flöde, byggt för att rätt person ska nå rätt plats.
+              Vi tror på kraften i det enkla. Smart teknik bakom kulisserna, tydlig struktur och en upplevelse som gör att rätt kandidat når rätt jobb — utan onödiga steg.&nbsp;Därför har vi byggt en plattform där allt hänger ihop — jobbannonsen, ansökan och dialogen. Ett enda flöde, byggt för att rätt person ska nå rätt plats.
             </p>
           </div>
         </motion.div>
@@ -169,9 +168,6 @@ const AboutPage = () => {
             <div className="mx-auto mt-10 max-w-2xl space-y-5">
               <p className="text-[18px] leading-[1.75] text-white lg:text-[20px]">
                 Vi bygger mot ett självklart mål och vision: Parium ska vara det naturliga valet för alla som söker jobb och för alla som rekryterar. En plattform som är lika enkel för kandidaten som den är kraftfull för arbetsgivaren.
-              </p>
-              <p className="text-[18px] leading-[1.75] text-white lg:text-[20px]">
-                Tekniken skapar möjligheterna. Strukturen ger tydligheten. Och upplevelsen gör att varje kandidat kan hitta och söka rätt jobb — helt på egen hand.
               </p>
             </div>
           </motion.div>
