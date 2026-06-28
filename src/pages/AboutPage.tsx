@@ -71,7 +71,24 @@ const AboutPage = () => {
       <LandingNav onLoginClick={handleLogin} />
       <SeoBubbles />
 
-      {/* HERO — full-bleed banner med mjuk övergång */}
+      {/* HERO — text-only statement */}
+      <section className="relative w-full overflow-hidden">
+        <div className="relative flex h-screen min-h-[700px] w-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
+          <div className="mx-auto w-full max-w-4xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h1 className="mx-auto text-balance text-center text-[2rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl">
+                En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
+              </h1>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* VEM VI ÄR — full-bleed banner med mjuk övergång */}
       <section className="relative w-full overflow-hidden">
         <div className="relative h-screen min-h-[700px] w-full">
           <img
@@ -88,45 +105,30 @@ const AboutPage = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 via-35% to-[hsl(215_100%_12%)] to-95%" />
 
           <div className="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
-            <div className="mx-auto w-full max-w-4xl">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <h1 className="mx-auto text-balance text-center text-[2rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl">
-                  En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
-                </h1>
-              </motion.div>
-            </div>
+            <motion.div
+              className="mx-auto w-full max-w-3xl"
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="show"
+              viewport={revealViewport}
+              transition={revealTransition}
+              style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
+            >
+              <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[14px]">
+                Vem vi är
+              </p>
+              <h2 className="mt-5 text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.75rem]">
+                Ett litet team. En ärlig idé.
+              </h2>
+              <p className="mx-auto mt-8 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
+                Parium grundades i Sverige av ett litet team som tröttnade på hur rekrytering fungerar. Vi kommer från produktutveckling, design och rekrytering — och vi bygger det vi själva alltid önskat fanns.
+              </p>
+              <p className="mx-auto mt-6 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
+                Långsamt. Noggrant. Utan kompromisser.
+              </p>
+            </motion.div>
           </div>
         </div>
-      </section>
-
-      {/* VEM VI ÄR — kort, personlig intro */}
-      <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
-        <motion.div
-          className="mx-auto max-w-3xl text-center"
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={revealViewport}
-          transition={revealTransition}
-          style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
-        >
-          <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[14px]">
-            Vem vi är
-          </p>
-          <h2 className="mt-5 text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.75rem]">
-            Ett litet team. En ärlig idé.
-          </h2>
-          <p className="mx-auto mt-8 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
-            Parium grundades i Sverige av ett litet team som tröttnade på hur rekrytering fungerar. Vi kommer från produktutveckling, design och rekrytering — och vi bygger det vi själva alltid önskat fanns.
-          </p>
-          <p className="mx-auto mt-6 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
-            Långsamt. Noggrant. Utan kompromisser.
-          </p>
-        </motion.div>
       </section>
 
       {/* INSIKTEN — split: stor rubrik vänster, text höger */}
