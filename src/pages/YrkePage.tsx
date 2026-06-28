@@ -282,7 +282,8 @@ const YrkePage = () => {
           </div>
         </section>
         
-      </div>
+      <SiteFooter />
+    </div>
     </>
   );
 };

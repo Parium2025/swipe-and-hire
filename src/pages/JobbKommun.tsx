@@ -360,6 +360,7 @@ const JobbKommun = () => {
           </div>
         </div>
       </section>
+    <SiteFooter />
     </div>
   );
 };

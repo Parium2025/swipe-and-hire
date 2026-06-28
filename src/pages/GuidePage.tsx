@@ -310,7 +310,8 @@ const GuidePage = () => {
             </ul>
           </div>
         </article>
-      </div>
+      <SiteFooter />
+    </div>
     </>
   );
 };

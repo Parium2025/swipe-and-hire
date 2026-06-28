@@ -175,6 +175,7 @@ const KommunHub = () => {
           </Link>
         </div>
       </section>
+    <SiteFooter />
     </div>
   );
 };

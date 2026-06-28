@@ -376,6 +376,7 @@ const JobbHub = () => {
           </div>
         </div>
       </section>
+    <SiteFooter />
     </div>
     </TooltipProvider>
   );

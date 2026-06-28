@@ -322,7 +322,8 @@ const JobbCityYrke = () => {
             </div>
           </div>
         </section>
-      </div>
+      <SiteFooter />
+    </div>
     </>
   );
 };

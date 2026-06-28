@@ -110,7 +110,8 @@ const GuiderHub = () => {
             ))}
           </ul>
         </section>
-      </div>
+      <SiteFooter />
+    </div>
     </>
   );
 };

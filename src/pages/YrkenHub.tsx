@@ -291,7 +291,8 @@ const YrkenHub = () => {
             </div>
           </div>
         </section>
-      </div>
+      <SiteFooter />
+    </div>
     </TooltipProvider>
   );
 };
