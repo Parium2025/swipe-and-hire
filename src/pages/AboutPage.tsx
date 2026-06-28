@@ -94,16 +94,10 @@ const AboutPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 backdrop-blur">
-                  <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[13px]">
-                    Om Parium
-                  </span>
-                </div>
-                <h1 className="mx-auto mt-6 text-balance text-center text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-7xl">
-                  Jobbsökandet,
+                <h1 className="mx-auto text-balance text-center text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-7xl">
+                  Byggt i Sverige.
                   <br />
-                  <span className="italic font-light">omtänkt från grunden.</span>
+                  <span className="italic font-light">För hur jobbsökandet borde fungera.</span>
                 </h1>
                 <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-8 text-white sm:text-lg lg:text-xl">
                   En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
