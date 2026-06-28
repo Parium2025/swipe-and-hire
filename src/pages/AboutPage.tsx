@@ -261,7 +261,7 @@ const AboutPage = () => {
       {/* CTA */}
       <section className="relative px-5 pb-24 pt-12 sm:px-8 md:px-12">
         <motion.div
-          className="mx-auto max-w-3xl rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-14"
+          className="relative mx-auto max-w-3xl overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-14"
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
@@ -269,13 +269,15 @@ const AboutPage = () => {
           transition={revealTransition}
           style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
-          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
+          <div className="absolute left-1/2 top-0 h-[2px] w-32 -translate-x-1/2 rounded-full bg-white/40" aria-hidden="true" />
+          <h2 className="relative text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Redo att ta nästa steg?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-[17px] leading-7 text-white">
+          <p className="relative mx-auto mt-4 max-w-xl text-[17px] leading-7 text-white">
             Skapa din profil idag. Resten sköter Parium.
           </p>
-          <div className="mt-8 flex justify-center">
+          <div className="relative mt-8 flex justify-center">
             <SeoCTAButton label="Skapa min profil idag" onClick={handleSignup} />
           </div>
         </motion.div>
