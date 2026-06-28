@@ -267,11 +267,10 @@ const AboutPage = () => {
           style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
           <h2 className="relative text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Redo att ta nästa steg?
           </h2>
-          <p className="relative mx-auto mt-4 max-w-xl text-[17px] leading-7 text-white">
+          <p className="relative mx-auto mt-4 max-w-xl text-[17px] leading-7 text-white lg:text-[19px]">
             Skapa din profil idag. Resten sköter Parium.
           </p>
           <div className="relative mt-8 flex justify-center">
