@@ -1097,6 +1097,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     return () => cancel(handle);
   }, []);
 
+  // High-priority preload + Spline prefetch — så /jobbsokare och /arbetsgivare
+  // får identisk LCP-känsla.
+  useEffect(() => {
+    preloadAudienceLandingAssets();
+  }, []);
+
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
 
