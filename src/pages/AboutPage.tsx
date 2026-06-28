@@ -24,11 +24,11 @@ const visionPoints = [
 const revealViewport = { once: true, amount: 0.22, margin: '0px 0px -12% 0px' };
 
 const fadeUp = {
-  hidden: { opacity: 0.42, y: 34, filter: 'blur(10px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)' },
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
 };
 
-const revealTransition = { duration: 0.82, ease: [0.16, 1, 0.3, 1] } as const;
+const revealTransition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] } as const;
 
 const AboutPage = () => {
   const navigate = useNavigate();
