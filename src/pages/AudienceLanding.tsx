@@ -16,6 +16,7 @@ import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { useWheelSmoother } from '@/hooks/useWheelSmoother';
+import { preloadAudienceLandingAssets } from '@/lib/audienceLandingPreload';
 
 
 
