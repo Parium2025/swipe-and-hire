@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import SiteFooter from '@/components/landing/SiteFooter';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
@@ -290,7 +291,8 @@ const YrkenHub = () => {
             </div>
           </div>
         </section>
-      </div>
+      <SiteFooter />
+    </div>
     </TooltipProvider>
   );
 };

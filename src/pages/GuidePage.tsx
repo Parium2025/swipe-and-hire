@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
+import SiteFooter from '@/components/landing/SiteFooter';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
@@ -309,7 +310,8 @@ const GuidePage = () => {
             </ul>
           </div>
         </article>
-      </div>
+      <SiteFooter />
+    </div>
     </>
   );
 };

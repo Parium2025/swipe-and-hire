@@ -221,8 +221,14 @@ const SiteFooter = () => {
         </motion.div>
 
         {/* Bottom bar */}
-        <div className="mt-14 border-t border-white/10 pt-6 text-center text-[13px] font-medium text-white">
-          <p>© {new Date().getFullYear()} Parium AB. Alla rättigheter förbehållna.</p>
+        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-[13px] font-medium text-white sm:flex-row sm:gap-4">
+          <p className="text-center sm:text-left">© {new Date().getFullYear()} Parium AB. Alla rättigheter förbehållna.</p>
+          <Link
+            to="/auth"
+            className="inline-flex min-h-11 items-center text-[13px] font-semibold text-white transition-colors hover:text-secondary"
+          >
+            Logga in här →
+          </Link>
         </div>
       </div>
     </footer>
