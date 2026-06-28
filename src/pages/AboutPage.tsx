@@ -103,31 +103,19 @@ const AboutPage = () => {
               <h2 className="mt-5 text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.75rem]">
                 Ett team, en idé.
               </h2>
-            <p className="mx-auto mt-8 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
-              Parium grundades i Sverige av ett team som kommer från olika branscher. Men det har alltid funnits rekrytering i centrum. Därför har vi byggt något som vi alltid önskat fanns på marknaden.
-            </p>
+              <div className="mx-auto mt-8 max-w-2xl space-y-6 text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
+                <p>
+                  Parium grundades i Sverige av ett team som kommer från olika branscher. Men det har alltid funnits rekrytering i centrum. Därför har vi byggt något som vi alltid önskat fanns på marknaden.
+                </p>
+                <p className="text-[1.05em] font-medium leading-[1.6] sm:text-[1.1em]">
+                  En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
+                </p>
+              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* HERO — text-only statement, kommer efter Vem vi är */}
-      <section className="relative w-full overflow-hidden">
-        <div className="relative flex min-h-[480px] flex-col items-center justify-center px-5 py-20 text-center sm:px-8 md:px-12 lg:py-24">
-          <div className="mx-auto w-full max-w-4xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={revealViewport}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="mx-auto text-balance text-center text-[2rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl">
-                En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
-              </h1>
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* INSIKTEN — split: stor rubrik vänster, text höger */}
       <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
