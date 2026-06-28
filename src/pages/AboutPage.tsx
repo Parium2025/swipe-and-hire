@@ -210,16 +210,14 @@ const AboutPage = () => {
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[13px]">
               Bolaget
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Litet team.<br />Stora ambitioner.
             </h2>
-            <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white">
+            <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white lg:text-[19px]">
               Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag som bygger för både jobbsökaren och arbetsgivaren. Fokuserat team. Långsiktig plan. Inga genvägar.
             </p>
           </motion.div>
@@ -235,16 +233,14 @@ const AboutPage = () => {
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-
             <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[13px]">
               Kontakt
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Har du något<br />att säga oss?
             </h2>
-            <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white">
+            <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white lg:text-[19px]">
               Tips, frågor, idéer eller bara en tanke — vi läser allt. Och vi svarar.
             </p>
             <a
