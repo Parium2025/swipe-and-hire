@@ -96,7 +96,7 @@ const AboutPage = () => {
               >
                 <div className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 backdrop-blur">
                   <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[13px]">
                     Om Parium
                   </span>
                 </div>
