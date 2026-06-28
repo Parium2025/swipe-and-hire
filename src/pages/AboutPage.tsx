@@ -167,7 +167,7 @@ const AboutPage = () => {
             </h2>
             <div className="mx-auto mt-10 max-w-2xl space-y-5">
               <p className="text-[18px] leading-[1.75] text-white lg:text-[20px]">
-                Vi bygger mot ett självklart mål och vision: Parium ska vara det naturliga valet för alla som söker jobb och för alla som rekryterar. En plattform som är lika enkel för kandidaten som den är kraftfull för arbetsgivaren.
+                Parium ska vara det naturliga valet för alla som söker jobb och för alla som rekryterar. En plattform som är lika enkel för kandidaten som den är kraftfull för arbetsgivaren.
               </p>
             </div>
           </motion.div>
