@@ -174,12 +174,12 @@ const AboutPage = () => {
             </div>
           </motion.div>
 
-          {/* visionspunkter — rena statements med subtil accent */}
+          {/* visionspunkter — rena statements */}
           <div className="mx-auto mt-16 max-w-3xl border-t border-white/10">
             {visionPoints.map((item) => (
               <motion.div
                 key={item}
-                className="border-b border-white/10 py-8 text-center"
+                className="border-b border-white/10 py-10 text-center"
                 variants={fadeUp}
                 initial="hidden"
                 whileInView="show"
@@ -187,13 +187,13 @@ const AboutPage = () => {
                 transition={revealTransition}
                 style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >
-                <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" />
-                <span className="text-[20px] font-light leading-snug tracking-tight text-white sm:text-[26px]">
+                <span className="text-[26px] font-light leading-snug tracking-tight text-white sm:text-[34px]">
                   {item}
                 </span>
               </motion.div>
             ))}
           </div>
+
         </div>
       </section>
 
@@ -211,7 +211,8 @@ const AboutPage = () => {
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-white" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
+
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Bolaget
@@ -235,7 +236,8 @@ const AboutPage = () => {
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-white" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
+
             <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Kontakt
@@ -270,7 +272,7 @@ const AboutPage = () => {
           style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-white" aria-hidden="true" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
           <h2 className="relative text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Redo att ta nästa steg?
           </h2>
