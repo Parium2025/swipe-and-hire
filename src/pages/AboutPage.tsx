@@ -210,6 +210,8 @@ const AboutPage = () => {
             transition={revealTransition}
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
+            <div className="absolute left-1/2 top-0 h-[2px] w-28 -translate-x-1/2 rounded-full bg-white/40" aria-hidden="true" />
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
               Bolaget
