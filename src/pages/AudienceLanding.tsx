@@ -1103,6 +1103,23 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     preloadAudienceLandingAssets();
   }, []);
 
+  // 🔧 Säkerställ att alla whileInView-animationer triggas korrekt när
+  // användaren växlar mellan /jobbsokare ↔ /arbetsgivare. Utan detta
+  // behåller sidan scrollpositionen och sektioner som hamnar OVANFÖR
+  // viewporten fastnar i sitt initiala "hidden"-läge (opacity: 0), vilket
+  // får texter och kort att försvinna.
+  useLayoutEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    } catch {
+      // tyst — får aldrig störa UX
+    }
+  }, [audience]);
+
+
+
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
 
