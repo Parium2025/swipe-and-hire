@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { ArrowRight, Mail, Sparkles } from 'lucide-react';
+import { Mail, Sparkles } from 'lucide-react';
 import LandingNav from '@/components/LandingNav';
 import SiteFooter from '@/components/landing/SiteFooter';
 import SeoBubbles from '@/components/seo/SeoBubbles';
@@ -166,20 +166,20 @@ const AboutPage = () => {
             </h2>
             <div className="mx-auto mt-10 max-w-2xl space-y-5">
               <p className="text-[18px] leading-[1.75] text-white">
-                Det är den riktning vi bygger mot — inte ett kvartalsmål, utan en långsiktig vision. Vi vill att Parium ska vara det självklara valet för alla som söker jobb och för alla som rekryterar. Oavsett om du är ny på arbetsmarknaden, har lång erfarenhet eller letar efter nästa stjärna till teamet.
+                Vi bygger mot ett självklart mål: att Parium ska vara det naturliga valet för alla som söker jobb och för alla som rekryterar. En plattform som är lika enkel för kandidaten som den är kraftfull för arbetsgivaren.
               </p>
               <p className="text-[18px] leading-[1.75] text-white">
-                Tekniken ska göra det möjligt. Strukturen ska göra det tydligt. Och upplevelsen ska göra det så enkelt att varje kandidat kan hitta och söka rätt jobb — på riktigt, och helt själv.
+                Tekniken skapar möjligheterna. Strukturen ger tydligheten. Och upplevelsen gör att varje kandidat kan hitta och söka rätt jobb — helt på egen hand.
               </p>
             </div>
           </motion.div>
 
-          {/* visionspunkter — rena statements, utan nummer */}
+          {/* visionspunkter — rena statements med subtil accent */}
           <div className="mx-auto mt-16 max-w-3xl border-t border-white/10">
             {visionPoints.map((item) => (
               <motion.div
                 key={item}
-                className="border-b border-white/10 py-7 text-center"
+                className="border-b border-white/10 py-8 text-center"
                 variants={fadeUp}
                 initial="hidden"
                 whileInView="show"
@@ -187,6 +187,7 @@ const AboutPage = () => {
                 transition={revealTransition}
                 style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >
+                <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" />
                 <span className="text-[20px] font-light leading-snug tracking-tight text-white sm:text-[26px]">
                   {item}
                 </span>
@@ -209,6 +210,8 @@ const AboutPage = () => {
             transition={revealTransition}
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
+            <div className="absolute left-1/2 top-0 h-[2px] w-28 -translate-x-1/2 rounded-full bg-white/40" aria-hidden="true" />
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
               Bolaget
@@ -231,6 +234,8 @@ const AboutPage = () => {
             transition={{ ...revealTransition, delay: 0.08 }}
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
+            <div className="absolute left-1/2 top-0 h-[2px] w-28 -translate-x-1/2 rounded-full bg-white/40" aria-hidden="true" />
             <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
               Kontakt
@@ -243,7 +248,7 @@ const AboutPage = () => {
             </p>
             <a
               href="mailto:hej@parium.se"
-              className="mx-auto mt-7 inline-flex min-h-touch items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-[15px] font-semibold text-white transition hover:bg-white/15"
+              className="relative mx-auto mt-7 inline-flex min-h-touch items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-[15px] font-semibold text-white transition hover:bg-white/15"
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               hej@parium.se
@@ -256,7 +261,7 @@ const AboutPage = () => {
       {/* CTA */}
       <section className="relative px-5 pb-24 pt-12 sm:px-8 md:px-12">
         <motion.div
-          className="mx-auto max-w-3xl rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-14"
+          className="relative mx-auto max-w-3xl overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-14"
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
@@ -264,13 +269,15 @@ const AboutPage = () => {
           transition={revealTransition}
           style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
-          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
+          <div className="absolute left-1/2 top-0 h-[2px] w-32 -translate-x-1/2 rounded-full bg-white/40" aria-hidden="true" />
+          <h2 className="relative text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Redo att ta nästa steg?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-[17px] leading-7 text-white">
+          <p className="relative mx-auto mt-4 max-w-xl text-[17px] leading-7 text-white">
             Skapa din profil idag. Resten sköter Parium.
           </p>
-          <div className="mt-8 flex justify-center">
+          <div className="relative mt-8 flex justify-center">
             <SeoCTAButton label="Skapa min profil idag" onClick={handleSignup} />
           </div>
         </motion.div>
