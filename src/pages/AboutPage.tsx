@@ -105,7 +105,7 @@ const AboutPage = () => {
               </h2>
               <div className="mx-auto mt-8 max-w-2xl space-y-6 text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
                 <p className="font-medium">
-                  Parium grundades i Sverige av ett team som kommer från olika branscher. Men det har alltid funnits rekrytering i centrum. Därför har vi byggt något som vi alltid önskat fanns på marknaden.
+                  Parium grundades i Sverige av ett team som kommer från olika branscher. Men rekrytering har alltid funnits i centrum. Därför har vi byggt något som vi alltid önskat fanns på marknaden.
                 </p>
                 <p className="font-medium leading-[1.6]">
                   En app för både kandidater och arbetsgivare. Ett enda flöde som faktiskt fungerar.
