@@ -157,7 +157,7 @@ const AboutPage = () => {
             transition={revealTransition}
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[13px]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[14px]">
               Vår vision
             </p>
             <h2 className="mx-auto mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-[5.5rem]">
