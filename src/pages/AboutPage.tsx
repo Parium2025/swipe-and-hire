@@ -105,7 +105,7 @@ const AboutPage = () => {
                   <br />
                   <span className="italic font-light">omtänkt från grunden.</span>
                 </h1>
-                <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-8 text-white sm:text-lg">
+                <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-8 text-white sm:text-lg lg:text-xl">
                   En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
                 </p>
               </motion.div>
