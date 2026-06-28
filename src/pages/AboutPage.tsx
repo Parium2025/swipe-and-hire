@@ -24,11 +24,11 @@ const visionPoints = [
 const revealViewport = { once: true, amount: 0.22, margin: '0px 0px -12% 0px' };
 
 const fadeUp = {
-  hidden: { opacity: 0.42, y: 34, filter: 'blur(10px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)' },
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
 };
 
-const revealTransition = { duration: 0.82, ease: [0.16, 1, 0.3, 1] } as const;
+const revealTransition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] } as const;
 
 const AboutPage = () => {
   const navigate = useNavigate();
@@ -174,27 +174,25 @@ const AboutPage = () => {
             </div>
           </motion.div>
 
-          {/* visionspunkter — staplade premium-rader */}
-          <div className="mx-auto mt-14 grid max-w-3xl gap-3">
+          {/* visionspunkter — editorial statements, inte knappar */}
+          <div className="mx-auto mt-16 max-w-3xl border-t border-white/10">
             {visionPoints.map((item, index) => (
               <motion.div
                 key={item}
-                className="flex items-center gap-5 rounded-2xl border border-white/15 bg-white/[0.06] px-6 py-5 text-left backdrop-blur"
+                className="flex items-baseline gap-6 border-b border-white/10 py-7 text-left sm:gap-10"
                 variants={fadeUp}
                 initial="hidden"
                 whileInView="show"
                 viewport={revealViewport}
                 transition={{ ...revealTransition, delay: index * 0.08 }}
-                style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
+                style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >
-                <span className="text-3xl font-light tabular-nums text-white/90 sm:text-4xl">
+                <span className="text-xs font-semibold uppercase tracking-[0.28em] text-white/50 tabular-nums">
                   0{index + 1}
                 </span>
-                <div className="h-10 w-px bg-white/20" />
-                <span className="flex-1 text-[16px] font-medium leading-snug text-white sm:text-[17px]">
+                <span className="flex-1 text-[20px] font-light leading-snug tracking-tight text-white sm:text-[26px]">
                   {item}
                 </span>
-                
               </motion.div>
             ))}
           </div>
