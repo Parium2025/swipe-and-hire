@@ -174,12 +174,12 @@ const AboutPage = () => {
             </div>
           </motion.div>
 
-          {/* visionspunkter — rena statements, utan nummer */}
+          {/* visionspunkter — rena statements med subtil accent */}
           <div className="mx-auto mt-16 max-w-3xl border-t border-white/10">
             {visionPoints.map((item) => (
               <motion.div
                 key={item}
-                className="border-b border-white/10 py-7 text-center"
+                className="border-b border-white/10 py-8 text-center"
                 variants={fadeUp}
                 initial="hidden"
                 whileInView="show"
@@ -187,6 +187,7 @@ const AboutPage = () => {
                 transition={revealTransition}
                 style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >
+                <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" />
                 <span className="text-[20px] font-light leading-snug tracking-tight text-white sm:text-[26px]">
                   {item}
                 </span>
