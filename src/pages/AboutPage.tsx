@@ -157,17 +157,17 @@ const AboutPage = () => {
             transition={revealTransition}
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[13px]">
               Vår vision
             </p>
-            <h2 className="mx-auto mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl">
+            <h2 className="mx-auto mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-[5.5rem]">
               Sveriges ledande<br className="hidden sm:block" /> jobbsökar- &amp; rekryteringsapp.
             </h2>
             <div className="mx-auto mt-10 max-w-2xl space-y-5">
-              <p className="text-[18px] leading-[1.75] text-white">
+              <p className="text-[18px] leading-[1.75] text-white lg:text-[20px]">
                 Vi bygger mot ett självklart mål: att Parium ska vara det naturliga valet för alla som söker jobb och för alla som rekryterar. En plattform som är lika enkel för kandidaten som den är kraftfull för arbetsgivaren.
               </p>
-              <p className="text-[18px] leading-[1.75] text-white">
+              <p className="text-[18px] leading-[1.75] text-white lg:text-[20px]">
                 Tekniken skapar möjligheterna. Strukturen ger tydligheten. Och upplevelsen gör att varje kandidat kan hitta och söka rätt jobb — helt på egen hand.
               </p>
             </div>
