@@ -127,20 +127,19 @@ const AboutPage = () => {
         >
           <div className="lg:col-span-5">
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[13px]">
                 Insikten
               </p>
               <h2 className="mt-5 text-balance text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-6xl lg:text-[4.25rem]">
                 Rekrytering har fastnat i gamla vanor.
               </h2>
-              <div className="mt-7 h-px w-20 bg-white/30" />
             </div>
           </div>
           <div className="lg:col-span-7 lg:pt-[3.25rem]">
-            <p className="text-[18px] leading-[1.75] text-white sm:text-[19px]">
+            <p className="text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
               Kandidater skickar ansökningar utan svar och utan återkoppling. Arbetsgivare lägger timmar på CV:n utan att hitta rätt. Resultatet blir missade möjligheter på båda sidor.
             </p>
-            <p className="mt-6 text-[18px] leading-[1.75] text-white sm:text-[19px]">
+            <p className="mt-6 text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
               Vi tror att det finns ett bättre sätt. Därför har vi byggt en plattform där allt hänger ihop — jobbannonsen, ansökan, dialogen och beslutet. Inga lösa trådar. Inga separata system. Ett enda flöde, byggt för att rätt person ska nå rätt plats.
             </p>
           </div>
