@@ -1281,22 +1281,25 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 {c.featuresIntro}
               </motion.p>
               <motion.div
-                initial={isMobileFeatureMotion ? false : "hidden"}
-                whileInView={isMobileFeatureMotion ? undefined : "visible"}
-                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
+                initial={false}
                 className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {c.features.map((feature, idx) => {
                   const i = idx + 1;
                   const Icon = feature.icon;
+                  // 🔧 Varje kort har sin EGEN whileInView-trigger med staggad delay.
+                  // Tidigare förlitade vi oss på parent→child variant-propagation,
+                  // vilket inte alltid slog igenom — korten kunde fastna på opacity:0.
+                  const cardInitial = isMobileFeatureMotion
+                    ? false
+                    : { opacity: 0, y: 18, filter: 'blur(6px)' };
                   return (
                   <motion.div
                     key={feature.title}
-                    variants={{
-                      hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
-                      visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease } },
-                    }}
+                    initial={cardInitial}
+                    whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
+                    transition={{ duration: 0.75, ease, delay: 0.15 + idx * 0.06 }}
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '-48px' : '48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${(i - 1) * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
                     className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-[border-color,background-color,box-shadow] duration-500 hover:border-white/30 hover:bg-white/[0.06] hover:shadow-[0_18px_44px_-28px_hsl(var(--secondary)/0.34)]"
                   >
@@ -1315,6 +1318,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   );
                 })}
               </motion.div>
+
             </div>
           </section>
 
