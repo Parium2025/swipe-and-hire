@@ -142,7 +142,7 @@ const AboutPage = () => {
               Kandidater skickar ansökningar utan svar och utan återkoppling. Arbetsgivare lägger timmar på CV:n utan att hitta rätt. Resultatet blir missade möjligheter.
             </p>
             <p className="mt-6 text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
-              Vi tror på kraften i det enkla. Smart teknik bakom kulisserna, tydlig struktur och en upplevelse som gör att rätt kandidat når rätt jobb — utan onödiga steg.&nbsp;Därför har vi byggt en plattform där allt hänger ihop — jobbannonsen, ansökan och dialogen. Ett enda flöde, byggt för att rätt person ska nå rätt plats.
+              Vi tror på kraften i det enkla: smart teknik bakom kulisserna, tydlig struktur och en upplevelse som gör att rätt kandidat når rätt jobb — utan onödiga steg.&nbsp;Därför har vi byggt en plattform där allt hänger ihop — jobbannonsen, ansökan och dialogen. Ett enda flöde, byggt för att rätt person ska nå rätt plats.
             </p>
           </div>
         </motion.div>
@@ -217,7 +217,7 @@ const AboutPage = () => {
               Ett team, stora ambitioner.
             </h2>
             <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white lg:text-[19px]">
-              Parium drivs av Parium AB, ett svenskt bolag som bygger för både jobbsökaren och arbetsgivaren. Enkel för kandidaten, kraftfull för arbetsgivare.
+              Parium drivs av Parium AB, ett svenskt bolag som bygger för både jobbsökaren och arbetsgivaren. Enkel för kandidaten, kraftfull för arbetsgivaren.
             </p>
           </motion.div>
 
