@@ -234,6 +234,8 @@ const AboutPage = () => {
             transition={{ ...revealTransition, delay: 0.08 }}
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
+            <div className="absolute left-1/2 top-0 h-[2px] w-28 -translate-x-1/2 rounded-full bg-white/40" aria-hidden="true" />
             <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
               Kontakt
@@ -246,7 +248,7 @@ const AboutPage = () => {
             </p>
             <a
               href="mailto:hej@parium.se"
-              className="mx-auto mt-7 inline-flex min-h-touch items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-[15px] font-semibold text-white transition hover:bg-white/15"
+              className="relative mx-auto mt-7 inline-flex min-h-touch items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-[15px] font-semibold text-white transition hover:bg-white/15"
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               hej@parium.se
