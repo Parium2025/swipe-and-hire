@@ -108,6 +108,32 @@ const AboutPage = () => {
         </div>
       </section>
 
+      {/* VEM VI ÄR — kort, personlig intro */}
+      <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
+        <motion.div
+          className="mx-auto max-w-3xl text-center"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={revealViewport}
+          transition={revealTransition}
+          style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
+        >
+          <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[14px]">
+            Vem vi är
+          </p>
+          <h2 className="mt-5 text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.75rem]">
+            Ett litet team. En ärlig idé.
+          </h2>
+          <p className="mx-auto mt-8 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
+            Parium grundades i Sverige av ett litet team som tröttnade på hur rekrytering fungerar. Vi kommer från produktutveckling, design och rekrytering — och vi bygger det vi själva alltid önskat fanns.
+          </p>
+          <p className="mx-auto mt-6 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
+            Långsamt. Noggrant. Utan kompromisser.
+          </p>
+        </motion.div>
+      </section>
+
       {/* INSIKTEN — split: stor rubrik vänster, text höger */}
       <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
         <motion.div
