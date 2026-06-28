@@ -1121,6 +1121,39 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     }
   }, [audience]);
 
+  // 🛟 Safety net: om någon whileInView-trigger av oförklarlig anledning inte
+  // fyrar (IntersectionObserver missar pga display:none-toggling i parent,
+  // browser-bugg, race condition), tvingar vi alla element som är i viewport
+  // men fortfarande osynliga (opacity 0) att fade:a in efter 1500ms.
+  // Garanterar att innehåll ALDRIG kan fastna osynligt.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+        if (!root) return;
+        const rootRect = root.getBoundingClientRect();
+        const candidates = root.querySelectorAll<HTMLElement>('[style*="opacity"]');
+        candidates.forEach((el) => {
+          const computed = window.getComputedStyle(el);
+          if (parseFloat(computed.opacity) > 0.01) return;
+          const rect = el.getBoundingClientRect();
+          const inView = rect.bottom > rootRect.top && rect.top < rootRect.bottom;
+          if (!inView) return;
+          el.style.transition = 'opacity 400ms ease-out, transform 400ms ease-out';
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+          el.style.filter = 'none';
+        });
+      } catch {
+        // tyst — får aldrig störa UX
+      }
+    }, 1500);
+    return () => window.clearTimeout(timer);
+  }, [audience]);
+
+
+
+
 
 
 
