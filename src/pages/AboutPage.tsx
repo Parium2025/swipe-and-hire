@@ -113,7 +113,7 @@ const AboutPage = () => {
 
       {/* HERO — text-only statement, kommer efter Vem vi är */}
       <section className="relative w-full overflow-hidden">
-        <div className="relative flex h-screen min-h-[700px] w-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
+        <div className="relative flex min-h-[480px] flex-col items-center justify-center px-5 py-20 text-center sm:px-8 md:px-12 lg:py-24">
           <div className="mx-auto w-full max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
