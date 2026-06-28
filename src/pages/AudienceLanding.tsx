@@ -16,6 +16,7 @@ import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { useWheelSmoother } from '@/hooks/useWheelSmoother';
+import { preloadAudienceLandingAssets } from '@/lib/audienceLandingPreload';
 
 
 
@@ -1094,6 +1095,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       import('@/pages/Auth').catch(() => {});
     });
     return () => cancel(handle);
+  }, []);
+
+  // High-priority preload + Spline prefetch — så /jobbsokare och /arbetsgivare
+  // får identisk LCP-känsla.
+  useEffect(() => {
+    preloadAudienceLandingAssets();
   }, []);
 
   useEffect(() => {
