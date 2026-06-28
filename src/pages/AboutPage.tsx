@@ -71,24 +71,7 @@ const AboutPage = () => {
       <LandingNav onLoginClick={handleLogin} />
       <SeoBubbles />
 
-      {/* HERO — text-only statement */}
-      <section className="relative w-full overflow-hidden">
-        <div className="relative flex h-screen min-h-[700px] w-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
-          <div className="mx-auto w-full max-w-4xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="mx-auto text-balance text-center text-[2rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl">
-                En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
-              </h1>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* VEM VI ÄR — full-bleed banner med mjuk övergång */}
+      {/* VEM VI ÄR — full-bleed banner, först */}
       <section className="relative w-full overflow-hidden">
         <div className="relative h-screen min-h-[700px] w-full">
           <img
@@ -126,6 +109,24 @@ const AboutPage = () => {
               <p className="mx-auto mt-6 max-w-2xl text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
                 Långsamt. Noggrant. Utan kompromisser.
               </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* HERO — text-only statement, kommer efter Vem vi är */}
+      <section className="relative w-full overflow-hidden">
+        <div className="relative flex h-screen min-h-[700px] w-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
+          <div className="mx-auto w-full max-w-4xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={revealViewport}
+              transition={{ duration: 0.6 }}
+            >
+              <h1 className="mx-auto text-balance text-center text-[2rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl">
+                En app för kandidater. En app för arbetsgivare. Ett enda flöde som faktiskt fungerar.
+              </h1>
             </motion.div>
           </div>
         </div>
