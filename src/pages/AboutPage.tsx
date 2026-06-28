@@ -211,7 +211,7 @@ const AboutPage = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[13px]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[14px]">
               Bolaget
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
