@@ -174,8 +174,8 @@ const AnimatedRoutes = () => {
       <Suspense fallback={<LazyFallback />}>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/jobbsokare" element={<AudienceLanding audience="job_seeker" />} />
-          <Route path="/arbetsgivare" element={<AudienceLanding audience="employer" />} />
+          <Route path="/jobbsokare" element={<AudienceLanding key="job_seeker" audience="job_seeker" />} />
+          <Route path="/arbetsgivare" element={<AudienceLanding key="employer" audience="employer" />} />
           <Route path="/jobb" element={<JobbHub />} />
           <Route path="/jobb/:citySlug" element={<JobbCity />} />
           <Route path="/jobb/:citySlug/:occupationSlug" element={<JobbCityYrke />} />

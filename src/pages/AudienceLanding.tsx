@@ -1065,7 +1065,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       cards.forEach((el) => io.observe(el));
     });
     return () => io.disconnect();
-  }, [isMobileFeatureMotion]);
+  }, [isMobileFeatureMotion, audience]);
 
   useWaveAwareText();
 
@@ -1361,13 +1361,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   ? 'Kom igång helt gratis. Uppgradera till Premium när du vill ta nästa steg — säg upp när du vill.'
                   : 'Transparenta priser. Inga överraskningar.'}
               </motion.p>
-              <motion.div
-                initial={isMobileFeatureMotion ? false : "hidden"}
-                whileInView={isMobileFeatureMotion ? undefined : "visible"}
-                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
-                className="relative mt-8 grid gap-5 md:grid-cols-2"
-              >
+              <div className="relative mt-8 grid gap-5 md:grid-cols-2">
 
                 {[
                   {
@@ -1407,11 +1401,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   return (
                   <motion.div
                     key={plan.name}
-                    initial={isMobileFeatureMotion ? false : undefined}
-                    variants={isMobileFeatureMotion ? undefined : {
-                      hidden: { opacity: 0 },
-                      visible: { opacity: 1, transition: { duration: 0.9, ease } },
-                    }}
+                    initial={isMobileFeatureMotion ? false : { opacity: 0, y: 18, filter: 'blur(6px)' }}
+                    whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
+                    transition={{ duration: 0.85, ease, delay: 0.1 + i * 0.08 }}
                     onPointerDownCapture={() => setSelectedPlan(plan.id)}
                     onFocusCapture={() => setSelectedPlan(plan.id)}
                     onClick={() => setSelectedPlan(plan.id)}
@@ -1460,7 +1453,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   </motion.div>
                   );
                 })}
-              </motion.div>
+              </div>
 
             </div>
           </section>
@@ -1481,13 +1474,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   className="landing-h2 mt-4 text-white"
                 />
               </motion.div>
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } } }}
-                className="mt-10 space-y-3"
-              >
+              <div className="mt-10 space-y-3">
                 {(audience === 'job_seeker'
                   ? [
                       {
@@ -1525,20 +1512,20 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         a: 'All data lagras inom EU enligt GDPR. Kandidater äger sin egen data och delar bara fullständig profil med er när de aktivt visat intresse. Ni kan exportera, anonymisera och radera kandidatdata direkt från dashboarden.',
                       },
                     ]
-                ).map(({ q, a }) => (
+                ).map(({ q, a }, i) => (
                   <motion.div
                     key={q}
-                    variants={{
-                      hidden: { opacity: 0, x: 60 },
-                      visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
-                    }}
+                    initial={{ opacity: 0, x: 60 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
+                    transition={{ duration: 0.7, ease, delay: 0.12 + i * 0.06 }}
                   >
                     <FaqAccordion q={q} a={a} />
                   </motion.div>
                 ))}
 
 
-              </motion.div>
+              </div>
             </div>
           </section>
 
