@@ -158,7 +158,7 @@ const AboutPage = () => {
             transition={revealTransition}
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Vår vision
             </p>
             <h2 className="mx-auto mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl">
@@ -211,9 +211,9 @@ const AboutPage = () => {
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-            <div className="absolute left-1/2 top-0 h-[2px] w-28 -translate-x-1/2 rounded-full bg-white/40" aria-hidden="true" />
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-white" aria-hidden="true" />
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Bolaget
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -235,9 +235,9 @@ const AboutPage = () => {
             style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-            <div className="absolute left-1/2 top-0 h-[2px] w-28 -translate-x-1/2 rounded-full bg-white/40" aria-hidden="true" />
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-white" aria-hidden="true" />
             <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" aria-hidden="true" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
               Kontakt
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -270,7 +270,7 @@ const AboutPage = () => {
           style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden="true" />
-          <div className="absolute left-1/2 top-0 h-[2px] w-32 -translate-x-1/2 rounded-full bg-white/40" aria-hidden="true" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-white" aria-hidden="true" />
           <h2 className="relative text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Redo att ta nästa steg?
           </h2>
