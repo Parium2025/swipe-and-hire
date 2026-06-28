@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { preloadAboutPageAssets } from '@/lib/aboutPagePreload';
@@ -144,14 +143,14 @@ function ColumnPair({
       <ColumnHeader title={rightTitle} />
 
       {Array.from({ length: rows }).map((_, i) => (
-        <Fragment key={i}>
+        <div key={i} className="contents">
           <div className="flex items-center">
             {leftLinks[i] ? <FooterLink link={leftLinks[i]} /> : null}
           </div>
           <div className="flex items-center">
             {rightLinks[i] ? <FooterLink link={rightLinks[i]} /> : null}
           </div>
-        </Fragment>
+        </div>
       ))}
     </div>
   );
