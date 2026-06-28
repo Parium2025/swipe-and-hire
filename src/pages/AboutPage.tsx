@@ -201,7 +201,7 @@ const AboutPage = () => {
         <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 md:gap-8">
           {/* Bolaget */}
           <motion.div
-            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 backdrop-blur sm:p-12"
+            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 text-center backdrop-blur sm:p-12"
             variants={fadeUp}
             initial="hidden"
             whileInView="show"
@@ -216,7 +216,7 @@ const AboutPage = () => {
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Litet team.<br />Stora ambitioner.
             </h2>
-            <p className="mt-6 text-[17px] leading-[1.7] text-white">
+            <p className="mx-auto mt-6 max-w-md text-[17px] leading-[1.7] text-white">
               Parium drivs av <span className="font-semibold text-white">Parium AB</span>, ett svenskt techbolag som bygger för både jobbsökaren och arbetsgivaren. Fokuserat team. Långsiktig plan. Inga genvägar.
             </p>
           </motion.div>
