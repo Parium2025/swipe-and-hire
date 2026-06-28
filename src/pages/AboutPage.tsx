@@ -174,23 +174,20 @@ const AboutPage = () => {
             </div>
           </motion.div>
 
-          {/* visionspunkter — centrerade, kritvita nummer 1, 2, 3 */}
+          {/* visionspunkter — rena statements, utan nummer */}
           <div className="mx-auto mt-16 max-w-3xl border-t border-white/10">
-            {visionPoints.map((item, index) => (
+            {visionPoints.map((item) => (
               <motion.div
                 key={item}
-                className="flex flex-col items-center border-b border-white/10 py-7 text-center"
+                className="border-b border-white/10 py-7 text-center"
                 variants={fadeUp}
                 initial="hidden"
                 whileInView="show"
                 viewport={revealViewport}
-                transition={{ ...revealTransition, delay: index * 0.08 }}
+                transition={revealTransition}
                 style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >
-                <span className="text-xs font-semibold uppercase tracking-[0.28em] text-white tabular-nums">
-                  {index + 1}
-                </span>
-                <span className="mt-1 text-[20px] font-light leading-snug tracking-tight text-white sm:text-[26px]">
+                <span className="text-[20px] font-light leading-snug tracking-tight text-white sm:text-[26px]">
                   {item}
                 </span>
               </motion.div>
