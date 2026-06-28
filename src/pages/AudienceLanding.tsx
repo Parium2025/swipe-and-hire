@@ -1104,12 +1104,15 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   }, []);
 
   // 🔧 Säkerställ att alla whileInView-animationer triggas korrekt när
-  // användaren växlar mellan /jobbsokare ↔ /arbetsgivare. Utan detta
-  // behåller sidan scrollpositionen och sektioner som hamnar OVANFÖR
-  // viewporten fastnar i sitt initiala "hidden"-läge (opacity: 0), vilket
-  // får texter och kort att försvinna.
+  // användaren växlar mellan /jobbsokare ↔ /arbetsgivare. Sidan scrollar
+  // INTE i window utan inuti [data-landing-scroll-root] (position: fixed,
+  // overflow-y: auto), så vi måste nollställa scroll på den containern —
+  // annars hamnar sektioner ovanför viewporten och deras IntersectionObserver
+  // (margin extends bara nedåt) triggas aldrig → opacity fastnar på 0.
   useLayoutEffect(() => {
     try {
+      const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+      if (root) root.scrollTop = 0;
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
@@ -1117,6 +1120,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       // tyst — får aldrig störa UX
     }
   }, [audience]);
+
+
 
 
 
