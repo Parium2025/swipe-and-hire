@@ -1104,6 +1104,28 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     preloadAudienceLandingAssets();
   }, []);
 
+  // Gate dekorativ bakgrund (bubblor + orb) bakom samma "parium:spline-ready"
+  // som hero-texten lyssnar på, så hela hero:n kommer in som ETT block i
+  // stället för att bakgrundens dot/bubblor poppar in 200–400ms tidigare.
+  // Återställs vid byte mellan jobbsökare/arbetsgivare så känslan blir samma
+  // även vid refresh.
+  const [heroBgReady, setHeroBgReady] = useState(false);
+  useEffect(() => {
+    setHeroBgReady(false);
+    let done = false;
+    const trigger = () => {
+      if (done) return;
+      done = true;
+      setHeroBgReady(true);
+    };
+    window.addEventListener('parium:spline-ready', trigger, { once: true });
+    const fallback = window.setTimeout(trigger, 1400);
+    return () => {
+      window.removeEventListener('parium:spline-ready', trigger);
+      window.clearTimeout(fallback);
+    };
+  }, [audience]);
+
   // 🔧 Ny framåtnavigering mellan /jobbsokare ↔ /arbetsgivare börjar högst upp.
   // Back/forward får däremot behålla exakt sparad position via ScrollRestoration.
   useLayoutEffect(() => {
@@ -1239,7 +1261,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         backgroundColor: 'hsl(var(--primary))',
       }}
     >
-      <AnimatedBackground showGlow={true} />
+      <div
+        className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-[600ms] ease-out"
+        style={{ opacity: heroBgReady ? 1 : 0, willChange: 'opacity' }}
+      >
+        <AnimatedBackground showGlow={true} />
+      </div>
       <FixedPhoneLayer />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
