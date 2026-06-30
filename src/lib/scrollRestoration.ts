@@ -100,6 +100,22 @@ export const clearScrollPosition = (pathname: string) => {
 };
 
 export const clearFooterNavigationForTarget = (targetPath: string) => {
+  const positions = readPositions();
+  let changed = false;
+
+  for (const [pathname, position] of Object.entries(positions)) {
+    if (position.restoreSource !== 'footer' || position.restoreTargetPath !== targetPath) continue;
+    positions[pathname] = {
+      top: position.top,
+      anchorId: position.anchorId,
+      anchorOffset: position.anchorOffset,
+      scrollHeight: position.scrollHeight,
+    };
+    changed = true;
+  }
+
+  if (changed) writePositions(positions);
+
   try {
     const pending = sessionStorage.getItem(PENDING_FOOTER_RESTORE_KEY);
     if (pending === targetPath) sessionStorage.removeItem(PENDING_FOOTER_RESTORE_KEY);
