@@ -50,6 +50,25 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     let cancelled = false;
     let app: SplineApplication | null = null;
 
+    const waitForFrames = (count: number) =>
+      new Promise<void>((resolve) => {
+        const tick = (remaining: number) => {
+          if (remaining <= 0) {
+            resolve();
+            return;
+          }
+          requestAnimationFrame(() => tick(remaining - 1));
+        };
+        tick(count);
+      });
+
+    const waitForVisualSettle = async () => {
+      const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
+      await waitForFrames(isCoarse ? 6 : 3);
+      await new Promise<void>((resolve) => window.setTimeout(resolve, isCoarse ? 320 : 90));
+      await waitForFrames(isCoarse ? 2 : 1);
+    };
+
     const boot = async () => {
       try {
         const { Application } = await import('@splinetool/runtime');
@@ -89,17 +108,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         app.setZoom(zoomRef.current);
         requestAnimationFrame(() => app?.setZoom(zoomRef.current));
         if (!activeRef.current) app.stop();
-        // Vänta 3 rAF så Spline garanterat hunnit rita sin första WebGL-frame
-        // innan vi fade:ar in canvasen. På throttlade enheter (Lovable preview-
-        // iframe, äldre Androids) räcker inte 2 rAF — då syns scenens
-        // default-bakgrund i en frame som "vit ram" runt telefonen.
-        await new Promise<void>((resolve) => {
-          requestAnimationFrame(() =>
-            requestAnimationFrame(() =>
-              requestAnimationFrame(() => resolve()),
-            ),
-          );
-        });
+        // Vänta tills WebGL/Spline har hunnit rita en stabil visuell frame innan
+        // canvasen släpps igenom. På mobil kan Spline annars visa en kort vit
+        // placeholder-yta/rektangel vid refresh innan telefonens material är klart.
+        await waitForVisualSettle();
         if (!cancelled) {
           setIsReady(true);
           // Signal till FixedPhoneLayer att vi får visa wrappern utan att
@@ -145,6 +157,9 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
           opacity: isReady ? 1 : 0,
           visibility: isReady ? 'visible' : 'hidden',
           backgroundColor: 'transparent',
+          display: 'block',
+          transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1)',
+          willChange: 'opacity',
           touchAction: 'none',
         }}
       />
