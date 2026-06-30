@@ -91,8 +91,8 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     ],
     featuresIntro: 'Allt ni behöver för att hitta, utvärdera och anställa rätt person — i en plattform byggd för moderna team.',
     features: [
-      { title: 'Relevanta kandidater', description: 'Smart matchning lyfter fram profilerna som faktiskt passar rollen — så ni slipper bläddra för att hitta dem.', icon: Target },
-      { title: 'Mobilt urval', description: 'Granska, sortera och svara direkt i mobilen. Hela rekryteringen följer med er — vart ni än är.', icon: Filter },
+      { title: 'Relevanta kandidater', description: 'Här finner du kandidater som faktiskt vill ha ett jobb.\u00a0', icon: Target },
+      { title: '\n', description: 'Granska, sortera och svara direkt i mobilen. Hela rekryteringen följer med er — vart ni än är.', icon: Filter },
       { title: 'Beslut i team', description: 'Bjud in kollegor, dela kandidater och fatta beslut tillsammans i en gemensam Kanban-vy.', icon: Users },
       { title: 'Direkt dialog', description: 'Öppna chatten med kandidater som vill prata. Ta nästa steg utan att lämna plattformen.', icon: Zap },
       { title: 'Strukturerade profiler', description: 'Video, bild, erfarenhet och AI-sammanfattningar — beslutsunderlag samlat på ett ställe.', icon: FileText },
