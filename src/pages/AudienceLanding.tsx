@@ -1104,11 +1104,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     preloadAudienceLandingAssets();
   }, []);
 
-  // Gate dekorativ bakgrund (bubblor + orb) bakom samma "parium:spline-ready"
-  // som hero-texten lyssnar på, så hela hero:n kommer in som ETT block i
-  // stället för att bakgrundens dot/bubblor poppar in 200–400ms tidigare.
-  // Återställs vid byte mellan jobbsökare/arbetsgivare så känslan blir samma
-  // även vid refresh.
+  // Gate endast Spline-relaterade detaljer bakom "parium:spline-ready".
+  // Själva gradient/glow får ligga på direkt, annars upplevs refresh som en
+  // platt/blå flash. Bubblorna tonas in efter telefonen så de inte poppar som
+  // en ensam punkt före resten av hero:n.
   const [heroBgReady, setHeroBgReady] = useState(false);
   useEffect(() => {
     setHeroBgReady(false);
