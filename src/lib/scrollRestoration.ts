@@ -92,6 +92,29 @@ export const writePositions = (positions: Record<string, ScrollPosition>) => {
   }
 };
 
+export const clearScrollPosition = (pathname: string) => {
+  const positions = readPositions();
+  if (!(pathname in positions)) return;
+  delete positions[pathname];
+  writePositions(positions);
+};
+
+export const clearFooterNavigationForTarget = (targetPath: string) => {
+  try {
+    const pending = sessionStorage.getItem(PENDING_FOOTER_RESTORE_KEY);
+    if (pending === targetPath) sessionStorage.removeItem(PENDING_FOOTER_RESTORE_KEY);
+
+    const raw = sessionStorage.getItem(LATEST_FOOTER_NAVIGATION_KEY);
+    if (!raw) return;
+    const latest = JSON.parse(raw) as { targetPath?: unknown };
+    if (latest && typeof latest === 'object' && latest.targetPath === targetPath) {
+      sessionStorage.removeItem(LATEST_FOOTER_NAVIGATION_KEY);
+    }
+  } catch {
+    try { sessionStorage.removeItem(LATEST_FOOTER_NAVIGATION_KEY); } catch { /* ignore */ }
+  }
+};
+
 /**
  * Synchronously snapshot the current scroll position for `pathname`.
  * Use this on pointerdown of links/cards so we never lose the exact
