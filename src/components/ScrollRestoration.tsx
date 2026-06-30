@@ -101,10 +101,18 @@ export function ScrollRestoration() {
   useLayoutEffect(() => {
     if (isJobViewOverlayPath) return;
 
+    // 🔁 Vid full page reload (F5 / refresh) ska vi ALDRIG återställa sparad
+    // scroll — användaren förväntar sig att landa i toppen, precis som första
+    // besöket. POP triggas annars både vid back-knapp och reload, vilket gör
+    // att refresh på /arbetsgivare landar i footern.
+    const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    const isReload = navEntries[0]?.type === 'reload';
+
     const positions = readPositions();
-    const shouldRestore = navigationType === 'POP' || consumePendingFooterRestore(location.pathname);
+    const shouldRestore = !isReload && (navigationType === 'POP' || consumePendingFooterRestore(location.pathname));
     const storedPosition = shouldRestore ? positions[location.pathname] : undefined;
     const targetTop = storedPosition?.top ?? 0;
+
     let cancelled = false;
     let rafId = 0;
 
