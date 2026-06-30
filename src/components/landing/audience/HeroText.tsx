@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
