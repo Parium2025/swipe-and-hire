@@ -82,6 +82,8 @@ export function ScrollRestoration() {
         writePositions(positions);
       };
 
+      const savePositionOnPageExit = () => savePosition(false);
+
       const handleScroll = () => {
         if (isRestoringRef.current) return;
         if (pendingSaveFrameRef.current) return;
@@ -93,13 +95,13 @@ export function ScrollRestoration() {
       };
 
       container.addEventListener('scroll', handleScroll, { passive: true });
-      window.addEventListener('pagehide', savePosition);
-      window.addEventListener('beforeunload', savePosition);
+      window.addEventListener('pagehide', savePositionOnPageExit);
+      window.addEventListener('beforeunload', savePositionOnPageExit);
 
       return () => {
         container.removeEventListener('scroll', handleScroll);
-        window.removeEventListener('pagehide', savePosition);
-        window.removeEventListener('beforeunload', savePosition);
+        window.removeEventListener('pagehide', savePositionOnPageExit);
+        window.removeEventListener('beforeunload', savePositionOnPageExit);
         if (pendingSaveFrameRef.current) {
           cancelAnimationFrame(pendingSaveFrameRef.current);
           pendingSaveFrameRef.current = null;
