@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -1025,6 +1025,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
 
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const c = audienceContent[audience];
   const isMobileFeatureMotion = useIsMobileLandingMotion();
   const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium'>('premium');
@@ -1103,13 +1104,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     preloadAudienceLandingAssets();
   }, []);
 
-  // 🔧 Säkerställ att alla whileInView-animationer triggas korrekt när
-  // användaren växlar mellan /jobbsokare ↔ /arbetsgivare. Sidan scrollar
-  // INTE i window utan inuti [data-landing-scroll-root] (position: fixed,
-  // overflow-y: auto), så vi måste nollställa scroll på den containern —
-  // annars hamnar sektioner ovanför viewporten och deras IntersectionObserver
-  // (margin extends bara nedåt) triggas aldrig → opacity fastnar på 0.
+  // 🔧 Ny framåtnavigering mellan /jobbsokare ↔ /arbetsgivare börjar högst upp.
+  // Back/forward får däremot behålla exakt sparad position via ScrollRestoration.
   useLayoutEffect(() => {
+    if (navigationType === 'POP') return;
+
     try {
       const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (root) root.scrollTop = 0;
@@ -1119,7 +1118,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     } catch {
       // tyst — får aldrig störa UX
     }
-  }, [audience]);
+  }, [audience, navigationType]);
 
   // 🛟 Safety net: om någon whileInView-trigger av oförklarlig anledning inte
   // fyrar (IntersectionObserver missar pga display:none-toggling i parent,

@@ -66,35 +66,44 @@ export function ScrollRestoration() {
     return bind(scrollContainer);
 
     function bind(container: HTMLElement) {
+      const savePosition = () => {
+        if (isRestoringRef.current) return;
+
+        const positions = readPositions();
+        const anchorSnapshot = getAnchorSnapshot(container);
+
+        positions[location.pathname] = {
+          top: container.scrollTop,
+          anchorId: anchorSnapshot?.anchorId,
+          anchorOffset: anchorSnapshot?.anchorOffset,
+          scrollHeight: container.scrollHeight,
+        };
+        writePositions(positions);
+      };
+
       const handleScroll = () => {
         if (isRestoringRef.current) return;
         if (pendingSaveFrameRef.current) return;
 
         pendingSaveFrameRef.current = requestAnimationFrame(() => {
           pendingSaveFrameRef.current = null;
-          if (isRestoringRef.current) return;
-
-          const positions = readPositions();
-          const anchorSnapshot = getAnchorSnapshot(container);
-
-          positions[location.pathname] = {
-            top: container.scrollTop,
-            anchorId: anchorSnapshot?.anchorId,
-            anchorOffset: anchorSnapshot?.anchorOffset,
-            scrollHeight: container.scrollHeight,
-          };
-          writePositions(positions);
+          savePosition();
         });
       };
 
       container.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('pagehide', savePosition);
+      window.addEventListener('beforeunload', savePosition);
 
       return () => {
         container.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('pagehide', savePosition);
+        window.removeEventListener('beforeunload', savePosition);
         if (pendingSaveFrameRef.current) {
           cancelAnimationFrame(pendingSaveFrameRef.current);
           pendingSaveFrameRef.current = null;
         }
+        savePosition();
       };
     }
   }, [location.pathname, isJobViewOverlayPath]);
@@ -105,20 +114,20 @@ export function ScrollRestoration() {
   useLayoutEffect(() => {
     if (isJobViewOverlayPath) return;
 
-    // 🔁 Vid full page reload (F5 / refresh) ska vi ALDRIG återställa sparad
-    // scroll — användaren förväntar sig att landa i toppen, precis som första
-    // besöket. POP triggas annars både vid back-knapp och reload, vilket gör
-    // att refresh på /arbetsgivare landar i footern.
     const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-    const isReload = navEntries[0]?.type === 'reload';
+    const documentNavigationType = navEntries[0]?.type;
+    const isReload = documentNavigationType === 'reload';
+    const isBackForwardDocument = documentNavigationType === 'back_forward';
+    const isFreshDocumentEntry = location.key === 'default' && navigationType === 'POP' && !isBackForwardDocument;
+    const shouldForceTopForDocumentEntry = isReload || isFreshDocumentEntry;
 
-    if (isReload) {
+    if (shouldForceTopForDocumentEntry) {
       clearScrollPosition(location.pathname);
       clearFooterNavigationForTarget(location.pathname);
     }
 
     const positions = readPositions();
-    const shouldRestore = !isReload && (navigationType === 'POP' || consumePendingFooterRestore(location.pathname));
+    const shouldRestore = !shouldForceTopForDocumentEntry && (navigationType === 'POP' || consumePendingFooterRestore(location.pathname));
     const storedPosition = shouldRestore ? positions[location.pathname] : undefined;
     const targetTop = storedPosition?.top ?? 0;
 
@@ -193,7 +202,7 @@ export function ScrollRestoration() {
         // Hard reloads can re-apply native scroll restoration to overflow
         // containers *after* React layout effects. Keep the top position locked
         // briefly so footer-origin reloads cannot land at the old footer/list.
-        if (isReload && performance.now() - startTime < FORCE_TOP_ON_RELOAD_MS) {
+        if (shouldForceTopForDocumentEntry && performance.now() - startTime < FORCE_TOP_ON_RELOAD_MS) {
           topFrame = requestAnimationFrame(enforceTop);
           return;
         }
@@ -326,7 +335,7 @@ export function ScrollRestoration() {
       cancelled = true;
       cleanup();
     };
-  }, [location.pathname, navigationType, isJobViewOverlayPath]);
+  }, [location.pathname, location.key, navigationType, isJobViewOverlayPath]);
 
   // -----------------------------------------------------------------------
   // Disable native scroll restoration
