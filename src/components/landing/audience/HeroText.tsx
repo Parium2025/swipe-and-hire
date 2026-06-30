@@ -34,47 +34,51 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     ? 'wave-text mt-7 max-w-xl text-base leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:mt-10 md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9'
     : 'wave-text mt-7 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-9 md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:max-w-2xl md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:mt-10 md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9';
 
-  // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
-  // Långsam, lugn ease (Apple-style) med en mjuk stagger rad-för-rad.
-  const fadeStyle = { willChange: 'opacity' } as const;
+  // Premium-entré: mjuk opacity + liten translateY, exakt som SEO/yrkessidornas hero.
+  // Alla element animeras samtidigt — ingen stagger, ingen trappa.
+  const fadeStyle = { willChange: 'opacity, transform' } as const;
   const premiumEase = [0.22, 1, 0.36, 1] as const;
 
   return (
     <>
       <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, ease: premiumEase }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: premiumEase }}
         style={fadeStyle}
         className={eyebrowClass}
       >
         {eyebrow}
       </motion.span>
 
-      <h1 id={headingId} className={headlineClass}>
+      <motion.h1
+        id={headingId}
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: premiumEase }}
+        style={fadeStyle}
+        className={headlineClass}
+      >
         {headline.map((line, i) => (
-          <motion.span
+          <span
             key={i}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, ease: premiumEase }}
-            style={fadeStyle}
             className={isMobile ? 'wave-text block' : 'wave-text block whitespace-nowrap'}
           >
             {line}
-          </motion.span>
+          </span>
         ))}
-      </h1>
+      </motion.h1>
 
       <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, ease: premiumEase }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: premiumEase }}
         style={fadeStyle}
         className={subtitleClass}
       >
         {subtitle}
       </motion.p>
+
 
 
     </>
