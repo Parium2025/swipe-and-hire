@@ -66,8 +66,9 @@ export function ScrollRestoration() {
     return bind(scrollContainer);
 
     function bind(container: HTMLElement) {
-      const savePosition = () => {
+      const savePosition = (requireCurrentPath = false) => {
         if (isRestoringRef.current) return;
+        if (requireCurrentPath && window.location.pathname !== location.pathname) return;
 
         const positions = readPositions();
         const anchorSnapshot = getAnchorSnapshot(container);
@@ -87,7 +88,7 @@ export function ScrollRestoration() {
 
         pendingSaveFrameRef.current = requestAnimationFrame(() => {
           pendingSaveFrameRef.current = null;
-          savePosition();
+          savePosition(true);
         });
       };
 
@@ -103,7 +104,7 @@ export function ScrollRestoration() {
           cancelAnimationFrame(pendingSaveFrameRef.current);
           pendingSaveFrameRef.current = null;
         }
-        savePosition();
+        savePosition(true);
       };
     }
   }, [location.pathname, isJobViewOverlayPath]);
