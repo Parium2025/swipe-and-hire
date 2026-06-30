@@ -44,7 +44,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease: premiumEase, delay: 0.05 }}
+        transition={{ duration: 0.6, ease: premiumEase }}
         style={fadeStyle}
         className={eyebrowClass}
       >
@@ -57,7 +57,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
             key={i}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, ease: premiumEase, delay: 0.12 + i * 0.06 }}
+            transition={{ duration: 0.6, ease: premiumEase }}
             style={fadeStyle}
             className={isMobile ? 'wave-text block' : 'wave-text block whitespace-nowrap'}
           >
@@ -69,12 +69,13 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.55, ease: premiumEase, delay: 0.32 }}
+        transition={{ duration: 0.6, ease: premiumEase }}
         style={fadeStyle}
         className={subtitleClass}
       >
         {subtitle}
       </motion.p>
+
 
     </>
   );
