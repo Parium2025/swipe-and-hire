@@ -65,7 +65,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
   employer: {
     eyebrow: 'För arbetsgivare',
     hero: {
-      headline: ['Hitta rätt', 'människor', 'snabbare!'],
+      headline: ['Hitta rätta', 'kandidater', 'snabbare!'],
       subtitle: 'Möt kandidater som vill prata med just er. Annonsera, nå rätt och kom till samtal — utan onödiga mellansteg.',
       cta: 'Skapa arbetsgivarkonto',
     },
