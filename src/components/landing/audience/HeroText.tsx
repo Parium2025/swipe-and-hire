@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -36,15 +37,35 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
 
   // Premium-entré: mjuk opacity + liten translateY, exakt som SEO/yrkessidornas hero.
   // Alla element animeras samtidigt — ingen stagger, ingen trappa.
+  // Vänta in Spline-telefonen så texten och 3D-mockupen tonas in TILLSAMMANS
+  // (max 1400 ms fallback om Spline tar för lång tid eller misslyckas).
   const fadeStyle = { willChange: 'opacity, transform' } as const;
   const premiumEase = [0.22, 1, 0.36, 1] as const;
+
+  const [animateIn, setAnimateIn] = useState(false);
+  useEffect(() => {
+    let done = false;
+    const trigger = () => {
+      if (done) return;
+      done = true;
+      setAnimateIn(true);
+    };
+    window.addEventListener('parium:spline-ready', trigger, { once: true });
+    const fallback = window.setTimeout(trigger, 1400);
+    return () => {
+      window.removeEventListener('parium:spline-ready', trigger);
+      window.clearTimeout(fallback);
+    };
+  }, []);
+
+  const animateTo = animateIn ? { opacity: 1, y: 0 } : { opacity: 0 };
 
   return (
     <>
       <motion.span
         initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: premiumEase }}
+        animate={animateTo}
+        transition={{ duration: 0.6, ease: premiumEase }}
         style={fadeStyle}
         className={eyebrowClass}
       >
@@ -54,8 +75,8 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
       <motion.h1
         id={headingId}
         initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: premiumEase }}
+        animate={animateTo}
+        transition={{ duration: 0.65, ease: premiumEase }}
         style={fadeStyle}
         className={headlineClass}
       >
@@ -71,8 +92,8 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
 
       <motion.p
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: premiumEase }}
+        animate={animateTo}
+        transition={{ duration: 0.65, ease: premiumEase }}
         style={fadeStyle}
         className={subtitleClass}
       >

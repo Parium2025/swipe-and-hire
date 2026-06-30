@@ -138,9 +138,15 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         role="img"
         aria-label="Parium 3D-telefon"
         tabIndex={-1}
-        className="relative h-full w-full cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing"
+        className="relative h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
         draggable={false}
-        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
+        style={{
+          colorScheme: 'normal',
+          opacity: isReady ? 1 : 0,
+          visibility: isReady ? 'visible' : 'hidden',
+          backgroundColor: 'transparent',
+          touchAction: 'none',
+        }}
       />
     </div>
   );
