@@ -6,6 +6,8 @@ import {
   writePositions,
   getAnchorSnapshot,
   getAnchorDelta,
+  clearScrollPosition,
+  clearFooterNavigationForTarget,
   clearFooterRestoreForTarget,
   clearLatestFooterNavigationIfLeavingTarget,
   consumePendingFooterRestore,
@@ -13,6 +15,8 @@ import {
   SCROLL_HEIGHT_TOLERANCE_PX,
   MAX_WAIT_MS,
 } from '@/lib/scrollRestoration';
+
+const FORCE_TOP_ON_RELOAD_MS = 1200;
 
 export function ScrollRestoration() {
   const location = useLocation();
@@ -108,6 +112,11 @@ export function ScrollRestoration() {
     const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
     const isReload = navEntries[0]?.type === 'reload';
 
+    if (isReload) {
+      clearScrollPosition(location.pathname);
+      clearFooterNavigationForTarget(location.pathname);
+    }
+
     const positions = readPositions();
     const shouldRestore = !isReload && (navigationType === 'POP' || consumePendingFooterRestore(location.pathname));
     const storedPosition = shouldRestore ? positions[location.pathname] : undefined;
@@ -130,15 +139,73 @@ export function ScrollRestoration() {
 
     // For scroll-to-top (targetTop === 0) we can apply immediately
     if (targetTop === 0) {
-      const scrollContainer = getRestorableScrollContainer();
-      if (scrollContainer) {
+      const startTime = performance.now();
+      let topFrame = 0;
+      let userInterrupted = false;
+      let boundContainer: HTMLElement | null = null;
+
+      const applyTop = () => {
+        const scrollContainer = getRestorableScrollContainer();
+        if (!scrollContainer) return;
+        if (boundContainer !== scrollContainer) {
+          boundContainer?.removeEventListener('touchstart', handleUserGesture);
+          boundContainer?.removeEventListener('wheel', handleUserGesture);
+          boundContainer?.removeEventListener('pointerdown', handleUserGesture);
+          boundContainer = scrollContainer;
+          scrollContainer.addEventListener('touchstart', handleUserGesture, { passive: true });
+          scrollContainer.addEventListener('wheel', handleUserGesture, { passive: true });
+          scrollContainer.addEventListener('pointerdown', handleUserGesture, { passive: true });
+        }
+        const previousBehavior = scrollContainer.style.scrollBehavior;
+        scrollContainer.style.scrollBehavior = 'auto';
+        scrollContainer.scrollTop = 0;
         scrollContainer.scrollTo({ top: 0, behavior: 'auto' });
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        scrollContainer.style.scrollBehavior = previousBehavior;
+      };
+
+      function cleanupTop() {
+        if (topFrame) cancelAnimationFrame(topFrame);
+        boundContainer?.removeEventListener('touchstart', handleUserGesture);
+        boundContainer?.removeEventListener('wheel', handleUserGesture);
+        boundContainer?.removeEventListener('pointerdown', handleUserGesture);
+        boundContainer = null;
       }
-      releaseRestoreLock();
+
+      function finishTop() {
+        cleanupTop();
+        releaseRestoreLock();
+      }
+
+      function handleUserGesture() {
+        userInterrupted = true;
+        cancelled = true;
+        finishTop();
+      }
+
+      const enforceTop = () => {
+        if (cancelled || userInterrupted) return;
+        isRestoringRef.current = true;
+        applyTop();
+
+        // Hard reloads can re-apply native scroll restoration to overflow
+        // containers *after* React layout effects. Keep the top position locked
+        // briefly so footer-origin reloads cannot land at the old footer/list.
+        if (isReload && performance.now() - startTime < FORCE_TOP_ON_RELOAD_MS) {
+          topFrame = requestAnimationFrame(enforceTop);
+          return;
+        }
+
+        finishTop();
+      };
+
+      enforceTop();
 
       return () => {
         cancelled = true;
-        if (rafId) cancelAnimationFrame(rafId);
+        cleanupTop();
       };
     }
 
