@@ -64,8 +64,8 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     <>
       <motion.span
         initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: premiumEase }}
+        animate={animateTo}
+        transition={{ duration: 0.6, ease: premiumEase }}
         style={fadeStyle}
         className={eyebrowClass}
       >
@@ -75,8 +75,8 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
       <motion.h1
         id={headingId}
         initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: premiumEase }}
+        animate={animateTo}
+        transition={{ duration: 0.65, ease: premiumEase }}
         style={fadeStyle}
         className={headlineClass}
       >
@@ -92,8 +92,8 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
 
       <motion.p
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: premiumEase }}
+        animate={animateTo}
+        transition={{ duration: 0.65, ease: premiumEase }}
         style={fadeStyle}
         className={subtitleClass}
       >
