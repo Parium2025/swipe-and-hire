@@ -72,9 +72,9 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     intro: {
       title: 'Vi gör det tillsammans',
       paragraphs: [
-        'Med Parium når ni kandidater i hela Sverige — och hanterar hela rekryteringen från mobil eller dator.',
-        'Skapa annonsen på minuter med bild och ett tydligt budskap. Lägg upp den direkt och nå rätt kandidater utan krångel.',
-        'Granska kandidaternas profiler, erfarenhet och kompetens i ett strukturerat flöde. När ni ser rätt match väljer ni själva när ni vill öppna dialogen — utan onödiga mellanled.',
+        'Med Parium når ni kandidater i hela Sverige — och hanterar hela rekryteringen oavsett enhet.\u00a0',
+        'Skapa anonnser/annonsen på några minuter med bild och ett tydligt budskap. Lägg upp den direkt och nå rätt kandidater utan krångel.',
+        'Granska kandidaternas profiler, erfarenhet och kompetens i ett strukturerat flöde. När ni ser rätt kandidat väljer ni själva när ni vill öppna dialogen — utan onödiga mellanled.',
         'I nästa sektion ser ni exempel på yrken som tar Sverige framåt.',
       ],
     },
