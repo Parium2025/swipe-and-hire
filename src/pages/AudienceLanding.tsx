@@ -5,7 +5,6 @@ import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 
-import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import WaveDivider from '@/components/landing/WaveDivider';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import SiteFooter from '@/components/landing/SiteFooter';
@@ -1234,7 +1233,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   };
 
   const navLinks: LandingNavLink[] = [
-    { label: 'Så funkar det', href: '#sa-funkar-det' },
     { label: 'Funktioner', href: '#funktioner' },
     { label: 'Priser', href: '#priser' },
     { label: 'Vanliga frågor', href: '#faq' },
@@ -1280,14 +1278,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
         <main>
           <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
-
-
-          {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
-          <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
-            <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
-            <PinnedHorizontalGallery />
-          </section>
-
 
           {/* ──────────────── FUNKTIONER ──────────────── */}
           {isMobileFeatureMotion && (

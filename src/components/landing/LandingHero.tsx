@@ -46,10 +46,9 @@ const preloadAudienceAssets = (role: AudienceRole) => {
     link.crossOrigin = 'anonymous';
     document.head.appendChild(link);
   } catch { /* no-op */ }
-  // Warm up gallery-bilder + spline-runtime + audience-data
+  // Warm up spline-runtime + audience-data
   Promise.all([
     import('@splinetool/runtime').catch(() => null),
-    import('@/components/landing/audience/PinnedHorizontalGallery').catch(() => null),
     import('@/components/landing/audience/content').catch(() => null),
   ]).catch(() => undefined);
 };
