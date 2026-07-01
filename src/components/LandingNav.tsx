@@ -178,7 +178,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
             >
               <img
                 src={pariumLogo}
-                alt="Parium"
+                alt="Parium logotyp – lediga jobb och rekrytering"
                 width={256}
                 height={256}
                 draggable={false}
