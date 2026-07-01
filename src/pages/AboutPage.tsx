@@ -22,12 +22,34 @@ const visionPoints = [
 
 const revealViewport = { once: true, amount: 0.22, margin: '0px 0px -12% 0px' };
 
+const revealTransition = { duration: 0.9, ease: [0.16, 1, 0.3, 1] as const } as const;
+
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 28, filter: 'blur(6px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)' },
 };
 
-const revealTransition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] } as const;
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.14, delayChildren: 0.05 } },
+};
+
+const kickerReveal = {
+  hidden: { opacity: 0, y: 14, letterSpacing: '0.34em' },
+  show: { opacity: 1, y: 0, letterSpacing: '0.28em', transition: { duration: 0.8, ease: EASE } },
+};
+
+const headlineReveal = {
+  hidden: { opacity: 0, y: 34, filter: 'blur(8px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1.0, ease: EASE } },
+};
+
+const bodyReveal = {
+  hidden: { opacity: 0, y: 22, filter: 'blur(4px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.85, ease: EASE } },
+};
 
 const AboutPage = () => {
   const navigate = useNavigate();
@@ -120,30 +142,41 @@ const AboutPage = () => {
       <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
         <motion.div
           className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-12 lg:gap-16"
-          variants={fadeUp}
+          variants={stagger}
           initial="hidden"
           whileInView="show"
           viewport={revealViewport}
-          transition={revealTransition}
-          style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
         >
           <div className="lg:col-span-5">
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[14px]">
+              <motion.p
+                variants={kickerReveal}
+                className="text-[12px] font-semibold uppercase tracking-[0.28em] text-white lg:text-[14px]"
+              >
                 Insikten
-              </p>
-              <h2 className="mt-5 text-balance text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-6xl lg:text-[4.25rem]">
+              </motion.p>
+              <motion.h2
+                variants={headlineReveal}
+                style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
+                className="mt-5 text-balance text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-6xl lg:text-[4.25rem]"
+              >
                 Rekrytering har fastnat i gamla vanor.
-              </h2>
+              </motion.h2>
             </div>
           </div>
           <div className="lg:col-span-7 lg:pt-[3.25rem]">
-            <p className="text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
+            <motion.p
+              variants={bodyReveal}
+              className="text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]"
+            >
               Kandidater skickar ansökningar utan svar och utan återkoppling. Arbetsgivare lägger timmar på CV:n utan att hitta rätt. Resultatet blir missade möjligheter.
-            </p>
-            <p className="mt-6 text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]">
+            </motion.p>
+            <motion.p
+              variants={bodyReveal}
+              className="mt-6 text-[18px] leading-[1.75] text-white sm:text-[19px] lg:text-[21px]"
+            >
               Vi tror på kraften i det enkla: smart teknik bakom kulisserna, tydlig struktur och en upplevelse som gör att rätt kandidat når rätt jobb — utan onödiga steg.&nbsp;Därför har vi byggt en plattform där allt hänger ihop — jobbannonsen, ansökan och dialogen. Ett enda flöde, byggt för att rätt person ska nå rätt plats.
-            </p>
+            </motion.p>
           </div>
         </motion.div>
       </section>
@@ -152,48 +185,56 @@ const AboutPage = () => {
       <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
         <div className="mx-auto max-w-5xl text-center">
           <motion.div
-            variants={fadeUp}
+            variants={stagger}
             initial="hidden"
             whileInView="show"
             viewport={revealViewport}
-            transition={revealTransition}
-            style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[14px]">
+            <motion.p
+              variants={kickerReveal}
+              className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white lg:text-[14px]"
+            >
               Vår vision
-            </p>
-            <h2 className="mx-auto mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-[5.5rem]">
+            </motion.p>
+            <motion.h2
+              variants={headlineReveal}
+              style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
+              className="mx-auto mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-[5.5rem]"
+            >
               Sveriges ledande<br className="hidden sm:block" /> jobbsökar- &amp; rekryteringsapp.
-            </h2>
-            <div className="mx-auto mt-10 max-w-2xl space-y-5">
+            </motion.h2>
+            <motion.div variants={bodyReveal} className="mx-auto mt-10 max-w-2xl space-y-5">
               <p className="text-[18px] leading-[1.75] text-white lg:text-[20px]">
                 Parium ska vara det naturliga valet för alla som söker jobb och för alla som rekryterar. En plattform som är lika enkel för kandidaten som den är kraftfull för arbetsgivaren.
               </p>
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* visionspunkter — rena statements */}
-          <div className="mx-auto mt-16 max-w-3xl border-t border-white/10">
+          <motion.div
+            className="mx-auto mt-16 max-w-3xl border-t border-white/10"
+            variants={stagger}
+            initial="hidden"
+            whileInView="show"
+            viewport={revealViewport}
+          >
             {visionPoints.map((item) => (
               <motion.div
                 key={item}
                 className="border-b border-white/10 py-10 text-center"
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="show"
-                viewport={revealViewport}
-                transition={revealTransition}
-                style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
+                variants={headlineReveal}
+                style={{ willChange: 'opacity, transform, filter', transform: 'translateZ(0)' }}
               >
                 <span className="text-[26px] font-light leading-snug tracking-tight text-white sm:text-[34px]">
                   {item}
                 </span>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
 
         </div>
       </section>
+
 
       {/* BOLAGET + KONTAKT — sida vid sida på desktop */}
       <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
