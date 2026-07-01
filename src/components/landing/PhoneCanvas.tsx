@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Canvas, useLoader, useThree } from '@react-three/fiber';
 import { useGLTF, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -10,6 +10,7 @@ interface PhoneCanvasProps {
   fit?: number;
   active?: boolean;
   instantFallback?: boolean;
+  style?: CSSProperties;
 }
 
 const MODEL_URL = '/models/parium-phone.glb';
@@ -128,7 +129,7 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   );
 }
 
-export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallback = false }: PhoneCanvasProps) => {
+export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallback = false, style }: PhoneCanvasProps) => {
   const [ready, setReady] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
 
@@ -167,7 +168,7 @@ export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallb
   return (
     <div
       className={`relative select-none overflow-visible ${className ?? ''}`}
-      style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+        style={{ touchAction: 'pan-y', overscrollBehavior: 'contain', ...style }}
     >
       {showFallback && !ready && (
         <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -175,7 +176,7 @@ export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallb
             className="relative aspect-[9/19] h-[82%] max-h-[360px] min-h-[190px] overflow-hidden rounded-[2.25rem] border border-white/15 backdrop-blur-sm"
             style={{
               background:
-                'linear-gradient(180deg, hsl(var(--primary-foreground) / 0.13) 0%, hsl(var(--primary-foreground) / 0.035) 100%)',
+                'linear-gradient(180deg, hsl(var(--secondary) / 0.18) 0%, hsl(var(--primary) / 0.18) 100%)',
               boxShadow:
                 '0 26px 86px hsl(var(--background) / 0.45), inset 0 1px 0 hsl(var(--primary-foreground) / 0.16)',
             }}
