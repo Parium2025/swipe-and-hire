@@ -22,12 +22,32 @@ const visionPoints = [
 
 const revealViewport = { once: true, amount: 0.22, margin: '0px 0px -12% 0px' };
 
+const revealTransition = { duration: 0.9, ease: [0.16, 1, 0.3, 1] } as const;
+
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 28, filter: 'blur(6px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)' },
 };
 
-const revealTransition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] } as const;
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.14, delayChildren: 0.05 } },
+};
+
+const kickerReveal = {
+  hidden: { opacity: 0, y: 14, letterSpacing: '0.34em' },
+  show: { opacity: 1, y: 0, letterSpacing: '0.28em', transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+};
+
+const headlineReveal = {
+  hidden: { opacity: 0, y: 34, filter: 'blur(8px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } },
+};
+
+const bodyReveal = {
+  hidden: { opacity: 0, y: 22, filter: 'blur(4px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] } },
+};
 
 const AboutPage = () => {
   const navigate = useNavigate();
