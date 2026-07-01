@@ -65,17 +65,15 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
   employer: {
     eyebrow: 'För arbetsgivare',
     hero: {
-      headline: ['Hitta rätta', 'kandidater', 'snabbare!'],
+      headline: ['Hitta rätt', 'kandidater', 'snabbare!'],
       subtitle: 'Möt kandidater som vill prata med just er. Annonsera, nå rätt och kom till samtal — utan onödiga mellansteg.',
       cta: 'Skapa arbetsgivarkonto',
     },
     intro: {
-      title: 'Vi gör det tillsammans',
+      title: 'Vi har gjort det möjligt.',
       paragraphs: [
-        'Med Parium når ni kandidater i hela Sverige — och hanterar hela rekryteringen oavsett enhet.\u00a0',
-        'Skapa anonnser/annonsen på några minuter med bild och ett tydligt budskap. Lägg upp den direkt och nå rätt kandidater utan krångel.',
-        'Granska kandidaternas profiler, erfarenhet och kompetens i ett strukturerat flöde. När ni ser rätt kandidat väljer ni själva när ni vill öppna dialogen — utan onödiga mellanled.',
-        'I nästa sektion ser ni exempel på yrken som tar Sverige framåt.',
+        'Med Parium når du/ni kandidater i hela Sverige — och hanterar rekryteringen oavsett enhet.\u00a0',
+        'Skapa annons/annonser på några minuter med bild och ett tydligt budskap. Lägg upp och nå rätt kandidater utan krångel.',
       ],
     },
     statement: {
