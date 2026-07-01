@@ -62,10 +62,77 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         tick(count);
       });
 
+    const hasWhiteSplineSlab = () => {
+      try {
+        const width = canvas.width;
+        const height = canvas.height;
+        if (!width || !height) return true;
+
+        const sampleCanvas = document.createElement('canvas');
+        const sampleWidth = 80;
+        const sampleHeight = Math.max(120, Math.round((height / width) * sampleWidth));
+        sampleCanvas.width = sampleWidth;
+        sampleCanvas.height = sampleHeight;
+
+        const ctx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) return false;
+        ctx.drawImage(canvas, 0, 0, sampleWidth, sampleHeight);
+
+        const { data } = ctx.getImageData(0, 0, sampleWidth, sampleHeight);
+        let whiteCount = 0;
+        let minX = sampleWidth;
+        let minY = sampleHeight;
+        let maxX = 0;
+        let maxY = 0;
+
+        for (let y = 0; y < sampleHeight; y += 1) {
+          for (let x = 0; x < sampleWidth; x += 1) {
+            const i = (y * sampleWidth + x) * 4;
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const a = data[i + 3];
+            const isWhite = a > 220 && r > 218 && g > 218 && b > 218 && Math.max(r, g, b) - Math.min(r, g, b) < 34;
+            if (!isWhite) continue;
+            whiteCount += 1;
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+          }
+        }
+
+        if (whiteCount < 180) return false;
+        const whiteRatio = whiteCount / (sampleWidth * sampleHeight);
+        const boxWidth = maxX - minX;
+        const boxHeight = maxY - minY;
+        const looksLikePhonePlaceholder = boxWidth >= sampleWidth * 0.16 && boxHeight >= sampleHeight * 0.34;
+
+        return whiteRatio > 0.025 && looksLikePhonePlaceholder;
+      } catch {
+        // If the WebGL canvas cannot be read, keep the time-based fallback below.
+        return false;
+      }
+    };
+
     const waitForVisualSettle = async () => {
       const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
       await waitForFrames(isCoarse ? 10 : 4);
       await new Promise<void>((resolve) => window.setTimeout(resolve, isCoarse ? 760 : 140));
+      const startedAt = performance.now();
+      const maxWait = isCoarse ? 2800 : 1200;
+      let stableFrames = 0;
+
+      while (!cancelled && performance.now() - startedAt < maxWait) {
+        await waitForFrames(1);
+        if (hasWhiteSplineSlab()) {
+          stableFrames = 0;
+          continue;
+        }
+        stableFrames += 1;
+        if (stableFrames >= (isCoarse ? 10 : 4)) break;
+      }
+
       await waitForFrames(isCoarse ? 4 : 1);
     };
 
@@ -98,12 +165,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
           const cap = isCoarse ? 1.5 : 2;
           const renderer = (app as unknown as { renderer?: { setPixelRatio?: (n: number) => void } }).renderer;
           renderer?.setPixelRatio?.(Math.min(window.devicePixelRatio || 1, cap));
-        } catch { /* no-op */ }
-        // Spline-scenen kan ha en egen background-color som annars syns som
-        // en vit ram innan WebGL fyller canvasen. Tvinga transparent.
-        try {
-          (app as unknown as { setBackgroundColor?: (c: string) => void })
-            .setBackgroundColor?.('rgba(0,0,0,0)');
         } catch { /* no-op */ }
         app.setZoom(zoomRef.current);
         requestAnimationFrame(() => app?.setZoom(zoomRef.current));
