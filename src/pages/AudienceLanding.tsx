@@ -11,7 +11,7 @@ import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import SiteFooter from '@/components/landing/SiteFooter';
 import SplitHeadline from '@/components/landing/audience/SplitHeadline';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
-import { PhoneCanvas } from '@/components/landing/PhoneCanvas';
+import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
@@ -537,9 +537,9 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
       className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-center justify-center overflow-visible ${className}`}
       style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px`, marginBottom: `-${metrics.canvasBottomTrim ?? 0}px` }}
     >
-      <PhoneCanvas
+      <SplinePhone
         className="h-full w-full"
-        fit={metrics.zoom}
+        zoom={metrics.zoom}
         active={enabled && active}
       />
     </div>
@@ -878,10 +878,10 @@ const FixedPhoneLayer = () => {
           }
         >
 
-          <PhoneCanvas
+          <SplinePhone
             className="h-full w-full"
             style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
-            fit={phoneMetrics.zoom}
+            zoom={phoneMetrics.zoom}
             active={active}
           />
         </div>
@@ -1154,9 +1154,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         const rootRect = root.getBoundingClientRect();
         const candidates = root.querySelectorAll<HTMLElement>('[style*="opacity"]');
         candidates.forEach((el) => {
-          // Rör aldrig WebGL-telefonen här. Den har en egen readiness-gate;
-          // safety-neten får inte tvinga fram canvasen innan modellen är stabil.
-          if (el.closest('[data-landing-phone]')) return;
+          // Rör aldrig Spline/WebGL-telefonen här. Den har en egen readiness-gate
+          // för att förhindra vit canvas/splash vid refresh; safety-neten får inte
+          // tvinga fram dess host/canvas innan WebGL-materialen är stabila.
+          if (el.closest('[data-spline-phone]')) return;
           const computed = window.getComputedStyle(el);
           if (parseFloat(computed.opacity) > 0.01) return;
           const rect = el.getBoundingClientRect();
