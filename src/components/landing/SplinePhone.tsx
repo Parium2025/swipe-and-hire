@@ -62,11 +62,11 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         tick(count);
       });
 
-    const hasWhiteSplineSlab = () => {
+    const inspectSplineFrame = () => {
       try {
         const width = canvas.width;
         const height = canvas.height;
-        if (!width || !height) return true;
+        if (!width || !height) return { hasScenePixels: false, hasWhiteSlab: true };
 
         const sampleCanvas = document.createElement('canvas');
         const sampleWidth = 80;
@@ -75,11 +75,12 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         sampleCanvas.height = sampleHeight;
 
         const ctx = sampleCanvas.getContext('2d', { willReadFrequently: true });
-        if (!ctx) return false;
+        if (!ctx) return { hasScenePixels: false, hasWhiteSlab: false };
         ctx.drawImage(canvas, 0, 0, sampleWidth, sampleHeight);
 
         const { data } = ctx.getImageData(0, 0, sampleWidth, sampleHeight);
         let whiteCount = 0;
+        let scenePixelCount = 0;
         let minX = sampleWidth;
         let minY = sampleHeight;
         let maxX = 0;
@@ -92,7 +93,9 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
             const g = data[i + 1];
             const b = data[i + 2];
             const a = data[i + 3];
+            const isMeaningfulPixel = a > 24 && (r > 8 || g > 8 || b > 8);
             const isWhite = a > 220 && r > 218 && g > 218 && b > 218 && Math.max(r, g, b) - Math.min(r, g, b) < 34;
+            if (isMeaningfulPixel) scenePixelCount += 1;
             if (!isWhite) continue;
             whiteCount += 1;
             minX = Math.min(minX, x);
@@ -102,16 +105,17 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
           }
         }
 
-        if (whiteCount < 180) return false;
+        const hasScenePixels = scenePixelCount / (sampleWidth * sampleHeight) > 0.012;
+        if (whiteCount < 180) return { hasScenePixels, hasWhiteSlab: false };
         const whiteRatio = whiteCount / (sampleWidth * sampleHeight);
         const boxWidth = maxX - minX;
         const boxHeight = maxY - minY;
         const looksLikePhonePlaceholder = boxWidth >= sampleWidth * 0.16 && boxHeight >= sampleHeight * 0.34;
 
-        return whiteRatio > 0.025 && looksLikePhonePlaceholder;
+        return { hasScenePixels, hasWhiteSlab: whiteRatio > 0.025 && looksLikePhonePlaceholder };
       } catch {
         // If the WebGL canvas cannot be read, keep the time-based fallback below.
-        return false;
+        return { hasScenePixels: true, hasWhiteSlab: false };
       }
     };
 
@@ -125,7 +129,8 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
       while (!cancelled && performance.now() - startedAt < maxWait) {
         await waitForFrames(1);
-        if (hasWhiteSplineSlab()) {
+        const frame = inspectSplineFrame();
+        if (!frame.hasScenePixels || frame.hasWhiteSlab) {
           stableFrames = 0;
           continue;
         }
@@ -219,9 +224,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         className="absolute inset-0"
         style={{
           opacity: isReady ? 1 : 0,
-          visibility: isReady ? 'visible' : 'hidden',
+          visibility: 'visible',
+          transform: isReady ? 'translate3d(0, 0, 0)' : 'translate3d(-200vw, 0, 0)',
           transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1)',
-          willChange: 'opacity',
+          willChange: 'opacity, transform',
           contain: 'layout paint style',
           backgroundColor: 'transparent',
         }}
