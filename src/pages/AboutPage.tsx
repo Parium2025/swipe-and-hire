@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Mail } from 'lucide-react';
 import LandingNav from '@/components/LandingNav';
 import SiteFooter from '@/components/landing/SiteFooter';
-import { AnimatedBackground } from '@/components/AnimatedBackground';
+import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { ABOUT_BANNER_URL, preloadAboutPageAssets } from '@/lib/aboutPagePreload';
@@ -68,7 +68,7 @@ const AboutPage = () => {
       </Helmet>
 
       <LandingNav onLoginClick={handleLogin} />
-      <AnimatedBackground showBubbles showGlow={false} variant="viewport" />
+      <SeoBubbles />
 
       {/* VEM VI ÄR — full-bleed banner, först */}
       <section className="relative w-full overflow-hidden">
