@@ -68,7 +68,7 @@ const AboutPage = () => {
       </Helmet>
 
       <LandingNav onLoginClick={handleLogin} />
-      <AnimatedBackground showBubbles showGlow={false} variant="viewport" />
+      <SeoBubbles />
 
       {/* VEM VI ÄR — full-bleed banner, först */}
       <section className="relative w-full overflow-hidden">
