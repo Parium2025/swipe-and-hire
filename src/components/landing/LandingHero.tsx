@@ -37,18 +37,8 @@ const preloadAudienceAssets = (role: AudienceRole) => {
   if (typeof window === 'undefined') return;
   if (preloadedRoles.has(role)) return;
   preloadedRoles.add(role);
-  // Spline-scenen (samma url för båda rollerna)
-  try {
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
-    link.as = 'fetch';
-    link.href = '/spline/parium-phone-scene.splinecode';
-    link.crossOrigin = 'anonymous';
-    document.head.appendChild(link);
-  } catch { /* no-op */ }
-  // Warm up gallery-bilder + spline-runtime + audience-data
+  // Warm up gallery-bilder + audience-data
   Promise.all([
-    import('@splinetool/runtime').catch(() => null),
     import('@/components/landing/audience/PinnedHorizontalGallery').catch(() => null),
     import('@/components/landing/audience/content').catch(() => null),
   ]).catch(() => undefined);
@@ -140,8 +130,8 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<AudienceRole | null>(null);
 
-  // Premium-prefetch: när huvudtråden är ledig, ladda tunga audience-assets
-  // (Spline-scen + runtime + gallery-modul + content) för BÅDA rollerna i
+    // Premium-prefetch: när huvudtråden är ledig, ladda tunga audience-assets
+    // (gallery-modul + content) för BÅDA rollerna i
   // bakgrunden. Påverkar inte hero-animationen, ingen render, ingen state.
   // Helt idempotent — om användaren hovrar/klickar tidigare körs det bara en gång.
   useEffect(() => {
