@@ -167,6 +167,7 @@ export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallb
 
   return (
     <div
+      data-landing-phone
       className={`relative select-none overflow-visible ${className ?? ''}`}
         style={{ touchAction: 'pan-y', overscrollBehavior: 'contain', ...style }}
     >
@@ -186,6 +187,7 @@ export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallb
         </div>
       )}
       <Canvas
+        data-landing-phone-canvas
         orthographic
         gl={{ antialias: true, alpha: true, preserveDrawingBuffer: false }}
         dpr={[1, 2]}
