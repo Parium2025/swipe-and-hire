@@ -135,34 +135,67 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
   if (hasError) {
     return (
-      <div ref={wrapperRef} aria-hidden="true" className={`relative select-none overflow-visible ${className ?? ''}`} style={style} />
+      <div
+        ref={wrapperRef}
+        aria-hidden="true"
+        data-spline-phone
+        className={`relative select-none overflow-visible ${className ?? ''}`}
+        style={style}
+      />
     );
   }
 
   return (
     <div
       ref={wrapperRef}
+      data-spline-phone
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'pan-y', overscrollBehavior: 'contain', ...style }}
     >
-      <canvas
-        ref={canvasRef}
-        role="img"
-        aria-label="Parium 3D-telefon"
-        tabIndex={-1}
-        className="relative h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
-        draggable={false}
+      <div
+        data-spline-phone-host
+        aria-hidden={!isReady}
+        className="absolute inset-0"
         style={{
-          colorScheme: 'normal',
           opacity: isReady ? 1 : 0,
           visibility: isReady ? 'visible' : 'hidden',
-          backgroundColor: 'transparent',
-          display: 'block',
           transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: 'opacity',
+          contain: 'layout paint style',
+          backgroundColor: 'transparent',
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          role="img"
+          aria-label="Parium 3D-telefon"
+          tabIndex={-1}
+          data-spline-phone-canvas
+          className="relative h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
+          draggable={false}
+          style={{
+            colorScheme: 'normal',
+            backgroundColor: 'transparent',
+            display: 'block',
+            opacity: 1,
+            visibility: 'inherit',
+            transition: 'none',
+            willChange: 'auto',
+            touchAction: 'none',
+          }}
+        />
+      </div>
+      {!isReady && (
+        <div
+          data-spline-phone-mask
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundColor: 'transparent',
           touchAction: 'none',
         }}
-      />
+        />
+      )}
     </div>
   );
 };

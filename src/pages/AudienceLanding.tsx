@@ -1154,6 +1154,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         const rootRect = root.getBoundingClientRect();
         const candidates = root.querySelectorAll<HTMLElement>('[style*="opacity"]');
         candidates.forEach((el) => {
+          // Rör aldrig Spline/WebGL-telefonen här. Den har en egen readiness-gate
+          // för att förhindra vit canvas/splash vid refresh; safety-neten får inte
+          // tvinga fram dess host/canvas innan WebGL-materialen är stabila.
+          if (el.closest('[data-spline-phone]')) return;
           const computed = window.getComputedStyle(el);
           if (parseFloat(computed.opacity) > 0.01) return;
           const rect = el.getBoundingClientRect();
