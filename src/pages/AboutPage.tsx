@@ -105,8 +105,8 @@ const AboutPage = () => {
           />
           {/* Mörkningslager — kraftig kontrast så texten alltid är läsbar */}
           <div className="absolute inset-0 bg-black/40" />
-          {/* Lång, mjuk gradient: bild → mörkblå så övergången till sidan blir sömlös */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 via-35% to-[hsl(215_100%_12%)] to-95%" />
+          {/* Lång, mjuk gradient: bild → transparent så page-gradienten fortsätter sömlöst */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 via-35% to-transparent to-95%" />
 
           <div className="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center sm:px-8 md:px-12">
             <motion.div
