@@ -72,10 +72,9 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     intro: {
       title: 'Vi har gjort det möjligt.',
       paragraphs: [
-        'Oavsett vilken anställningsform ni söker. Heltid, deltid, vikariat, visstid, interim, konsult, praktik, LIA eller sommarjobb — alla får plats på Parium.',
-        'En plattform för hela ert HR-rekryteringsbehov, från första praktikplats till nyckelroll i ledningen.',
-        'Med Parium når du kandidater i hela Sverige och hanterar HR oavsett enhet.',
-        'Skapa ny annons på några minuter. Med bild och ett tydligt budskap. Lägg upp och nå rätt kandidater utan krångel.',
+        'Med Parium når du/ni kandidater i hela Sverige — och hanterar rekryteringen oavsett enhet.\u00a0',
+        'Skapa annons/annonser på några minuter med bild och ett tydligt budskap. Lägg upp och nå rätt kandidater utan krångel.',
+        'Oavsett om ni söker heltid, deltid, vikariat, visstid, interim, konsult, praktik, LIA eller sommarjobb — alla anställningsformer får plats i Parium. En plattform för hela ert rekryteringsbehov, från första praktikplatsen till nyckelrollen i ledningen.',
       ],
     },
     statement: {
