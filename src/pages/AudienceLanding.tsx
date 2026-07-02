@@ -1710,7 +1710,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Vad kostar det att rekrytera?',
-                        a: 'Skapa konto och första annonsen är gratis. Därefter har vi transparent prissättning baserat på antal aktiva annonser och teamstorlek — inga dolda avgifter, inga långa bindningstider. Kontakta oss så ger vi er ett pris som passar er volym.',
+                        a: 'Vi har tre månadspaket: Start på 5 000 kr/mån (1 användare, upp till 40 annonser i månaden), Växa på 7 500 kr/mån (2 användare, obegränsat antal annonser) och Pro på 10 000 kr/mån (obegränsat antal användare och annonser). Behöver ni bara rekrytera en gång kan ni publicera en enskild annons för 799 kr som ligger uppe i 14 dagar. Alla annonser är aktiva i 14 dagar och det är inga bindningstider.',
                       },
                       {
                         q: 'Hur kvalitetssäkras kandidaterna?',
