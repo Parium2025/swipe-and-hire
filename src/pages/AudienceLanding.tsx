@@ -11,6 +11,7 @@ import SiteFooter from '@/components/landing/SiteFooter';
 import SplitHeadline from '@/components/landing/audience/SplitHeadline';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
+import EmployerJourney from '@/components/landing/audience/EmployerJourney';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
@@ -1335,6 +1336,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               >
                 {c.featuresIntro}
               </motion.p>
+              {audience === 'employer' ? (
+                <EmployerJourney />
+              ) : (
               <motion.div
                 initial={false}
                 className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
@@ -1342,9 +1346,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 {c.features.map((feature, idx) => {
                   const i = idx + 1;
                   const Icon = feature.icon;
-                  // 🔧 Varje kort har sin EGEN whileInView-trigger med staggad delay.
-                  // Tidigare förlitade vi oss på parent→child variant-propagation,
-                  // vilket inte alltid slog igenom — korten kunde fastna på opacity:0.
                   const cardInitial = isMobileFeatureMotion
                     ? false
                     : { opacity: 0, y: 18, filter: 'blur(6px)' };
@@ -1377,6 +1378,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   );
                 })}
               </motion.div>
+              )}
 
             </div>
           </section>
