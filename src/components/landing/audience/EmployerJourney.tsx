@@ -20,9 +20,9 @@ type JourneyStep = {
 
 const steps: JourneyStep[] = [
   {
-    title: 'Skapa annonsen på minuter',
-    body: 'Bygg en professionell jobbannons i vår guidade wizard — direkt på mobilen eller från skrivbordet.',
-    detail: 'Ingen mall att kämpa mot. Fyll i det viktiga, publicera och nå ut i hela Sverige.',
+    title: 'Skapa annonsen på några minuter',
+    body: 'Bygg en tydlig och professionell jobbannons direkt i appen — steg för steg, utan krångliga mallar.',
+    detail: 'Fyll i det som är viktigt, förhandsgranska och publicera. Annonsen når kandidater i hela Sverige.',
     icon: PenLine,
   },
   {
@@ -32,21 +32,21 @@ const steps: JourneyStep[] = [
     icon: Users,
   },
   {
-    title: 'Överblick i Kanban',
-    body: 'Alla kandidater samlas i en tydlig Kanban-vy där ni flyttar dem mellan era egna steg.',
-    detail: 'Ni ser statusen på hela rekryteringen i en enda blick — inga kalkylark, inga mejlkedjor.',
+    title: 'Samla favoriterna i Kanban',
+    body: 'Lägg till kandidaterna ni vill gå vidare med och flytta dem mellan era egna steg i en tydlig vy.',
+    detail: 'Ni bygger er egen rekryteringsprocess och får full överblick på ett ställe — inga kalkylark, inga mejlkedjor.',
     icon: LayoutGrid,
   },
   {
-    title: 'Bjud in hela teamet',
-    body: 'Med Premium delar ni kontot med kollegor och rekryterar tillsammans i samma vy.',
-    detail: 'Roller och behörigheter styrs enkelt. Alla ser samma kandidater, samma anteckningar, samma beslut.',
+    title: 'Rekrytera tillsammans med teamet',
+    body: 'Med våra Premium-paket bjuder ni in kollegor och arbetar tillsammans i samma vy — välj antal användare efter behov.',
+    detail: 'Alla ser samma kandidater, samma anteckningar och samma beslut. Ingen tappar tråden.',
     icon: UserPlus,
   },
   {
-    title: 'Prata direkt i plattformen',
-    body: 'Öppna dialog, boka intervju och håll kontakten med kandidaten — utan att lämna Parium.',
-    detail: 'Ni slipper hoppa mellan mejl, sms och kalendrar. Allt finns samlat på ett ställe.',
+    title: 'Öppna dialogen direkt',
+    body: 'Chatta med kandidater som vill vidare, ställ följdfrågor och boka in intervju när det känns rätt.',
+    detail: 'All löpande kommunikation samlas i plattformen så ni slipper hoppa mellan mejl och sms.',
     icon: MessagesSquare,
   },
   {
