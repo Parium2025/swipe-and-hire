@@ -69,7 +69,7 @@ export function EmployerJourney() {
       <ol className="space-y-6 md:space-y-8">
         {steps.map((step, idx) => {
           const Icon = step.icon;
-          const number = String(idx + 1).padStart(2, '0');
+          const number = String(idx + 1);
           return (
             <motion.li
               key={step.title}
