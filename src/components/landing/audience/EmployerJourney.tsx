@@ -20,7 +20,7 @@ type JourneyStep = {
 const steps: JourneyStep[] = [
   {
     title: 'Skapa annonsen på några minuter',
-    body: 'Bygg en tydlig och professionell jobbannons direkt i appen — steg för steg, utan krångliga mallar.',
+    body: 'Bygg en tydlig och professionell jobbannons direkt i appen eller i webben — steg för steg, utan krångliga mallar.',
     icon: PenLine,
   },
   {
@@ -29,7 +29,7 @@ const steps: JourneyStep[] = [
     icon: Users,
   },
   {
-    title: 'Samla favoriterna i Kanban',
+    title: 'Samla favoriterna\u00a0',
     body: 'Lägg till kandidaterna ni vill gå vidare med och flytta dem mellan era egna steg i en tydlig vy.',
     icon: LayoutGrid,
   },
