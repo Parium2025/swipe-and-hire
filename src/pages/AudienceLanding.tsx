@@ -1028,7 +1028,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigationType = useNavigationType();
   const c = audienceContent[audience];
   const isMobileFeatureMotion = useIsMobileLandingMotion();
-  const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium'>('premium');
+  const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium' | 'growth' | 'pro'>('premium');
 
   // Mjuk musscroll på Windows/desktop. Inaktiv på touch, trackpad, reduced-motion.
   useWheelSmoother(true);
