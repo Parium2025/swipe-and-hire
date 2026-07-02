@@ -88,7 +88,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
       { title: 'Filtrera och välj', description: 'Granska, sortera och besluta i ett snabbt, mobilt flöde.' },
       { title: 'Boka samtal', description: 'När intresset är ömsesidigt öppnas dialogen direkt.' },
     ],
-    featuresIntro: 'I 6 konkreta steg:',
+    featuresIntro: '',
     features: [
       { title: 'Relevanta kandidater', description: 'Här finner du kandidater som faktiskt vill ha ett jobb.\u00a0', icon: Target },
       { title: 'Rekrytera på språng', description: 'Granska, sortera och svara direkt i mobilen. Hela rekryteringen följer med er — vart ni än är.', icon: Filter },
