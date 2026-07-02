@@ -1420,7 +1420,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               >
                 {audience === 'job_seeker'
                   ? 'Kom igång helt gratis. Uppgradera till Premium när du vill ta nästa steg — säg upp när du vill.'
-                  : 'Transparenta priser. Inga överraskningar.'}
+                  : 'Välj det paket som passar er volym. Alla annonser är aktiva i 14 dagar och det är inga bindningstider.'}
               </motion.p>
               {audience === 'job_seeker' ? (
                 <div className="relative mt-8 grid gap-5 md:grid-cols-2">
