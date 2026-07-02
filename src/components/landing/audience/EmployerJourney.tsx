@@ -5,7 +5,7 @@ import {
   LayoutGrid,
   UserPlus,
   MessagesSquare,
-  LineChart,
+  Mail,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -14,7 +14,6 @@ const ease = [0.16, 1, 0.3, 1] as const;
 type JourneyStep = {
   title: string;
   body: string;
-  detail: string;
   icon: LucideIcon;
 };
 
@@ -22,38 +21,32 @@ const steps: JourneyStep[] = [
   {
     title: 'Skapa annonsen på några minuter',
     body: 'Bygg en tydlig och professionell jobbannons direkt i appen — steg för steg, utan krångliga mallar.',
-    detail: 'Fyll i det som är viktigt, förhandsgranska och publicera. Annonsen når kandidater i hela Sverige.',
     icon: PenLine,
   },
   {
     title: 'Möt kandidater som verkligen vill',
     body: 'Ni ser bara kandidater som aktivt sökt just er roll — inga slumpmässiga profiler eller kalla listor.',
-    detail: 'Varje ansökan är ett faktiskt intresse. Ni börjar samtalet där det redan finns motivation.',
     icon: Users,
   },
   {
     title: 'Samla favoriterna i Kanban',
     body: 'Lägg till kandidaterna ni vill gå vidare med och flytta dem mellan era egna steg i en tydlig vy.',
-    detail: 'Ni bygger er egen rekryteringsprocess och får full överblick på ett ställe — inga kalkylark, inga mejlkedjor.',
     icon: LayoutGrid,
   },
   {
     title: 'Rekrytera tillsammans med teamet',
     body: 'Med våra Premium-paket bjuder ni in kollegor och arbetar tillsammans i samma vy — välj antal användare efter behov.',
-    detail: 'Alla ser samma kandidater, samma anteckningar och samma beslut. Ingen tappar tråden.',
     icon: UserPlus,
   },
   {
     title: 'Öppna dialogen direkt',
     body: 'Chatta med kandidater som vill vidare, ställ följdfrågor och boka in intervju när det känns rätt.',
-    detail: 'All löpande kommunikation samlas i plattformen så ni slipper hoppa mellan mejl och sms.',
     icon: MessagesSquare,
   },
   {
-    title: 'Följ upp med insikter',
-    body: 'Se annonsens räckvidd, ansökningstakt och kandidatflöde i realtid.',
-    detail: 'Justera annonsen om det behövs. Ni fattar beslut på riktig data — inte gissningar.',
-    icon: LineChart,
+    title: 'Ge alla kandidater ett svar',
+    body: 'När processen är klar skickar Parium ett automatiskt mejl till de kandidater som inte gått vidare. Välj vår förinställda text eller skriv ert helt egna meddelande — så ingen lämnas utan återkoppling.',
+    icon: Mail,
   },
 ];
 
@@ -103,11 +96,8 @@ export function EmployerJourney() {
                   <h3 className="mt-3 text-xl font-bold tracking-tight text-white sm:text-2xl">
                     {step.title}
                   </h3>
-                  <p className="mt-3 text-[15px] leading-7 text-white/85 sm:text-base">
+                  <p className="mt-3 text-[15px] leading-7 text-white sm:text-base">
                     {step.body}
-                  </p>
-                  <p className="mt-3 text-sm leading-7 text-white/60">
-                    {step.detail}
                   </p>
                 </article>
               </div>
@@ -115,24 +105,9 @@ export function EmployerJourney() {
           );
         })}
       </ol>
-
-      {/* Avslutande statement */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: 0.7, ease, delay: 0.1 }}
-        className="mt-10 rounded-3xl border border-secondary/25 bg-gradient-to-br from-secondary/[0.12] via-white/[0.03] to-transparent p-6 text-center backdrop-blur-xl sm:mt-14 sm:p-8"
-      >
-        <p className="text-base font-semibold text-white sm:text-lg">
-          Ingen matchning i det tysta. Ingen svart låda.
-        </p>
-        <p className="mt-2 text-sm leading-7 text-white/75 sm:text-base">
-          Ni ser exakt vilka som sökt, vad de vill och var i processen ni är — hela vägen till anställning.
-        </p>
-      </motion.div>
     </div>
   );
 }
 
 export default EmployerJourney;
+
