@@ -72,9 +72,9 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     intro: {
       title: 'Vi har gjort det möjligt.',
       paragraphs: [
-        'Med Parium når du/ni kandidater i hela Sverige — och hanterar rekryteringen oavsett enhet.\u00a0',
-        'Skapa annons/annonser på några minuter med bild och ett tydligt budskap. Lägg upp och nå rätt kandidater utan krångel.',
-        'Oavsett om ni söker heltid, deltid, vikariat, visstid, interim, konsult, praktik, LIA eller sommarjobb — alla anställningsformer får plats i Parium. En plattform för hela ert rekryteringsbehov, från första praktikplatsen till nyckelrollen i ledningen.',
+        'Rekrytera kandidater i hela Sverige – från en och samma plattform.',
+        'Med Parium skapar ni professionella jobbannonser på några minuter och når rätt kandidater med ett tydligt och genomtänkt budskap. Hantera hela rekryteringsprocessen smidigt, oavsett vilken enhet ni arbetar från.',
+        'Oavsett vilken tjänst ni vill tillsätta ger Parium er verktygen för en modern, effektiv och professionell rekrytering – från första annonsen till anställning.',
       ],
     },
     statement: {
