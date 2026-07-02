@@ -1422,100 +1422,248 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   ? 'Kom igång helt gratis. Uppgradera till Premium när du vill ta nästa steg — säg upp när du vill.'
                   : 'Transparenta priser. Inga överraskningar.'}
               </motion.p>
-              <div className="relative mt-8 grid gap-5 md:grid-cols-2">
+              {audience === 'job_seeker' ? (
+                <div className="relative mt-8 grid gap-5 md:grid-cols-2">
+                  {[
+                    {
+                      id: 'start' as const,
+                      name: 'Start',
+                      price: '0',
+                      priceSuffix: '/mån',
+                      tagline: 'Allt du behöver för att börja söka jobb.',
+                      features: [
+                        'Skapa profil med CV och videopresentation',
+                        'Bläddra bland alla jobb',
+                        'Sökfilter på plats, roll och erfarenhet',
+                        'Visa intresse för upp till 3 jobb i veckan',
+                        'Spara upp till 3 jobb samtidigt',
+                        'Chatta med arbetsgivare',
+                      ],
+                      cta: 'Kom igång gratis',
+                      highlight: false,
+                    },
+                    {
+                      id: 'premium' as const,
+                      name: 'Premium',
+                      price: '29',
+                      priceSuffix: '/mån',
+                      tagline: 'För dig som menar allvar med jobbsökandet.',
+                      features: [
+                        'Skapa profil med CV och videopresentation',
+                        'Bläddra bland alla jobb',
+                        'Sökfilter på plats, roll och erfarenhet',
+                        'Visa intresse för hur många jobb du vill',
+                        'Spara obegränsat antal jobb',
+                        'Chatta med arbetsgivare',
+                        'Se vilka företag som tittat på din profil',
+                        'Direktkontakt till arbetsgivaren via mejl',
+                        'Statistik över profilvisningar senaste 30 dagarna',
+                      ],
+                      cta: 'Bli Premium',
+                      highlight: true,
+                    },
+                  ].map((plan, i) => {
+                    const isActive = selectedPlan === plan.id;
+                    return (
+                      <motion.div
+                        key={plan.name}
+                        initial={isMobileFeatureMotion ? false : { opacity: 0, y: 18, filter: 'blur(6px)' }}
+                        whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+                        viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: '100% 0px 100% 0px' }}
+                        transition={{ duration: 0.85, ease, delay: 0.1 + i * 0.08 }}
+                        onPointerDownCapture={() => setSelectedPlan(plan.id)}
+                        onFocusCapture={() => setSelectedPlan(plan.id)}
+                        onClick={() => setSelectedPlan(plan.id)}
+                        role="button"
+                        tabIndex={0}
+                        data-allow-focus-shadow="true"
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
+                        style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
+                        className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
+                          isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
+                        }`}
+                      >
+                        {plan.highlight && (
+                          <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+                            Populär
+                          </span>
+                        )}
+                        <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                        <p className="mt-2 text-4xl font-black text-white">
+                          {plan.price} kr<span className="text-sm font-medium text-white">{plan.priceSuffix}</span>
+                        </p>
+                        <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
+                        <PlanFeatures features={plan.features} isActive={isActive} />
+                        <button
+                          type="button"
+                          onPointerDown={(e) => { e.stopPropagation(); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/auth', { state: { mode: 'register', role: audience, plan: plan.id } });
+                          }}
+                          className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
+                            plan.highlight
+                              ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] hover:-translate-y-0.5'
+                              : 'bg-white/10 text-white border border-white/20 hover:bg-white/15 hover:border-white/30'
+                          }`}
+                        >
+                          {plan.cta}
+                        </button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <>
+                  {/* 3 månadspaket för arbetsgivare */}
+                  <div className="relative mt-8 grid gap-5 md:grid-cols-3">
+                    {[
+                      {
+                        id: 'start' as const,
+                        name: 'Start',
+                        price: '5 000',
+                        priceSuffix: '/mån',
+                        tagline: 'För dig som rekryterar regelbundet.',
+                        features: [
+                          '1 användare',
+                          'Upp till 40 aktiva annonser per månad',
+                          'Video-CV och strukturerade svar',
+                          'Kanban över kandidater',
+                          'Chatt direkt med kandidater',
+                          'Automatisk återkoppling till alla sökande',
+                        ],
+                        cta: 'Kom igång',
+                        highlight: false,
+                      },
+                      {
+                        id: 'growth' as const,
+                        name: 'Växa',
+                        price: '7 500',
+                        priceSuffix: '/mån',
+                        tagline: 'När teamet växer och volymen ökar.',
+                        features: [
+                          '2 användare',
+                          'Obegränsat antal annonser',
+                          'Allt i Start',
+                          'Samarbete i realtid mellan kollegor',
+                          'Delade kandidatlistor och kommentarer',
+                          'Prioriterad support',
+                        ],
+                        cta: 'Välj Växa',
+                        highlight: true,
+                      },
+                      {
+                        id: 'pro' as const,
+                        name: 'Pro',
+                        price: '10 000',
+                        priceSuffix: '/mån',
+                        tagline: 'För organisationer utan gränser.',
+                        features: [
+                          'Obegränsat antal användare',
+                          'Obegränsat antal annonser',
+                          'Allt i Växa',
+                          'Roller och behörigheter för hela teamet',
+                          'Dedikerad kontaktperson',
+                          'Onboarding och utbildning',
+                        ],
+                        cta: 'Välj Pro',
+                        highlight: false,
+                      },
+                    ].map((plan, i) => {
+                      const isActive = selectedPlan === plan.id;
+                      return (
+                        <motion.div
+                          key={plan.name}
+                          initial={isMobileFeatureMotion ? false : { opacity: 0, y: 18, filter: 'blur(6px)' }}
+                          whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+                          viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: '100% 0px 100% 0px' }}
+                          transition={{ duration: 0.85, ease, delay: 0.1 + i * 0.08 }}
+                          onPointerDownCapture={() => setSelectedPlan(plan.id)}
+                          onFocusCapture={() => setSelectedPlan(plan.id)}
+                          onClick={() => setSelectedPlan(plan.id)}
+                          role="button"
+                          tabIndex={0}
+                          data-allow-focus-shadow="true"
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
+                          style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
+                          className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
+                            isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
+                          }`}
+                        >
+                          {plan.highlight && (
+                            <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+                              Populär
+                            </span>
+                          )}
+                          <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                          <p className="mt-2 text-4xl font-black text-white">
+                            {plan.price} kr<span className="text-sm font-medium text-white">{plan.priceSuffix}</span>
+                          </p>
+                          <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
+                          <PlanFeatures features={plan.features} isActive={isActive} />
+                          <button
+                            type="button"
+                            onPointerDown={(e) => { e.stopPropagation(); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate('/auth', { state: { mode: 'register', role: audience, plan: plan.id } });
+                            }}
+                            className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
+                              plan.highlight
+                                ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] hover:-translate-y-0.5'
+                                : 'bg-white/10 text-white border border-white/20 hover:bg-white/15 hover:border-white/30'
+                            }`}
+                          >
+                            {plan.cta}
+                          </button>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
 
-                {[
-                  {
-                    id: 'start' as const,
-                    name: 'Start',
-                    price: '0',
-                    tagline: 'Allt du behöver för att börja söka jobb.',
-                    features: [
-                      'Skapa profil med CV och videopresentation',
-                      'Bläddra bland alla jobb',
-                      'Sökfilter på plats, roll och erfarenhet',
-                      'Visa intresse för upp till 3 jobb i veckan',
-                      'Spara upp till 3 jobb samtidigt',
-                      'Chatta med arbetsgivare',
-                    ],
-                  },
-                  {
-                    id: 'premium' as const,
-                    name: 'Premium',
-                    price: '29',
-                    tagline: 'För dig som menar allvar med jobbsökandet.',
-                    features: [
-                      'Skapa profil med CV och videopresentation',
-                      'Bläddra bland alla jobb',
-                      'Sökfilter på plats, roll och erfarenhet',
-                      'Visa intresse för hur många jobb du vill',
-                      'Spara obegränsat antal jobb',
-                      'Chatta med arbetsgivare',
-                      'Se vilka företag som tittat på din profil',
-                      'Direktkontakt till arbetsgivaren via mejl',
-
-                      'Statistik över profilvisningar senaste 30 dagarna',
-                    ],
-                  },
-                ].map((plan, i) => {
-                  const isActive = selectedPlan === plan.id;
-                  return (
-                  <motion.div
-                    key={plan.name}
-                    initial={isMobileFeatureMotion ? false : { opacity: 0, y: 18, filter: 'blur(6px)' }}
-                    whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
-                    viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
-                    transition={{ duration: 0.85, ease, delay: 0.1 + i * 0.08 }}
-                    onPointerDownCapture={() => setSelectedPlan(plan.id)}
-                    onFocusCapture={() => setSelectedPlan(plan.id)}
-                    onClick={() => setSelectedPlan(plan.id)}
-                    role="button"
-                    tabIndex={0}
-                    data-allow-focus-shadow="true"
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
-                    style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
-                    className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
-                      isActive
-                        ? 'border-secondary bg-white/5'
-                        : 'border border-white/15 bg-white/5 hover:border-secondary/25'
-                    }`}
+                  {/* Universell 14-dagars-rad */}
+                  <motion.p
+                    initial={isMobileFeatureMotion ? false : { opacity: 0, y: 12 }}
+                    whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0 }}
+                    viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.2 }}
+                    transition={{ duration: 0.6, ease, delay: 0.1 }}
+                    className="mt-6 text-center text-sm text-white/80"
                   >
-                    {plan.id === 'premium' && (
-                      <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-                        Populär
-                      </span>
-                    )}
+                    Alla annonser är aktiva i 14 dagar. Inga bindningstider — säg upp när ni vill.
+                  </motion.p>
 
-                    <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                    <p className="mt-2 text-4xl font-black text-white">
-                      {plan.price} kr<span className="text-sm font-medium text-white">/mån</span>
-                    </p>
-                    <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
-
-                    <PlanFeatures features={plan.features} isActive={isActive} />
-
-                    <button
-                      type="button"
-                      onPointerDown={(e) => { e.stopPropagation(); }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate('/auth', { state: { mode: 'register', role: audience, plan: plan.id } });
-                      }}
-                      className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
-                        plan.id === 'premium'
-                          ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] hover:-translate-y-0.5'
-                          : 'bg-white/10 text-white border border-white/20 hover:bg-white/15 hover:border-white/30'
-                      }`}
-                    >
-                      {plan.id === 'premium' ? 'Bli Premium' : 'Kom igång gratis'}
-                    </button>
-
-
+                  {/* Engångspaket — separat block */}
+                  <motion.div
+                    initial={isMobileFeatureMotion ? false : { opacity: 0, y: 24, filter: 'blur(6px)' }}
+                    whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.05, margin: '0px 0px -10% 0px' }}
+                    transition={{ duration: 0.85, ease, delay: 0.1 }}
+                    className="mt-14"
+                  >
+                    <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/5 p-8 backdrop-blur-xl md:flex md:items-center md:justify-between md:gap-8">
+                      <div>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-secondary/85">
+                          Behöver ni bara rekrytera en gång?
+                        </span>
+                        <h3 className="mt-3 text-2xl font-bold text-white">Enkelannons</h3>
+                        <p className="mt-3 max-w-md text-sm leading-7 text-white">
+                          Publicera en enskild annons som ligger uppe i 14 dagar. Perfekt när ni bara söker en person och inte behöver ett löpande abonnemang.
+                        </p>
+                        <p className="mt-4 text-3xl font-black text-white">
+                          799 kr<span className="ml-1 text-sm font-medium text-white">/annons</span>
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigate('/auth', { state: { mode: 'register', role: audience, plan: 'single' } })}
+                        className="mt-6 w-full rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/15 md:mt-0 md:w-auto md:min-w-[200px]"
+                      >
+                        Publicera en annons
+                      </button>
+                    </div>
                   </motion.div>
-                  );
-                })}
-              </div>
-
+                </>
+              )}
             </div>
           </section>
 
