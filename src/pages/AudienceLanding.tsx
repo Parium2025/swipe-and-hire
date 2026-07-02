@@ -1356,17 +1356,21 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
                     transition={{ duration: 0.75, ease, delay: 0.15 + idx * 0.06 }}
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '-48px' : '48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${(i - 1) * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
-                    className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-[border-color,background-color,box-shadow] duration-500 hover:border-white/30 hover:bg-white/[0.06] hover:shadow-[0_18px_44px_-28px_hsl(var(--secondary)/0.34)]"
+                    className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.055] to-white/[0.02] p-7 backdrop-blur-xl transition-[border-color,background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-[0_28px_60px_-30px_hsl(var(--secondary)/0.55)] sm:p-8"
                   >
-                    <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.12),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
-                        <Icon className="h-5 w-5" strokeWidth={2} />
+                    <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-secondary/60 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-100" />
+                    <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.18),transparent_65%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary/25 to-secondary/10 text-secondary ring-1 ring-inset ring-secondary/25 transition-transform duration-500 group-hover:scale-105">
+                        <Icon className="h-[22px] w-[22px]" strokeWidth={2} />
+                        <span className="pointer-events-none absolute inset-0 rounded-2xl bg-secondary/25 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
                       </div>
-                      <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-secondary/70">{i}</div>
+                      <div className="font-mono text-[11px] font-semibold tracking-[0.2em] text-white/40">
+                        0{i}
+                      </div>
                     </div>
-                    <h3 className="wave-text mt-4 text-lg font-bold">{feature.title}</h3>
-                    <p className="wave-text mt-2 text-sm leading-7 text-white">
+                    <h3 className="wave-text mt-6 text-xl font-bold tracking-tight text-white">{feature.title}</h3>
+                    <p className="wave-text mt-3 text-[15px] leading-7 text-white/85">
                       {feature.description}
                     </p>
                   </motion.div>
