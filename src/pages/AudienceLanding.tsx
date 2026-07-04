@@ -299,14 +299,25 @@ const useWaveAwareText = () => {
   }, []);
 };
 
-const isMobileAnimationPrearmed = () => false;
+const isMobileAnimationPrearmed = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)').matches;
+};
 
 const useIsMobileLandingMotion = () => {
-  // Option B: full desktop-paritet — animationer körs även på mobil.
-  // Vi lämnar hooken kvar (för callsites) men returnerar alltid false så att
-  // ingen fallback-gren till statiskt UI triggas på små skärmar.
-  return false;
+  const [isMobile, setIsMobile] = useState(isMobileAnimationPrearmed);
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)');
+    const sync = () => setIsMobile(query.matches);
+    sync();
+    query.addEventListener?.('change', sync);
+    return () => query.removeEventListener?.('change', sync);
+  }, []);
+
+  return isMobile;
 };
+
 
 
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
