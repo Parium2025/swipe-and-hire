@@ -1420,20 +1420,24 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {/* ──────────────── FUNKTIONER ──────────────── */}
           {isMobileFeatureMotion && (
             <style>{`
-              @keyframes landingFeatureMobileIn {
-                0% { opacity: 0; transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0); filter: blur(6px); }
-                100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
-              }
               [data-mobile-feature-prearm] .landing-feature-mobile-in {
                 opacity: 0;
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
                 filter: blur(6px);
                 transform-origin: center;
+                transition:
+                  opacity 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
+                  transform 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
+                  filter 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
+                  border-color 300ms ease,
+                  background-color 300ms ease,
+                  box-shadow 300ms ease;
               }
               [data-mobile-feature-prearm] .landing-feature-mobile-in.is-in-view,
               [data-mobile-feature-prearm] .landing-feature-mobile-in[data-lf-shown="true"] {
-                animation: landingFeatureMobileIn 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
-                animation-delay: var(--lf-delay, 0ms);
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+                filter: blur(0);
               }
               [data-mobile-feature-prearm] .landing-feature-card {
                 backdrop-filter: none;
