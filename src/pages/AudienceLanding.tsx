@@ -1849,6 +1849,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
+          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+
           {/* ──────────────── KONTAKT ──────────────── */}
           <section
             id="kontakt"
