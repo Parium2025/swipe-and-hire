@@ -1033,10 +1033,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   );
 
   const commonEmployerFeatures = [
-    'Skapa annons på minuter — guidat flöde med AI-hjälp för text och krav',
-    '14 dagars synlighet i kandidaternas jobbflöde',
-    'Kandidatpresentation med video, bild och egna ord — se personen bakom CV:t',
-    'Överblick över alla sökande — flytta kandidater mellan steg: ny, intressant, intervju, erbjudande',
+    'Skapa annons på minuter',
+    'Kandidatpresentation med bild, video och egna ord — där kandidaten själv väljer vad som visas',
+    'Överblick över alla sökande — flytta kandidater mellan steg: ny, intressant, intervju, erbjudande m.m.',
     'Chatt direkt med kandidater i plattformen',
     'Automatiska svar till alla sökande — ingen lämnas utan besked',
     'Fungerar lika bra i mobilen som på datorn',
