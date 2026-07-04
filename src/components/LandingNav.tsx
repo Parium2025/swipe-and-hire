@@ -291,15 +291,17 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
             {/* Logga in — alltid längst till höger */}
             <div className="shrink-0 ml-auto">
-            <Button
-              onClick={onLoginClick}
-              size="sm"
-              className={`h-11 rounded-full border px-7 text-[15px] font-medium transition-all duration-300 hover:border-secondary/30 hover:bg-secondary/[0.14] hover:text-white hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] ${
-                isLightSection ? 'border-primary/10 bg-background/80 text-primary' : 'border-secondary/20 bg-secondary/[0.10] text-secondary'
-              }`}
-            >
-              Logga in
-            </Button>
+              <Button
+                onClick={onLoginClick}
+                size="sm"
+                className={`group relative h-11 overflow-hidden rounded-full border px-7 text-[15px] font-medium text-white transition-all duration-300 hover:border-white/80 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] ${
+                  isLightSection ? 'border-primary/10 bg-background/80 text-primary' : 'border-white bg-white/[0.045]'
+                }`}
+              >
+                <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
+                <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-45 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
+                <span className="relative z-10">Logga in</span>
+              </Button>
             </div>
           </div>
         </div>
