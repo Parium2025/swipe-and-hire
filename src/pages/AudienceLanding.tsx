@@ -947,7 +947,7 @@ const SectionDivider = ({ className = '' }: { className?: string }) => (
 // `whileInView`. Telefonen (FixedPhoneLayer) hittar fortfarande hero via
 // data-hero-intro-stage och döljs när användaren scrollar förbi.
 // ─────────────────────────────────────────────────────────────────────────────
-const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
+const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   const mobileHeroMinHeight = useMobileHeroMinHeight();
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
@@ -1020,6 +1020,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         </section>
         )}
       </section>
+
+      {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
 
       {/* ─────────── INTRO ─────────── */}
       <section
@@ -1391,7 +1393,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
         <main>
-          <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
+          <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
           {audience === 'job_seeker' && (
             <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
