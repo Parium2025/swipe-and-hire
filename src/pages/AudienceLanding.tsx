@@ -1400,13 +1400,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           <SectionDivider className="my-2 md:my-4" />
 
           {audience === 'job_seeker' && (
-            <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
-              <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
-              <PinnedHorizontalGallery />
-            </section>
+            <>
+              <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
+                <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
+                <PinnedHorizontalGallery />
+              </section>
+
+              <SectionDivider className="my-2 md:my-4" />
+            </>
           )}
 
-          <SectionDivider className="my-2 md:my-4" />
 
           {/* ──────────────── FUNKTIONER ──────────────── */}
           {isMobileFeatureMotion && (
