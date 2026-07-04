@@ -1560,35 +1560,32 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           )}
 
           <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-visible px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 md:[@media_(orientation:portrait)]:pt-8 lg:px-24 lg:[@media_(orientation:portrait)]:pt-20">
-            <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
+            <div className="mx-auto max-w-[1180px]">
               <motion.span
-                initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
-                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
-                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2, margin: '0px 0px -8% 0px' }}
                 transition={{ duration: 0.7, ease }}
-                className="landing-feature-mobile-in block text-xs font-bold uppercase tracking-[0.32em] text-secondary/85 md:[@media_(orientation:portrait)]:text-sm md:[@media_(orientation:portrait)]:tracking-[0.36em]"
-                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-40px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '120ms' } : undefined}
+                className="block text-xs font-bold uppercase tracking-[0.32em] text-secondary/85 md:[@media_(orientation:portrait)]:text-sm md:[@media_(orientation:portrait)]:tracking-[0.36em]"
               >
                 Funktioner
               </motion.span>
               <motion.h2
                 id="funktioner-heading"
-                initial={isMobileFeatureMotion ? false : { opacity: 0, x: -60 }}
-                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
-                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-                transition={{ duration: 0.9, ease, delay: 0.05 }}
-                className="landing-h2 landing-feature-mobile-in wave-text mt-4 max-w-3xl md:[@media_(orientation:portrait)]:mt-6"
-                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '180ms' } : undefined}
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2, margin: '0px 0px -8% 0px' }}
+                transition={{ duration: 0.75, ease, delay: 0.08 }}
+                className="landing-h2 wave-text mt-4 max-w-3xl md:[@media_(orientation:portrait)]:mt-6"
               >
                 Allt du behöver för att {audience === 'job_seeker' ? 'hitta rätt jobb' : 'hitta rätt person'}.
               </motion.h2>
               <motion.p
-                initial={isMobileFeatureMotion ? false : { opacity: 0, x: 60 }}
-                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
-                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-                transition={{ duration: 0.9, ease, delay: 0.15 }}
-                className="landing-feature-mobile-in wave-text mt-6 max-w-2xl text-base leading-8 text-white sm:text-lg md:[@media_(orientation:portrait)]:mt-8 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
-                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '260ms' } : undefined}
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2, margin: '0px 0px -8% 0px' }}
+                transition={{ duration: 0.75, ease, delay: 0.16 }}
+                className="wave-text mt-6 max-w-2xl text-base leading-8 text-white sm:text-lg md:[@media_(orientation:portrait)]:mt-8 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
               >
                 {c.featuresIntro}
               </motion.p>
