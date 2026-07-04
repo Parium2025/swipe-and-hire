@@ -58,10 +58,39 @@ export function EmployerJourney() {
     const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     const items = Array.from(list.querySelectorAll<HTMLElement>('[data-journey-step]'));
     if (!items.length) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const reveal = (item: HTMLElement) => {
       if (item.dataset.journeyShown === 'true') return;
       item.dataset.journeyShown = 'true';
+      item.style.opacity = '1';
+      item.style.transform = 'none';
+      item.style.filter = 'none';
+      item.style.willChange = 'auto';
+
+      if (reduceMotion) return;
+
+      item.style.willChange = 'opacity, transform, filter';
+      const animation = item.animate(
+        [
+          { opacity: 0, transform: 'translate3d(0, 24px, 0)', filter: 'blur(6px)' },
+          { opacity: 1, transform: 'translate3d(0, 0, 0)', filter: 'blur(0px)' },
+        ],
+        {
+          duration: 720,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          fill: 'none',
+        },
+      );
+
+      animation.finished
+        .catch(() => undefined)
+        .finally(() => {
+          item.style.opacity = '1';
+          item.style.transform = 'none';
+          item.style.filter = 'none';
+          item.style.willChange = 'auto';
+        });
     };
 
     let frame = 0;
@@ -107,36 +136,6 @@ export function EmployerJourney() {
 
   return (
     <div className="relative mt-10 sm:mt-14">
-      <style>{`
-        @keyframes employerJourneyStepIn {
-          0% { opacity: 0; transform: translate3d(0, 24px, 0); filter: blur(6px); }
-          100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
-        }
-
-        .employer-journey-step {
-          opacity: 0;
-          transform: translate3d(0, 24px, 0);
-          filter: blur(6px);
-          will-change: opacity, transform, filter;
-        }
-
-        .employer-journey-step[data-journey-shown="true"] {
-          animation: employerJourneyStepIn 720ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          animation-delay: var(--journey-delay, 0ms);
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .employer-journey-step {
-            opacity: 1;
-            transform: none;
-            filter: none;
-            will-change: auto;
-          }
-          .employer-journey-step[data-journey-shown="true"] {
-            animation: none;
-          }
-        }
-      `}</style>
       {/* Vertikal tidslinje — synlig från md och uppåt */}
       <div
         aria-hidden
@@ -152,7 +151,6 @@ export function EmployerJourney() {
               key={step.title}
               data-journey-step
               className="employer-journey-step relative"
-              style={{ ['--journey-delay' as string]: `${idx * 70}ms` }}
             >
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
