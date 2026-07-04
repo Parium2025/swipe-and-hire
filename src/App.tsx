@@ -192,6 +192,7 @@ const AnimatedRoutes = () => {
           <Route path="/om-oss" element={<AboutPage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/valj-plan" element={<ValjPlan />}
           <Route path="/home" element={<Index />} />
           <Route path="/index" element={<Index />} />
           <Route path="/consent" element={<Index />} />
