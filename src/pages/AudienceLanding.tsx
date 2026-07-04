@@ -1776,6 +1776,22 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         q: 'Vilka företag finns här?',
                         a: 'Allt från lokala restauranger och butiker till växande techbolag och etablerade arbetsgivare runt om i Sverige. Vi lägger till nya företag löpande och prioriterar arbetsgivare som svarar snabbt och håller hög kvalitet på sina annonser.',
                       },
+                      {
+                        q: 'Vad händer när jag visat intresse för ett jobb?',
+                        a: 'Arbetsgivaren ser din profil, video och svar på deras frågor. Om de också är intresserade öppnas en chatt direkt i appen där ni kan prata vidare, ställa frågor och boka intervju — utan mejltrådar eller telefonjakt.',
+                      },
+                      {
+                        q: 'Måste jag ha CV och video?',
+                        a: 'Nej, men vi rekommenderar det starkt. En video på 30–60 sekunder gör att du sticker ut på ett sätt som ingen text kan matcha, och arbetsgivare svarar snabbare på profiler där de får en känsla för personen bakom orden.',
+                      },
+                      {
+                        q: 'Vem kan se min profil?',
+                        a: 'Bara arbetsgivare som du själv aktivt visat intresse för får se hela din profil. Din information ligger aldrig öppet — du bestämmer när, var och för vem den syns.',
+                      },
+                      {
+                        q: 'Hur ökar jag mina chanser att bli kontaktad?',
+                        a: 'Komplettera profilen med video, ett tydligt CV och skriv några rader om vad du söker. Håll önskemål kring roll, ort och tillgänglighet uppdaterade — då hamnar du högre i arbetsgivarens flöde och får fler relevanta träffar.',
+                      },
                     ]
                   : [
                       {
