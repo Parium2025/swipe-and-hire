@@ -1028,7 +1028,64 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigationType = useNavigationType();
   const c = audienceContent[audience];
   const isMobileFeatureMotion = useIsMobileLandingMotion();
-  const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium' | 'growth' | 'pro'>('premium');
+  const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium' | 'growth' | 'pro'>(
+    audience === 'employer' ? 'pro' : 'premium',
+  );
+
+  const employerPlans = [
+    {
+      id: 'start' as const,
+      name: 'Start',
+      price: '5 000',
+      priceSuffix: '/mån',
+      tagline: 'För dig som rekryterar regelbundet.',
+      features: [
+        '1 användare',
+        'Upp till 40 aktiva annonser per månad',
+        'Video-CV och strukturerade svar',
+        'Kanban över kandidater',
+        'Chatt direkt med kandidater',
+        'Automatisk återkoppling till alla sökande',
+      ],
+      cta: 'Välj Start',
+      highlight: false,
+    },
+    {
+      id: 'growth' as const,
+      name: 'Växa',
+      price: '7 500',
+      priceSuffix: '/mån',
+      tagline: 'När teamet växer och volymen ökar.',
+      features: [
+        '2 användare',
+        'Obegränsat antal annonser',
+        'Allt i Start',
+        'Samarbete i realtid mellan kollegor',
+        'Delade kandidatlistor och kommentarer',
+        'Prioriterad support',
+      ],
+      cta: 'Välj Växa',
+      highlight: false,
+    },
+    {
+      id: 'pro' as const,
+      name: 'Pro',
+      price: '10 000',
+      priceSuffix: '/mån',
+      tagline: 'För organisationer utan gränser.',
+      features: [
+        'Obegränsat antal användare',
+        'Obegränsat antal annonser',
+        'Allt i Växa',
+        'Roller och behörigheter för hela teamet',
+        'Dedikerad kontaktperson',
+        'Onboarding och utbildning',
+      ],
+      cta: 'Välj Pro',
+      highlight: true,
+    },
+  ];
+
 
   // Mjuk musscroll på Windows/desktop. Inaktiv på touch, trackpad, reduced-motion.
   useWheelSmoother(true);
@@ -1517,59 +1574,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 <>
                   {/* 3 månadspaket för arbetsgivare */}
                   <div className="relative mt-8 grid gap-5 md:grid-cols-3">
-                    {[
-                      {
-                        id: 'start' as const,
-                        name: 'Start',
-                        price: '5 000',
-                        priceSuffix: '/mån',
-                        tagline: 'För dig som rekryterar regelbundet.',
-                        features: [
-                          '1 användare',
-                          'Upp till 40 aktiva annonser per månad',
-                          'Video-CV och strukturerade svar',
-                          'Kanban över kandidater',
-                          'Chatt direkt med kandidater',
-                          'Automatisk återkoppling till alla sökande',
-                        ],
-                        cta: 'Kom igång',
-                        highlight: false,
-                      },
-                      {
-                        id: 'growth' as const,
-                        name: 'Växa',
-                        price: '7 500',
-                        priceSuffix: '/mån',
-                        tagline: 'När teamet växer och volymen ökar.',
-                        features: [
-                          '2 användare',
-                          'Obegränsat antal annonser',
-                          'Allt i Start',
-                          'Samarbete i realtid mellan kollegor',
-                          'Delade kandidatlistor och kommentarer',
-                          'Prioriterad support',
-                        ],
-                        cta: 'Välj Växa',
-                        highlight: true,
-                      },
-                      {
-                        id: 'pro' as const,
-                        name: 'Pro',
-                        price: '10 000',
-                        priceSuffix: '/mån',
-                        tagline: 'För organisationer utan gränser.',
-                        features: [
-                          'Obegränsat antal användare',
-                          'Obegränsat antal annonser',
-                          'Allt i Växa',
-                          'Roller och behörigheter för hela teamet',
-                          'Dedikerad kontaktperson',
-                          'Onboarding och utbildning',
-                        ],
-                        cta: 'Välj Pro',
-                        highlight: false,
-                      },
-                    ].map((plan, i) => {
+                    {employerPlans.map((plan, i) => {
                       const isActive = selectedPlan === plan.id;
                       return (
                         <motion.div
@@ -1586,40 +1591,32 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           data-allow-focus-shadow="true"
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                           style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
-                          className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
+                          className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-colors duration-300 ${
                             isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                           }`}
                         >
-                          {plan.highlight && (
-                            <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-                              Populär
-                            </span>
-                          )}
-                          <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                          <p className="mt-2 text-4xl font-black text-white">
-                            {plan.price} kr<span className="text-sm font-medium text-white">{plan.priceSuffix}</span>
-                          </p>
-                          <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
-                          <PlanFeatures features={plan.features} isActive={isActive} />
-                          <button
-                            type="button"
-                            onPointerDown={(e) => { e.stopPropagation(); }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate('/auth', { state: { mode: 'register', role: audience, plan: plan.id } });
-                            }}
-                            className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
-                              plan.highlight
-                                ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] hover:-translate-y-0.5'
-                                : 'bg-white/10 text-white border border-white/20 hover:bg-white/15 hover:border-white/30'
-                            }`}
+                          <motion.div
+                            animate={{ y: isActive ? -12 : 0 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+                            className={isActive ? 'drop-shadow-[0_24px_40px_rgba(0,0,0,0.25)]' : ''}
                           >
-                            {plan.cta}
-                          </button>
+                            {plan.highlight && (
+                              <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+                                Populär
+                              </span>
+                            )}
+                            <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                            <p className="mt-2 text-4xl font-black text-white">
+                              {plan.price} kr<span className="text-sm font-medium text-white">{plan.priceSuffix}</span>
+                            </p>
+                            <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
+                            <PlanFeatures features={plan.features} isActive={isActive} />
+                          </motion.div>
                         </motion.div>
                       );
                     })}
                   </div>
+
 
                   {/* Universell 14-dagars-rad */}
                   <motion.p
@@ -1631,6 +1628,27 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   >
                     Alla annonser är aktiva i 14 dagar. Inga bindningstider — säg upp när ni vill.
                   </motion.p>
+
+                  {/* Gemensam CTA som följer det valda paketet */}
+                  {(() => {
+                    const selectedEmployerPlan = employerPlans.find((p) => p.id === selectedPlan) ?? employerPlans[2];
+                    return (
+                      <motion.button
+                        type="button"
+                        initial={isMobileFeatureMotion ? false : { opacity: 0, y: 12 }}
+                        whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0 }}
+                        viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.2 }}
+                        transition={{ duration: 0.6, ease, delay: 0.2 }}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => navigate('/auth', { state: { mode: 'register', role: audience, plan: selectedPlan } })}
+                        className="mx-auto mt-8 flex w-full max-w-sm min-h-[56px] items-center justify-center rounded-2xl bg-secondary px-8 text-sm font-bold text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] transition-all duration-300 hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))]"
+                      >
+                        {selectedEmployerPlan.cta}
+                      </motion.button>
+                    );
+                  })()}
+
 
                   {/* Engångspaket — separat block */}
                   <motion.div
