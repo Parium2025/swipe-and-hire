@@ -2326,7 +2326,19 @@ const MobileJobWizard = ({
   };
 
   const handleSubmit = async () => {
-    if (!user || !validateCurrentStep() || loading) return;
+    if (!user || !validateCurrentStep() || loading || planLoading) return;
+
+    // 🔒 Plan-gate: kräv aktiv plan för att publicera. Utkastet är redan sparat.
+    if (!hasPlan) {
+      toast({
+        title: 'Välj plan för att publicera',
+        description: 'Ditt utkast är sparat. Vi tar dig till plan-valet.',
+      });
+      const draftId = existingJob?.id ? `&job_id=${existingJob.id}` : '';
+      navigate(`/valj-plan?from=publish${draftId}`);
+      return;
+    }
+
     await performPublish();
   };
   
