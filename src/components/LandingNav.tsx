@@ -197,24 +197,27 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                     <button
                       type="button"
                       aria-label="Öppna sektionsmeny"
-                      className={`inline-flex h-11 items-center gap-1.5 rounded-full border px-4 text-[15px] font-medium shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl transition-colors focus:outline-none focus-visible:ring-2 ${
+                      className={`group relative inline-flex h-11 items-center gap-1.5 overflow-hidden rounded-full border px-5 text-[15px] font-medium transition-all duration-300 hover:border-white/80 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] focus:outline-none focus-visible:ring-2 ${
                         isLightSection
-                          ? 'border-primary/10 bg-background/80 text-primary hover:bg-background focus-visible:ring-primary/20'
-                          : 'border-white/[0.08] bg-white/[0.04] text-white hover:bg-white/[0.08] active:bg-white/[0.10] focus-visible:ring-white/30'
+                          ? 'border-primary/10 bg-background/80 text-primary focus-visible:ring-primary/20'
+                          : 'border-white bg-white/[0.045] text-white focus-visible:ring-white/30'
                       }`}
                     >
-                      <span className="whitespace-nowrap">
+                      <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
+                      <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-65 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
+                      <span className="relative z-10 whitespace-nowrap">
                         Meny
                       </span>
                       <svg
                         width="12" height="12" viewBox="0 0 12 12" fill="none"
-                        className={`shrink-0 transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`}
+                        className={`relative z-10 shrink-0 transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`}
                         aria-hidden="true"
                       >
                         <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </button>
                   </DropdownMenuTrigger>
+
                   <DropdownMenuContent align="center" sideOffset={8} className="min-w-[200px]">
                     {links.map((l) => {
                       const id = l.href.replace('#', '');
