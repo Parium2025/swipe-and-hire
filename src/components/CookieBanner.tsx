@@ -380,7 +380,7 @@ function Category({
               </span>
             ) : null}
           </div>
-          <p className="mt-1 text-[13px] leading-5 text-white/85">{description}</p>
+          <p className="mt-1 text-[13px] leading-5 text-white">{description}</p>
         </div>
 
         <Toggle checked={checked} disabled={disabled} onChange={onChange} label={title} />
@@ -408,13 +408,14 @@ function Toggle({
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange?.(!checked)}
-      className={`relative mt-1 h-6 w-11 shrink-0 rounded-full transition ${
-        checked ? 'bg-secondary' : 'bg-white/15'
+      className={`relative mt-1 inline-flex h-[31px] w-[51px] shrink-0 items-center rounded-full p-[2px] transition-colors duration-200 ease-out ${
+        checked ? 'bg-secondary' : 'bg-white/20'
       } ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
     >
+      {/* iPhone-style knob — helt innanför ramen, 2px inset på alla sidor */}
       <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-          checked ? 'translate-x-[22px]' : 'translate-x-0.5'
+        className={`pointer-events-none block h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.35)] transition-transform duration-200 ease-out ${
+          checked ? 'translate-x-[20px]' : 'translate-x-0'
         }`}
       />
     </button>
