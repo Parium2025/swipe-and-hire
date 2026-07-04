@@ -51,6 +51,47 @@ const steps: JourneyStep[] = [
 ];
 
 export function EmployerJourney() {
+  const listRef = useRef<HTMLOListElement | null>(null);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+
+    const items = Array.from(
+      list.querySelectorAll<HTMLLIElement>('[data-journey-step]'),
+    );
+    if (items.length === 0) return;
+
+    const prefersReduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+
+    if (prefersReduced) {
+      items.forEach((el) => el.setAttribute('data-journey-shown', 'true'));
+      return;
+    }
+
+    // Set initial hidden state only now (post-mount) so SSR/no-JS stays visible.
+    items.forEach((el) => el.setAttribute('data-journey-shown', 'false'));
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLLIElement;
+          // One-way reveal — never hide again.
+          el.setAttribute('data-journey-shown', 'true');
+          observer.unobserve(el);
+        });
+      },
+      { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.15 },
+    );
+
+    items.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="relative mt-10 sm:mt-14">
       {/* Vertikal tidslinje — synlig från md och uppåt */}
@@ -59,15 +100,18 @@ export function EmployerJourney() {
         className="pointer-events-none absolute left-[27px] top-2 hidden h-[calc(100%-16px)] w-px bg-gradient-to-b from-secondary/60 via-secondary/25 to-transparent md:block"
       />
 
-      <ol className="space-y-6 md:space-y-8">
+      <ol ref={listRef} className="space-y-6 md:space-y-8">
         {steps.map((step, idx) => {
           const Icon = step.icon;
           const number = String(idx + 1);
           return (
             <li
               key={step.title}
-              className="relative"
+              data-journey-step
+              style={{ transitionDelay: `${Math.min(idx, 5) * 90}ms` }}
+              className="employer-journey-step relative"
             >
+
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
                 <div className="relative flex md:justify-center">
