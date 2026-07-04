@@ -1582,7 +1582,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           {plan.price} kr<span className="text-sm font-medium text-white">{plan.priceSuffix}</span>
                         </p>
                         <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
-                        <PlanFeatures features={plan.features} isActive={isActive} />
+                        <PlanFeatures
+                          features={plan.features}
+                          isActive={isActive}
+                          open={seekerFeaturesOpen}
+                          onToggle={() => setSeekerFeaturesOpen((v) => !v)}
+                        />
                         <button
                           type="button"
                           onPointerDown={(e) => { e.stopPropagation(); }}
