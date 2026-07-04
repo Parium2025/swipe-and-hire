@@ -146,6 +146,25 @@ export function CookieBanner() {
         <div className="relative w-full max-w-[560px] overflow-hidden rounded-3xl border border-white/12 bg-[#0b1220]/98 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-secondary/70 to-transparent" />
 
+          {/* Stäng-knapp — tolkas som "endast nödvändiga" om inget val gjorts,
+              annars behåller den redan sparat val och stänger bara modalen. */}
+          <button
+            type="button"
+            onClick={() => {
+              const existing = getCookieConsent();
+              if (existing) {
+                setVisible(false);
+              } else {
+                persist(false, false, false);
+              }
+            }}
+            aria-label="Stäng"
+            className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full text-white transition hover:bg-white/10"
+          >
+            <X className="h-4 w-4" />
+          </button>
+
+
           {mode === 'summary' ? (
             <SummaryView
               onAcceptAll={() => persist(true, true, true)}
