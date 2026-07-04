@@ -299,24 +299,15 @@ const useWaveAwareText = () => {
   }, []);
 };
 
-const isMobileAnimationPrearmed = () => {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)').matches;
-};
+const isMobileAnimationPrearmed = () => false;
 
 const useIsMobileLandingMotion = () => {
-  const [isMobile, setIsMobile] = useState(isMobileAnimationPrearmed);
-
-  useEffect(() => {
-    const query = window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)');
-    const sync = () => setIsMobile(query.matches);
-    sync();
-    query.addEventListener?.('change', sync);
-    return () => query.removeEventListener?.('change', sync);
-  }, []);
-
-  return isMobile;
+  // Option B: full desktop-paritet — animationer körs även på mobil.
+  // Vi lämnar hooken kvar (för callsites) men returnerar alltid false så att
+  // ingen fallback-gren till statiskt UI triggas på små skärmar.
+  return false;
 };
+
 
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
   <div className="max-w-3xl text-center text-base leading-[1.6] sm:text-lg sm:leading-[1.75] md:text-xl md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]">

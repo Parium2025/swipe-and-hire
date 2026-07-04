@@ -30,17 +30,13 @@ const SplitHeadline = ({
   delay = 0.05,
 }: Props) => {
   const reduce = useReducedMotion();
-  const [isTouch, setIsTouch] = useState(false);
-  const words = text.split(/\s+/).filter(Boolean);
-  const lastIdx = words.length - 1;
+  // Option B: full desktop-paritet — kör samma blur/stagger även på touch.
+  const [isTouch] = useState(false);
 
   useEffect(() => {
-    const query = window.matchMedia('(pointer: coarse), (max-width: 767px)');
-    const sync = () => setIsTouch(query.matches);
-    sync();
-    query.addEventListener?.('change', sync);
-    return () => query.removeEventListener?.('change', sync);
+    // Intentionally no-op — behållet för framtida per-enhet-tuning.
   }, []);
+
 
   const useSimpleMotion = reduce || isTouch;
 
