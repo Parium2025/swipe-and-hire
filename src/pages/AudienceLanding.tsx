@@ -1591,20 +1591,20 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           data-allow-focus-shadow="true"
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                           style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
-                          className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-colors duration-300 ${
-                            isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
+                          className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-secondary/40 ${
+                            isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5'
                           }`}
                         >
+                          {plan.highlight && (
+                            <span className="absolute right-6 top-6 z-10 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+                              Populär
+                            </span>
+                          )}
                           <motion.div
                             animate={{ y: isActive ? -12 : 0 }}
                             transition={{ type: 'spring', stiffness: 300, damping: 22 }}
                             className={isActive ? 'drop-shadow-[0_24px_40px_rgba(0,0,0,0.25)]' : ''}
                           >
-                            {plan.highlight && (
-                              <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-                                Populär
-                              </span>
-                            )}
                             <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                             <p className="mt-2 text-4xl font-black text-white">
                               {plan.price} kr<span className="text-sm font-medium text-white">{plan.priceSuffix}</span>
@@ -1624,7 +1624,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0 }}
                     viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.2 }}
                     transition={{ duration: 0.6, ease, delay: 0.1 }}
-                    className="mt-6 text-center text-sm text-white/80"
+                    className="mt-6 text-center text-sm text-white"
                   >
                     Alla annonser är aktiva i 14 dagar. Inga bindningstider — säg upp när ni vill.
                   </motion.p>
