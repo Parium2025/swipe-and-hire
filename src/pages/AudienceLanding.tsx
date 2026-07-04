@@ -1397,6 +1397,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <main>
           <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
+          <SectionDivider className="my-2 md:my-4" />
+
           {audience === 'job_seeker' && (
             <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
               <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
