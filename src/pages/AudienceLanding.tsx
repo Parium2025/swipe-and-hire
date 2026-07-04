@@ -1497,7 +1497,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="landing-h2 landing-feature-mobile-in mt-4 max-w-2xl text-white"
                 style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '180ms' } : undefined}
               >
-                {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
+                {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Byggt för att växa med er.'}
               </motion.h2>
               <motion.p
                 initial={isMobileFeatureMotion ? false : { opacity: 0, x: 60 }}
@@ -1509,7 +1509,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               >
                 {audience === 'job_seeker'
                   ? 'Kom igång helt gratis. Uppgradera till Premium när du vill ta nästa steg — säg upp när du vill.'
-                  : 'Välj det paket som passar er volym. Alla annonser är aktiva i 14 dagar och det är inga bindningstider.'}
+                  : 'Välj det paket som passar er idag. Uppgradera när behoven förändras — resten sköter vi.'}
               </motion.p>
               {audience === 'job_seeker' ? (
                 <div className="relative mt-8 grid gap-5 md:grid-cols-2">
