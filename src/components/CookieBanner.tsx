@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Cookie, ShieldCheck, BarChart3, Megaphone, Settings2, ArrowLeft } from 'lucide-react';
+import { Cookie, ShieldCheck, BarChart3, Megaphone, Settings2, ArrowLeft, X } from 'lucide-react';
 
 const STORAGE_KEY = 'parium-cookie-consent';
 const CONSENT_VERSION = 1; // Höj om policyn ändras — då triggas ny fråga
@@ -57,7 +57,11 @@ export function CookieBanner() {
   const [preferences, setPreferences] = useState(false);
 
   // Initial visning: om inget val gjorts, visa banner.
+  // Undantag: på /integritetspolicy vill vi INTE auto-öppna — användaren
+  // ska kunna läsa policyn i lugn och ro innan de tar ställning.
   useEffect(() => {
+    const path = typeof window !== 'undefined' ? window.location.pathname : '';
+    if (path === '/integritetspolicy') return;
     const id = window.setTimeout(() => {
       if (getCookieConsent() === null) setVisible(true);
     }, 400);
