@@ -229,7 +229,7 @@ const SiteFooter = () => {
           <button
             type="button"
             onClick={openCookieSettings}
-            className="text-white/70 underline-offset-4 transition hover:text-white hover:underline"
+            className="text-white underline-offset-4 transition hover:text-secondary hover:underline"
           >
             Cookie-inställningar
           </button>

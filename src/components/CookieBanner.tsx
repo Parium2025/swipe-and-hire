@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Cookie, ShieldCheck, BarChart3, Megaphone, Settings2, ArrowLeft } from 'lucide-react';
+import { Cookie, ShieldCheck, BarChart3, Megaphone, Settings2, ArrowLeft, X } from 'lucide-react';
 
 const STORAGE_KEY = 'parium-cookie-consent';
 const CONSENT_VERSION = 1; // Höj om policyn ändras — då triggas ny fråga
@@ -57,7 +57,11 @@ export function CookieBanner() {
   const [preferences, setPreferences] = useState(false);
 
   // Initial visning: om inget val gjorts, visa banner.
+  // Undantag: på /integritetspolicy vill vi INTE auto-öppna — användaren
+  // ska kunna läsa policyn i lugn och ro innan de tar ställning.
   useEffect(() => {
+    const path = typeof window !== 'undefined' ? window.location.pathname : '';
+    if (path === '/integritetspolicy') return;
     const id = window.setTimeout(() => {
       if (getCookieConsent() === null) setVisible(true);
     }, 400);
@@ -141,6 +145,25 @@ export function CookieBanner() {
       >
         <div className="relative w-full max-w-[560px] overflow-hidden rounded-3xl border border-white/12 bg-[#0b1220]/98 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-secondary/70 to-transparent" />
+
+          {/* Stäng-knapp — tolkas som "endast nödvändiga" om inget val gjorts,
+              annars behåller den redan sparat val och stänger bara modalen. */}
+          <button
+            type="button"
+            onClick={() => {
+              const existing = getCookieConsent();
+              if (existing) {
+                setVisible(false);
+              } else {
+                persist(false, false, false);
+              }
+            }}
+            aria-label="Stäng"
+            className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full text-white transition hover:bg-white/10"
+          >
+            <X className="h-4 w-4" />
+          </button>
+
 
           {mode === 'summary' ? (
             <SummaryView
@@ -357,7 +380,7 @@ function Category({
               </span>
             ) : null}
           </div>
-          <p className="mt-1 text-[13px] leading-5 text-white/85">{description}</p>
+          <p className="mt-1 text-[13px] leading-5 text-white">{description}</p>
         </div>
 
         <Toggle checked={checked} disabled={disabled} onChange={onChange} label={title} />
@@ -385,13 +408,14 @@ function Toggle({
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange?.(!checked)}
-      className={`relative mt-1 h-6 w-11 shrink-0 rounded-full transition ${
-        checked ? 'bg-secondary' : 'bg-white/15'
+      className={`relative mt-1 inline-flex h-[31px] w-[51px] shrink-0 items-center rounded-full p-[2px] transition-colors duration-200 ease-out ${
+        checked ? 'bg-secondary' : 'bg-white/20'
       } ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
     >
+      {/* iPhone-style knob — helt innanför ramen, 2px inset på alla sidor */}
       <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-          checked ? 'translate-x-[22px]' : 'translate-x-0.5'
+        className={`pointer-events-none block h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.35)] transition-transform duration-200 ease-out ${
+          checked ? 'translate-x-[20px]' : 'translate-x-0'
         }`}
       />
     </button>
