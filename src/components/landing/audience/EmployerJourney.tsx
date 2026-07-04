@@ -50,8 +50,9 @@ const steps: JourneyStep[] = [
   },
 ];
 
-export function EmployerJourney() {
+export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } = {}) {
   const listRef = useRef<HTMLOListElement | null>(null);
+  const activeSteps = stepsProp ?? steps;
 
   useEffect(() => {
     const list = listRef.current;
@@ -101,7 +102,7 @@ export function EmployerJourney() {
       />
 
       <ol ref={listRef} className="space-y-6 md:space-y-8">
-        {steps.map((step, idx) => {
+        {activeSteps.map((step, idx) => {
           const Icon = step.icon;
           const number = String(idx + 1);
           return (

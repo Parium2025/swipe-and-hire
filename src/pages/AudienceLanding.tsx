@@ -1397,6 +1397,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <main>
           <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
+          <SectionDivider className="my-2 md:my-4" />
+
           {audience === 'job_seeker' && (
             <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
               <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
@@ -1465,45 +1467,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               {audience === 'employer' ? (
                 <EmployerJourney />
               ) : (
-              <motion.div
-                initial={false}
-                className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-              >
-                {c.features.map((feature, idx) => {
-                  const i = idx + 1;
-                  const Icon = feature.icon;
-                  const cardInitial = isMobileFeatureMotion
-                    ? false
-                    : { opacity: 1, y: 18 };
-                  return (
-                  <motion.div
-                    key={feature.title}
-                    initial={cardInitial}
-                    whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0 }}
-                    viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
-                    transition={{ duration: 0.75, ease, delay: 0.15 + idx * 0.06 }}
-                    style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '-48px' : '48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${(i - 1) * 90}ms`, willChange: 'auto' } : { willChange: 'transform' }}
-                    className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.055] to-white/[0.02] p-7 backdrop-blur-xl transition-[border-color,background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-[0_28px_60px_-30px_hsl(var(--secondary)/0.55)] sm:p-8"
-                  >
-                    <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-secondary/60 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-100" />
-                    <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.18),transparent_65%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary/25 to-secondary/10 text-secondary ring-1 ring-inset ring-secondary/25 transition-transform duration-500 group-hover:scale-105">
-                        <Icon className="h-[22px] w-[22px]" strokeWidth={2} />
-                        <span className="pointer-events-none absolute inset-0 rounded-2xl bg-secondary/25 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
-                      </div>
-                      <div className="font-mono text-[11px] font-semibold tracking-[0.2em] text-white/40">
-                        0{i}
-                      </div>
-                    </div>
-                    <h3 className="wave-text mt-6 text-xl font-bold tracking-tight text-white">{feature.title}</h3>
-                    <p className="wave-text mt-3 text-[15px] leading-7 text-white/85">
-                      {feature.description}
-                    </p>
-                  </motion.div>
-                  );
-                })}
-              </motion.div>
+                <EmployerJourney
+                  steps={c.features.map((f) => ({
+                    title: f.title,
+                    body: f.description,
+                    icon: f.icon,
+                  }))}
+                />
               )}
 
             </div>
