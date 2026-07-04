@@ -135,7 +135,7 @@ export function CookieBanner() {
     <>
       <div
         aria-hidden="true"
-        className="fixed inset-0 animate-fade-in bg-black/50"
+        className="fixed inset-0 animate-fade-in bg-black/60 backdrop-blur-[3px]"
         style={{ zIndex: 2147483646 }}
         onClick={() => persist(false, false, false)}
       />
@@ -145,10 +145,15 @@ export function CookieBanner() {
         aria-modal="true"
         aria-labelledby="cookie-title"
         aria-describedby="cookie-desc"
-        className="pointer-events-none fixed inset-x-0 bottom-0 flex items-end justify-center px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] animate-fade-in sm:inset-0 sm:items-center sm:px-4 sm:py-4"
-        style={{ zIndex: 2147483647 }}
+        className="pointer-events-none fixed inset-0 flex items-center justify-center px-4 py-4 animate-fade-in"
+        style={{
+          zIndex: 2147483647,
+          paddingTop: 'calc(env(safe-area-inset-top,0px) + 1rem)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom,0px) + 1rem)',
+        }}
       >
-        <div className="pointer-events-auto relative flex max-h-[calc(100svh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-1.5rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-3xl bg-[#0b1220] shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] sm:max-h-[calc(100svh-2rem)]">
+        <div className="pointer-events-auto relative flex max-h-[calc(100svh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0b1220]/95 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
+
 
           {/* Stäng-knapp — tolkas som "endast nödvändiga" om inget val gjorts,
               annars behåller den redan sparat val och stänger bara modalen. */}

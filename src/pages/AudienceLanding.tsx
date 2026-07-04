@@ -1159,36 +1159,67 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // från sidorna upplevs i takt med scrollen.
   useEffect(() => {
     if (!isMobileFeatureMotion) return;
-    const scrollRoot = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-    const roots = Array.from(document.querySelectorAll('[data-mobile-feature-prearm]'));
-    if (!roots.length) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.setAttribute('data-lf-shown', 'true');
-            entry.target.classList.add('is-in-view');
-            io.unobserve(entry.target);
-          }
+
+    let io: IntersectionObserver | null = null;
+    let cancelled = false;
+
+    const start = () => {
+      if (cancelled) return;
+      const scrollRoot = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+      const roots = Array.from(document.querySelectorAll('[data-mobile-feature-prearm]'));
+      if (!roots.length) return;
+      io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.setAttribute('data-lf-shown', 'true');
+              entry.target.classList.add('is-in-view');
+              io?.unobserve(entry.target);
+            }
+          });
+        },
+        { root: scrollRoot, rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
+      );
+      roots.forEach((root) => {
+        const headers = root.querySelectorAll(':scope > .landing-feature-mobile-in');
+        headers.forEach((el) => {
+          el.setAttribute('data-lf-shown', 'true');
+          el.classList.add('is-in-view');
         });
-      },
-      { root: scrollRoot, rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
-    );
-    roots.forEach((root) => {
-      const headers = root.querySelectorAll(':scope > .landing-feature-mobile-in');
-      headers.forEach((el) => {
-        el.setAttribute('data-lf-shown', 'true');
-        el.classList.add('is-in-view');
+        const cards = root.querySelectorAll('.landing-feature-card.landing-feature-mobile-in');
+        cards.forEach((el) => {
+          el.classList.remove('is-in-view');
+          el.setAttribute('data-lf-shown', 'false');
+          io!.observe(el);
+        });
       });
-      const cards = root.querySelectorAll('.landing-feature-card.landing-feature-mobile-in');
-      cards.forEach((el) => {
-        el.classList.remove('is-in-view');
-        el.setAttribute('data-lf-shown', 'false');
-        io.observe(el);
-      });
-    });
-    return () => io.disconnect();
+    };
+
+    // Vänta tills cookie-bannern är stängd innan vi observerar korten —
+    // annars körs slide-in-animationen bakom bannerns blur och användaren
+    // ser aldrig entrén när de sen börjar scrolla.
+    const isBannerOpen = () => document.documentElement.dataset.cookieBannerOpen === 'true';
+    if (!isBannerOpen()) {
+      start();
+    } else {
+      const onConsent = () => {
+        window.removeEventListener('parium:cookie-consent-updated', onConsent);
+        // Vänta en tick så body-scroll unlockas innan vi mäter viewport
+        window.setTimeout(start, 50);
+      };
+      window.addEventListener('parium:cookie-consent-updated', onConsent);
+      return () => {
+        cancelled = true;
+        window.removeEventListener('parium:cookie-consent-updated', onConsent);
+        io?.disconnect();
+      };
+    }
+    return () => {
+      cancelled = true;
+      io?.disconnect();
+    };
   }, [isMobileFeatureMotion, audience]);
+
 
   useWaveAwareText();
 
