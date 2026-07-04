@@ -48,7 +48,7 @@ function BadgeButton({
   return (
     <div
       aria-disabled="true"
-      className="group relative flex min-h-[60px] items-center gap-3 rounded-2xl border border-white/12 bg-white/[0.04] px-5 py-3 backdrop-blur-xl transition-[transform,border-color,box-shadow] duration-500 hover:-translate-y-0.5 hover:border-secondary/35 hover:shadow-[0_20px_50px_-24px_hsl(var(--secondary)/0.55)]"
+      className="group relative flex min-h-[60px] items-center gap-3 rounded-2xl border border-white/12 bg-white/[0.04] px-5 py-3 transition-[transform,border-color,box-shadow] duration-500 hover:-translate-y-0.5 hover:border-secondary/35 hover:shadow-[0_20px_50px_-24px_hsl(var(--secondary)/0.55)] [@media_(hover:hover)]:backdrop-blur-xl"
     >
       <span className="text-white/90">{icon}</span>
       <span className="flex flex-col leading-none">

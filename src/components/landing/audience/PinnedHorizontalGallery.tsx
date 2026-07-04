@@ -606,7 +606,7 @@ const PinnedHorizontalGallery = () => {
           100% { transform: scale(1.04) translate3d(0,0,0); }
         }
         .phg-card img { animation: phg-kenburns 24s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) {
+        @media (prefers-reduced-motion: reduce), (pointer: coarse) {
           .phg-card img { animation: none; }
         }
         .phg-card::after {
