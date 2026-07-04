@@ -291,15 +291,15 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
             {/* Logga in — alltid längst till höger */}
             <div className="shrink-0 ml-auto">
-              <Button
-                onClick={onLoginClick}
-                size="sm"
-                className={`h-11 rounded-full border px-7 text-[15px] font-medium transition-all duration-300 hover:border-secondary/45 hover:bg-secondary/20 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] ${
-                  isLightSection ? 'border-primary/10 bg-background/80 text-primary' : 'border-white/[0.08] bg-white/[0.04] text-white'
-                }`}
-              >
-                Logga in
-              </Button>
+            <Button
+              onClick={onLoginClick}
+              size="sm"
+              className={`h-11 rounded-full border px-7 text-[15px] font-medium transition-all duration-300 hover:border-white/80 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(255,255,255,0.18)] ${
+                isLightSection ? 'border-primary/10 bg-background/80 text-primary' : 'border-white bg-white/[0.04] text-white'
+              }`}
+            >
+              Logga in
+            </Button>
             </div>
           </div>
         </div>
