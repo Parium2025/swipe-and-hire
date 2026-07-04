@@ -1596,8 +1596,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           }`}
                         >
                           <motion.div
-                            animate={{ y: isActive ? -12 : 0, scale: isActive ? 1.03 : 1 }}
+                            animate={{ y: isActive ? -12 : 0 }}
                             transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+                            className={isActive ? 'drop-shadow-[0_24px_40px_rgba(0,0,0,0.25)]' : ''}
                           >
                             {plan.highlight && (
                               <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
