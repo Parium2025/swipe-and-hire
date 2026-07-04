@@ -22,7 +22,7 @@ const footerContainerVariants: Variants = {
 };
 
 
-type ColLink = { label: string; to: string };
+type ColLink = { label: string; to: string; action?: 'cookies' };
 
 const cityLinks: ColLink[] = [
   { label: 'Stockholm', to: '/jobb/stockholm' },
@@ -57,6 +57,7 @@ const companyLinks: ColLink[] = [
   { label: 'Om oss', to: '/om-oss' },
   { label: 'Lediga jobb', to: '/jobb' },
   { label: 'Integritetspolicy', to: '/integritetspolicy' },
+  { label: 'Cookie-inställningar', to: '#cookies', action: 'cookies' },
 ];
 
 
@@ -77,6 +78,18 @@ function FooterLink({ link }: { link: ColLink }) {
   const warmTarget = () => {
     if (link.to === '/om-oss') void preloadAboutPageAssets('low');
   };
+
+  if (link.action === 'cookies') {
+    return (
+      <button
+        type="button"
+        onClick={openCookieSettings}
+        className="inline-flex min-h-11 items-center whitespace-nowrap text-[15px] font-medium leading-none text-white transition-colors hover:text-secondary"
+      >
+        {link.label}
+      </button>
+    );
+  }
 
   return (
     <Link
@@ -224,15 +237,8 @@ const SiteFooter = () => {
         </motion.div>
 
         {/* Bottom bar */}
-        <div className="mt-14 flex flex-col items-center gap-3 border-t border-white/10 pt-6 text-center text-[13px] font-medium text-white sm:flex-row sm:justify-between sm:text-left">
+        <div className="mt-14 flex items-center justify-center border-t border-white/10 pt-6 text-center text-[13px] font-medium text-white">
           <p>© {new Date().getFullYear()} Parium AB. Alla rättigheter förbehållna.</p>
-          <button
-            type="button"
-            onClick={openCookieSettings}
-            className="text-white underline-offset-4 transition hover:text-secondary hover:underline"
-          >
-            Cookie-inställningar
-          </button>
         </div>
       </div>
     </footer>
