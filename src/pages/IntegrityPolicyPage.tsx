@@ -450,15 +450,6 @@ export default function IntegrityPolicyPage() {
               </p>
             </Section>
           </div>
-
-          <div className="mt-16 border-t border-white/10 pt-8 text-center">
-            <Link
-              to="/"
-              className="text-sm font-semibold text-white/70 underline-offset-4 hover:text-white hover:underline"
-            >
-              ← Tillbaka till startsidan
-            </Link>
-          </div>
         </main>
 
         <SiteFooter />
