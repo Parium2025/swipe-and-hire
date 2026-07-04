@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import {
   PenLine,
   Users,
@@ -8,8 +7,6 @@ import {
   Mail,
   type LucideIcon,
 } from 'lucide-react';
-
-const ease = [0.16, 1, 0.3, 1] as const;
 
 type JourneyStep = {
   title: string;
@@ -64,14 +61,9 @@ export function EmployerJourney() {
           const Icon = step.icon;
           const number = String(idx + 1);
           return (
-            <motion.li
+            <li
               key={step.title}
-              initial={{ opacity: 1, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25, margin: '0px 0px -80px 0px' }}
-              transition={{ duration: 0.7, ease, delay: idx * 0.05 }}
               className="relative"
-              style={{ willChange: 'transform' }}
             >
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
@@ -102,7 +94,7 @@ export function EmployerJourney() {
                   </p>
                 </article>
               </div>
-            </motion.li>
+            </li>
           );
         })}
       </ol>
