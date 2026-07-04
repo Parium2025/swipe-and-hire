@@ -247,7 +247,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                 <div
                   ref={pillScrollerRef}
                     className={`flex max-w-full items-center gap-1 overflow-x-auto rounded-full border px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
-                      isLightSection ? 'border-primary/10 bg-background/80' : 'border-white/[0.06] bg-white/[0.03]'
+                      isLightSection ? 'border-primary/10 bg-background/80' : 'border-white bg-white/[0.045]'
                     }`}
                   style={{ WebkitOverflowScrolling: 'touch' }}
                 >
@@ -269,18 +269,26 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                         className={`relative whitespace-nowrap rounded-full px-3 py-1.5 md:px-2.5 md:py-2 lg:px-4 text-[12px] lg:text-[13px] font-medium transition-colors ${
                           isLightSection
                             ? isActive ? 'text-primary' : 'text-primary/60 hover:text-primary'
-                            : isActive ? 'text-white' : 'text-white/65 hover:text-white'
+                            : isActive ? 'text-white' : 'text-white/70 hover:text-white'
                         }`}
                       >
                         {isActive && (
                           <motion.span
                             layoutId="nav-bubble"
-                            className={`absolute inset-0 -z-0 rounded-full border shadow-[0_4px_20px_rgba(0,0,0,0.25)] ${
+                            className={`absolute inset-0 -z-0 overflow-hidden rounded-full border shadow-[0_4px_20px_rgba(0,0,0,0.25)] ${
                               isLightSection ? 'border-primary/10 bg-primary/[0.06]' : 'border-white bg-white/[0.045]'
                             }`}
                             transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
-                          />
+                          >
+                            {!isLightSection && (
+                              <>
+                                <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-100 blur-2xl" />
+                                <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-65" />
+                              </>
+                            )}
+                          </motion.span>
                         )}
+
 
                         <span className="relative z-10">{l.label}</span>
                       </a>
