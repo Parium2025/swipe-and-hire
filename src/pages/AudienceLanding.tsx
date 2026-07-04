@@ -957,8 +957,9 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
     <>
       {/* ─────────── HERO ─────────── */}
       <section
+        id="start"
         data-hero-intro-stage
-        className={`relative min-h-[100svh] w-full ${isMobileLikeHeroLayout ? 'overflow-visible' : 'overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden'}`}
+        className={`relative min-h-[100svh] w-full scroll-mt-24 ${isMobileLikeHeroLayout ? 'overflow-visible' : 'overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden'}`}
       >
         {/* Mobile hero — renderas endast i mobil-layout så att enbart EN <h1>
             existerar i DOM samtidigt (SEO: undvik duplicate h1). */}
