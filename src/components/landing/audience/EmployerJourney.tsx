@@ -115,11 +115,12 @@ export function EmployerJourney() {
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
                 <div className="relative flex md:justify-center">
-                  <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-white bg-gradient-to-br from-white/15 to-white/[0.03] text-white shadow-[0_10px_30px_-16px_rgba(255,255,255,0.45)] backdrop-blur-xl">
-                    <Icon className="h-6 w-6" strokeWidth={2} color="#FFFFFF" />
-                    <span className="pointer-events-none absolute inset-0 rounded-2xl bg-white/15 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
+                  <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-white bg-gradient-to-br from-secondary/25 to-secondary/5 text-secondary shadow-[0_10px_30px_-16px_hsl(var(--secondary)/0.6)] backdrop-blur-xl">
+                    <Icon className="h-6 w-6" strokeWidth={2} />
+                    <span className="pointer-events-none absolute inset-0 rounded-2xl bg-secondary/20 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
                   </div>
                 </div>
+
 
 
                 {/* Textkort */}
