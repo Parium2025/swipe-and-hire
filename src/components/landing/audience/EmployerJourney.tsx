@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import {
   PenLine,
   Users,
@@ -49,91 +48,6 @@ const steps: JourneyStep[] = [
 ];
 
 export function EmployerJourney() {
-  const listRef = useRef<HTMLOListElement | null>(null);
-
-  useEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-
-    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    const items = Array.from(list.querySelectorAll<HTMLElement>('[data-journey-step]'));
-    if (!items.length) return;
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const reveal = (item: HTMLElement) => {
-      if (item.dataset.journeyShown === 'true') return;
-      item.dataset.journeyShown = 'true';
-      item.style.opacity = '1';
-      item.style.transform = 'none';
-      item.style.filter = 'none';
-      item.style.willChange = 'auto';
-
-      if (reduceMotion) return;
-
-      item.style.willChange = 'opacity, transform, filter';
-      const animation = item.animate(
-        [
-          { opacity: 0, transform: 'translate3d(0, 24px, 0)', filter: 'blur(6px)' },
-          { opacity: 1, transform: 'translate3d(0, 0, 0)', filter: 'blur(0px)' },
-        ],
-        {
-          duration: 720,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          fill: 'none',
-        },
-      );
-
-      animation.finished
-        .catch(() => undefined)
-        .finally(() => {
-          item.style.opacity = '1';
-          item.style.transform = 'none';
-          item.style.filter = 'none';
-          item.style.willChange = 'auto';
-        });
-    };
-
-    let frame = 0;
-    const revealVisibleItems = () => {
-      frame = 0;
-      const rootRect = root?.getBoundingClientRect() ?? { top: 0, bottom: window.innerHeight };
-      items.forEach((item) => {
-        if (item.dataset.journeyShown === 'true') return;
-        const rect = item.getBoundingClientRect();
-        const isNearViewport = rect.bottom > rootRect.top + 80 && rect.top < rootRect.bottom - 80;
-        if (isNearViewport) reveal(item);
-      });
-    };
-
-    const scheduleRevealCheck = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(revealVisibleItems);
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          reveal(entry.target as HTMLElement);
-          observer.unobserve(entry.target);
-        });
-      },
-      { root, rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
-    );
-
-    items.forEach((item) => observer.observe(item));
-    scheduleRevealCheck();
-    root?.addEventListener('scroll', scheduleRevealCheck, { passive: true });
-    window.addEventListener('resize', scheduleRevealCheck, { passive: true });
-
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame);
-      observer.disconnect();
-      root?.removeEventListener('scroll', scheduleRevealCheck);
-      window.removeEventListener('resize', scheduleRevealCheck);
-    };
-  }, []);
-
   return (
     <div className="relative mt-10 sm:mt-14">
       {/* Vertikal tidslinje — synlig från md och uppåt */}
@@ -142,15 +56,14 @@ export function EmployerJourney() {
         className="pointer-events-none absolute left-[27px] top-2 hidden h-[calc(100%-16px)] w-px bg-gradient-to-b from-secondary/60 via-secondary/25 to-transparent md:block"
       />
 
-      <ol ref={listRef} className="space-y-6 md:space-y-8">
+      <ol className="space-y-6 md:space-y-8">
         {steps.map((step, idx) => {
           const Icon = step.icon;
           const number = String(idx + 1);
           return (
             <li
               key={step.title}
-              data-journey-step
-              className="employer-journey-step relative"
+              className="relative"
             >
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
