@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import LandingNav from '@/components/LandingNav';
+import { X } from 'lucide-react';
 import SiteFooter from '@/components/landing/SiteFooter';
 import { openCookieSettings } from '@/components/CookieBanner';
+import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
 const CANONICAL = 'https://parium.se/integritetspolicy';
 const TITLE = 'Integritetspolicy – Parium';
@@ -33,11 +34,20 @@ const sections: Section[] = [
 ];
 
 export default function IntegrityPolicyPage() {
+  const navigate = useNavigate();
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-policy-scroll-root]');
     if (root) root.scrollTop = 0;
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, []);
+
+  const handleClose = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
 
   const scrollPolicySection = (id: string) => {
     const root = document.querySelector<HTMLElement>('[data-policy-scroll-root]');
@@ -76,15 +86,37 @@ export default function IntegrityPolicyPage() {
           scrollPaddingTop: 'calc(env(safe-area-inset-top, 0px) + 9.5rem)',
         }}
       >
-        <LandingNav
-          onLoginClick={() => { window.location.href = '/auth'; }}
-          links={[
-            { label: 'Start', href: '/' },
-            { label: 'För jobbsökare', href: '/jobbsokare' },
-            { label: 'För arbetsgivare', href: '/arbetsgivare' },
-            { label: 'Om oss', href: '/om-oss' },
-          ]}
-        />
+        <header
+          className="fixed inset-x-0 top-0 z-40"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 18px)' }}
+        >
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 sm:px-6 md:px-10">
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label="Tillbaka"
+              className="flex items-center gap-2 rounded-full transition-opacity hover:opacity-80 active:opacity-70"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              <img
+                src={pariumLogo}
+                alt="Parium"
+                width={256}
+                height={256}
+                draggable={false}
+                className="h-auto w-32 sm:w-36 md:w-40 pointer-events-none"
+              />
+            </button>
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label="Stäng och gå tillbaka"
+              className="group relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-white backdrop-blur-xl transition hover:bg-white/[0.12] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            >
+              <X className="h-5 w-5" strokeWidth={2.2} />
+            </button>
+          </div>
+        </header>
 
         <main className="mx-auto w-full max-w-[880px] px-5 pb-28 pt-36 sm:px-8 sm:pt-40 md:px-12">
           <motion.header
@@ -98,7 +130,7 @@ export default function IntegrityPolicyPage() {
             <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl">
               Integritetspolicy
             </h1>
-            <p className="mt-4 text-[15px] text-white/70">
+            <p className="mt-4 text-[15px] text-white">
               Senast uppdaterad: {LAST_UPDATED}
             </p>
             <p className="mt-6 max-w-[680px] text-[16px] leading-7 text-white sm:text-[17px]">
@@ -112,7 +144,7 @@ export default function IntegrityPolicyPage() {
           {/* Innehållsförteckning */}
           <nav
             aria-label="Innehåll"
-            className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl sm:p-6"
+            className="mt-10 rounded-2xl bg-white/[0.04] p-5 backdrop-blur-xl sm:p-6"
           >
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-secondary/85">
               Innehåll
@@ -126,7 +158,7 @@ export default function IntegrityPolicyPage() {
                       e.preventDefault();
                       scrollPolicySection(s.id);
                     }}
-                    className="text-[14px] text-white/85 underline-offset-4 transition hover:text-secondary hover:underline"
+                    className="text-[14px] text-white underline-offset-4 transition hover:text-secondary hover:underline"
                   >
                     {s.title}
                   </a>
@@ -140,7 +172,7 @@ export default function IntegrityPolicyPage() {
               <p>
                 Personuppgiftsansvarig för behandlingen av dina personuppgifter är:
               </p>
-              <p className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-[14.5px]">
+              <p className="mt-3 rounded-xl bg-white/[0.05] p-4 text-[14.5px]">
                 <strong>Parium AB</strong>
                 <br />
                 E-post:{' '}
@@ -194,15 +226,15 @@ export default function IntegrityPolicyPage() {
                 Vi behandlar dina uppgifter för följande ändamål och med följande
                 rättsliga grunder:
               </p>
-              <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
+              <div className="mt-4 overflow-hidden rounded-2xl">
                 <table className="w-full text-left text-[14px]">
-                  <thead className="bg-white/[0.05] text-[12px] uppercase tracking-wider text-white/70">
+                  <thead className="bg-white/[0.08] text-[12px] uppercase tracking-wider text-white">
                     <tr>
                       <th className="px-4 py-3">Ändamål</th>
                       <th className="px-4 py-3">Rättslig grund</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10">
+                  <tbody className="divide-y divide-white/[0.06]">
                     <Row
                       what="Tillhandahålla tjänsten och ditt konto"
                       basis="Avtal"
@@ -405,7 +437,7 @@ export default function IntegrityPolicyPage() {
                 Har du frågor om denna policy eller om hur vi behandlar dina
                 uppgifter? Hör av dig, så svarar vi inom 24 timmar på vardagar.
               </p>
-              <p className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-[14.5px]">
+              <p className="mt-4 rounded-xl bg-white/[0.05] p-4 text-[14.5px]">
                 <strong>Parium AB</strong>
                 <br />
                 E-post:{' '}
@@ -417,15 +449,6 @@ export default function IntegrityPolicyPage() {
                 </a>
               </p>
             </Section>
-          </div>
-
-          <div className="mt-16 border-t border-white/10 pt-8 text-center">
-            <Link
-              to="/"
-              className="text-sm font-semibold text-white/70 underline-offset-4 hover:text-white hover:underline"
-            >
-              ← Tillbaka till startsidan
-            </Link>
           </div>
         </main>
 
@@ -465,18 +488,18 @@ function Section({
 
 function Row({ what, basis }: { what: string; basis: string }) {
   return (
-    <tr className="text-white/90">
+    <tr className="text-white">
       <td className="px-4 py-3 align-top">{what}</td>
-      <td className="px-4 py-3 align-top text-white/75">{basis}</td>
+      <td className="px-4 py-3 align-top text-white">{basis}</td>
     </tr>
   );
 }
 
 function CookieCat({ title, desc }: { title: string; desc: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+    <div className="rounded-xl bg-white/[0.05] p-4">
       <p className="text-sm font-bold text-white">{title}</p>
-      <p className="mt-1 text-[13.5px] leading-6 text-white/85">{desc}</p>
+      <p className="mt-1 text-[13.5px] leading-6 text-white">{desc}</p>
     </div>
   );
 }
