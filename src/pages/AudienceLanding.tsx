@@ -1043,6 +1043,35 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
 
 
 
+/**
+ * Subtil, animerad sektionslinje.
+ * - Ritas ut från mitten när den scrollas in i vy (scaleX 0 → 1).
+ * - En liten glödande prick pulserar i mitten.
+ * - Ren visuell paus mellan sektioner utan att bryta det mörka djupet.
+ */
+const SectionDivider = ({ className = '' }: { className?: string }) => (
+  <div className={`relative mx-auto flex w-full max-w-[1180px] items-center justify-center px-5 sm:px-6 md:px-12 lg:px-24 ${className}`}>
+    <div className="relative flex w-full items-center justify-center">
+      <motion.div
+        initial={{ scaleX: 0, opacity: 0 }}
+        whileInView={{ scaleX: 1, opacity: 1 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+        className="h-px w-full origin-center bg-gradient-to-r from-transparent via-secondary/40 to-transparent"
+        style={{ willChange: 'transform, opacity' }}
+      />
+      <motion.span
+        initial={{ opacity: 0, scale: 0.4 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.9 }}
+        className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary shadow-[0_0_16px_2px_hsl(var(--secondary)/0.8)]"
+        aria-hidden
+      />
+    </div>
+  </div>
+);
+
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const navigationType = useNavigationType();
