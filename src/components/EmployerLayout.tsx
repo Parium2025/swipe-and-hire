@@ -13,6 +13,7 @@ import { useEmployerPrefetch } from '@/hooks/useEmployerPrefetch';
 import { useEmployerWarmupOrchestrator } from '@/hooks/useEmployerWarmupOrchestrator';
 import EmployerDesktopShell from '@/components/employer/EmployerDesktopShell';
 import EmployerMobileShell from '@/components/employer/EmployerMobileShell';
+import { NoPlanBanner } from '@/components/NoPlanBanner';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -113,6 +114,7 @@ const EmployerLayoutInner = memo(({ children, overlay, developerView, onViewChan
           mainScrollRef={mainScrollRef}
           onJobCreated={invalidateJobs}
         >
+          <NoPlanBanner />
           {children}
         </EmployerDesktopShell>
         {overlay}
@@ -132,6 +134,7 @@ const EmployerLayoutInner = memo(({ children, overlay, developerView, onViewChan
         mainScrollRef={mainScrollRef}
         onJobCreated={invalidateJobs}
       >
+        <NoPlanBanner />
         {children}
       </EmployerMobileShell>
       {overlay}
