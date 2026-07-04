@@ -1022,7 +1022,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
         )}
       </section>
 
-      <SectionDivider className="my-2 md:my-4" />
+      <SectionDivider className="my-12 md:my-20" />
 
       {/* ─────────── INTRO ─────────── */}
       <section
@@ -1397,7 +1397,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <main>
           <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
-          <SectionDivider className="my-2 md:my-4" />
+          <SectionDivider className="my-12 md:my-20" />
 
           {audience === 'job_seeker' && (
             <>
@@ -1406,7 +1406,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 <PinnedHorizontalGallery />
               </section>
 
-              <SectionDivider className="my-2 md:my-4" />
+              <SectionDivider className="my-12 md:my-20" />
             </>
           )}
 
@@ -1482,7 +1482,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          <SectionDivider className="my-2 md:my-4" />
+          <SectionDivider className="my-12 md:my-20" />
 
           <div className="relative z-10 -mt-px text-white">
           {/* ──────────────── PRISER ──────────────── */}
@@ -1738,7 +1738,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          <SectionDivider className="my-2 md:my-4" />
+          <SectionDivider className="my-12 md:my-20" />
 
           {/* ──────────────── FAQ ──────────────── */}
           <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
@@ -1828,7 +1828,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          <SectionDivider className="my-2 md:my-4" />
+          <SectionDivider className="my-12 md:my-20" />
 
           {/* ──────────────── KONTAKT ──────────────── */}
           <section

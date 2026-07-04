@@ -51,11 +51,12 @@ const guideLinks: ColLink[] = [
 ];
 
 const companyLinks: ColLink[] = [
+  { label: 'För arbetsgivare', to: '/arbetsgivare' },
   { label: 'För jobbsökare', to: '/jobbsokare' },
   { label: 'Om oss', to: '/om-oss' },
-  { label: 'För arbetsgivare', to: '/arbetsgivare' },
   { label: 'Lediga jobb', to: '/jobb' },
 ];
+
 
 
 function useRememberFooterOrigin() {
