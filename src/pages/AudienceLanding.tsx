@@ -1051,6 +1051,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium' | 'growth' | 'pro'>(
     audience === 'employer' ? 'pro' : 'premium',
   );
+  const [employerFeaturesOpen, setEmployerFeaturesOpen] = useState(false);
+
 
   const commonEmployerFeatures = [
     'Skapa annons på minuter',
