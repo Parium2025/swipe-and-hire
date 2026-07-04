@@ -18,6 +18,7 @@ import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { useWheelSmoother } from '@/hooks/useWheelSmoother';
 import { preloadAudienceLandingAssets } from '@/lib/audienceLandingPreload';
+import { AppBadges } from '@/components/landing/AppBadges';
 
 
 
@@ -1842,6 +1843,24 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
               </div>
             </div>
+          </section>
+
+          <SectionDivider className="my-12 md:my-20" />
+
+          {/* ──────────────── APP BADGES ──────────────── */}
+          <section
+            aria-label="Ladda ner Parium-appen"
+            className="relative overflow-hidden px-5 py-10 sm:px-6 sm:py-12 md:px-12 md:py-14 lg:px-24"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, ease }}
+              className="mx-auto max-w-[720px] text-center"
+            >
+              <AppBadges />
+            </motion.div>
           </section>
 
           <SectionDivider className="my-12 md:my-20" />
