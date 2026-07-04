@@ -1350,6 +1350,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   };
 
   const navLinks: LandingNavLink[] = [
+    { label: 'Start', href: '#start' },
     { label: 'Funktioner', href: '#funktioner' },
     { label: 'Priser', href: '#priser' },
     { label: 'Vanliga frågor', href: '#faq' },
