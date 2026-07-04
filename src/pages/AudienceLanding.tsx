@@ -1043,6 +1043,35 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
 
 
 
+/**
+ * Subtil, animerad sektionslinje.
+ * - Ritas ut från mitten när den scrollas in i vy (scaleX 0 → 1).
+ * - En liten glödande prick pulserar i mitten.
+ * - Ren visuell paus mellan sektioner utan att bryta det mörka djupet.
+ */
+const SectionDivider = ({ className = '' }: { className?: string }) => (
+  <div className={`relative mx-auto flex w-full max-w-[1180px] items-center justify-center px-5 sm:px-6 md:px-12 lg:px-24 ${className}`}>
+    <div className="relative flex w-full items-center justify-center">
+      <motion.div
+        initial={{ scaleX: 0, opacity: 0 }}
+        whileInView={{ scaleX: 1, opacity: 1 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+        className="h-px w-full origin-center bg-gradient-to-r from-transparent via-secondary/40 to-transparent"
+        style={{ willChange: 'transform, opacity' }}
+      />
+      <motion.span
+        initial={{ opacity: 0, scale: 0.4 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.9 }}
+        className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary shadow-[0_0_16px_2px_hsl(var(--secondary)/0.8)]"
+        aria-hidden
+      />
+    </div>
+  </div>
+);
+
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const navigationType = useNavigationType();
@@ -1472,11 +1501,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          
+          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
 
           <div className="relative z-10 -mt-px text-white">
           {/* ──────────────── PRISER ──────────────── */}
           <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-visible px-5 pb-20 pt-12 sm:px-6 md:px-12 md:pb-28 md:pt-16 lg:px-24">
+
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
                 initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
@@ -1727,9 +1757,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
+          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+
           {/* ──────────────── FAQ ──────────────── */}
           <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
-            <div className="mx-auto max-w-[880px]">
+            <div className={audience === 'employer' ? "mx-auto max-w-[1180px]" : "mx-auto max-w-[880px]"}>
+
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -1743,7 +1776,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   className="landing-h2 mt-4 text-white"
                 />
               </motion.div>
-              <div className="mt-10 space-y-3">
+              <div className={audience === 'employer' ? "mt-10 grid gap-3 md:grid-cols-2" : "mt-10 space-y-3"}>
                 {(audience === 'job_seeker'
                   ? [
                       {
