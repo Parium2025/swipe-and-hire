@@ -76,22 +76,87 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
     items.forEach((el) => el.setAttribute('data-journey-shown', 'false'));
 
     const scrollRoot = list.closest('[data-landing-scroll-root]') as HTMLElement | null;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const el = entry.target as HTMLLIElement;
-          // One-way reveal — never hide again.
-          el.setAttribute('data-journey-shown', 'true');
-          observer.unobserve(el);
+    let observer: IntersectionObserver | null = null;
+    let cancelled = false;
+    let rafA = 0;
+    let rafB = 0;
+    const timers: number[] = [];
+
+    const reveal = (el: HTMLLIElement) => {
+      el.setAttribute('data-journey-shown', 'true');
+      observer?.unobserve(el);
+    };
+
+    const isVisible = (el: HTMLLIElement) => {
+      const rootRect = scrollRoot?.getBoundingClientRect() ?? {
+        top: 0,
+        bottom: window.innerHeight || document.documentElement.clientHeight,
+      };
+      const rect = el.getBoundingClientRect();
+      return rect.bottom > rootRect.top + 16 && rect.top < rootRect.bottom * 0.9;
+    };
+
+    const syncVisible = () => {
+      if (cancelled) return;
+      items.forEach((el) => {
+        if (el.getAttribute('data-journey-shown') !== 'true' && isVisible(el)) reveal(el);
+      });
+    };
+
+    const start = () => {
+      rafA = window.requestAnimationFrame(() => {
+        rafB = window.requestAnimationFrame(() => {
+          if (cancelled) return;
+          observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                reveal(entry.target as HTMLLIElement);
+              });
+            },
+            { root: scrollRoot, rootMargin: '0px 0px -10% 0px', threshold: 0.01 },
+          );
+          items.forEach((el) => observer?.observe(el));
+          syncVisible();
+          timers.push(window.setTimeout(syncVisible, 250), window.setTimeout(syncVisible, 900));
         });
-      },
-      { root: scrollRoot, rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
-    );
+      });
+    };
 
-    items.forEach((el) => observer.observe(el));
+    const isCookieBannerOpen = () => document.documentElement.dataset.cookieBannerOpen === 'true';
+    if (isCookieBannerOpen()) {
+      const onConsent = () => {
+        window.removeEventListener('parium:cookie-consent-updated', onConsent);
+        window.setTimeout(start, 50);
+      };
+      window.addEventListener('parium:cookie-consent-updated', onConsent);
+      return () => {
+        cancelled = true;
+        window.removeEventListener('parium:cookie-consent-updated', onConsent);
+        if (rafA) window.cancelAnimationFrame(rafA);
+        if (rafB) window.cancelAnimationFrame(rafB);
+        timers.forEach((timer) => window.clearTimeout(timer));
+        observer?.disconnect();
+      };
+    }
 
-    return () => observer.disconnect();
+    start();
+    scrollRoot?.addEventListener('scroll', syncVisible, { passive: true });
+    window.addEventListener('resize', syncVisible, { passive: true });
+    window.addEventListener('orientationchange', syncVisible, { passive: true });
+    window.visualViewport?.addEventListener('resize', syncVisible, { passive: true });
+
+    return () => {
+      cancelled = true;
+      if (rafA) window.cancelAnimationFrame(rafA);
+      if (rafB) window.cancelAnimationFrame(rafB);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      observer?.disconnect();
+      scrollRoot?.removeEventListener('scroll', syncVisible);
+      window.removeEventListener('resize', syncVisible);
+      window.removeEventListener('orientationchange', syncVisible);
+      window.visualViewport?.removeEventListener('resize', syncVisible);
+    };
   }, []);
 
   return (
