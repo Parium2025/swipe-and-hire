@@ -143,7 +143,7 @@ export function CookieBanner() {
         aria-describedby="cookie-desc"
         className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] animate-fade-in sm:items-center"
       >
-        <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-3xl border border-white/12 bg-[#0b1220]/98 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
+        <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-3xl bg-[#0b1220]/98 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-secondary/70 to-transparent" />
 
           {/* Stäng-knapp — tolkas som "endast nödvändiga" om inget val gjorts,
