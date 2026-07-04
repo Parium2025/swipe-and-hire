@@ -102,7 +102,7 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
       />
 
       <ol ref={listRef} className="space-y-6 md:space-y-8">
-        {steps.map((step, idx) => {
+        {activeSteps.map((step, idx) => {
           const Icon = step.icon;
           const number = String(idx + 1);
           return (
