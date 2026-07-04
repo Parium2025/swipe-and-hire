@@ -301,7 +301,7 @@ const useWaveAwareText = () => {
 
 const isMobileAnimationPrearmed = () => {
   if (typeof window === 'undefined') return false;
-  return window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
+  return window.matchMedia('(max-width: 767px), ((pointer: coarse) and (orientation: portrait) and (max-width: 1024px))').matches;
 };
 
 const useIsMobileLandingMotion = () => {
@@ -1343,12 +1343,14 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // men fortfarande osynliga (opacity 0) att fade:a in efter 1500ms.
   // Garanterar att innehåll ALDRIG kan fastna osynligt.
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const forceVisibleIfStuck = () => {
       try {
         const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
         if (!root) return;
         const rootRect = root.getBoundingClientRect();
-        const candidates = root.querySelectorAll<HTMLElement>('[style*="opacity"]');
+        const candidates = root.querySelectorAll<HTMLElement>(
+          '[style*="opacity"], [data-lf-shown="false"], [data-journey-shown="false"]',
+        );
         candidates.forEach((el) => {
           // Rör aldrig Spline/WebGL-telefonen här. Den har en egen readiness-gate
           // för att förhindra vit canvas/splash vid refresh; safety-neten får inte
@@ -1359,6 +1361,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           const rect = el.getBoundingClientRect();
           const inView = rect.bottom > rootRect.top && rect.top < rootRect.bottom;
           if (!inView) return;
+          if (el.getAttribute('data-lf-shown') === 'false') {
+            el.setAttribute('data-lf-shown', 'true');
+            el.classList.add('is-in-view');
+          }
+          if (el.getAttribute('data-journey-shown') === 'false') {
+            el.setAttribute('data-journey-shown', 'true');
+          }
           el.style.transition = 'opacity 400ms ease-out, transform 400ms ease-out';
           el.style.opacity = '1';
           el.style.transform = 'none';
@@ -1367,8 +1376,28 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       } catch {
         // tyst — får aldrig störa UX
       }
-    }, 1500);
-    return () => window.clearTimeout(timer);
+    };
+
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    let raf = 0;
+    const schedule = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        forceVisibleIfStuck();
+      });
+    };
+
+    const timer = window.setTimeout(forceVisibleIfStuck, 1500);
+    root?.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+
+    return () => {
+      window.clearTimeout(timer);
+      if (raf) window.cancelAnimationFrame(raf);
+      root?.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
   }, [audience]);
 
 
