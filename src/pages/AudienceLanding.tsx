@@ -69,14 +69,33 @@ function FaqAccordion({ q, a }: { q: string; a: string }) {
   );
 }
 
-function PlanFeatures({ features, isActive }: { features: string[]; isActive: boolean }) {
-  const [open, setOpen] = useState(false);
+function PlanFeatures({
+  features,
+  isActive,
+  open: openProp,
+  onToggle,
+}: {
+  features: string[];
+  isActive: boolean;
+  open?: boolean;
+  onToggle?: () => void;
+}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : internalOpen;
+  const handleToggle = () => {
+    if (isControlled) {
+      onToggle?.();
+    } else {
+      setInternalOpen((v) => !v);
+    }
+  };
   return (
     <div className="mt-6 border-t border-white/10 pt-5">
       <button
         type="button"
         aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         className="flex w-full min-h-[44px] cursor-pointer items-center justify-between text-sm font-semibold text-white"
       >
         <span>Se alla funktioner</span>
