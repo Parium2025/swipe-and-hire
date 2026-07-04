@@ -1398,6 +1398,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </section>
           )}
 
+          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+
           {/* ──────────────── FUNKTIONER ──────────────── */}
           {isMobileFeatureMotion && (
             <style>{`
