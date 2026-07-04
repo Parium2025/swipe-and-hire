@@ -1,43 +1,121 @@
 import { useEffect, useState } from 'react';
-import { Cookie } from 'lucide-react';
+import { Cookie, ShieldCheck, BarChart3, Megaphone, Settings2, ArrowLeft } from 'lucide-react';
 
 const STORAGE_KEY = 'parium-cookie-consent';
+const CONSENT_VERSION = 1; // Höj om policyn ändras — då triggas ny fråga
+const OPEN_EVENT = 'parium:open-cookie-settings';
 
-type Consent = 'accepted' | 'necessary_only';
+export type CookieCategory = 'necessary' | 'analytics' | 'marketing' | 'preferences';
+
+export type CookieConsent = {
+  version: number;
+  timestamp: string;
+  necessary: true; // Alltid true — kan inte stängas av
+  analytics: boolean;
+  marketing: boolean;
+  preferences: boolean;
+};
 
 /**
- * Enkel, GDPR-säker cookie-banner.
- * - Visas endast om användaren inte redan tagit ställning.
- * - Sparar val i localStorage (persistent över sessioner).
- * - "Endast nödvändiga" är default — inga tredjepartsspårare aktiveras
- *   utan explicit "Acceptera alla".
- * - Framtida analytics-integrationer (t.ex. GA4) kan läsa flaggan
- *   via `getCookieConsent()` innan de laddas.
+ * Läs sparat cookie-samtycke.
+ * Returnerar `null` om användaren inte tagit ställning eller om policy-versionen
+ * har ändrats (då ska bannern visas på nytt).
  */
-export function getCookieConsent(): Consent | null {
+export function getCookieConsent(): CookieConsent | null {
   if (typeof window === 'undefined') return null;
   try {
-    const v = window.localStorage.getItem(STORAGE_KEY);
-    return v === 'accepted' || v === 'necessary_only' ? v : null;
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CookieConsent;
+    if (parsed.version !== CONSENT_VERSION) return null;
+    return parsed;
   } catch {
     return null;
   }
 }
 
+/** Kolla snabbt om en specifik kategori är godkänd. */
+export function hasConsent(category: CookieCategory): boolean {
+  if (category === 'necessary') return true;
+  const c = getCookieConsent();
+  return !!c && c[category] === true;
+}
+
+/** Öppna bannern igen (används från footer-länken "Cookie-inställningar"). */
+export function openCookieSettings() {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(OPEN_EVENT));
+}
+
+type Mode = 'summary' | 'customize';
+
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
+  const [mode, setMode] = useState<Mode>('summary');
+  const [analytics, setAnalytics] = useState(false);
+  const [marketing, setMarketing] = useState(false);
+  const [preferences, setPreferences] = useState(false);
 
+  // Initial visning: om inget val gjorts, visa banner.
   useEffect(() => {
-    // Vänta en tick så banner inte flashar under första renderpassen.
     const id = window.setTimeout(() => {
       if (getCookieConsent() === null) setVisible(true);
     }, 400);
     return () => window.clearTimeout(id);
   }, []);
 
-  const setConsent = (value: Consent) => {
+  // Lyssna på "öppna igen"-event från footern
+  useEffect(() => {
+    const open = () => {
+      const existing = getCookieConsent();
+      if (existing) {
+        setAnalytics(existing.analytics);
+        setMarketing(existing.marketing);
+        setPreferences(existing.preferences);
+      }
+      setMode('summary');
+      setVisible(true);
+    };
+    window.addEventListener(OPEN_EVENT, open);
+    return () => window.removeEventListener(OPEN_EVENT, open);
+  }, []);
+
+  // Lås body-scroll när modalen är öppen
+  useEffect(() => {
+    if (!visible) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [visible]);
+
+  // Stäng med Escape → tolkas som "endast nödvändiga"
+  useEffect(() => {
+    if (!visible) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') persist(false, false, false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+
+  const persist = (a: boolean, m: boolean, p: boolean) => {
+    const consent: CookieConsent = {
+      version: CONSENT_VERSION,
+      timestamp: new Date().toISOString(),
+      necessary: true,
+      analytics: a,
+      marketing: m,
+      preferences: p,
+    };
     try {
-      window.localStorage.setItem(STORAGE_KEY, value);
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
+      // Notifiera lyssnare (framtida analytics-init kan reagera direkt)
+      window.dispatchEvent(
+        new CustomEvent('parium:cookie-consent-updated', { detail: consent }),
+      );
     } catch {
       /* ignore */
     }
@@ -48,74 +126,275 @@ export function CookieBanner() {
 
   return (
     <>
-      {/* Backdrop — dimmar bakgrunden men blockerar inte scroll */}
       <div
         aria-hidden="true"
-        className="fixed inset-0 z-[59] bg-black/55 backdrop-blur-[2px] animate-fade-in"
+        className="fixed inset-0 z-[59] bg-black/60 backdrop-blur-[3px] animate-fade-in"
+        onClick={() => persist(false, false, false)}
       />
 
       <div
         role="dialog"
         aria-modal="true"
-        aria-live="polite"
         aria-labelledby="cookie-title"
+        aria-describedby="cookie-desc"
         className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in"
       >
-        <div className="relative w-full max-w-[520px] overflow-hidden rounded-3xl border border-white/12 bg-[#0b1220]/98 p-6 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl sm:p-8">
+        <div className="relative w-full max-w-[560px] overflow-hidden rounded-3xl border border-white/12 bg-[#0b1220]/98 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-secondary/70 to-transparent" />
 
-          <div className="flex flex-col items-center text-center">
-            <span className="grid h-14 w-14 place-items-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
-              <Cookie className="h-6 w-6" />
-            </span>
+          {mode === 'summary' ? (
+            <SummaryView
+              onAcceptAll={() => persist(true, true, true)}
+              onNecessaryOnly={() => persist(false, false, false)}
+              onCustomize={() => setMode('customize')}
+            />
+          ) : (
+            <CustomizeView
+              analytics={analytics}
+              marketing={marketing}
+              preferences={preferences}
+              setAnalytics={setAnalytics}
+              setMarketing={setMarketing}
+              setPreferences={setPreferences}
+              onBack={() => setMode('summary')}
+              onAcceptAll={() => persist(true, true, true)}
+              onSave={() => persist(analytics, marketing, preferences)}
+            />
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
 
-            <h2
-              id="cookie-title"
-              className="mt-5 text-xl font-bold text-white sm:text-2xl"
-            >
-              Vi använder cookies
-            </h2>
+// ─────────────────────────── Summary ───────────────────────────
+function SummaryView({
+  onAcceptAll,
+  onNecessaryOnly,
+  onCustomize,
+}: {
+  onAcceptAll: () => void;
+  onNecessaryOnly: () => void;
+  onCustomize: () => void;
+}) {
+  return (
+    <div className="p-6 sm:p-8">
+      <div className="flex flex-col items-center text-center">
+        <span className="grid h-14 w-14 place-items-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
+          <Cookie className="h-6 w-6" />
+        </span>
 
-            <p className="mt-3 max-w-[420px] text-[14px] leading-6 text-white sm:text-[15px]">
-              Parium använder cookies för att sidan ska fungera, komma ihåg dina val och
-              hjälpa oss förbättra din upplevelse. Du bestämmer själv vad du accepterar.{' '}
-              <a
-                href="/om-oss#integritet"
-                className="underline underline-offset-2 hover:text-secondary"
-              >
-                Läs mer
-              </a>
-              .
-            </p>
+        <h2 id="cookie-title" className="mt-5 text-xl font-bold text-white sm:text-2xl">
+          Vi använder cookies
+        </h2>
 
-            <div className="mt-6 flex w-full flex-col gap-2.5 sm:flex-row sm:gap-3">
-              <button
-                type="button"
-                onClick={() => setConsent('necessary_only')}
-                className="min-h-[48px] flex-1 rounded-xl border border-white/15 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Endast nödvändiga
-              </button>
-              <button
-                type="button"
-                onClick={() => setConsent('accepted')}
-                className="min-h-[48px] flex-1 rounded-xl bg-secondary px-5 text-sm font-bold text-white shadow-[0_14px_35px_-16px_hsl(var(--secondary))] transition hover:-translate-y-0.5"
-              >
-                Acceptera alla
-              </button>
-            </div>
+        <p
+          id="cookie-desc"
+          className="mt-3 max-w-[440px] text-[14px] leading-6 text-white sm:text-[15px]"
+        >
+          Parium använder cookies för att sidan ska fungera, komma ihåg dina val och
+          hjälpa oss förbättra din upplevelse. Du bestämmer själv vad du accepterar.{' '}
+          <a
+            href="/om-oss#integritet"
+            className="underline underline-offset-2 hover:text-secondary"
+          >
+            Läs mer i vår integritetspolicy
+          </a>
+          .
+        </p>
 
+        <div className="mt-6 flex w-full flex-col gap-2.5">
+          <button
+            type="button"
+            onClick={onAcceptAll}
+            className="min-h-[50px] w-full rounded-xl bg-secondary px-5 text-sm font-bold text-white shadow-[0_14px_35px_-16px_hsl(var(--secondary))] transition hover:-translate-y-0.5"
+          >
+            Acceptera alla
+          </button>
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
             <button
               type="button"
-              onClick={() => setConsent('necessary_only')}
-              className="mt-3 text-xs text-white/50 underline underline-offset-2 hover:text-white/80"
+              onClick={onNecessaryOnly}
+              className="min-h-[48px] flex-1 rounded-xl border border-white/15 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/10"
             >
-              Stäng
+              Endast nödvändiga
+            </button>
+            <button
+              type="button"
+              onClick={onCustomize}
+              className="min-h-[48px] flex-1 rounded-xl border border-white/15 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/10 flex items-center justify-center gap-2"
+            >
+              <Settings2 className="h-4 w-4" />
+              Anpassa
             </button>
           </div>
         </div>
       </div>
-    </>
+    </div>
+  );
+}
+
+// ─────────────────────────── Customize ───────────────────────────
+function CustomizeView({
+  analytics,
+  marketing,
+  preferences,
+  setAnalytics,
+  setMarketing,
+  setPreferences,
+  onBack,
+  onAcceptAll,
+  onSave,
+}: {
+  analytics: boolean;
+  marketing: boolean;
+  preferences: boolean;
+  setAnalytics: (v: boolean) => void;
+  setMarketing: (v: boolean) => void;
+  setPreferences: (v: boolean) => void;
+  onBack: () => void;
+  onAcceptAll: () => void;
+  onSave: () => void;
+}) {
+  return (
+    <div className="p-6 sm:p-8">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Tillbaka"
+          className="grid h-9 w-9 place-items-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <h2 id="cookie-title" className="text-lg font-bold text-white sm:text-xl">
+          Cookie-inställningar
+        </h2>
+      </div>
+
+      <div className="mt-5 max-h-[52vh] space-y-3 overflow-y-auto pr-1">
+        <Category
+          icon={<ShieldCheck className="h-4 w-4" />}
+          title="Nödvändiga"
+          badge="Alltid aktiv"
+          description="Krävs för att sidan ska fungera: inloggning, sessioner, säkerhet och grundläggande inställningar. Kan inte stängas av."
+          checked
+          disabled
+        />
+        <Category
+          icon={<Settings2 className="h-4 w-4" />}
+          title="Preferenser"
+          description="Kommer ihåg dina val — språk, region och sparade filter — så du slipper göra om dem varje besök."
+          checked={preferences}
+          onChange={setPreferences}
+        />
+        <Category
+          icon={<BarChart3 className="h-4 w-4" />}
+          title="Statistik & analys"
+          description="Anonymiserad data om hur sidan används så vi kan förbättra Parium. Ingen enskild person kan identifieras."
+          checked={analytics}
+          onChange={setAnalytics}
+        />
+        <Category
+          icon={<Megaphone className="h-4 w-4" />}
+          title="Marknadsföring"
+          description="Låter oss visa mer relevanta annonser på andra sajter och mäta hur våra kampanjer fungerar."
+          checked={marketing}
+          onChange={setMarketing}
+        />
+      </div>
+
+      <div className="mt-6 flex flex-col gap-2.5 sm:flex-row-reverse sm:gap-3">
+        <button
+          type="button"
+          onClick={onAcceptAll}
+          className="min-h-[48px] flex-1 rounded-xl bg-secondary px-5 text-sm font-bold text-white shadow-[0_14px_35px_-16px_hsl(var(--secondary))] transition hover:-translate-y-0.5"
+        >
+          Acceptera alla
+        </button>
+        <button
+          type="button"
+          onClick={onSave}
+          className="min-h-[48px] flex-1 rounded-xl border border-white/15 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/10"
+        >
+          Spara mina val
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────── Category row ───────────────────────────
+function Category({
+  icon,
+  title,
+  badge,
+  description,
+  checked,
+  disabled,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  badge?: string;
+  description: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange?: (v: boolean) => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-secondary/25 bg-secondary/10 text-secondary">
+          {icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-white">{title}</span>
+            {badge ? (
+              <span className="rounded-full border border-secondary/40 bg-secondary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-secondary">
+                {badge}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-1 text-[13px] leading-5 text-white/85">{description}</p>
+        </div>
+
+        <Toggle checked={checked} disabled={disabled} onChange={onChange} label={title} />
+      </div>
+    </div>
+  );
+}
+
+function Toggle({
+  checked,
+  disabled,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  disabled?: boolean;
+  onChange?: (v: boolean) => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => onChange?.(!checked)}
+      className={`relative mt-1 h-6 w-11 shrink-0 rounded-full transition ${
+        checked ? 'bg-secondary' : 'bg-white/15'
+      } ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
+    >
+      <span
+        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+          checked ? 'translate-x-[22px]' : 'translate-x-0.5'
+        }`}
+      />
+    </button>
   );
 }
 
