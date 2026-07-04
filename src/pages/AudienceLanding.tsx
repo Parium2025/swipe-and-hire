@@ -31,7 +31,7 @@ const ease = [0.16, 1, 0.3, 1] as const;
 function FaqAccordion({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl overflow-hidden transition-colors hover:border-secondary/25">
+    <div className="overflow-hidden rounded-2xl border border-white/15 bg-white/5 transition-colors hover:border-secondary/25 md:backdrop-blur-xl">
       <button
         type="button"
         aria-expanded={open}
@@ -918,28 +918,44 @@ const FixedPhoneLayer = () => {
  * - En liten glödande prick pulserar i mitten.
  * - Ren visuell paus mellan sektioner utan att bryta det mörka djupet.
  */
-const SectionDivider = ({ className = '' }: { className?: string }) => (
-  <div className={`relative mx-auto flex w-full max-w-[1180px] items-center justify-center px-5 sm:px-6 md:px-12 lg:px-24 ${className}`}>
-    <div className="relative flex w-full items-center justify-center">
-      <motion.div
-        initial={{ scaleX: 0, opacity: 0 }}
-        whileInView={{ scaleX: 1, opacity: 1 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-        className="h-px w-full origin-center bg-gradient-to-r from-transparent via-secondary/40 to-transparent"
-        style={{ willChange: 'transform, opacity' }}
-      />
-      <motion.span
-        initial={{ opacity: 0, scale: 0.4 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.9 }}
-        className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary shadow-[0_0_16px_2px_hsl(var(--secondary)/0.8)]"
-        aria-hidden
-      />
+const SectionDivider = ({ className = '' }: { className?: string }) => {
+  const isMobileMotion = useIsMobileLandingMotion();
+
+  return (
+    <div className={`relative mx-auto flex w-full max-w-[1180px] items-center justify-center px-5 sm:px-6 md:px-12 lg:px-24 ${className}`}>
+      <div className="relative flex w-full items-center justify-center">
+        {isMobileMotion ? (
+          <>
+            <div className="h-px w-full origin-center bg-gradient-to-r from-transparent via-secondary/40 to-transparent" />
+            <span
+              className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary shadow-[0_0_16px_2px_hsl(var(--secondary)/0.8)]"
+              aria-hidden
+            />
+          </>
+        ) : (
+          <>
+            <motion.div
+              initial={{ scaleX: 0, opacity: 0 }}
+              whileInView={{ scaleX: 1, opacity: 1 }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+              className="h-px w-full origin-center bg-gradient-to-r from-transparent via-secondary/40 to-transparent"
+              style={{ willChange: 'transform, opacity' }}
+            />
+            <motion.span
+              initial={{ opacity: 0, scale: 0.4 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 0.6, ease: 'easeOut', delay: 0.9 }}
+              className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary shadow-[0_0_16px_2px_hsl(var(--secondary)/0.8)]"
+              aria-hidden
+            />
+          </>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroIntroStage — Native scroll, inga hijacks.
@@ -1539,7 +1555,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 opacity: 1;
                 transform: translate3d(0, 0, 0);
               }
-              [data-mobile-feature-prearm] .landing-feature-card {
+              [data-mobile-feature-prearm] .landing-feature-card,
+              [data-mobile-feature-prearm] .landing-faq-card {
                 backdrop-filter: none;
                 -webkit-backdrop-filter: none;
               }
@@ -1691,7 +1708,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         data-allow-focus-shadow="true"
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                         style={isMobileFeatureMotion ? { ['--lf-x' as string]: '0px', ['--lf-y' as string]: '22px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
-                        className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
+                        className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 md:backdrop-blur-xl ${
                           isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                         }`}
                       >
@@ -1751,7 +1768,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           data-allow-focus-shadow="true"
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                           style={isMobileFeatureMotion ? { ['--lf-x' as string]: '0px', ['--lf-y' as string]: '22px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
-                          className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-secondary/40 ${
+                          className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 transition-all duration-300 hover:scale-[1.02] hover:border-secondary/40 md:backdrop-blur-xl ${
                             isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5'
                           }`}
                         >
@@ -1823,7 +1840,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     transition={{ duration: 0.85, ease, delay: 0.1 }}
                     className="mt-14"
                   >
-                    <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/5 p-8 backdrop-blur-xl md:flex md:items-center md:justify-between md:gap-8">
+                    <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/5 p-8 md:flex md:items-center md:justify-between md:gap-8 md:backdrop-blur-xl">
                       <div>
                         <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-secondary/85">
                           Behöver ni bara rekrytera en gång?
@@ -1854,13 +1871,15 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
           {/* ──────────────── FAQ ──────────────── */}
           <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
-            <div className={audience === 'employer' ? "mx-auto max-w-[1180px]" : "mx-auto max-w-[880px]"}>
+            <div className={audience === 'employer' ? "mx-auto max-w-[1180px]" : "mx-auto max-w-[880px]"} data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
 
               <motion.div
-                initial={{ opacity: 0, x: -60 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={isMobileFeatureMotion ? false : { opacity: 0, x: -60 }}
+                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease }}
+                className="landing-feature-mobile-in"
+                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '80ms' } : undefined}
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Vanliga frågor</span>
                 <SplitHeadline
@@ -1942,10 +1961,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 ).map(({ q, a }, i) => (
                   <motion.div
                     key={q}
-                    initial={{ opacity: 0, x: 60 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
+                    initial={isMobileFeatureMotion ? false : { opacity: 0, x: 60 }}
+                    whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                    viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
                     transition={{ duration: 0.7, ease, delay: 0.12 + i * 0.06 }}
+                    className="landing-faq-card landing-feature-mobile-in"
+                    style={isMobileFeatureMotion ? { ['--lf-x' as string]: '60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${120 + i * 45}ms` } : undefined}
                   >
                     <FaqAccordion q={q} a={a} />
                   </motion.div>
