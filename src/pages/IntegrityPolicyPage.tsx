@@ -39,6 +39,22 @@ export default function IntegrityPolicyPage() {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, []);
 
+  const scrollPolicySection = (id: string) => {
+    const root = document.querySelector<HTMLElement>('[data-policy-scroll-root]');
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    if (root) {
+      const top = root.scrollTop + target.getBoundingClientRect().top - 144;
+      root.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    } else {
+      const top = window.scrollY + target.getBoundingClientRect().top - 144;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+
+    window.history.replaceState(null, '', `#${id}`);
+  };
+
   return (
     <>
       <Helmet>
@@ -106,6 +122,10 @@ export default function IntegrityPolicyPage() {
                 <li key={s.id}>
                   <a
                     href={`#${s.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      scrollPolicySection(s.id);
+                    }}
                     className="text-[14px] text-white/85 underline-offset-4 transition hover:text-secondary hover:underline"
                   >
                     {s.title}
