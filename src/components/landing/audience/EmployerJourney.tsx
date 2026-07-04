@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import {
   PenLine,
   Users,
@@ -7,6 +8,8 @@ import {
   Mail,
   type LucideIcon,
 } from 'lucide-react';
+
+
 
 type JourneyStep = {
   title: string;
