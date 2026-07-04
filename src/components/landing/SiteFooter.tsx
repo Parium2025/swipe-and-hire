@@ -22,7 +22,7 @@ const footerContainerVariants: Variants = {
 };
 
 
-type ColLink = { label: string; to: string };
+type ColLink = { label: string; to: string; action?: 'cookies' };
 
 const cityLinks: ColLink[] = [
   { label: 'Stockholm', to: '/jobb/stockholm' },
