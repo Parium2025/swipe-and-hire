@@ -294,7 +294,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="h-11 rounded-full border border-secondary/30 bg-secondary/[0.12] px-7 text-[15px] font-medium text-white shadow-[0_0_24px_hsl(var(--secondary)/0.18)] transition-all duration-300 [@media(hover:hover)]:hover:border-secondary/45 [@media(hover:hover)]:hover:bg-secondary/[0.20] [@media(hover:hover)]:hover:shadow-[0_0_36px_hsl(var(--secondary)/0.34)]"
+                className="h-11 rounded-full border border-primary/30 bg-primary/15 px-7 text-[15px] font-medium text-white shadow-[0_0_24px_hsl(var(--primary)/0.20)] transition-all duration-300 [@media(hover:hover)]:hover:border-primary/45 [@media(hover:hover)]:hover:bg-primary/25 [@media(hover:hover)]:hover:shadow-[0_0_36px_hsl(var(--primary)/0.34)]"
               >
                 Logga in
               </Button>
