@@ -32,10 +32,13 @@ const SplitHeadline = ({
   const reduce = useReducedMotion();
   // Option B: full desktop-paritet — kör samma blur/stagger även på touch.
   const [isTouch] = useState(false);
+  const words = text.split(/\s+/).filter(Boolean);
+  const lastIdx = words.length - 1;
 
   useEffect(() => {
     // Intentionally no-op — behållet för framtida per-enhet-tuning.
   }, []);
+
 
 
   const useSimpleMotion = reduce || isTouch;
