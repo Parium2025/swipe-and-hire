@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Cookie, X } from 'lucide-react';
+import { Cookie } from 'lucide-react';
 
 const STORAGE_KEY = 'parium-cookie-consent';
 
@@ -47,32 +47,38 @@ export function CookieBanner() {
   if (!visible) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-live="polite"
-      aria-label="Cookie-inställningar"
-      className="fixed inset-x-3 bottom-3 z-[60] mx-auto max-w-[720px] animate-fade-in sm:inset-x-4 sm:bottom-4"
-    >
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220]/95 p-4 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.9)] backdrop-blur-xl sm:p-5">
-        <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-secondary/60 to-transparent" />
+    <>
+      {/* Backdrop — dimmar bakgrunden men blockerar inte scroll */}
+      <div
+        aria-hidden="true"
+        className="fixed inset-0 z-[59] bg-black/55 backdrop-blur-[2px] animate-fade-in"
+      />
 
-        <button
-          type="button"
-          onClick={() => setConsent('necessary_only')}
-          aria-label="Stäng"
-          className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white"
-        >
-          <X className="h-4 w-4" />
-        </button>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-live="polite"
+        aria-labelledby="cookie-title"
+        className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in"
+      >
+        <div className="relative w-full max-w-[520px] overflow-hidden rounded-3xl border border-white/12 bg-[#0b1220]/98 p-6 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl sm:p-8">
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-secondary/70 to-transparent" />
 
-        <div className="flex flex-col gap-4 pr-6 sm:flex-row sm:items-center sm:gap-5">
-          <div className="flex items-start gap-3 sm:flex-1">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-secondary/30 bg-secondary/10 text-secondary">
-              <Cookie className="h-5 w-5" />
+          <div className="flex flex-col items-center text-center">
+            <span className="grid h-14 w-14 place-items-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
+              <Cookie className="h-6 w-6" />
             </span>
-            <p className="text-[13.5px] leading-6 text-white sm:text-sm">
-              Vi använder cookies för att Parium ska fungera och för att förbättra din
-              upplevelse.{' '}
+
+            <h2
+              id="cookie-title"
+              className="mt-5 text-xl font-bold text-white sm:text-2xl"
+            >
+              Vi använder cookies
+            </h2>
+
+            <p className="mt-3 max-w-[420px] text-[14px] leading-6 text-white sm:text-[15px]">
+              Parium använder cookies för att sidan ska fungera, komma ihåg dina val och
+              hjälpa oss förbättra din upplevelse. Du bestämmer själv vad du accepterar.{' '}
               <a
                 href="/om-oss#integritet"
                 className="underline underline-offset-2 hover:text-secondary"
@@ -81,27 +87,35 @@ export function CookieBanner() {
               </a>
               .
             </p>
-          </div>
 
-          <div className="flex shrink-0 gap-2 sm:gap-3">
+            <div className="mt-6 flex w-full flex-col gap-2.5 sm:flex-row sm:gap-3">
+              <button
+                type="button"
+                onClick={() => setConsent('necessary_only')}
+                className="min-h-[48px] flex-1 rounded-xl border border-white/15 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Endast nödvändiga
+              </button>
+              <button
+                type="button"
+                onClick={() => setConsent('accepted')}
+                className="min-h-[48px] flex-1 rounded-xl bg-secondary px-5 text-sm font-bold text-white shadow-[0_14px_35px_-16px_hsl(var(--secondary))] transition hover:-translate-y-0.5"
+              >
+                Acceptera alla
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={() => setConsent('necessary_only')}
-              className="min-h-[44px] rounded-xl border border-white/15 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="mt-3 text-xs text-white/50 underline underline-offset-2 hover:text-white/80"
             >
-              Endast nödvändiga
-            </button>
-            <button
-              type="button"
-              onClick={() => setConsent('accepted')}
-              className="min-h-[44px] rounded-xl bg-secondary px-5 text-sm font-bold text-white shadow-[0_14px_35px_-16px_hsl(var(--secondary))] transition hover:-translate-y-0.5"
-            >
-              Acceptera
+              Stäng
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
