@@ -147,7 +147,7 @@ const LazyFallback = () => (
   <div className="min-h-screen bg-parium-gradient" />
 );
 
-const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare', '/om-oss'];
+const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare', '/om-oss', '/integritetspolicy'];
 const isPublicLightweightPath = (pathname: string) =>
   LIGHTWEIGHT_ROUTES.includes(pathname) ||
   pathname === '/jobb' ||

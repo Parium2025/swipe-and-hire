@@ -56,6 +56,7 @@ const companyLinks: ColLink[] = [
   { label: 'För jobbsökare', to: '/jobbsokare' },
   { label: 'Om oss', to: '/om-oss' },
   { label: 'Lediga jobb', to: '/jobb' },
+  { label: 'Integritetspolicy', to: '/integritetspolicy' },
 ];
 
 
