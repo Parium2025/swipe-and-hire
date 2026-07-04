@@ -88,9 +88,12 @@ export function CookieBanner() {
   useEffect(() => {
     if (!visible) return;
     const prev = document.body.style.overflow;
+    const root = document.documentElement;
     document.body.style.overflow = 'hidden';
+    root.dataset.cookieBannerOpen = 'true';
     return () => {
       document.body.style.overflow = prev;
+      delete root.dataset.cookieBannerOpen;
     };
   }, [visible]);
 
@@ -132,7 +135,8 @@ export function CookieBanner() {
     <>
       <div
         aria-hidden="true"
-        className="fixed inset-0 z-[59] bg-black/60 backdrop-blur-[3px] animate-fade-in"
+        className="fixed inset-0 animate-fade-in bg-black/50"
+        style={{ zIndex: 2147483646 }}
         onClick={() => persist(false, false, false)}
       />
 
@@ -141,10 +145,10 @@ export function CookieBanner() {
         aria-modal="true"
         aria-labelledby="cookie-title"
         aria-describedby="cookie-desc"
-        className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] animate-fade-in sm:items-center"
+        className="pointer-events-none fixed inset-x-0 bottom-0 flex items-end justify-center px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] animate-fade-in sm:inset-0 sm:items-center sm:px-4 sm:py-4"
+        style={{ zIndex: 2147483647 }}
       >
-        <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-3xl bg-[#0b1220]/98 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-secondary/70 to-transparent" />
+        <div className="pointer-events-auto relative flex max-h-[calc(100svh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-1.5rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-3xl bg-[#0b1220] shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] sm:max-h-[calc(100svh-2rem)]">
 
           {/* Stäng-knapp — tolkas som "endast nödvändiga" om inget val gjorts,
               annars behåller den redan sparat val och stänger bara modalen. */}
@@ -201,7 +205,7 @@ function SummaryView({
   onCustomize: () => void;
 }) {
   return (
-    <div className="overflow-y-auto p-6 sm:p-8">
+    <div className="min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-8">
       <div className="flex flex-col items-center text-center">
         <span className="grid h-14 w-14 place-items-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
           <Cookie className="h-6 w-6" />
@@ -280,7 +284,7 @@ function CustomizeView({
   onSave: () => void;
 }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col p-6 sm:p-8">
+    <div className="flex min-h-0 flex-1 flex-col p-5 sm:p-8">
       <div className="flex shrink-0 items-center gap-3">
         <button
           type="button"
