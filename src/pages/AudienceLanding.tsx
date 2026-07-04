@@ -1628,6 +1628,27 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     Alla annonser är aktiva i 14 dagar. Inga bindningstider — säg upp när ni vill.
                   </motion.p>
 
+                  {/* Gemensam CTA som följer det valda paketet */}
+                  {(() => {
+                    const selectedEmployerPlan = employerPlans.find((p) => p.id === selectedPlan) ?? employerPlans[2];
+                    return (
+                      <motion.button
+                        type="button"
+                        initial={isMobileFeatureMotion ? false : { opacity: 0, y: 12 }}
+                        whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0 }}
+                        viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.2 }}
+                        transition={{ duration: 0.6, ease, delay: 0.2 }}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => navigate('/auth', { state: { mode: 'register', role: audience, plan: selectedPlan } })}
+                        className="mx-auto mt-8 flex w-full max-w-sm min-h-[56px] items-center justify-center rounded-2xl bg-secondary px-8 text-sm font-bold text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] transition-all duration-300 hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))]"
+                      >
+                        {selectedEmployerPlan.cta}
+                      </motion.button>
+                    );
+                  })()}
+
+
                   {/* Engångspaket — separat block */}
                   <motion.div
                     initial={isMobileFeatureMotion ? false : { opacity: 0, y: 24, filter: 'blur(6px)' }}
