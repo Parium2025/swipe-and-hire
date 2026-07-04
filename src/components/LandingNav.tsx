@@ -220,16 +220,34 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
                   <DropdownMenuContent align="center" sideOffset={8} className="min-w-[200px]">
                     {links.map((l) => {
-                      const id = l.href.replace('#', '');
-                      const isActive = activeId === id;
+                      const isAnchor = l.href.startsWith('#');
+                      const id = isAnchor ? l.href.slice(1) : l.href;
+                      const isActive = isAnchor
+                        ? activeId === id
+                        : location.pathname === l.href;
                       return (
                         <DropdownMenuItem
                           key={l.href}
                           onSelect={(e) => {
                             e.preventDefault();
                             setMenuOpen(false);
-                            // Vänta tills menyn stängts så scroll inte avbryts av focus-return
-                            requestAnimationFrame(() => scrollToSection(id));
+                            if (isAnchor) {
+                              // Vänta tills menyn stängts så scroll inte avbryts av focus-return
+                              requestAnimationFrame(() => scrollToSection(id));
+                            } else {
+                              const goTop = () => {
+                                const scroller = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+                                if (scroller) scroller.scrollTop = 0;
+                                window.scrollTo({ top: 0, behavior: 'auto' });
+                              };
+                              if (location.pathname === l.href) {
+                                requestAnimationFrame(goTop);
+                              } else {
+                                sessionStorage.setItem('parium-skip-splash', '1');
+                                navigate(l.href);
+                                requestAnimationFrame(() => requestAnimationFrame(goTop));
+                              }
+                            }
                           }}
                           className={isActive ? 'bg-accent/60 font-semibold' : ''}
                         >
