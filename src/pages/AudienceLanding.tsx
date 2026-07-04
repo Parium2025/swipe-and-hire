@@ -329,6 +329,7 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 
 type HeroIntroStageProps = {
   c: (typeof audienceContent)[AudienceRole];
+  audience: AudienceRole;
   onIntroCta?: () => void;
   introCtaLabel?: string;
 };
@@ -910,6 +911,35 @@ const FixedPhoneLayer = () => {
   );
 };
 
+/**
+ * Subtil, animerad sektionslinje.
+ * - Ritas ut från mitten när den scrollas in i vy (scaleX 0 → 1).
+ * - En liten glödande prick pulserar i mitten.
+ * - Ren visuell paus mellan sektioner utan att bryta det mörka djupet.
+ */
+const SectionDivider = ({ className = '' }: { className?: string }) => (
+  <div className={`relative mx-auto flex w-full max-w-[1180px] items-center justify-center px-5 sm:px-6 md:px-12 lg:px-24 ${className}`}>
+    <div className="relative flex w-full items-center justify-center">
+      <motion.div
+        initial={{ scaleX: 0, opacity: 0 }}
+        whileInView={{ scaleX: 1, opacity: 1 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+        className="h-px w-full origin-center bg-gradient-to-r from-transparent via-secondary/40 to-transparent"
+        style={{ willChange: 'transform, opacity' }}
+      />
+      <motion.span
+        initial={{ opacity: 0, scale: 0.4 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.9 }}
+        className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary shadow-[0_0_16px_2px_hsl(var(--secondary)/0.8)]"
+        aria-hidden
+      />
+    </div>
+  </div>
+);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroIntroStage — Native scroll, inga hijacks.
 // Hero ligger som en vanlig 100svh-sektion. Intro ligger som en egen
@@ -917,7 +947,7 @@ const FixedPhoneLayer = () => {
 // `whileInView`. Telefonen (FixedPhoneLayer) hittar fortfarande hero via
 // data-hero-intro-stage och döljs när användaren scrollar förbi.
 // ─────────────────────────────────────────────────────────────────────────────
-const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
+const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   const mobileHeroMinHeight = useMobileHeroMinHeight();
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
@@ -991,6 +1021,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         )}
       </section>
 
+      {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+
       {/* ─────────── INTRO ─────────── */}
       <section
         aria-label="Introduktion"
@@ -1043,34 +1075,6 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
 
 
 
-/**
- * Subtil, animerad sektionslinje.
- * - Ritas ut från mitten när den scrollas in i vy (scaleX 0 → 1).
- * - En liten glödande prick pulserar i mitten.
- * - Ren visuell paus mellan sektioner utan att bryta det mörka djupet.
- */
-const SectionDivider = ({ className = '' }: { className?: string }) => (
-  <div className={`relative mx-auto flex w-full max-w-[1180px] items-center justify-center px-5 sm:px-6 md:px-12 lg:px-24 ${className}`}>
-    <div className="relative flex w-full items-center justify-center">
-      <motion.div
-        initial={{ scaleX: 0, opacity: 0 }}
-        whileInView={{ scaleX: 1, opacity: 1 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-        className="h-px w-full origin-center bg-gradient-to-r from-transparent via-secondary/40 to-transparent"
-        style={{ willChange: 'transform, opacity' }}
-      />
-      <motion.span
-        initial={{ opacity: 0, scale: 0.4 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.9 }}
-        className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary shadow-[0_0_16px_2px_hsl(var(--secondary)/0.8)]"
-        aria-hidden
-      />
-    </div>
-  </div>
-);
 
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
@@ -1389,7 +1393,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
         <main>
-          <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
+          <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
           {audience === 'job_seeker' && (
             <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
