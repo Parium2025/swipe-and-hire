@@ -144,7 +144,7 @@ export default function IntegrityPolicyPage() {
           {/* Innehållsförteckning */}
           <nav
             aria-label="Innehåll"
-            className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl sm:p-6"
+            className="mt-10 rounded-2xl bg-white/[0.04] p-5 backdrop-blur-xl sm:p-6"
           >
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-secondary/85">
               Innehåll
@@ -158,7 +158,7 @@ export default function IntegrityPolicyPage() {
                       e.preventDefault();
                       scrollPolicySection(s.id);
                     }}
-                    className="text-[14px] text-white/85 underline-offset-4 transition hover:text-secondary hover:underline"
+                    className="text-[14px] text-white underline-offset-4 transition hover:text-secondary hover:underline"
                   >
                     {s.title}
                   </a>
@@ -172,7 +172,7 @@ export default function IntegrityPolicyPage() {
               <p>
                 Personuppgiftsansvarig för behandlingen av dina personuppgifter är:
               </p>
-              <p className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-[14.5px]">
+              <p className="mt-3 rounded-xl bg-white/[0.05] p-4 text-[14.5px]">
                 <strong>Parium AB</strong>
                 <br />
                 E-post:{' '}
@@ -226,15 +226,15 @@ export default function IntegrityPolicyPage() {
                 Vi behandlar dina uppgifter för följande ändamål och med följande
                 rättsliga grunder:
               </p>
-              <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
+              <div className="mt-4 overflow-hidden rounded-2xl">
                 <table className="w-full text-left text-[14px]">
-                  <thead className="bg-white/[0.05] text-[12px] uppercase tracking-wider text-white/70">
+                  <thead className="bg-white/[0.08] text-[12px] uppercase tracking-wider text-white">
                     <tr>
                       <th className="px-4 py-3">Ändamål</th>
                       <th className="px-4 py-3">Rättslig grund</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10">
+                  <tbody className="divide-y divide-white/[0.06]">
                     <Row
                       what="Tillhandahålla tjänsten och ditt konto"
                       basis="Avtal"
@@ -437,7 +437,7 @@ export default function IntegrityPolicyPage() {
                 Har du frågor om denna policy eller om hur vi behandlar dina
                 uppgifter? Hör av dig, så svarar vi inom 24 timmar på vardagar.
               </p>
-              <p className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-[14.5px]">
+              <p className="mt-4 rounded-xl bg-white/[0.05] p-4 text-[14.5px]">
                 <strong>Parium AB</strong>
                 <br />
                 E-post:{' '}
@@ -488,18 +488,18 @@ function Section({
 
 function Row({ what, basis }: { what: string; basis: string }) {
   return (
-    <tr className="text-white/90">
+    <tr className="text-white">
       <td className="px-4 py-3 align-top">{what}</td>
-      <td className="px-4 py-3 align-top text-white/75">{basis}</td>
+      <td className="px-4 py-3 align-top text-white">{basis}</td>
     </tr>
   );
 }
 
 function CookieCat({ title, desc }: { title: string; desc: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+    <div className="rounded-xl bg-white/[0.05] p-4">
       <p className="text-sm font-bold text-white">{title}</p>
-      <p className="mt-1 text-[13.5px] leading-6 text-white/85">{desc}</p>
+      <p className="mt-1 text-[13.5px] leading-6 text-white">{desc}</p>
     </div>
   );
 }
