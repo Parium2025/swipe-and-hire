@@ -29,6 +29,7 @@ import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
+import ValjPlan from "./pages/ValjPlan";
 
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
 // imported module" errors from freezing the app on a dark Suspense fallback.
@@ -191,6 +192,7 @@ const AnimatedRoutes = () => {
           <Route path="/om-oss" element={<AboutPage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/valj-plan" element={<ValjPlan />} />
           <Route path="/home" element={<Index />} />
           <Route path="/index" element={<Index />} />
           <Route path="/consent" element={<Index />} />

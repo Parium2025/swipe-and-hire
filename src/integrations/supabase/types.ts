@@ -1673,6 +1673,69 @@ export type Database = {
         }
         Relationships: []
       }
+      one_time_purchases: {
+        Row: {
+          activated_at: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          job_id: string | null
+          metadata: Json
+          organization_id: string | null
+          price_sek: number
+          purchased_at: string
+          status: Database["public"]["Enums"]["plan_status"]
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          job_id?: string | null
+          metadata?: Json
+          organization_id?: string | null
+          price_sek?: number
+          purchased_at?: string
+          status?: Database["public"]["Enums"]["plan_status"]
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          job_id?: string | null
+          metadata?: Json
+          organization_id?: string | null
+          price_sek?: number
+          purchased_at?: string
+          status?: Database["public"]["Enums"]["plan_status"]
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "one_time_purchases_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "one_time_purchases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string
@@ -2356,6 +2419,57 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          billing_period: Database["public"]["Enums"]["plan_billing_period"]
+          created_at: string
+          description: string | null
+          features: Json
+          id: string
+          includes_candidate_bank: boolean
+          is_active: boolean
+          max_active_jobs: number | null
+          max_users: number | null
+          name: string
+          price_sek: number
+          sort_order: number
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at: string
+        }
+        Insert: {
+          billing_period: Database["public"]["Enums"]["plan_billing_period"]
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          includes_candidate_bank?: boolean
+          is_active?: boolean
+          max_active_jobs?: number | null
+          max_users?: number | null
+          name: string
+          price_sek: number
+          sort_order?: number
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+        }
+        Update: {
+          billing_period?: Database["public"]["Enums"]["plan_billing_period"]
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          includes_candidate_bank?: boolean
+          is_active?: boolean
+          max_active_jobs?: number | null
+          max_users?: number | null
+          name?: string
+          price_sek?: number
+          sort_order?: number
+          tier?: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           created_at: string
@@ -2596,6 +2710,65 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          metadata: Json
+          organization_id: string | null
+          source: Database["public"]["Enums"]["plan_source"]
+          started_at: string | null
+          status: Database["public"]["Enums"]["plan_status"]
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          organization_id?: string | null
+          source?: Database["public"]["Enums"]["plan_source"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["plan_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          organization_id?: string | null
+          source?: Database["public"]["Enums"]["plan_source"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["plan_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -2652,6 +2825,19 @@ export type Database = {
       employer_owns_job_for_question: {
         Args: { p_job_id: string }
         Returns: boolean
+      }
+      get_active_plan_details: {
+        Args: { _user_id: string }
+        Returns: {
+          expires_at: string
+          max_active_jobs: number
+          max_users: number
+          plan_name: string
+          price_sek: number
+          source_type: string
+          status: Database["public"]["Enums"]["plan_status"]
+          tier: Database["public"]["Enums"]["plan_tier"]
+        }[]
       }
       get_active_sessions: {
         Args: never
@@ -2784,6 +2970,7 @@ export type Database = {
       }
       get_profile_view_stats: { Args: { p_user_id: string }; Returns: Json }
       get_user_organization_id: { Args: { p_user_id: string }; Returns: string }
+      has_active_plan: { Args: { _user_id: string }; Returns: boolean }
       has_applied_to_employer: {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: boolean
@@ -3044,6 +3231,10 @@ export type Database = {
         | "application_no_response_14d"
         | "interview_before"
         | "interview_after"
+      plan_billing_period: "monthly" | "one_time"
+      plan_source: "stripe" | "manual" | "trial"
+      plan_status: "active" | "expired" | "cancelled" | "pending"
+      plan_tier: "one_time" | "start" | "vaxa" | "pro" | "jobseeker_premium"
       swipe_action_type: "skipped" | "liked" | "applied"
       user_role: "job_seeker" | "employer"
     }
@@ -3184,6 +3375,10 @@ export const Constants = {
         "interview_before",
         "interview_after",
       ],
+      plan_billing_period: ["monthly", "one_time"],
+      plan_source: ["stripe", "manual", "trial"],
+      plan_status: ["active", "expired", "cancelled", "pending"],
+      plan_tier: ["one_time", "start", "vaxa", "pro", "jobseeker_premium"],
       swipe_action_type: ["skipped", "liked", "applied"],
       user_role: ["job_seeker", "employer"],
     },

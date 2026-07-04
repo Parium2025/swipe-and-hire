@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useHasActivePlan } from '@/hooks/useHasActivePlan';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -883,6 +884,7 @@ const MobileJobWizard = ({
   };
 
   const { user } = useAuth();
+  const { hasPlan, loading: planLoading } = useHasActivePlan();
   const { toast } = useToast();
 
   // Load user profile and question templates when opening
@@ -2324,7 +2326,19 @@ const MobileJobWizard = ({
   };
 
   const handleSubmit = async () => {
-    if (!user || !validateCurrentStep() || loading) return;
+    if (!user || !validateCurrentStep() || loading || planLoading) return;
+
+    // 🔒 Plan-gate: kräv aktiv plan för att publicera. Utkastet är redan sparat.
+    if (!hasPlan) {
+      toast({
+        title: 'Välj plan för att publicera',
+        description: 'Ditt utkast är sparat. Vi tar dig till plan-valet.',
+      });
+      const draftId = existingJob?.id ? `&job_id=${existingJob.id}` : '';
+      navigate(`/valj-plan?from=publish${draftId}`);
+      return;
+    }
+
     await performPublish();
   };
   
