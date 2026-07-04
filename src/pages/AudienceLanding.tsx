@@ -1716,9 +1716,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       <button
                         type="button"
                         onClick={() => navigate('/auth', { state: { mode: 'register', role: audience, plan: 'single' } })}
-                        className="mt-6 w-full rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/15 md:mt-0 md:w-auto md:min-w-[200px]"
+                        className="mt-6 w-full min-h-[56px] rounded-2xl bg-secondary px-8 text-sm font-bold text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] active:scale-[0.98] md:mt-0 md:w-auto md:min-w-[220px]"
                       >
-                        Publicera en annons
+                        Publicera annons
                       </button>
                     </div>
                   </motion.div>
