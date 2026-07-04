@@ -75,6 +75,7 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
     // Set initial hidden state only now (post-mount) so SSR/no-JS stays visible.
     items.forEach((el) => el.setAttribute('data-journey-shown', 'false'));
 
+    const scrollRoot = list.closest('[data-landing-scroll-root]') as HTMLElement | null;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -85,7 +86,7 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
           observer.unobserve(el);
         });
       },
-      { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.15 },
+      { root: scrollRoot, rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
     );
 
     items.forEach((el) => observer.observe(el));

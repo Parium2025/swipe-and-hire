@@ -141,9 +141,9 @@ export function CookieBanner() {
         aria-modal="true"
         aria-labelledby="cookie-title"
         aria-describedby="cookie-desc"
-        className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in"
+        className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] animate-fade-in sm:items-center"
       >
-        <div className="relative w-full max-w-[560px] overflow-hidden rounded-3xl border border-white/12 bg-[#0b1220]/98 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
+        <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-3xl border border-white/12 bg-[#0b1220]/98 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-secondary/70 to-transparent" />
 
           {/* Stäng-knapp — tolkas som "endast nödvändiga" om inget val gjorts,
@@ -201,7 +201,7 @@ function SummaryView({
   onCustomize: () => void;
 }) {
   return (
-    <div className="p-6 sm:p-8">
+    <div className="overflow-y-auto p-6 sm:p-8">
       <div className="flex flex-col items-center text-center">
         <span className="grid h-14 w-14 place-items-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
           <Cookie className="h-6 w-6" />
@@ -280,8 +280,8 @@ function CustomizeView({
   onSave: () => void;
 }) {
   return (
-    <div className="p-6 sm:p-8">
-      <div className="flex items-center gap-3">
+    <div className="flex min-h-0 flex-1 flex-col p-6 sm:p-8">
+      <div className="flex shrink-0 items-center gap-3">
         <button
           type="button"
           onClick={onBack}
@@ -295,7 +295,7 @@ function CustomizeView({
         </h2>
       </div>
 
-      <div className="mt-5 max-h-[52vh] space-y-3 overflow-y-auto pr-1">
+      <div className="mt-5 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pr-1">
         <Category
           icon={<ShieldCheck className="h-4 w-4" />}
           title="Nödvändiga"
@@ -327,7 +327,7 @@ function CustomizeView({
         />
       </div>
 
-      <div className="mt-6 flex flex-col gap-2.5 sm:flex-row-reverse sm:gap-3">
+      <div className="mt-6 flex shrink-0 flex-col gap-2.5 sm:flex-row-reverse sm:gap-3">
         <button
           type="button"
           onClick={onAcceptAll}
