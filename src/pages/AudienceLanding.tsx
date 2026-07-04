@@ -1773,12 +1773,28 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         a: 'Vi har tre månadspaket: Start på 5 000 kr/mån (1 användare, upp till 40 annonser i månaden), Växa på 7 500 kr/mån (2 användare, obegränsat antal annonser) och Pro på 10 000 kr/mån (obegränsat antal användare och annonser). Behöver ni bara rekrytera en gång kan ni publicera en enskild annons för 799 kr som ligger uppe i 14 dagar. Alla annonser är aktiva i 14 dagar och det är inga bindningstider.',
                       },
                       {
+                        q: 'Finns det någon bindningstid?',
+                        a: 'Nej. Alla månadspaket löper månadsvis och ni säger upp när ni vill från era kontoinställningar. Ingen uppsägningstid, inga dolda avgifter. Betalar ni för en enkelannons gäller den i 14 dagar och avslutas automatiskt.',
+                      },
+                      {
+                        q: 'Hur snabbt kommer vi igång?',
+                        a: 'På under 10 minuter. Ni skapar ett arbetsgivarkonto, verifierar organisationen och publicerar er första annons direkt. Har ni företagslogga och en rollbeskrivning redo är annonsen live samma dag.',
+                      },
+                      {
                         q: 'Hur kvalitetssäkras kandidaterna?',
                         a: 'Varje kandidat har en verifierad profil med video, erfarenhet och tydliga önskemål kring roll, ort och lön. Ni ser allt innan ni matchar, vilket minimerar tiden ni lägger på irrelevanta ansökningar.',
                       },
                       {
+                        q: 'Kan flera kollegor arbeta i samma konto?',
+                        a: 'Ja. På Växa bjuder ni in en kollega, på Pro får ni obegränsat antal användare. Ni delar kandidater i en gemensam Kanban-vy, kommenterar och fattar beslut tillsammans — utan att någon information faller mellan stolarna.',
+                      },
+                      {
                         q: 'Hur hanteras GDPR och kandidatdata?',
                         a: 'All data lagras inom EU enligt GDPR. Kandidater äger sin egen data och delar bara fullständig profil med er när de aktivt visat intresse. Ni kan exportera, anonymisera och radera kandidatdata direkt från dashboarden.',
+                      },
+                      {
+                        q: 'Vilken support får vi som kund?',
+                        a: 'Ni når oss på hej@parium.se alla vardagar. Vi hjälper till med allt från annonsupplägg och kandidattips till fakturafrågor — svar inom 24 timmar, oftast samma dag. På Pro får ni dessutom en dedikerad kontaktperson.',
                       },
                     ]
                 ).map(({ q, a }, i) => (
