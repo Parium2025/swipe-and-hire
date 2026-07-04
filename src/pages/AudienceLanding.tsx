@@ -1501,11 +1501,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          
+          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
 
           <div className="relative z-10 -mt-px text-white">
           {/* ──────────────── PRISER ──────────────── */}
           <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-visible px-5 pb-20 pt-12 sm:px-6 md:px-12 md:pb-28 md:pt-16 lg:px-24">
+
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
                 initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
