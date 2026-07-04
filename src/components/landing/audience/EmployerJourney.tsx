@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import {
   PenLine,
   Users,
@@ -48,22 +49,110 @@ const steps: JourneyStep[] = [
 ];
 
 export function EmployerJourney() {
+  const listRef = useRef<HTMLOListElement | null>(null);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const items = Array.from(list.querySelectorAll<HTMLElement>('[data-journey-step]'));
+    if (!items.length) return;
+
+    const reveal = (item: HTMLElement) => {
+      if (item.dataset.journeyShown === 'true') return;
+      item.dataset.journeyShown = 'true';
+    };
+
+    let frame = 0;
+    const revealVisibleItems = () => {
+      frame = 0;
+      const rootRect = root?.getBoundingClientRect() ?? { top: 0, bottom: window.innerHeight };
+      items.forEach((item) => {
+        if (item.dataset.journeyShown === 'true') return;
+        const rect = item.getBoundingClientRect();
+        const isNearViewport = rect.bottom > rootRect.top + 80 && rect.top < rootRect.bottom - 80;
+        if (isNearViewport) reveal(item);
+      });
+    };
+
+    const scheduleRevealCheck = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(revealVisibleItems);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          reveal(entry.target as HTMLElement);
+          observer.unobserve(entry.target);
+        });
+      },
+      { root, rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+    );
+
+    items.forEach((item) => observer.observe(item));
+    scheduleRevealCheck();
+    root?.addEventListener('scroll', scheduleRevealCheck, { passive: true });
+    window.addEventListener('resize', scheduleRevealCheck, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      root?.removeEventListener('scroll', scheduleRevealCheck);
+      window.removeEventListener('resize', scheduleRevealCheck);
+    };
+  }, []);
+
   return (
     <div className="relative mt-10 sm:mt-14">
+      <style>{`
+        @keyframes employerJourneyStepIn {
+          0% { opacity: 0; transform: translate3d(0, 24px, 0); filter: blur(6px); }
+          100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+        }
+
+        .employer-journey-step {
+          opacity: 0;
+          transform: translate3d(0, 24px, 0);
+          filter: blur(6px);
+          will-change: opacity, transform, filter;
+        }
+
+        .employer-journey-step[data-journey-shown="true"] {
+          animation: employerJourneyStepIn 720ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation-delay: var(--journey-delay, 0ms);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .employer-journey-step {
+            opacity: 1;
+            transform: none;
+            filter: none;
+            will-change: auto;
+          }
+          .employer-journey-step[data-journey-shown="true"] {
+            animation: none;
+          }
+        }
+      `}</style>
       {/* Vertikal tidslinje — synlig från md och uppåt */}
       <div
         aria-hidden
         className="pointer-events-none absolute left-[27px] top-2 hidden h-[calc(100%-16px)] w-px bg-gradient-to-b from-secondary/60 via-secondary/25 to-transparent md:block"
       />
 
-      <ol className="space-y-6 md:space-y-8">
+      <ol ref={listRef} className="space-y-6 md:space-y-8">
         {steps.map((step, idx) => {
           const Icon = step.icon;
           const number = String(idx + 1);
           return (
             <li
               key={step.title}
-              className="relative"
+              data-journey-step
+              className="employer-journey-step relative"
+              style={{ ['--journey-delay' as string]: `${idx * 70}ms` }}
             >
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
