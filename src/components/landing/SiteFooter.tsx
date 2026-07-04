@@ -237,15 +237,8 @@ const SiteFooter = () => {
         </motion.div>
 
         {/* Bottom bar */}
-        <div className="mt-14 flex flex-col items-center gap-3 border-t border-white/10 pt-6 text-center text-[13px] font-medium text-white sm:flex-row sm:justify-between sm:text-left">
+        <div className="mt-14 flex items-center justify-center border-t border-white/10 pt-6 text-center text-[13px] font-medium text-white">
           <p>© {new Date().getFullYear()} Parium AB. Alla rättigheter förbehållna.</p>
-          <button
-            type="button"
-            onClick={openCookieSettings}
-            className="text-white underline-offset-4 transition hover:text-secondary hover:underline"
-          >
-            Cookie-inställningar
-          </button>
         </div>
       </div>
     </footer>
