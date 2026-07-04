@@ -195,7 +195,7 @@ function SummaryView({
           Parium använder cookies för att sidan ska fungera, komma ihåg dina val och
           hjälpa oss förbättra din upplevelse. Du bestämmer själv vad du accepterar.{' '}
           <a
-            href="/om-oss#integritet"
+            href="/integritetspolicy"
             className="underline underline-offset-2 hover:text-secondary"
           >
             Läs mer i vår integritetspolicy
