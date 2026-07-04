@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   PenLine,
   Users,
@@ -8,8 +8,6 @@ import {
   Mail,
   type LucideIcon,
 } from 'lucide-react';
-
-
 
 type JourneyStep = {
   title: string;
@@ -50,114 +48,11 @@ const steps: JourneyStep[] = [
   },
 ];
 
+const ease = [0.16, 1, 0.3, 1] as const;
+
 export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } = {}) {
-  const listRef = useRef<HTMLOListElement | null>(null);
   const activeSteps = stepsProp ?? steps;
-
-  useEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-
-    const items = Array.from(
-      list.querySelectorAll<HTMLLIElement>('[data-journey-step]'),
-    );
-    if (items.length === 0) return;
-
-    const prefersReduced = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
-
-    if (prefersReduced) {
-      items.forEach((el) => el.setAttribute('data-journey-shown', 'true'));
-      return;
-    }
-
-    // Set initial hidden state only now (post-mount) so SSR/no-JS stays visible.
-    items.forEach((el) => el.setAttribute('data-journey-shown', 'false'));
-
-    const scrollRoot = list.closest('[data-landing-scroll-root]') as HTMLElement | null;
-    let observer: IntersectionObserver | null = null;
-    let cancelled = false;
-    let rafA = 0;
-    let rafB = 0;
-    const timers: number[] = [];
-
-    const reveal = (el: HTMLLIElement) => {
-      el.setAttribute('data-journey-shown', 'true');
-      observer?.unobserve(el);
-    };
-
-    const isVisible = (el: HTMLLIElement) => {
-      const rootRect = scrollRoot?.getBoundingClientRect() ?? {
-        top: 0,
-        bottom: window.innerHeight || document.documentElement.clientHeight,
-      };
-      const rect = el.getBoundingClientRect();
-      return rect.bottom > rootRect.top + 16 && rect.top < rootRect.bottom * 0.9;
-    };
-
-    const syncVisible = () => {
-      if (cancelled) return;
-      items.forEach((el) => {
-        if (el.getAttribute('data-journey-shown') !== 'true' && isVisible(el)) reveal(el);
-      });
-    };
-
-    const start = () => {
-      rafA = window.requestAnimationFrame(() => {
-        rafB = window.requestAnimationFrame(() => {
-          if (cancelled) return;
-          observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                reveal(entry.target as HTMLLIElement);
-              });
-            },
-            { root: scrollRoot, rootMargin: '0px 0px -10% 0px', threshold: 0.01 },
-          );
-          items.forEach((el) => observer?.observe(el));
-          syncVisible();
-          timers.push(window.setTimeout(syncVisible, 250), window.setTimeout(syncVisible, 900));
-        });
-      });
-    };
-
-    const isCookieBannerOpen = () => document.documentElement.dataset.cookieBannerOpen === 'true';
-    if (isCookieBannerOpen()) {
-      const onConsent = () => {
-        window.removeEventListener('parium:cookie-consent-updated', onConsent);
-        window.setTimeout(start, 50);
-      };
-      window.addEventListener('parium:cookie-consent-updated', onConsent);
-      return () => {
-        cancelled = true;
-        window.removeEventListener('parium:cookie-consent-updated', onConsent);
-        if (rafA) window.cancelAnimationFrame(rafA);
-        if (rafB) window.cancelAnimationFrame(rafB);
-        timers.forEach((timer) => window.clearTimeout(timer));
-        observer?.disconnect();
-      };
-    }
-
-    start();
-    scrollRoot?.addEventListener('scroll', syncVisible, { passive: true });
-    window.addEventListener('resize', syncVisible, { passive: true });
-    window.addEventListener('orientationchange', syncVisible, { passive: true });
-    window.visualViewport?.addEventListener('resize', syncVisible, { passive: true });
-
-    return () => {
-      cancelled = true;
-      if (rafA) window.cancelAnimationFrame(rafA);
-      if (rafB) window.cancelAnimationFrame(rafB);
-      timers.forEach((timer) => window.clearTimeout(timer));
-      observer?.disconnect();
-      scrollRoot?.removeEventListener('scroll', syncVisible);
-      window.removeEventListener('resize', syncVisible);
-      window.removeEventListener('orientationchange', syncVisible);
-      window.visualViewport?.removeEventListener('resize', syncVisible);
-    };
-  }, []);
+  const reduce = useReducedMotion();
 
   return (
     <div className="relative mt-10 sm:mt-14">
@@ -167,18 +62,19 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
         className="pointer-events-none absolute left-[27px] top-2 hidden h-[calc(100%-16px)] w-px bg-gradient-to-b from-secondary/60 via-secondary/25 to-transparent md:block"
       />
 
-      <ol ref={listRef} className="space-y-6 md:space-y-8">
+      <ol className="space-y-6 md:space-y-8">
         {activeSteps.map((step, idx) => {
           const Icon = step.icon;
           const number = String(idx + 1);
           return (
-            <li
+            <motion.li
               key={step.title}
-              data-journey-step
-              style={{ transitionDelay: `${Math.min(idx, 5) * 90}ms` }}
-              className="employer-journey-step relative"
+              initial={reduce ? false : { opacity: 0, y: 24 }}
+              whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15, margin: '0px 0px -8% 0px' }}
+              transition={{ duration: 0.7, ease, delay: Math.min(idx, 5) * 0.09 }}
+              className="relative"
             >
-
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
                 <div className="relative flex md:justify-center">
@@ -187,8 +83,6 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
                     <span className="pointer-events-none absolute inset-0 hidden rounded-2xl bg-secondary/20 opacity-0 blur-xl transition-opacity duration-500 [@media(hover:hover)]:block [@media(hover:hover)]:group-hover:opacity-100" />
                   </div>
                 </div>
-
-
 
                 {/* Textkort */}
                 <article className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.055] to-white/[0.02] p-6 transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-0.5 hover:border-secondary/35 hover:shadow-[0_28px_60px_-30px_hsl(var(--secondary)/0.55)] sm:p-8 [@media_(hover:hover)]:backdrop-blur-xl">
@@ -210,7 +104,7 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
                   </p>
                 </article>
               </div>
-            </li>
+            </motion.li>
           );
         })}
       </ol>
@@ -219,4 +113,3 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
 }
 
 export default EmployerJourney;
-
