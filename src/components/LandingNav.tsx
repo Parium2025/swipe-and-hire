@@ -276,11 +276,12 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           <motion.span
                             layoutId="nav-bubble"
                             className={`absolute inset-0 -z-0 rounded-full border shadow-[0_4px_20px_rgba(0,0,0,0.25)] ${
-                              isLightSection ? 'border-primary/10 bg-primary/[0.06]' : 'border-white/[0.10] bg-white/[0.10]'
+                              isLightSection ? 'border-primary/10 bg-primary/[0.06]' : 'border-white bg-white/[0.045]'
                             }`}
                             transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
                           />
                         )}
+
                         <span className="relative z-10">{l.label}</span>
                       </a>
                     );
