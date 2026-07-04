@@ -182,16 +182,16 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
                 <div className="relative flex md:justify-center">
-                  <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-secondary bg-gradient-to-br from-secondary/25 to-secondary/5 text-secondary shadow-[0_10px_30px_-16px_hsl(var(--secondary)/0.6)] backdrop-blur-xl">
+                  <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-secondary bg-gradient-to-br from-secondary/25 to-secondary/5 text-secondary shadow-[0_10px_30px_-16px_hsl(var(--secondary)/0.6)] [@media_(hover:hover)]:backdrop-blur-xl">
                     <Icon className="h-6 w-6" strokeWidth={2} />
-                    <span className="pointer-events-none absolute inset-0 rounded-2xl bg-secondary/20 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
+                    <span className="pointer-events-none absolute inset-0 hidden rounded-2xl bg-secondary/20 opacity-0 blur-xl transition-opacity duration-500 [@media(hover:hover)]:block [@media(hover:hover)]:group-hover:opacity-100" />
                   </div>
                 </div>
 
 
 
                 {/* Textkort */}
-                <article className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.055] to-white/[0.02] p-6 backdrop-blur-xl transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-0.5 hover:border-secondary/35 hover:shadow-[0_28px_60px_-30px_hsl(var(--secondary)/0.55)] sm:p-8">
+                <article className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.055] to-white/[0.02] p-6 transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-0.5 hover:border-secondary/35 hover:shadow-[0_28px_60px_-30px_hsl(var(--secondary)/0.55)] sm:p-8 [@media_(hover:hover)]:backdrop-blur-xl">
                   <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-secondary/60 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-100" />
                   <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.16),transparent_65%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 

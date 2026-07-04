@@ -203,7 +203,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           : 'border-white bg-white/[0.045] text-white focus-visible:ring-white/30'
                       }`}
                     >
-                      <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
+                      <span className="pointer-events-none absolute -inset-3 hidden rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:block [@media(hover:hover)]:group-hover:opacity-100" />
                       <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-65 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
                       <span className="relative z-10 whitespace-nowrap">
                         Meny
@@ -267,7 +267,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               <div className="hidden flex-1 min-w-0 justify-center md:flex">
                 <div
                   ref={pillScrollerRef}
-                    className={`flex max-w-full items-center gap-1 overflow-x-auto rounded-full border px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
+                    className={`flex max-w-full items-center gap-1 overflow-x-auto rounded-full border px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] [@media_(hover:hover)]:backdrop-blur-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
                       isLightSection ? 'border-primary/10 bg-background/80' : 'border-white bg-white/[0.045]'
                     }`}
                   style={{ WebkitOverflowScrolling: 'touch' }}
@@ -322,7 +322,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           >
                             {!isLightSection && (
                               <>
-                                <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-100 blur-2xl" />
+                                <span className="pointer-events-none absolute -inset-3 hidden rounded-full bg-secondary/24 opacity-100 blur-2xl [@media(hover:hover)]:block" />
                                 <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-65" />
                               </>
                             )}
@@ -347,7 +347,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                   isLightSection ? 'border-primary/10 bg-background/80 text-primary' : 'border-white bg-white/[0.045]'
                 }`}
               >
-                <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
+                <span className="pointer-events-none absolute -inset-3 hidden rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:block [@media(hover:hover)]:group-hover:opacity-100" />
                 <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-65 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
                 <span className="relative z-10">Logga in</span>
               </Button>

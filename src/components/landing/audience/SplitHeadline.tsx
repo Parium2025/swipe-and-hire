@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { createElement, type ElementType } from 'react';
+import { createElement, useEffect, useState, type ElementType } from 'react';
 
 type Props = {
   text: string;
@@ -30,14 +30,25 @@ const SplitHeadline = ({
   delay = 0.05,
 }: Props) => {
   const reduce = useReducedMotion();
+  const [isTouch, setIsTouch] = useState(false);
   const words = text.split(/\s+/).filter(Boolean);
   const lastIdx = words.length - 1;
+
+  useEffect(() => {
+    const query = window.matchMedia('(pointer: coarse), (max-width: 767px)');
+    const sync = () => setIsTouch(query.matches);
+    sync();
+    query.addEventListener?.('change', sync);
+    return () => query.removeEventListener?.('change', sync);
+  }, []);
+
+  const useSimpleMotion = reduce || isTouch;
 
   const container = {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: reduce ? 0 : stagger,
+        staggerChildren: useSimpleMotion ? Math.min(stagger, 0.035) : stagger,
         delayChildren: reduce ? 0 : delay,
       },
     },
@@ -46,13 +57,21 @@ const SplitHeadline = ({
   const word = {
     hidden: reduce
       ? { opacity: 1, y: 0 }
-      : { opacity: 0, y: '0.6em', filter: 'blur(8px)' },
-    visible: {
-      opacity: 1,
-      y: 0,
-      filter: 'blur(0px)',
-      transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] as const },
-    },
+      : useSimpleMotion
+        ? { opacity: 0, y: '0.35em' }
+        : { opacity: 0, y: '0.6em', filter: 'blur(8px)' },
+    visible: useSimpleMotion
+      ? {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.62, ease: [0.16, 1, 0.3, 1] as const },
+        }
+      : {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] as const },
+        },
   };
 
   return createElement(
