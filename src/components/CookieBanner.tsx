@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Cookie, X } from 'lucide-react';
+import { Cookie } from 'lucide-react';
 
 const STORAGE_KEY = 'parium-cookie-consent';
 
