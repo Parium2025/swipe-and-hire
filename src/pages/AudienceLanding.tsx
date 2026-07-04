@@ -1776,7 +1776,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   className="landing-h2 mt-4 text-white"
                 />
               </motion.div>
-              <div className="mt-10 space-y-3">
+              <div className={audience === 'employer' ? "mt-10 grid gap-3 md:grid-cols-2" : "mt-10 space-y-3"}>
                 {(audience === 'job_seeker'
                   ? [
                       {
