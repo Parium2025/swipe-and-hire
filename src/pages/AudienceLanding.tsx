@@ -31,7 +31,7 @@ const ease = [0.16, 1, 0.3, 1] as const;
 function FaqAccordion({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/15 bg-white/5 transition-colors hover:border-secondary/25 md:backdrop-blur-xl">
+    <div className="overflow-hidden rounded-2xl border border-white/15 bg-white/5 transition-colors hover:border-secondary/25 [@media_(hover:hover)]:backdrop-blur-xl">
       <button
         type="button"
         aria-expanded={open}
@@ -1365,15 +1365,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         if (!root) return;
         const rootRect = root.getBoundingClientRect();
         const candidates = root.querySelectorAll<HTMLElement>(
-          '[style*="opacity"], [data-lf-shown="false"], [data-journey-shown="false"]',
+          '[data-lf-shown="false"], [data-journey-shown="false"]',
         );
         candidates.forEach((el) => {
           // Rör aldrig Spline/WebGL-telefonen här. Den har en egen readiness-gate
           // för att förhindra vit canvas/splash vid refresh; safety-neten får inte
           // tvinga fram dess host/canvas innan WebGL-materialen är stabila.
           if (el.closest('[data-spline-phone]')) return;
-          const computed = window.getComputedStyle(el);
-          if (parseFloat(computed.opacity) > 0.01) return;
           const rect = el.getBoundingClientRect();
           const inView = rect.bottom > rootRect.top && rect.top < rootRect.bottom;
           if (!inView) return;
@@ -1384,10 +1382,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           if (el.getAttribute('data-journey-shown') === 'false') {
             el.setAttribute('data-journey-shown', 'true');
           }
-          el.style.transition = 'opacity 400ms ease-out, transform 400ms ease-out';
-          el.style.opacity = '1';
-          el.style.transform = 'none';
-          el.style.filter = 'none';
         });
       } catch {
         // tyst — får aldrig störa UX
@@ -1708,7 +1702,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         data-allow-focus-shadow="true"
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                         style={isMobileFeatureMotion ? { ['--lf-x' as string]: '0px', ['--lf-y' as string]: '22px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
-                        className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 md:backdrop-blur-xl ${
+                        className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 [@media_(hover:hover)]:backdrop-blur-xl ${
                           isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                         }`}
                       >
@@ -1768,7 +1762,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           data-allow-focus-shadow="true"
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                           style={isMobileFeatureMotion ? { ['--lf-x' as string]: '0px', ['--lf-y' as string]: '22px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
-                          className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 transition-all duration-300 hover:scale-[1.02] hover:border-secondary/40 md:backdrop-blur-xl ${
+                          className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 transition-all duration-300 hover:scale-[1.02] hover:border-secondary/40 [@media_(hover:hover)]:backdrop-blur-xl ${
                             isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5'
                           }`}
                         >
@@ -1840,7 +1834,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     transition={{ duration: 0.85, ease, delay: 0.1 }}
                     className="mt-14"
                   >
-                    <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/5 p-8 md:flex md:items-center md:justify-between md:gap-8 md:backdrop-blur-xl">
+                    <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/5 p-8 md:flex md:items-center md:justify-between md:gap-8 [@media_(hover:hover)]:backdrop-blur-xl">
                       <div>
                         <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-secondary/85">
                           Behöver ni bara rekrytera en gång?
