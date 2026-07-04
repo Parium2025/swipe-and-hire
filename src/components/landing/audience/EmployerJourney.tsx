@@ -50,8 +50,9 @@ const steps: JourneyStep[] = [
   },
 ];
 
-export function EmployerJourney() {
+export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } = {}) {
   const listRef = useRef<HTMLOListElement | null>(null);
+  const activeSteps = stepsProp ?? steps;
 
   useEffect(() => {
     const list = listRef.current;
