@@ -34,7 +34,9 @@ const sections: Section[] = [
 
 export default function IntegrityPolicyPage() {
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const root = document.querySelector<HTMLElement>('[data-policy-scroll-root]');
+    if (root) root.scrollTop = 0;
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, []);
 
   return (
@@ -49,7 +51,15 @@ export default function IntegrityPolicyPage() {
         <meta name="twitter:card" content="summary" />
       </Helmet>
 
-      <div className="relative min-h-screen bg-primary text-white">
+      <div
+        data-policy-scroll-root
+        className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-white"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehavior: 'contain',
+          scrollPaddingTop: 'calc(env(safe-area-inset-top, 0px) + 9.5rem)',
+        }}
+      >
         <LandingNav
           onLoginClick={() => { window.location.href = '/auth'; }}
           links={[
@@ -60,7 +70,7 @@ export default function IntegrityPolicyPage() {
           ]}
         />
 
-        <main className="mx-auto w-full max-w-[880px] px-5 pb-24 pt-28 sm:px-8 sm:pt-32 md:px-12">
+        <main className="mx-auto w-full max-w-[880px] px-5 pb-28 pt-36 sm:px-8 sm:pt-40 md:px-12">
           <motion.header
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -421,7 +431,7 @@ function Section({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.7, ease: EASE }}
-      className="scroll-mt-24"
+      className="scroll-mt-36 sm:scroll-mt-40"
     >
       <h2 className="text-2xl font-bold tracking-tight text-white sm:text-[26px]">
         {title}

@@ -1159,7 +1159,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // från sidorna upplevs i takt med scrollen.
   useEffect(() => {
     if (!isMobileFeatureMotion) return;
-    const roots = document.querySelectorAll('[data-mobile-feature-prearm]');
+    const scrollRoot = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+    const roots = Array.from(document.querySelectorAll('[data-mobile-feature-prearm]'));
     if (!roots.length) return;
     const io = new IntersectionObserver(
       (entries) => {
@@ -1171,7 +1172,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           }
         });
       },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.12 },
+      { root: scrollRoot, rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
     );
     roots.forEach((root) => {
       const headers = root.querySelectorAll(':scope > .landing-feature-mobile-in');
@@ -1180,7 +1181,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         el.classList.add('is-in-view');
       });
       const cards = root.querySelectorAll('.landing-feature-card.landing-feature-mobile-in');
-      cards.forEach((el) => io.observe(el));
+      cards.forEach((el) => {
+        el.classList.remove('is-in-view');
+        el.setAttribute('data-lf-shown', 'false');
+        io.observe(el);
+      });
     });
     return () => io.disconnect();
   }, [isMobileFeatureMotion, audience]);
@@ -1420,12 +1425,14 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
               }
               [data-mobile-feature-prearm] .landing-feature-mobile-in {
-                opacity: 1;
+                opacity: 0;
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
+                filter: blur(6px);
+                transform-origin: center;
               }
               [data-mobile-feature-prearm] .landing-feature-mobile-in.is-in-view,
               [data-mobile-feature-prearm] .landing-feature-mobile-in[data-lf-shown="true"] {
-                animation: landingFeatureMobileIn 760ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                animation: landingFeatureMobileIn 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
                 animation-delay: var(--lf-delay, 0ms);
               }
               [data-mobile-feature-prearm] .landing-feature-card {
@@ -1579,7 +1586,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         tabIndex={0}
                         data-allow-focus-shadow="true"
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
-                        style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
+                        style={isMobileFeatureMotion ? { ['--lf-x' as string]: '0px', ['--lf-y' as string]: '22px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
                         className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
                           isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                         }`}
@@ -1639,7 +1646,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           tabIndex={0}
                           data-allow-focus-shadow="true"
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
-                          style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
+                          style={isMobileFeatureMotion ? { ['--lf-x' as string]: '0px', ['--lf-y' as string]: '22px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
                           className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-secondary/40 ${
                             isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5'
                           }`}
