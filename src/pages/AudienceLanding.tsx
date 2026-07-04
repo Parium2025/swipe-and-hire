@@ -1412,7 +1412,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
               }
               [data-mobile-feature-prearm] .landing-feature-mobile-in {
-                opacity: 0;
+                opacity: 1;
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
               }
               [data-mobile-feature-prearm] .landing-feature-mobile-in.is-in-view,
@@ -1472,15 +1472,15 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   const Icon = feature.icon;
                   const cardInitial = isMobileFeatureMotion
                     ? false
-                    : { opacity: 0, y: 18, filter: 'blur(6px)' };
+                    : { opacity: 1, y: 18 };
                   return (
                   <motion.div
                     key={feature.title}
                     initial={cardInitial}
-                    whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, y: 0 }}
                     viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
                     transition={{ duration: 0.75, ease, delay: 0.15 + idx * 0.06 }}
-                    style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '-48px' : '48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${(i - 1) * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
+                    style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '-48px' : '48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${(i - 1) * 90}ms`, willChange: 'auto' } : { willChange: 'transform' }}
                     className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.055] to-white/[0.02] p-7 backdrop-blur-xl transition-[border-color,background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-[0_28px_60px_-30px_hsl(var(--secondary)/0.55)] sm:p-8"
                   >
                     <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-secondary/60 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-100" />
