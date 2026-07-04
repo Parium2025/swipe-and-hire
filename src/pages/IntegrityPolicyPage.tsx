@@ -34,11 +34,20 @@ const sections: Section[] = [
 ];
 
 export default function IntegrityPolicyPage() {
+  const navigate = useNavigate();
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-policy-scroll-root]');
     if (root) root.scrollTop = 0;
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, []);
+
+  const handleClose = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
 
   const scrollPolicySection = (id: string) => {
     const root = document.querySelector<HTMLElement>('[data-policy-scroll-root]');
