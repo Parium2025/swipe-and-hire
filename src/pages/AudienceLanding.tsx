@@ -1028,7 +1028,64 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigationType = useNavigationType();
   const c = audienceContent[audience];
   const isMobileFeatureMotion = useIsMobileLandingMotion();
-  const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium' | 'growth' | 'pro'>('premium');
+  const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium' | 'growth' | 'pro'>(
+    audience === 'employer' ? 'pro' : 'premium',
+  );
+
+  const employerPlans = [
+    {
+      id: 'start' as const,
+      name: 'Start',
+      price: '5 000',
+      priceSuffix: '/mån',
+      tagline: 'För dig som rekryterar regelbundet.',
+      features: [
+        '1 användare',
+        'Upp till 40 aktiva annonser per månad',
+        'Video-CV och strukturerade svar',
+        'Kanban över kandidater',
+        'Chatt direkt med kandidater',
+        'Automatisk återkoppling till alla sökande',
+      ],
+      cta: 'Välj Start',
+      highlight: false,
+    },
+    {
+      id: 'growth' as const,
+      name: 'Växa',
+      price: '7 500',
+      priceSuffix: '/mån',
+      tagline: 'När teamet växer och volymen ökar.',
+      features: [
+        '2 användare',
+        'Obegränsat antal annonser',
+        'Allt i Start',
+        'Samarbete i realtid mellan kollegor',
+        'Delade kandidatlistor och kommentarer',
+        'Prioriterad support',
+      ],
+      cta: 'Välj Växa',
+      highlight: false,
+    },
+    {
+      id: 'pro' as const,
+      name: 'Pro',
+      price: '10 000',
+      priceSuffix: '/mån',
+      tagline: 'För organisationer utan gränser.',
+      features: [
+        'Obegränsat antal användare',
+        'Obegränsat antal annonser',
+        'Allt i Växa',
+        'Roller och behörigheter för hela teamet',
+        'Dedikerad kontaktperson',
+        'Onboarding och utbildning',
+      ],
+      cta: 'Välj Pro',
+      highlight: true,
+    },
+  ];
+
 
   // Mjuk musscroll på Windows/desktop. Inaktiv på touch, trackpad, reduced-motion.
   useWheelSmoother(true);
