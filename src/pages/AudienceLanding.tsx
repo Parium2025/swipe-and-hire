@@ -1022,7 +1022,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
         )}
       </section>
 
-      {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+      <SectionDivider className="my-2 md:my-4" />
 
       {/* ─────────── INTRO ─────────── */}
       <section
@@ -1404,7 +1404,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </section>
           )}
 
-          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+          <SectionDivider className="my-2 md:my-4" />
 
           {/* ──────────────── FUNKTIONER ──────────────── */}
           {isMobileFeatureMotion && (
@@ -1509,7 +1509,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+          <SectionDivider className="my-2 md:my-4" />
 
           <div className="relative z-10 -mt-px text-white">
           {/* ──────────────── PRISER ──────────────── */}
@@ -1765,7 +1765,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+          <SectionDivider className="my-2 md:my-4" />
 
           {/* ──────────────── FAQ ──────────────── */}
           <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
@@ -1855,7 +1855,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+          <SectionDivider className="my-2 md:my-4" />
 
           {/* ──────────────── KONTAKT ──────────────── */}
           <section
