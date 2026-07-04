@@ -51,7 +51,7 @@ export default function IntegrityPolicyPage() {
 
       <div className="relative min-h-screen bg-primary text-white">
         <LandingNav
-          activeAudience={null}
+          onLoginClick={() => { window.location.href = '/auth'; }}
           links={[
             { label: 'Start', href: '/' },
             { label: 'För jobbsökare', href: '/jobbsokare' },
