@@ -884,6 +884,7 @@ const MobileJobWizard = ({
   };
 
   const { user } = useAuth();
+  const { hasPlan, loading: planLoading } = useHasActivePlan();
   const { toast } = useToast();
 
   // Load user profile and question templates when opening
