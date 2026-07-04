@@ -47,7 +47,16 @@ const CardItem = ({ item, index }: CardItemProps) => {
   // network error, 404, codec-fel eller om användaren är offline när videon
   // ska laddas. Användaren ser alltid en relevant bild istället för svart ruta.
   const [failed, setFailed] = useState(false);
+  const [usePosterOnly, setUsePosterOnly] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const query = window.matchMedia('(pointer: coarse), (max-width: 767px)');
+    const sync = () => setUsePosterOnly(query.matches);
+    sync();
+    query.addEventListener?.('change', sync);
+    return () => query.removeEventListener?.('change', sync);
+  }, []);
 
   // Pausa videor som ligger utanför viewporten. Annars håller browsern igång
   // 8 parallella H.264-dekodrar samtidigt vilket hackar/lagger på Windows-
@@ -99,7 +108,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
       className="phg-card phg-card-enter"
       style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
-      {item.type === 'video' && !failed ? (
+      {item.type === 'video' && !failed && !usePosterOnly ? (
         <video
           ref={videoRef}
           src={item.src}
