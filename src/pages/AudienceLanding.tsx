@@ -1757,9 +1757,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
+          {audience === 'employer' && <SectionDivider className="my-2 md:my-4" />}
+
           {/* ──────────────── FAQ ──────────────── */}
           <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
-            <div className="mx-auto max-w-[880px]">
+            <div className={audience === 'employer' ? "mx-auto max-w-[1180px]" : "mx-auto max-w-[880px]"}>
+
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
                 whileInView={{ opacity: 1, x: 0 }}
