@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { preloadAboutPageAssets } from '@/lib/aboutPagePreload';
 import { saveScrollNow } from '@/lib/scrollRestoration';
+import { openCookieSettings } from '@/components/CookieBanner';
 
 // Apple-style premium entry — samma timing/easing som AboutPage så
 // hela sajten har symmetrisk rörelsekänsla.
@@ -222,8 +223,15 @@ const SiteFooter = () => {
         </motion.div>
 
         {/* Bottom bar */}
-        <div className="mt-14 border-t border-white/10 pt-6 text-center text-[13px] font-medium text-white">
+        <div className="mt-14 flex flex-col items-center gap-3 border-t border-white/10 pt-6 text-center text-[13px] font-medium text-white sm:flex-row sm:justify-between sm:text-left">
           <p>© {new Date().getFullYear()} Parium AB. Alla rättigheter förbehållna.</p>
+          <button
+            type="button"
+            onClick={openCookieSettings}
+            className="text-white/70 underline-offset-4 transition hover:text-white hover:underline"
+          >
+            Cookie-inställningar
+          </button>
         </div>
       </div>
     </footer>
