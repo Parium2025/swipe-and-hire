@@ -130,7 +130,7 @@ export default function IntegrityPolicyPage() {
             <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl">
               Integritetspolicy
             </h1>
-            <p className="mt-4 text-[15px] text-white/70">
+            <p className="mt-4 text-[15px] text-white">
               Senast uppdaterad: {LAST_UPDATED}
             </p>
             <p className="mt-6 max-w-[680px] text-[16px] leading-7 text-white sm:text-[17px]">
