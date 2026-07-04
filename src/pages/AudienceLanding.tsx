@@ -1032,6 +1032,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     audience === 'employer' ? 'pro' : 'premium',
   );
 
+  const commonEmployerFeatures = [
+    'Skapa annons på minuter — guidat flöde med AI-hjälp för text och krav',
+    '14 dagars synlighet i kandidaternas jobbflöde',
+    'Kandidatpresentation med video, bild och egna ord — se personen bakom CV:t',
+    'Överblick över alla sökande — flytta kandidater mellan steg: ny, intressant, intervju, erbjudande',
+    'Chatt direkt med kandidater i plattformen',
+    'Automatiska svar till alla sökande — ingen lämnas utan besked',
+    'Fungerar lika bra i mobilen som på datorn',
+  ];
+
   const employerPlans = [
     {
       id: 'start' as const,
@@ -1042,10 +1052,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       features: [
         '1 användare',
         'Upp till 40 aktiva annonser per månad',
-        'Video-CV och strukturerade svar',
-        'Kanban över kandidater',
-        'Chatt direkt med kandidater',
-        'Automatisk återkoppling till alla sökande',
+        ...commonEmployerFeatures,
       ],
       cta: 'Välj Start',
       highlight: false,
@@ -1059,10 +1066,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       features: [
         '2 användare',
         'Obegränsat antal annonser',
-        'Video-CV och strukturerade svar',
-        'Kanban över kandidater',
-        'Chatt direkt med kandidater',
-        'Automatisk återkoppling till alla sökande',
+        ...commonEmployerFeatures,
       ],
       cta: 'Välj Växa',
       highlight: false,
@@ -1076,10 +1080,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       features: [
         'Obegränsat antal användare',
         'Obegränsat antal annonser',
-        'Video-CV och strukturerade svar',
-        'Kanban över kandidater',
-        'Chatt direkt med kandidater',
-        'Automatisk återkoppling till alla sökande',
+        'Roller och behörigheter för hela teamet',
+        'Dedikerad kontaktperson',
+        ...commonEmployerFeatures,
       ],
       cta: 'Välj Pro',
       highlight: true,
