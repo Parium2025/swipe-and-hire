@@ -135,7 +135,7 @@ export function CookieBanner() {
     <>
       <div
         aria-hidden="true"
-        className="fixed inset-0 animate-fade-in bg-black/60 backdrop-blur-[3px]"
+        className="fixed inset-0 animate-fade-in bg-black/70"
         style={{ zIndex: 2147483646 }}
         onClick={() => persist(false, false, false)}
       />
@@ -152,7 +152,7 @@ export function CookieBanner() {
           paddingBottom: 'calc(env(safe-area-inset-bottom,0px) + 1rem)',
         }}
       >
-        <div className="pointer-events-auto relative flex max-h-[calc(100svh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0b1220]/95 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
+        <div className="pointer-events-auto relative flex max-h-[calc(100svh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0b1220]/95 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)]">
 
 
           {/* Stäng-knapp — tolkas som "endast nödvändiga" om inget val gjorts,
