@@ -12,6 +12,7 @@ import SplitHeadline from '@/components/landing/audience/SplitHeadline';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import EmployerJourney from '@/components/landing/audience/EmployerJourney';
+import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
@@ -1338,6 +1339,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
         <main>
           <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
+
+          {audience === 'job_seeker' && (
+            <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
+              <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
+              <PinnedHorizontalGallery />
+            </section>
+          )}
 
           {/* ──────────────── FUNKTIONER ──────────────── */}
           {isMobileFeatureMotion && (
