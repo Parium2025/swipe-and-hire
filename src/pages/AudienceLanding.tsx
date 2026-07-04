@@ -301,14 +301,14 @@ const useWaveAwareText = () => {
 
 const isMobileAnimationPrearmed = () => {
   if (typeof window === 'undefined') return false;
-  return window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
+  return window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)').matches;
 };
 
 const useIsMobileLandingMotion = () => {
   const [isMobile, setIsMobile] = useState(isMobileAnimationPrearmed);
 
   useEffect(() => {
-    const query = window.matchMedia('(max-width: 767px), (pointer: coarse)');
+    const query = window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)');
     const sync = () => setIsMobile(query.matches);
     sync();
     query.addEventListener?.('change', sync);
@@ -1153,45 +1153,80 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
 
-  // Mobil: trigga `.landing-feature-mobile-in` när de scrollas in.
-  // Header-elementen (eyebrow/h2/p) animeras direkt vid mount; korten
-  // animeras när användaren faktiskt når sektionen så att slide-in
-  // från sidorna upplevs i takt med scrollen.
+  // Mobil: trigga `.landing-feature-mobile-in` först när varje element faktiskt
+  // scrollas in. Tidigare markerades rubriker i alla sektioner som visade direkt
+  // vid mount, vilket gjorde att t.ex. Pris-rubriken saknade animation på mobil.
   useEffect(() => {
     if (!isMobileFeatureMotion) return;
 
     let io: IntersectionObserver | null = null;
     let cancelled = false;
+    let rafA = 0;
+    let rafB = 0;
+    const timers: number[] = [];
+    const cleanupFns: Array<() => void> = [];
+
+    const reveal = (el: Element) => {
+      el.setAttribute('data-lf-shown', 'true');
+      el.classList.add('is-in-view');
+      io?.unobserve(el);
+    };
 
     const start = () => {
       if (cancelled) return;
       const scrollRoot = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-      const roots = Array.from(document.querySelectorAll('[data-mobile-feature-prearm]'));
-      if (!roots.length) return;
-      io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.setAttribute('data-lf-shown', 'true');
-              entry.target.classList.add('is-in-view');
-              io?.unobserve(entry.target);
-            }
-          });
-        },
-        { root: scrollRoot, rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
+      const elements = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-mobile-feature-prearm] .landing-feature-mobile-in'),
       );
-      roots.forEach((root) => {
-        const headers = root.querySelectorAll(':scope > .landing-feature-mobile-in');
-        headers.forEach((el) => {
-          el.setAttribute('data-lf-shown', 'true');
-          el.classList.add('is-in-view');
+      if (!elements.length) return;
+
+      elements.forEach((el) => {
+        el.classList.remove('is-in-view');
+        el.setAttribute('data-lf-shown', 'false');
+      });
+
+      const isVisible = (el: HTMLElement) => {
+        const rootRect = scrollRoot?.getBoundingClientRect() ?? {
+          top: 0,
+          bottom: window.innerHeight || document.documentElement.clientHeight,
+        };
+        const rect = el.getBoundingClientRect();
+        return rect.bottom > rootRect.top + 16 && rect.top < rootRect.bottom * 0.9;
+      };
+
+      const syncVisible = () => {
+        if (cancelled) return;
+        elements.forEach((el) => {
+          if (el.getAttribute('data-lf-shown') !== 'true' && isVisible(el)) reveal(el);
         });
-        const cards = root.querySelectorAll('.landing-feature-card.landing-feature-mobile-in');
-        cards.forEach((el) => {
-          el.classList.remove('is-in-view');
-          el.setAttribute('data-lf-shown', 'false');
-          io!.observe(el);
+      };
+
+      rafA = window.requestAnimationFrame(() => {
+        rafB = window.requestAnimationFrame(() => {
+          if (cancelled) return;
+          io = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) reveal(entry.target);
+              });
+            },
+            { root: scrollRoot, rootMargin: '0px 0px -10% 0px', threshold: 0.01 },
+          );
+          elements.forEach((el) => io?.observe(el));
+          syncVisible();
+          timers.push(window.setTimeout(syncVisible, 250), window.setTimeout(syncVisible, 900));
         });
+      });
+
+      scrollRoot?.addEventListener('scroll', syncVisible, { passive: true });
+      window.addEventListener('resize', syncVisible, { passive: true });
+      window.addEventListener('orientationchange', syncVisible, { passive: true });
+      window.visualViewport?.addEventListener('resize', syncVisible, { passive: true });
+      cleanupFns.push(() => {
+        scrollRoot?.removeEventListener('scroll', syncVisible);
+        window.removeEventListener('resize', syncVisible);
+        window.removeEventListener('orientationchange', syncVisible);
+        window.visualViewport?.removeEventListener('resize', syncVisible);
       });
     };
 
@@ -1211,11 +1246,19 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       return () => {
         cancelled = true;
         window.removeEventListener('parium:cookie-consent-updated', onConsent);
+        if (rafA) window.cancelAnimationFrame(rafA);
+        if (rafB) window.cancelAnimationFrame(rafB);
+        timers.forEach((timer) => window.clearTimeout(timer));
+        cleanupFns.forEach((fn) => fn());
         io?.disconnect();
       };
     }
     return () => {
       cancelled = true;
+      if (rafA) window.cancelAnimationFrame(rafA);
+      if (rafB) window.cancelAnimationFrame(rafB);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      cleanupFns.forEach((fn) => fn());
       io?.disconnect();
     };
   }, [isMobileFeatureMotion, audience]);
@@ -1300,12 +1343,14 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // men fortfarande osynliga (opacity 0) att fade:a in efter 1500ms.
   // Garanterar att innehåll ALDRIG kan fastna osynligt.
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const forceVisibleIfStuck = () => {
       try {
         const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
         if (!root) return;
         const rootRect = root.getBoundingClientRect();
-        const candidates = root.querySelectorAll<HTMLElement>('[style*="opacity"]');
+        const candidates = root.querySelectorAll<HTMLElement>(
+          '[style*="opacity"], [data-lf-shown="false"], [data-journey-shown="false"]',
+        );
         candidates.forEach((el) => {
           // Rör aldrig Spline/WebGL-telefonen här. Den har en egen readiness-gate
           // för att förhindra vit canvas/splash vid refresh; safety-neten får inte
@@ -1316,6 +1361,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           const rect = el.getBoundingClientRect();
           const inView = rect.bottom > rootRect.top && rect.top < rootRect.bottom;
           if (!inView) return;
+          if (el.getAttribute('data-lf-shown') === 'false') {
+            el.setAttribute('data-lf-shown', 'true');
+            el.classList.add('is-in-view');
+          }
+          if (el.getAttribute('data-journey-shown') === 'false') {
+            el.setAttribute('data-journey-shown', 'true');
+          }
           el.style.transition = 'opacity 400ms ease-out, transform 400ms ease-out';
           el.style.opacity = '1';
           el.style.transform = 'none';
@@ -1324,8 +1376,28 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       } catch {
         // tyst — får aldrig störa UX
       }
-    }, 1500);
-    return () => window.clearTimeout(timer);
+    };
+
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    let raf = 0;
+    const schedule = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        forceVisibleIfStuck();
+      });
+    };
+
+    const timer = window.setTimeout(forceVisibleIfStuck, 1500);
+    root?.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+
+    return () => {
+      window.clearTimeout(timer);
+      if (raf) window.cancelAnimationFrame(raf);
+      root?.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
   }, [audience]);
 
 
@@ -1454,12 +1526,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               [data-mobile-feature-prearm] .landing-feature-mobile-in {
                 opacity: 0;
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
-                filter: blur(6px);
                 transform-origin: center;
                 transition:
                   opacity 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
                   transform 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
-                  filter 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
                   border-color 300ms ease,
                   background-color 300ms ease,
                   box-shadow 300ms ease;
@@ -1468,7 +1538,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               [data-mobile-feature-prearm] .landing-feature-mobile-in[data-lf-shown="true"] {
                 opacity: 1;
                 transform: translate3d(0, 0, 0);
-                filter: blur(0);
               }
               [data-mobile-feature-prearm] .landing-feature-card {
                 backdrop-filter: none;
