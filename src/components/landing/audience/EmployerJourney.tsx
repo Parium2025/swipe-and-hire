@@ -66,11 +66,12 @@ export function EmployerJourney() {
           return (
             <motion.li
               key={step.title}
-              initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
-              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              initial={{ opacity: 1, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25, margin: '0px 0px -80px 0px' }}
               transition={{ duration: 0.7, ease, delay: idx * 0.05 }}
               className="relative"
+              style={{ willChange: 'transform' }}
             >
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
