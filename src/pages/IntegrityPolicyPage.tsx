@@ -86,15 +86,37 @@ export default function IntegrityPolicyPage() {
           scrollPaddingTop: 'calc(env(safe-area-inset-top, 0px) + 9.5rem)',
         }}
       >
-        <LandingNav
-          onLoginClick={() => { window.location.href = '/auth'; }}
-          links={[
-            { label: 'Start', href: '/' },
-            { label: 'För jobbsökare', href: '/jobbsokare' },
-            { label: 'För arbetsgivare', href: '/arbetsgivare' },
-            { label: 'Om oss', href: '/om-oss' },
-          ]}
-        />
+        <header
+          className="fixed inset-x-0 top-0 z-40"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 18px)' }}
+        >
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 sm:px-6 md:px-10">
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label="Tillbaka"
+              className="flex items-center gap-2 rounded-full transition-opacity hover:opacity-80 active:opacity-70"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              <img
+                src={pariumLogo}
+                alt="Parium"
+                width={256}
+                height={256}
+                draggable={false}
+                className="h-auto w-32 sm:w-36 md:w-40 pointer-events-none"
+              />
+            </button>
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label="Stäng och gå tillbaka"
+              className="group relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-white backdrop-blur-xl transition hover:bg-white/[0.12] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            >
+              <X className="h-5 w-5" strokeWidth={2.2} />
+            </button>
+          </div>
+        </header>
 
         <main className="mx-auto w-full max-w-[880px] px-5 pb-28 pt-36 sm:px-8 sm:pt-40 md:px-12">
           <motion.header
