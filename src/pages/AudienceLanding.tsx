@@ -12,6 +12,7 @@ import SplitHeadline from '@/components/landing/audience/SplitHeadline';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import EmployerJourney from '@/components/landing/audience/EmployerJourney';
+import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
