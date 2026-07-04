@@ -329,6 +329,7 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 
 type HeroIntroStageProps = {
   c: (typeof audienceContent)[AudienceRole];
+  audience: AudienceRole;
   onIntroCta?: () => void;
   introCtaLabel?: string;
 };
