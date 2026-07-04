@@ -1,116 +1,113 @@
-## Mål
 
-Bygg om alla SEO-landningssidor (`/jobb/...`, `/yrke/...`, `/yrken`, `/annonser`, `/guider/...`) så de:
-1. Har samma struktur och känsla som appens egen landning (`/jobbsokare`).
-2. Använder Pariums **ljusblå pill-CTA** ("Skapa min profil idag"-stilen) — inte vit/kritvit.
-3. Visar **äkta jobbsiffror** för varje (stad × yrke) — och döljer/disablar länkar utan jobb.
-4. Skickar alla knappar och länkar till rätt destination (`/auth` → in i appen, eller direkt till matchande SEO-sida).
+# Grundplan: Prenumerationer & Planer (utan Stripe)
+
+Målet: All infrastruktur, UI, CTA-flöden och låsningslogik är klar. När du fixat organisationsnummer slår vi bara på Stripe-webhooken sist.
 
 ---
 
-## 1. Knapp-standard (gäller överallt på SEO)
+## 1. Databas
 
-Ny gemensam komponent `src/components/seo/SeoCTAButton.tsx`:
-- `rounded-full bg-secondary text-white px-8 py-4 font-semibold` — exakt samma som hero-knappen på `/jobbsokare`.
-- Hover: `scale-1.03`, `bg-secondary/90`.
-- Ersätter alla `bg-chalk`-knappar på SEO-sidor.
-- Mobil-sticky CTA (`MobileStickyCTA`) använder samma stil.
+**Ny enum `plan_tier`:**
+`one_time` · `start` · `vaxa` · `pro` · `jobseeker_premium`
 
-**Text på alla primära CTA**: "Skapa min profil idag" (enhetligt, matchar landning).
+**Ny enum `plan_status`:**
+`active` · `expired` · `cancelled` · `pending`
 
----
+**Ny tabell `subscription_plans`** (statisk katalog – priser & regler):
+- tier, name, price_sek, billing_period (`monthly` / `one_time`), max_active_jobs, max_users, includes_candidate_bank, is_active
 
-## 2. Ny sidstruktur (per SEO-sida)
+**Ny tabell `user_subscriptions`** (aktiva/historiska planer):
+- user_id, organization_id, tier, status, started_at, expires_at, cancelled_at, stripe_subscription_id (null tills vidare), stripe_customer_id (null), source (`stripe` / `manual` / `trial`)
 
-```text
-┌─ LandingNav (logga + Logga in)
-│
-├─ HERO
-│   • Breadcrumb (Jobb / Stad / Yrke)
-│   • H1 "Lediga jobb som elektriker i Göteborg"
-│   • 2 rader intro
-│   • [Skapa min profil idag]  [Se 12 jobb i Göteborg]
-│         ↑ ljusblå pill          ↑ outline, visar äkta siffra
-│
-├─ JOBB-LISTA (om jobb finns)
-│   • Upp till 6 äkta jobbkort från job_postings
-│   • "Se alla X jobb" → /auth
-│
-├─ KOMPAKT INFO-RAD (3 kolumner, tätt)
-│   • Arbetsuppgifter | Krav | Lön
-│
-├─ FAQ ACCORDION (stängd by default)
-│   • 4-5 frågor, JSON-LD FAQPage för rich results
-│
-├─ INTERN LÄNK-FOOTER (diskret, för Google + UX)
-│   • "Andra yrken i {stad}"  — visar antal jobb per yrke
-│   • "Elektriker i andra städer" — visar antal jobb per stad
-│   • Yrken/städer med 0 jobb: gråade ut, ej klickbara,
-│     med label "Inga jobb just nu"
-│
-└─ MobileStickyCTA (samma ljusblå knapp)
-```
+**Ny tabell `one_time_purchases`** (för 799 kr engångsköp):
+- user_id, tier=`one_time`, purchased_at, activated_at (null tills första annons publiceras), expires_at (14 dagar efter activated_at), job_id, stripe_payment_intent_id
+
+**Två security-definer functions:**
+- `has_active_plan(_user_id uuid)` → boolean (kollar user_subscriptions + one_time_purchases)
+- `get_active_plan_details(_user_id uuid)` → tabell med tier, expires_at, max_active_jobs osv.
+
+**GRANT + RLS** på alla nya tabeller enligt projektets standard.
+
+**Seedar** `subscription_plans` med dina fem produkter (799, 5000, 7500, 10000, 29).
 
 ---
 
-## 3. Dynamiska jobbsiffror (kritisk ändring)
+## 2. Frontend — Ny sida `/valj-plan`
 
-Ny hook `src/hooks/useJobCounts.ts`:
-- En query mot `job_postings` (`is_active=true`, `deleted_at IS NULL`) som returnerar `{ city: count, occupation: count, "city|occupation": count }`.
-- Cachas i React Query (5 min stale).
-- Används av alla SEO-sidor + footer-länkar.
+Route dit man landar när:
+- Man loggat in utan aktiv plan och trycker "Publicera annons"
+- Man avbryter Stripe-flödet
+- Man klickar "Uppgradera" var som helst
 
-**Beteende:**
-- `12 jobb` → knapp aktiv, visar siffran.
-- `0 jobb` → länken renderas som inaktiv chip med text "Inga jobb just nu" + CTA "Bevaka {stad} {yrke}" → `/auth?notify=elektriker-malmo`.
-- Detta löser ditt exempel: "Elektriker Malmö" utan jobb kan inte längre klickas till tom sida.
+Innehåll:
+- Hero: "Välj plan som passar er rekrytering"
+- 4 planer sida-vid-sida (Start/Växa/Pro + 799-engång som separat kort)
+- Feature-matris (kollapsbar på mobil)
+- CTA: "Fortsätt till betalning" → placeholder-modal ("Stripe kopplas snart") — samma knapp aktiveras senare
+- FAQ: bindningstid, ångerrätt, byta plan
 
----
-
-## 4. Konsekvens i innehåll
-
-- Alla CTA: **"Skapa min profil idag"**.
-- Alla sekundärknappar: **"Se {N} jobb i {stad}"** eller **"Bevaka jobb"** (om N=0).
-- Breadcrumbs alltid: `Jobb / {Stad} / {Yrke}`.
-- FAQ-rubriker enhetliga per sidtyp.
+Jobbsökar-Premium (29 kr) får eget kort på egen sida för kandidater — inte samma flöde.
 
 ---
 
-## 5. Filer som ändras (~9 filer)
+## 3. Låsningslogik (den viktigaste delen)
 
-**Nya:**
-- `src/components/seo/SeoCTAButton.tsx` — den ljusblå pill-knappen.
-- `src/components/seo/SeoFooterLinks.tsx` — diskret länk-footer med jobbsiffror + disable-läge.
-- `src/components/seo/SeoFAQ.tsx` — kompakt accordion + JSON-LD.
-- `src/hooks/useJobCounts.ts` — aggregerade siffror.
+En central hook: `useHasActivePlan()` → `{ hasPlan, tier, expiresAt, loading }`
 
-**Uppdateras (struktur + knappar):**
-- `src/pages/JobbCity.tsx`
-- `src/pages/JobbCityYrke.tsx`
-- `src/pages/YrkePage.tsx`
-- `src/pages/JobbHub.tsx`
-- `src/pages/YrkenHub.tsx`
-- `src/pages/AnnonserHub.tsx`
-- `src/pages/GuidePage.tsx`
-- `src/pages/GuiderHub.tsx`
-- `src/pages/PublicJobPage.tsx`
-- `src/components/seo/MobileStickyCTA.tsx` (byter till `bg-secondary`)
+**Enda stället som blockeras:** "Publicera annons"-knappen.
+- Wizard: sista steget "Publicera" → om ingen plan → navigate till `/valj-plan?from=publish&job_id=X`
+- Draft sparas alltid, oavsett plan
+
+**Allt annat fungerar som vanligt även utan plan:**
+- Kandidatbanken, chatt, betyg, anteckningar, gamla annonser, sökningar, filter
+- Detta är kärnan i "inget försvinner"-principen
+
+**Visuell indikator:** Diskret badge uppe till höger i employer-headern: "Ingen aktiv plan · Uppgradera" (grå, inte pushig).
 
 ---
 
-## 6. Vad detta INTE rör
+## 4. CTA-flöden som byggs klara
 
-- Inga ändringar i appens inloggade vyer.
-- Inga ändringar i `/jobbsokare`, `/arbetsgivare`, `/` (landning).
-- Ingen databas-migration — bara läs-query mot `job_postings`.
-- Ingen påverkan på befintliga URL:er — alla canonicals behålls.
+| Var | Trigger | Går till |
+|---|---|---|
+| Wizard "Publicera" utan plan | Klick | `/valj-plan?from=publish` |
+| Header-badge | Klick | `/valj-plan` |
+| Inställningar → Faktura & Plan | Klick | Ny sida `/settings/plan` (visar nuvarande) |
+| Efter Stripe-avbrott | Redirect | `/valj-plan?cancelled=true` |
+| Onboarding för nya företag | Sista steget | `/valj-plan?welcome=true` |
+
+Alla knappar går till **placeholder-modal**: "Betalning aktiveras när Stripe kopplas. Vi meddelar dig så fort det är klart."
 
 ---
 
-## 7. Svar på "kommer SEO drunkna parium.se?"
+## 5. Ny sida `/settings/plan`
 
-**Nej, 2/10 risk.** Alla SEO-sidor är på **samma domän** (parium.se) och länkar canonical hem. Google rankar dem som delar av Parium — det stärker hela domänen istället för att konkurrera. Och varje ny jobbannons skapar EN sida (`/annons/{id}`), inte en hel SEO-trädgren — strukturen är fast och kontrollerad.
+- Visar nuvarande plan + status + förnyelsedatum
+- "Byt plan" → `/valj-plan`
+- "Säg upp" → placeholder ("aktiveras med Stripe")
+- Historik-lista över tidigare planer och engångsköp
 
 ---
 
-**Klart att köra?** Säg "kör" så bygger jag allt i en sittning.
+## 6. Vad som INTE byggs nu
+
+- Stripe-webhooks
+- `create-checkout-session` edge function
+- Faktisk debitering
+- E-postkvitton
+- Prorated byten
+
+Detta läggs på när du fixat orgnummer — då blir det ~2 timmars jobb eftersom all grund finns.
+
+---
+
+## Ordning för genomförande
+
+1. Migration: enums + 3 tabeller + functions + RLS + seed
+2. Hook `useHasActivePlan` + typer
+3. Sida `/valj-plan` med alla 4 planer + placeholder-CTA
+4. Header-badge + låsning på "Publicera annons"
+5. Sida `/settings/plan`
+6. Testa hela flödet end-to-end mot placeholders
+
+**Kör jag igång med steg 1 (migrationen) direkt?**
