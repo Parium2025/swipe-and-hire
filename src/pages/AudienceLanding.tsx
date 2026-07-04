@@ -18,6 +18,7 @@ import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { useWheelSmoother } from '@/hooks/useWheelSmoother';
 import { preloadAudienceLandingAssets } from '@/lib/audienceLandingPreload';
+import { AppBadges } from '@/components/landing/AppBadges';
 
 
 
@@ -1776,6 +1777,22 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         q: 'Vilka företag finns här?',
                         a: 'Allt från lokala restauranger och butiker till växande techbolag och etablerade arbetsgivare runt om i Sverige. Vi lägger till nya företag löpande och prioriterar arbetsgivare som svarar snabbt och håller hög kvalitet på sina annonser.',
                       },
+                      {
+                        q: 'Vad händer när jag visat intresse för ett jobb?',
+                        a: 'Arbetsgivaren ser din profil, video och svar på deras frågor. Om de också är intresserade öppnas en chatt direkt i appen där ni kan prata vidare, ställa frågor och boka intervju — utan mejltrådar eller telefonjakt.',
+                      },
+                      {
+                        q: 'Måste jag ha CV och video?',
+                        a: 'Nej, men vi rekommenderar det starkt. En video på 30–60 sekunder gör att du sticker ut på ett sätt som ingen text kan matcha, och arbetsgivare svarar snabbare på profiler där de får en känsla för personen bakom orden.',
+                      },
+                      {
+                        q: 'Vem kan se min profil?',
+                        a: 'Bara arbetsgivare som du själv aktivt visat intresse för får se hela din profil. Din information ligger aldrig öppet — du bestämmer när, var och för vem den syns.',
+                      },
+                      {
+                        q: 'Hur ökar jag mina chanser att bli kontaktad?',
+                        a: 'Komplettera profilen med video, ett tydligt CV och skriv några rader om vad du söker. Håll önskemål kring roll, ort och tillgänglighet uppdaterade — då hamnar du högre i arbetsgivarens flöde och får fler relevanta träffar.',
+                      },
                     ]
                   : [
                       {
@@ -1826,6 +1843,24 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
               </div>
             </div>
+          </section>
+
+          <SectionDivider className="my-12 md:my-20" />
+
+          {/* ──────────────── APP BADGES ──────────────── */}
+          <section
+            aria-label="Ladda ner Parium-appen"
+            className="relative overflow-hidden px-5 py-10 sm:px-6 sm:py-12 md:px-12 md:py-14 lg:px-24"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, ease }}
+              className="mx-auto max-w-[720px] text-center"
+            >
+              <AppBadges />
+            </motion.div>
           </section>
 
           <SectionDivider className="my-12 md:my-20" />
