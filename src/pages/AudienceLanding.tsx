@@ -301,14 +301,14 @@ const useWaveAwareText = () => {
 
 const isMobileAnimationPrearmed = () => {
   if (typeof window === 'undefined') return false;
-  return window.matchMedia('(max-width: 767px), ((pointer: coarse) and (orientation: portrait) and (max-width: 1024px))').matches;
+  return window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)').matches;
 };
 
 const useIsMobileLandingMotion = () => {
   const [isMobile, setIsMobile] = useState(isMobileAnimationPrearmed);
 
   useEffect(() => {
-    const query = window.matchMedia('(max-width: 767px), (pointer: coarse)');
+    const query = window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)');
     const sync = () => setIsMobile(query.matches);
     sync();
     query.addEventListener?.('change', sync);
