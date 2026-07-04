@@ -273,14 +273,33 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                   style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                   {links.map((l) => {
-                    const id = l.href.replace('#', '');
-                    const isActive = activeId === id;
+                    const isAnchor = l.href.startsWith('#');
+                    const id = isAnchor ? l.href.slice(1) : l.href;
+                    const isActive = isAnchor
+                      ? activeId === id
+                      : location.pathname === l.href;
                     return (
                       <a
                         key={l.href}
                         href={l.href}
                         onClick={(e) => {
-                          handleAnchor(e, l.href);
+                          if (isAnchor) {
+                            handleAnchor(e, l.href);
+                          } else {
+                            e.preventDefault();
+                            const goTop = () => {
+                              const scroller = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+                              if (scroller) scroller.scrollTop = 0;
+                              window.scrollTo({ top: 0, behavior: 'auto' });
+                            };
+                            if (location.pathname === l.href) {
+                              goTop();
+                            } else {
+                              sessionStorage.setItem('parium-skip-splash', '1');
+                              navigate(l.href);
+                              requestAnimationFrame(() => requestAnimationFrame(goTop));
+                            }
+                          }
                           requestAnimationFrame(() => {
                             const target = e.currentTarget as HTMLElement | null;
                             target?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
