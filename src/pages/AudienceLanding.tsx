@@ -1052,6 +1052,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     audience === 'employer' ? 'pro' : 'premium',
   );
   const [employerFeaturesOpen, setEmployerFeaturesOpen] = useState(false);
+  const [seekerFeaturesOpen, setSeekerFeaturesOpen] = useState(false);
 
 
   const commonEmployerFeatures = [
