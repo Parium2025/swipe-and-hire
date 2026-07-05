@@ -25,6 +25,7 @@ interface EmployerJobCardProps {
     applications_count: number;
     created_at: string;
     expires_at?: string;
+    overlay_text_color?: string | null;
     job_image_url?: string;
     company_logo_url?: string;
     image_focus_position?: string;
