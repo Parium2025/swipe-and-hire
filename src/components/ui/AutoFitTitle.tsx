@@ -60,6 +60,7 @@ export function AutoFitTitle({
   const ref = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [truncated, setTruncated] = useState(false);
+  const [fitStyle, setFitStyle] = useState<React.CSSProperties>({});
   const [open, setOpen] = useState(false);
 
   const { isTouch, supportsHover } = ENV;
@@ -74,6 +75,7 @@ export function AutoFitTitle({
     if (!text) {
       el.style.fontSize = '';
       textEl.style.transform = '';
+      setFitStyle({});
       setTruncated(false);
       return;
     }
@@ -82,14 +84,16 @@ export function AutoFitTitle({
 
     const resetTextPaint = () => {
       textEl.style.transform = '';
+      textEl.style.fontSize = '';
       textEl.style.maxWidth = '';
       textEl.style.overflow = 'visible';
       textEl.style.textOverflow = 'clip';
     };
 
     const measureAt = (fontPx: number) => {
-      el.style.fontSize = `${fontPx}px`;
+      textEl.style.fontSize = `${fontPx}px`;
       resetTextPaint();
+      textEl.style.fontSize = `${fontPx}px`;
       return textEl.scrollWidth;
     };
 
@@ -141,13 +145,18 @@ export function AutoFitTitle({
 
         const shouldTruncate = chosenFont <= minFontPx + 0.1 && scale < scaleFloor;
 
-        el.style.fontSize = `${chosenFont}px`;
-
         if (shouldTruncate) {
           textEl.style.transform = '';
           textEl.style.maxWidth = `${availableWidth}px`;
           textEl.style.overflow = 'hidden';
           textEl.style.textOverflow = 'ellipsis';
+          setFitStyle({
+            fontSize: `${chosenFont}px`,
+            maxWidth: '100%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            transform: 'none',
+          });
           setTruncated(true);
           return;
         }
@@ -156,6 +165,13 @@ export function AutoFitTitle({
         textEl.style.overflow = 'visible';
         textEl.style.textOverflow = 'clip';
         textEl.style.transform = scale < 0.999 ? `scaleX(${scale})` : '';
+        setFitStyle({
+          fontSize: `${chosenFont}px`,
+          maxWidth: 'none',
+          overflow: 'visible',
+          textOverflow: 'clip',
+          transform: scale < 0.999 ? `scaleX(${scale})` : 'none',
+        });
         setTruncated(false);
       });
     };
@@ -190,8 +206,8 @@ export function AutoFitTitle({
 
   const mergedStyle: React.CSSProperties = {
     whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    overflow: truncated ? 'hidden' : 'visible',
+    textOverflow: truncated ? 'ellipsis' : 'clip',
     ...style,
   };
 
@@ -207,11 +223,12 @@ export function AutoFitTitle({
         style={{
           display: 'inline-block',
           maxWidth: '100%',
-          overflow: 'visible',
-          textOverflow: 'clip',
+          overflow: truncated ? 'hidden' : 'visible',
+          textOverflow: truncated ? 'ellipsis' : 'clip',
           transformOrigin: 'center',
           verticalAlign: 'top',
           whiteSpace: 'nowrap',
+          ...fitStyle,
         }}
       >
         {text}
