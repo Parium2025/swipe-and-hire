@@ -274,9 +274,9 @@ export function EmployerJourney({
 
 
                 {/* Textkort */}
-                <article className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.055] to-white/[0.02] p-6 transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-0.5 hover:border-secondary/35 hover:shadow-[0_28px_60px_-30px_hsl(var(--secondary)/0.55)] sm:p-8 [@media_(hover:hover)]:backdrop-blur-xl">
-                  <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-secondary/60 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-100" />
-                  <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.16),transparent_65%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <article className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.055] to-white/[0.02] p-6 transition-[border-color,box-shadow,transform] duration-500 [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:border-secondary/35 [@media(hover:hover)]:hover:shadow-[0_28px_60px_-30px_hsl(var(--secondary)/0.55)] sm:p-8 [@media_(hover:hover)]:backdrop-blur-xl">
+                  <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-secondary/60 to-transparent opacity-60 transition-opacity duration-500 [@media(hover:hover)]:group-hover:opacity-100" />
+                  <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.16),transparent_65%)] opacity-0 transition-opacity duration-500 [@media(hover:hover)]:group-hover:opacity-100" />
 
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[11px] font-semibold tracking-[0.28em] text-secondary/80">
