@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import {
   PenLine,
   Users,
@@ -54,7 +54,7 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
   const listRef = useRef<HTMLOListElement | null>(null);
   const activeSteps = stepsProp ?? steps;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const list = listRef.current;
     if (!list) return;
 
@@ -72,55 +72,46 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
       return;
     }
 
-    // Set initial hidden state only now (post-mount) so SSR/no-JS stays visible.
     items.forEach((el) => el.setAttribute('data-journey-shown', 'false'));
 
     const scrollRoot = list.closest('[data-landing-scroll-root]') as HTMLElement | null;
-    let observer: IntersectionObserver | null = null;
     let cancelled = false;
-    let rafA = 0;
-    let rafB = 0;
+    let raf = 0;
     const timers: number[] = [];
 
     const reveal = (el: HTMLLIElement) => {
       el.setAttribute('data-journey-shown', 'true');
-      observer?.unobserve(el);
     };
 
-    const isVisible = (el: HTMLLIElement) => {
+    const shouldRevealList = () => {
       const rootRect = scrollRoot?.getBoundingClientRect() ?? {
         top: 0,
         bottom: window.innerHeight || document.documentElement.clientHeight,
       };
-      const rect = el.getBoundingClientRect();
-      return rect.bottom > rootRect.top + 16 && rect.top < rootRect.bottom * 0.9;
+      const rect = list.getBoundingClientRect();
+      const rootHeight = rootRect.bottom - rootRect.top;
+      return rect.bottom > rootRect.top + 16 && rect.top < rootRect.top + rootHeight * 0.92;
     };
 
     const syncVisible = () => {
       if (cancelled) return;
+      if (!shouldRevealList()) return;
       items.forEach((el) => {
-        if (el.getAttribute('data-journey-shown') !== 'true' && isVisible(el)) reveal(el);
+        if (el.getAttribute('data-journey-shown') !== 'true') reveal(el);
+      });
+    };
+
+    const schedule = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        syncVisible();
       });
     };
 
     const start = () => {
-      rafA = window.requestAnimationFrame(() => {
-        rafB = window.requestAnimationFrame(() => {
-          if (cancelled) return;
-          observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                reveal(entry.target as HTMLLIElement);
-              });
-            },
-            { root: scrollRoot, rootMargin: '0px 0px -10% 0px', threshold: 0.01 },
-          );
-          items.forEach((el) => observer?.observe(el));
-          syncVisible();
-          timers.push(window.setTimeout(syncVisible, 250), window.setTimeout(syncVisible, 900));
-        });
-      });
+      schedule();
+      timers.push(window.setTimeout(syncVisible, 80), window.setTimeout(syncVisible, 260), window.setTimeout(syncVisible, 900));
     };
 
     const isCookieBannerOpen = () => document.documentElement.dataset.cookieBannerOpen === 'true';
@@ -133,29 +124,25 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
       return () => {
         cancelled = true;
         window.removeEventListener('parium:cookie-consent-updated', onConsent);
-        if (rafA) window.cancelAnimationFrame(rafA);
-        if (rafB) window.cancelAnimationFrame(rafB);
+        if (raf) window.cancelAnimationFrame(raf);
         timers.forEach((timer) => window.clearTimeout(timer));
-        observer?.disconnect();
       };
     }
 
     start();
-    scrollRoot?.addEventListener('scroll', syncVisible, { passive: true });
-    window.addEventListener('resize', syncVisible, { passive: true });
-    window.addEventListener('orientationchange', syncVisible, { passive: true });
-    window.visualViewport?.addEventListener('resize', syncVisible, { passive: true });
+    scrollRoot?.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('orientationchange', schedule, { passive: true });
+    window.visualViewport?.addEventListener('resize', schedule, { passive: true });
 
     return () => {
       cancelled = true;
-      if (rafA) window.cancelAnimationFrame(rafA);
-      if (rafB) window.cancelAnimationFrame(rafB);
+      if (raf) window.cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
-      observer?.disconnect();
-      scrollRoot?.removeEventListener('scroll', syncVisible);
-      window.removeEventListener('resize', syncVisible);
-      window.removeEventListener('orientationchange', syncVisible);
-      window.visualViewport?.removeEventListener('resize', syncVisible);
+      scrollRoot?.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('orientationchange', schedule);
+      window.visualViewport?.removeEventListener('resize', schedule);
     };
   }, []);
 

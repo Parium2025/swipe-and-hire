@@ -675,8 +675,8 @@ const PinnedHorizontalGallery = () => {
         }
 
         @media (max-width: 767px) {
-          /* Mobil touch: längre pin = lugnare, mer kontrollerad scroll utan tunghetskänsla. */
-          .phg-section { height: 520vh; }
+          /* Mobil touch: tillräcklig pin för mjuk horisontell rörelse, men utan den långa tomkänslan mellan sektionerna. */
+          .phg-section { height: 420vh; }
           .phg-header { padding: clamp(28px, 5vh, 56px) 24px clamp(20px, 3vh, 36px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
