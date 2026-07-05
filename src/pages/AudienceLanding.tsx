@@ -1767,7 +1767,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                             <p className="mt-2 text-4xl font-black text-white">
                               {plan.price} kr<span className="text-sm font-medium text-white">{plan.priceSuffix}</span>
                             </p>
-                            <p className="mt-1 text-xs font-medium text-white/70">exkl. moms</p>
+                            <p className="mt-1 text-xs font-medium text-white">exkl. moms</p>
                             <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
                             <PlanFeatures
                               features={plan.features}
@@ -1834,7 +1834,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         <p className="mt-4 text-3xl font-black text-white">
                           799 kr<span className="ml-1 text-sm font-medium text-white">/annons</span>
                         </p>
-                        <p className="mt-1 text-xs font-medium text-white/70">exkl. moms</p>
+                        <p className="mt-1 text-xs font-medium text-white">exkl. moms</p>
                       </div>
                       <button
                         type="button"
@@ -1921,12 +1921,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         a: 'Nej. Alla månadspaket löper månadsvis och ni säger upp när ni vill från era kontoinställningar. Ingen uppsägningstid, inga dolda avgifter. Betalar ni för en enkelannons gäller den i 14 dagar och avslutas automatiskt.',
                       },
                       {
-                        q: 'Hur snabbt kommer vi igång?',
-                        a: 'På under 10 minuter. Ni skapar ett arbetsgivarkonto, verifierar organisationen och publicerar er första annons direkt. Har ni företagslogga och en rollbeskrivning redo är annonsen live samma dag.',
+                        q: 'Vad händer om vi inte förnyar?',
+                        a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
                       },
                       {
-                        q: 'Hur kvalitetssäkras kandidaterna?',
-                        a: 'Varje kandidat har en verifierad profil med video, erfarenhet och tydliga önskemål kring roll, ort och lön. Ni ser allt innan ni matchar, vilket minimerar tiden ni lägger på irrelevanta ansökningar.',
+                        q: 'Kan vi byta plan?',
+                        a: 'Ja, ni kan uppgradera eller nedgradera när som helst från Inställningar → Plan. Ändringen träder i kraft omedelbart och vi justerar debiteringen proportionerligt.',
+                      },
+                      {
+                        q: 'Ingår moms?',
+                        a: 'Priserna är exklusive moms. 25 % moms läggs på i checkouten och specificeras på fakturan. Momsregistrerade företag drar av den som ingående moms som vanligt.',
                       },
                       {
                         q: 'Kan flera kollegor arbeta i samma konto?',
