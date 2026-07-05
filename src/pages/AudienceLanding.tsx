@@ -1185,7 +1185,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
       elements.forEach((el) => {
         el.classList.remove('is-in-view');
-        el.setAttribute('data-lf-shown', 'true');
+        el.removeAttribute('data-lf-shown');
       });
 
       const isVisible = (el: HTMLElement) => {
