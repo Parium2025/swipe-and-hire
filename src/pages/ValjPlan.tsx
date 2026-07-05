@@ -76,8 +76,9 @@ const FEATURES_BY_TIER: Record<PlanTier, string[]> = {
 export default function ValjPlan() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { plan: activePlan } = useHasActivePlan();
+  const isEmployer = userRole?.role === 'employer';
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
