@@ -62,6 +62,9 @@ export default defineConfig(({ mode }) => ({
       "react/jsx-dev-runtime",
     ],
   },
+  esbuild: mode === 'production'
+    ? { drop: ['console', 'debugger'] }
+    : undefined,
   optimizeDeps: {
     force: true,
     include: [
