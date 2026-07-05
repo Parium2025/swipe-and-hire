@@ -246,7 +246,14 @@ export default function ValjPlan() {
         <div className="mx-auto flex max-w-6xl items-center justify-end px-4 py-4">
           <button
             type="button"
-            onClick={() => navigate('/', { replace: true })}
+            onClick={() => {
+              // Kom du från publiceringsflödet? Gå tillbaka till annonsen (utkastet är sparat).
+              if (from === 'publish') {
+                navigate(-1);
+              } else {
+                navigate('/', { replace: true });
+              }
+            }}
             aria-label="Stäng"
             className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white transition-colors hover:bg-white/[0.12]"
           >
