@@ -1527,11 +1527,17 @@ const MobileJobWizard = ({
     }
   ];
 
-  const handleInputChange = (field: keyof JobFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleInputChange = (field: keyof JobFormData, value: any) => {
+    setFormData(prev => {
+      const next: any = { ...prev, [field]: value };
+      if (field === 'employment_type') {
+        // Reset detail-fields whenever the type changes so old values don't leak
+        next.part_time_days = [];
+        next.duration_amount = '';
+        next.duration_unit = prev.duration_unit || 'months';
+      }
+      return next;
+    });
   };
 
   const handleCitySearch = (value: string) => {
