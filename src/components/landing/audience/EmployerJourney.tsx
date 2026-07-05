@@ -50,7 +50,10 @@ const steps: JourneyStep[] = [
   },
 ];
 
-export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } = {}) {
+export function EmployerJourney({
+  steps: stepsProp,
+  mobileClassMode = false,
+}: { steps?: JourneyStep[]; mobileClassMode?: boolean } = {}) {
   const listRef = useRef<HTMLOListElement | null>(null);
   const activeSteps = stepsProp ?? steps;
 
