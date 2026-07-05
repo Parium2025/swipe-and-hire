@@ -173,9 +173,20 @@ export default function ValjPlan() {
     }
   }, [cancelled]);
 
-  // Företagsplaner (visas i huvudgriden) vs jobbsökar-premium (eget kort)
-  const companyPlans = useMemo(
-    () => plans.filter(p => p.tier !== 'jobseeker_premium'),
+  // Har användaren redan en aktiv plan? Då ska sidan inte vara nåbar.
+  useEffect(() => {
+    if (activePlan && !cancelled) {
+      navigate('/', { replace: true });
+    }
+  }, [activePlan, cancelled, navigate]);
+
+  // Prenumerationsplaner (huvudgrid) — engångsköp visas separat under
+  const subscriptionPlans = useMemo(
+    () => plans.filter(p => p.tier !== 'jobseeker_premium' && p.billing_period !== 'one_time'),
+    [plans]
+  );
+  const oneTimePlan = useMemo(
+    () => plans.find(p => p.billing_period === 'one_time' && p.tier !== 'jobseeker_premium') ?? null,
     [plans]
   );
   const seekerPlan = useMemo(
@@ -236,31 +247,30 @@ export default function ValjPlan() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-24 pt-4 sm:pt-8">
-        {/* Kompakt intro — utan stor banner, matchar landningens ton */}
+        {/* Kompakt intro — centrerad, större & grövre rubrik */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="max-w-3xl"
+          className="mx-auto max-w-3xl text-center"
         >
-          <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+          <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl md:text-6xl">
             {headline}
           </h1>
-          <p className="mt-3 text-base leading-7 text-white sm:text-lg">
+          <p className="mt-4 text-base leading-7 text-white sm:text-lg">
             {subline}
           </p>
         </motion.div>
 
-        {/* Company plans grid */}
-        <div className="mt-10 grid grid-cols-1 gap-5 sm:mt-12 md:grid-cols-2 xl:grid-cols-4">
-          {loading && Array.from({ length: 4 }).map((_, i) => (
+        {/* Prenumerationsplaner */}
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:mt-12 md:grid-cols-2 xl:grid-cols-3">
+          {loading && Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-[420px] animate-pulse rounded-3xl border border-white/5 bg-white/[0.03]" />
           ))}
-          {!loading && companyPlans.map((plan, idx) => {
+          {!loading && subscriptionPlans.map((plan, idx) => {
             const isRecommended = plan.tier === 'pro' && !userHasPro;
             const isCurrent = activePlan?.tier === plan.tier;
             const isActive = activeTier === plan.tier || (activeTier === null && isRecommended);
-            const isOpen = allFeaturesOpen;
             return (
               <motion.div
                 key={plan.id}
@@ -271,8 +281,10 @@ export default function ValjPlan() {
                 onFocusCapture={() => setActiveTier(plan.tier)}
                 role="button"
                 tabIndex={0}
-                className={`relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:border-secondary/40 ${
-                  isActive ? 'border-secondary bg-white/5' : 'border-white/15 bg-white/5'
+                className={`relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 ${
+                  isActive
+                    ? 'border-secondary bg-white/5 shadow-[0_0_60px_-12px_hsl(var(--secondary)/0.55)]'
+                    : 'border-white/15 bg-white/5 hover:border-secondary/40'
                 }`}
               >
                 {isRecommended && (
@@ -324,6 +336,59 @@ export default function ValjPlan() {
             );
           })}
         </div>
+
+        {/* Engångsköp — under prenumerationsplanerna */}
+        {!loading && oneTimePlan && (() => {
+          const plan = oneTimePlan;
+          const isCurrent = activePlan?.tier === plan.tier;
+          const isActive = activeTier === plan.tier;
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 0.6, ease, delay: 0.25 }}
+              onPointerDownCapture={() => setActiveTier(plan.tier)}
+              onFocusCapture={() => setActiveTier(plan.tier)}
+              role="button"
+              tabIndex={0}
+              className={`relative mt-6 flex cursor-pointer flex-col gap-6 overflow-hidden rounded-3xl border p-8 transition-all duration-300 sm:flex-row sm:items-center sm:justify-between ${
+                isActive
+                  ? 'border-secondary bg-white/5 shadow-[0_0_60px_-12px_hsl(var(--secondary)/0.55)]'
+                  : 'border-white/15 bg-white/5 hover:border-secondary/40'
+              }`}
+            >
+              <div className="flex-1">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                  <span className="rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80">
+                    Engångsköp
+                  </span>
+                </div>
+                <p className="mt-2 text-3xl font-black text-white">
+                  {formatPrice(plan.price_sek)} kr
+                  <span className="text-sm font-medium text-white"> engångs</span>
+                </p>
+                <p className="mt-3 max-w-xl text-sm leading-7 text-white">{plan.description}</p>
+              </div>
+              <button
+                type="button"
+                onPointerDown={(e) => { e.stopPropagation(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!isCurrent) handleSelect(plan);
+                }}
+                disabled={isCurrent}
+                className={`flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] disabled:opacity-60 sm:w-auto ${
+                  isCurrent
+                    ? 'border border-white/20 bg-white/10 text-white hover:border-white/30 hover:bg-white/15'
+                    : 'bg-secondary text-white shadow-[0_14px_40px_-14px_hsl(var(--secondary)/0.8)] hover:-translate-y-0.5 hover:shadow-[0_18px_45px_-18px_hsl(var(--secondary))]'
+                }`}
+              >
+                {isCurrent ? 'Nuvarande plan' : 'Köp engångsannons'}
+              </button>
+            </motion.div>
+          );
+        })()}
 
         {/* Jobseeker premium card */}
         {seekerPlan && !isEmployer && (
