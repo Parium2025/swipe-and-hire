@@ -45,9 +45,9 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     featuresIntro: 'En genomtänkt upplevelse, designad för alla enheter — så att du alltid kan upptäcka möjligheter och ta nästa steg, oavsett var du befinner dig i din karriär.',
     features: [
       { title: 'Du bestämmer', description: 'Din profil, dina villkor. Du väljer vad som visas.', icon: ShieldCheck },
-      { title: 'Profil framför CV', description: 'Visa vem du är med video, bilder och egna ord — en levande profil som kompletterar ditt CV.', icon: Sparkles },
+      { title: 'Profil framför CV', description: 'Visa vem du är med video, en profilbild och egna ord — en levande profil som kompletterar ditt CV.', icon: Sparkles },
       { title: 'Sök smart', description: 'Filtrera på plats, roll och erfarenhet. Hitta rätt jobb utan att scrolla i evighet.', icon: Brain },
-      { title: 'Swipa & spara', description: 'Bläddra jobben med ett svep. Spara de du gillar och återvänd när du vill.', icon: Heart },
+      { title: 'Swipa & spara', description: 'Bläddra jobben med ett svep. Spara jobben du gillar och återvänd när du vill.', icon: Heart },
       { title: 'Jobbevakningar', description: 'Spara din sökning och få notis när en ny roll matchar.', icon: Bell },
       { title: 'Få kontakt direkt', description: 'Med premium får du tillgång till arbetsgivarens mejl och kan bli kontaktad direkt av arbetsgivaren i appen.', icon: MessageCircle },
     ],
