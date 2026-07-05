@@ -263,7 +263,7 @@ export function EmployerJourney({
                 <div className="relative flex md:justify-center">
                   <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-secondary bg-gradient-to-br from-secondary/25 to-secondary/5 text-secondary shadow-[0_10px_30px_-16px_hsl(var(--secondary)/0.6)] [@media_(hover:hover)]:backdrop-blur-xl">
                     <Icon className="h-6 w-6" strokeWidth={2} />
-                    <span className="pointer-events-none absolute inset-0 hidden rounded-2xl bg-secondary/20 opacity-0 blur-xl transition-opacity duration-500 [@media(hover:hover)]:block [@media(hover:hover)]:group-hover:opacity-100" />
+                    <span className="employer-journey-icon-glow pointer-events-none absolute inset-0 hidden rounded-2xl bg-secondary/20 opacity-0 blur-xl transition-opacity duration-500 [@media(hover:hover)]:block [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:none)]:block" />
                   </div>
                 </div>
 
