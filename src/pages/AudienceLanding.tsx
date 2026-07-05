@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
@@ -6,19 +6,23 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 
 import WaveDivider from '@/components/landing/WaveDivider';
-import BouncyFooter from '@/components/landing/audience/BouncyFooter';
-import SiteFooter from '@/components/landing/SiteFooter';
 import SplitHeadline from '@/components/landing/audience/SplitHeadline';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import EmployerJourney from '@/components/landing/audience/EmployerJourney';
-import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { useWheelSmoother } from '@/hooks/useWheelSmoother';
 import { preloadAudienceLandingAssets } from '@/lib/audienceLandingPreload';
 import { AppBadges } from '@/components/landing/AppBadges';
+
+// Under-fold sektioner — lata in för att korta första paint.
+// Preloadas via requestIdleCallback så de är redo innan användaren scrollar dit.
+const PinnedHorizontalGallery = lazy(() => import('@/components/landing/audience/PinnedHorizontalGallery'));
+const BouncyFooter = lazy(() => import('@/components/landing/audience/BouncyFooter'));
+const SiteFooter = lazy(() => import('@/components/landing/SiteFooter'));
+
 
 
 
