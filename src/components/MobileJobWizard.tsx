@@ -2686,6 +2686,7 @@ const MobileJobWizard = ({
                       value={formData.occupation}
                       onChange={(e) => handleOccupationSearch(e.target.value)}
                       onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
+                      onKeyDown={occupationNav.handleKeyDown}
                       placeholder="t.ex. Mjukvaru- och systemutvecklare"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 focus:border-white/40"
                     />
@@ -2693,30 +2694,36 @@ const MobileJobWizard = ({
                     
                     {/* Occupation Dropdown */}
                     {showOccupationDropdown && (
-                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                        {/* Show filtered occupations */}
-                        {filteredOccupations.map((occupation, index) => (
-                          <button
-                            key={`${occupation}-${index}`}
-                            type="button"
-                            onClick={() => handleOccupationSelect(occupation)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{occupation}</div>
-                          </button>
-                        ))}
-                        
-                        {/* Custom value option if no matches and search term exists */}
-                        {occupationSearchTerm.trim().length >= 2 &&
-                         filteredOccupations.length === 0 && (
-                          <button
-                            type="button"
-                            onClick={() => handleOccupationSelect(occupationSearchTerm)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-t border-white/10 transition-colors"
-                          >
-                            <span className="font-medium">Använd "{occupationSearchTerm}"</span>
-                          </button>
-                        )}
+                      <div ref={occupationNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                        {occupationNavItems.map((item, index) => {
+                          const isHighlighted = occupationNav.highlightedIndex === index;
+                          if (item.kind === 'custom') {
+                            return (
+                              <button
+                                key={`custom-${item.value}`}
+                                type="button"
+                                data-index={index}
+                                onMouseEnter={() => occupationNav.setHighlightedIndex(index)}
+                                onClick={() => handleOccupationSelect(item.value)}
+                                className={`w-full px-3 py-2.5 text-left text-white text-sm border-t border-white/10 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                              >
+                                <span className="font-medium">{item.label}</span>
+                              </button>
+                            );
+                          }
+                          return (
+                            <button
+                              key={`${item.value}-${index}`}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => occupationNav.setHighlightedIndex(index)}
+                              onClick={() => handleOccupationSelect(item.value)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{item.label}</div>
+                            </button>
+                          );
+                        })}
                         
                         {/* Show message if search is too short */}
                         {occupationSearchTerm.trim().length > 0 && occupationSearchTerm.trim().length < 2 && (
