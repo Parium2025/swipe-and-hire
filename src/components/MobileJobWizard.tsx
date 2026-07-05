@@ -3477,6 +3477,7 @@ const MobileJobWizard = ({
                             value={questionTypeSearchTerm || (editingQuestion?.question_type ? questionTypes.find(t => t.value === editingQuestion.question_type)?.label || '' : '')}
                             onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                             onClick={handleQuestionTypeClick}
+                            onKeyDown={questionTypeNav.handleKeyDown}
                             placeholder="Välj frågetyp"
                             className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer focus:border-white/40 focus:ring-0 focus:ring-offset-0"
                             readOnly
@@ -3485,17 +3486,22 @@ const MobileJobWizard = ({
                           
                           {/* Question Type Dropdown */}
                           {showQuestionTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-48 overflow-y-auto">
-                              {filteredQuestionTypes.map((type) => (
-                                <button
-                                  key={type.value}
-                                  type="button"
-                                  onClick={() => handleQuestionTypeSelect(type)}
-                                  className="w-full px-3 py-2.5 text-left hover:bg-white/15 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                                >
-                                  <span className="font-medium">{type.label}</span>
-                                </button>
-                              ))}
+                            <div ref={questionTypeNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-48 overflow-y-auto">
+                              {filteredQuestionTypes.map((type, index) => {
+                                const isHighlighted = questionTypeNav.highlightedIndex === index;
+                                return (
+                                  <button
+                                    key={type.value}
+                                    type="button"
+                                    data-index={index}
+                                    onMouseEnter={() => questionTypeNav.setHighlightedIndex(index)}
+                                    onClick={() => handleQuestionTypeSelect(type)}
+                                    className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/15' : 'hover:bg-white/15'}`}
+                                  >
+                                    <span className="font-medium">{type.label}</span>
+                                  </button>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
