@@ -1878,7 +1878,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Vad kostar det?',
-                        a: 'Parium är helt gratis att använda. Vill du ta nästa steg kan du uppgradera till Premium för 29 kr/mån — då får du obegränsat antal intresseanmälningar, obegränsat antal sparade jobb, direktkontakt via mejl och statistik över vilka företag som tittat på din profil. Du säger upp när du vill, utan bindningstid.',
+                        a: 'Parium är helt gratis att använda. Vill du ta nästa steg kan du uppgradera till Premium för 29 kr/mån — då får du obegränsat antal intresseanmälningar, obegränsat antal sparade jobb, direktkontakt via bolagets mejl. Du säger upp när du vill, utan bindningstid.',
                       },
                       {
                         q: 'Är mina uppgifter säkra?',
