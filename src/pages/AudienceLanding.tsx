@@ -1921,12 +1921,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         a: 'Nej. Alla månadspaket löper månadsvis och ni säger upp när ni vill från era kontoinställningar. Ingen uppsägningstid, inga dolda avgifter. Betalar ni för en enkelannons gäller den i 14 dagar och avslutas automatiskt.',
                       },
                       {
-                        q: 'Hur snabbt kommer vi igång?',
-                        a: 'På under 10 minuter. Ni skapar ett arbetsgivarkonto, verifierar organisationen och publicerar er första annons direkt. Har ni företagslogga och en rollbeskrivning redo är annonsen live samma dag.',
+                        q: 'Vad händer om vi inte förnyar?',
+                        a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
                       },
                       {
-                        q: 'Hur kvalitetssäkras kandidaterna?',
-                        a: 'Varje kandidat har en verifierad profil med video, erfarenhet och tydliga önskemål kring roll, ort och lön. Ni ser allt innan ni matchar, vilket minimerar tiden ni lägger på irrelevanta ansökningar.',
+                        q: 'Kan vi byta plan?',
+                        a: 'Ja, ni kan uppgradera eller nedgradera när som helst från Inställningar → Plan. Ändringen träder i kraft omedelbart och vi justerar debiteringen proportionerligt.',
+                      },
+                      {
+                        q: 'Ingår moms?',
+                        a: 'Priserna är exklusive moms. 25 % moms läggs på i checkouten och specificeras på fakturan. Momsregistrerade företag drar av den som ingående moms som vanligt.',
                       },
                       {
                         q: 'Kan flera kollegor arbeta i samma konto?',
