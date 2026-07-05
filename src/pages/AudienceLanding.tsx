@@ -2008,10 +2008,14 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
           </div>
             {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
-            <BouncyFooter audience={audience} onCta={handleStart} />
+            <Suspense fallback={null}>
+              <BouncyFooter audience={audience} onCta={handleStart} />
+            </Suspense>
 
             {/* ──────────────── 5. SITE FOOTER (SEO + navigation) ──────────────── */}
-            <SiteFooter />
+            <Suspense fallback={null}>
+              <SiteFooter />
+            </Suspense>
 
 
         </main>
