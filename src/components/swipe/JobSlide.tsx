@@ -850,7 +850,7 @@ export const JobSlide = memo(function JobSlide({
               data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 active:scale-[0.93] transition-transform touch-manipulation"
             >
-              <Heart className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`} strokeWidth={saved ? 2 : 2.25} />
+              <Bookmark className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`} strokeWidth={saved ? 2 : 2.25} />
             </button>
             <button
               type="button"
@@ -862,18 +862,24 @@ export const JobSlide = memo(function JobSlide({
             >
               <Heart className="w-6 h-6 text-white fill-white" />
             </button>
-            {canUndo && onUndo && (
-              <button
-                type="button"
-                aria-label="Ångra senaste åtgärd"
-                onPointerDown={(e) => { e.stopPropagation(); onUndo(); }}
-                onClick={(e) => e.preventDefault()}
-                data-swipe-action-button
-                className="w-[44px] h-[44px] rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
-              >
-                <Undo2 className="w-5 h-5 text-white" />
-              </button>
-            )}
+            <button
+              type="button"
+              aria-label="Ångra senaste åtgärd"
+              disabled={!canUndo || !onUndo}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                if (canUndo && onUndo) onUndo();
+              }}
+              onClick={(e) => e.preventDefault()}
+              data-swipe-action-button
+              className={`w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation border ${
+                canUndo && onUndo
+                  ? 'bg-white/15 backdrop-blur-md border-white/25 opacity-100'
+                  : 'bg-white/5 border-white/10 opacity-40'
+              }`}
+            >
+              <Undo2 className="w-6 h-6 text-white" strokeWidth={2.25} />
+            </button>
           </div>
         </div>
         </motion.div>
