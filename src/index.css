@@ -2118,3 +2118,22 @@ video::-webkit-media-controls {
     filter: none !important;
   }
 }
+
+/* Touch: när ett steg är aktivt (närmast ankaret vid scroll) speglas
+   hover-glowen så att effekten följer scrollen. Endast på enheter utan
+   riktig hover, så mus-upplevelsen på desktop är helt oförändrad. */
+@media (hover: none) {
+  .employer-journey-step[data-journey-active="true"] > div > article {
+    border-color: hsl(var(--secondary) / 0.35);
+    box-shadow: 0 28px 60px -30px hsl(var(--secondary) / 0.55);
+    transform: translateY(-2px);
+  }
+  .employer-journey-step[data-journey-active="true"] > div > article > div:nth-child(1),
+  .employer-journey-step[data-journey-active="true"] > div > article > div:nth-child(2) {
+    opacity: 1;
+  }
+  .employer-journey-step[data-journey-active="true"] .employer-journey-icon-glow {
+    opacity: 1;
+  }
+}
+
