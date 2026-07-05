@@ -865,20 +865,16 @@ export const JobSlide = memo(function JobSlide({
             <button
               type="button"
               aria-label="Ångra senaste åtgärd"
-              disabled={!canUndo || !onUndo}
+              aria-disabled={!canUndo || !onUndo}
               onPointerDown={(e) => {
                 e.stopPropagation();
                 if (canUndo && onUndo) onUndo();
               }}
               onClick={(e) => e.preventDefault()}
               data-swipe-action-button
-              className={`w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation border ${
-                canUndo && onUndo
-                  ? 'bg-white/15 backdrop-blur-md border-white/25 opacity-100'
-                  : 'bg-white/5 border-white/10 opacity-40'
-              }`}
+              className="w-[52px] h-[52px] rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation opacity-100"
             >
-              <Undo2 className="w-6 h-6 text-white" strokeWidth={2.25} />
+              <Undo2 className={`w-6 h-6 text-white transition-opacity duration-200 ${canUndo && onUndo ? 'opacity-100' : 'opacity-40'}`} strokeWidth={2.25} />
             </button>
           </div>
         </div>
