@@ -51,6 +51,7 @@ export function AutoFitTitle({
   className,
   style,
   minFontPx = 12,
+  maxFontPx,
   tooltipSide = 'top',
   onClick,
 }: AutoFitTitleProps) {
