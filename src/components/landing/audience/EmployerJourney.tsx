@@ -175,7 +175,8 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
             <li
               key={step.title}
               data-journey-step
-              style={{ transitionDelay: `${Math.min(idx, 5) * 90}ms` }}
+              data-journey-side={idx % 2 === 0 ? 'left' : 'right'}
+              style={{ transitionDelay: `${Math.min(idx, 5) * 110}ms` }}
               className="employer-journey-step relative"
             >
 
