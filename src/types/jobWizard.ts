@@ -40,11 +40,11 @@ export interface BaseFormData {
   pitch: string;
   benefits: string[];
   /** Weekday codes ('mon','tue',...) for part-time positions. */
-  part_time_days: string[];
+  part_time_days?: string[];
   /** Duration amount for contract/temporary/internship/lia. */
-  duration_amount: string;
-  /** 'weeks' | 'months' — always set (default 'months'). */
-  duration_unit: string;
+  duration_amount?: string;
+  /** 'weeks' | 'months' */
+  duration_unit?: string;
 }
 
 export interface JobFormData extends BaseFormData {
