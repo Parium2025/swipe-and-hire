@@ -33,6 +33,63 @@ function formatPrice(sek: number) {
   return sek.toLocaleString('sv-SE');
 }
 
+/** Kollapsbar feature-lista — samma stuk som pricing på landningen. */
+function PlanFeatures({
+  features,
+  isActive,
+  open,
+  onToggle,
+}: {
+  features: string[];
+  isActive: boolean;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="mt-6 border-t border-white/10 pt-5">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={onToggle}
+        className="flex w-full min-h-[44px] cursor-pointer items-center justify-between text-sm font-semibold text-white"
+      >
+        <span>Se alla funktioner</span>
+        <motion.span
+          className="ml-4 text-secondary"
+          animate={{ rotate: open ? 45 : 0 }}
+          transition={{ duration: 0.35, ease }}
+        >
+          +
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.45, ease },
+              opacity: { duration: 0.3, ease, delay: open ? 0.08 : 0 },
+            }}
+            className="overflow-hidden"
+          >
+            <ul className="mt-4 space-y-3">
+              {features.map((feature) => (
+                <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-white">
+                  <Check className={`mt-0.5 h-4 w-4 flex-shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`} />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 /**
  * Speglar EXAKT samma punktlistor som visas på audience-landningen
  * (se `AudienceLanding.tsx` → `employerPlans` + engångskortet).
