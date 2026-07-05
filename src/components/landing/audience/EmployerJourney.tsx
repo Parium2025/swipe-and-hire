@@ -1,3 +1,4 @@
+import type React from 'react';
 import { useLayoutEffect, useRef } from 'react';
 import {
   PenLine,
@@ -50,11 +51,15 @@ const steps: JourneyStep[] = [
   },
 ];
 
-export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } = {}) {
+export function EmployerJourney({
+  steps: stepsProp,
+  mobileClassMode = false,
+}: { steps?: JourneyStep[]; mobileClassMode?: boolean } = {}) {
   const listRef = useRef<HTMLOListElement | null>(null);
   const activeSteps = stepsProp ?? steps;
 
   useLayoutEffect(() => {
+    if (mobileClassMode) return;
     const list = listRef.current;
     if (!list) return;
 
@@ -144,7 +149,7 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
       window.removeEventListener('orientationchange', schedule);
       window.visualViewport?.removeEventListener('resize', schedule);
     };
-  }, []);
+  }, [mobileClassMode]);
 
   return (
     <div className="relative mt-10 sm:mt-14">
@@ -161,11 +166,25 @@ export function EmployerJourney({ steps: stepsProp }: { steps?: JourneyStep[] } 
           return (
             <li
               key={step.title}
-              data-journey-step
-              data-journey-side={idx % 2 === 0 ? 'left' : 'right'}
-              style={{ transitionDelay: `${Math.min(idx, 5) * 110}ms` }}
-              className="employer-journey-step relative"
+              {...(mobileClassMode
+                ? {}
+                : {
+                    'data-journey-step': true as unknown as string,
+                    'data-journey-side': idx % 2 === 0 ? 'left' : 'right',
+                  })}
+              style={
+                mobileClassMode
+                  ? ({
+                      ['--lf-x' as string]: idx % 2 === 0 ? '-46px' : '46px',
+                      ['--lf-y' as string]: '0px',
+                      ['--lf-delay' as string]: `${120 + Math.min(idx, 5) * 120}ms`,
+                      willChange: 'opacity, transform',
+                    } as React.CSSProperties)
+                  : { transitionDelay: `${Math.min(idx, 5) * 110}ms` }
+              }
+              className={`employer-journey-step relative${mobileClassMode ? ' landing-feature-mobile-in' : ''}`}
             >
+
 
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}

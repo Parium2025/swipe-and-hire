@@ -1566,9 +1566,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 {c.featuresIntro}
               </motion.p>
               {audience === 'employer' ? (
-                <EmployerJourney />
+                <EmployerJourney mobileClassMode={isMobileFeatureMotion} />
               ) : (
                 <EmployerJourney
+                  mobileClassMode={isMobileFeatureMotion}
                   steps={c.features.map((f) => ({
                     title: f.title,
                     body: f.description,
@@ -1576,6 +1577,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   }))}
                 />
               )}
+
 
             </div>
           </section>
