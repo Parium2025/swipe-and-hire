@@ -233,8 +233,8 @@ export default function ValjPlan() {
                 </div>
 
                 <ul className="mb-6 flex-1 space-y-2.5">
-                  {plan.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-white/85">
+                  {(FEATURES_BY_TIER[plan.tier] ?? plan.features).map((f, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-white">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
                       <span>{f}</span>
                     </li>
