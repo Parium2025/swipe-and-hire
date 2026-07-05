@@ -170,9 +170,6 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
 
         {/* Info rows — always show all 6 rows for consistent card height */}
         <div className="space-y-2 px-3 pb-1">
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Anställningsform</span>
-            <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}</span>
           <div className="flex items-start justify-between gap-3">
             <span className="text-sm leading-snug text-white">Anställningsform</span>
             {(() => {
