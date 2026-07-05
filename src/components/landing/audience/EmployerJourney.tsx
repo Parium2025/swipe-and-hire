@@ -148,7 +148,7 @@ export function EmployerJourney({
       window.removeEventListener('orientationchange', schedule);
       window.visualViewport?.removeEventListener('resize', schedule);
     };
-  }, []);
+  }, [mobileClassMode]);
 
   return (
     <div className="relative mt-10 sm:mt-14">
