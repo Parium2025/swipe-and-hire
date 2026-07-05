@@ -12,7 +12,6 @@ interface AutoFitTitleProps {
   style?: React.CSSProperties;
   minFontPx?: number;
   maxFontPx?: number;
-  minScaleX?: number;
   tooltipSide?: 'top' | 'bottom' | 'left' | 'right';
   onClick?: () => void;
 }
@@ -53,14 +52,13 @@ export function AutoFitTitle({
   style,
   minFontPx = 12,
   maxFontPx,
-  minScaleX = 0.72,
   tooltipSide = 'top',
   onClick,
 }: AutoFitTitleProps) {
   const ref = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [truncated, setTruncated] = useState(false);
-  const [fitStyle, setFitStyle] = useState<React.CSSProperties>({});
+  const [fontSize, setFontSize] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
 
   const { isTouch, supportsHover } = ENV;
@@ -73,105 +71,63 @@ export function AutoFitTitle({
       return;
     }
     if (!text) {
-      el.style.fontSize = '';
-      textEl.style.transform = '';
-      setFitStyle({});
+      setFontSize(null);
       setTruncated(false);
       return;
     }
 
     let frame = 0;
 
-    const resetTextPaint = () => {
-      textEl.style.transform = '';
-      textEl.style.fontSize = '';
-      textEl.style.maxWidth = '';
-      textEl.style.overflow = 'visible';
-      textEl.style.textOverflow = 'clip';
-    };
-
     const measureAt = (fontPx: number) => {
       textEl.style.fontSize = `${fontPx}px`;
-      resetTextPaint();
-      textEl.style.fontSize = `${fontPx}px`;
+      textEl.style.maxWidth = 'none';
+      textEl.style.overflow = 'visible';
+      textEl.style.textOverflow = 'clip';
       return textEl.scrollWidth;
     };
 
     const fit = () => {
       cancelAnimationFrame(frame);
-
-      // Reset any previously applied font-size so we can read the class-defined size
-      el.style.fontSize = '';
-      resetTextPaint();
+      setOpen(false);
 
       frame = requestAnimationFrame(() => {
-        const availableWidth = el.clientWidth - 2; // säkerhetsmarginal
+        const availableWidth = Math.floor(el.getBoundingClientRect().width) - 2;
 
         if (availableWidth <= 0) return;
 
         const baseFontPx = parseFloat(getComputedStyle(el).fontSize) || 16;
         const ceiling = Math.max(minFontPx, maxFontPx ?? baseFontPx);
-        const scaleFloor = Math.min(1, Math.max(0.5, minScaleX));
+        const maxWidth = measureAt(ceiling);
 
-        // Start at the ceiling, then only shrink if the horizontal compression
-        // would become visually too aggressive. This keeps normal titles as
-        // large as possible while still locked to one row.
-        let chosenFont = ceiling;
-        let naturalWidth = measureAt(chosenFont);
-        let scale = naturalWidth > 0 ? Math.min(1, availableWidth / naturalWidth) : 1;
-
-        if (naturalWidth > availableWidth && scale < scaleFloor) {
-          let low = minFontPx;
-          let high = ceiling;
-          let best = minFontPx;
-
-          for (let i = 0; i < 18; i += 1) {
-            const mid = (low + high) / 2;
-            const widthAtMid = measureAt(mid);
-            const scaleAtMid = widthAtMid > 0 ? availableWidth / widthAtMid : 1;
-
-            if (widthAtMid <= availableWidth || scaleAtMid >= scaleFloor) {
-              best = mid;
-              low = mid;
-            } else {
-              high = mid;
-            }
-          }
-
-          chosenFont = best;
-          naturalWidth = measureAt(chosenFont);
-          scale = naturalWidth > 0 ? Math.min(1, availableWidth / naturalWidth) : 1;
+        if (maxWidth <= availableWidth) {
+          setFontSize(ceiling);
+          setTruncated(false);
+          return;
         }
 
-        const shouldTruncate = chosenFont <= minFontPx + 0.1 && scale < scaleFloor;
+        const minWidth = measureAt(minFontPx);
 
-        if (shouldTruncate) {
-          textEl.style.transform = '';
-          textEl.style.maxWidth = `${availableWidth}px`;
-          textEl.style.overflow = 'hidden';
-          textEl.style.textOverflow = 'ellipsis';
-          setFitStyle({
-            fontSize: `${chosenFont}px`,
-            maxWidth: '100%',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            transform: 'none',
-          });
+        if (minWidth > availableWidth) {
+          setFontSize(minFontPx);
           setTruncated(true);
           return;
         }
 
-        textEl.style.maxWidth = '';
-        textEl.style.overflow = 'visible';
-        textEl.style.textOverflow = 'clip';
-        textEl.style.transform = scale < 0.999 ? `scaleX(${scale})` : '';
-        setFitStyle({
-          fontSize: `${chosenFont}px`,
-          maxWidth: 'none',
-          overflow: 'visible',
-          textOverflow: 'clip',
-          transform: scale < 0.999 ? `scaleX(${scale})` : 'none',
-        });
+        let low = minFontPx;
+        let high = ceiling;
+        let best = minFontPx;
+
+        for (let i = 0; i < 18; i += 1) {
+          const mid = (low + high) / 2;
+          if (measureAt(mid) <= availableWidth) {
+            best = mid;
+            low = mid;
+          } else {
+            high = mid;
+          }
+        }
+
+        setFontSize(Math.floor(best * 10) / 10);
         setTruncated(false);
       });
     };
@@ -190,7 +146,7 @@ export function AutoFitTitle({
       cancelAnimationFrame(frame);
       clearTimeout(timeout);
     };
-  }, [text, minFontPx, maxFontPx, minScaleX]);
+  }, [text, minFontPx, maxFontPx]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -206,8 +162,9 @@ export function AutoFitTitle({
 
   const mergedStyle: React.CSSProperties = {
     whiteSpace: 'nowrap',
-    overflow: truncated ? 'hidden' : 'visible',
+    overflow: 'hidden',
     textOverflow: truncated ? 'ellipsis' : 'clip',
+    textAlign: 'center',
     ...style,
   };
 
@@ -225,10 +182,9 @@ export function AutoFitTitle({
           maxWidth: '100%',
           overflow: truncated ? 'hidden' : 'visible',
           textOverflow: truncated ? 'ellipsis' : 'clip',
-          transformOrigin: 'center',
+          fontSize: fontSize ? `${fontSize}px` : undefined,
           verticalAlign: 'top',
           whiteSpace: 'nowrap',
-          ...fitStyle,
         }}
       >
         {text}
