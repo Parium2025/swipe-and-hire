@@ -1902,7 +1902,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur ökar jag mina chanser att bli kontaktad?',
-                        a: 'Komplettera profilen med video, ett tydligt CV och skriv några rader om vad du söker. Håll önskemål kring roll, ort och tillgänglighet uppdaterade — då hamnar du högre i arbetsgivarens flöde och får fler relevanta träffar.',
+                        a: 'Komplettera profilen med video, ett tydligt CV och skriv några rader om vad du söker. Håll önskemål kring roll, ort och tillgänglighet uppdaterade.',
                       },
                     ]
                   : [
