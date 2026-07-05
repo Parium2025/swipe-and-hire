@@ -3914,7 +3914,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       ) : null}
                                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                                       <div 
-                                        className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
+                                        className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
                                         onClick={() => setShowDesktopApplicationForm(true)}
                                       >
                                         {(() => {
@@ -3927,12 +3927,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               >
                                                 {profile?.company_name || 'Företag'}
                                               </button>
-                                              <TruncatedTitle 
-                                                fullText={formData.title || 'Jobbtitel'} 
-                                                className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-2 cursor-default w-full max-w-full`}
-                                              >
-                                                {formData.title || 'Jobbtitel'}
-                                              </TruncatedTitle>
+                                              <AutoFitTitle
+                                                text={formData.title || 'Jobbtitel'}
+                                                className={`${textSizes.title} text-white font-bold leading-tight mb-1 w-full max-w-full cursor-default`}
+                                                minFontPx={15}
+                                                maxFontPx={40}
+                                              />
                                               <div className={`${textSizes.meta} text-white`}>
                                                 {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                               </div>
