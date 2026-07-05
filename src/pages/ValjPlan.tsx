@@ -410,12 +410,6 @@ export default function ValjPlan() {
           </motion.div>
         )}
 
-        {/* FAQ mini */}
-        <div className="mx-auto mt-16 grid max-w-3xl gap-6 sm:grid-cols-2">
-          {[
-            { q: 'Finns bindningstid?', a: 'Nej. Alla planer är månadsvis. Säg upp eller byt när du vill.' },
-            { q: 'Vad händer om jag inte förnyar?', a: 'Allt sparas — kandidatbank, chattar, gamla annonser. Bara "publicera ny annons" pausas.' },
-            { q: 'Kan jag byta plan?', a: 'Ja, du kan uppgradera eller nedgradera när som helst från Inställningar → Plan.' },
         {/* Vanliga frågor — samma accordion-stuk som på landningen */}
         <section className="mx-auto mt-20 max-w-[1180px]">
           <div className="text-center">
