@@ -251,7 +251,7 @@ export default function ValjPlan() {
               if (from === 'publish') {
                 navigate(-1);
               } else {
-                navigate('/', { replace: true });
+                navigate(user ? '/home' : '/', { replace: true });
               }
             }}
             aria-label="Stäng"
