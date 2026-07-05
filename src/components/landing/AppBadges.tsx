@@ -50,16 +50,16 @@ function BadgeButton({
       aria-disabled="true"
       className="group relative flex min-h-[60px] items-center gap-3 rounded-2xl border border-white/12 bg-white/[0.04] px-5 py-3 [@media_(hover:hover)]:backdrop-blur-xl"
     >
-      <span className="text-white/90">{icon}</span>
+        <span className="text-white/90">{icon}</span>
       <span className="flex flex-col leading-none">
-        <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/60">
+        <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-secondary">
           {top}
         </span>
         <span className="mt-1 text-base font-bold text-white sm:text-[17px]">
           {bottom}
         </span>
       </span>
-      <span className="ml-1 rounded-full border border-secondary/40 bg-secondary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+      <span className="ml-1 rounded-full border border-secondary/40 bg-secondary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-secondary">
         Snart
       </span>
     </div>
