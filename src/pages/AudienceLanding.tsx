@@ -1874,7 +1874,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   ? [
                       {
                         q: 'Hur fungerar Parium?',
-                        a: 'Du skapar en profil med CV, video och dina önskemål, swipar bland aktuella jobb och visar intresse för det som passar. När arbetsgivaren också är intresserad öppnas en chatt direkt i appen — utan långa formulär eller personliga brev.',
+                        a: 'Du skapar en profil med ditt CV, profilbild, video och dina önskemål, swipar bland aktuella jobb och visar intresse för det som passar. Utan långa formulär eller personliga brev.',
                       },
                       {
                         q: 'Vad kostar det?',
