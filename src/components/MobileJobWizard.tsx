@@ -2762,7 +2762,11 @@ const MobileJobWizard = ({
                     </div>
                     
                     {showBenefitsDropdown && (
-                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                      <div
+                        className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
+                        onWheel={(e) => e.stopPropagation()}
+                        onTouchMove={(e) => e.stopPropagation()}
+                      >
                         <BenefitsList
                           selectedBenefits={formData.benefits}
                           onToggle={handleBenefitToggle}
