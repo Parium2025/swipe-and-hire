@@ -50,12 +50,18 @@ export const preloadAudienceLandingAssets = () => {
   //    runtime-importen kickar in.
   addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
 
-  // 3. Dekoda bilderna i bakgrunden (idle).
+  // 3. Dekoda bilderna i bakgrunden (idle) + preloada under-fold chunks
+  //    så Suspense-fallback aldrig hinner synas när användaren scrollar.
   const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
   const run = () => {
     decode(realPosters);
     decode(realPoster2);
+    // Prefetch lazy-chunkarna i bakgrunden — helt osynligt för användaren.
+    import('@/components/landing/audience/PinnedHorizontalGallery').catch(() => {});
+    import('@/components/landing/audience/BouncyFooter').catch(() => {});
+    import('@/components/landing/SiteFooter').catch(() => {});
   };
   if (typeof w.requestIdleCallback === 'function') w.requestIdleCallback(run);
   else window.setTimeout(run, 600);
 };
+
