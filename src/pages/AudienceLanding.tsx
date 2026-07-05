@@ -1897,8 +1897,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         a: 'Nej, men vi rekommenderar det starkt. En video på 30–60 sekunder gör att du sticker ut på ett sätt som ingen text kan matcha, och arbetsgivare svarar snabbare på profiler där de får en känsla för personen bakom orden.',
                       },
                       {
-                        q: 'Vem kan se min profil?',
-                        a: 'Bara arbetsgivare som du själv aktivt visat intresse för får se hela din profil. Din information ligger aldrig öppet — du bestämmer när, var och för vem den syns.',
+                        q: 'Hur får jag notiser om nya jobb?',
+                        a: 'Spara en sökning med dina önskemål kring roll, ort och erfarenhet. När en ny annons matchar får du en notis — så missar du aldrig ett relevant jobb.',
                       },
                       {
                         q: 'Hur ökar jag mina chanser att bli kontaktad?',
