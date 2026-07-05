@@ -336,7 +336,7 @@ export default function ValjPlan() {
         {!loading && subscriptionPlans.length > 0 && (() => {
           const fallback = subscriptionPlans.find(p => p.tier === 'pro') ?? subscriptionPlans[subscriptionPlans.length - 1];
           const selected = subscriptionPlans.find(p => p.tier === activeTier) ?? fallback;
-          const isCurrent = activePlan?.tier === selected.tier;
+          const isCurrent = displayActivePlan?.tier === selected.tier;
           return (
             <motion.button
               type="button"
