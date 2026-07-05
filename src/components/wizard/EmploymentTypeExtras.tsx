@@ -85,11 +85,8 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
   }
 
   if (TYPES_WITH_DURATION.has(employmentType)) {
-    // Ensure unit is always 'months' (weeks removed per product decision)
-    if (durationUnit !== 'months') {
-      onDurationUnitChange('months');
-    }
     return (
+
       <div className="mt-3 space-y-2">
         <div className="text-white text-xs font-medium">Hur många månader?</div>
         <div className="flex items-center gap-2">
