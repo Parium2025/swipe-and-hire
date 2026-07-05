@@ -91,6 +91,9 @@ export interface JobTemplate {
   is_default: boolean;
   benefits?: string[];
   questions?: JobQuestion[];
+  part_time_days?: string[];
+  duration_amount?: number | string;
+  duration_unit?: string;
 }
 
 // Dropdown option types
