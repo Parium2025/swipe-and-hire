@@ -1501,7 +1501,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             <>
               <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
                 <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
-                <PinnedHorizontalGallery />
+                <Suspense fallback={null}>
+                  <PinnedHorizontalGallery />
+                </Suspense>
               </section>
 
               <SectionDivider className="my-12 md:my-20" />
