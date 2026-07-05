@@ -58,6 +58,7 @@ export function EmployerJourney({
   const activeSteps = stepsProp ?? steps;
 
   useLayoutEffect(() => {
+    if (mobileClassMode) return;
     const list = listRef.current;
     if (!list) return;
 
