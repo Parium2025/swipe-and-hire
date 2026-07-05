@@ -428,7 +428,7 @@ const SavedJobs = () => {
                       {/* Restore button overlay */}
                       <button
                         onClick={() => handleRestoreSkipped(job.id)}
-                        className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-xs font-medium shadow-lg transition-colors touch-manipulation md:hover:bg-white/25"
+                        className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-primary text-primary-foreground border-2 border-white/40 text-xs font-semibold shadow-xl shadow-black/40 transition-colors touch-manipulation md:hover:bg-primary/90"
                       >
                         <Undo2 className="h-3.5 w-3.5" />
                         Återställ
