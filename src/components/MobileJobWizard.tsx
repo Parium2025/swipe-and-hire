@@ -673,36 +673,33 @@ const MobileJobWizard = ({
     const titleLength = jobTitle.length;
     const metaLength = metaLine.length;
 
-    // More aggressive sizing for better visual balance
-    let companySizeClass = 'text-sm'; // Start smaller for company
-    let titleSizeClass = 'text-lg';   // Make title more prominent 
-    let metaSizeClass = 'text-sm';    // Readable meta info
+    // Title is the hero element: make it as large as possible while still
+    // fitting on a single line. AutoFitTitle will shrink from these base sizes
+    // down to minFontPx if needed, but never wrap.
+    let companySizeClass = 'text-sm';
+    let titleSizeClass = 'text-xl';
+    let metaSizeClass = 'text-sm';
 
-    // Adjust title size based on length - this is the hero element
     if (titleLength > 50) {
       titleSizeClass = 'text-base';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-sm';
-    } else if (titleLength > 30) {
+    } else if (titleLength > 35) {
       titleSizeClass = 'text-lg';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-sm';
-    } else if (titleLength < 20) {
+    } else if (titleLength > 20) {
       titleSizeClass = 'text-xl';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-base';
+    } else {
+      titleSizeClass = 'text-2xl';
     }
 
     // Adjust company name - keep it subtle but readable
     if (companyLength > 15) {
-      companySizeClass = 'text-sm';
+      companySizeClass = 'text-xs';
     } else if (companyLength < 8) {
       companySizeClass = 'text-sm';
     }
 
-    // Ensure meta info is always readable
-    if (metaLength > 20) {
-      metaSizeClass = 'text-sm';
+    // Ensure meta info is always readable but smaller than the title
+    if (metaLength > 25) {
+      metaSizeClass = 'text-xs';
     } else if (metaLength < 10) {
       metaSizeClass = 'text-sm';
     }
