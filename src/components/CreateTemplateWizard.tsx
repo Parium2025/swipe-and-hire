@@ -9,7 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { useToast } from '@/hooks/use-toast';
-import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
+import { EMPLOYMENT_TYPES, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, type DurationUnit } from '@/lib/employmentTypes';
+import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
 import { searchOccupations } from '@/lib/occupations';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Search, Pencil, Heart, CheckCircle, AlertTriangle } from 'lucide-react';
 import {
