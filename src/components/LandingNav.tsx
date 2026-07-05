@@ -204,6 +204,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           : 'border-white bg-white/[0.045] text-white'
                       }`}
                     >
+                      <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-65" />
                       <span className="relative z-10 whitespace-nowrap">
                         Meny
                       </span>
