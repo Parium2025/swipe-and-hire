@@ -21,6 +21,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
+import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare, Copy } from 'lucide-react';
@@ -626,21 +627,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     const metaLength = metaLine.length;
 
     let companySizeClass = 'text-sm';
-    let titleSizeClass = 'text-lg';
+    let titleSizeClass = 'text-2xl';
     let metaSizeClass = 'text-sm';
 
     if (titleLength > 50) {
       titleSizeClass = 'text-base';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-sm';
-    } else if (titleLength > 30) {
+    } else if (titleLength > 35) {
       titleSizeClass = 'text-lg';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-sm';
-    } else if (titleLength < 20) {
+    } else if (titleLength > 20) {
       titleSizeClass = 'text-xl';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-base';
+    } else {
+      titleSizeClass = 'text-2xl';
     }
 
     if (companyLength > 15) {
@@ -3387,7 +3384,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                     ) : null}
                                     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                                     <div 
-                                      className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain"
+                                      className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain"
                                       onClick={() => setShowApplicationForm(true)}
                                     >
                                       {(() => {
@@ -3400,12 +3397,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             >
                                               {profile?.company_name || 'Företag'}
                                             </button>
-                                            <TruncatedTitle 
-                                              fullText={getDisplayTitle()} 
-                                              className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 cursor-default`}
-                                            >
-                                              {getDisplayTitle()}
-                                            </TruncatedTitle>
+                                            <AutoFitTitle
+                                              text={getDisplayTitle()}
+                                              className={`${textSizes.title} text-white font-bold leading-tight mb-1 w-full max-w-full cursor-default`}
+                                              minFontPx={15}
+                                              maxFontPx={34}
+                                            />
                                             <div className={`${textSizes.meta} text-white`}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                             </div>
@@ -3917,7 +3914,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       ) : null}
                                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                                       <div 
-                                        className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
+                                        className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
                                         onClick={() => setShowDesktopApplicationForm(true)}
                                       >
                                         {(() => {
@@ -3930,12 +3927,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               >
                                                 {profile?.company_name || 'Företag'}
                                               </button>
-                                              <TruncatedTitle 
-                                                fullText={formData.title || 'Jobbtitel'} 
-                                                className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-2 cursor-default w-full max-w-full`}
-                                              >
-                                                {formData.title || 'Jobbtitel'}
-                                              </TruncatedTitle>
+                                              <AutoFitTitle
+                                                text={formData.title || 'Jobbtitel'}
+                                                className={`${textSizes.title} text-white font-bold leading-tight mb-1 w-full max-w-full cursor-default`}
+                                                minFontPx={15}
+                                                maxFontPx={40}
+                                              />
                                               <div className={`${textSizes.meta} text-white`}>
                                                 {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                               </div>
