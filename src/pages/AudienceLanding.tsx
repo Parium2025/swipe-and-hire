@@ -1485,10 +1485,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       <div className="pointer-events-none absolute inset-0 z-0">
         <AnimatedBackground showBubbles={false} showGlow={true} />
       </div>
-      <div
-        className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-[600ms] ease-out"
-        style={{ opacity: heroBgReady ? 1 : 0, willChange: 'opacity' }}
-      >
+      <div className="pointer-events-none absolute inset-0 z-0">
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
       <FixedPhoneLayer />
