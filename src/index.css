@@ -2132,8 +2132,6 @@ video::-webkit-media-controls {
   .employer-journey-step[data-journey-active="true"] > div > article > div:nth-child(2) {
     opacity: 1;
   }
-  .employer-journey-step[data-journey-active="true"] .employer-journey-icon-glow {
-    opacity: 1;
-  }
+  /* Ikonen påverkas medvetet INTE på touch – bara kortet får glowen. */
 }
 
