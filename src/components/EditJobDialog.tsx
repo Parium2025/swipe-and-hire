@@ -27,7 +27,6 @@ import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } fro
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare, Copy } from 'lucide-react';
 import { BenefitsList } from '@/components/wizard/BenefitsList';
 import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
-import { motion } from 'framer-motion';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
