@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Check, ArrowLeft, Sparkles, ShieldCheck, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PaymentPlaceholderDialog } from '@/components/PaymentPlaceholderDialog';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { PariumLogoButton } from '@/components/PariumLogoButton';
 import { toast } from 'sonner';
 
 type BillingPeriod = 'monthly' | 'one_time';
@@ -75,8 +76,9 @@ const FEATURES_BY_TIER: Record<PlanTier, string[]> = {
 export default function ValjPlan() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { plan: activePlan } = useHasActivePlan();
+  const isEmployer = userRole?.role === 'employer';
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -166,14 +168,15 @@ export default function ValjPlan() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <button
             onClick={() => navigate(-1)}
-            className="flex min-h-[44px] items-center gap-2 text-sm text-white hover:text-white"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 text-sm font-medium text-white transition-colors hover:bg-white/[0.12]"
           >
             <ArrowLeft className="h-4 w-4" />
             Tillbaka
           </button>
-          <Link to="/" className="text-sm font-medium text-white hover:text-white">
-            Parium
-          </Link>
+          <PariumLogoButton
+            onClick={() => navigate('/')}
+            ariaLabel="Gå till startsidan"
+          />
         </div>
       </div>
 
@@ -263,10 +266,10 @@ export default function ValjPlan() {
                 <Button
                   onClick={() => handleSelect(plan)}
                   disabled={isCurrent}
-                  className={`h-11 w-full font-medium ${
+                  className={`mt-auto inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] disabled:opacity-60 ${
                     isRecommended
-                      ? 'bg-white text-[#0F172A] hover:bg-white/90'
-                      : 'bg-white/10 text-white hover:bg-white/20'
+                      ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:-translate-y-0.5 hover:bg-secondary hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))]'
+                      : 'border border-white/20 bg-white/10 text-white hover:border-white/30 hover:bg-white/15'
                   }`}
                 >
                   {isCurrent ? 'Nuvarande plan' : 'Fortsätt till betalning'}
@@ -277,7 +280,7 @@ export default function ValjPlan() {
         </div>
 
         {/* Jobseeker premium card */}
-        {seekerPlan && (
+        {seekerPlan && !isEmployer && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -293,7 +296,7 @@ export default function ValjPlan() {
             </div>
             <Button
               onClick={() => handleSelect(seekerPlan)}
-              className="h-11 w-full bg-white/10 text-white hover:bg-white/20 sm:w-auto"
+              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-6 text-sm font-bold tracking-wide text-white transition-all duration-300 hover:border-white/30 hover:bg-white/15 active:scale-[0.98] sm:w-auto"
             >
               Aktivera Premium
             </Button>
