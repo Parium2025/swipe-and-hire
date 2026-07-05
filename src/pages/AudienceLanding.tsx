@@ -1882,7 +1882,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Är mina uppgifter säkra?',
-                        a: 'Ja. All data lagras krypterat hos europeiska leverantörer, och endast arbetsgivare du själv visat intresse för kan se din fullständiga profil. Du äger din data och kan när som helst exportera eller radera ditt konto från inställningarna.',
+                        a: 'Ja. Vi använder etablerade europeiska leverantörer och krypterar data under överföring. Din fullständiga profil visas bara för arbetsgivare du aktivt visat intresse för. Du kan kontakta oss på hej@parium.se för att få ut eller radera din data.',
                       },
                       {
                         q: 'Vilka företag finns här?',
