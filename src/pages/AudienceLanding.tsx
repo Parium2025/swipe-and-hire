@@ -1874,7 +1874,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   ? [
                       {
                         q: 'Hur fungerar Parium?',
-                        a: 'Parium kopplar ihop arbetsgivare och jobbsökare direkt i samma plattform. En arbetsgivare publicerar en annons som är aktiv i 14 dagar. Under den perioden skapar du en profil med CV, profilbild, video och dina önskemål, swipar bland aktuella jobb och visar intresse för de roller som passar dig. Utan långa formulär eller personliga brev.',
+                        a: 'Parium kopplar ihop arbetsgivare och jobbsökare direkt i samma plattform. En arbetsgivare publicerar en annons som är aktiv i 14 dagar. Swipa sedan bland aktuella jobb och visa intresse för de roller som passar dig.',
                       },
                       {
                         q: 'Vad kostar det?',
