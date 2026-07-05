@@ -1209,6 +1209,8 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           description: string | null
+          duration_amount: number | null
+          duration_unit: string | null
           employer_id: string
           employment_type: string | null
           expires_at: string | null
@@ -1224,6 +1226,7 @@ export type Database = {
           location: string | null
           occupation: string | null
           overlay_text_color: string
+          part_time_days: string[] | null
           pitch: string | null
           positions_count: number | null
           remote_work_possible: string | null
@@ -1258,6 +1261,8 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           description?: string | null
+          duration_amount?: number | null
+          duration_unit?: string | null
           employer_id: string
           employment_type?: string | null
           expires_at?: string | null
@@ -1273,6 +1278,7 @@ export type Database = {
           location?: string | null
           occupation?: string | null
           overlay_text_color?: string
+          part_time_days?: string[] | null
           pitch?: string | null
           positions_count?: number | null
           remote_work_possible?: string | null
@@ -1307,6 +1313,8 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           description?: string | null
+          duration_amount?: number | null
+          duration_unit?: string | null
           employer_id?: string
           employment_type?: string | null
           expires_at?: string | null
@@ -1322,6 +1330,7 @@ export type Database = {
           location?: string | null
           occupation?: string | null
           overlay_text_color?: string
+          part_time_days?: string[] | null
           pitch?: string | null
           positions_count?: number | null
           remote_work_possible?: string | null
@@ -1501,6 +1510,8 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string | null
+          duration_amount: number | null
+          duration_unit: string | null
           employer_id: string
           employment_type: string | null
           id: string
@@ -1508,6 +1519,7 @@ export type Database = {
           location: string | null
           name: string
           occupation: string | null
+          part_time_days: string[] | null
           pitch: string | null
           positions_count: string | null
           questions: Json | null
@@ -1534,6 +1546,8 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           description?: string | null
+          duration_amount?: number | null
+          duration_unit?: string | null
           employer_id: string
           employment_type?: string | null
           id?: string
@@ -1541,6 +1555,7 @@ export type Database = {
           location?: string | null
           name: string
           occupation?: string | null
+          part_time_days?: string[] | null
           pitch?: string | null
           positions_count?: string | null
           questions?: Json | null
@@ -1567,6 +1582,8 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           description?: string | null
+          duration_amount?: number | null
+          duration_unit?: string | null
           employer_id?: string
           employment_type?: string | null
           id?: string
@@ -1574,6 +1591,7 @@ export type Database = {
           location?: string | null
           name?: string
           occupation?: string | null
+          part_time_days?: string[] | null
           pitch?: string | null
           positions_count?: string | null
           questions?: Json | null
