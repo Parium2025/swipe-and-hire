@@ -3055,9 +3055,35 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               })}
                                             </div>
                                           </div>
-                                        )}
+                                         )}
 
-                                         {(formData.salary_min || formData.salary_max || formData.salary_type) && (
+                                          {/* Anställningsform */}
+                                          {formData.employment_type && (
+                                            <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                                <Briefcase className="h-2 w-2 mr-1 text-white" />
+                                                Anställningsform
+                                              </h5>
+                                              <div className="text-xs text-white leading-relaxed break-words">
+                                                <div className="font-medium">
+                                                  {getEmploymentTypeLabel(formData.employment_type)}
+                                                  {formatEmploymentDetails({
+                                                    employment_type: formData.employment_type,
+                                                    part_time_days: formData.part_time_days,
+                                                    duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+                                                    duration_unit: formData.duration_unit,
+                                                  }) && ` · ${formatEmploymentDetails({
+                                                    employment_type: formData.employment_type,
+                                                    part_time_days: formData.part_time_days,
+                                                    duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+                                                    duration_unit: formData.duration_unit,
+                                                  })}`}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                            <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                                Lön
@@ -3593,9 +3619,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 <Briefcase className="h-3 w-3 mr-1 text-white" />
                                                 Anställningsform
                                               </h5>
-                                              <div className="text-xs text-white font-medium">
-                                                {getEmploymentTypeLabel(formData.employment_type)}
-                                              </div>
+                                               <div className="text-xs text-white font-medium">
+                                                 {getEmploymentTypeLabel(formData.employment_type)}
+                                                 {formatEmploymentDetails({
+                                                   employment_type: formData.employment_type,
+                                                   part_time_days: formData.part_time_days,
+                                                   duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+                                                   duration_unit: formData.duration_unit,
+                                                 }) && ` · ${formatEmploymentDetails({
+                                                   employment_type: formData.employment_type,
+                                                   part_time_days: formData.part_time_days,
+                                                   duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+                                                   duration_unit: formData.duration_unit,
+                                                 })}`}
+                                               </div>
                                             </div>
                                           )}
 
