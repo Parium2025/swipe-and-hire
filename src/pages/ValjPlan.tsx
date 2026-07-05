@@ -141,7 +141,7 @@ export default function ValjPlan() {
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [expandedTier, setExpandedTier] = useState<PlanTier | null>(null);
+  const [allFeaturesOpen, setAllFeaturesOpen] = useState(false);
   const [activeTier, setActiveTier] = useState<PlanTier | null>(null);
 
   const from = searchParams.get('from');
