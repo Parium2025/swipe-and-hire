@@ -17,6 +17,9 @@ interface EmployerJobCardProps {
     location: string;
     workplace_name?: string;
     employment_type?: string;
+    part_time_days?: string[] | null;
+    duration_amount?: number | null;
+    duration_unit?: string | null;
     is_active: boolean;
     views_count: number;
     applications_count: number;
