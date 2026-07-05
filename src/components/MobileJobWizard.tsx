@@ -4754,7 +4754,7 @@ const MobileJobWizard = ({
                                 
                                 {/* Content - clickable to show form */}
                                 <div 
-                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
+                                  className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
                                   style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                   onClick={() => setShowDesktopApplicationForm(true)}
                                 >
