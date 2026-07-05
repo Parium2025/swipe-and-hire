@@ -586,7 +586,9 @@ const MobileJobWizard = ({
 
   // Build meta line: "Deltid • Saltsjö-Boo, Stockholms län"
   const getMetaLine = (employment?: string, city?: string, county?: string) => {
-    const emp = getEmploymentTypeLabel(employment);
+    const empBase = getEmploymentTypeLabel(employment);
+    const details = formatEmploymentDetailsFromForm();
+    const emp = [empBase, details].filter(Boolean).join(' · ');
     // Include county if available
     let locationPart = formatCity(city || '');
     if (county && county.trim()) {
