@@ -38,7 +38,7 @@ import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, ArrowDown, Pencil, Smartphone, Monitor, Check, AlertTriangle, Copy, Palette } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
-import { BenefitsList, BENEFIT_OPTIONS } from '@/components/wizard/BenefitsList';
+import { BENEFIT_OPTIONS } from '@/components/wizard/BenefitsList';
 import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
 import { Switch } from '@/components/ui/switch';
 import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePositioner';
