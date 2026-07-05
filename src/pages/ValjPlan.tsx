@@ -168,14 +168,15 @@ export default function ValjPlan() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <button
             onClick={() => navigate(-1)}
-            className="flex min-h-[44px] items-center gap-2 text-sm text-white hover:text-white"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 text-sm font-medium text-white transition-colors hover:bg-white/[0.12]"
           >
             <ArrowLeft className="h-4 w-4" />
             Tillbaka
           </button>
-          <Link to="/" className="text-sm font-medium text-white hover:text-white">
-            Parium
-          </Link>
+          <PariumLogoButton
+            onClick={() => navigate('/')}
+            ariaLabel="Gå till startsidan"
+          />
         </div>
       </div>
 
