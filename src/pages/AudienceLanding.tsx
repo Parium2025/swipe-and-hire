@@ -22,6 +22,7 @@ import { AppBadges } from '@/components/landing/AppBadges';
 const PinnedHorizontalGallery = lazy(() => import('@/components/landing/audience/PinnedHorizontalGallery'));
 const BouncyFooter = lazy(() => import('@/components/landing/audience/BouncyFooter'));
 const SiteFooter = lazy(() => import('@/components/landing/SiteFooter'));
+const JobSeekerVideoShowcase = lazy(() => import('@/components/landing/audience/JobSeekerVideoShowcase'));
 
 
 
