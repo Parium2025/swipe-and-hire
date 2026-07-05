@@ -81,7 +81,7 @@ export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onMod
       <div className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
         {/* Sliding background */}
         <div
-          className="absolute top-1 bottom-1 bg-white/20 rounded-[7px]"
+          className="absolute top-1 bottom-1 bg-white/20 rounded-[7px] transition-all duration-300 ease-out"
           style={{ width: indicatorStyle.width, left: 0, transform: `translateX(${indicatorStyle.x}px)` }}
         />
         
