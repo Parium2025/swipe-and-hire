@@ -31,6 +31,46 @@ function formatPrice(sek: number) {
   return sek.toLocaleString('sv-SE');
 }
 
+/**
+ * Speglar EXAKT samma punktlistor som visas på audience-landningen
+ * (se `AudienceLanding.tsx` → `employerPlans` + engångskortet).
+ * Ändras något där ska det ändras här också.
+ */
+const COMMON_EMPLOYER_FEATURES = [
+  'Skapa annons på minuter',
+  'Kandidatpresentation med bild, video och egna ord — där kandidaten själv väljer vad som visas',
+  'Överblick över alla sökande — flytta kandidater mellan steg: ny, intressant, intervju, erbjudande m.m.',
+  'Chatt direkt med kandidater i plattformen',
+  'Automatiska svar till alla sökande — ingen lämnas utan besked',
+  'Fungerar lika bra i mobilen som på datorn',
+];
+
+const FEATURES_BY_TIER: Record<PlanTier, string[]> = {
+  one_time: [
+    '1 annons live i 14 dagar',
+    'Ingen bindningstid',
+    ...COMMON_EMPLOYER_FEATURES,
+  ],
+  start: [
+    '1 användare',
+    'Upp till 40 aktiva annonser per månad',
+    ...COMMON_EMPLOYER_FEATURES,
+  ],
+  vaxa: [
+    '2 användare',
+    'Obegränsat antal annonser',
+    ...COMMON_EMPLOYER_FEATURES,
+  ],
+  pro: [
+    'Obegränsat antal användare',
+    'Obegränsat antal annonser',
+    'Roller och behörigheter för hela teamet',
+    'Dedikerad kontaktperson',
+    ...COMMON_EMPLOYER_FEATURES,
+  ],
+  jobseeker_premium: [],
+};
+
 export default function ValjPlan() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
