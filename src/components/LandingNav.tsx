@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -218,43 +219,60 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                     </button>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="center" sideOffset={8} className="min-w-[200px]">
-                    {links.map((l) => {
-                      const isAnchor = l.href.startsWith('#');
-                      const id = isAnchor ? l.href.slice(1) : l.href;
-                      const isActive = isAnchor
-                        ? activeId === id
-                        : location.pathname === l.href;
-                      return (
-                        <DropdownMenuItem
-                          key={l.href}
-                          onSelect={(e) => {
-                            e.preventDefault();
-                            setMenuOpen(false);
-                            if (isAnchor) {
-                              // Vänta tills menyn stängts så scroll inte avbryts av focus-return
-                              requestAnimationFrame(() => scrollToSection(id));
-                            } else {
-                              const goTop = () => {
-                                const scroller = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-                                if (scroller) scroller.scrollTop = 0;
-                                window.scrollTo({ top: 0, behavior: 'auto' });
-                              };
-                              if (location.pathname === l.href) {
-                                requestAnimationFrame(goTop);
+                  <DropdownMenuContent
+                    align="center"
+                    sideOffset={8}
+                    className="relative min-w-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-primary/90 p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.5)] backdrop-blur-2xl"
+                  >
+                    {/* Mjukt aurora-glow bakom menyn — Pariums sekundärfärg tonat in i primären */}
+                    <span className="pointer-events-none absolute -inset-1 rounded-[32px] bg-gradient-to-r from-secondary/15 via-secondary/5 to-primary/15 opacity-60 blur-2xl" />
+
+                    <div className="relative z-10 flex flex-col gap-1">
+                      {links.map((l) => {
+                        const isAnchor = l.href.startsWith('#');
+                        const id = isAnchor ? l.href.slice(1) : l.href;
+                        const isActive = isAnchor
+                          ? activeId === id
+                          : location.pathname === l.href;
+                        return (
+                          <DropdownMenuItem
+                            key={l.href}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              setMenuOpen(false);
+                              if (isAnchor) {
+                                // Vänta tills menyn stängts så scroll inte avbryts av focus-return
+                                requestAnimationFrame(() => scrollToSection(id));
                               } else {
-                                sessionStorage.setItem('parium-skip-splash', '1');
-                                navigate(l.href);
-                                requestAnimationFrame(() => requestAnimationFrame(goTop));
+                                const goTop = () => {
+                                  const scroller = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+                                  if (scroller) scroller.scrollTop = 0;
+                                  window.scrollTo({ top: 0, behavior: 'auto' });
+                                };
+                                if (location.pathname === l.href) {
+                                  requestAnimationFrame(goTop);
+                                } else {
+                                  sessionStorage.setItem('parium-skip-splash', '1');
+                                  navigate(l.href);
+                                  requestAnimationFrame(() => requestAnimationFrame(goTop));
+                                }
                               }
-                            }
-                          }}
-                          className={isActive ? 'bg-accent/60 font-semibold' : ''}
-                        >
-                          {l.label}
-                        </DropdownMenuItem>
-                      );
-                    })}
+                            }}
+                            className={cn(
+                              'relative flex items-center justify-between rounded-2xl px-5 py-3.5 text-[15px] font-medium transition-colors focus:bg-transparent md:hover:bg-white/5 md:focus:bg-white/5',
+                              isActive
+                                ? 'bg-white/5 text-white'
+                                : 'text-white/70 hover:text-white'
+                            )}
+                          >
+                            <span className="relative z-10">{l.label}</span>
+                            {isActive && (
+                              <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-secondary shadow-[0_0_8px_hsl(var(--secondary))]" />
+                            )}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
