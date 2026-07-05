@@ -151,37 +151,60 @@ export function EmployerJourney({
     };
   }, [mobileClassMode]);
 
-  // Touch: låt "glowen" följa scrollen istället för hover. Aktivt steg = det
-  // vars kort ligger närmast en fast ankare-linje ~38% ned i viewporten.
-  // Ändras kontinuerligt vid scroll så glowen hoppar mellan stegen både
-  // framåt och bakåt. Ingen effekt på hover-enheter.
+  // Touch: låt "glowen" följa scrollen istället för hover. Vi använder en
+  // IntersectionObserver med en 0-pixels-tunn detektionslinje ~38% ned i
+  // viewporten. När ett steg passerar linjen (upp eller ned) blir det aktivt.
+  // Detta är pålitligt på iOS där window-scroll ofta inte fyrar under
+  // native momentum-scroll — IntersectionObserver kollar mot compositor-tråden.
   useEffect(() => {
     const list = listRef.current;
     if (!list) return;
     if (typeof window === 'undefined') return;
     if (!window.matchMedia('(hover: none)').matches) return;
 
-    const scrollRoot = list.closest('[data-landing-scroll-root]') as HTMLElement | null;
-    let raf = 0;
+    const items = Array.from(list.querySelectorAll<HTMLLIElement>('li'));
+    if (!items.length) return;
+
     let currentActive = -1;
+    const setActive = (idx: number) => {
+      if (idx === currentActive) return;
+      currentActive = idx;
+      items.forEach((el, i) => {
+        if (i === idx) el.setAttribute('data-journey-active', 'true');
+        else el.removeAttribute('data-journey-active');
+      });
+    };
 
-    const compute = () => {
-      raf = 0;
-      const items = Array.from(list.querySelectorAll<HTMLLIElement>('li'));
-      if (!items.length) return;
-      const rootRect = scrollRoot?.getBoundingClientRect() ?? {
-        top: 0,
-        bottom: window.innerHeight || document.documentElement.clientHeight,
-      };
-      const rootHeight = rootRect.bottom - rootRect.top;
-      const anchorY = rootRect.top + rootHeight * 0.38;
+    // Detektionsband på 0px höjd, positionerat vid ~38% från toppen.
+    // Ett steg är "intersecting" bara medan dess rect korsar linjen.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Om flera korsar samtidigt (t.ex. vid layout-init), välj det
+        // som ligger närmast linjens topp.
+        const crossing = entries.filter((e) => e.isIntersecting);
+        if (crossing.length === 0) return;
+        // Vid enstaka övergångar räcker det med det senast korsande steget.
+        const latest = crossing[crossing.length - 1];
+        const idx = items.indexOf(latest.target as HTMLLIElement);
+        if (idx !== -1) setActive(idx);
+      },
+      {
+        root: null, // viewporten
+        rootMargin: '-38% 0px -62% 0px',
+        threshold: 0,
+      },
+    );
 
+    items.forEach((el) => observer.observe(el));
+
+    // Initial-check: om ett steg redan täcker linjen vid mount, aktivera det.
+    const initial = () => {
+      const anchorY = window.innerHeight * 0.38;
       let bestIdx = -1;
       let bestDist = Infinity;
       items.forEach((el, idx) => {
         const rect = el.getBoundingClientRect();
-        // Bara steg som faktiskt är i (eller nära) viewporten får bli aktiva
-        if (rect.bottom < rootRect.top || rect.top > rootRect.bottom) return;
+        if (rect.bottom < 0 || rect.top > window.innerHeight) return;
         const center = rect.top + rect.height / 2;
         const dist = Math.abs(center - anchorY);
         if (dist < bestDist) {
@@ -189,34 +212,15 @@ export function EmployerJourney({
           bestIdx = idx;
         }
       });
-
-      if (bestIdx === currentActive) return;
-      currentActive = bestIdx;
-      items.forEach((el, idx) => {
-        if (idx === bestIdx) el.setAttribute('data-journey-active', 'true');
-        else el.removeAttribute('data-journey-active');
-      });
+      if (bestIdx !== -1) setActive(bestIdx);
     };
-
-    const schedule = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(compute);
-    };
-
-    schedule();
-    scrollRoot?.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule, { passive: true });
-    window.addEventListener('orientationchange', schedule, { passive: true });
+    initial();
 
     return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      scrollRoot?.removeEventListener('scroll', schedule);
-      window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
-      window.removeEventListener('orientationchange', schedule);
+      observer.disconnect();
     };
   }, [mobileClassMode, activeSteps]);
+
 
 
   return (
