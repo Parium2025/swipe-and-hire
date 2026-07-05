@@ -1824,6 +1824,15 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       </div>
                     )}
                   </div>
+                  <EmploymentTypeExtras
+                    employmentType={formData.employment_type}
+                    partTimeDays={formData.part_time_days || []}
+                    durationAmount={formData.duration_amount ? parseInt(formData.duration_amount, 10) : null}
+                    durationUnit={(formData.duration_unit as DurationUnit) || 'months'}
+                    onPartTimeDaysChange={(days) => setFormData(prev => ({ ...prev, part_time_days: days }))}
+                    onDurationAmountChange={(n) => setFormData(prev => ({ ...prev, duration_amount: n == null ? '' : String(n) }))}
+                    onDurationUnitChange={(u) => setFormData(prev => ({ ...prev, duration_unit: u }))}
+                  />
                 </div>
 
                 <div className="space-y-2">
