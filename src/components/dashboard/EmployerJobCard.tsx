@@ -173,6 +173,26 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Anställningsform</span>
             <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}</span>
+          <div className="flex items-start justify-between gap-3">
+            <span className="text-sm leading-snug text-white">Anställningsform</span>
+            {(() => {
+              const details = formatEmploymentDetails({
+                employment_type: job.employment_type,
+                part_time_days: job.part_time_days,
+                duration_amount: job.duration_amount,
+                duration_unit: job.duration_unit,
+              });
+              return (
+                <span className="text-sm leading-snug text-white font-medium text-right max-w-[65%]">
+                  {job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}
+                  {details && (
+                    <span className="block text-[12px] leading-snug text-white/80 font-normal mt-0.5">
+                      {details}
+                    </span>
+                  )}
+                </span>
+              );
+            })()}
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Ansökningar</span>
