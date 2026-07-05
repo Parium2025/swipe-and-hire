@@ -90,7 +90,7 @@ export const BenefitsDropdown = ({
         {isOpen && (
           <div className="absolute z-50 mt-1 w-full glass-panel rounded-md max-h-72 overflow-hidden">
             {/* Predefined benefits */}
-            <div className="max-h-48 overflow-y-auto">
+            <div className="max-h-48 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
               {BENEFITS_OPTIONS.map((option) => {
                 const isSelected = selectedBenefits.includes(option.value);
                 return (
@@ -99,8 +99,8 @@ export const BenefitsDropdown = ({
                     type="button"
                     onClick={() => toggleBenefit(option.value)}
                     aria-pressed={isSelected}
-                    className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors hover:bg-white/20 ${
-                      isSelected ? 'bg-white/20' : ''
+                    className={`w-full px-3 py-2.5 text-left text-sm transition-all duration-300 hover:bg-white/20 ${
+                      isSelected ? 'bg-white/10 text-white' : 'text-white'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -109,7 +109,7 @@ export const BenefitsDropdown = ({
                       ) : (
                         <span className="h-4 w-4 shrink-0" aria-hidden="true" />
                       )}
-                      <span className={`text-white ${isSelected ? 'font-semibold' : 'font-medium'}`}>
+                      <span className="block truncate text-white">
                         {option.label}
                       </span>
                     </div>
