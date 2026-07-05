@@ -29,7 +29,6 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
-import { motion, AnimatePresence } from 'framer-motion';
 import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
@@ -4222,10 +4221,10 @@ const MobileJobWizard = ({
                     </button>
                     <AutoFitTitle
                       text={getDisplayTitle()}
-                      className={`${textSizes.title} font-bold leading-tight mb-1 cursor-pointer`}
+                      className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-pointer`}
                       style={getJobOverlayTextStyle(formData.overlay_text_color)}
                       minFontPx={15}
-                      maxFontPx={26}
+                      maxFontPx={29}
                     />
                     <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
@@ -4772,10 +4771,10 @@ const MobileJobWizard = ({
                                         </button>
                                          <AutoFitTitle
                                            text={formData.title || 'Jobbtitel'}
-                                           className={`${textSizes.title} font-bold leading-tight mb-1 cursor-pointer`}
+                                           className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-pointer`}
                                            style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                            minFontPx={15}
-                                           maxFontPx={32}
+                                           maxFontPx={36}
                                          />
                                         <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                           {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}

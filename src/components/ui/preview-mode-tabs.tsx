@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { memo, useRef, useState, useLayoutEffect, useCallback, useEffect } from 'react';
 import { Smartphone, Monitor } from 'lucide-react';
 
@@ -81,17 +80,9 @@ export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onMod
     <div className="dashboard-tabs-viewport mx-auto">
       <div className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
         {/* Sliding background */}
-        <motion.div
-          className="absolute top-1 bottom-1 bg-white/20 rounded-[7px] will-change-transform"
-          style={{ width: indicatorStyle.width, left: 0 }}
-          initial={false}
-          animate={{ x: indicatorStyle.x }}
-          transition={{
-            type: "spring",
-            stiffness: 380,
-            damping: 34,
-            mass: 0.6,
-          }}
+        <div
+          className="absolute top-1 bottom-1 bg-white/20 rounded-[7px]"
+          style={{ width: indicatorStyle.width, left: 0, transform: `translateX(${indicatorStyle.x}px)` }}
         />
         
         <button
