@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Clock, Euro, Building2, Users, Heart, X, FileText, Video, CheckSquare, List } from 'lucide-react';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatSalary as formatSalaryShared } from '@/lib/jobViewHelpers';
 
 interface JobQuestion {
