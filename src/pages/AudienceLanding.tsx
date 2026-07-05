@@ -1185,7 +1185,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
       elements.forEach((el) => {
         el.classList.remove('is-in-view');
-        el.setAttribute('data-lf-shown', 'false');
+        el.setAttribute('data-lf-shown', 'true');
       });
 
       const isVisible = (el: HTMLElement) => {
@@ -1205,7 +1205,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       const syncVisible = () => {
         if (cancelled) return;
         elements.forEach((el) => {
-          if (el.getAttribute('data-lf-shown') !== 'true' && isVisible(el)) reveal(el);
+          if (isVisible(el)) reveal(el);
         });
       };
 
@@ -1519,7 +1519,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {isMobileFeatureMotion && (
             <style>{`
               [data-mobile-feature-prearm] .landing-feature-mobile-in {
-                opacity: 0;
+                opacity: 1;
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
                 transform-origin: center;
                 transition:
