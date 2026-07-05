@@ -614,7 +614,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
   // Build meta line: "Deltid • Saltsjö-Boo, Stockholms län"
   const getMetaLine = (employment?: string, city?: string, county?: string) => {
-    const emp = getEmploymentTypeLabel(employment);
+    const empBase = getEmploymentTypeLabel(employment);
+    const details = formatEmploymentDetails({
+      employment_type: employment,
+      part_time_days: formData.part_time_days,
+      duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+      duration_unit: formData.duration_unit,
+    });
+    const emp = [empBase, details].filter(Boolean).join(' · ');
     // Include county if available
     let locationPart = formatCityWithMainCity(city || '');
     if (county && county.trim()) {
