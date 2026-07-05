@@ -1710,6 +1710,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
              formData.occupation.trim() && 
              formData.description.trim() && 
              formData.employment_type &&
+             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || (formData.part_time_days && formData.part_time_days.length > 0)) &&
+             (!TYPES_WITH_DURATION.has(formData.employment_type) || (formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) &&
              formData.salary_type &&
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0 &&
