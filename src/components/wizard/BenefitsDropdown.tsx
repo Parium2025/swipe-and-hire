@@ -98,7 +98,10 @@ export const BenefitsDropdown = ({
                     key={option.value}
                     type="button"
                     onClick={() => toggleBenefit(option.value)}
-                    className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                    aria-pressed={isSelected}
+                    className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors hover:bg-white/20 ${
+                      isSelected ? 'bg-white/20' : ''
+                    }`}
                   >
                     <div className="flex items-center gap-2">
                       {isSelected ? (
@@ -106,7 +109,7 @@ export const BenefitsDropdown = ({
                       ) : (
                         <span className="h-4 w-4 shrink-0" aria-hidden="true" />
                       )}
-                      <span className="font-medium text-white">
+                      <span className={`text-white ${isSelected ? 'font-semibold' : 'font-medium'}`}>
                         {option.label}
                       </span>
                     </div>
