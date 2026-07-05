@@ -4345,7 +4345,7 @@ const MobileJobWizard = ({
                                 <Bookmark className="h-4 w-4 text-white" />
                               </button>
                               <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                <Check className="h-4 w-4 text-white" />
+                                <Heart className="h-4 w-4 text-white fill-white" />
                               </button>
                             </div>
                           </div>
