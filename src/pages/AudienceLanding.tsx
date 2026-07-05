@@ -1064,10 +1064,6 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
             <motion.button
               type="button"
               onClick={onIntroCta}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-              transition={{ duration: 0.8, ease, delay: 0.15 }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
               className="mt-16 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-20 sm:text-lg"
