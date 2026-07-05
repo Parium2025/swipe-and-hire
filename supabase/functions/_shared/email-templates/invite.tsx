@@ -29,7 +29,7 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailP
     <Body style={main}>
       <Container style={container}>
         <Section style={brandSection}>
-          <Img src="https://parium.se/parium-auth-logo.png" alt="Parium" width="120" height="32" style={{ display: "block" }} />
+          <Img src="https://www.parium.se/parium-auth-logo.png" alt="Parium" width="140" height="56" style={{ display: "block" }} />
         </Section>
         <Heading style={h1}>Du har bjudits in</Heading>
         <Text style={text}>
