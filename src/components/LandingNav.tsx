@@ -265,7 +265,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           >
                             <span className="relative z-10">{l.label}</span>
                             {isActive && (
-                              <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-secondary shadow-[0_0_8px_hsl(var(--secondary))]" />
+                              <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-secondary" />
                             )}
                           </DropdownMenuItem>
                         );
