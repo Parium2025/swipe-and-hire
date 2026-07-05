@@ -178,7 +178,7 @@ export default function ValjPlan() {
       </div>
 
 
-      <div className="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:pt-16">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-24 pt-10 sm:pt-16">
         {/* Hero */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
