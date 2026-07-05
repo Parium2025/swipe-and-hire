@@ -2070,6 +2070,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
                             onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                             onClick={handleEmploymentTypeClick}
+                            onKeyDown={employmentTypeNav.handleKeyDown}
                             placeholder="Välj anställningsform"
                             className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showEmploymentTypeDropdown ? 'border-white/50' : ''}`}
                             readOnly
@@ -2077,17 +2078,22 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {showEmploymentTypeDropdown && (
-                             <div className="absolute top-full left-0 right-0 glass-dropdown">
-                              {filteredEmploymentTypes.map((type) => (
-                                <button
-                                  key={type.value}
-                                  type="button"
-                                  onClick={() => handleEmploymentTypeSelect(type)}
-                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                                >
-                                  <div className="font-medium">{type.label}</div>
-                                </button>
-                              ))}
+                             <div ref={employmentTypeNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown">
+                              {filteredEmploymentTypes.map((type, index) => {
+                                const isHighlighted = employmentTypeNav.highlightedIndex === index;
+                                return (
+                                  <button
+                                    key={type.value}
+                                    type="button"
+                                    data-index={index}
+                                    onMouseEnter={() => employmentTypeNav.setHighlightedIndex(index)}
+                                    onClick={() => handleEmploymentTypeSelect(type)}
+                                    className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                                  >
+                                    <div className="font-medium">{type.label}</div>
+                                  </button>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
