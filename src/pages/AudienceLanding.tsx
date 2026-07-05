@@ -1921,16 +1921,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         a: 'Nej. Alla månadspaket löper månadsvis och ni säger upp när ni vill från era kontoinställningar. Ingen uppsägningstid, inga dolda avgifter. Betalar ni för en enkelannons gäller den i 14 dagar och avslutas automatiskt.',
                       },
                       {
-                        q: 'Vad händer om vi inte förnyar?',
-                        a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
+                        q: 'Hur snabbt kommer vi igång?',
+                        a: 'På under 10 minuter. Ni skapar ett arbetsgivarkonto, verifierar organisationen och publicerar er första annons direkt. Har ni företagslogga och en rollbeskrivning redo är annonsen live samma dag.',
                       },
                       {
-                        q: 'Kan vi byta plan?',
-                        a: 'Ja, ni kan uppgradera eller nedgradera när som helst från Inställningar → Plan. Ändringen träder i kraft omedelbart och vi justerar debiteringen proportionerligt.',
-                      },
-                      {
-                        q: 'Ingår moms?',
-                        a: 'Priserna är exklusive moms. 25 % moms läggs på i checkouten och specificeras på fakturan. Momsregistrerade företag drar av den som ingående moms som vanligt.',
+                        q: 'Hur kvalitetssäkras kandidaterna?',
+                        a: 'Varje kandidat har en verifierad profil med video, erfarenhet och tydliga önskemål kring roll, ort och lön. Ni ser allt innan ni matchar, vilket minimerar tiden ni lägger på irrelevanta ansökningar.',
                       },
                       {
                         q: 'Kan flera kollegor arbeta i samma konto?',
@@ -1944,10 +1940,26 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         q: 'Vilken support får vi som kund?',
                         a: 'Ni når oss på hej@parium.se alla vardagar. Vi hjälper till med allt från annonsupplägg och kandidattips till fakturafrågor — svar inom 24 timmar, oftast samma dag. På Pro får ni dessutom en dedikerad kontaktperson.',
                       },
+                      {
+                        q: 'Finns det någon bindningstid?',
+                        a: 'Nej. Alla månadspaket löper månadsvis och ni säger upp när ni vill från era kontoinställningar. Ingen uppsägningstid, inga dolda avgifter. Betalar ni för en enkelannons gäller den i 14 dagar och avslutas automatiskt.',
+                      },
+                      {
+                        q: 'Vad händer om vi inte förnyar?',
+                        a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
+                      },
+                      {
+                        q: 'Kan vi byta plan?',
+                        a: 'Ja, ni kan uppgradera eller nedgradera när som helst från Inställningar → Plan. Ändringen träder i kraft omedelbart och vi justerar debiteringen proportionerligt.',
+                      },
+                      {
+                        q: 'Ingår moms?',
+                        a: 'Priserna är exklusive moms. 25 % moms läggs på i checkouten och specificeras på fakturan. Momsregistrerade företag drar av den som ingående moms som vanligt.',
+                      },
                     ]
                 ).map(({ q, a }, i) => (
                   <motion.div
-                    key={q}
+                    key={`${q}-${i}`}
                     initial={isMobileFeatureMotion ? false : { opacity: 0, x: 60 }}
                     whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                     viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
