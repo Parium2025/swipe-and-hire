@@ -260,7 +260,7 @@ export default function ValjPlan() {
             const isRecommended = plan.tier === 'pro' && !userHasPro;
             const isCurrent = activePlan?.tier === plan.tier;
             const isActive = activeTier === plan.tier || (activeTier === null && isRecommended);
-            const isOpen = expandedTier === plan.tier;
+            const isOpen = allFeaturesOpen;
             return (
               <motion.div
                 key={plan.id}
@@ -298,8 +298,8 @@ export default function ValjPlan() {
                 <PlanFeatures
                   features={FEATURES_BY_TIER[plan.tier] ?? plan.features}
                   isActive={isActive}
-                  open={isOpen}
-                  onToggle={() => setExpandedTier(isOpen ? null : plan.tier)}
+                  open={allFeaturesOpen}
+                  onToggle={() => setAllFeaturesOpen(open => !open)}
                 />
 
                 <button
