@@ -627,21 +627,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     const metaLength = metaLine.length;
 
     let companySizeClass = 'text-sm';
-    let titleSizeClass = 'text-lg';
+    let titleSizeClass = 'text-2xl';
     let metaSizeClass = 'text-sm';
 
     if (titleLength > 50) {
       titleSizeClass = 'text-base';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-sm';
-    } else if (titleLength > 30) {
+    } else if (titleLength > 35) {
       titleSizeClass = 'text-lg';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-sm';
-    } else if (titleLength < 20) {
+    } else if (titleLength > 20) {
       titleSizeClass = 'text-xl';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-base';
+    } else {
+      titleSizeClass = 'text-2xl';
     }
 
     if (companyLength > 15) {
