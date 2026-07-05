@@ -416,14 +416,46 @@ export default function ValjPlan() {
             { q: 'Finns bindningstid?', a: 'Nej. Alla planer är månadsvis. Säg upp eller byt när du vill.' },
             { q: 'Vad händer om jag inte förnyar?', a: 'Allt sparas — kandidatbank, chattar, gamla annonser. Bara "publicera ny annons" pausas.' },
             { q: 'Kan jag byta plan?', a: 'Ja, du kan uppgradera eller nedgradera när som helst från Inställningar → Plan.' },
-            { q: 'Ingår moms?', a: 'Priserna är exklusive moms (25%). Företag drar av momsen.' },
-          ].map((item, i) => (
-            <div key={i} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
-              <h4 className="mb-1.5 text-sm font-semibold text-white">{item.q}</h4>
-              <p className="text-sm text-white">{item.a}</p>
-            </div>
-          ))}
-        </div>
+        {/* Vanliga frågor — samma accordion-stuk som på landningen */}
+        <section className="mx-auto mt-20 max-w-[1180px]">
+          <div className="text-center">
+            <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Vanliga frågor</span>
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-4xl md:text-5xl">
+              Frågor & svar
+            </h2>
+          </div>
+          <div className="mt-10 grid gap-3 md:grid-cols-2">
+            {[
+              {
+                q: 'Finns det någon bindningstid?',
+                a: 'Nej. Alla månadspaket löper månadsvis och ni säger upp när ni vill från era kontoinställningar. Ingen uppsägningstid, inga dolda avgifter. Betalar ni för en enkelannons gäller den i 14 dagar och avslutas automatiskt.',
+              },
+              {
+                q: 'Vad händer om jag inte förnyar?',
+                a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
+              },
+              {
+                q: 'Kan jag byta plan?',
+                a: 'Ja, ni kan uppgradera eller nedgradera när som helst från Inställningar → Plan. Ändringen träder i kraft omedelbart och vi justerar debiteringen proportionerligt.',
+              },
+              {
+                q: 'Ingår moms?',
+                a: 'Priserna är exklusive moms. 25 % moms läggs på i checkouten och specificeras på fakturan. Momsregistrerade företag drar av den som ingående moms som vanligt.',
+              },
+            ].map(({ q, a }, i) => (
+              <motion.div
+                key={q}
+                initial={{ opacity: 0, x: 60 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.7, ease, delay: 0.12 + i * 0.06 }}
+                className="landing-faq-card"
+              >
+                <FaqAccordion q={q} a={a} />
+              </motion.div>
+            ))}
+          </div>
+        </section>
       </div>
 
       <PaymentPlaceholderDialog
