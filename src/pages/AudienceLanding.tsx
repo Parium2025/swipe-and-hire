@@ -1185,7 +1185,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
       elements.forEach((el) => {
         el.classList.remove('is-in-view');
-        el.setAttribute('data-lf-shown', 'true');
+        el.setAttribute('data-lf-shown', 'false');
       });
 
       const isVisible = (el: HTMLElement) => {
@@ -1516,9 +1516,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {isMobileFeatureMotion && (
             <style>{`
               [data-mobile-feature-prearm] .landing-feature-mobile-in {
-                opacity: 1;
+                opacity: 0;
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
                 transform-origin: center;
+                will-change: opacity, transform;
                 transition:
                   opacity 820ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
                   transform 820ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
@@ -1530,6 +1531,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               [data-mobile-feature-prearm] .landing-feature-mobile-in[data-lf-shown="true"] {
                 opacity: 1;
                 transform: translate3d(0, 0, 0);
+              }
+              [data-mobile-feature-prearm] .landing-feature-mobile-in[data-lf-shown="false"] {
+                pointer-events: none;
               }
               [data-mobile-feature-prearm] .landing-feature-card,
               [data-mobile-feature-prearm] .landing-faq-card {
