@@ -170,7 +170,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         <div className="space-y-2 px-3 pb-1">
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Anställningsform</span>
-            <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}</span>
+            <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Ansökningar</span>
