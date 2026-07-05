@@ -119,6 +119,9 @@ interface ExistingJob {
   job_image_desktop_url?: string | null;
   overlay_text_color?: string | null;
   is_active?: boolean;
+  part_time_days?: string[] | null;
+  duration_amount?: number | null;
+  duration_unit?: string | null;
 }
 
 interface MobileJobWizardProps {
