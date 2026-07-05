@@ -30,11 +30,23 @@ const SplitHeadline = ({
   delay = 0.05,
 }: Props) => {
   const reduce = useReducedMotion();
-  const [isTouch, setIsTouch] = useState(false);
+  // 🛟 Synkron init: läs matchMedia direkt så vi ALDRIG hamnar i desktop-varianten
+  // (som har filter: blur(8px)) på en mobil första render. Om Framer Motion redan
+  // hunnit applicera hidden-varianten innan useEffect hann köra så fastnade rubriken
+  // som suddig — vilket också skapade ett stort tomrum där texten "gömdes".
+  const [isTouch, setIsTouch] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+    try {
+      return window.matchMedia('(pointer: coarse), (max-width: 767px)').matches;
+    } catch {
+      return false;
+    }
+  });
   const words = text.split(/\s+/).filter(Boolean);
   const lastIdx = words.length - 1;
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
     const query = window.matchMedia('(pointer: coarse), (max-width: 767px)');
     const sync = () => setIsTouch(query.matches);
     sync();
