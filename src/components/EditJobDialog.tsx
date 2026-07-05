@@ -3397,11 +3397,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             >
                                               {profile?.company_name || 'Företag'}
                                             </button>
-                                            <AutoFitTitle
+                                              <AutoFitTitle
                                               text={getDisplayTitle()}
-                                              className={`${textSizes.title} text-white font-bold leading-tight mb-1 cursor-default`}
+                                               className={`${textSizes.title} w-full text-white font-bold leading-tight mb-1 cursor-default`}
                                               minFontPx={15}
-                                              maxFontPx={26}
+                                               maxFontPx={29}
                                             />
                                             <div className={`${textSizes.meta} text-white`}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
@@ -3929,9 +3929,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               </button>
                                               <AutoFitTitle
                                                 text={formData.title || 'Jobbtitel'}
-                                                className={`${textSizes.title} text-white font-bold leading-tight mb-1 cursor-default`}
+                                                className={`${textSizes.title} w-full text-white font-bold leading-tight mb-1 cursor-default`}
                                                 minFontPx={15}
-                                                maxFontPx={32}
+                                                maxFontPx={36}
                                               />
                                               <div className={`${textSizes.meta} text-white`}>
                                                 {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}

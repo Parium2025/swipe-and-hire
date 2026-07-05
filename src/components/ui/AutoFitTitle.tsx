@@ -76,8 +76,6 @@ export function AutoFitTitle({
       return;
     }
 
-    let frame = 0;
-
     const measureAt = (fontPx: number) => {
       textEl.style.fontSize = `${fontPx}px`;
       textEl.style.maxWidth = 'none';
@@ -87,64 +85,56 @@ export function AutoFitTitle({
     };
 
     const fit = () => {
-      cancelAnimationFrame(frame);
       setOpen(false);
+      const availableWidth = Math.floor(el.getBoundingClientRect().width) - 2;
 
-      frame = requestAnimationFrame(() => {
-        const availableWidth = Math.floor(el.getBoundingClientRect().width) - 2;
+      if (availableWidth <= 0) return;
 
-        if (availableWidth <= 0) return;
+      const baseFontPx = parseFloat(getComputedStyle(el).fontSize) || 16;
+      const ceiling = Math.max(minFontPx, maxFontPx ?? baseFontPx);
+      const maxWidth = measureAt(ceiling);
 
-        const baseFontPx = parseFloat(getComputedStyle(el).fontSize) || 16;
-        const ceiling = Math.max(minFontPx, maxFontPx ?? baseFontPx);
-        const maxWidth = measureAt(ceiling);
-
-        if (maxWidth <= availableWidth) {
-          setFontSize(ceiling);
-          setTruncated(false);
-          return;
-        }
-
-        const minWidth = measureAt(minFontPx);
-
-        if (minWidth > availableWidth) {
-          setFontSize(minFontPx);
-          setTruncated(true);
-          return;
-        }
-
-        let low = minFontPx;
-        let high = ceiling;
-        let best = minFontPx;
-
-        for (let i = 0; i < 18; i += 1) {
-          const mid = (low + high) / 2;
-          if (measureAt(mid) <= availableWidth) {
-            best = mid;
-            low = mid;
-          } else {
-            high = mid;
-          }
-        }
-
-        setFontSize(Math.floor(best * 10) / 10);
+      if (maxWidth <= availableWidth) {
+        setFontSize(ceiling);
         setTruncated(false);
-      });
+        return;
+      }
+
+      const minWidth = measureAt(minFontPx);
+
+      if (minWidth > availableWidth) {
+        setFontSize(minFontPx);
+        setTruncated(true);
+        return;
+      }
+
+      let low = minFontPx;
+      let high = ceiling;
+      let best = minFontPx;
+
+      for (let i = 0; i < 18; i += 1) {
+        const mid = (low + high) / 2;
+        if (measureAt(mid) <= availableWidth) {
+          best = mid;
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+
+      setFontSize(Math.floor(best * 10) / 10);
+      setTruncated(false);
     };
 
-
-    const timeout = setTimeout(fit, 30);
+    fit();
     const ro = new ResizeObserver(() => {
-      // Debounce via microtask; keeps things cheap on rapid layout changes
-      setTimeout(fit, 10);
+      fit();
     });
     ro.observe(el);
     if (el.parentElement) ro.observe(el.parentElement);
 
     return () => {
       ro.disconnect();
-      cancelAnimationFrame(frame);
-      clearTimeout(timeout);
     };
   }, [text, minFontPx, maxFontPx]);
 
@@ -162,7 +152,7 @@ export function AutoFitTitle({
 
   const mergedStyle: React.CSSProperties = {
     whiteSpace: 'nowrap',
-    overflow: 'hidden',
+    overflow: truncated ? 'hidden' : 'visible',
     textOverflow: truncated ? 'ellipsis' : 'clip',
     textAlign: 'center',
     ...style,
