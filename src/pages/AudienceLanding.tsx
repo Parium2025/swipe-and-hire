@@ -1959,7 +1959,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     ]
                 ).map(({ q, a }, i) => (
                   <motion.div
-                    key={q}
+                    key={`${q}-${i}`}
                     initial={isMobileFeatureMotion ? false : { opacity: 0, x: 60 }}
                     whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                     viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "100% 0px 100% 0px" }}
