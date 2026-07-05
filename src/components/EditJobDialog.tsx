@@ -23,7 +23,7 @@ import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { useToast } from '@/hooks/use-toast';
-import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, type DurationUnit } from '@/lib/employmentTypes';
+import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, formatEmploymentDetails, type DurationUnit } from '@/lib/employmentTypes';
 import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare, Copy } from 'lucide-react';
 import { BenefitsList } from '@/components/wizard/BenefitsList';
