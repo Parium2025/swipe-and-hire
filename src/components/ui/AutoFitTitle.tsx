@@ -11,6 +11,7 @@ interface AutoFitTitleProps {
   className?: string;
   style?: React.CSSProperties;
   minFontPx?: number;
+  maxFontPx?: number;
   tooltipSide?: 'top' | 'bottom' | 'left' | 'right';
   onClick?: () => void;
 }
