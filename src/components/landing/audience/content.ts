@@ -90,7 +90,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     ],
     featuresIntro: '',
     features: [
-      { title: 'Relevanta kandidater', description: 'Här finner du kandidater som faktiskt vill ha ett jobb.\u00a0', icon: Target },
+      { title: 'Relevanta kandidater', description: 'Här hittar du kandidater som faktiskt vill ha ett jobb.\u00a0', icon: Target },
       { title: 'Rekrytera på språng', description: 'Granska, sortera och svara direkt i mobilen. Hela rekryteringen följer med er — vart ni än är.', icon: Filter },
       { title: 'Beslut i team', description: 'Bjud in kollegor, dela kandidater och fatta beslut tillsammans i en gemensam Kanban-vy.', icon: Users },
       { title: 'Direkt dialog', description: 'Öppna chatten med kandidater som vill prata. Ta nästa steg utan att lämna plattformen.', icon: Zap },
