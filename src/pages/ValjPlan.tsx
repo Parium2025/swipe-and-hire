@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { PaymentPlaceholderDialog } from '@/components/PaymentPlaceholderDialog';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { isOwnerEmail } from '@/lib/ownerAccess';
+import FaqAccordion from '@/components/seo/FaqAccordion';
 
 import { toast } from 'sonner';
 
