@@ -11,6 +11,7 @@ interface AutoFitTitleProps {
   className?: string;
   style?: React.CSSProperties;
   minFontPx?: number;
+  maxFontPx?: number;
   tooltipSide?: 'top' | 'bottom' | 'left' | 'right';
   onClick?: () => void;
 }
@@ -50,6 +51,7 @@ export function AutoFitTitle({
   className,
   style,
   minFontPx = 12,
+  maxFontPx,
   tooltipSide = 'top',
   onClick,
 }: AutoFitTitleProps) {
@@ -89,21 +91,39 @@ export function AutoFitTitle({
         if (availableWidth <= 0) return;
 
         const baseFontPx = parseFloat(getComputedStyle(el).fontSize) || 16;
+        const ceiling = maxFontPx ?? baseFontPx;
         let currentFont = baseFontPx;
 
         // scrollWidth reflects natural single-line width because nowrap is set
         let width = el.scrollWidth;
 
-        while (width > availableWidth && currentFont > minFontPx) {
-          currentFont = Math.max(minFontPx, currentFont - 0.25);
-          el.style.fontSize = `${currentFont}px`;
-          width = el.scrollWidth;
-          if (currentFont <= minFontPx) break;
+        if (width <= availableWidth && ceiling > baseFontPx) {
+          // Grow font-size until it just barely fits (or we hit ceiling)
+          while (currentFont < ceiling) {
+            const next = Math.min(ceiling, currentFont + 0.5);
+            el.style.fontSize = `${next}px`;
+            if (el.scrollWidth > availableWidth) {
+              // Step back to last fitting size
+              currentFont = Math.max(minFontPx, next - 0.5);
+              el.style.fontSize = `${currentFont}px`;
+              break;
+            }
+            currentFont = next;
+          }
+        } else {
+          // Shrink font-size until it fits (or we hit floor)
+          while (width > availableWidth && currentFont > minFontPx) {
+            currentFont = Math.max(minFontPx, currentFont - 0.25);
+            el.style.fontSize = `${currentFont}px`;
+            width = el.scrollWidth;
+            if (currentFont <= minFontPx) break;
+          }
         }
 
         setTruncated(el.scrollWidth > el.clientWidth + 1);
       });
     };
+
 
     const timeout = setTimeout(fit, 30);
     const ro = new ResizeObserver(() => {
@@ -117,7 +137,7 @@ export function AutoFitTitle({
       ro.disconnect();
       clearTimeout(timeout);
     };
-  }, [text, minFontPx]);
+  }, [text, minFontPx, maxFontPx]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
