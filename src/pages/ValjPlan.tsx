@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PaymentPlaceholderDialog } from '@/components/PaymentPlaceholderDialog';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { PariumLogoButton } from '@/components/PariumLogoButton';
+
 import { toast } from 'sonner';
 
 type BillingPeriod = 'monthly' | 'one_time';
@@ -222,13 +222,9 @@ export default function ValjPlan() {
       {/* Dekorativa bubblor + glow — samma som resten av appen */}
       <AnimatedBackground />
 
-      {/* Minimal header — logga vänster, kryss höger (samma stuk som landningen) */}
+      {/* Minimal header — endast kryss (går tillbaka till annonsen/föregående sida) */}
       <div className="sticky top-0 z-20 bg-transparent">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <PariumLogoButton
-            onClick={() => navigate('/')}
-            ariaLabel="Gå till startsidan"
-          />
+        <div className="mx-auto flex max-w-6xl items-center justify-end px-4 py-4">
           <button
             onClick={() => navigate(-1)}
             aria-label="Stäng"
