@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useHasActivePlan } from '@/hooks/useHasActivePlan';
@@ -1928,6 +1929,106 @@ const MobileJobWizard = ({
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
   const filteredOccupations = occupationSearchTerm.length > 0 ? searchOccupations(occupationSearchTerm) : [];
 
+  // ============ Keyboard navigation for custom dropdowns ============
+  type OccItem = { kind: 'suggestion' | 'custom'; label: string; value: string };
+  const occupationNavItems = useMemo<OccItem[]>(() => {
+    const list: OccItem[] = filteredOccupations.map((o) => ({
+      kind: 'suggestion',
+      label: o,
+      value: o,
+    }));
+    if (occupationSearchTerm.trim().length >= 2 && filteredOccupations.length === 0) {
+      list.push({
+        kind: 'custom',
+        label: `Använd "${occupationSearchTerm}"`,
+        value: occupationSearchTerm,
+      });
+    }
+    return list;
+  }, [filteredOccupations, occupationSearchTerm]);
+
+  const occupationNav = useDropdownKeyboardNav<OccItem>({
+    items: occupationNavItems,
+    isOpen: showOccupationDropdown,
+    onSelect: (item) => handleOccupationSelect(item.value),
+    onOpen: () => setShowOccupationDropdown(occupationSearchTerm.length > 0),
+    onClose: () => setShowOccupationDropdown(false),
+  });
+
+  const employmentTypeNav = useDropdownKeyboardNav({
+    items: filteredEmploymentTypes,
+    isOpen: showEmploymentTypeDropdown,
+    onSelect: (t) => handleEmploymentTypeSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setEmploymentTypeSearchTerm('');
+      setShowEmploymentTypeDropdown(true);
+    },
+    onClose: () => setShowEmploymentTypeDropdown(false),
+  });
+
+  const salaryTypeNav = useDropdownKeyboardNav({
+    items: filteredSalaryTypes,
+    isOpen: showSalaryTypeDropdown,
+    onSelect: (t) => handleSalaryTypeSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setSalaryTypeSearchTerm('');
+      setShowSalaryTypeDropdown(true);
+    },
+    onClose: () => setShowSalaryTypeDropdown(false),
+  });
+
+  const salaryTransparencyNav = useDropdownKeyboardNav({
+    items: filteredSalaryTransparencyOptions,
+    isOpen: showSalaryTransparencyDropdown,
+    onSelect: (t) => handleSalaryTransparencySelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setSalaryTransparencySearchTerm('');
+      setShowSalaryTransparencyDropdown(true);
+    },
+    onClose: () => setShowSalaryTransparencyDropdown(false),
+  });
+
+  const workLocationNav = useDropdownKeyboardNav({
+    items: filteredWorkLocationTypes,
+    isOpen: showWorkLocationDropdown,
+    onSelect: (t) => handleWorkLocationSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setWorkLocationSearchTerm('');
+      setShowWorkLocationDropdown(true);
+    },
+    onClose: () => setShowWorkLocationDropdown(false),
+  });
+
+  const remoteWorkNav = useDropdownKeyboardNav({
+    items: filteredRemoteWorkOptions,
+    isOpen: showRemoteWorkDropdown,
+    onSelect: (t) => handleRemoteWorkSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setRemoteWorkSearchTerm('');
+      setShowRemoteWorkDropdown(true);
+    },
+    onClose: () => setShowRemoteWorkDropdown(false),
+  });
+
+  const questionTypeNav = useDropdownKeyboardNav({
+    items: filteredQuestionTypes,
+    isOpen: showQuestionTypeDropdown,
+    onSelect: (t) => handleQuestionTypeSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setQuestionTypeSearchTerm('');
+      setShowQuestionTypeDropdown(true);
+    },
+    onClose: () => setShowQuestionTypeDropdown(false),
+  });
+  // ============ /Keyboard navigation ============
+
+
   const validateCurrentStep = () => {
     const currentStepFields = steps[currentStep].fields;
     
@@ -2585,6 +2686,7 @@ const MobileJobWizard = ({
                       value={formData.occupation}
                       onChange={(e) => handleOccupationSearch(e.target.value)}
                       onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
+                      onKeyDown={occupationNav.handleKeyDown}
                       placeholder="t.ex. Mjukvaru- och systemutvecklare"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 focus:border-white/40"
                     />
@@ -2592,30 +2694,36 @@ const MobileJobWizard = ({
                     
                     {/* Occupation Dropdown */}
                     {showOccupationDropdown && (
-                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                        {/* Show filtered occupations */}
-                        {filteredOccupations.map((occupation, index) => (
-                          <button
-                            key={`${occupation}-${index}`}
-                            type="button"
-                            onClick={() => handleOccupationSelect(occupation)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{occupation}</div>
-                          </button>
-                        ))}
-                        
-                        {/* Custom value option if no matches and search term exists */}
-                        {occupationSearchTerm.trim().length >= 2 &&
-                         filteredOccupations.length === 0 && (
-                          <button
-                            type="button"
-                            onClick={() => handleOccupationSelect(occupationSearchTerm)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-t border-white/10 transition-colors"
-                          >
-                            <span className="font-medium">Använd "{occupationSearchTerm}"</span>
-                          </button>
-                        )}
+                      <div ref={occupationNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                        {occupationNavItems.map((item, index) => {
+                          const isHighlighted = occupationNav.highlightedIndex === index;
+                          if (item.kind === 'custom') {
+                            return (
+                              <button
+                                key={`custom-${item.value}`}
+                                type="button"
+                                data-index={index}
+                                onMouseEnter={() => occupationNav.setHighlightedIndex(index)}
+                                onClick={() => handleOccupationSelect(item.value)}
+                                className={`w-full px-3 py-2.5 text-left text-white text-sm border-t border-white/10 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                              >
+                                <span className="font-medium">{item.label}</span>
+                              </button>
+                            );
+                          }
+                          return (
+                            <button
+                              key={`${item.value}-${index}`}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => occupationNav.setHighlightedIndex(index)}
+                              onClick={() => handleOccupationSelect(item.value)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{item.label}</div>
+                            </button>
+                          );
+                        })}
                         
                         {/* Show message if search is too short */}
                         {occupationSearchTerm.trim().length > 0 && occupationSearchTerm.trim().length < 2 && (
@@ -2728,6 +2836,7 @@ const MobileJobWizard = ({
                       value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
                       onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                       onClick={handleEmploymentTypeClick}
+                      onKeyDown={employmentTypeNav.handleKeyDown}
                       placeholder="Välj anställningsform"
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showEmploymentTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
@@ -2736,17 +2845,22 @@ const MobileJobWizard = ({
                     
                     {/* Employment Type Dropdown */}
                     {showEmploymentTypeDropdown && (
-                       <div className="absolute top-full left-0 right-0 glass-dropdown">
-                        {filteredEmploymentTypes.map((type) => (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => handleEmploymentTypeSelect(type)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{type.label}</div>
-                          </button>
-                        ))}
+                       <div ref={employmentTypeNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown">
+                        {filteredEmploymentTypes.map((type, index) => {
+                          const isHighlighted = employmentTypeNav.highlightedIndex === index;
+                          return (
+                            <button
+                              key={type.value}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => employmentTypeNav.setHighlightedIndex(index)}
+                              onClick={() => handleEmploymentTypeSelect(type)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{type.label}</div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -2759,6 +2873,7 @@ const MobileJobWizard = ({
                       value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
                       onChange={(e) => handleSalaryTypeSearch(e.target.value)}
                       onClick={handleSalaryTypeClick}
+                      onKeyDown={salaryTypeNav.handleKeyDown}
                       placeholder="Välj lönetyp"
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showSalaryTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
@@ -2767,17 +2882,22 @@ const MobileJobWizard = ({
                     
                     {/* Salary Type Dropdown */}
                     {showSalaryTypeDropdown && (
-                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                        {filteredSalaryTypes.map((type) => (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => handleSalaryTypeSelect(type)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{type.label}</div>
-                          </button>
-                        ))}
+                      <div ref={salaryTypeNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                        {filteredSalaryTypes.map((type, index) => {
+                          const isHighlighted = salaryTypeNav.highlightedIndex === index;
+                          return (
+                            <button
+                              key={type.value}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => salaryTypeNav.setHighlightedIndex(index)}
+                              onClick={() => handleSalaryTypeSelect(type)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{type.label}</div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -2790,6 +2910,7 @@ const MobileJobWizard = ({
                       value={salaryTransparencySearchTerm || (formData.salary_transparency ? salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '' : '')}
                       onChange={(e) => handleSalaryTransparencySearch(e.target.value)}
                       onClick={handleSalaryTransparencyClick}
+                      onKeyDown={salaryTransparencyNav.handleKeyDown}
                       placeholder="Välj lönespann"
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showSalaryTransparencyDropdown ? 'border-white/50' : ''}`}
                       readOnly
@@ -2798,17 +2919,22 @@ const MobileJobWizard = ({
                     
                     {/* Salary Transparency Dropdown */}
                     {showSalaryTransparencyDropdown && (
-                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                        {filteredSalaryTransparencyOptions.map((option) => (
-                          <button
-                            key={option.value}
-                            type="button"
-                            onClick={() => handleSalaryTransparencySelect(option)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{option.label}</div>
-                          </button>
-                        ))}
+                      <div ref={salaryTransparencyNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                        {filteredSalaryTransparencyOptions.map((option, index) => {
+                          const isHighlighted = salaryTransparencyNav.highlightedIndex === index;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => salaryTransparencyNav.setHighlightedIndex(index)}
+                              onClick={() => handleSalaryTransparencySelect(option)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{option.label}</div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -2929,6 +3055,7 @@ const MobileJobWizard = ({
                       value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
                       onChange={(e) => handleWorkLocationSearch(e.target.value)}
                       onClick={handleWorkLocationClick}
+                      onKeyDown={workLocationNav.handleKeyDown}
                       placeholder="Välj arbetsplats"
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showWorkLocationDropdown ? 'border-white/50' : ''}`}
                       readOnly
@@ -2937,17 +3064,22 @@ const MobileJobWizard = ({
                     
                     {/* Work Location Dropdown */}
                     {showWorkLocationDropdown && (
-                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                        {filteredWorkLocationTypes.map((type) => (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => handleWorkLocationSelect(type)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{type.label}</div>
-                          </button>
-                        ))}
+                      <div ref={workLocationNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                        {filteredWorkLocationTypes.map((type, index) => {
+                          const isHighlighted = workLocationNav.highlightedIndex === index;
+                          return (
+                            <button
+                              key={type.value}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => workLocationNav.setHighlightedIndex(index)}
+                              onClick={() => handleWorkLocationSelect(type)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{type.label}</div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -2960,6 +3092,7 @@ const MobileJobWizard = ({
                       value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
                       onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                       onClick={handleRemoteWorkClick}
+                      onKeyDown={remoteWorkNav.handleKeyDown}
                       placeholder="Välj alternativ"
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showRemoteWorkDropdown ? 'border-white/50' : ''}`}
                       readOnly
@@ -2968,17 +3101,22 @@ const MobileJobWizard = ({
                     
                     {/* Remote Work Dropdown */}
                     {showRemoteWorkDropdown && (
-                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                        {filteredRemoteWorkOptions.map((type) => (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => handleRemoteWorkSelect(type)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{type.label}</div>
-                          </button>
-                        ))}
+                      <div ref={remoteWorkNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                        {filteredRemoteWorkOptions.map((type, index) => {
+                          const isHighlighted = remoteWorkNav.highlightedIndex === index;
+                          return (
+                            <button
+                              key={type.value}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => remoteWorkNav.setHighlightedIndex(index)}
+                              onClick={() => handleRemoteWorkSelect(type)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{type.label}</div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -3339,6 +3477,7 @@ const MobileJobWizard = ({
                             value={questionTypeSearchTerm || (editingQuestion?.question_type ? questionTypes.find(t => t.value === editingQuestion.question_type)?.label || '' : '')}
                             onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                             onClick={handleQuestionTypeClick}
+                            onKeyDown={questionTypeNav.handleKeyDown}
                             placeholder="Välj frågetyp"
                             className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer focus:border-white/40 focus:ring-0 focus:ring-offset-0"
                             readOnly
@@ -3347,17 +3486,22 @@ const MobileJobWizard = ({
                           
                           {/* Question Type Dropdown */}
                           {showQuestionTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-48 overflow-y-auto">
-                              {filteredQuestionTypes.map((type) => (
-                                <button
-                                  key={type.value}
-                                  type="button"
-                                  onClick={() => handleQuestionTypeSelect(type)}
-                                  className="w-full px-3 py-2.5 text-left hover:bg-white/15 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                                >
-                                  <span className="font-medium">{type.label}</span>
-                                </button>
-                              ))}
+                            <div ref={questionTypeNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-48 overflow-y-auto">
+                              {filteredQuestionTypes.map((type, index) => {
+                                const isHighlighted = questionTypeNav.highlightedIndex === index;
+                                return (
+                                  <button
+                                    key={type.value}
+                                    type="button"
+                                    data-index={index}
+                                    onMouseEnter={() => questionTypeNav.setHighlightedIndex(index)}
+                                    onClick={() => handleQuestionTypeSelect(type)}
+                                    className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/15' : 'hover:bg-white/15'}`}
+                                  >
+                                    <span className="font-medium">{type.label}</span>
+                                  </button>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
