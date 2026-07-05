@@ -174,11 +174,13 @@ export default function ValjPlan() {
   }, [cancelled]);
 
   // Har användaren redan en aktiv plan? Då ska sidan inte vara nåbar.
+  // Ägare (admin) får alltid access för att kunna granska sidan.
+  const isOwner = isOwnerEmail(user?.email);
   useEffect(() => {
-    if (activePlan && !cancelled) {
+    if (activePlan && !cancelled && !isOwner) {
       navigate('/', { replace: true });
     }
-  }, [activePlan, cancelled, navigate]);
+  }, [activePlan, cancelled, navigate, isOwner]);
 
   // Prenumerationsplaner (huvudgrid) — engångsköp visas separat under
   const subscriptionPlans = useMemo(
