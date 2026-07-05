@@ -1,94 +1,66 @@
 project_id = "jrjaegapuujushsiofoi"
 
-[functions.get-storage-stats]
-verify_jwt = false
-
-[functions.custom-signup]
-verify_jwt = false
-
-[functions.redirect-confirm]
-verify_jwt = false
-
-[functions.confirm-email]
-verify_jwt = false
-
-[functions.send-confirmation-email]
-verify_jwt = false
-
-[functions.resend-confirmation]
-verify_jwt = false
-
-[functions.send-reset-password]
-verify_jwt = false
-
-[functions.redirect-recovery]
-verify_jwt = false
-
-[functions.reset-redirect]
-verify_jwt = false
-
-[functions.email-confirm]
-verify_jwt = false
-
-[functions.auth]
-verify_jwt = false
-
-[functions.cleanup-all-users]
-verify_jwt = false
-
-[functions.delete-test-user]
-verify_jwt = false
-
-[functions.job-expiration-notifications]
-verify_jwt = false
-
-[functions.evaluate-candidate]
-verify_jwt = true
-
-[functions.generate-cv-summary]
-verify_jwt = true
-
-[functions.process-cv-queue]
-verify_jwt = false
-
-[functions.fetch-hr-news]
-verify_jwt = false
-# Kör kl 06, 11, 18 UTC + midnatt (23:00 UTC)
-schedule = "0 6,11,18,23 * * *"
-
-[functions.fetch-career-tips]
-verify_jwt = false
-# Kör kl 06, 11, 18 UTC + midnatt (23:00 UTC) - SAMMA SOM HR-NYHETER
-schedule = "0 6,11,18,23 * * *"
-
-[functions.interview-reminders]
-verify_jwt = false
-# Kör varje minut för att fånga intervjuer som börjar om 10 minuter
-schedule = "* * * * *"
-
-[functions.send-push-notification]
-verify_jwt = false
-
-[functions.send-interview-invitation]
-verify_jwt = false
-
-[functions.send-admin-alert]
-verify_jwt = false
-
-[functions.fetch-link-preview]
-verify_jwt = false
-
-[functions.check-saved-searches]
-verify_jwt = false
-# Kör var 5:e minut för realtidsbevakning av nya jobb
-schedule = "*/5 * * * *"
-
-[functions.outreach-dispatch]
-verify_jwt = false
-schedule = "* * * * *"
-
-[functions.public-sitemap]
-verify_jwt = false
-
-[functions.process-email-queue]
-verify_jwt = true
+[functions]
+  [functions.auth]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.check-saved-searches]
+    schedule = "*/5 * * * *"
+    verify_jwt = false
+  [functions.cleanup-all-users]
+    verify_jwt = false
+  [functions.confirm-email]
+    verify_jwt = false
+  [functions.custom-signup]
+    verify_jwt = false
+  [functions.delete-test-user]
+    verify_jwt = false
+  [functions.email-confirm]
+    verify_jwt = false
+  [functions.evaluate-candidate]
+    verify_jwt = true
+  [functions.fetch-career-tips]
+    schedule = "0 6,11,18,23 * * *"
+    verify_jwt = false
+  [functions.fetch-hr-news]
+    schedule = "0 6,11,18,23 * * *"
+    verify_jwt = false
+  [functions.fetch-link-preview]
+    verify_jwt = false
+  [functions.generate-cv-summary]
+    verify_jwt = true
+  [functions.get-storage-stats]
+    verify_jwt = false
+  [functions.interview-reminders]
+    schedule = "* * * * *"
+    verify_jwt = false
+  [functions.job-expiration-notifications]
+    verify_jwt = false
+  [functions.outreach-dispatch]
+    schedule = "* * * * *"
+    verify_jwt = false
+  [functions.process-cv-queue]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.public-sitemap]
+    verify_jwt = false
+  [functions.redirect-confirm]
+    verify_jwt = false
+  [functions.redirect-recovery]
+    verify_jwt = false
+  [functions.resend-confirmation]
+    verify_jwt = false
+  [functions.reset-redirect]
+    verify_jwt = false
+  [functions.send-admin-alert]
+    verify_jwt = false
+  [functions.send-confirmation-email]
+    verify_jwt = false
+  [functions.send-interview-invitation]
+    verify_jwt = false
+  [functions.send-push-notification]
+    verify_jwt = false
+  [functions.send-reset-password]
+    verify_jwt = false
