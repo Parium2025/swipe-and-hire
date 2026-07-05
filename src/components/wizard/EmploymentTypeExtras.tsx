@@ -46,7 +46,7 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
     };
     return (
       <div className="mt-3 space-y-2">
-        <div className="text-white text-xs">Vilka dagar? (välj en eller flera)</div>
+        <div className="text-white text-xs font-medium">Vilka dagar? (välj en eller flera)</div>
         <div className="flex flex-wrap gap-1.5">
           {WEEKDAYS.map(day => {
             const active = partTimeDays.includes(day.value);
