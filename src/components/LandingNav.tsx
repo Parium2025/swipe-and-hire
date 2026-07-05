@@ -222,7 +222,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                   <DropdownMenuContent
                     align="center"
                     sideOffset={8}
-                    className="relative min-w-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.5)] backdrop-blur-2xl"
+                    className="relative min-w-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-primary/90 p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.5)] backdrop-blur-2xl"
                   >
                     {/* Mjukt aurora-glow bakom menyn — Pariums sekundärfärg tonat in i primären */}
                     <span className="pointer-events-none absolute -inset-1 rounded-[32px] bg-gradient-to-r from-secondary/15 via-secondary/5 to-primary/15 opacity-60 blur-2xl" />
