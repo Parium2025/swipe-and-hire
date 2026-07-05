@@ -179,7 +179,8 @@ export function AutoFitTitle({
         ref={textRef}
         style={{
           display: 'inline-block',
-          maxWidth: '100%',
+          width: truncated ? '100%' : 'auto',
+          maxWidth: truncated ? '100%' : 'none',
           overflow: truncated ? 'hidden' : 'visible',
           textOverflow: truncated ? 'ellipsis' : 'clip',
           fontSize: fontSize ? `${fontSize}px` : undefined,
