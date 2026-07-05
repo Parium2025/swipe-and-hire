@@ -4933,7 +4933,7 @@ const MobileJobWizard = ({
                                     aria-label="Ansök" 
                                     className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto"
                                   >
-                                    <Check className="h-3.5 w-3.5 text-white" />
+                                    <Heart className="h-3.5 w-3.5 text-white fill-white" />
                                   </button>
                                 </div>
                               </div>
