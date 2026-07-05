@@ -1767,6 +1767,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                             <p className="mt-2 text-4xl font-black text-white">
                               {plan.price} kr<span className="text-sm font-medium text-white">{plan.priceSuffix}</span>
                             </p>
+                            <p className="mt-1 text-xs font-medium text-white/70">exkl. moms</p>
                             <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
                             <PlanFeatures
                               features={plan.features}
@@ -1833,6 +1834,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         <p className="mt-4 text-3xl font-black text-white">
                           799 kr<span className="ml-1 text-sm font-medium text-white">/annons</span>
                         </p>
+                        <p className="mt-1 text-xs font-medium text-white/70">exkl. moms</p>
                       </div>
                       <button
                         type="button"
