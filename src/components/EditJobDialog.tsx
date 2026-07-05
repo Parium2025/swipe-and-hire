@@ -3996,7 +3996,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 }
                               }}
                               acceptedFileTypes={['image/*']}
-                              maxFileSize={5 * 1024 * 1024}
+                              maxFileSize={15 * 1024 * 1024}
                             />
                           )}
                           
@@ -4099,7 +4099,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 }
                               }}
                               acceptedFileTypes={['image/*']}
-                              maxFileSize={5 * 1024 * 1024}
+                              maxFileSize={15 * 1024 * 1024}
                             />
                           )}
                           
