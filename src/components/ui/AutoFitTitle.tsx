@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
   Tooltip,
   TooltipContent,
@@ -12,6 +12,7 @@ interface AutoFitTitleProps {
   style?: React.CSSProperties;
   minFontPx?: number;
   maxFontPx?: number;
+  minScaleX?: number;
   tooltipSide?: 'top' | 'bottom' | 'left' | 'right';
   onClick?: () => void;
 }
@@ -52,75 +53,110 @@ export function AutoFitTitle({
   style,
   minFontPx = 12,
   maxFontPx,
+  minScaleX = 0.72,
   tooltipSide = 'top',
   onClick,
 }: AutoFitTitleProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
   const [truncated, setTruncated] = useState(false);
   const [open, setOpen] = useState(false);
 
   const { isTouch, supportsHover } = ENV;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current;
-    if (!el) {
+    const textEl = textRef.current;
+    if (!el || !textEl) {
       setTruncated(false);
       return;
     }
     if (!text) {
       el.style.fontSize = '';
+      textEl.style.transform = '';
       setTruncated(false);
       return;
     }
 
+    let frame = 0;
+
+    const resetTextPaint = () => {
+      textEl.style.transform = '';
+      textEl.style.maxWidth = '';
+      textEl.style.overflow = 'visible';
+      textEl.style.textOverflow = 'clip';
+    };
+
+    const measureAt = (fontPx: number) => {
+      el.style.fontSize = `${fontPx}px`;
+      resetTextPaint();
+      return textEl.scrollWidth;
+    };
+
     const fit = () => {
-      // Reset any previously applied font-size so we start from the class-defined size
+      cancelAnimationFrame(frame);
+
+      // Reset any previously applied font-size so we can read the class-defined size
       el.style.fontSize = '';
+      resetTextPaint();
 
-      requestAnimationFrame(() => {
-        const parent = el.parentElement;
-        if (!parent) return;
-
-        const parentStyles = getComputedStyle(parent);
-        const availableWidth =
-          parent.clientWidth -
-          parseFloat(parentStyles.paddingLeft || '0') -
-          parseFloat(parentStyles.paddingRight || '0') -
-          2; // säkerhetsmarginal
+      frame = requestAnimationFrame(() => {
+        const availableWidth = el.clientWidth - 2; // säkerhetsmarginal
 
         if (availableWidth <= 0) return;
 
         const baseFontPx = parseFloat(getComputedStyle(el).fontSize) || 16;
-        const ceiling = maxFontPx ?? baseFontPx;
-        let currentFont = baseFontPx;
+        const ceiling = Math.max(minFontPx, maxFontPx ?? baseFontPx);
+        const scaleFloor = Math.min(1, Math.max(0.5, minScaleX));
 
-        // scrollWidth reflects natural single-line width because nowrap is set
-        let width = el.scrollWidth;
+        // Start at the ceiling, then only shrink if the horizontal compression
+        // would become visually too aggressive. This keeps normal titles as
+        // large as possible while still locked to one row.
+        let chosenFont = ceiling;
+        let naturalWidth = measureAt(chosenFont);
+        let scale = naturalWidth > 0 ? Math.min(1, availableWidth / naturalWidth) : 1;
 
-        if (width <= availableWidth && ceiling > baseFontPx) {
-          // Grow font-size until it just barely fits (or we hit ceiling)
-          while (currentFont < ceiling) {
-            const next = Math.min(ceiling, currentFont + 0.5);
-            el.style.fontSize = `${next}px`;
-            if (el.scrollWidth > availableWidth) {
-              // Step back to last fitting size
-              currentFont = Math.max(minFontPx, next - 0.5);
-              el.style.fontSize = `${currentFont}px`;
-              break;
+        if (naturalWidth > availableWidth && scale < scaleFloor) {
+          let low = minFontPx;
+          let high = ceiling;
+          let best = minFontPx;
+
+          for (let i = 0; i < 18; i += 1) {
+            const mid = (low + high) / 2;
+            const widthAtMid = measureAt(mid);
+            const scaleAtMid = widthAtMid > 0 ? availableWidth / widthAtMid : 1;
+
+            if (widthAtMid <= availableWidth || scaleAtMid >= scaleFloor) {
+              best = mid;
+              low = mid;
+            } else {
+              high = mid;
             }
-            currentFont = next;
           }
-        } else {
-          // Shrink font-size until it fits (or we hit floor)
-          while (width > availableWidth && currentFont > minFontPx) {
-            currentFont = Math.max(minFontPx, currentFont - 0.25);
-            el.style.fontSize = `${currentFont}px`;
-            width = el.scrollWidth;
-            if (currentFont <= minFontPx) break;
-          }
+
+          chosenFont = best;
+          naturalWidth = measureAt(chosenFont);
+          scale = naturalWidth > 0 ? Math.min(1, availableWidth / naturalWidth) : 1;
         }
 
-        setTruncated(el.scrollWidth > el.clientWidth + 1);
+        const shouldTruncate = chosenFont <= minFontPx + 0.1 && scale < scaleFloor;
+
+        el.style.fontSize = `${chosenFont}px`;
+
+        if (shouldTruncate) {
+          textEl.style.transform = '';
+          textEl.style.maxWidth = `${availableWidth}px`;
+          textEl.style.overflow = 'hidden';
+          textEl.style.textOverflow = 'ellipsis';
+          setTruncated(true);
+          return;
+        }
+
+        textEl.style.maxWidth = '';
+        textEl.style.overflow = 'visible';
+        textEl.style.textOverflow = 'clip';
+        textEl.style.transform = scale < 0.999 ? `scaleX(${scale})` : '';
+        setTruncated(false);
       });
     };
 
@@ -135,9 +171,10 @@ export function AutoFitTitle({
 
     return () => {
       ro.disconnect();
+      cancelAnimationFrame(frame);
       clearTimeout(timeout);
     };
-  }, [text, minFontPx, maxFontPx]);
+  }, [text, minFontPx, maxFontPx, minScaleX]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -165,7 +202,20 @@ export function AutoFitTitle({
       style={mergedStyle}
       onClick={handleClick}
     >
-      {text}
+      <span
+        ref={textRef}
+        style={{
+          display: 'inline-block',
+          maxWidth: '100%',
+          overflow: 'visible',
+          textOverflow: 'clip',
+          transformOrigin: 'center',
+          verticalAlign: 'top',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {text}
+      </span>
     </div>
   );
 

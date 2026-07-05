@@ -4226,6 +4226,7 @@ const MobileJobWizard = ({
                       style={getJobOverlayTextStyle(formData.overlay_text_color)}
                       minFontPx={15}
                       maxFontPx={34}
+                      minScaleX={0.68}
                     />
                     <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
@@ -4776,6 +4777,7 @@ const MobileJobWizard = ({
                                            style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                            minFontPx={15}
                                            maxFontPx={40}
+                                           minScaleX={0.68}
                                          />
                                         <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                           {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
