@@ -165,11 +165,25 @@ export function EmployerJourney({
           return (
             <li
               key={step.title}
-              data-journey-step
-              data-journey-side={idx % 2 === 0 ? 'left' : 'right'}
-              style={{ transitionDelay: `${Math.min(idx, 5) * 110}ms` }}
-              className="employer-journey-step relative"
+              {...(mobileClassMode
+                ? {}
+                : {
+                    'data-journey-step': true as unknown as string,
+                    'data-journey-side': idx % 2 === 0 ? 'left' : 'right',
+                  })}
+              style={
+                mobileClassMode
+                  ? ({
+                      ['--lf-x' as string]: idx % 2 === 0 ? '-46px' : '46px',
+                      ['--lf-y' as string]: '0px',
+                      ['--lf-delay' as string]: `${120 + Math.min(idx, 5) * 120}ms`,
+                      willChange: 'opacity, transform',
+                    } as React.CSSProperties)
+                  : { transitionDelay: `${Math.min(idx, 5) * 110}ms` }
+              }
+              className={`employer-journey-step relative${mobileClassMode ? ' landing-feature-mobile-in' : ''}`}
             >
+
 
               <div className="grid gap-5 md:grid-cols-[56px_1fr] md:gap-8">
                 {/* Nummer / ikon-kolumn */}
