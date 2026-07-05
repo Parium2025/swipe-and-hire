@@ -177,7 +177,11 @@ export function EmployerJourney({
                   ? ({
                       ['--lf-x' as string]: idx % 2 === 0 ? '-46px' : '46px',
                       ['--lf-y' as string]: '0px',
-                      ['--lf-delay' as string]: `${120 + Math.min(idx, 5) * 120}ms`,
+                      // Kort stagger (max ~240ms). Eftersom varje steg triggas
+                      // när det scrollas in – inte alla samtidigt – räcker en
+                      // liten fördröjning för att undvika synkronrörelse när
+                      // två steg råkar synas i samma svep.
+                      ['--lf-delay' as string]: `${Math.min(idx, 3) * 80}ms`,
                       willChange: 'opacity, transform',
                     } as React.CSSProperties)
                   : { transitionDelay: `${Math.min(idx, 5) * 110}ms` }

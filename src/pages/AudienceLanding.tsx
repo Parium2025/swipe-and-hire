@@ -1195,7 +1195,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         };
         const rect = el.getBoundingClientRect();
         const rootHeight = rootRect.bottom - rootRect.top;
-        return rect.bottom > rootRect.top + 16 && rect.top < rootRect.top + rootHeight * 0.94;
+        // Trigga när elementet faktiskt är väl inne i viewporten (topp ovanför
+        // 82% av höjden), inte så fort dess kant tittar fram. Annars hinner
+        // flera intilliggande element passera tröskeln samtidigt på liten
+        // skärm och animationen ser statisk ut.
+        return rect.bottom > rootRect.top + 16 && rect.top < rootRect.top + rootHeight * 0.82;
       };
 
       const syncVisible = () => {
