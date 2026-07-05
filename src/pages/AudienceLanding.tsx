@@ -1158,20 +1158,17 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // Mobil: trigga `.landing-feature-mobile-in` först när varje element faktiskt
   // scrollas in. Tidigare markerades rubriker i alla sektioner som visade direkt
   // vid mount, vilket gjorde att t.ex. Pris-rubriken saknade animation på mobil.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isMobileFeatureMotion) return;
 
-    let io: IntersectionObserver | null = null;
     let cancelled = false;
-    let rafA = 0;
-    let rafB = 0;
+    let raf = 0;
     const timers: number[] = [];
     const cleanupFns: Array<() => void> = [];
 
     const reveal = (el: Element) => {
       el.setAttribute('data-lf-shown', 'true');
       el.classList.add('is-in-view');
-      io?.unobserve(el);
     };
 
     const start = () => {
@@ -1193,7 +1190,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           bottom: window.innerHeight || document.documentElement.clientHeight,
         };
         const rect = el.getBoundingClientRect();
-        return rect.bottom > rootRect.top + 16 && rect.top < rootRect.bottom * 0.9;
+        const rootHeight = rootRect.bottom - rootRect.top;
+        return rect.bottom > rootRect.top + 16 && rect.top < rootRect.top + rootHeight * 0.94;
       };
 
       const syncVisible = () => {
@@ -1203,32 +1201,27 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         });
       };
 
-      rafA = window.requestAnimationFrame(() => {
-        rafB = window.requestAnimationFrame(() => {
-          if (cancelled) return;
-          io = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting) reveal(entry.target);
-              });
-            },
-            { root: scrollRoot, rootMargin: '0px 0px -10% 0px', threshold: 0.01 },
-          );
-          elements.forEach((el) => io?.observe(el));
+      const schedule = () => {
+        if (raf) return;
+        raf = window.requestAnimationFrame(() => {
+          raf = 0;
           syncVisible();
-          timers.push(window.setTimeout(syncVisible, 250), window.setTimeout(syncVisible, 900));
         });
-      });
+      };
 
-      scrollRoot?.addEventListener('scroll', syncVisible, { passive: true });
-      window.addEventListener('resize', syncVisible, { passive: true });
-      window.addEventListener('orientationchange', syncVisible, { passive: true });
-      window.visualViewport?.addEventListener('resize', syncVisible, { passive: true });
+      schedule();
+      timers.push(window.setTimeout(syncVisible, 80), window.setTimeout(syncVisible, 260), window.setTimeout(syncVisible, 900));
+
+      scrollRoot?.addEventListener('scroll', schedule, { passive: true });
+      window.addEventListener('resize', schedule, { passive: true });
+      window.addEventListener('orientationchange', schedule, { passive: true });
+      window.visualViewport?.addEventListener('resize', schedule, { passive: true });
       cleanupFns.push(() => {
-        scrollRoot?.removeEventListener('scroll', syncVisible);
-        window.removeEventListener('resize', syncVisible);
-        window.removeEventListener('orientationchange', syncVisible);
-        window.visualViewport?.removeEventListener('resize', syncVisible);
+        if (raf) window.cancelAnimationFrame(raf);
+        scrollRoot?.removeEventListener('scroll', schedule);
+        window.removeEventListener('resize', schedule);
+        window.removeEventListener('orientationchange', schedule);
+        window.visualViewport?.removeEventListener('resize', schedule);
       });
     };
 
@@ -1248,20 +1241,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       return () => {
         cancelled = true;
         window.removeEventListener('parium:cookie-consent-updated', onConsent);
-        if (rafA) window.cancelAnimationFrame(rafA);
-        if (rafB) window.cancelAnimationFrame(rafB);
+        if (raf) window.cancelAnimationFrame(raf);
         timers.forEach((timer) => window.clearTimeout(timer));
         cleanupFns.forEach((fn) => fn());
-        io?.disconnect();
       };
     }
     return () => {
       cancelled = true;
-      if (rafA) window.cancelAnimationFrame(rafA);
-      if (rafB) window.cancelAnimationFrame(rafB);
+      if (raf) window.cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
       cleanupFns.forEach((fn) => fn());
-      io?.disconnect();
     };
   }, [isMobileFeatureMotion, audience]);
 
@@ -1524,8 +1513,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
                 transform-origin: center;
                 transition:
-                  opacity 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
-                  transform 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
+                  opacity 820ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
+                  transform 820ms cubic-bezier(0.16, 1, 0.3, 1) var(--lf-delay, 0ms),
                   border-color 300ms ease,
                   background-color 300ms ease,
                   box-shadow 300ms ease;
@@ -1543,7 +1532,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             `}</style>
           )}
 
-          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-visible px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 md:[@media_(orientation:portrait)]:pt-8 lg:px-24 lg:[@media_(orientation:portrait)]:pt-20">
+          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-visible px-5 pb-12 pt-10 sm:px-6 sm:pb-14 sm:pt-12 md:px-12 md:py-20 md:[@media_(orientation:portrait)]:pt-8 lg:px-24 lg:[@media_(orientation:portrait)]:pt-20">
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
                 initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
@@ -1687,7 +1676,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         tabIndex={0}
                         data-allow-focus-shadow="true"
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
-                        style={isMobileFeatureMotion ? { ['--lf-x' as string]: '0px', ['--lf-y' as string]: '22px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
+                         style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 0 ? '-46px' : '46px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${120 + i * 120}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
                         className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 [@media_(hover:hover)]:backdrop-blur-xl ${
                           isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                         }`}
@@ -1747,7 +1736,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           tabIndex={0}
                           data-allow-focus-shadow="true"
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
-                          style={isMobileFeatureMotion ? { ['--lf-x' as string]: '0px', ['--lf-y' as string]: '22px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
+                          style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 0 ? '-46px' : '46px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${120 + i * 120}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
                           className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 transition-all duration-300 hover:scale-[1.02] hover:border-secondary/40 [@media_(hover:hover)]:backdrop-blur-xl ${
                             isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5'
                           }`}
