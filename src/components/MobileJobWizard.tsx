@@ -4222,10 +4222,10 @@ const MobileJobWizard = ({
                     </button>
                     <AutoFitTitle
                       text={getDisplayTitle()}
-                      className={`${textSizes.title} font-bold leading-tight mb-1 -mx-2 w-[calc(100%+1rem)] max-w-[calc(100%+1rem)] cursor-pointer`}
+                      className={`${textSizes.title} font-bold leading-tight mb-1 cursor-pointer`}
                       style={getJobOverlayTextStyle(formData.overlay_text_color)}
                       minFontPx={15}
-                      maxFontPx={34}
+                      maxFontPx={26}
                     />
                     <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
@@ -4772,10 +4772,10 @@ const MobileJobWizard = ({
                                         </button>
                                          <AutoFitTitle
                                            text={formData.title || 'Jobbtitel'}
-                                           className={`${textSizes.title} font-bold leading-tight mb-1 -mx-2 w-[calc(100%+1rem)] max-w-[calc(100%+1rem)] cursor-pointer`}
+                                           className={`${textSizes.title} font-bold leading-tight mb-1 cursor-pointer`}
                                            style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                            minFontPx={15}
-                                           maxFontPx={40}
+                                           maxFontPx={32}
                                          />
                                         <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                           {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
