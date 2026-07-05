@@ -210,7 +210,8 @@ export default function ValjPlan() {
             <div key={i} className="h-[520px] animate-pulse rounded-3xl border border-white/5 bg-white/[0.03]" />
           ))}
           {!loading && companyPlans.map((plan, idx) => {
-            const isRecommended = plan.tier === 'vaxa';
+            // Populärast sitter alltid på Pro, men göms om användaren redan har Pro.
+            const isRecommended = plan.tier === 'pro' && !userHasPro;
             const isCurrent = activePlan?.tier === plan.tier;
             return (
               <motion.div
