@@ -9,7 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { useToast } from '@/hooks/use-toast';
-import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
+import { EMPLOYMENT_TYPES, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, type DurationUnit } from '@/lib/employmentTypes';
+import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
 import { searchOccupations } from '@/lib/occupations';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Search, Pencil, Heart, CheckCircle, AlertTriangle } from 'lucide-react';
 import {
@@ -315,6 +316,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         description: templateToEdit.description || '',
         pitch: templateToEdit.pitch || '',
         employment_type: templateToEdit.employment_type || '',
+        part_time_days: (templateToEdit as any).part_time_days || [],
+        duration_amount: (templateToEdit as any).duration_amount != null ? String((templateToEdit as any).duration_amount) : '',
+        duration_unit: (templateToEdit as any).duration_unit || 'months',
         work_schedule: templateToEdit.work_schedule || '',
         salary_type: templateToEdit.salary_type || '',
         salary_transparency: templateToEdit.salary_transparency || '',
@@ -696,11 +700,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     { value: 'personalrabatter', label: 'Personalrabatter' },
   ];
 
-  const handleInputChange = (field: keyof TemplateFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleInputChange = (field: keyof TemplateFormData, value: any) => {
+    setFormData(prev => {
+      const next: any = { ...prev, [field]: value };
+      if (field === 'employment_type') {
+        next.part_time_days = [];
+        next.duration_amount = '';
+        next.duration_unit = prev.duration_unit || 'months';
+      }
+      return next;
+    });
   };
 
   const handleOccupationSearch = (value: string) => {
@@ -909,6 +918,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
              formData.occupation.trim() && 
              formData.description.trim() &&
              formData.employment_type &&
+             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || (formData.part_time_days && formData.part_time_days.length > 0)) &&
+             (!TYPES_WITH_DURATION.has(formData.employment_type) || (formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) &&
              formData.salary_type &&
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0;
@@ -1041,6 +1052,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         location: formData.location || '',
         occupation: formData.occupation || null,
         employment_type: formData.employment_type || null,
+        part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+        duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         work_schedule: formData.work_schedule || null,
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
@@ -1810,6 +1824,15 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       </div>
                     )}
                   </div>
+                  <EmploymentTypeExtras
+                    employmentType={formData.employment_type}
+                    partTimeDays={formData.part_time_days || []}
+                    durationAmount={formData.duration_amount ? parseInt(formData.duration_amount, 10) : null}
+                    durationUnit={(formData.duration_unit as DurationUnit) || 'months'}
+                    onPartTimeDaysChange={(days) => setFormData(prev => ({ ...prev, part_time_days: days }))}
+                    onDurationAmountChange={(n) => setFormData(prev => ({ ...prev, duration_amount: n == null ? '' : String(n) }))}
+                    onDurationUnitChange={(u) => setFormData(prev => ({ ...prev, duration_unit: u }))}
+                  />
                 </div>
 
                 <div className="space-y-2">

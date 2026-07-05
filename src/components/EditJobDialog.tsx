@@ -23,7 +23,8 @@ import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { useToast } from '@/hooks/use-toast';
-import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, formatEmploymentDetails, type DurationUnit } from '@/lib/employmentTypes';
+import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare, Copy } from 'lucide-react';
 import { BenefitsList } from '@/components/wizard/BenefitsList';
 import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
@@ -100,6 +101,9 @@ interface JobPosting {
   job_image_desktop_url?: string;
   is_active?: boolean | null;
   expires_at?: string | null;
+  part_time_days?: string[] | null;
+  duration_amount?: number | null;
+  duration_unit?: string | null;
 }
 
 interface JobFormData {
@@ -133,6 +137,9 @@ interface JobFormData {
   job_image_desktop_url: string;
   image_focus_position: string;
   image_focus_position_desktop: string;
+  part_time_days?: string[];
+  duration_amount?: string;
+  duration_unit?: string;
 }
 
 interface EditJobDialogProps {
@@ -607,7 +614,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
   // Build meta line: "Deltid • Saltsjö-Boo, Stockholms län"
   const getMetaLine = (employment?: string, city?: string, county?: string) => {
-    const emp = getEmploymentTypeLabel(employment);
+    const empBase = getEmploymentTypeLabel(employment);
+    const details = formatEmploymentDetails({
+      employment_type: employment,
+      part_time_days: formData.part_time_days,
+      duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+      duration_unit: formData.duration_unit,
+    });
+    const emp = [empBase, details].filter(Boolean).join(' · ');
     // Include county if available
     let locationPart = formatCityWithMainCity(city || '');
     if (county && county.trim()) {
@@ -955,7 +969,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         job_image_url: job.job_image_url || '',
         job_image_desktop_url: job.job_image_desktop_url || '',
         image_focus_position: (job as any).image_focus_position || 'center',
-        image_focus_position_desktop: (job as any).image_focus_position_desktop || 'center'
+        image_focus_position_desktop: (job as any).image_focus_position_desktop || 'center',
+        part_time_days: (job as any).part_time_days || [],
+        duration_amount: (job as any).duration_amount != null ? String((job as any).duration_amount) : '',
+        duration_unit: (job as any).duration_unit || 'months',
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
@@ -1034,6 +1051,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
+        part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+        duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         salary_type: formData.salary_type || null,
         salary_transparency: formData.salary_transparency || null,
         positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
@@ -1102,11 +1122,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   };
 
-  const handleInputChange = (field: keyof JobFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleInputChange = (field: keyof JobFormData, value: any) => {
+    setFormData(prev => {
+      const next: any = { ...prev, [field]: value };
+      if (field === 'employment_type') {
+        next.part_time_days = [];
+        next.duration_amount = '';
+        next.duration_unit = prev.duration_unit || 'months';
+      }
+      return next;
+    });
   };
 
   const handleOccupationSearch = (value: string) => {
@@ -1692,6 +1717,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
              formData.occupation.trim() && 
              formData.description.trim() && 
              formData.employment_type &&
+             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || (formData.part_time_days && formData.part_time_days.length > 0)) &&
+             (!TYPES_WITH_DURATION.has(formData.employment_type) || (formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) &&
              formData.salary_type &&
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0 &&
@@ -1754,6 +1781,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
+        part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+        duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         salary_type: formData.salary_type || null,
         salary_transparency: formData.salary_transparency || null,
         positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
@@ -2093,6 +2123,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             </div>
                           )}
                         </div>
+                        <EmploymentTypeExtras
+                          employmentType={formData.employment_type}
+                          partTimeDays={formData.part_time_days || []}
+                          durationAmount={formData.duration_amount ? parseInt(formData.duration_amount, 10) : null}
+                          durationUnit={(formData.duration_unit as DurationUnit) || 'months'}
+                          onPartTimeDaysChange={(days) => setFormData(prev => ({ ...prev, part_time_days: days }))}
+                          onDurationAmountChange={(n) => setFormData(prev => ({ ...prev, duration_amount: n == null ? '' : String(n) }))}
+                          onDurationUnitChange={(u) => setFormData(prev => ({ ...prev, duration_unit: u }))}
+                        />
                       </div>
 
                       <div className="space-y-2">

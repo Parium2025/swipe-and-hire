@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Clock, Euro, Building2, Users, Heart, X, FileText, Video, CheckSquare, List } from 'lucide-react';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatSalary as formatSalaryShared } from '@/lib/jobViewHelpers';
 
 interface JobQuestion {
@@ -289,7 +289,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
               {jobData.employment_type && (
                 <div className="flex items-center text-white text-lg">
                   <Clock className="h-5 w-5 mr-3" />
-                  <span>{getEmploymentTypeLabel(jobData.employment_type)}</span>
+                  <span>{[getEmploymentTypeLabel(jobData.employment_type), formatEmploymentDetails(jobData as any)].filter(Boolean).join(' · ')}</span>
                 </div>
               )}
 

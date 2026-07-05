@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Users, Edit, Trash2, Building2 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 import { isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
@@ -170,7 +170,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         <div className="space-y-2 px-3 pb-1">
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Anställningsform</span>
-            <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}</span>
+            <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Ansökningar</span>

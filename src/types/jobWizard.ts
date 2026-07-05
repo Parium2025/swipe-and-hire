@@ -39,6 +39,12 @@ export interface BaseFormData {
   application_instructions: string;
   pitch: string;
   benefits: string[];
+  /** Weekday codes ('mon','tue',...) for part-time positions. */
+  part_time_days?: string[];
+  /** Duration amount for contract/temporary/internship/lia. */
+  duration_amount?: string;
+  /** 'weeks' | 'months' */
+  duration_unit?: string;
 }
 
 export interface JobFormData extends BaseFormData {
@@ -85,6 +91,9 @@ export interface JobTemplate {
   is_default: boolean;
   benefits?: string[];
   questions?: JobQuestion[];
+  part_time_days?: string[];
+  duration_amount?: number | string;
+  duration_unit?: string;
 }
 
 // Dropdown option types

@@ -33,7 +33,8 @@ import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
-import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { EMPLOYMENT_TYPES, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, formatEmploymentDetails, type DurationUnit } from '@/lib/employmentTypes';
+import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, ArrowDown, Pencil, Smartphone, Monitor, Check, AlertTriangle, Copy, Palette } from 'lucide-react';
@@ -119,6 +120,9 @@ interface ExistingJob {
   job_image_desktop_url?: string | null;
   overlay_text_color?: string | null;
   is_active?: boolean;
+  part_time_days?: string[] | null;
+  duration_amount?: number | null;
+  duration_unit?: string | null;
 }
 
 interface MobileJobWizardProps {
@@ -315,6 +319,9 @@ const MobileJobWizard = ({
           workplace_county: existingJob.workplace_county || '',
           workplace_municipality: existingJob.workplace_municipality || '',
           employment_type: existingJob.employment_type || '',
+          part_time_days: existingJob.part_time_days || [],
+          duration_amount: existingJob.duration_amount != null ? String(existingJob.duration_amount) : '',
+          duration_unit: existingJob.duration_unit || 'months',
           work_schedule: existingJob.work_schedule || '',
           work_start_time: existingJob.work_start_time || '',
           work_end_time: existingJob.work_end_time || '',
@@ -392,6 +399,9 @@ const MobileJobWizard = ({
           salary_transparency: selectedTemplate.salary_transparency || '',
           benefits: selectedTemplate.benefits || [],
           employment_type: selectedTemplate.employment_type || '',
+          part_time_days: (selectedTemplate as any).part_time_days || [],
+          duration_amount: (selectedTemplate as any).duration_amount != null ? String((selectedTemplate as any).duration_amount) : '',
+          duration_unit: (selectedTemplate as any).duration_unit || 'months',
           work_location_type: selectedTemplate.work_location_type || 'på-plats',
           remote_work_possible: selectedTemplate.remote_work_possible || 'nej',
           workplace_name: selectedTemplate.workplace_name || '',
@@ -449,6 +459,9 @@ const MobileJobWizard = ({
           salary_transparency: '',
           benefits: [],
           employment_type: '',
+          part_time_days: [],
+          duration_amount: '',
+          duration_unit: 'months',
           work_location_type: 'på-plats',
           remote_work_possible: 'nej',
           workplace_name: '',
@@ -573,7 +586,14 @@ const MobileJobWizard = ({
 
   // Build meta line: "Deltid • Saltsjö-Boo, Stockholms län"
   const getMetaLine = (employment?: string, city?: string, county?: string) => {
-    const emp = getEmploymentTypeLabel(employment);
+    const empBase = getEmploymentTypeLabel(employment);
+    const details = formatEmploymentDetails({
+      employment_type: employment,
+      part_time_days: formData.part_time_days,
+      duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+      duration_unit: formData.duration_unit,
+    });
+    const emp = [empBase, details].filter(Boolean).join(' · ');
     // Include county if available
     let locationPart = formatCity(city || '');
     if (county && county.trim()) {
@@ -1514,11 +1534,17 @@ const MobileJobWizard = ({
     }
   ];
 
-  const handleInputChange = (field: keyof JobFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleInputChange = (field: keyof JobFormData, value: any) => {
+    setFormData(prev => {
+      const next: any = { ...prev, [field]: value };
+      if (field === 'employment_type') {
+        // Reset detail-fields whenever the type changes so old values don't leak
+        next.part_time_days = [];
+        next.duration_amount = '';
+        next.duration_unit = prev.duration_unit || 'months';
+      }
+      return next;
+    });
   };
 
   const handleCitySearch = (value: string) => {
@@ -2046,6 +2072,8 @@ const MobileJobWizard = ({
              formData.occupation.trim() && 
              formData.description.trim() && 
              formData.employment_type &&
+             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || (formData.part_time_days && formData.part_time_days.length > 0)) &&
+             (!TYPES_WITH_DURATION.has(formData.employment_type) || (formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) &&
              formData.salary_type &&
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0 &&
@@ -2081,6 +2109,8 @@ const MobileJobWizard = ({
       if (!formData.occupation.trim()) missing.push('Yrkeskategori');
       if (!formData.description.trim()) missing.push('Beskrivning');
       if (!formData.employment_type) missing.push('Anställningsform');
+      if (formData.employment_type && TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && !(formData.part_time_days && formData.part_time_days.length > 0)) missing.push('Arbetsdagar (deltid)');
+      if (formData.employment_type && TYPES_WITH_DURATION.has(formData.employment_type) && !(formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) missing.push('Varaktighet');
       if (!formData.salary_type) missing.push('Lönetyp');
       if (!formData.salary_transparency) missing.push('Lönetransparens');
       if (!(parseInt(formData.positions_count) > 0)) missing.push('Antal personer att rekrytera');
@@ -2300,6 +2330,9 @@ const MobileJobWizard = ({
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
+        part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+        duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         salary_type: formData.salary_type || null,
         salary_transparency: formData.salary_transparency || null,
         benefits: formData.benefits.length > 0 ? formData.benefits : null,
@@ -2475,6 +2508,9 @@ const MobileJobWizard = ({
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
+        part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+        duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         salary_type: formData.salary_type || null,
         salary_transparency: formData.salary_transparency || null,
         benefits: formData.benefits.length > 0 ? formData.benefits : null,
@@ -2894,6 +2930,15 @@ const MobileJobWizard = ({
                       </div>
                     )}
                   </div>
+                  <EmploymentTypeExtras
+                    employmentType={formData.employment_type}
+                    partTimeDays={formData.part_time_days || []}
+                    durationAmount={formData.duration_amount ? parseInt(formData.duration_amount, 10) : null}
+                    durationUnit={(formData.duration_unit as DurationUnit) || 'months'}
+                    onPartTimeDaysChange={(days) => setFormData(prev => ({ ...prev, part_time_days: days }))}
+                    onDurationAmountChange={(n) => setFormData(prev => ({ ...prev, duration_amount: n == null ? '' : String(n) }))}
+                    onDurationUnitChange={(u) => setFormData(prev => ({ ...prev, duration_unit: u }))}
+                  />
                 </div>
 
                 <div className="space-y-2">
