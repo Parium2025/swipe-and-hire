@@ -4225,6 +4225,7 @@ const MobileJobWizard = ({
                       className={`${textSizes.title} font-bold leading-tight mb-1 w-full max-w-full cursor-pointer`}
                       style={getJobOverlayTextStyle(formData.overlay_text_color)}
                       minFontPx={15}
+                      maxFontPx={34}
                     />
                     <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
