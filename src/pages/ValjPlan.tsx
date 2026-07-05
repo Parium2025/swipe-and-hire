@@ -308,6 +308,7 @@ export default function ValjPlan() {
                   <p className="mt-2 text-4xl font-black text-white">
                     {formatPrice(plan.price_sek)} kr<span className="text-sm font-medium text-white">/mån</span>
                   </p>
+                  <p className="mt-1 text-xs font-medium text-white/70">exkl. moms</p>
                   <p className="mt-4 text-sm leading-7 text-white">{plan.description}</p>
                   <PlanFeatures
                     features={FEATURES_BY_TIER[plan.tier] ?? plan.features}
