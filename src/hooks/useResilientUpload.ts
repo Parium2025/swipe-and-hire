@@ -67,8 +67,8 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   },
   'job-image': {
     bucket: 'job-images',
-    maxSizeMB: 10,
-    allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    maxSizeMB: 15,
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif'],
     shouldCompress: true,
   },
 };
