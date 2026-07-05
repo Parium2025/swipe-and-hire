@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Users, Building2 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { isEmployerJobExpired } from '@/lib/jobStatus';
@@ -17,6 +17,9 @@ interface EmployerJobCardProps {
     location: string;
     workplace_name?: string;
     employment_type?: string;
+    part_time_days?: string[] | null;
+    duration_amount?: number | null;
+    duration_unit?: string | null;
     is_active: boolean;
     views_count: number;
     applications_count: number;
@@ -167,9 +170,26 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
 
         {/* Info rows — always show all 6 rows for consistent card height */}
         <div className="space-y-2 px-3 pb-1">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between gap-3">
             <span className="text-sm leading-snug text-white">Anställningsform</span>
-            <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}</span>
+            {(() => {
+              const details = formatEmploymentDetails({
+                employment_type: job.employment_type,
+                part_time_days: job.part_time_days,
+                duration_amount: job.duration_amount,
+                duration_unit: job.duration_unit,
+              });
+              return (
+                <span className="text-sm leading-snug text-white font-medium text-right max-w-[65%]">
+                  {job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}
+                  {details && (
+                    <span className="block text-[12px] leading-snug text-white/80 font-normal mt-0.5">
+                      {details}
+                    </span>
+                  )}
+                </span>
+              );
+            })()}
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Ansökningar</span>
