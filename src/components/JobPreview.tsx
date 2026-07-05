@@ -289,7 +289,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
               {jobData.employment_type && (
                 <div className="flex items-center text-white text-lg">
                   <Clock className="h-5 w-5 mr-3" />
-                  <span>{getEmploymentTypeLabel(jobData.employment_type)}</span>
+                  <span>{[getEmploymentTypeLabel(jobData.employment_type), formatEmploymentDetails(jobData as any)].filter(Boolean).join(' · ')}</span>
                 </div>
               )}
 
