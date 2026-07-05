@@ -36,17 +36,13 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "parium-ab"
+const SITE_NAME = "Parium"
 const SENDER_DOMAIN = "notify.parium.se"
 const ROOT_DOMAIN = "parium.se"
 const FROM_DOMAIN = "notify.parium.se" // Domain shown in From address (may be root or sender subdomain)
 
 // Sample data for preview mode ONLY (not used in actual email sending).
-// URLs are baked in at scaffold time from the project's real data.
-// The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
-// can always find-and-replace it with the actual recipient when sending test emails,
-// even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://parium-ab.lovable.app"
+const SAMPLE_PROJECT_URL = "https://parium.se"
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
