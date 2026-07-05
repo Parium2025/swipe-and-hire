@@ -72,6 +72,8 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
   }
 
   if (TYPES_WITH_DURATION.has(employmentType)) {
+    const units: DurationUnit[] = ['weeks', 'months'];
+    const activeIndex = units.indexOf(durationUnit);
     return (
       <div className="mt-3 space-y-2">
         <div className="text-white text-xs">Hur länge pågår tjänsten?</div>
@@ -92,19 +94,26 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
                 if (!isNaN(n) && n > 0) onDurationAmountChange(n);
               }
             }}
-            className="h-11 w-24 px-3 rounded-md bg-white/5 border border-white/20 text-white text-sm placeholder:text-white/60 focus:outline-none focus:border-white/40 [font-size:16px]"
+            className="h-9 w-20 px-3 rounded-full bg-white/5 border border-white/15 text-white text-xs font-medium placeholder:text-white/50 focus:outline-none focus:border-white/40 transition-all duration-200 [font-size:16px] sm:[font-size:12px] text-center"
           />
-          <div className="flex rounded-md bg-white/5 border border-white/20 overflow-hidden">
-            {(['weeks', 'months'] as DurationUnit[]).map(u => (
+          <div className="relative inline-flex rounded-full bg-white/5 border border-white/15 p-0.5 h-9">
+            <div
+              aria-hidden
+              className="absolute top-0.5 bottom-0.5 rounded-full bg-white/20 border border-white/40 transition-transform duration-300 ease-out"
+              style={{
+                width: 'calc(50% - 2px)',
+                left: '2px',
+                transform: `translateX(${activeIndex * 100}%)`,
+              }}
+            />
+            {units.map(u => (
               <button
                 key={u}
                 type="button"
                 aria-pressed={durationUnit === u}
                 onClick={() => onDurationUnitChange(u)}
-                className={`h-11 px-4 text-sm font-medium transition-colors ${
-                  durationUnit === u
-                    ? 'bg-white/20 text-white'
-                    : 'bg-transparent text-white/80 hover:bg-white/10'
+                className={`relative z-10 h-8 min-w-[3.5rem] px-3 rounded-full text-xs font-medium transition-colors duration-200 ${
+                  durationUnit === u ? 'text-white' : 'text-white/70 hover:text-white'
                 }`}
               >
                 {u === 'weeks' ? 'Veckor' : 'Månader'}
@@ -115,6 +124,7 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
       </div>
     );
   }
+
 
   return null;
 };
