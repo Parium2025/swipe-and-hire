@@ -179,14 +179,11 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
                 duration_amount: job.duration_amount,
                 duration_unit: job.duration_unit,
               });
+              const label = job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–';
+              const combined = [label, details].filter(Boolean).join(' · ');
               return (
-                <span className="text-sm leading-snug text-white font-medium text-right max-w-[65%]">
-                  {job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}
-                  {details && (
-                    <span className="block text-[12px] leading-snug text-white/80 font-normal mt-0.5">
-                      {details}
-                    </span>
-                  )}
+                <span className="text-sm leading-snug text-white font-medium text-right max-w-[65%] break-words">
+                  {combined}
                 </span>
               );
             })()}
