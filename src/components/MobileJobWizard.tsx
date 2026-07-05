@@ -2102,6 +2102,8 @@ const MobileJobWizard = ({
       if (!formData.occupation.trim()) missing.push('Yrkeskategori');
       if (!formData.description.trim()) missing.push('Beskrivning');
       if (!formData.employment_type) missing.push('Anställningsform');
+      if (formData.employment_type && TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && !(formData.part_time_days && formData.part_time_days.length > 0)) missing.push('Arbetsdagar (deltid)');
+      if (formData.employment_type && TYPES_WITH_DURATION.has(formData.employment_type) && !(formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) missing.push('Varaktighet');
       if (!formData.salary_type) missing.push('Lönetyp');
       if (!formData.salary_transparency) missing.push('Lönetransparens');
       if (!(parseInt(formData.positions_count) > 0)) missing.push('Antal personer att rekrytera');
