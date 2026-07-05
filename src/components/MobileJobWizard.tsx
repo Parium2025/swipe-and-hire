@@ -4205,7 +4205,7 @@ const MobileJobWizard = ({
                             ) : null}
                             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                             <div 
-                              className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-center cursor-pointer overflow-y-auto overscroll-contain"
+                              className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-center cursor-pointer overflow-y-auto overscroll-contain"
                               style={getJobOverlayTextStyle(formData.overlay_text_color)}
                               onClick={() => setShowApplicationForm(true)}
                             >
