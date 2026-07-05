@@ -1929,6 +1929,106 @@ const MobileJobWizard = ({
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
   const filteredOccupations = occupationSearchTerm.length > 0 ? searchOccupations(occupationSearchTerm) : [];
 
+  // ============ Keyboard navigation for custom dropdowns ============
+  type OccItem = { kind: 'suggestion' | 'custom'; label: string; value: string };
+  const occupationNavItems = useMemo<OccItem[]>(() => {
+    const list: OccItem[] = filteredOccupations.map((o) => ({
+      kind: 'suggestion',
+      label: o,
+      value: o,
+    }));
+    if (occupationSearchTerm.trim().length >= 2 && filteredOccupations.length === 0) {
+      list.push({
+        kind: 'custom',
+        label: `Använd "${occupationSearchTerm}"`,
+        value: occupationSearchTerm,
+      });
+    }
+    return list;
+  }, [filteredOccupations, occupationSearchTerm]);
+
+  const occupationNav = useDropdownKeyboardNav<OccItem>({
+    items: occupationNavItems,
+    isOpen: showOccupationDropdown,
+    onSelect: (item) => handleOccupationSelect(item.value),
+    onOpen: () => setShowOccupationDropdown(occupationSearchTerm.length > 0),
+    onClose: () => setShowOccupationDropdown(false),
+  });
+
+  const employmentTypeNav = useDropdownKeyboardNav({
+    items: filteredEmploymentTypes,
+    isOpen: showEmploymentTypeDropdown,
+    onSelect: (t) => handleEmploymentTypeSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setEmploymentTypeSearchTerm('');
+      setShowEmploymentTypeDropdown(true);
+    },
+    onClose: () => setShowEmploymentTypeDropdown(false),
+  });
+
+  const salaryTypeNav = useDropdownKeyboardNav({
+    items: filteredSalaryTypes,
+    isOpen: showSalaryTypeDropdown,
+    onSelect: (t) => handleSalaryTypeSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setSalaryTypeSearchTerm('');
+      setShowSalaryTypeDropdown(true);
+    },
+    onClose: () => setShowSalaryTypeDropdown(false),
+  });
+
+  const salaryTransparencyNav = useDropdownKeyboardNav({
+    items: filteredSalaryTransparencyOptions,
+    isOpen: showSalaryTransparencyDropdown,
+    onSelect: (t) => handleSalaryTransparencySelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setSalaryTransparencySearchTerm('');
+      setShowSalaryTransparencyDropdown(true);
+    },
+    onClose: () => setShowSalaryTransparencyDropdown(false),
+  });
+
+  const workLocationNav = useDropdownKeyboardNav({
+    items: filteredWorkLocationTypes,
+    isOpen: showWorkLocationDropdown,
+    onSelect: (t) => handleWorkLocationSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setWorkLocationSearchTerm('');
+      setShowWorkLocationDropdown(true);
+    },
+    onClose: () => setShowWorkLocationDropdown(false),
+  });
+
+  const remoteWorkNav = useDropdownKeyboardNav({
+    items: filteredRemoteWorkOptions,
+    isOpen: showRemoteWorkDropdown,
+    onSelect: (t) => handleRemoteWorkSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setRemoteWorkSearchTerm('');
+      setShowRemoteWorkDropdown(true);
+    },
+    onClose: () => setShowRemoteWorkDropdown(false),
+  });
+
+  const questionTypeNav = useDropdownKeyboardNav({
+    items: filteredQuestionTypes,
+    isOpen: showQuestionTypeDropdown,
+    onSelect: (t) => handleQuestionTypeSelect(t),
+    onOpen: () => {
+      closeAllDropdowns();
+      setQuestionTypeSearchTerm('');
+      setShowQuestionTypeDropdown(true);
+    },
+    onClose: () => setShowQuestionTypeDropdown(false),
+  });
+  // ============ /Keyboard navigation ============
+
+
   const validateCurrentStep = () => {
     const currentStepFields = steps[currentStep].fields;
     
