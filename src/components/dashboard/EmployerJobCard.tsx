@@ -162,7 +162,8 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
         <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] items-start justify-center px-2">
           <TruncatedText
             text={job.title}
-            className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] text-white line-clamp-2"
+            className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] line-clamp-2"
+            style={{ color: job.overlay_text_color || '#FFFFFF' }}
           />
         </div>
 
