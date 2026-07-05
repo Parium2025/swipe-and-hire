@@ -9,8 +9,10 @@ export const EMPLOYMENT_TYPES: EmploymentType[] = [
   { value: 'part_time', label: 'Deltid', description: 'Deltidsanställning' },
   { value: 'contract', label: 'Konsult', description: 'Konsultuppdrag' },
   { value: 'temporary', label: 'Vikariat', description: 'Tillfällig anställning' },
+  { value: 'interim', label: 'Interim', description: 'Interimsuppdrag' },
   { value: 'internship', label: 'Praktik', description: 'Praktikplats' },
   { value: 'lia', label: 'LIA', description: 'Lärande i arbete (LIA)' },
+
   { value: 'summer_job', label: 'Sommarjobb', description: 'Sommaranställning' }
 ];
 
