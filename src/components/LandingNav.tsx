@@ -222,7 +222,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                   <DropdownMenuContent
                     align="center"
                     sideOffset={8}
-                    className="relative min-w-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-primary/90 p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.5)] backdrop-blur-2xl"
+                    className="relative min-w-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-primary p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.5)]"
                   >
 
                     <div className="relative z-10 flex flex-col gap-1">
@@ -265,7 +265,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           >
                             <span className="relative z-10">{l.label}</span>
                             {isActive && (
-                              <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-secondary shadow-[0_0_8px_hsl(var(--secondary))]" />
+                              <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-secondary" />
                             )}
                           </DropdownMenuItem>
                         );
