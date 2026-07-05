@@ -962,7 +962,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         job_image_url: job.job_image_url || '',
         job_image_desktop_url: job.job_image_desktop_url || '',
         image_focus_position: (job as any).image_focus_position || 'center',
-        image_focus_position_desktop: (job as any).image_focus_position_desktop || 'center'
+        image_focus_position_desktop: (job as any).image_focus_position_desktop || 'center',
+        part_time_days: (job as any).part_time_days || [],
+        duration_amount: (job as any).duration_amount != null ? String((job as any).duration_amount) : '',
+        duration_unit: (job as any).duration_unit || 'months',
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
