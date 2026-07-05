@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PaymentPlaceholderDialog } from '@/components/PaymentPlaceholderDialog';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { isOwnerEmail } from '@/lib/ownerAccess';
 
 import { toast } from 'sonner';
 
