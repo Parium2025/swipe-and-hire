@@ -222,117 +222,106 @@ export default function ValjPlan() {
       {/* Dekorativa bubblor + glow — samma som resten av appen */}
       <AnimatedBackground />
 
-      {/* Header */}
-      <div className="sticky top-0 z-20 border-b border-white/5 bg-primary/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 text-sm font-medium text-white transition-colors hover:bg-white/[0.12]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Tillbaka
-          </button>
+      {/* Minimal header — logga vänster, kryss höger (samma stuk som landningen) */}
+      <div className="sticky top-0 z-20 bg-transparent">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <PariumLogoButton
             onClick={() => navigate('/')}
             ariaLabel="Gå till startsidan"
           />
+          <button
+            onClick={() => navigate(-1)}
+            aria-label="Stäng"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white transition-colors hover:bg-white/[0.12]"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
       </div>
 
-
-      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-24 pt-10 sm:pt-16">
-        {/* Hero */}
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-24 pt-4 sm:pt-8">
+        {/* Kompakt intro — utan stor banner, matchar landningens ton */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="mx-auto max-w-3xl text-center"
+          className="max-w-3xl"
         >
-          <Badge className="mb-4 border-white/10 bg-white/[0.06] text-white/80">
-            <Sparkles className="mr-1.5 h-3 w-3" /> Ingen bindningstid
-          </Badge>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">
+          <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
             {headline}
           </h1>
-          <p className="mt-4 text-base text-white sm:text-lg">
+          <p className="mt-3 text-base leading-7 text-white sm:text-lg">
             {subline}
           </p>
         </motion.div>
 
-        {/* Trust row */}
-        <div className="mx-auto mt-8 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white">
-          <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Trygg betalning</span>
-          <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> Direkt access efter köp</span>
-          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5" /> Full kandidatbank i alla planer</span>
-        </div>
-
         {/* Company plans grid */}
-        <div className="mt-12 grid grid-cols-1 gap-4 sm:mt-16 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:mt-12 md:grid-cols-2 xl:grid-cols-4">
           {loading && Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-[520px] animate-pulse rounded-3xl border border-white/5 bg-white/[0.03]" />
+            <div key={i} className="h-[420px] animate-pulse rounded-3xl border border-white/5 bg-white/[0.03]" />
           ))}
           {!loading && companyPlans.map((plan, idx) => {
-            // Populärast sitter alltid på Pro, men göms om användaren redan har Pro.
             const isRecommended = plan.tier === 'pro' && !userHasPro;
             const isCurrent = activePlan?.tier === plan.tier;
+            const isActive = activeTier === plan.tier || (activeTier === null && isRecommended);
+            const isOpen = expandedTier === plan.tier;
             return (
               <motion.div
                 key={plan.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease, delay: idx * 0.06 }}
-                className={`relative flex flex-col rounded-3xl border p-6 ${
-                  isRecommended
-                    ? 'border-secondary/40 bg-gradient-to-b from-secondary/[0.08] to-white/[0.02] shadow-[0_0_60px_-20px_rgba(233,69,96,0.3)]'
-                    : 'border-white/10 bg-white/[0.03]'
+                initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ duration: 0.6, ease, delay: idx * 0.06 }}
+                onPointerDownCapture={() => setActiveTier(plan.tier)}
+                onFocusCapture={() => setActiveTier(plan.tier)}
+                role="button"
+                tabIndex={0}
+                className={`relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:border-secondary/40 ${
+                  isActive ? 'border-secondary bg-white/5' : 'border-white/15 bg-white/5'
                 }`}
               >
                 {isRecommended && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="border-0 bg-secondary text-white shadow-lg">Populärast</Badge>
-                  </div>
+                  <span className="absolute right-6 top-6 z-10 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+                    Populär
+                  </span>
                 )}
                 {isCurrent && (
-                  <div className="absolute -top-3 right-4">
-                    <Badge className="border-0 bg-emerald-500/90 text-white">Din plan</Badge>
-                  </div>
+                  <span className="absolute right-6 top-6 z-10 rounded-full bg-emerald-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+                    Din plan
+                  </span>
                 )}
 
-                <div className="mb-5">
-                  <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
-                  <p className="mt-1 text-sm text-white">{plan.description}</p>
-                </div>
+                <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                <p className="mt-2 text-4xl font-black text-white">
+                  {formatPrice(plan.price_sek)} kr
+                  <span className="text-sm font-medium text-white">
+                    {plan.billing_period === 'monthly' ? '/mån' : ' engångs'}
+                  </span>
+                </p>
+                <p className="mt-4 text-sm leading-7 text-white">{plan.description}</p>
 
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-semibold text-white">{formatPrice(plan.price_sek)}</span>
-                    <span className="text-sm text-white/60">kr</span>
-                  </div>
-                  <p className="mt-1 text-xs text-white">
-                    {plan.billing_period === 'monthly' ? 'per månad · ex. moms' : 'engångsköp · ex. moms'}
-                  </p>
-                </div>
+                <PlanFeatures
+                  features={FEATURES_BY_TIER[plan.tier] ?? plan.features}
+                  isActive={isActive}
+                  open={isOpen}
+                  onToggle={() => setExpandedTier(isOpen ? null : plan.tier)}
+                />
 
-                <ul className="mb-6 flex-1 space-y-2.5">
-                  {(FEATURES_BY_TIER[plan.tier] ?? plan.features).map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-white">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  onClick={() => handleSelect(plan)}
+                <button
+                  type="button"
+                  onPointerDown={(e) => { e.stopPropagation(); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isCurrent) handleSelect(plan);
+                  }}
                   disabled={isCurrent}
-                  className={`mt-auto inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] disabled:opacity-60 ${
+                  className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] disabled:opacity-60 ${
                     isRecommended
-                      ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:-translate-y-0.5 hover:bg-secondary hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))]'
+                      ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))]'
                       : 'border border-white/20 bg-white/10 text-white hover:border-white/30 hover:bg-white/15'
                   }`}
                 >
                   {isCurrent ? 'Nuvarande plan' : 'Fortsätt till betalning'}
-                </Button>
+                </button>
               </motion.div>
             );
           })}
