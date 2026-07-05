@@ -280,7 +280,7 @@ export default function ValjPlan() {
         </div>
 
         {/* Jobseeker premium card */}
-        {seekerPlan && (
+        {seekerPlan && !isEmployer && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -296,7 +296,7 @@ export default function ValjPlan() {
             </div>
             <Button
               onClick={() => handleSelect(seekerPlan)}
-              className="h-11 w-full bg-white/10 text-white hover:bg-white/20 sm:w-auto"
+              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-6 text-sm font-bold tracking-wide text-white transition-all duration-300 hover:border-white/30 hover:bg-white/15 active:scale-[0.98] sm:w-auto"
             >
               Aktivera Premium
             </Button>
