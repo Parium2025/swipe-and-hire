@@ -1112,11 +1112,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   };
 
-  const handleInputChange = (field: keyof JobFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleInputChange = (field: keyof JobFormData, value: any) => {
+    setFormData(prev => {
+      const next: any = { ...prev, [field]: value };
+      if (field === 'employment_type') {
+        next.part_time_days = [];
+        next.duration_amount = '';
+        next.duration_unit = prev.duration_unit || 'months';
+      }
+      return next;
+    });
   };
 
   const handleOccupationSearch = (value: string) => {
