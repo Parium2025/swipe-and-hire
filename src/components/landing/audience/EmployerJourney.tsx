@@ -151,6 +151,74 @@ export function EmployerJourney({
     };
   }, [mobileClassMode]);
 
+  // Touch: låt "glowen" följa scrollen istället för hover. Aktivt steg = det
+  // vars kort ligger närmast en fast ankare-linje ~38% ned i viewporten.
+  // Ändras kontinuerligt vid scroll så glowen hoppar mellan stegen både
+  // framåt och bakåt. Ingen effekt på hover-enheter.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    if (typeof window === 'undefined') return;
+    if (!window.matchMedia('(hover: none)').matches) return;
+
+    const scrollRoot = list.closest('[data-landing-scroll-root]') as HTMLElement | null;
+    let raf = 0;
+    let currentActive = -1;
+
+    const compute = () => {
+      raf = 0;
+      const items = Array.from(list.querySelectorAll<HTMLLIElement>('li'));
+      if (!items.length) return;
+      const rootRect = scrollRoot?.getBoundingClientRect() ?? {
+        top: 0,
+        bottom: window.innerHeight || document.documentElement.clientHeight,
+      };
+      const rootHeight = rootRect.bottom - rootRect.top;
+      const anchorY = rootRect.top + rootHeight * 0.38;
+
+      let bestIdx = -1;
+      let bestDist = Infinity;
+      items.forEach((el, idx) => {
+        const rect = el.getBoundingClientRect();
+        // Bara steg som faktiskt är i (eller nära) viewporten får bli aktiva
+        if (rect.bottom < rootRect.top || rect.top > rootRect.bottom) return;
+        const center = rect.top + rect.height / 2;
+        const dist = Math.abs(center - anchorY);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestIdx = idx;
+        }
+      });
+
+      if (bestIdx === currentActive) return;
+      currentActive = bestIdx;
+      items.forEach((el, idx) => {
+        if (idx === bestIdx) el.setAttribute('data-journey-active', 'true');
+        else el.removeAttribute('data-journey-active');
+      });
+    };
+
+    const schedule = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(compute);
+    };
+
+    schedule();
+    scrollRoot?.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('orientationchange', schedule, { passive: true });
+
+    return () => {
+      if (raf) window.cancelAnimationFrame(raf);
+      scrollRoot?.removeEventListener('scroll', schedule);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('orientationchange', schedule);
+    };
+  }, [mobileClassMode, activeSteps]);
+
+
   return (
     <div className="relative mt-10 sm:mt-14">
       {/* Vertikal tidslinje — synlig från md och uppåt */}
