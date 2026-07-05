@@ -2836,6 +2836,7 @@ const MobileJobWizard = ({
                       value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
                       onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                       onClick={handleEmploymentTypeClick}
+                      onKeyDown={employmentTypeNav.handleKeyDown}
                       placeholder="Välj anställningsform"
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showEmploymentTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
@@ -2844,17 +2845,22 @@ const MobileJobWizard = ({
                     
                     {/* Employment Type Dropdown */}
                     {showEmploymentTypeDropdown && (
-                       <div className="absolute top-full left-0 right-0 glass-dropdown">
-                        {filteredEmploymentTypes.map((type) => (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => handleEmploymentTypeSelect(type)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{type.label}</div>
-                          </button>
-                        ))}
+                       <div ref={employmentTypeNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown">
+                        {filteredEmploymentTypes.map((type, index) => {
+                          const isHighlighted = employmentTypeNav.highlightedIndex === index;
+                          return (
+                            <button
+                              key={type.value}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => employmentTypeNav.setHighlightedIndex(index)}
+                              onClick={() => handleEmploymentTypeSelect(type)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{type.label}</div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -2867,6 +2873,7 @@ const MobileJobWizard = ({
                       value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
                       onChange={(e) => handleSalaryTypeSearch(e.target.value)}
                       onClick={handleSalaryTypeClick}
+                      onKeyDown={salaryTypeNav.handleKeyDown}
                       placeholder="Välj lönetyp"
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showSalaryTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
@@ -2875,17 +2882,22 @@ const MobileJobWizard = ({
                     
                     {/* Salary Type Dropdown */}
                     {showSalaryTypeDropdown && (
-                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                        {filteredSalaryTypes.map((type) => (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => handleSalaryTypeSelect(type)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{type.label}</div>
-                          </button>
-                        ))}
+                      <div ref={salaryTypeNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                        {filteredSalaryTypes.map((type, index) => {
+                          const isHighlighted = salaryTypeNav.highlightedIndex === index;
+                          return (
+                            <button
+                              key={type.value}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => salaryTypeNav.setHighlightedIndex(index)}
+                              onClick={() => handleSalaryTypeSelect(type)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{type.label}</div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -2898,6 +2910,7 @@ const MobileJobWizard = ({
                       value={salaryTransparencySearchTerm || (formData.salary_transparency ? salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '' : '')}
                       onChange={(e) => handleSalaryTransparencySearch(e.target.value)}
                       onClick={handleSalaryTransparencyClick}
+                      onKeyDown={salaryTransparencyNav.handleKeyDown}
                       placeholder="Välj lönespann"
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showSalaryTransparencyDropdown ? 'border-white/50' : ''}`}
                       readOnly
@@ -2906,17 +2919,22 @@ const MobileJobWizard = ({
                     
                     {/* Salary Transparency Dropdown */}
                     {showSalaryTransparencyDropdown && (
-                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                        {filteredSalaryTransparencyOptions.map((option) => (
-                          <button
-                            key={option.value}
-                            type="button"
-                            onClick={() => handleSalaryTransparencySelect(option)}
-                            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                          >
-                            <div className="font-medium">{option.label}</div>
-                          </button>
-                        ))}
+                      <div ref={salaryTransparencyNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                        {filteredSalaryTransparencyOptions.map((option, index) => {
+                          const isHighlighted = salaryTransparencyNav.highlightedIndex === index;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              data-index={index}
+                              onMouseEnter={() => salaryTransparencyNav.setHighlightedIndex(index)}
+                              onClick={() => handleSalaryTransparencySelect(option)}
+                              className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <div className="font-medium">{option.label}</div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
