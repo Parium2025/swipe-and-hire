@@ -30,7 +30,20 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
   onDurationAmountChange,
   onDurationUnitChange,
 }) => {
+  // Weeks were removed as an option — always coerce to months when a
+  // duration-based type is active.
+  useEffect(() => {
+    if (
+      employmentType &&
+      TYPES_WITH_DURATION.has(employmentType) &&
+      durationUnit !== 'months'
+    ) {
+      onDurationUnitChange('months');
+    }
+  }, [employmentType, durationUnit, onDurationUnitChange]);
+
   if (!employmentType) return null;
+
 
   if (TYPES_WITH_PART_TIME_DAYS.has(employmentType)) {
     const toggle = (v: string) => {
