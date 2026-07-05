@@ -100,6 +100,9 @@ interface JobPosting {
   job_image_desktop_url?: string;
   is_active?: boolean | null;
   expires_at?: string | null;
+  part_time_days?: string[] | null;
+  duration_amount?: number | null;
+  duration_unit?: string | null;
 }
 
 interface JobFormData {
