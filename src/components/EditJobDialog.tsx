@@ -4025,7 +4025,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           <Bookmark className="h-3.5 w-3.5 text-white" />
                                         </button>
                                         <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                          </button>
+                                          <Heart className="h-3.5 w-3.5 text-white fill-white" />
+                                        </button>
                                       </div>
                                     </div>
                                   )}
