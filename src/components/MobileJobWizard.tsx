@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useHasActivePlan } from '@/hooks/useHasActivePlan';
