@@ -2288,6 +2288,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
                             onChange={(e) => handleWorkLocationSearch(e.target.value)}
                             onClick={handleWorkLocationClick}
+                            onKeyDown={workLocationNav.handleKeyDown}
                             placeholder="Välj arbetsplats"
                             className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showWorkLocationDropdown ? 'border-white/50' : ''}`}
                             readOnly
@@ -2295,17 +2296,22 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {showWorkLocationDropdown && (
-                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                              {filteredWorkLocationTypes.map((type) => (
-                                <button
-                                  key={type.value}
-                                  type="button"
-                                  onClick={() => handleWorkLocationSelect(type)}
-                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                                >
-                                  <div className="font-medium">{type.label}</div>
-                                </button>
-                              ))}
+                            <div ref={workLocationNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                              {filteredWorkLocationTypes.map((type, index) => {
+                                const isHighlighted = workLocationNav.highlightedIndex === index;
+                                return (
+                                  <button
+                                    key={type.value}
+                                    type="button"
+                                    data-index={index}
+                                    onMouseEnter={() => workLocationNav.setHighlightedIndex(index)}
+                                    onClick={() => handleWorkLocationSelect(type)}
+                                    className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                                  >
+                                    <div className="font-medium">{type.label}</div>
+                                  </button>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
@@ -2318,6 +2324,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
                             onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                             onClick={handleRemoteWorkClick}
+                            onKeyDown={remoteWorkNav.handleKeyDown}
                             placeholder="Välj alternativ"
                             className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showRemoteWorkDropdown ? 'border-white/50' : ''}`}
                             readOnly
@@ -2325,17 +2332,22 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {showRemoteWorkDropdown && (
-                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                              {filteredRemoteWorkOptions.map((type) => (
-                                <button
-                                  key={type.value}
-                                  type="button"
-                                  onClick={() => handleRemoteWorkSelect(type)}
-                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                                >
-                                  <div className="font-medium">{type.label}</div>
-                                </button>
-                              ))}
+                            <div ref={remoteWorkNav.listRef} className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
+                              {filteredRemoteWorkOptions.map((type, index) => {
+                                const isHighlighted = remoteWorkNav.highlightedIndex === index;
+                                return (
+                                  <button
+                                    key={type.value}
+                                    type="button"
+                                    data-index={index}
+                                    onMouseEnter={() => remoteWorkNav.setHighlightedIndex(index)}
+                                    onClick={() => handleRemoteWorkSelect(type)}
+                                    className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                                  >
+                                    <div className="font-medium">{type.label}</div>
+                                  </button>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
