@@ -330,7 +330,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           {job.employment_type && (
             <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
               <Briefcase className="h-3 w-3 mr-1 flex-shrink-0" />
-              <span className="leading-snug">{getEmploymentTypeLabel(job.employment_type)}</span>
+              <span className="leading-snug">{[getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ')}</span>
             </Badge>
           )}
           {/* Salary badge */}
