@@ -31,6 +31,46 @@ function formatPrice(sek: number) {
   return sek.toLocaleString('sv-SE');
 }
 
+/**
+ * Speglar EXAKT samma punktlistor som visas på audience-landningen
+ * (se `AudienceLanding.tsx` → `employerPlans` + engångskortet).
+ * Ändras något där ska det ändras här också.
+ */
+const COMMON_EMPLOYER_FEATURES = [
+  'Skapa annons på minuter',
+  'Kandidatpresentation med bild, video och egna ord — där kandidaten själv väljer vad som visas',
+  'Överblick över alla sökande — flytta kandidater mellan steg: ny, intressant, intervju, erbjudande m.m.',
+  'Chatt direkt med kandidater i plattformen',
+  'Automatiska svar till alla sökande — ingen lämnas utan besked',
+  'Fungerar lika bra i mobilen som på datorn',
+];
+
+const FEATURES_BY_TIER: Record<PlanTier, string[]> = {
+  one_time: [
+    '1 annons live i 14 dagar',
+    'Ingen bindningstid',
+    ...COMMON_EMPLOYER_FEATURES,
+  ],
+  start: [
+    '1 användare',
+    'Upp till 40 aktiva annonser per månad',
+    ...COMMON_EMPLOYER_FEATURES,
+  ],
+  vaxa: [
+    '2 användare',
+    'Obegränsat antal annonser',
+    ...COMMON_EMPLOYER_FEATURES,
+  ],
+  pro: [
+    'Obegränsat antal användare',
+    'Obegränsat antal annonser',
+    'Roller och behörigheter för hela teamet',
+    'Dedikerad kontaktperson',
+    ...COMMON_EMPLOYER_FEATURES,
+  ],
+  jobseeker_premium: [],
+};
+
 export default function ValjPlan() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -109,7 +149,7 @@ export default function ValjPlan() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <button
             onClick={() => navigate(-1)}
-            className="flex min-h-[44px] items-center gap-2 text-sm text-white/70 hover:text-white"
+            className="flex min-h-[44px] items-center gap-2 text-sm text-white hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
             Tillbaka
@@ -134,13 +174,13 @@ export default function ValjPlan() {
           <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">
             {headline}
           </h1>
-          <p className="mt-4 text-base text-white/70 sm:text-lg">
+          <p className="mt-4 text-base text-white sm:text-lg">
             {subline}
           </p>
         </motion.div>
 
         {/* Trust row */}
-        <div className="mx-auto mt-8 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white/60">
+        <div className="mx-auto mt-8 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white">
           <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Trygg betalning</span>
           <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> Direkt access efter köp</span>
           <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5" /> Full kandidatbank i alla planer</span>
@@ -179,7 +219,7 @@ export default function ValjPlan() {
 
                 <div className="mb-5">
                   <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
-                  <p className="mt-1 text-sm text-white/60">{plan.description}</p>
+                  <p className="mt-1 text-sm text-white">{plan.description}</p>
                 </div>
 
                 <div className="mb-6">
@@ -187,14 +227,14 @@ export default function ValjPlan() {
                     <span className="text-4xl font-semibold text-white">{formatPrice(plan.price_sek)}</span>
                     <span className="text-sm text-white/60">kr</span>
                   </div>
-                  <p className="mt-1 text-xs text-white/50">
+                  <p className="mt-1 text-xs text-white">
                     {plan.billing_period === 'monthly' ? 'per månad · ex. moms' : 'engångsköp · ex. moms'}
                   </p>
                 </div>
 
                 <ul className="mb-6 flex-1 space-y-2.5">
-                  {plan.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-white/85">
+                  {(FEATURES_BY_TIER[plan.tier] ?? plan.features).map((f, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-white">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
                       <span>{f}</span>
                     </li>
@@ -228,7 +268,7 @@ export default function ValjPlan() {
             <div>
               <Badge className="mb-2 border-white/10 bg-white/[0.06] text-white/80">För jobbsökare</Badge>
               <h3 className="text-lg font-semibold text-white">{seekerPlan.name}</h3>
-              <p className="mt-1 text-sm text-white/60">
+              <p className="mt-1 text-sm text-white">
                 {seekerPlan.description} · {formatPrice(seekerPlan.price_sek)} kr/mån
               </p>
             </div>
@@ -251,7 +291,7 @@ export default function ValjPlan() {
           ].map((item, i) => (
             <div key={i} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
               <h4 className="mb-1.5 text-sm font-semibold text-white">{item.q}</h4>
-              <p className="text-sm text-white/70">{item.a}</p>
+              <p className="text-sm text-white">{item.a}</p>
             </div>
           ))}
         </div>
