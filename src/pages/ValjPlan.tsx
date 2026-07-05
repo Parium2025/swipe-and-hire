@@ -218,8 +218,12 @@ export default function ValjPlan() {
     ? 'Ditt utkast är sparat. Välj plan så publicerar vi direkt efteråt.'
     : 'Ingen bindningstid. Månadsvis debitering. Byt eller säg upp när du vill.';
 
+  // Ägare ser sidan som en helt ny kund — dölj "Nuvarande plan"-tillstånd
+  // så vi kan verifiera exakt hur nya besökare upplever sidan.
+  const displayActivePlan = isOwner ? null : activePlan;
+
   // Populärast-kortet: alltid Pro, men dölj märket om användaren redan har Pro.
-  const userHasPro = activePlan?.tier === 'pro';
+  const userHasPro = displayActivePlan?.tier === 'pro';
 
   return (
     <div
