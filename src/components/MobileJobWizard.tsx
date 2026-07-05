@@ -673,36 +673,33 @@ const MobileJobWizard = ({
     const titleLength = jobTitle.length;
     const metaLength = metaLine.length;
 
-    // More aggressive sizing for better visual balance
-    let companySizeClass = 'text-sm'; // Start smaller for company
-    let titleSizeClass = 'text-lg';   // Make title more prominent 
-    let metaSizeClass = 'text-sm';    // Readable meta info
+    // Title is the hero element: make it as large as possible while still
+    // fitting on a single line. AutoFitTitle will shrink from these base sizes
+    // down to minFontPx if needed, but never wrap.
+    let companySizeClass = 'text-sm';
+    let titleSizeClass = 'text-xl';
+    let metaSizeClass = 'text-sm';
 
-    // Adjust title size based on length - this is the hero element
     if (titleLength > 50) {
       titleSizeClass = 'text-base';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-sm';
-    } else if (titleLength > 30) {
+    } else if (titleLength > 35) {
       titleSizeClass = 'text-lg';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-sm';
-    } else if (titleLength < 20) {
+    } else if (titleLength > 20) {
       titleSizeClass = 'text-xl';
-      companySizeClass = 'text-sm';
-      metaSizeClass = 'text-base';
+    } else {
+      titleSizeClass = 'text-2xl';
     }
 
     // Adjust company name - keep it subtle but readable
     if (companyLength > 15) {
-      companySizeClass = 'text-sm';
+      companySizeClass = 'text-xs';
     } else if (companyLength < 8) {
       companySizeClass = 'text-sm';
     }
 
-    // Ensure meta info is always readable
-    if (metaLength > 20) {
-      metaSizeClass = 'text-sm';
+    // Ensure meta info is always readable but smaller than the title
+    if (metaLength > 25) {
+      metaSizeClass = 'text-xs';
     } else if (metaLength < 10) {
       metaSizeClass = 'text-sm';
     }
@@ -4208,7 +4205,7 @@ const MobileJobWizard = ({
                             ) : null}
                             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                             <div 
-                              className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-center cursor-pointer overflow-y-auto overscroll-contain"
+                              className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-center cursor-pointer overflow-y-auto overscroll-contain"
                               style={getJobOverlayTextStyle(formData.overlay_text_color)}
                               onClick={() => setShowApplicationForm(true)}
                             >
@@ -4227,7 +4224,7 @@ const MobileJobWizard = ({
                       text={getDisplayTitle()}
                       className={`${textSizes.title} font-bold leading-tight mb-1 w-full max-w-full cursor-pointer`}
                       style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                      minFontPx={13}
+                      minFontPx={15}
                     />
                     <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
@@ -4757,7 +4754,7 @@ const MobileJobWizard = ({
                                 
                                 {/* Content - clickable to show form */}
                                 <div 
-                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
+                                  className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
                                   style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                   onClick={() => setShowDesktopApplicationForm(true)}
                                 >
@@ -4776,7 +4773,7 @@ const MobileJobWizard = ({
                                            text={formData.title || 'Jobbtitel'}
                                            className={`${textSizes.title} font-bold leading-tight mb-1 w-full max-w-full cursor-pointer`}
                                            style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                                           minFontPx={13}
+                                           minFontPx={15}
                                          />
                                         <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                           {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
