@@ -136,6 +136,9 @@ interface JobFormData {
   job_image_desktop_url: string;
   image_focus_position: string;
   image_focus_position_desktop: string;
+  part_time_days?: string[];
+  duration_amount?: string;
+  duration_unit?: string;
 }
 
 interface EditJobDialogProps {
