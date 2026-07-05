@@ -142,10 +142,26 @@ export default function ValjPlan() {
     ? 'Ditt utkast är sparat. Välj plan så publicerar vi direkt efteråt.'
     : 'Ingen bindningstid. Månadsvis debitering. Byt eller säg upp när du vill.';
 
+  // Populärast-kortet: alltid Pro, men dölj märket om användaren redan har Pro.
+  const userHasPro = activePlan?.tier === 'pro';
+
   return (
-    <div className="min-h-screen bg-[#0F172A] text-white">
+    <div
+      data-valj-plan-scroll-root
+      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
+      style={{
+        overscrollBehavior: 'contain',
+        WebkitOverflowScrolling: 'touch',
+        scrollBehavior: 'smooth',
+        backgroundImage:
+          'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 65svh, hsl(var(--primary)) 100%)',
+      }}
+    >
+      {/* Dekorativa bubblor + glow — samma som resten av appen */}
+      <AnimatedBackground />
+
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-white/5 bg-[#0F172A]/80 backdrop-blur-xl">
+      <div className="sticky top-0 z-20 border-b border-white/5 bg-primary/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <button
             onClick={() => navigate(-1)}
@@ -154,11 +170,12 @@ export default function ValjPlan() {
             <ArrowLeft className="h-4 w-4" />
             Tillbaka
           </button>
-          <Link to="/" className="text-sm font-medium text-white/70 hover:text-white">
+          <Link to="/" className="text-sm font-medium text-white hover:text-white">
             Parium
           </Link>
         </div>
       </div>
+
 
       <div className="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:pt-16">
         {/* Hero */}
