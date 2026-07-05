@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   WEEKDAYS,
   TYPES_WITH_DURATION,
@@ -30,7 +30,20 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
   onDurationAmountChange,
   onDurationUnitChange,
 }) => {
+  // Weeks were removed as an option — always coerce to months when a
+  // duration-based type is active.
+  useEffect(() => {
+    if (
+      employmentType &&
+      TYPES_WITH_DURATION.has(employmentType) &&
+      durationUnit !== 'months'
+    ) {
+      onDurationUnitChange('months');
+    }
+  }, [employmentType, durationUnit, onDurationUnitChange]);
+
   if (!employmentType) return null;
+
 
   if (TYPES_WITH_PART_TIME_DAYS.has(employmentType)) {
     const toggle = (v: string) => {
@@ -72,18 +85,17 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
   }
 
   if (TYPES_WITH_DURATION.has(employmentType)) {
-    const units: DurationUnit[] = ['weeks', 'months'];
-    const activeIndex = units.indexOf(durationUnit);
     return (
+
       <div className="mt-3 space-y-2">
-        <div className="text-white text-xs font-medium">Hur länge pågår tjänsten?</div>
+        <div className="text-white text-xs font-medium">Hur många månader?</div>
         <div className="flex items-center gap-2">
           <input
             type="number"
             inputMode="numeric"
             min={1}
             max={999}
-            placeholder="6"
+            placeholder="t.ex. 6"
             value={durationAmount ?? ''}
             onChange={(e) => {
               const v = e.target.value;
@@ -94,37 +106,16 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
                 if (!isNaN(n) && n > 0) onDurationAmountChange(n);
               }
             }}
-            className="h-9 w-16 px-3 rounded-full bg-white/5 border border-white/15 text-white text-xs font-medium placeholder:text-white/40 focus:outline-none focus:border-white/40 transition-all duration-200 [font-size:16px] sm:[font-size:12px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="h-9 w-24 px-3 rounded-full bg-white/5 border border-white/15 text-white text-xs font-medium placeholder:text-white/40 focus:outline-none focus:border-white/40 transition-all duration-200 [font-size:16px] sm:[font-size:12px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
-
-          <div className="relative inline-flex rounded-full bg-white/5 border border-white/15 p-0.5 h-9">
-            <div
-              aria-hidden
-              className="absolute top-0.5 bottom-0.5 rounded-full bg-white/20 border border-white/40 transition-transform duration-300 ease-out"
-              style={{
-                width: 'calc(50% - 2px)',
-                left: '2px',
-                transform: `translateX(${activeIndex * 100}%)`,
-              }}
-            />
-            {units.map(u => (
-              <button
-                key={u}
-                type="button"
-                aria-pressed={durationUnit === u}
-                onClick={() => onDurationUnitChange(u)}
-                className={`relative z-10 h-8 min-w-[3.5rem] px-3 rounded-full text-xs font-medium transition-colors duration-200 ${
-                  durationUnit === u ? 'text-white' : 'text-white/70 hover:text-white'
-                }`}
-              >
-                {u === 'weeks' ? 'Veckor' : 'Månader'}
-              </button>
-            ))}
-          </div>
+          <span className="text-white text-xs font-medium">
+            {durationAmount === 1 ? 'månad' : 'månader'}
+          </span>
         </div>
       </div>
     );
   }
+
 
 
   return null;

@@ -9,8 +9,10 @@ export const EMPLOYMENT_TYPES: EmploymentType[] = [
   { value: 'part_time', label: 'Deltid', description: 'Deltidsanställning' },
   { value: 'contract', label: 'Konsult', description: 'Konsultuppdrag' },
   { value: 'temporary', label: 'Vikariat', description: 'Tillfällig anställning' },
+  { value: 'interim', label: 'Interim', description: 'Interimsuppdrag' },
   { value: 'internship', label: 'Praktik', description: 'Praktikplats' },
   { value: 'lia', label: 'LIA', description: 'Lärande i arbete (LIA)' },
+
   { value: 'summer_job', label: 'Sommarjobb', description: 'Sommaranställning' }
 ];
 
@@ -45,7 +47,7 @@ export const SEARCH_EMPLOYMENT_TYPES = EMPLOYMENT_TYPES.map(type => ({
 // ---------------------------------------------------------------------------
 
 /** Employment types that need a duration (X weeks / X months). */
-export const TYPES_WITH_DURATION = new Set(['contract', 'temporary', 'internship', 'lia']);
+export const TYPES_WITH_DURATION = new Set(['contract', 'temporary', 'interim', 'internship', 'lia']);
 
 /** Employment types that need part-time weekday picker. */
 export const TYPES_WITH_PART_TIME_DAYS = new Set(['part_time']);
