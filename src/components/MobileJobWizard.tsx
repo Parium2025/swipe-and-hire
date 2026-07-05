@@ -1988,6 +1988,17 @@ const MobileJobWizard = ({
     onClose: () => setShowSalaryTransparencyDropdown(false),
   });
 
+  const benefitsNav = useDropdownKeyboardNav({
+    items: BENEFIT_OPTIONS,
+    isOpen: showBenefitsDropdown,
+    onSelect: (benefit) => handleBenefitToggle(benefit.value),
+    onOpen: () => {
+      closeAllDropdowns();
+      setShowBenefitsDropdown(true);
+    },
+    onClose: () => setShowBenefitsDropdown(false),
+  });
+
   const workLocationNav = useDropdownKeyboardNav({
     items: filteredWorkLocationTypes,
     isOpen: showWorkLocationDropdown,
@@ -2749,28 +2760,46 @@ const MobileJobWizard = ({
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
                   <div className="relative benefits-dropdown">
-                    <div
+                    <Input
+                      value={formData.benefits.length > 0 
+                        ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
+                        : ''}
                       onClick={handleBenefitsClick}
-                      className={`flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 h-11 cursor-pointer hover:border-white/40 transition-colors ${showBenefitsDropdown ? 'border-white/50' : ''}`}
-                    >
-                      <span className="text-sm text-white">
-                        {formData.benefits.length > 0 
-                          ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
-                          : 'Välj förmåner'}
-                      </span>
-                      <ChevronDown className={`h-4 w-4 shrink-0 text-white transition-transform duration-200 ${showBenefitsDropdown ? 'rotate-180' : 'rotate-0'}`} />
-                    </div>
+                      onKeyDown={benefitsNav.handleKeyDown}
+                      placeholder="Välj förmåner"
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showBenefitsDropdown ? 'border-white/50' : ''}`}
+                      readOnly
+                    />
+                    <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white transition-transform duration-200 ${showBenefitsDropdown ? 'rotate-180' : 'rotate-0'}`} />
                     
                     {showBenefitsDropdown && (
                       <div
+                        ref={benefitsNav.listRef}
                         className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
                         onWheel={(e) => e.stopPropagation()}
                         onTouchMove={(e) => e.stopPropagation()}
                       >
-                        <BenefitsList
-                          selectedBenefits={formData.benefits}
-                          onToggle={handleBenefitToggle}
-                        />
+                        {BENEFIT_OPTIONS.map((benefit, index) => {
+                          const isSelected = formData.benefits.includes(benefit.value);
+                          const isHighlighted = benefitsNav.highlightedIndex === index;
+
+                          return (
+                            <button
+                              key={benefit.value}
+                              type="button"
+                              data-index={index}
+                              aria-pressed={isSelected}
+                              onMouseEnter={() => benefitsNav.setHighlightedIndex(index)}
+                              onClick={() => handleBenefitToggle(benefit.value)}
+                              className={`relative w-full px-3 pr-10 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors ${isSelected || isHighlighted ? 'bg-white/20' : 'hover:bg-white/20'}`}
+                            >
+                              <span className="block truncate font-medium">{benefit.label}</span>
+                              {isSelected && (
+                                <Check className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white" strokeWidth={2.75} />
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
