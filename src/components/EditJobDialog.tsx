@@ -3402,6 +3402,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               className={`${textSizes.title} text-white font-bold leading-tight mb-1 w-full max-w-full cursor-default`}
                                               minFontPx={15}
                                               maxFontPx={34}
+                                              minScaleX={0.68}
                                             />
                                             <div className={`${textSizes.meta} text-white`}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
@@ -3932,6 +3933,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 className={`${textSizes.title} text-white font-bold leading-tight mb-1 w-full max-w-full cursor-default`}
                                                 minFontPx={15}
                                                 maxFontPx={40}
+                                                minScaleX={0.68}
                                               />
                                               <div className={`${textSizes.meta} text-white`}>
                                                 {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
