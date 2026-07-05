@@ -137,7 +137,7 @@ export function AutoFitTitle({
       ro.disconnect();
       clearTimeout(timeout);
     };
-  }, [text, minFontPx]);
+  }, [text, minFontPx, maxFontPx]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
