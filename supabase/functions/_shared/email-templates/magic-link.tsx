@@ -28,7 +28,7 @@ export const MagicLinkEmail = ({ confirmationUrl }: MagicLinkEmailProps) => (
     <Body style={main}>
       <Container style={container}>
         <Section style={brandSection}>
-          <Img src="https://parium.se/parium-auth-logo.png" alt="Parium" width="120" height="32" style={{ display: "block" }} />
+          <Img src="https://www.parium.se/parium-auth-logo.png" alt="Parium" width="140" height="56" style={{ display: "block" }} />
         </Section>
         <Heading style={h1}>Din inloggningslänk</Heading>
         <Text style={text}>
