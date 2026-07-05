@@ -3399,9 +3399,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             </button>
                                             <AutoFitTitle
                                               text={getDisplayTitle()}
-                                              className={`${textSizes.title} text-white font-bold leading-tight mb-1 -mx-2 w-[calc(100%+1rem)] max-w-[calc(100%+1rem)] cursor-default`}
+                                              className={`${textSizes.title} text-white font-bold leading-tight mb-1 cursor-default`}
                                               minFontPx={15}
-                                              maxFontPx={34}
+                                              maxFontPx={26}
                                             />
                                             <div className={`${textSizes.meta} text-white`}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
@@ -3929,9 +3929,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               </button>
                                               <AutoFitTitle
                                                 text={formData.title || 'Jobbtitel'}
-                                                className={`${textSizes.title} text-white font-bold leading-tight mb-1 -mx-2 w-[calc(100%+1rem)] max-w-[calc(100%+1rem)] cursor-default`}
+                                                className={`${textSizes.title} text-white font-bold leading-tight mb-1 cursor-default`}
                                                 minFontPx={15}
-                                                maxFontPx={40}
+                                                maxFontPx={32}
                                               />
                                               <div className={`${textSizes.meta} text-white`}>
                                                 {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
