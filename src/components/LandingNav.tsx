@@ -198,14 +198,12 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                     <button
                       type="button"
                       aria-label="Öppna sektionsmeny"
-                      className={`group relative inline-flex h-11 items-center gap-1.5 overflow-hidden rounded-full border px-5 text-[15px] font-medium transition-all duration-300 hover:border-white/80 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] focus:outline-none focus-visible:ring-2 ${
+                      className={`group relative inline-flex h-11 items-center gap-1.5 overflow-hidden rounded-full border px-5 text-[15px] font-medium transition-colors duration-200 hover:border-white/80 focus:outline-none focus-visible:outline-none ${
                         isLightSection
-                          ? 'border-primary/10 bg-background/80 text-primary focus-visible:ring-primary/20'
-                          : 'border-white bg-white/[0.045] text-white focus-visible:ring-white/30'
+                          ? 'border-primary/10 bg-background/80 text-primary'
+                          : 'border-white bg-white/[0.045] text-white'
                       }`}
                     >
-                      <span className="pointer-events-none absolute -inset-3 hidden rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:block [@media(hover:hover)]:group-hover:opacity-100" />
-                      <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-65 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
                       <span className="relative z-10 whitespace-nowrap">
                         Meny
                       </span>
@@ -222,7 +220,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                   <DropdownMenuContent
                     align="center"
                     sideOffset={8}
-                    className="relative min-w-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-primary p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.5)]"
+                    className="relative min-w-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-primary p-2 shadow-none"
                   >
 
                     <div className="relative z-10 flex flex-col gap-1">
@@ -257,7 +255,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                               }
                             }}
                             className={cn(
-                              'relative flex items-center justify-between rounded-2xl px-5 py-3.5 text-[15px] font-medium transition-colors focus:bg-transparent md:hover:bg-white/5 md:focus:bg-white/5',
+                              'relative flex items-center justify-between rounded-2xl px-5 py-3.5 text-[15px] font-medium transition-none hover:bg-transparent focus:bg-transparent data-[highlighted]:bg-transparent data-[highlighted]:text-white',
                               isActive
                                 ? 'bg-white/5 text-white'
                                 : 'text-white/70 hover:text-white'
