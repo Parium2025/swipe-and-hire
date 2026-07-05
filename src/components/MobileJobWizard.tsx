@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
+import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useHasActivePlan } from '@/hooks/useHasActivePlan';
@@ -4222,10 +4223,11 @@ const MobileJobWizard = ({
                     >
                       {profile?.company_name || 'Företag'}
                     </button>
-                    <TruncatedText 
-                      text={getDisplayTitle()} 
-                      className={`${textSizes.title} font-bold leading-tight mb-1 line-clamp-5 w-full max-w-full cursor-pointer`}
+                    <AutoFitTitle
+                      text={getDisplayTitle()}
+                      className={`${textSizes.title} font-bold leading-tight mb-1 w-full max-w-full cursor-pointer`}
                       style={getJobOverlayTextStyle(formData.overlay_text_color)}
+                      minFontPx={13}
                     />
                     <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
@@ -4770,10 +4772,11 @@ const MobileJobWizard = ({
                                          >
                                           {profile?.company_name || 'Företag'}
                                         </button>
-                                         <TruncatedText 
-                                           text={formData.title || 'Jobbtitel'} 
-                                           className={`${textSizes.title} font-bold leading-tight mb-1 line-clamp-2 w-full max-w-full cursor-pointer`}
+                                         <AutoFitTitle
+                                           text={formData.title || 'Jobbtitel'}
+                                           className={`${textSizes.title} font-bold leading-tight mb-1 w-full max-w-full cursor-pointer`}
                                            style={getJobOverlayTextStyle(formData.overlay_text_color)}
+                                           minFontPx={13}
                                          />
                                         <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                           {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
