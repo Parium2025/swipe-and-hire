@@ -1046,7 +1046,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
           transition={{ duration: 1, ease }}
-          className="relative z-10 flex max-w-4xl flex-col items-center text-center"
+          className="relative z-10 flex max-w-6xl flex-col items-center text-center"
         >
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
@@ -1057,14 +1057,33 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
           >
             {c.intro.title}
           </motion.h2>
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } } }}
-          >
-            <IntroText paragraphs={c.intro.paragraphs} />
-          </motion.div>
+          {audience === 'job_seeker' ? (
+            <div className="grid w-full items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(260px,340px)] md:gap-14 lg:gap-20 md:text-left">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } } }}
+                className="order-2 md:order-1"
+              >
+                <IntroText paragraphs={c.intro.paragraphs} />
+              </motion.div>
+              <div className="order-1 md:order-2">
+                <Suspense fallback={null}>
+                  <JobSeekerVideoShowcase />
+                </Suspense>
+              </div>
+            </div>
+          ) : (
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } } }}
+            >
+              <IntroText paragraphs={c.intro.paragraphs} />
+            </motion.div>
+          )}
           {onIntroCta && (
             <motion.button
               type="button"
