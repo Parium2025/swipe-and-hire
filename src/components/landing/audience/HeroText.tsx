@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -35,38 +34,16 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     ? 'wave-text mt-7 max-w-xl text-base leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:mt-10 md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9'
     : 'wave-text mt-7 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-9 md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:max-w-2xl md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:mt-10 md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9';
 
-  // Premium-entré: mjuk opacity + liten translateY, exakt som SEO/yrkessidornas hero.
-  // Alla element animeras samtidigt — ingen stagger, ingen trappa.
-  // Vänta in Spline-telefonen så texten och 3D-mockupen tonas in TILLSAMMANS
-  // (max 1400 ms fallback om Spline tar för lång tid eller misslyckas).
-  const fadeStyle = { willChange: 'opacity, transform' } as const;
-  const premiumEase = [0.22, 1, 0.36, 1] as const;
-
-  const [animateIn, setAnimateIn] = useState(false);
-  useEffect(() => {
-    let done = false;
-    const trigger = () => {
-      if (done) return;
-      done = true;
-      setAnimateIn(true);
-    };
-    window.addEventListener('parium:spline-ready', trigger, { once: true });
-    const fallback = window.setTimeout(trigger, 1400);
-    return () => {
-      window.removeEventListener('parium:spline-ready', trigger);
-      window.clearTimeout(fallback);
-    };
-  }, []);
-
-  const animateTo = animateIn ? { opacity: 1, y: 0 } : { opacity: 0 };
+  // Texten får aldrig vänta på Spline/3D-lagret. Om telefonen är sen eller
+  // previewn renderar om ska hero-copy alltid vara synlig direkt, utan tom blå yta.
+  const visibleStyle = { opacity: 1, transform: 'none' } as const;
 
   return (
     <>
       <motion.span
-        initial={{ opacity: 0, y: 8 }}
-        animate={animateTo}
-        transition={{ duration: 0.6, ease: premiumEase }}
-        style={fadeStyle}
+        initial={false}
+        animate={{ opacity: 1, y: 0 }}
+        style={visibleStyle}
         className={eyebrowClass}
       >
         {eyebrow}
@@ -74,10 +51,9 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
 
       <motion.h1
         id={headingId}
-        initial={{ opacity: 0, y: 14 }}
-        animate={animateTo}
-        transition={{ duration: 0.65, ease: premiumEase }}
-        style={fadeStyle}
+        initial={false}
+        animate={{ opacity: 1, y: 0 }}
+        style={visibleStyle}
         className={headlineClass}
       >
         {headline.map((line, i) => (
@@ -91,10 +67,9 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
       </motion.h1>
 
       <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={animateTo}
-        transition={{ duration: 0.65, ease: premiumEase }}
-        style={fadeStyle}
+        initial={false}
+        animate={{ opacity: 1, y: 0 }}
+        style={visibleStyle}
         className={subtitleClass}
       >
         {subtitle}
