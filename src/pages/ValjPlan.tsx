@@ -8,6 +8,7 @@ import { useHasActivePlan, type PlanTier } from '@/hooks/useHasActivePlan';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PaymentPlaceholderDialog } from '@/components/PaymentPlaceholderDialog';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { toast } from 'sonner';
 
 type BillingPeriod = 'monthly' | 'one_time';
