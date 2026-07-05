@@ -141,7 +141,7 @@ export default function ValjPlan() {
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [expandedTier, setExpandedTier] = useState<PlanTier | null>(null);
+  const [allFeaturesOpen, setAllFeaturesOpen] = useState(false);
   const [activeTier, setActiveTier] = useState<PlanTier | null>(null);
 
   const from = searchParams.get('from');
@@ -260,7 +260,7 @@ export default function ValjPlan() {
             const isRecommended = plan.tier === 'pro' && !userHasPro;
             const isCurrent = activePlan?.tier === plan.tier;
             const isActive = activeTier === plan.tier || (activeTier === null && isRecommended);
-            const isOpen = expandedTier === plan.tier;
+            const isOpen = allFeaturesOpen;
             return (
               <motion.div
                 key={plan.id}
@@ -298,8 +298,8 @@ export default function ValjPlan() {
                 <PlanFeatures
                   features={FEATURES_BY_TIER[plan.tier] ?? plan.features}
                   isActive={isActive}
-                  open={isOpen}
-                  onToggle={() => setExpandedTier(isOpen ? null : plan.tier)}
+                  open={allFeaturesOpen}
+                  onToggle={() => setAllFeaturesOpen(open => !open)}
                 />
 
                 <button
@@ -311,9 +311,11 @@ export default function ValjPlan() {
                   }}
                   disabled={isCurrent}
                   className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] disabled:opacity-60 ${
-                    isRecommended
+                    isCurrent
+                      ? 'border border-white/20 bg-white/10 text-white hover:border-white/30 hover:bg-white/15'
+                      : isRecommended
                       ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))]'
-                      : 'border border-white/20 bg-white/10 text-white hover:border-white/30 hover:bg-white/15'
+                      : 'bg-secondary text-white shadow-[0_14px_40px_-14px_hsl(var(--secondary)/0.8)] hover:-translate-y-0.5 hover:shadow-[0_18px_45px_-18px_hsl(var(--secondary))]'
                   }`}
                 >
                   {isCurrent ? 'Nuvarande plan' : 'Fortsätt till betalning'}
