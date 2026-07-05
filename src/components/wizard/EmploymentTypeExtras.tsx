@@ -46,7 +46,7 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
     };
     return (
       <div className="mt-3 space-y-2">
-        <div className="text-white text-xs">Vilka dagar? (välj en eller flera)</div>
+        <div className="text-white text-xs font-medium">Vilka dagar? (välj en eller flera)</div>
         <div className="flex flex-wrap gap-1.5">
           {WEEKDAYS.map(day => {
             const active = partTimeDays.includes(day.value);
@@ -76,14 +76,14 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
     const activeIndex = units.indexOf(durationUnit);
     return (
       <div className="mt-3 space-y-2">
-        <div className="text-white text-xs">Hur länge pågår tjänsten?</div>
+        <div className="text-white text-xs font-medium">Hur länge pågår tjänsten?</div>
         <div className="flex items-center gap-2">
           <input
             type="number"
             inputMode="numeric"
             min={1}
             max={999}
-            placeholder="t.ex. 6"
+            placeholder="6"
             value={durationAmount ?? ''}
             onChange={(e) => {
               const v = e.target.value;
@@ -94,8 +94,9 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
                 if (!isNaN(n) && n > 0) onDurationAmountChange(n);
               }
             }}
-            className="h-9 w-20 px-3 rounded-full bg-white/5 border border-white/15 text-white text-xs font-medium placeholder:text-white/50 focus:outline-none focus:border-white/40 transition-all duration-200 [font-size:16px] sm:[font-size:12px] text-center"
+            className="h-9 w-16 px-3 rounded-full bg-white/5 border border-white/15 text-white text-xs font-medium placeholder:text-white/40 focus:outline-none focus:border-white/40 transition-all duration-200 [font-size:16px] sm:[font-size:12px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
+
           <div className="relative inline-flex rounded-full bg-white/5 border border-white/15 p-0.5 h-9">
             <div
               aria-hidden
