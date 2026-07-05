@@ -8,7 +8,6 @@ import {
   Container,
   Head,
   Heading,
-  Img,
   Html,
   Link,
   Preview,
@@ -29,7 +28,7 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailP
     <Body style={main}>
       <Container style={container}>
         <Section style={brandSection}>
-          <Img src="https://www.parium.se/parium-auth-logo.png" alt="Parium" width="140" height="56" style={{ display: "block" }} />
+          <Text style={brand}>Parium</Text>
         </Section>
         <Heading style={h1}>Du har bjudits in</Heading>
         <Text style={text}>
