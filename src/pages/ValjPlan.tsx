@@ -173,9 +173,20 @@ export default function ValjPlan() {
     }
   }, [cancelled]);
 
-  // Företagsplaner (visas i huvudgriden) vs jobbsökar-premium (eget kort)
-  const companyPlans = useMemo(
-    () => plans.filter(p => p.tier !== 'jobseeker_premium'),
+  // Har användaren redan en aktiv plan? Då ska sidan inte vara nåbar.
+  useEffect(() => {
+    if (activePlan && !cancelled) {
+      navigate('/', { replace: true });
+    }
+  }, [activePlan, cancelled, navigate]);
+
+  // Prenumerationsplaner (huvudgrid) — engångsköp visas separat under
+  const subscriptionPlans = useMemo(
+    () => plans.filter(p => p.tier !== 'jobseeker_premium' && p.billing_period !== 'one_time'),
+    [plans]
+  );
+  const oneTimePlan = useMemo(
+    () => plans.find(p => p.billing_period === 'one_time' && p.tier !== 'jobseeker_premium') ?? null,
     [plans]
   );
   const seekerPlan = useMemo(
