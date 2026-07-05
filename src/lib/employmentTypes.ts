@@ -47,7 +47,7 @@ export const SEARCH_EMPLOYMENT_TYPES = EMPLOYMENT_TYPES.map(type => ({
 // ---------------------------------------------------------------------------
 
 /** Employment types that need a duration (X weeks / X months). */
-export const TYPES_WITH_DURATION = new Set(['contract', 'temporary', 'internship', 'lia']);
+export const TYPES_WITH_DURATION = new Set(['contract', 'temporary', 'interim', 'internship', 'lia']);
 
 /** Employment types that need part-time weekday picker. */
 export const TYPES_WITH_PART_TIME_DAYS = new Set(['part_time']);
