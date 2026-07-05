@@ -266,10 +266,10 @@ export default function ValjPlan() {
                 <Button
                   onClick={() => handleSelect(plan)}
                   disabled={isCurrent}
-                  className={`h-11 w-full font-medium ${
+                  className={`mt-auto inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] disabled:opacity-60 ${
                     isRecommended
-                      ? 'bg-white text-[#0F172A] hover:bg-white/90'
-                      : 'bg-white/10 text-white hover:bg-white/20'
+                      ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:-translate-y-0.5 hover:bg-secondary hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))]'
+                      : 'border border-white/20 bg-white/10 text-white hover:border-white/30 hover:bg-white/15'
                   }`}
                 >
                   {isCurrent ? 'Nuvarande plan' : 'Fortsätt till betalning'}
