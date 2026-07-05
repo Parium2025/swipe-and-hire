@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
+import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useHasActivePlan } from '@/hooks/useHasActivePlan';
