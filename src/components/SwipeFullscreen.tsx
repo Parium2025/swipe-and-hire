@@ -115,6 +115,19 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     isInCooldown,
   } = useOverlayCooldown(520);
 
+  /* ── Persistent action-bar: ref till aktivt korts swipe-API ────
+   * Bar-knapparna (✕ / ❤) triggar den aktiva JobSlidens `triggerSwipe`
+   * — samma animation som en manuell swipe. Ref används istället för
+   * state så baren står stilla utan re-render vid varje kortbyte.
+   */
+  const activeCardSwipeRef = useRef<((direction: 'left' | 'right') => void) | null>(null);
+  const registerActiveSwipeApi = useCallback(
+    (api: { swipe: (d: 'left' | 'right') => void } | null) => {
+      activeCardSwipeRef.current = api?.swipe ?? null;
+    },
+    [],
+  );
+
   /* ── Premium image preloading: 10 ahead, 2 back, bulk-25 on mount ── */
   useSwipeImagePreloader(jobs, currentIndex, 10, 2, 25);
 
