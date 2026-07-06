@@ -154,8 +154,9 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
                 <div className={`h-[26px] w-28 rounded-full ${SKELETON_SHAPE}`} />
               </div>
 
-              {/* JobSlideContent */}
-              <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6">
+              {/* JobSlideContent — flyttad något uppåt för att matcha
+                  verkligt kort ännu mer exakt (16 % istället för 20 %). */}
+              <div className="absolute inset-x-0 top-[16%] bottom-28 z-10 flex items-center justify-center px-6">
                 <div className="mx-auto w-full max-w-[21rem] flex flex-col items-center">
                   {/* Logo */}
                   <div className={`w-14 h-14 rounded-full mb-4 ${SKELETON_SHAPE}`} />
