@@ -53,6 +53,24 @@ export function useSwipeActions() {
     fetchActions();
   }, [user?.id]);
 
+  // 🔔 Lyssna på broadcast från restoreSkippedJob (Skippade jobb-sidan) så
+  // att Swipe Mode omedelbart plockar tillbaka jobbet i kön utan reload.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (e: Event) => {
+      const jobId = (e as CustomEvent<{ jobId: string }>).detail?.jobId;
+      if (!jobId) return;
+      setActions(prev => {
+        if (!prev.has(jobId)) return prev;
+        const next = new Map(prev);
+        next.delete(jobId);
+        return next;
+      });
+    };
+    window.addEventListener('parium:swipe-action-removed', handler);
+    return () => window.removeEventListener('parium:swipe-action-removed', handler);
+  }, []);
+
   const recordAction = useCallback(async (jobId: string, action: SwipeActionType) => {
     if (!user?.id) return;
 
