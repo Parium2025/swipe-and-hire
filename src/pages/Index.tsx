@@ -339,6 +339,10 @@ const Index = () => {
   const device = useDevice();
   const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
   const shouldShowSearchBootSkeleton = location.pathname === '/search-jobs';
+  const swipeModeBoot = (() => {
+    try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
+  })();
+  const SearchBootSkeleton = swipeModeBoot ? SwipeModeSkeleton : JobListSkeleton;
 
   // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
   // den underliggande KeepAlive-vyn (SearchJobs/SavedJobs/etc) stå kvar
