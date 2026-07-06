@@ -145,7 +145,7 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
           </div>
 
           {/* Centrerad kortinnehåll: logo → företag-pill → titel → subtitel → info-pills */}
-          <div className="absolute inset-x-0 top-[38%] flex flex-col items-center gap-3 px-6">
+          <div className="absolute inset-x-0 top-[22%] flex flex-col items-center gap-3 px-6">
             <div className="h-14 w-14 rounded-full bg-white/10 animate-pulse" />
             <div className="h-7 w-28 rounded-full bg-white/10 animate-pulse" />
             <div className="h-8 w-56 max-w-[80%] rounded bg-white/15 animate-pulse" />
