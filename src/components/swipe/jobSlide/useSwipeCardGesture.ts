@@ -95,43 +95,51 @@ export function useSwipeCardGesture({
 
       swipedRef.current = true;
 
-      animate(x, -EXIT_X, {
+      // 🚀 Advance föräldern OMEDELBART så nästa "riktiga" kort monteras
+      // i samma frame som exit-animationen startar (Tinder/Hinge-känsla).
+      // Underlaget animerar upp i bakgrunden och tas ur DOM när nästa
+      // kort tar över — ingen dead zone mellan 400–600 ms längre.
+      onSwipeLeft();
+
+      const exitControls = animate(x, -EXIT_X, {
         type: 'spring',
-        stiffness: 220,
-        damping: 26,
-        mass: 0.85,
+        stiffness: 240,
+        damping: 28,
+        mass: 0.8,
       });
       animate(exitOpacity, 0, {
-        duration: 0.4,
+        duration: 0.32,
         ease: [0.22, 1, 0.36, 1],
       });
 
       animate(underlayY, 0, {
         type: 'spring',
-        stiffness: 120,
+        stiffness: 140,
         damping: 22,
-        mass: 1.2,
+        mass: 1.1,
       });
       animate(underlayScale, 1, {
         type: 'spring',
-        stiffness: 120,
+        stiffness: 140,
         damping: 22,
-        mass: 1.2,
+        mass: 1.1,
       });
       animate(underlayOpacity, 1, {
-        duration: 0.6,
+        duration: 0.4,
         ease: [0.22, 1, 0.36, 1],
       });
 
-      setTimeout(() => {
-        onSwipeLeft();
+      // Städa state när exit-animationen faktiskt är klar — tied to spring,
+      // inte hårdkodad timeout. Om komponenten unmountas dessförinnan
+      // (nästa kort tar över) så avbryts callbacken automatiskt.
+      exitControls.then(() => {
         swipedRef.current = false;
         x.set(0);
         exitOpacity.set(1);
         underlayY.set(800);
         underlayScale.set(0.68);
         underlayOpacity.set(0);
-      }, 600);
+      });
     },
     [
       clearTapHint,
