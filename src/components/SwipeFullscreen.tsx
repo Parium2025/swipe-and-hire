@@ -103,7 +103,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const {
     canUndo,
     undoEntryJobId,
-    pendingUndoJobIdRef,
+    consumePendingUndo,
     pushSkipped,
     handleUndo,
   } = useSwipeUndo({ onUndoSwipeAction });
