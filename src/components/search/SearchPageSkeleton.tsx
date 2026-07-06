@@ -122,30 +122,32 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
         className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
         style={fullscreenSkeletonStyle}
       >
-        <div className="relative flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
-          <div className="py-3">
-            <div className="h-3 w-8 bg-white/15 rounded animate-pulse" />
-          </div>
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 pt-[env(safe-area-inset-top,0px)]">
-            <div className="py-3">
-              <div className="h-12 w-[132px] rounded-full bg-white/10 border border-white/20 animate-pulse" />
-            </div>
-          </div>
-          <div className="flex h-11 w-11 items-center justify-center">
-            <div className="h-9 w-9 rounded-full bg-white/10 animate-pulse" />
-          </div>
-        </div>
-
-        <div className="flex-1 mx-3 mb-3 mt-2 rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden relative">
+        {/* Real layout: kortet fyller hela ytan, header ligger absolut ovanpå */}
+        <div className="flex-1 mx-3 mb-3 mt-3 rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden relative">
           <div className="absolute inset-0 bg-white/[0.03] animate-pulse" />
 
-          {/* Kategori-chip uppe till vänster */}
-          <div className="absolute top-4 left-4">
+          {/* Header overlay: index vänster, Visa filter mitten, X höger */}
+          <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
+            <div className="py-3">
+              <div className="h-3 w-8 rounded bg-white/15 animate-pulse" />
+            </div>
+            <div className="flex h-11 w-11 items-center justify-center">
+              <div className="h-9 w-9 rounded-full bg-white/10 animate-pulse" />
+            </div>
+          </div>
+          <div className="absolute top-0 left-1/2 z-20 -translate-x-1/2 pt-[env(safe-area-inset-top,0px)]">
+            <div className="py-3">
+              <div className="h-12 w-[150px] rounded-full bg-white/10 border border-white/20 animate-pulse" />
+            </div>
+          </div>
+
+          {/* Kategori-chip uppe till vänster (under headern) */}
+          <div className="absolute left-4" style={{ top: 'calc(env(safe-area-inset-top,0px) + 4.25rem)' }}>
             <div className="h-7 w-32 rounded-full bg-white/10 animate-pulse" />
           </div>
 
           {/* Centrerad kortinnehåll: logo → företag-pill → titel → subtitel → info-pills */}
-          <div className="absolute inset-x-0 top-[22%] flex flex-col items-center gap-3 px-6">
+          <div className="absolute inset-x-0 top-[34%] flex flex-col items-center gap-3 px-6">
             <div className="h-14 w-14 rounded-full bg-white/10 animate-pulse" />
             <div className="h-7 w-28 rounded-full bg-white/10 animate-pulse" />
             <div className="h-8 w-56 max-w-[80%] rounded bg-white/15 animate-pulse" />
