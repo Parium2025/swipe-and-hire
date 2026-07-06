@@ -6,7 +6,12 @@ import type { SwipeJob } from './types';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getImageVersion } from '@/lib/imageTransforms';
 
-import { SWIPE_IMG_TRANSFORM, SWIPE_LOGO_TRANSFORM } from './jobSlide/constants';
+import {
+  SWIPE_IMG_TRANSFORM,
+  SWIPE_LOGO_TRANSFORM,
+  UNDERLAY_INITIAL_SCALE,
+  UNDERLAY_INITIAL_Y,
+} from './jobSlide/constants';
 import { getImageObjectPosition } from './jobSlide/utils';
 import { JobSlideContent, OccupationBadge } from './jobSlide/JobSlideContent';
 import { NextCardUnderlay } from './jobSlide/NextCardUnderlay';
