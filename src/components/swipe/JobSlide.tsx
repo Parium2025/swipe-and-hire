@@ -1,23 +1,47 @@
-import { memo, useCallback, useEffect, useRef, useState, useMemo, type TouchEvent as ReactTouchEvent } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type TouchEvent as ReactTouchEvent,
+} from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
-import { CheckCircle, X, Bookmark, Heart, Users, Gift, Undo2, Building2 } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCardImage } from '@/hooks/useCardImage';
-import { differenceInDays, format, parseISO } from 'date-fns';
-import { sv } from 'date-fns/locale';
-import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
+import { hapticLight, hapticMedium } from '@/lib/haptics';
 import type { SwipeJob } from './types';
-import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 import { TruncatedText } from '@/components/TruncatedText';
 import { Badge } from '@/components/ui/badge';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getImageVersion } from '@/lib/imageTransforms';
 
-// Transform-konstant — MÅSTE matcha SWIPE_CARD_TRANSFORM i imageTransforms.ts
-// och useSwipeImagePreloader, annars hamnar preload-cachen på fel key.
-const SWIPE_IMG_TRANSFORM = { width: 800, height: 1000, quality: 78, resize: 'cover' as const };
-const SWIPE_LOGO_TRANSFORM = { width: 64, height: 64, quality: 80, resize: 'contain' as const };
+import {
+  SWIPE_IMG_TRANSFORM,
+  SWIPE_LOGO_TRANSFORM,
+  SWIPE_THRESHOLD,
+  VELOCITY_THRESHOLD,
+  EXIT_X,
+  SNAP_SPRING,
+  DOUBLE_TAP_DELAY,
+  TAP_MAX_DURATION,
+  TAP_MOVE_THRESHOLD,
+  TAP_RESET_VELOCITY_THRESHOLD,
+  TOUCH_DRAG_INTENT_THRESHOLD,
+} from './jobSlide/constants';
+import {
+  getImageObjectPosition,
+  getCompanyInitials,
+  isWithinTapHintTarget,
+  isWithinInteractiveTarget,
+} from './jobSlide/utils';
+import { JobSlideBadgesRow } from './jobSlide/JobSlideBadgesRow';
+import { JobSlideActions } from './jobSlide/JobSlideActions';
+import { NextCardUnderlay } from './jobSlide/NextCardUnderlay';
+import { useUndoEntryAnimation } from './jobSlide/useUndoEntryAnimation';
 
 interface JobSlideProps {
   job: SwipeJob;
@@ -50,32 +74,6 @@ interface TouchGestureState {
 
 type SwipeDirection = 'left' | 'right';
 
-const SWIPE_THRESHOLD = 100;
-const VELOCITY_THRESHOLD = 400;
-const EXIT_X = typeof window !== 'undefined' ? window.innerWidth * 1.4 : 600;
-const SNAP_SPRING = { type: 'spring' as const, stiffness: 340, damping: 28, mass: 0.9 };
-const DOUBLE_TAP_DELAY = 280;
-const TAP_MAX_DURATION = 250;
-const TAP_MOVE_THRESHOLD = 18;
-const TAP_RESET_VELOCITY_THRESHOLD = 120;
-const TOUCH_DRAG_INTENT_THRESHOLD = 12;
-function getImageObjectPosition(value?: string): string {
-  if (!value || value === 'center') return 'center 50%';
-  if (value === 'top') return 'center 20%';
-  if (value === 'bottom') return 'center 80%';
-  return `center ${value}%`;
-}
-
-function isWithinTapHintTarget(target: EventTarget | null): boolean {
-  return target instanceof Element && Boolean(target.closest('[data-tap-hint-scroll]'));
-}
-
-function isWithinInteractiveTarget(target: EventTarget | null): boolean {
-  return target instanceof Element && Boolean(
-    target.closest('button, a, input, textarea, select, [role="button"], [data-swipe-action-button]'),
-  );
-}
-
 export const JobSlide = memo(function JobSlide({
   job,
   nextJob,
@@ -98,6 +96,7 @@ export const JobSlide = memo(function JobSlide({
 }: JobSlideProps) {
   const inputCapability = useInputCapability();
   const useTouchTunnel = inputCapability !== 'mouse';
+
   const x = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
   const entryScale = useMotionValue(1);
@@ -105,18 +104,20 @@ export const JobSlide = memo(function JobSlide({
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
   const cardRotate = useTransform(x, [-200, 0, 200], [-10, 0, 10]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
-  // Combine drag scale with entry animation scale
-  const combinedScale = useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number));
-  // Dynamic shadow that intensifies with drag distance — premium depth effect
+  const combinedScale = useTransform(
+    [cardScale, entryScale],
+    ([cs, es]) => (cs as number) * (es as number),
+  );
   const cardShadow = useTransform(x, [-200, 0, 200], [
     '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
     '0 10px 30px -8px rgba(0,0,0,0.25)',
     '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
   ]);
-  // Underlay: driven by explicit timed animation, NOT drag progress
+  // Underlay: driven av explicit timed animation, INTE drag-progress
   const underlayY = useMotionValue(800);
   const underlayScale = useMotionValue(0.68);
   const underlayOpacity = useMotionValue(0);
+
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
@@ -125,12 +126,22 @@ export const JobSlide = memo(function JobSlide({
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
-  const nextDisplayCompanyName = nextJob?.workplace_name || nextJob?.company_name || 'Okänt företag';
+
   // KRITISKT: getImageVersion (image_updated_at ?? updated_at) MÅSTE matcha
   // useSwipeImagePreloader exakt, annars warmar preloadern en URL och kortet
   // renderar en annan → cache-miss + synlig nätverksladdning på första frame.
-  const { displayUrl: imageUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images', getImageVersion(job), SWIPE_IMG_TRANSFORM);
-  const { displayUrl: nextImageUrl } = useCardImage(nextJob?.job_image_url ?? null, 'job-images', getImageVersion(nextJob), SWIPE_IMG_TRANSFORM);
+  const { displayUrl: imageUrl, handleError: handleImageError } = useCardImage(
+    job.job_image_url ?? null,
+    'job-images',
+    getImageVersion(job),
+    SWIPE_IMG_TRANSFORM,
+  );
+  const { displayUrl: nextImageUrl } = useCardImage(
+    nextJob?.job_image_url ?? null,
+    'job-images',
+    getImageVersion(nextJob),
+    SWIPE_IMG_TRANSFORM,
+  );
 
   // 🐛 iOS WebKit-bugg: backdrop-filter rastreras EN gång när elementet skapas
   // och uppdateras inte när underliggande <img> laddas in efteråt. Resultat:
@@ -143,10 +154,22 @@ export const JobSlide = memo(function JobSlide({
   const blurClass = !imageUrl || imageLoaded ? 'backdrop-blur-md' : '';
 
   // 🚀 Logo i swipe-card är liten (~64px) → be om optimerad version
-  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', getImageVersion(job), SWIPE_LOGO_TRANSFORM);
-  const { displayUrl: nextLogoUrl } = useCardImage(nextJob?.company_logo_url ?? null, 'company-logos', getImageVersion(nextJob), SWIPE_LOGO_TRANSFORM);
-  const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
-  const nextOverlayTextStyle = useMemo(() => getJobOverlayTextStyle(nextJob?.overlay_text_color), [nextJob?.overlay_text_color]);
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(
+    job.company_logo_url ?? null,
+    'company-logos',
+    getImageVersion(job),
+    SWIPE_LOGO_TRANSFORM,
+  );
+  const { displayUrl: nextLogoUrl } = useCardImage(
+    nextJob?.company_logo_url ?? null,
+    'company-logos',
+    getImageVersion(nextJob),
+    SWIPE_LOGO_TRANSFORM,
+  );
+  const overlayTextStyle = useMemo(
+    () => getJobOverlayTextStyle(job.overlay_text_color),
+    [job.overlay_text_color],
+  );
 
   const isTitleTruncated = useCallback(() => {
     const el = titleRef.current;
@@ -166,19 +189,17 @@ export const JobSlide = memo(function JobSlide({
     clearTapHint();
     setShowTapHint(true);
     setTapHintSource(source);
-    // Auto-dismiss only when title is NOT truncated (simple hint text)
     if (source === 'title' && !isTitleTruncated()) {
       tapHintTimerRef.current = setTimeout(() => setShowTapHint(false), 1800);
     }
   }, [clearTapHint, isTitleTruncated]);
-  // Clear tap hint immediately when any overlay opens/closes
+
   useEffect(() => {
     if (overlayOpen) clearTapHint();
   }, [overlayOpen, clearTapHint]);
 
-  // 🧹 Memory leak fix: städa tap-hint-timern vid unmount så att state
-  // inte uppdateras på en avmonterad komponent (t.ex. snabb filter-change
-  // medan timern ännu tickar).
+  // 🧹 Städa tap-hint-timern vid unmount så att state
+  // inte uppdateras på en avmonterad komponent.
   useEffect(() => {
     return () => {
       if (tapHintTimerRef.current) clearTimeout(tapHintTimerRef.current);
@@ -189,7 +210,6 @@ export const JobSlide = memo(function JobSlide({
     lastTapTimestampRef.current = 0;
     clearTapHint();
 
-    // Haptic feedback on swipe commit
     hapticMedium();
 
     if (direction === 'right') {
@@ -200,7 +220,6 @@ export const JobSlide = memo(function JobSlide({
 
     swipedRef.current = true;
 
-    // Premium exit: slide current card out
     animate(x, -EXIT_X, {
       type: 'spring',
       stiffness: 220,
@@ -212,7 +231,6 @@ export const JobSlide = memo(function JobSlide({
       ease: [0.22, 1, 0.36, 1],
     });
 
-    // Premium underlay reveal: slow, graceful rise from below
     animate(underlayY, 0, {
       type: 'spring',
       stiffness: 120,
@@ -235,7 +253,6 @@ export const JobSlide = memo(function JobSlide({
       swipedRef.current = false;
       x.set(0);
       exitOpacity.set(1);
-      // Reset underlay for next swipe
       underlayY.set(800);
       underlayScale.set(0.68);
       underlayOpacity.set(0);
@@ -287,7 +304,6 @@ export const JobSlide = memo(function JobSlide({
     ) return;
 
     // Kill any ongoing scroll momentum so the card "lands" immediately
-    // and the user can begin a horizontal swipe without waiting
     const scrollParent = (event.currentTarget as HTMLElement).closest('[class*="overflow-y"]');
     if (scrollParent) {
       scrollParent.scrollTop = scrollParent.scrollTop;
@@ -303,7 +319,6 @@ export const JobSlide = memo(function JobSlide({
     };
   }, [useTouchTunnel, overlayOpen]);
 
-  // Track whether we already fired threshold haptic for this gesture
   const thresholdHapticFiredRef = useRef(false);
 
   const handleTouchMoveCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
@@ -346,7 +361,6 @@ export const JobSlide = memo(function JobSlide({
 
     x.set(deltaX);
 
-    // Light haptic when crossing the swipe threshold (fire once per gesture)
     if (!thresholdHapticFiredRef.current && Math.abs(deltaX) >= SWIPE_THRESHOLD) {
       thresholdHapticFiredRef.current = true;
       hapticLight();
@@ -363,7 +377,6 @@ export const JobSlide = memo(function JobSlide({
       return;
     }
 
-    // Reject if overlay is open or was very recently closed (prevents tap-through)
     if (overlayOpen || (Date.now() - overlayClosedAtRef.current < 500)) {
       touchGestureRef.current = null;
       return;
@@ -404,29 +417,24 @@ export const JobSlide = memo(function JobSlide({
     const now = Date.now();
 
     if (showTapHint) {
-      // Tooltip is visible → dismiss it, don't open job info
       clearTapHint();
       lastTapTimestampRef.current = 0;
       return;
     }
 
-    // Check if tap was on the title or company name area
     const isTapOnTitle = event.target instanceof Element && Boolean(event.target.closest('[data-title-tap-zone]'));
     const isTapOnCompany = event.target instanceof Element && Boolean(event.target.closest('[data-company-tap-zone]'));
 
     if (isTapOnTitle) {
-      // Tap on title → show title tooltip only
       armTapHint('title');
       return;
     }
 
     if (isTapOnCompany) {
-      // Tap on company → show company tooltip only (TruncatedText handles its own expansion)
       armTapHint('company');
       return;
     }
 
-    // Quick double-tap anywhere → open job info (keep as fallback)
     if (now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
       clearTapHint();
       lastTapTimestampRef.current = 0;
@@ -434,7 +442,6 @@ export const JobSlide = memo(function JobSlide({
       return;
     }
 
-    // Single tap outside title → open job info directly
     lastTapTimestampRef.current = 0;
     onTap();
   }, [armTapHint, clearTapHint, onTap, triggerSwipe, useTouchTunnel, overlayOpen, x, showTapHint]);
@@ -447,25 +454,8 @@ export const JobSlide = memo(function JobSlide({
     }
   }, [clearTapHint, x]);
 
-  // ✨ Ångra: mjuk premium "catch"-animation. Kortet glider in med en kort
-  // spring i scale + opacity så det känns ihopkopplat med resten av Spotify-
-  // känslan istället för att bara poppa fram.
-  //
-  // VIKTIGT: Animationen får ENDAST triggas när isUndoEntry går från false→true
-  // (dvs precis efter ett klick på Ångra). Annars kunde animationen "läcka"
-  // till nästa kort efter en dislike, eller spelas om när användaren scrollade
-  // mellan kort inom 700 ms-fönstret (isActive ändras → effekt re-fyrade).
-  const prevIsUndoEntryRef = useRef(false);
-  useEffect(() => {
-    if (isUndoEntry && !prevIsUndoEntryRef.current) {
-      x.set(0);
-      exitOpacity.set(0.4);
-      entryScale.set(0.92);
-      animate(exitOpacity, 1, { duration: 0.32, ease: [0.22, 1, 0.36, 1] });
-      animate(entryScale, 1, { type: 'spring', stiffness: 320, damping: 26, mass: 0.7 });
-    }
-    prevIsUndoEntryRef.current = isUndoEntry ?? false;
-  }, [isUndoEntry, x, exitOpacity, entryScale]);
+  // ✨ Ångra: mjuk premium "catch"-animation.
+  useUndoEntryAnimation({ isUndoEntry, x, exitOpacity, entryScale });
 
   return (
     <div
@@ -475,162 +465,20 @@ export const JobSlide = memo(function JobSlide({
       {/* Card area with swipe */}
       <div className="relative min-h-0 flex-1">
         {nextJob && isActive && !overlayOpen && (
-          <motion.div
-            aria-hidden="true"
-            className="absolute inset-0 overflow-hidden rounded-2xl border border-white/10 shadow-2xl pointer-events-none"
-            style={{
-              y: underlayY,
-              scale: underlayScale,
-              opacity: underlayOpacity,
-            }}
-          >
-            {/* Background image */}
-            <div className="absolute inset-0">
-              {nextImageUrl ? (
-                <img
-                  src={nextImageUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                  style={{
-                    objectPosition: getImageObjectPosition(nextJob.image_focus_position),
-                  }}
-                  loading="eager"
-                  draggable={false}
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />
-              )}
-            </div>
-
-            {/* Gradient — matches active card exactly */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
-
-            {/* Category badge */}
-            {nextJob.occupation && (
-              <div className="absolute top-5 left-5 z-10">
-                <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md transform-gpu [will-change:transform]">
-                  <span className="text-xs font-semibold tracking-wide text-white">{nextJob.occupation}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Full content — identical to active card so nothing flashes on transition */}
-            <div
-              className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center"
-              style={nextOverlayTextStyle}
-            >
-              <div className="mx-auto w-full max-w-[21rem]">
-                {/* Company logo or initials — same logic as active card */}
-                {(!nextImageUrl || nextJob.company_logo_url) && nextDisplayCompanyName && (
-                  <div className="flex justify-center mb-4">
-                    {nextJob.company_logo_url ? (
-                      <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg">
-                        <img
-                            src={nextLogoUrl || ''}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          draggable={false}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                        <span className="text-xl font-bold text-white/40 tracking-wide select-none">
-                          {nextDisplayCompanyName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="flex justify-center">
-                  <Badge variant="glass" className="inline-flex max-w-[80%] min-w-0 items-center gap-1.5 border-white/15 px-3 py-1 text-white">
-                    <Building2 className="h-3.5 w-3.5 shrink-0" />
-                    <TruncatedText
-                      text={nextDisplayCompanyName}
-                      className="min-w-0 flex-1 text-sm font-medium"
-                      tooltipSide="bottom"
-                      style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        wordBreak: 'break-word',
-                      }}
-                    />
-                  </Badge>
-                </div>
-
-                <h3 className="mt-1 line-clamp-2 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold leading-[1.08] tracking-tight text-white" style={nextOverlayTextStyle}>
-                  {nextJob.title}
-                </h3>
-                <p className="mt-2 truncate text-base font-semibold text-white" style={nextOverlayTextStyle}>
-                  {[nextJob.employment_type && getEmploymentTypeLabel(nextJob.employment_type), nextJob.location].filter(Boolean).join(' • ')}
-                </p>
-                {/* Badges — salary, date, benefits, applicants */}
-                <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-                  {(() => {
-                    const salaryText = getJobBadgeSalary(nextJob);
-                    if (!salaryText) return null;
-                    return (
-                      <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform]">
-                        <span className="text-white text-xs font-semibold">{salaryText}</span>
-                      </div>
-                    );
-                  })()}
-                  {(() => {
-                    const publishedDate = format(parseISO(nextJob.created_at), 'd MMM', { locale: sv });
-                    const daysLeft = nextJob.expires_at ? differenceInDays(parseISO(nextJob.expires_at), new Date()) : null;
-                    const parts: string[] = [`Publicerad ${publishedDate}`];
-                    if (daysLeft !== null && daysLeft >= 0) {
-                      parts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
-                    }
-                    return (
-                      <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform]">
-                        <span className="text-white text-xs font-semibold">{parts.join(' • ')}</span>
-                      </div>
-                    );
-                  })()}
-                  {nextJob.benefits && nextJob.benefits.length > 0 && (
-                    <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5">
-                      <Gift className="w-3 h-3 text-white" />
-                      <span className="text-white text-xs font-semibold">
-                        Förmåner {nextJob.benefits.length <= 5 ? `${nextJob.benefits.length} st` : `${Math.floor(nextJob.benefits.length / 5) * 5}+`}
-                      </span>
-                    </div>
-                  )}
-                  {nextJob.applications_count > 0 && (
-                    <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5">
-                      <Users className="w-3 h-3 text-white" />
-                      <span className="text-white text-xs font-semibold">
-                        {nextJob.applications_count} sökande
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Action buttons — visual ghost for seamless transition */}
-            <div className="absolute inset-x-0 bottom-4 z-10 px-5">
-              <div className="mt-4 flex items-center justify-center gap-5">
-                <div className="w-[52px] h-[52px] rounded-full bg-destructive/70 flex items-center justify-center shadow-lg">
-                  <X className="w-6 h-6 text-white/70" strokeWidth={2.5} />
-                </div>
-                <div className="w-[52px] h-[52px] rounded-full bg-secondary/70 border border-white/20 flex items-center justify-center shadow-lg">
-                  <Bookmark className="w-6 h-6 text-white/70" />
-                </div>
-                <div className="w-[52px] h-[52px] rounded-full bg-green-500/70 flex items-center justify-center shadow-lg">
-                  <Heart className="w-6 h-6 text-white/70 fill-white/70" />
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          <NextCardUnderlay
+            job={nextJob}
+            imageUrl={nextImageUrl}
+            logoUrl={nextLogoUrl}
+            y={underlayY}
+            scale={underlayScale}
+            opacity={underlayOpacity}
+          />
         )}
 
         <motion.div
           className="relative h-full rounded-2xl overflow-hidden select-none [-webkit-tap-highlight-color:transparent]"
           style={{
             x,
-            
             opacity: exitOpacity,
             rotate: cardRotate,
             scale: combinedScale,
@@ -648,240 +496,151 @@ export const JobSlide = memo(function JobSlide({
           onTouchCancelCapture={handleTouchCancelCapture}
           onDoubleClick={useTouchTunnel ? undefined : onTap}
         >
-        {/* Background image */}
-        <div className="absolute inset-0">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={job.title}
-              className="w-full h-full object-cover"
-              style={{
-                objectPosition: getImageObjectPosition(job.image_focus_position),
-              }}
-              loading={isVisible ? 'eager' : 'lazy'}
-              draggable={false}
-              onLoad={() => setImageLoaded(true)}
-              onError={handleImageError}
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />
-          )}
-        </div>
-
-        {/* Initials watermark removed – moved into text content block below */}
-
-        {/* Gradient overlay – stronger for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
-
-        {/* Category badge at top */}
-        {job.occupation && (
-          <div className="absolute top-5 left-5 z-10 pointer-events-none">
-            <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
-              <span className="text-white text-xs font-semibold tracking-wide">{job.occupation}</span>
-            </div>
-          </div>
-        )}
-
-        {/* SÖKA stamp */}
-        <motion.div
-          className="absolute top-8 left-6 z-20 border-4 border-green-400 rounded-lg px-4 py-1 -rotate-12 pointer-events-none"
-          style={{ opacity: likeOpacity }}
-        >
-          <span className="text-green-400 text-2xl font-black tracking-wider">SÖK</span>
-        </motion.div>
-
-        {/* TYCKER INTE OM stamp */}
-        <motion.div
-          className="absolute top-8 right-6 z-20 border-4 border-red-400 rounded-lg px-3 py-1 rotate-12 pointer-events-none"
-          style={{ opacity: nopeOpacity }}
-        >
-          <span className="text-red-400 text-lg font-black tracking-wider">TYCKER INTE OM</span>
-        </motion.div>
-
-        {/* Applied stamp overlay */}
-        {applied && (
-          <div className="absolute top-4 left-4 z-30 pointer-events-none">
-            <div className="-rotate-[12deg] border-[3px] border-green-500 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
-              <span className="text-green-500 text-lg font-black tracking-widest uppercase">SÖKT ✓</span>
-            </div>
-          </div>
-        )}
-
-        {/* Skipped stamp overlay */}
-        {skipped && !applied && (
-          <div className="absolute top-4 left-4 z-30 pointer-events-none">
-            <div className="-rotate-[12deg] border-[3px] border-white/40 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
-              <span className="text-white/60 text-lg font-black tracking-widest uppercase">SKIPPAD</span>
-            </div>
-          </div>
-        )}
-
-        <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center" style={overlayTextStyle}>
-          <div className="mx-auto w-full max-w-[21rem]">
-            {/* Company logo or initials fallback */}
-            {(logoUrl || !imageUrl) && displayCompanyName && (
-              <div className="flex justify-center mb-4">
-                {logoUrl ? (
-                  <div className={`w-14 h-14 rounded-full bg-white/10 border border-white/15 ${blurClass} transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg`}>
-                    <img
-                      src={logoUrl}
-                      alt={displayCompanyName}
-                      className="w-full h-full object-cover"
-                      draggable={false}
-                      onError={handleLogoError}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                    <span className="text-xl font-bold text-white/40 tracking-wide select-none">
-                      {displayCompanyName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                    </span>
-                  </div>
-                )}
-              </div>
+          {/* Bakgrundsbild */}
+          <div className="absolute inset-0">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={job.title}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
+                loading={isVisible ? 'eager' : 'lazy'}
+                draggable={false}
+                onLoad={() => setImageLoaded(true)}
+                onError={handleImageError}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />
             )}
-            <div className="flex justify-center" data-company-tap-zone>
-              <Badge variant="glass" className="inline-flex max-w-[80%] min-w-0 items-center gap-1.5 border-white/15 px-3 py-1 text-white">
-                <Building2 className="h-3.5 w-3.5 shrink-0" />
-                <TruncatedText
-                  text={displayCompanyName}
-                  className="min-w-0 flex-1 text-sm font-medium"
-                  tooltipSide="bottom"
-                  style={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    wordBreak: 'break-word',
-                  }}
-                />
-              </Badge>
-            </div>
+          </div>
 
-            <h2
-              ref={titleRef}
-              data-title-tap-zone
-              className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
-              style={overlayTextStyle}
-            >
-              {job.title}
-            </h2>
-            <p className="text-white font-semibold text-base mt-2 truncate" style={overlayTextStyle}>
-              {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
-            </p>
-            {/* Salary + Date badges */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-              {/* 1. Salary badge */}
-              {(() => {
-                const salaryText = getJobBadgeSalary(job);
-                if (!salaryText) return null;
-                return (
-                  <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
-                    <span className="text-white text-xs font-semibold">{salaryText}</span>
-                  </div>
-                );
-              })()}
-              {/* 2. Published + days left badge */}
-              {(() => {
-                const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
-                const daysLeft = job.expires_at ? differenceInDays(parseISO(job.expires_at), new Date()) : null;
-                const parts: string[] = [`Publicerad ${publishedDate}`];
-                if (daysLeft !== null && daysLeft >= 0) {
-                  parts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
-                }
-                return (
-                  <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
-                    <span className="text-white text-xs font-semibold">{parts.join(' • ')}</span>
-                  </div>
-                );
-              })()}
-              {/* 3. Benefits count badge */}
-              {job.benefits && job.benefits.length > 0 && (
-                <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5`}>
-                  <Gift className="w-3 h-3 text-white" />
-                  <span className="text-white text-xs font-semibold">
-                    Förmåner {job.benefits.length <= 5 ? `${job.benefits.length} st` : `${Math.floor(job.benefits.length / 5) * 5}+`}
-                  </span>
+          {/* Gradient overlay – stronger for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+
+          {/* Kategori-badge */}
+          {job.occupation && (
+            <div className="absolute top-5 left-5 z-10 pointer-events-none">
+              <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
+                <span className="text-white text-xs font-semibold tracking-wide">{job.occupation}</span>
+              </div>
+            </div>
+          )}
+
+          {/* SÖK-stamp */}
+          <motion.div
+            className="absolute top-8 left-6 z-20 border-4 border-green-400 rounded-lg px-4 py-1 -rotate-12 pointer-events-none"
+            style={{ opacity: likeOpacity }}
+          >
+            <span className="text-green-400 text-2xl font-black tracking-wider">SÖK</span>
+          </motion.div>
+
+          {/* TYCKER INTE OM-stamp */}
+          <motion.div
+            className="absolute top-8 right-6 z-20 border-4 border-red-400 rounded-lg px-3 py-1 rotate-12 pointer-events-none"
+            style={{ opacity: nopeOpacity }}
+          >
+            <span className="text-red-400 text-lg font-black tracking-wider">TYCKER INTE OM</span>
+          </motion.div>
+
+          {/* Applied stamp */}
+          {applied && (
+            <div className="absolute top-4 left-4 z-30 pointer-events-none">
+              <div className="-rotate-[12deg] border-[3px] border-green-500 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
+                <span className="text-green-500 text-lg font-black tracking-widest uppercase">SÖKT ✓</span>
+              </div>
+            </div>
+          )}
+
+          {/* Skipped stamp */}
+          {skipped && !applied && (
+            <div className="absolute top-4 left-4 z-30 pointer-events-none">
+              <div className="-rotate-[12deg] border-[3px] border-white/40 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
+                <span className="text-white/60 text-lg font-black tracking-widest uppercase">SKIPPAD</span>
+              </div>
+            </div>
+          )}
+
+          <div
+            className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center"
+            style={overlayTextStyle}
+          >
+            <div className="mx-auto w-full max-w-[21rem]">
+              {(logoUrl || !imageUrl) && displayCompanyName && (
+                <div className="flex justify-center mb-4">
+                  {logoUrl ? (
+                    <div className={`w-14 h-14 rounded-full bg-white/10 border border-white/15 ${blurClass} transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg`}>
+                      <img
+                        src={logoUrl}
+                        alt={displayCompanyName}
+                        className="w-full h-full object-cover"
+                        draggable={false}
+                        onError={handleLogoError}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
+                      <span className="text-xl font-bold text-white/40 tracking-wide select-none">
+                        {getCompanyInitials(displayCompanyName)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
-              {/* 4. Applicants count badge */}
-              {job.applications_count > 0 && (
-                <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5`}>
-                  <Users className="w-3 h-3 text-white" />
-                  <span className="text-white text-xs font-semibold">
-                    {job.applications_count} sökande
-                  </span>
-                </div>
-              )}
+              <div className="flex justify-center" data-company-tap-zone>
+                <Badge variant="glass" className="inline-flex max-w-[80%] min-w-0 items-center gap-1.5 border-white/15 px-3 py-1 text-white">
+                  <Building2 className="h-3.5 w-3.5 shrink-0" />
+                  <TruncatedText
+                    text={displayCompanyName}
+                    className="min-w-0 flex-1 text-sm font-medium"
+                    tooltipSide="bottom"
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      wordBreak: 'break-word',
+                    }}
+                  />
+                </Badge>
+              </div>
+
+              <h2
+                ref={titleRef}
+                data-title-tap-zone
+                className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
+                style={overlayTextStyle}
+              >
+                {job.title}
+              </h2>
+              <p className="text-white font-semibold text-base mt-2 truncate" style={overlayTextStyle}>
+                {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
+              </p>
+
+              <JobSlideBadgesRow job={job} blurClass={blurClass} />
             </div>
           </div>
-        </div>
 
-        {showTapHint && tapHintSource === 'title' && isTitleTruncated() && (
-          <div className="absolute inset-x-4 bottom-24 z-30 pointer-events-none">
-            <div
-              data-tap-hint-scroll
-              className="pointer-events-auto rounded-xl border border-white/20 bg-slate-900/95 px-4 py-3 backdrop-blur-md shadow-2xl max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y"
-            >
-              <p className="text-sm font-semibold text-white leading-relaxed break-words whitespace-pre-wrap">{job.title}</p>
+          {showTapHint && tapHintSource === 'title' && isTitleTruncated() && (
+            <div className="absolute inset-x-4 bottom-24 z-30 pointer-events-none">
+              <div
+                data-tap-hint-scroll
+                className="pointer-events-auto rounded-xl border border-white/20 bg-slate-900/95 px-4 py-3 backdrop-blur-md shadow-2xl max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y"
+              >
+                <p className="text-sm font-semibold text-white leading-relaxed break-words whitespace-pre-wrap">{job.title}</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Action buttons */}
-        <div className="absolute inset-x-0 bottom-4 z-10 px-5">
-          <div className="mt-4 flex items-center justify-center gap-4">
-            <button
-              type="button"
-              aria-label="Nej tack, hoppa över jobbet"
-              onPointerDown={(e) => { e.stopPropagation(); triggerSwipe('left'); }}
-              onClick={(e) => e.preventDefault()}
-              data-swipe-action-button
-              className="w-[52px] h-[52px] rounded-full bg-destructive flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
-            >
-              <X className="w-6 h-6 text-white" strokeWidth={2.5} />
-            </button>
-            <button
-              type="button"
-              aria-label={saved ? 'Ta bort från sparade jobb' : 'Spara jobbet'}
-              aria-pressed={saved}
-              onPointerDown={(e) => { e.stopPropagation(); hapticLight(); onSave(); }}
-              onClick={(e) => e.preventDefault()}
-              data-swipe-action-button
-              className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 active:scale-[0.93] transition-transform touch-manipulation"
-            >
-              <Bookmark className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`} strokeWidth={saved ? 2 : 2.25} />
-            </button>
-            <button
-              type="button"
-              aria-label="Sök jobbet"
-              onPointerDown={(e) => { e.stopPropagation(); triggerSwipe('right'); }}
-              onClick={(e) => e.preventDefault()}
-              data-swipe-action-button
-              className="w-[52px] h-[52px] rounded-full bg-success flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
-            >
-              <Heart className="w-6 h-6 text-white fill-white" />
-            </button>
-            <button
-              type="button"
-              aria-label="Ångra senaste åtgärd"
-              aria-disabled={!canUndo || !onUndo}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                if (canUndo && onUndo) onUndo();
-              }}
-              onClick={(e) => e.preventDefault()}
-              data-swipe-action-button
-              className="w-[52px] h-[52px] rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation opacity-100"
-            >
-              <Undo2 className={`w-6 h-6 text-white transition-opacity duration-200 ${canUndo && onUndo ? 'opacity-100' : 'opacity-40'}`} strokeWidth={2.25} />
-            </button>
-          </div>
-        </div>
+          <JobSlideActions
+            saved={saved}
+            canUndo={canUndo}
+            onUndo={onUndo}
+            onSave={onSave}
+            onDislike={() => triggerSwipe('left')}
+            onLike={() => triggerSwipe('right')}
+          />
         </motion.div>
       </div>
-
-      {/* Scroll hint on last card */}
     </div>
   );
 });
