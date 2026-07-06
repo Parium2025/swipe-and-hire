@@ -388,7 +388,7 @@ const Index = () => {
 
   // Vid logout/inloggning hanteras övergången av AuthSplashScreen - visa bara bakgrund
   if (loading && !user && authAction !== 'logout') {
-    if (shouldShowSearchBootSkeleton) return <JobListSkeleton />;
+    if (shouldShowSearchBootSkeleton) return <SearchBootSkeleton />;
     return <div className="min-h-screen bg-gradient-parium" />;
   }
 
@@ -399,7 +399,7 @@ const Index = () => {
 
   // Vänta på profil men visa bakgrund
   if (!profile) {
-    if (shouldShowSearchBootSkeleton) return <JobListSkeleton />;
+    if (shouldShowSearchBootSkeleton) return <SearchBootSkeleton />;
     return (
       <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />
     );
@@ -510,7 +510,7 @@ const Index = () => {
 
   // While role is resolving, keep seamless background
   if (user && profile && !role) {
-    if (shouldShowSearchBootSkeleton) return <JobListSkeleton />;
+    if (shouldShowSearchBootSkeleton) return <SearchBootSkeleton />;
     return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
   
