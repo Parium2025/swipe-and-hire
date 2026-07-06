@@ -170,6 +170,21 @@ export const JobSlide = memo(function JobSlide({
   // ✨ Ångra: mjuk premium "catch"-animation.
   useUndoEntryAnimation({ isUndoEntry, x, exitOpacity, entryScale });
 
+  // 🎛️ Registrera swipe-API för föräldern när kortet är aktivt.
+  // Bar-knapparna (persistent längst ner i SwipeFullscreen) triggar
+  // den aktiva `triggerSwipe`. Vi avregistrerar vid unmount + när isActive
+  // blir false så att den gamla instansen inte lämnar en stale referens.
+  useEffect(() => {
+    if (!onRegisterSwipeApi) return;
+    if (isActive) {
+      onRegisterSwipeApi({ swipe: triggerSwipe });
+      return () => {
+        onRegisterSwipeApi(null);
+      };
+    }
+  }, [isActive, onRegisterSwipeApi, triggerSwipe]);
+
+
 
   return (
     <div
