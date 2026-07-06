@@ -28,16 +28,30 @@ export function useUndoEntryAnimation({
 
   useEffect(() => {
     if (isUndoEntry && !prevIsUndoEntryRef.current) {
+      prevIsUndoEntryRef.current = true;
       x.set(0);
       exitOpacity.set(0.4);
       entryScale.set(0.92);
-      animate(exitOpacity, 1, { duration: 0.32, ease: [0.22, 1, 0.36, 1] });
-      animate(entryScale, 1, {
+      const a1 = animate(exitOpacity, 1, {
+        duration: 0.32,
+        ease: [0.22, 1, 0.36, 1],
+      });
+      const a2 = animate(entryScale, 1, {
         type: 'spring',
         stiffness: 320,
         damping: 26,
         mass: 0.7,
       });
+      // 🛟 Säkerhet: om isUndoEntry rensas (700ms-timern), komponenten
+      // unmountas, eller effekten körs om innan animationerna landat —
+      // stoppa dem OCH tvinga vilovärdena. Utan detta kunde kortet
+      // fastna vid entryScale=0.92 / exitOpacity=0.4 och se "hopkrympt" ut.
+      return () => {
+        a1.stop();
+        a2.stop();
+        exitOpacity.set(1);
+        entryScale.set(1);
+      };
     }
     prevIsUndoEntryRef.current = isUndoEntry ?? false;
   }, [isUndoEntry, x, exitOpacity, entryScale]);

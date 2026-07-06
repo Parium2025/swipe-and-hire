@@ -149,6 +149,29 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const isEndStateActive = endStateVisible || showEndBounce;
   const displayIndex = Math.min(currentIndex + 1, jobs.length);
 
+  /* ── Stabila callbacks för persistent action-bar ─────────
+   * Utan dessa skapades onSave/onDislike/onLike som inline-arrows i JSX
+   * varje render → memo(SwipeActionsBar) blev värdelös → knapparna
+   * "reload:ades" visuellt varje gång currentIndex/undo-state ändrades.
+   * Ref-baserad currentJob-lookup gör att baren aldrig behöver re-renderas
+   * när kort byts eller Ångra trycks.
+   */
+  const currentJobRef = useRef(currentJob);
+  currentJobRef.current = currentJob;
+  const onToggleSaveRef = useRef(onToggleSave);
+  onToggleSaveRef.current = onToggleSave;
+
+  const barOnSave = useCallback(() => {
+    const job = currentJobRef.current;
+    if (job) onToggleSaveRef.current(job.id);
+  }, []);
+  const barOnDislike = useCallback(() => {
+    activeCardSwipeRef.current?.('left');
+  }, []);
+  const barOnLike = useCallback(() => {
+    activeCardSwipeRef.current?.('right');
+  }, []);
+
   /* ── Helpers ──────────────────────────────────────────── */
   const isApplied = useCallback(
     (jobId: string) => appliedJobIds.has(jobId) || localAppliedIds.has(jobId),
@@ -593,9 +616,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           canUndo={canUndo}
           visible={!isEndStateActive && !showDetail && !showApply && !showFilter}
           onUndo={handleUndo}
-          onSave={() => currentJob && onToggleSave(currentJob.id)}
-          onDislike={() => activeCardSwipeRef.current?.('left')}
-          onLike={() => activeCardSwipeRef.current?.('right')}
+          onSave={barOnSave}
+          onDislike={barOnDislike}
+          onLike={barOnLike}
         />
 
 
