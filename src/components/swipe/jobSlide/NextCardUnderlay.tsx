@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { motion, type MotionValue } from 'framer-motion';
-import { Bookmark, Building2, Heart, X } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import type { SwipeJob } from '../types';
 import { Badge } from '@/components/ui/badge';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -145,20 +145,8 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
         </div>
       </div>
 
-      {/* Ghost-actions (icke-interaktiva placeholders) */}
-      <div className="absolute inset-x-0 bottom-4 z-10 px-5">
-        <div className="mt-4 flex items-center justify-center gap-5">
-          <div className="w-[52px] h-[52px] rounded-full bg-destructive/70 flex items-center justify-center shadow-lg">
-            <X className="w-6 h-6 text-white/70" strokeWidth={2.5} />
-          </div>
-          <div className="w-[52px] h-[52px] rounded-full bg-secondary/70 border border-white/20 flex items-center justify-center shadow-lg">
-            <Bookmark className="w-6 h-6 text-white/70" />
-          </div>
-          <div className="w-[52px] h-[52px] rounded-full bg-green-500/70 flex items-center justify-center shadow-lg">
-            <Heart className="w-6 h-6 text-white/70 fill-white/70" />
-          </div>
-        </div>
-      </div>
+      {/* Ghost-knappar borttagna — den persistenta SwipeActionsBar ligger ovanpå
+          hela stacken och skulle annars dubbleras när underlaget syns. */}
     </motion.div>
   );
 });
