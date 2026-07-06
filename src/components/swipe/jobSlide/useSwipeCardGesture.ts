@@ -242,7 +242,11 @@ export function useSwipeCardGesture({
 
       if (!thresholdHapticFiredRef.current && Math.abs(deltaX) >= SWIPE_THRESHOLD) {
         thresholdHapticFiredRef.current = true;
-        hapticLight();
+        // Differentierad tröskel-haptic: höger (SÖK) = medium (tydlig "commit"-
+        // feedback), vänster (TYCKER INTE OM) = light (mjukare, mindre påträngande
+        // för negativ handling). Ren känslodetalj, ingen visuell påverkan.
+        if (deltaX > 0) hapticMedium();
+        else hapticLight();
       }
     },
     [clearTapHint, useTouchTunnel, x],
