@@ -55,6 +55,10 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
             className="h-full w-full object-cover"
             style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
             loading="eager"
+            // 🚀 Fix 1: prio + async decode så bitmapen finns i minnet
+            // innan kortet blir aktivt → inga första-frame-hicka vid swap.
+            decoding="async"
+            {...({ fetchpriority: 'high' } as Record<string, string>)}
             draggable={false}
           />
         ) : (
