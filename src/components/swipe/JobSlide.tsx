@@ -12,6 +12,7 @@ import { getImageVersion } from '@/lib/imageTransforms';
 
 import { SWIPE_IMG_TRANSFORM, SWIPE_LOGO_TRANSFORM } from './jobSlide/constants';
 import { getImageObjectPosition, getCompanyInitials } from './jobSlide/utils';
+import { JobSlideBadgesRow } from './jobSlide/JobSlideBadgesRow';
 import { NextCardUnderlay } from './jobSlide/NextCardUnderlay';
 import { useUndoEntryAnimation } from './jobSlide/useUndoEntryAnimation';
 import { useTapHint } from './jobSlide/useTapHint';
