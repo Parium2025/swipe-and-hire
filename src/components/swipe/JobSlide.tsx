@@ -297,7 +297,7 @@ export const JobSlide = memo(function JobSlide({
               {(logoUrl || !imageUrl) && displayCompanyName && (
                 <div className="flex justify-center mb-4">
                   {logoUrl ? (
-                    <div className={`w-14 h-14 rounded-full bg-white/10 border border-white/15 ${blurClass} transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg`}>
+                    <div className="w-14 h-14 rounded-full bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
                       <img
                         src={logoUrl}
                         alt={displayCompanyName}
