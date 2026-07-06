@@ -122,14 +122,67 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
         className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
         style={fullscreenSkeletonStyle}
       >
-        {/* Real layout: kortet fyller hela ytan, header ligger absolut ovanpå */}
-        <div className="flex-1 mx-3 mb-3 mt-3 rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden relative">
-          <div className="absolute inset-0 bg-white/[0.03] animate-pulse" />
+        {/*
+          Mirror-perfect skeleton av SwipeFullscreen + JobSlide:
+          - Wrapper: px-3, pt-[safe+4.75rem], pb-[safe+1.25rem] (samma som JobSlide-wrapper)
+          - Kortet: relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)]
+          - Header (SwipeHeader) absolut ovanpå
+          - OccupationBadge top-5 left-5
+          - Innehållsblock absolute top-[20%] bottom-28 (identiskt med JobSlideContent)
+          - Actions-bar identisk med SwipeActionsBar (bottom safe+2.25rem, gap-4, 52x52)
+        */}
+        <div className="relative flex-1 min-h-0">
+          <div
+            className="h-full w-full flex flex-col px-3"
+            style={{
+              paddingTop: 'calc(env(safe-area-inset-top,0px) + 4.75rem)',
+              paddingBottom: 'calc(env(safe-area-inset-bottom,0px) + 1.25rem)',
+            }}
+          >
+            <div className="relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)] shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4),0_6px_16px_-4px_rgba(0,0,0,0.25)]">
+              {/* Bakgrundsplatta (jobbild + gradient) */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+              <div className="absolute inset-0 bg-white/[0.02] animate-pulse" />
 
-          {/* Header overlay: index vänster, Visa filter mitten, X höger */}
+              {/* OccupationBadge: top-5 left-5, px-3 py-1.5, text-xs */}
+              <div className="absolute top-5 left-5 z-10">
+                <div className="h-[26px] w-28 rounded-full bg-black/45 border border-white/10 animate-pulse" />
+              </div>
+
+              {/* JobSlideContent: absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center */}
+              <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6">
+                <div className="mx-auto w-full max-w-[21rem] flex flex-col items-center">
+                  {/* Logo: w-14 h-14 rounded-full, mb-4 */}
+                  <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 shadow-lg animate-pulse mb-4" />
+
+                  {/* Företags-pill: h ~28px (py-1.5 + text-xs), rounded-full, max-w-[80%] */}
+                  <div className="h-[28px] w-40 max-w-[80%] rounded-full bg-black/45 border border-white/10 animate-pulse" />
+
+                  {/* Titel (h2, clamp 1.58-2.1rem, line-clamp-2) — reservera 2 rader ≈ 62px, mt-1 */}
+                  <div className="mt-1 w-full flex flex-col items-center gap-1.5">
+                    <div className="h-7 w-[85%] rounded bg-white/20 animate-pulse" />
+                    <div className="h-7 w-[60%] rounded bg-white/20 animate-pulse" />
+                  </div>
+
+                  {/* Subtitel (text-base, mt-2) */}
+                  <div className="mt-2 h-5 w-56 max-w-[75%] rounded bg-white/15 animate-pulse" />
+
+                  {/* JobSlideBadgesRow (mt ~3, wrap centered) */}
+                  <div className="mt-3 flex flex-wrap justify-center gap-2 w-full">
+                    <div className="h-7 w-24 rounded-full bg-white/10 border border-white/10 animate-pulse" />
+                    <div className="h-7 w-28 rounded-full bg-white/10 border border-white/10 animate-pulse" />
+                    <div className="h-7 w-20 rounded-full bg-white/10 border border-white/10 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* SwipeHeader (renderas utanför kort-wrappern i SwipeFullscreen) */}
           <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
             <div className="py-3">
-              <div className="h-3 w-8 rounded bg-white/15 animate-pulse" />
+              <div className="h-3 w-10 rounded bg-white/25 animate-pulse" />
             </div>
             <div className="flex h-11 w-11 items-center justify-center">
               <div className="h-9 w-9 rounded-full bg-white/10 animate-pulse" />
@@ -141,31 +194,16 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
             </div>
           </div>
 
-          {/* Kategori-chip uppe till vänster (under headern) */}
-          <div className="absolute left-4" style={{ top: 'calc(env(safe-area-inset-top,0px) + 4.25rem)' }}>
-            <div className="h-7 w-32 rounded-full bg-white/10 animate-pulse" />
-          </div>
-
-          {/* Centrerad kortinnehåll: logo → företag-pill → titel → subtitel → info-pills */}
-          <div className="absolute inset-x-0 top-[34%] flex flex-col items-center gap-3 px-6">
-            <div className="h-14 w-14 rounded-full bg-white/10 animate-pulse" />
-            <div className="h-7 w-28 rounded-full bg-white/10 animate-pulse" />
-            <div className="h-8 w-56 max-w-[80%] rounded bg-white/15 animate-pulse" />
-            <div className="h-5 w-40 max-w-[70%] rounded bg-white/10 animate-pulse" />
-            <div className="h-8 w-48 rounded-full bg-white/10 animate-pulse mt-1" />
-            <div className="h-8 w-56 rounded-full bg-white/10 animate-pulse" />
-            <div className="h-8 w-32 rounded-full bg-white/10 animate-pulse" />
-          </div>
-
+          {/* SwipeActionsBar — identisk positionering */}
           <div
-            className="absolute inset-x-0 px-5"
+            className="absolute inset-x-0 z-20 px-5"
             style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
           >
             <div className="flex items-center justify-center gap-4">
-              <div className="w-[52px] h-[52px] rounded-full bg-destructive/70 animate-pulse" />
-              <div className="w-[52px] h-[52px] rounded-full bg-secondary/70 border border-white/25 animate-pulse" />
-              <div className="w-[52px] h-[52px] rounded-full bg-success/70 animate-pulse" />
-              <div className="w-[52px] h-[52px] rounded-full bg-white/15 border border-white/25 animate-pulse" />
+              <div className="w-[52px] h-[52px] rounded-full bg-destructive shadow-lg animate-pulse" />
+              <div className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 shadow-lg shadow-secondary/30 animate-pulse" />
+              <div className="w-[52px] h-[52px] rounded-full bg-success shadow-lg animate-pulse" />
+              <div className="w-[52px] h-[52px] rounded-full bg-white/15 border border-white/25 shadow-lg animate-pulse" />
             </div>
           </div>
         </div>
