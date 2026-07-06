@@ -199,9 +199,14 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
             </div>
           </div>
 
-          {/* SwipeActionsBar — identisk positionering */}
+          {/*
+            SwipeActionsBar — position: fixed så knapparna sitter vid
+            faktisk viewport-botten. Containern (fullscreenSkeletonStyle)
+            sträcker sig medvetet 96px förbi viewport-botten för att dölja
+            eventuell bounce, så en `absolute bottom` skulle hamna off-screen.
+          */}
           <div
-            className="absolute inset-x-0 z-20 px-5"
+            className="fixed inset-x-0 z-[2147483647] px-5 pointer-events-none"
             style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
           >
             <div className="flex items-center justify-center gap-4">
