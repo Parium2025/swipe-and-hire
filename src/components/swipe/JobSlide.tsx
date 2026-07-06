@@ -1,18 +1,14 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { Building2 } from 'lucide-react';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCardImage } from '@/hooks/useCardImage';
 import type { SwipeJob } from './types';
-import { TruncatedText } from '@/components/TruncatedText';
-import { Badge } from '@/components/ui/badge';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getImageVersion } from '@/lib/imageTransforms';
 
 import { SWIPE_IMG_TRANSFORM, SWIPE_LOGO_TRANSFORM } from './jobSlide/constants';
-import { getImageObjectPosition, getCompanyInitials } from './jobSlide/utils';
-import { JobSlideBadgesRow } from './jobSlide/JobSlideBadgesRow';
+import { getImageObjectPosition } from './jobSlide/utils';
+import { JobSlideContent, OccupationBadge } from './jobSlide/JobSlideContent';
 import { NextCardUnderlay } from './jobSlide/NextCardUnderlay';
 import { useUndoEntryAnimation } from './jobSlide/useUndoEntryAnimation';
 import { useTapHint } from './jobSlide/useTapHint';
