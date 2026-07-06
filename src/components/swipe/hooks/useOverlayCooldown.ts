@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * cooldown-flagga i 520 ms + rendera en osynlig shield-layer som
  * fångar alla pekare under samma fönster.
  */
-export function useOverlayCooldown(durationMs = 520) {
+export function useOverlayCooldown(durationMs = 260) {
   const cooldownActiveRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [shieldActive, setShieldActive] = useState(false);
