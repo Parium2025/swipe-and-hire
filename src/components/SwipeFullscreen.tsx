@@ -616,9 +616,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           canUndo={canUndo}
           visible={!isEndStateActive && !showDetail && !showApply && !showFilter}
           onUndo={handleUndo}
-          onSave={() => currentJob && onToggleSave(currentJob.id)}
-          onDislike={() => activeCardSwipeRef.current?.('left')}
-          onLike={() => activeCardSwipeRef.current?.('right')}
+          onSave={barOnSave}
+          onDislike={barOnDislike}
+          onLike={barOnLike}
         />
 
 
