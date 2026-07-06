@@ -406,14 +406,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     const skippedJob = jobs[currentIndex];
     if (!skippedJob) return;
     setSkipEntryAnimationForId(jobs[currentIndex + 1]?.id ?? null);
-    
+
     // Record skip action – the job will be removed from the array by the parent
     onRecordSwipeAction?.(skippedJob.id, 'skipped');
 
-    // Push to undo stack (ref-based to avoid re-renders)
-    undoStackRef.current = [...undoStackRef.current, skippedJob.id];
-    setCanUndo(true);
-  }, [currentIndex, jobs, onRecordSwipeAction]);
+    // Undo-hookens LIFO-push (ref-baserad, ingen re-render).
+    pushSkipped(skippedJob.id);
+  }, [currentIndex, jobs, onRecordSwipeAction, pushSkipped]);
 
   // ♿ Refs så keyboard-handlern alltid kallar senaste callbacken utan att
   // re-binda window.keydown vid varje state-ändring (currentIndex etc).
@@ -422,13 +421,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   useEffect(() => { handleSwipeRightRef.current = handleSwipeRight; }, [handleSwipeRight]);
   useEffect(() => { handleSwipeLeftRef.current = handleSwipeLeft; }, [handleSwipeLeft]);
 
-  // Guard against tap-through: when an overlay closes, ignore taps briefly
-  const overlayCooldownRef = useRef(false);
-
   const handleTap = useCallback(() => {
-    if (overlayCooldownRef.current) return;
+    if (isInCooldown()) return;
     setShowDetail(true);
-  }, []);
+  }, [isInCooldown]);
 
   const handleApplyFromDetail = useCallback(() => {
     setShowDetail(false);
@@ -444,49 +440,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     // Stay on the card so user sees the "SÖKT" stamp
   }, [currentJob, onRecordSwipeAction]);
 
-  const startOverlayCooldown = useCallback(() => {
-    overlayCooldownRef.current = true;
-    setOverlayInteractionShieldActive(true);
-
-    if (overlayShieldTimerRef.current) {
-      clearTimeout(overlayShieldTimerRef.current);
-    }
-
-    overlayShieldTimerRef.current = setTimeout(() => {
-      overlayCooldownRef.current = false;
-      setOverlayInteractionShieldActive(false);
-      overlayShieldTimerRef.current = null;
-    }, 520);
-  }, []);
-
   const handleCloseApply = useCallback(() => { setShowApply(false); startOverlayCooldown(); }, [startOverlayCooldown]);
   const handleCloseDetail = useCallback(() => { setShowDetail(false); startOverlayCooldown(); }, [startOverlayCooldown]);
   const handleFilterOpen = useCallback(() => { setShowFilter(true); }, []);
   const handleFilterClose = useCallback(() => { setShowFilter(false); startOverlayCooldown(); }, [startOverlayCooldown]);
-
-  const handleUndo = useCallback(() => {
-    const stack = undoStackRef.current;
-    if (stack.length === 0 || !onUndoSwipeAction) return;
-    const lastId = stack[stack.length - 1];
-    // 🎯 Mark the restored job so the jobs-effect can snap back to it,
-    // not just clamp the previous currentIndex (which would leave the
-    // user on the card that took the skipped one's place).
-    pendingUndoJobIdRef.current = lastId;
-    setUndoEntryJobId(lastId);
-    onUndoSwipeAction(lastId);
-    undoStackRef.current = stack.slice(0, -1);
-    setCanUndo(undoStackRef.current.length > 0);
-    // Haptic feedback for undo
-    hapticSuccess();
-    // 🧹 Memory leak fix: lagra timer i ref + städa i unmount-effekten.
-    // Tidigare orphaned timeout kunde sätta state på avmonterad komponent
-    // om användaren stängde swipe-mode inom 700 ms efter Ångra.
-    if (undoEntryTimerRef.current) clearTimeout(undoEntryTimerRef.current);
-    undoEntryTimerRef.current = setTimeout(() => {
-      setUndoEntryJobId(null);
-      undoEntryTimerRef.current = null;
-    }, 700);
-  }, [onUndoSwipeAction]);
 
   // Stable ref setter
   const setSlideRef = useCallback((el: HTMLDivElement | null, idx: number) => {
