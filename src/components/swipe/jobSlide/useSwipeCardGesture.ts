@@ -103,34 +103,19 @@ export function useSwipeCardGesture({
 
       swipedRef.current = true;
 
-      // Exit-animation för kortet (spring med tydlig kurva så den syns).
-      const exitControls = animate(x, -EXIT_X, {
-        type: 'spring',
-        stiffness: 220,
-        damping: 26,
-        mass: 0.85,
-      });
+      // Exit-animation för kortet.
+      const exitControls = animate(x, -EXIT_X, EXIT_SPRING);
       animate(exitOpacity, 0, {
-        duration: 0.38,
-        ease: [0.22, 1, 0.36, 1],
+        duration: EXIT_OPACITY_DURATION,
+        ease: PREMIUM_EASE,
       });
 
       // Underlaget stiger upp bakom det utåkande kortet.
-      animate(underlayY, 0, {
-        type: 'spring',
-        stiffness: 140,
-        damping: 22,
-        mass: 1.1,
-      });
-      animate(underlayScale, 1, {
-        type: 'spring',
-        stiffness: 140,
-        damping: 22,
-        mass: 1.1,
-      });
+      animate(underlayY, 0, UNDERLAY_RISE_SPRING);
+      animate(underlayScale, 1, UNDERLAY_RISE_SPRING);
       animate(underlayOpacity, 1, {
-        duration: 0.42,
-        ease: [0.22, 1, 0.36, 1],
+        duration: UNDERLAY_OPACITY_DURATION,
+        ease: PREMIUM_EASE,
       });
 
       // Advance föräldern PRECIS när exit-animationen är klar — animationen
@@ -140,8 +125,8 @@ export function useSwipeCardGesture({
         swipedRef.current = false;
         x.set(0);
         exitOpacity.set(1);
-        underlayY.set(800);
-        underlayScale.set(0.68);
+        underlayY.set(UNDERLAY_INITIAL_Y);
+        underlayScale.set(UNDERLAY_INITIAL_SCALE);
         underlayOpacity.set(0);
       });
     },
