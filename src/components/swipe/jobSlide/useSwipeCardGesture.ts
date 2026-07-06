@@ -3,13 +3,21 @@ import { animate, type MotionValue, type PanInfo } from 'framer-motion';
 import { hapticLight, hapticMedium } from '@/lib/haptics';
 import {
   DOUBLE_TAP_DELAY,
+  EXIT_OPACITY_DURATION,
+  EXIT_SPRING,
   EXIT_X,
+  OVERLAY_CLOSE_INPUT_LOCK_MS,
+  PREMIUM_EASE,
   SNAP_SPRING,
   SWIPE_THRESHOLD,
   TAP_MAX_DURATION,
   TAP_MOVE_THRESHOLD,
   TAP_RESET_VELOCITY_THRESHOLD,
   TOUCH_DRAG_INTENT_THRESHOLD,
+  UNDERLAY_INITIAL_SCALE,
+  UNDERLAY_INITIAL_Y,
+  UNDERLAY_OPACITY_DURATION,
+  UNDERLAY_RISE_SPRING,
   VELOCITY_THRESHOLD,
 } from './constants';
 import { isWithinInteractiveTarget, isWithinTapHintTarget } from './utils';
