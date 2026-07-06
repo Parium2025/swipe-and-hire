@@ -98,13 +98,22 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [endStateVisible, setEndStateVisible] = useState(false);
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
-  const [overlayInteractionShieldActive, setOverlayInteractionShieldActive] = useState(false);
-  const undoStackRef = useRef<string[]>([]);
-  const [canUndo, setCanUndo] = useState(false);
-  const [undoEntryJobId, setUndoEntryJobId] = useState<string | null>(null);
-  // 🎯 Pending undo target: the jobs[] effect uses this to snap back to the
-  // restored card after parent re-inserts it (instead of just clamping prev).
-  const pendingUndoJobIdRef = useRef<string | null>(null);
+
+  /* ── Undo (isolerad hook) ─────────────────────────────── */
+  const {
+    canUndo,
+    undoEntryJobId,
+    pendingUndoJobIdRef,
+    pushSkipped,
+    handleUndo,
+  } = useSwipeUndo({ onUndoSwipeAction });
+
+  /* ── Overlay-cooldown (isolerad hook) ─────────────────── */
+  const {
+    shieldActive: overlayInteractionShieldActive,
+    startCooldown: startOverlayCooldown,
+    isInCooldown,
+  } = useOverlayCooldown(520);
 
   /* ── Premium image preloading: 10 ahead, 2 back, bulk-25 on mount ── */
   useSwipeImagePreloader(jobs, currentIndex, 10, 2, 25);
