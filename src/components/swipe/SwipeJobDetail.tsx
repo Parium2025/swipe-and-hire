@@ -1,51 +1,17 @@
-import { useState, useEffect, useRef, useCallback, type MouseEvent, type PointerEvent, type TouchEvent } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, useAnimation } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { recordJobView } from '@/lib/recordJobView';
 import { useAuth } from '@/hooks/useAuth';
 import { X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getBenefitLabel } from '@/types/jobWizard';
-import {
-  capitalize as cap,
-  getSalaryTypeLabel,
-  formatSalary,
-  getWorkLocationLabel,
-  getRemoteWorkLabel,
-  getSalaryTransparencyLabel,
-} from '@/lib/jobViewHelpers';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { SwipeJob } from './types';
-import type { JobQuestion } from '@/types/jobWizard';
-
-interface FullJobData {
-  description?: string;
-  requirements?: string;
-  pitch?: string;
-  benefits?: string[];
-  employment_type?: string;
-  work_schedule?: string;
-  work_start_time?: string;
-  work_end_time?: string;
-  work_location_type?: string;
-  remote_work_possible?: string;
-  salary_min?: number;
-  salary_max?: number;
-  salary_type?: string;
-  salary_transparency?: string;
-  positions_count?: number;
-  occupation?: string;
-  workplace_name?: string;
-  workplace_city?: string;
-  workplace_county?: string;
-  workplace_municipality?: string;
-  workplace_address?: string;
-  workplace_postal_code?: string;
-  contact_email?: string;
-  application_instructions?: string;
-}
+import { useSheetDragDismiss } from './hooks/useSheetDragDismiss';
+import { useJobDetailData } from './hooks/useJobDetailData';
+import { JobDetailInfoGrid } from './jobDetail/JobDetailInfoGrid';
+import { JobDetailQuestions } from './jobDetail/JobDetailQuestions';
 
 interface SwipeJobDetailProps {
   job: SwipeJob;
@@ -77,227 +43,34 @@ function DescriptionSection({ text }: { text: string }) {
   );
 }
 
-const DISMISS_THRESHOLD = 100;
-
 export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: SwipeJobDetailProps) {
   const { user } = useAuth();
-  const [detail, setDetail] = useState<FullJobData | null>(null);
-  const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
-  const [myAnswers, setMyAnswers] = useState<Record<string, any> | null>(null);
-  const [loading, setLoading] = useState(false);
-  const viewRecorded = useRef<string | null>(null);
-  const openedAtRef = useRef(0);
-  // 🧹 Memory leak fix: hålla koll på pågående close-timers så de kan städas
-  // vid unmount innan callbacks anropas på en avmonterad komponent.
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Drag-to-dismiss state
-  const dragY = useMotionValue(0);
-  const sheetControls = useAnimation();
-  const dragStartY = useRef(0);
-  const isDraggingSheet = useRef(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const backdropOpacity = useTransform(dragY, [0, 300], [1, 0]);
-  const [isAnimatingIn, setIsAnimatingIn] = useState(true);
+  const {
+    dragY,
+    sheetControls,
+    backdropOpacity,
+    scrollRef,
+    isAnimatingIn,
+    animatedClose,
+    handleBackdropDismiss,
+    stopSheetPropagation,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    handleHandleTouchStart,
+  } = useSheetDragDismiss(open, onClose);
 
-  // Animated close helper — used by X button and backdrop
-  const animatedClose = useCallback(() => {
-    setDismissing(true);
-    void sheetControls.start({
-      y: '100%',
-      transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
-    });
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    closeTimerRef.current = setTimeout(() => {
-      onClose();
-      setDismissing(false);
-      closeTimerRef.current = null;
-    }, 220);
-  }, [onClose, sheetControls]);
+  const { detail, questions, myAnswers, loading, viewRecordedRef } =
+    useJobDetailData(job.id, open, user?.id);
 
-  const handleBackdropDismiss = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
-    if (Date.now() - openedAtRef.current < 420) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-    animatedClose();
-  }, [animatedClose]);
-
-  const stopSheetPropagation = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
-    event.stopPropagation();
-  }, []);
-
-  // Handle drag-to-dismiss via touch on the handle area + when scrolled to top
-  const handleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
-    const scrollTop = scrollRef.current?.scrollTop ?? 0;
-    // Only allow drag-dismiss when content is scrolled to top
-    if (scrollTop <= 0) {
-      isDraggingSheet.current = true;
-      dragStartY.current = e.touches[0].clientY;
-      dragY.set(0);
-    }
-  }, [dragY]);
-
-  const handleTouchMove = useCallback((e: TouchEvent<HTMLDivElement>) => {
-    if (!isDraggingSheet.current) return;
-    const dy = e.touches[0].clientY - dragStartY.current;
-    if (dy > 0) {
-      // Dragging down — apply with resistance
-      dragY.set(dy * 0.8);
-      // Prevent scroll while dragging sheet
-      e.preventDefault();
-    } else {
-      // Dragging up — cancel sheet drag, let scroll take over
-      isDraggingSheet.current = false;
-      dragY.set(0);
-    }
-  }, [dragY]);
-
-  const [dismissing, setDismissing] = useState(false);
-
-  const handleTouchEnd = useCallback(() => {
-    if (!isDraggingSheet.current) return;
-    isDraggingSheet.current = false;
-    const currentY = dragY.get();
-    if (currentY > DISMISS_THRESHOLD) {
-      setDismissing(true);
-      void sheetControls.start({
-        y: '100%',
-        transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
-      });
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = setTimeout(() => {
-        onClose();
-        setDismissing(false);
-        closeTimerRef.current = null;
-      }, 220);
-    } else {
-      // Snap back with a satisfying bounce
-      dragY.set(0);
-      void sheetControls.start({
-        y: 0,
-        scale: 1,
-        opacity: 1,
-        transition: { type: 'spring', damping: 24, stiffness: 400 },
-      });
-    }
-  }, [dragY, onClose, sheetControls]);
-
-  // 🧹 Cleanup: avbryt pending close-timer om komponenten unmountas.
+  // Track view när swipe detail öppnas (en gång per jobb-öppning)
   useEffect(() => {
-    return () => {
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    };
-  }, []);
-
-  // Handle-specific drag (always draggable regardless of scroll)
-  const handleHandleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
-    isDraggingSheet.current = true;
-    dragStartY.current = e.touches[0].clientY;
-    dragY.set(0);
-    e.stopPropagation();
-  }, [dragY]);
-
-  // Track view when swipe detail is opened
-  useEffect(() => {
-    if (open && job.id && user?.id && viewRecorded.current !== job.id) {
-      viewRecorded.current = job.id;
+    if (open && job.id && user?.id && viewRecordedRef.current !== job.id) {
+      viewRecordedRef.current = job.id;
       recordJobView(job.id, user.id);
     }
-  }, [open, job.id, user?.id]);
-
-  useEffect(() => {
-    if (open) {
-      openedAtRef.current = Date.now();
-      setIsAnimatingIn(true);
-      dragY.set(0);
-      void sheetControls.start({
-        y: 0,
-        transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
-      }).then(() => setIsAnimatingIn(false));
-    }
-  }, [open, job.id, dragY, sheetControls]);
-
-  useEffect(() => {
-    if (!open) {
-      setDetail(null);
-      setQuestions([]);
-      setMyAnswers(null);
-      setLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-
-    setDetail(null);
-    setQuestions([]);
-    setMyAnswers(null);
-    setLoading(true);
-
-    void (async () => {
-      const fetchPromises: [any, any, any] = [
-        supabase
-          .from('job_postings')
-          .select(`
-            description, requirements, pitch, benefits, employment_type,
-            work_schedule, work_start_time, work_end_time,
-            work_location_type, remote_work_possible,
-            salary_min, salary_max, salary_type, salary_transparency,
-            positions_count, occupation,
-            workplace_name, workplace_city, workplace_county,
-            workplace_municipality, workplace_address, workplace_postal_code,
-            contact_email, application_instructions
-          `)
-          .eq('id', job.id)
-          .single(),
-        supabase
-          .from('job_questions')
-          .select('*')
-          .eq('job_id', job.id)
-          .order('order_index'),
-        // Fetch user's answers if they applied
-        user?.id
-          ? supabase
-              .from('job_applications')
-              .select('custom_answers')
-              .eq('job_id', job.id)
-              .eq('applicant_id', user.id)
-              .maybeSingle()
-          : Promise.resolve({ data: null }),
-      ];
-
-      const [jobRes, questionsRes, answersRes] = await Promise.all(fetchPromises);
-
-      if (cancelled) return;
-      setDetail(jobRes.data ?? null);
-      setQuestions((questionsRes.data as (JobQuestion & { id: string })[]) ?? []);
-      
-      // Parse custom_answers
-      if (answersRes.data?.custom_answers) {
-        const answers = answersRes.data.custom_answers;
-        if (typeof answers === 'object' && !Array.isArray(answers)) {
-          setMyAnswers(answers as Record<string, any>);
-        } else {
-          setMyAnswers(null);
-        }
-      } else {
-        setMyAnswers(null);
-      }
-      
-      setLoading(false);
-    })().catch(() => {
-      if (cancelled) return;
-      setDetail(null);
-      setQuestions([]);
-      setMyAnswers(null);
-      setLoading(false);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [open, job.id]);
+  }, [open, job.id, user?.id, viewRecordedRef]);
 
   const displayCompanyName = detail?.workplace_name || job.workplace_name || job.company_name || 'Företag';
 
@@ -402,146 +175,11 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                 </div>
               ) : detail ? (
                 <>
-                  {/* 1. Om tjänsten (Description) */}
-                  {detail.description && (
-                    <DescriptionSection text={detail.description} />
-                  )}
+                  {/* 1. Om tjänsten */}
+                  {detail.description && <DescriptionSection text={detail.description} />}
 
                   {/* 2. Detaljer om tjänsten */}
-                  <div className="bg-white/10 rounded-lg p-4 overflow-hidden">
-                    <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Detaljer om tjänsten</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
-                      {detail.employment_type && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Anställning:</span>
-                          <span className="font-medium">{getEmploymentTypeLabel(detail.employment_type)}</span>
-                        </div>
-                      )}
-
-                      {detail.work_schedule && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Schema:</span>
-                          <span className="font-medium">{cap(detail.work_schedule)}</span>
-                        </div>
-                      )}
-
-                      {job.location && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Ort:</span>
-                          <span className="font-medium">{cap(job.location)}</span>
-                        </div>
-                      )}
-
-                      {displayCompanyName && (
-                        <div className="flex text-white text-[15px] sm:text-sm min-w-0">
-                          <span className="shrink-0 w-[110px] text-white">Bolagsnamn:</span>
-                          <TruncatedText
-                            text={cap(displayCompanyName)}
-                            className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]"
-                            tooltipSide="top"
-                            style={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
-                          />
-                        </div>
-                      )}
-
-                      {detail.workplace_address && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Adress:</span>
-                          <span className="font-medium">
-                            {detail.workplace_address}
-                            {detail.workplace_postal_code && `, ${detail.workplace_postal_code}`}
-                            {detail.workplace_city && ` ${detail.workplace_city}`}
-                            {detail.workplace_municipality && detail.workplace_municipality !== detail.workplace_city && ` (${detail.workplace_municipality})`}
-                          </span>
-                        </div>
-                      )}
-
-                      {detail.workplace_city && detail.workplace_city !== job.location && !detail.workplace_address && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Stad:</span>
-                          <span className="font-medium">
-                            {detail.workplace_city}
-                            {detail.workplace_municipality && detail.workplace_municipality !== detail.workplace_city ? `, ${detail.workplace_municipality}` : ''}
-                            {detail.workplace_county ? `, ${detail.workplace_county}` : ''}
-                          </span>
-                        </div>
-                      )}
-
-                      {detail.workplace_municipality && !detail.workplace_address && (!detail.workplace_city || detail.workplace_city === job.location) && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Kommun:</span>
-                          <span className="font-medium">{detail.workplace_municipality}</span>
-                        </div>
-                      )}
-
-                      {detail.work_location_type && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Platstyp:</span>
-                          <span className="font-medium">{getWorkLocationLabel(detail.work_location_type)}</span>
-                        </div>
-                      )}
-
-                      {detail.remote_work_possible && detail.remote_work_possible !== 'no' && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Distans:</span>
-                          <span className="font-medium">{getRemoteWorkLabel(detail.remote_work_possible)}</span>
-                        </div>
-                      )}
-
-                      {(detail.work_start_time || detail.work_end_time) && (
-                        <div className="flex items-center text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Arbetstid:</span>
-                          <span className="font-medium">{detail.work_start_time} – {detail.work_end_time}</span>
-                        </div>
-                      )}
-
-                      {detail.positions_count && detail.positions_count > 1 && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Antal tjänster:</span>
-                          <span className="font-medium">{detail.positions_count} st</span>
-                        </div>
-                      )}
-
-                      {detail.occupation && (
-                        <div className="flex text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Yrke:</span>
-                          <span className="font-medium">{cap(detail.occupation)}</span>
-                        </div>
-                      )}
-
-                      {(() => {
-                        const salaryStr = formatSalary(detail.salary_min, detail.salary_max, detail.salary_type);
-                        if (salaryStr) {
-                          return (
-                            <div className="flex items-center text-white text-[15px] sm:text-sm sm:col-span-2 pt-1">
-                              <span className="shrink-0 w-[110px] text-white">Lön:</span>
-                              <span className="font-semibold">
-                                {salaryStr}
-                                {detail.salary_type && (
-                                  <span className="text-white ml-1.5 text-[13px] sm:text-xs">({getSalaryTypeLabel(detail.salary_type)})</span>
-                                )}
-                              </span>
-                            </div>
-                          );
-                        }
-                        if (detail.salary_transparency) {
-                          return (
-                            <div className="flex items-center text-white text-[15px] sm:text-sm">
-                              <span className="shrink-0 w-[110px] text-white">Lön:</span>
-                              <span className="font-medium">{getSalaryTransparencyLabel(detail.salary_transparency)}</span>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })()}
-                    </div>
-                  </div>
-
+                  <JobDetailInfoGrid job={job} detail={detail} displayCompanyName={displayCompanyName} />
 
                   {/* 3. Förmåner */}
                   {detail.benefits && detail.benefits.length > 0 && (
@@ -574,42 +212,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   )}
 
                   {/* 6. Ansökningsfrågor */}
-                  {questions.length > 0 && (
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Ansökningsfrågor</h3>
-                      {!hasApplied && (
-                        <p className="text-white text-[13px] sm:text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
-                      )}
-                      {hasApplied && myAnswers && (
-                        <p className="text-white text-[13px] sm:text-xs mb-3">Dina svar</p>
-                      )}
-                      <div className="space-y-3">
-                        {questions.map((q, i) => {
-                          // Match by question ID (primary key used in custom_answers)
-                          const answer = myAnswers?.[q.id] ?? myAnswers?.[q.question_text];
-                          const rawAnswer = Array.isArray(answer) ? answer.join(', ') : answer;
-                          // Translate yes/no to Swedish
-                          const displayAnswer = rawAnswer === 'yes' ? 'Ja' : rawAnswer === 'no' ? 'Nej' : rawAnswer;
-                          
-                          return (
-                            <div key={q.id} className="flex items-start gap-2">
-                              <span className="text-white text-[15px] sm:text-sm font-medium shrink-0">{i + 1}.</span>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-white text-[15px] sm:text-sm font-medium break-words">{q.question_text}</p>
-                                {hasApplied && displayAnswer ? (
-                                  <p className="text-white text-[15px] sm:text-sm mt-1 break-words">{String(displayAnswer)}</p>
-                                ) : (
-                                  q.is_required && (
-                                    <span className="text-white text-[13px] sm:text-xs">Obligatorisk</span>
-                                  )
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
+                  <JobDetailQuestions questions={questions} myAnswers={myAnswers} hasApplied={hasApplied} />
 
                   {/* 7. Ansökningsinstruktioner */}
                   {detail.application_instructions && (
