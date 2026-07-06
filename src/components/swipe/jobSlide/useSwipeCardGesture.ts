@@ -3,6 +3,7 @@ import { animate, type MotionValue, type PanInfo } from 'framer-motion';
 import { hapticLight, hapticMedium } from '@/lib/haptics';
 import {
   DOUBLE_TAP_DELAY,
+  EXIT_HANDOFF_MS,
   EXIT_OPACITY_DURATION,
   EXIT_SPRING,
   EXIT_X,
