@@ -129,7 +129,14 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
         className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
         style={fullscreenSkeletonStyle}
       >
-        <div className="relative flex-1 min-h-0">
+        {/* Höjd = viewport (100dvh), INTE portalens overhang (som är
+            100dvh + safe-areas + 96px för iOS bounce). Utan detta blir
+            kortet för högt och `top-[20%]` inuti hero-blocket landar
+            längre ner än i det riktiga JobSlide. */}
+        <div
+          className="relative w-full"
+          style={{ height: '100dvh' }}
+        >
           <div
             className="h-full w-full flex flex-col px-3"
             style={{
