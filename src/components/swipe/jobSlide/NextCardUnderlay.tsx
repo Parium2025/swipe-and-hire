@@ -141,7 +141,7 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
               .join(' • ')}
           </p>
 
-          <JobSlideBadgesRow job={job} blurClass="backdrop-blur-md" />
+          <JobSlideBadgesRow job={job} blurClass="" />
         </div>
       </div>
 
