@@ -39,7 +39,11 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
   return (
     <motion.div
       aria-hidden="true"
-      className="absolute inset-0 overflow-hidden rounded-2xl border border-white/10 shadow-2xl pointer-events-none"
+      // Ingen border här — en 1px white/10-ram syns som ett vitt "rim" när
+      // underlaget är fullt synligt precis innan det nya kortet mountas
+      // (särskilt på iOS Safari). Solid mörk bas så inget lyser igenom om
+      // bilden inte hunnit dekodas till första paint.
+      className="absolute inset-0 overflow-hidden rounded-2xl bg-[hsl(215,85%,15%)] shadow-2xl pointer-events-none"
       style={{ y, scale, opacity }}
     >
       {/* Bakgrundsbild */}
