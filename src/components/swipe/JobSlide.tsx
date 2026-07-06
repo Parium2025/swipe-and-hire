@@ -109,15 +109,15 @@ export const JobSlide = memo(function JobSlide({
     SWIPE_IMG_TRANSFORM,
   );
 
-  // 🐛 iOS WebKit-bugg: backdrop-filter rastreras EN gång när elementet skapas
-  // och uppdateras inte när underliggande <img> laddas in efteråt. Resultat:
-  // badgesen "fryser" mot den mörkblå placeholder-bakgrunden och blir blå tills
-  // användaren rör skärmen (drag-transform → forced repaint). Lösning: vänta
-  // med att applicera blur tills bilden faktiskt är laddad — då samplar
-  // glas-effekten rätt innehåll redan från första frame.
+  // Badges använder alltid backdrop-blur. Tidigare togglades blur baserat på
+  // `imageLoaded` för att kringgå en iOS WebKit-bugg, men den toggeln orsakade
+  // synligt flimmer på badges varje gång kortet bytte jobb (bg-white/10 utan
+  // blur → med blur = repaint). Med korrekt preloadning (useSwipeImagePreloader)
+  // är iOS-buggen inte längre ett problem — bilden ligger i cache från första
+  // frame och backdrop-filter samplar rätt innehåll direkt.
   const [imageLoaded, setImageLoaded] = useState(false);
   useEffect(() => { setImageLoaded(false); }, [imageUrl]);
-  const blurClass = !imageUrl || imageLoaded ? 'backdrop-blur-md' : '';
+  const blurClass = 'backdrop-blur-md';
 
   // 🚀 Logo i swipe-card är liten (~64px) → be om optimerad version
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(
