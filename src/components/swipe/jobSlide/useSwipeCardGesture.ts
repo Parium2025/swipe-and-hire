@@ -103,8 +103,9 @@ export function useSwipeCardGesture({
 
       swipedRef.current = true;
 
-      // Exit-animation för kortet.
-      const exitControls = animate(x, -EXIT_X, EXIT_SPRING);
+      // Exit-animation för kortet (kör klart även efter att föräldern
+      // har advancerat — motion-instansen lever kvar tills unmount).
+      animate(x, -EXIT_X, EXIT_SPRING);
       animate(exitOpacity, 0, {
         duration: EXIT_OPACITY_DURATION,
         ease: PREMIUM_EASE,
@@ -118,9 +119,10 @@ export function useSwipeCardGesture({
         ease: PREMIUM_EASE,
       });
 
-      // Advance föräldern PRECIS när exit-animationen är klar — animationen
-      // hinner alltid synas, men det finns ingen dead zone efteråt.
-      exitControls.then(() => {
+      // 🚀 Tinder/TikTok-handoff: mounta nästa kort mid-exit istället för
+      // att vänta på att springen landar. Underlaget täcker då redan större
+      // delen av frame → smidig visuell övergång, ingen väntetid för input.
+      window.setTimeout(() => {
         onSwipeLeft();
         swipedRef.current = false;
         x.set(0);
@@ -128,7 +130,7 @@ export function useSwipeCardGesture({
         underlayY.set(UNDERLAY_INITIAL_Y);
         underlayScale.set(UNDERLAY_INITIAL_SCALE);
         underlayOpacity.set(0);
-      });
+      }, EXIT_HANDOFF_MS);
     },
     [
       clearTapHint,
