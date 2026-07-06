@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -17,8 +18,10 @@ interface SwipeAction {
 
 export function useSwipeActions() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [actions, setActions] = useState<Map<string, SwipeActionType>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
+  
   
 
   // Fetch existing swipe actions
@@ -90,6 +93,13 @@ export function useSwipeActions() {
         );
 
       if (error) throw error;
+
+      // 🔁 Invalidera Skippade/Sparade-listorna så de reflekterar den nya
+      // swipen omedelbart när användaren öppnar den fliken (annars visas
+      // gammal placeholderData från localStorage och saknar det jobbet).
+      if (action === 'skipped') {
+        queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
+      }
     } catch (err) {
       console.error('Error recording swipe action:', err);
       // Revert optimistic update
@@ -99,7 +109,7 @@ export function useSwipeActions() {
         return next;
       });
     }
-  }, [user?.id]);
+  }, [user?.id, queryClient]);
 
   const undoAction = useCallback(async (jobId: string) => {
     if (!user?.id) return;
