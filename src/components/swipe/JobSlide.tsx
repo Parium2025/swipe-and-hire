@@ -35,12 +35,15 @@ interface JobSlideProps {
   overlayOpen?: boolean;
   skipEntryAnimation?: boolean;
   isUndoEntry?: boolean;
-  canUndo?: boolean;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
   onTap: () => void;
-  onUndo?: () => void;
+  /**
+   * Registrerar/avregistrerar aktivt korts swipe-API mot föräldern så att
+   * den persistenta action-baren kan trigga vänster/höger-swipe.
+   */
+  onRegisterSwipeApi?: (api: JobSlideSwipeApi | null) => void;
 }
 
 export const JobSlide = memo(function JobSlide({
