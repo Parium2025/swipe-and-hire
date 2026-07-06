@@ -204,7 +204,7 @@ export const JobSlide = memo(function JobSlide({
           // lyser igenom den avrundade kanten under första framen eller under
           // scale-in (nytt kort/ångra). Utan denna färg såg iOS Safari ett
           // synligt vitt "rim" tills bilden dekodades.
-          className="relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)] select-none [-webkit-tap-highlight-color:transparent] will-change-transform"
+          className={`relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)] select-none [-webkit-tap-highlight-color:transparent] ${isActive ? 'will-change-transform' : ''}`}
           style={{
             x,
             opacity: exitOpacity,
