@@ -7,22 +7,20 @@ import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 
 interface JobSlideBadgesRowProps {
   job: SwipeJob;
-  /**
-   * Klass för backdrop-blur. På aktivt kort villkoras den av att bilden
-   * har laddats (iOS WebKit-bugg — se JobSlide.tsx). På next-underlay
-   * skickas alltid 'backdrop-blur-md' in.
-   */
-  blurClass: string;
 }
 
 /**
- * Den identiska 4-badge-raden som renderas på både det aktiva kortet och
+ * Den identiska badge-raden som renderas på både det aktiva kortet och
  * next-card-underlay. Bryts ut för att garantera visuell paritet mellan
- * de två — allt annat än `blurClass` är hårdlåst.
+ * de två.
+ *
+ * 🚫 INGEN backdrop-blur: filter på pills över en bakgrundsbild som
+ * laddar/animerar tvingar webbläsaren att resampla lagret varje frame →
+ * synligt flimmer när kortet växlar jobb. Solid mörk chip (bg-black/45)
+ * ger samma premium-läsbarhet utan resampling.
  */
 export const JobSlideBadgesRow = memo(function JobSlideBadgesRow({
   job,
-  blurClass,
 }: JobSlideBadgesRowProps) {
   const salaryText = getJobBadgeSalary(job);
   const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
@@ -33,6 +31,10 @@ export const JobSlideBadgesRow = memo(function JobSlideBadgesRow({
   if (daysLeft !== null && daysLeft >= 0) {
     dateParts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
   }
+
+  const pillClass =
+    'px-3 py-1.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]';
+  const textClass = 'text-white text-xs font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]';
 
   // 🚫 INGEN backdrop-blur här. Blur på pills över en bakgrundsbild som
   // laddar/animerar tvingar webbläsaren att resampla lagret varje frame →
