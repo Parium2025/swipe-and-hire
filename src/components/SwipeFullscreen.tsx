@@ -622,7 +622,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 onRegisterSwipeApi={registerActiveSwipeApi}
               />
             </div>
-          ))}
+            </div>
+            );
+          })}
 
           <SwipeEndSection
             ref={endSectionRef}
