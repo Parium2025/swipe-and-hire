@@ -309,11 +309,11 @@ export function useSwipeCardGesture({
 
       if (gesture.isDragging) {
         if (offsetX > SWIPE_THRESHOLD || velocityX > VELOCITY_THRESHOLD) {
-          triggerSwipe('right');
+          triggerSwipe('right', velocityX);
           return;
         }
         if (offsetX < -SWIPE_THRESHOLD || velocityX < -VELOCITY_THRESHOLD) {
-          triggerSwipe('left');
+          triggerSwipe('left', velocityX);
           return;
         }
         animate(x, 0, SNAP_SPRING);
