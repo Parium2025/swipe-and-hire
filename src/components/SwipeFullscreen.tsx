@@ -586,6 +586,19 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           />
         </div>
 
+        {/* Persistent action-bar: står stilla mellan kort så att t.ex.
+            Ångra-knappen är på plats i samma sekund som ett kort nekas. */}
+        <SwipeActionsBar
+          saved={currentJob ? savedJobIds.has(currentJob.id) : false}
+          canUndo={canUndo}
+          visible={!isEndStateActive && !showDetail && !showApply && !showFilter}
+          onUndo={handleUndo}
+          onSave={() => currentJob && onToggleSave(currentJob.id)}
+          onDislike={() => activeCardSwipeRef.current?.('left')}
+          onLike={() => activeCardSwipeRef.current?.('right')}
+        />
+
+
         {currentJob && showDetail && (
           <div className="fixed inset-0 z-[10000] pointer-events-none">
             <div className="relative w-full h-full pointer-events-auto">
