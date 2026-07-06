@@ -105,7 +105,7 @@ export function useSwipeCardGesture({
   }, [overlayOpen]);
 
   const triggerSwipe = useCallback(
-    (direction: SwipeDirection) => {
+    (direction: SwipeDirection, velocityX?: number) => {
       lastTapTimestampRef.current = 0;
       clearTapHint();
       hapticMedium();
@@ -118,11 +118,26 @@ export function useSwipeCardGesture({
 
       swipedRef.current = true;
 
+      // 🚀 Fix 5: låt fingerns velocity översätta till exit-hastighet.
+      // Snabb swipe → kortet "flyger" (styvare spring, högre initial velocity).
+      // Långsam swipe / knapp → mjuk standard-exit. Ger Tinder-känslan där
+      // gesten känns fysiskt kopplad till animationen.
+      const speed = Math.abs(velocityX ?? 0);
+      const isFlick = speed > VELOCITY_THRESHOLD;
+      const exitSpring = isFlick
+        ? {
+            ...EXIT_SPRING,
+            stiffness: 320,
+            damping: 30,
+            velocity: -Math.min(Math.max(speed, 800), 3000),
+          }
+        : EXIT_SPRING;
+
       // Exit-animation för kortet (kör klart även efter att föräldern
       // har advancerat — motion-instansen lever kvar tills unmount).
-      animate(x, -EXIT_X, EXIT_SPRING);
+      animate(x, -EXIT_X, exitSpring);
       animate(exitOpacity, 0, {
-        duration: EXIT_OPACITY_DURATION,
+        duration: isFlick ? 0.28 : EXIT_OPACITY_DURATION,
         ease: PREMIUM_EASE,
       });
 
@@ -135,9 +150,12 @@ export function useSwipeCardGesture({
       });
 
       // 🚀 Tinder/TikTok-handoff: mounta nästa kort mid-exit istället för
-      // att vänta på att springen landar. Underlaget täcker då redan större
-      // delen av frame → smidig visuell övergång, ingen väntetid för input.
-      window.setTimeout(() => {
+      // att vänta på att springen landar.
+      if (exitHandoffTimerRef.current !== null) {
+        window.clearTimeout(exitHandoffTimerRef.current);
+      }
+      exitHandoffTimerRef.current = window.setTimeout(() => {
+        exitHandoffTimerRef.current = null;
         onSwipeLeft();
         swipedRef.current = false;
         x.set(0);
@@ -145,7 +163,7 @@ export function useSwipeCardGesture({
         underlayY.set(UNDERLAY_INITIAL_Y);
         underlayScale.set(UNDERLAY_INITIAL_SCALE);
         underlayOpacity.set(0);
-      }, EXIT_HANDOFF_MS);
+      }, isFlick ? 160 : EXIT_HANDOFF_MS);
     },
     [
       clearTapHint,
