@@ -225,9 +225,11 @@ export const JobSlide = memo(function JobSlide({
           onTouchCancelCapture={handleTouchCancelCapture}
           onDoubleClick={useTouchTunnel ? undefined : onTap}
         >
-          {/* Bakgrundsbild — decoding="async" garanterar att dekoderingen aldrig
-              blockar fade-in-framen; bilden är förvärmd i blob-cachen så den
-              målas i första paint utan flimmer. */}
+          {/* Bakgrundsbild — decoding="sync" på AKTIVT kort: bilden är redan
+              förvärmd i blob-cachen (useSwipeImagePreloader), och vi behöver
+              garantera att den är fullt dekodad till första paint när ett nytt
+              kort mountas efter swipe. Async här orsakade en synlig "blixt"
+              (basfärgen syns 1 frame innan bilden hinner målas). */}
           <div className="absolute inset-0">
             {imageUrl ? (
               <img
@@ -236,7 +238,7 @@ export const JobSlide = memo(function JobSlide({
                 className="w-full h-full object-cover"
                 style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
                 loading={isVisible ? 'eager' : 'lazy'}
-                decoding="async"
+                decoding="sync"
                 draggable={false}
                 onError={handleImageError}
               />
