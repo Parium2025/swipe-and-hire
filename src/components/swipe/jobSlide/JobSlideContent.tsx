@@ -49,21 +49,17 @@ export const JobSlideContent = memo(function JobSlideContent({
         {(logoUrl || !hasImage) && displayCompanyName && (
           <div className="flex justify-center mb-4">
             {logoUrl ? (
-              // Ingen border-ring: den syntes som en ful 1px-kant runt logon
-              // (särskilt när logon var mörk eller transparent). Ren avatar
-              // med shadow räcker för premium-look.
-              <div className="w-14 h-14 rounded-full bg-[hsl(215,85%,15%)] flex items-center justify-center overflow-hidden shadow-lg">
+              <div className="w-14 h-14 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
                 <img
                   src={logoUrl}
                   alt={interactive ? displayCompanyName : ''}
                   className="w-full h-full object-cover"
                   draggable={false}
-                  decoding="async"
                   onError={onLogoError}
                 />
               </div>
             ) : (
-              <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
                 <span className="text-xl font-bold text-white/40 tracking-wide select-none">
                   {getCompanyInitials(displayCompanyName)}
                 </span>

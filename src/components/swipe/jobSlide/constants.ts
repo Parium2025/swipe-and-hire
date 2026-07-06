@@ -46,12 +46,7 @@ export const UNDERLAY_RISE_SPRING = {
   damping: 22,
   mass: 1.1,
 };
-// KRITISKT: måste vara KORTARE än EXIT_HANDOFF_MS (i sekunder), annars är
-// underlaget bara delvis opakt när nästa kort mountas ovanpå → synlig "cut"
-// / blixt-känsla vid nekning. 0.11s (110ms) < 120ms handoff = underlaget är
-// fullt synligt innan seamen syns. Fade-in-känslan bibehålls (samma spring
-// för Y/scale-resning som är den dominerande visuella effekten).
-export const UNDERLAY_OPACITY_DURATION = 0.11;
+export const UNDERLAY_OPACITY_DURATION = 0.42;
 export const UNDERLAY_INITIAL_Y = 800;
 export const UNDERLAY_INITIAL_SCALE = 0.68;
 

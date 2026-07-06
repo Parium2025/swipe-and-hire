@@ -46,10 +46,7 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
       className="absolute inset-0 overflow-hidden rounded-2xl bg-[hsl(215,85%,15%)] shadow-2xl pointer-events-none"
       style={{ y, scale, opacity }}
     >
-      {/* Bakgrundsbild — decoding="async" så dekoderingen sker off-thread
-          och aldrig blockar fade-in-framen (annars syns ett "blink" när GPU
-          måste dekoda + composita samma frame). Bilden är redan varm i
-          blob-cachen via useSwipeImagePreloader innan underlaget mountas. */}
+      {/* Bakgrundsbild */}
       <div className="absolute inset-0">
         {imageUrl ? (
           <img
@@ -58,7 +55,6 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
             className="h-full w-full object-cover"
             style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
             loading="eager"
-            decoding="async"
             draggable={false}
           />
         ) : (

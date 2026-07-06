@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef } from 'react';
-import { motion, useMotionValue, useTransform, useVelocity, useSpring } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCardImage } from '@/hooks/useCardImage';
 import type { SwipeJob } from './types';
@@ -74,31 +74,13 @@ export const JobSlide = memo(function JobSlide({
   const entryScale = useMotionValue(1);
   const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
-  // 🎯 VELOCITY-KOPPLAD ROTATION (Tinder/Hinge-fysik):
-  // Position ger basrotation (linjär); velocity lägger till ett "flick"-utslag
-  // så kortet reagerar på HUR användaren drar, inte bara VAR fingret är.
-  // Snabb flick → större rotation + minimalt djupare scale ("kastar" kortet).
-  // Långsam drag → nästan identisk med tidigare (märks knappt).
-  const baseRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
-  const rawVelocity = useVelocity(x);
-  // Spring på velocity = mjuk, ingen ryckighet. Damping högt så det inte studsar.
-  const smoothVelocity = useSpring(rawVelocity, { stiffness: 400, damping: 50, mass: 0.4 });
-  // Velocity → extra rotation. ±2000px/s ≈ ±3° extra (clamp via range).
-  const velocityRotate = useTransform(smoothVelocity, [-2000, 0, 2000], [-3, 0, 3]);
-  const cardRotate = useTransform(
-    [baseRotate, velocityRotate],
-    ([b, v]) => (b as number) + (v as number),
-  );
+  // Mjukare rotate/scale-utslag = mindre visuell wobble under drag.
+  // Rotate 10° → 6°, scale 0.95 → 0.98.
+  const cardRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.98, 1, 0.98]);
-  // Velocity-baserad "tyngd": vid snabb drag sjunker scale minimalt extra
-  // (0 → -0.015). Ger fysisk känsla att kortet får "moment".
-  const velocityScaleDip = useTransform(smoothVelocity, (v) => {
-    const abs = Math.min(Math.abs(v as number), 2500) / 2500;
-    return 1 - abs * 0.015;
-  });
   const combinedScale = useTransform(
-    [cardScale, entryScale, velocityScaleDip],
-    ([cs, es, vs]) => (cs as number) * (es as number) * (vs as number),
+    [cardScale, entryScale],
+    ([cs, es]) => (cs as number) * (es as number),
   );
   // 🚫 Ingen animerad boxShadow: att interpolera skuggsträngar per frame
   // tvingar browsern att repainta hela kortet varje frame → lagg-känsla.
@@ -222,7 +204,7 @@ export const JobSlide = memo(function JobSlide({
           // lyser igenom den avrundade kanten under första framen eller under
           // scale-in (nytt kort/ångra). Utan denna färg såg iOS Safari ett
           // synligt vitt "rim" tills bilden dekodades.
-          className={`relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)] select-none [-webkit-tap-highlight-color:transparent] ${isActive ? 'will-change-transform' : ''}`}
+          className="relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)] select-none [-webkit-tap-highlight-color:transparent] will-change-transform"
           style={{
             x,
             opacity: exitOpacity,
@@ -243,11 +225,7 @@ export const JobSlide = memo(function JobSlide({
           onTouchCancelCapture={handleTouchCancelCapture}
           onDoubleClick={useTouchTunnel ? undefined : onTap}
         >
-          {/* Bakgrundsbild — decoding="sync" på AKTIVT kort: bilden är redan
-              förvärmd i blob-cachen (useSwipeImagePreloader), och vi behöver
-              garantera att den är fullt dekodad till första paint när ett nytt
-              kort mountas efter swipe. Async här orsakade en synlig "blixt"
-              (basfärgen syns 1 frame innan bilden hinner målas). */}
+          {/* Bakgrundsbild */}
           <div className="absolute inset-0">
             {imageUrl ? (
               <img
@@ -256,8 +234,6 @@ export const JobSlide = memo(function JobSlide({
                 className="w-full h-full object-cover"
                 style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
                 loading={isVisible ? 'eager' : 'lazy'}
-                decoding="sync"
-                fetchPriority={isActive ? 'high' : 'auto'}
                 draggable={false}
                 onError={handleImageError}
               />
@@ -288,21 +264,19 @@ export const JobSlide = memo(function JobSlide({
             <span className="text-red-400 text-lg font-black tracking-wider">TYCKER INTE OM</span>
           </motion.div>
 
-          {/* Applied stamp — ingen backdrop-blur: filter re-samplas per frame
-              på iOS Safari → orsakar synligt flimmer vid fade-in. bg-black/55
-              ger samma läsbarhet utan GPU-blur-kostnad. */}
+          {/* Applied stamp */}
           {applied && (
             <div className="absolute top-4 left-4 z-30 pointer-events-none">
-              <div className="-rotate-[12deg] border-[3px] border-green-500 rounded-lg px-4 py-1.5 bg-black/55">
+              <div className="-rotate-[12deg] border-[3px] border-green-500 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
                 <span className="text-green-500 text-lg font-black tracking-widest uppercase">SÖKT ✓</span>
               </div>
             </div>
           )}
 
-          {/* Skipped stamp — samma anledning: ingen backdrop-blur. */}
+          {/* Skipped stamp */}
           {skipped && !applied && (
             <div className="absolute top-4 left-4 z-30 pointer-events-none">
-              <div className="-rotate-[12deg] border-[3px] border-white/40 rounded-lg px-4 py-1.5 bg-black/55">
+              <div className="-rotate-[12deg] border-[3px] border-white/40 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
                 <span className="text-white/60 text-lg font-black tracking-widest uppercase">SKIPPAD</span>
               </div>
             </div>
