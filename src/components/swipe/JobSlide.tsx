@@ -13,11 +13,14 @@ import { getImageVersion } from '@/lib/imageTransforms';
 import { SWIPE_IMG_TRANSFORM, SWIPE_LOGO_TRANSFORM } from './jobSlide/constants';
 import { getImageObjectPosition, getCompanyInitials } from './jobSlide/utils';
 import { JobSlideBadgesRow } from './jobSlide/JobSlideBadgesRow';
-import { JobSlideActions } from './jobSlide/JobSlideActions';
 import { NextCardUnderlay } from './jobSlide/NextCardUnderlay';
 import { useUndoEntryAnimation } from './jobSlide/useUndoEntryAnimation';
 import { useTapHint } from './jobSlide/useTapHint';
-import { useSwipeCardGesture } from './jobSlide/useSwipeCardGesture';
+import { useSwipeCardGesture, type SwipeDirection } from './jobSlide/useSwipeCardGesture';
+
+export interface JobSlideSwipeApi {
+  swipe: (direction: SwipeDirection) => void;
+}
 
 interface JobSlideProps {
   job: SwipeJob;
@@ -32,12 +35,15 @@ interface JobSlideProps {
   overlayOpen?: boolean;
   skipEntryAnimation?: boolean;
   isUndoEntry?: boolean;
-  canUndo?: boolean;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
   onTap: () => void;
-  onUndo?: () => void;
+  /**
+   * Registrerar/avregistrerar aktivt korts swipe-API mot föräldern så att
+   * den persistenta action-baren kan trigga vänster/höger-swipe.
+   */
+  onRegisterSwipeApi?: (api: JobSlideSwipeApi | null) => void;
 }
 
 export const JobSlide = memo(function JobSlide({
@@ -53,12 +59,11 @@ export const JobSlide = memo(function JobSlide({
   overlayOpen,
   skipEntryAnimation,
   isUndoEntry,
-  canUndo,
   onSwipeRight,
   onSwipeLeft,
   onSave,
   onTap,
-  onUndo,
+  onRegisterSwipeApi,
 }: JobSlideProps) {
   const inputCapability = useInputCapability();
   const useTouchTunnel = inputCapability !== 'mouse';
@@ -164,6 +169,21 @@ export const JobSlide = memo(function JobSlide({
 
   // ✨ Ångra: mjuk premium "catch"-animation.
   useUndoEntryAnimation({ isUndoEntry, x, exitOpacity, entryScale });
+
+  // 🎛️ Registrera swipe-API för föräldern när kortet är aktivt.
+  // Bar-knapparna (persistent längst ner i SwipeFullscreen) triggar
+  // den aktiva `triggerSwipe`. Vi avregistrerar vid unmount + när isActive
+  // blir false så att den gamla instansen inte lämnar en stale referens.
+  useEffect(() => {
+    if (!onRegisterSwipeApi) return;
+    if (isActive) {
+      onRegisterSwipeApi({ swipe: triggerSwipe });
+      return () => {
+        onRegisterSwipeApi(null);
+      };
+    }
+  }, [isActive, onRegisterSwipeApi, triggerSwipe]);
+
 
 
   return (
@@ -340,14 +360,6 @@ export const JobSlide = memo(function JobSlide({
             </div>
           )}
 
-          <JobSlideActions
-            saved={saved}
-            canUndo={canUndo}
-            onUndo={onUndo}
-            onSave={onSave}
-            onDislike={() => triggerSwipe('left')}
-            onLike={() => triggerSwipe('right')}
-          />
         </motion.div>
       </div>
     </div>
