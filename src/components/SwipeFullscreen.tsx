@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, memo, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { JobSlide } from '@/components/swipe/JobSlide';
@@ -10,7 +10,8 @@ import { SwipeDots } from '@/components/swipe/SwipeDots';
 import { SwipeEndSection } from '@/components/swipe/SwipeEndSection';
 import { SwipeEmptyState } from '@/components/swipe/SwipeEmptyState';
 import { useSwipeImagePreloader } from '@/hooks/useSwipeImagePreloader';
-import { hapticSuccess } from '@/lib/haptics';
+import { useSwipeUndo } from '@/components/swipe/hooks/useSwipeUndo';
+import { useOverlayCooldown } from '@/components/swipe/hooks/useOverlayCooldown';
 import type { SwipeJob } from '@/components/swipe/types';
 
 export type { SwipeJob };
