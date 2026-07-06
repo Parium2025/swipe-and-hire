@@ -225,7 +225,9 @@ export const JobSlide = memo(function JobSlide({
           onTouchCancelCapture={handleTouchCancelCapture}
           onDoubleClick={useTouchTunnel ? undefined : onTap}
         >
-          {/* Bakgrundsbild */}
+          {/* Bakgrundsbild — decoding="async" garanterar att dekoderingen aldrig
+              blockar fade-in-framen; bilden är förvärmd i blob-cachen så den
+              målas i första paint utan flimmer. */}
           <div className="absolute inset-0">
             {imageUrl ? (
               <img
@@ -234,6 +236,7 @@ export const JobSlide = memo(function JobSlide({
                 className="w-full h-full object-cover"
                 style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
                 loading={isVisible ? 'eager' : 'lazy'}
+                decoding="async"
                 draggable={false}
                 onError={handleImageError}
               />
@@ -264,19 +267,21 @@ export const JobSlide = memo(function JobSlide({
             <span className="text-red-400 text-lg font-black tracking-wider">TYCKER INTE OM</span>
           </motion.div>
 
-          {/* Applied stamp */}
+          {/* Applied stamp — ingen backdrop-blur: filter re-samplas per frame
+              på iOS Safari → orsakar synligt flimmer vid fade-in. bg-black/55
+              ger samma läsbarhet utan GPU-blur-kostnad. */}
           {applied && (
             <div className="absolute top-4 left-4 z-30 pointer-events-none">
-              <div className="-rotate-[12deg] border-[3px] border-green-500 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
+              <div className="-rotate-[12deg] border-[3px] border-green-500 rounded-lg px-4 py-1.5 bg-black/55">
                 <span className="text-green-500 text-lg font-black tracking-widest uppercase">SÖKT ✓</span>
               </div>
             </div>
           )}
 
-          {/* Skipped stamp */}
+          {/* Skipped stamp — samma anledning: ingen backdrop-blur. */}
           {skipped && !applied && (
             <div className="absolute top-4 left-4 z-30 pointer-events-none">
-              <div className="-rotate-[12deg] border-[3px] border-white/40 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
+              <div className="-rotate-[12deg] border-[3px] border-white/40 rounded-lg px-4 py-1.5 bg-black/55">
                 <span className="text-white/60 text-lg font-black tracking-widest uppercase">SKIPPAD</span>
               </div>
             </div>
