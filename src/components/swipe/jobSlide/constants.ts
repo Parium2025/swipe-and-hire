@@ -63,3 +63,10 @@ export const TOUCH_DRAG_INTENT_THRESHOLD = 12;
 // råkar registreras som en swipe/tap på kortet under.
 export const OVERLAY_CLOSE_INPUT_LOCK_MS = 150;
 
+// Tinder/TikTok-känsla: släpp föräldern (mounta nästa kort och gör det
+// interaktivt) redan när exit-animationen passerat ~55 % av sin väg.
+// Underlaget har då rest sig så pass mycket att övergången ser smidig ut,
+// men användaren behöver INTE vänta på att gamla kortets spring landar.
+// ~200 ms mot tidigare ~380 ms → nästan halverad väntetid.
+export const EXIT_HANDOFF_MS = 200;
+
