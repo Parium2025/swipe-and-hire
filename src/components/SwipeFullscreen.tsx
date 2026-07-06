@@ -556,7 +556,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 overlayOpen={showDetail || showApply || showFilter}
                 skipEntryAnimation={job.id === skipEntryAnimationForId}
                 isUndoEntry={job.id === undoEntryJobId}
-                canUndo={canUndo && !!onUndoSwipeAction}
+                canUndo={canUndo}
                 onSwipeRight={handleSwipeRight}
                 onSwipeLeft={handleSwipeLeft}
                 onSave={() => onToggleSave(job.id)}
