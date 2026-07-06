@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
