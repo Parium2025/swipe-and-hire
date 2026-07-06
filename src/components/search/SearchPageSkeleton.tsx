@@ -106,21 +106,21 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
         className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
         style={fullscreenSkeletonStyle}
       >
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="h-8 w-8 bg-white/10 rounded-full animate-pulse" />
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-28 bg-white/10 rounded-full animate-pulse" />
-            <div className="h-8 w-8 bg-white/10 rounded-full animate-pulse" />
+        <div className="relative flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
+          <div className="py-3">
+            <div className="h-3 w-8 bg-white/15 rounded animate-pulse" />
+          </div>
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 pt-[env(safe-area-inset-top,0px)]">
+            <div className="py-3">
+              <div className="h-12 w-[132px] rounded-full bg-white/10 border border-white/20 animate-pulse" />
+            </div>
+          </div>
+          <div className="flex h-11 w-11 items-center justify-center">
+            <div className="h-9 w-9 rounded-full bg-white/10 animate-pulse" />
           </div>
         </div>
 
-        <div className="flex justify-center gap-1.5 py-1.5">
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className={`h-1.5 rounded-full animate-pulse ${i === 1 ? 'w-6 bg-white/40' : 'w-1.5 bg-white/15'}`} />
-          ))}
-        </div>
-
-        <div className="flex-1 mx-3 mb-3 rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden relative">
+        <div className="flex-1 mx-3 mb-3 mt-2 rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden relative">
           <div className="absolute inset-0 bg-white/[0.03] animate-pulse" />
 
           <div className="absolute inset-x-0 top-[25%] px-6 space-y-4">
@@ -136,10 +136,16 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
             </div>
           </div>
 
-          <div className="absolute bottom-6 inset-x-0 flex items-center justify-center gap-6">
-            <div className="h-14 w-14 bg-white/10 rounded-full animate-pulse" />
-            <div className="h-12 w-12 bg-white/10 rounded-full animate-pulse" />
-            <div className="h-14 w-14 bg-white/10 rounded-full animate-pulse" />
+          <div
+            className="absolute inset-x-0 px-5"
+            style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
+          >
+            <div className="flex items-center justify-center gap-4">
+              <div className="w-[52px] h-[52px] rounded-full bg-destructive/70 animate-pulse" />
+              <div className="w-[52px] h-[52px] rounded-full bg-secondary/70 border border-white/25 animate-pulse" />
+              <div className="w-[52px] h-[52px] rounded-full bg-success/70 animate-pulse" />
+              <div className="w-[52px] h-[52px] rounded-full bg-white/15 border border-white/25 animate-pulse" />
+            </div>
           </div>
         </div>
       </motion.div>
