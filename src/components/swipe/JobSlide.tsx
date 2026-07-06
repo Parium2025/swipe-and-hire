@@ -74,13 +74,31 @@ export const JobSlide = memo(function JobSlide({
   const entryScale = useMotionValue(1);
   const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
-  // Mjukare rotate/scale-utslag = mindre visuell wobble under drag.
-  // Rotate 10° → 6°, scale 0.95 → 0.98.
-  const cardRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
+  // 🎯 VELOCITY-KOPPLAD ROTATION (Tinder/Hinge-fysik):
+  // Position ger basrotation (linjär); velocity lägger till ett "flick"-utslag
+  // så kortet reagerar på HUR användaren drar, inte bara VAR fingret är.
+  // Snabb flick → större rotation + minimalt djupare scale ("kastar" kortet).
+  // Långsam drag → nästan identisk med tidigare (märks knappt).
+  const baseRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
+  const rawVelocity = useVelocity(x);
+  // Spring på velocity = mjuk, ingen ryckighet. Damping högt så det inte studsar.
+  const smoothVelocity = useSpring(rawVelocity, { stiffness: 400, damping: 50, mass: 0.4 });
+  // Velocity → extra rotation. ±2000px/s ≈ ±3° extra (clamp via range).
+  const velocityRotate = useTransform(smoothVelocity, [-2000, 0, 2000], [-3, 0, 3]);
+  const cardRotate = useTransform(
+    [baseRotate, velocityRotate],
+    ([b, v]) => (b as number) + (v as number),
+  );
   const cardScale = useTransform(x, [-200, 0, 200], [0.98, 1, 0.98]);
+  // Velocity-baserad "tyngd": vid snabb drag sjunker scale minimalt extra
+  // (0 → -0.015). Ger fysisk känsla att kortet får "moment".
+  const velocityScaleDip = useTransform(smoothVelocity, (v) => {
+    const abs = Math.min(Math.abs(v as number), 2500) / 2500;
+    return 1 - abs * 0.015;
+  });
   const combinedScale = useTransform(
-    [cardScale, entryScale],
-    ([cs, es]) => (cs as number) * (es as number),
+    [cardScale, entryScale, velocityScaleDip],
+    ([cs, es, vs]) => (cs as number) * (es as number) * (vs as number),
   );
   // 🚫 Ingen animerad boxShadow: att interpolera skuggsträngar per frame
   // tvingar browsern att repainta hela kortet varje frame → lagg-känsla.
