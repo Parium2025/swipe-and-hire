@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { hapticSuccess } from '@/lib/haptics';
 
 interface UseSwipeUndoOptions {
