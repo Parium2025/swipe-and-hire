@@ -82,6 +82,20 @@ export function useSwipeCardGesture({
   const thresholdHapticFiredRef = useRef(false);
   const overlayClosedAtRef = useRef(0);
   const prevOverlayOpenRef = useRef(overlayOpen);
+  const exitHandoffTimerRef = useRef<number | null>(null);
+
+  // 🧹 Fix 2: rensa ev. pending exit-handoff timer om komponenten unmountas
+  // mid-exit (t.ex. snabb navigering bort från swipe-vyn). Annars kör
+  // callbacken mot en stale closure och kan trigga onSwipeLeft/state-set
+  // på en död komponent.
+  useEffect(() => {
+    return () => {
+      if (exitHandoffTimerRef.current !== null) {
+        window.clearTimeout(exitHandoffTimerRef.current);
+        exitHandoffTimerRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (prevOverlayOpenRef.current && !overlayOpen) {
