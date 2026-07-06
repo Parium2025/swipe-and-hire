@@ -435,6 +435,16 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
         .eq('action', 'skipped');
 
       if (error) throw error;
+
+      // 🔔 Broadcasta till alla useSwipeActions-instanser (t.ex. Swipe Mode)
+      // så jobbet omedelbart återkommer i swipe-kön utan att sidan behöver
+      // laddas om. Utan detta stannar den gamla `skippedJobIds`-Mapen kvar
+      // och filtrerar bort jobbet lokalt tills nästa full reload.
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('parium:swipe-action-removed', { detail: { jobId } }),
+        );
+      }
     } catch (error) {
       queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
       throw error;
