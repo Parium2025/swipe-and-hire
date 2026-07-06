@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
@@ -540,14 +540,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
 
   /* ── Main render ──────────────────────────────────────── */
   return createPortal(
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-[9999] bg-parium-gradient"
-      >
+    <div className="fixed inset-0 z-[9999] bg-parium-gradient">
+
         <SwipeHeader
           displayIndex={displayIndex}
           totalCount={jobs.length}
@@ -671,8 +665,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
             className="fixed inset-0 z-[10002] pointer-events-auto"
           />
         )}
-      </motion.div>
-    </AnimatePresence>,
+      </div>,
     document.body,
   );
+
 });
