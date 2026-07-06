@@ -587,7 +587,9 @@ const SearchJobs = memo(() => {
       salary_transparency: job.salary_transparency,
       benefits: job.benefits,
       company_logo_url: job.company_logo_url,
+      overlay_text_color: job.overlay_text_color,
     }));
+
   }, [filteredAndSortedJobs, skippedJobIds, appliedJobIds]);
 
   // Find matching companies for smart search suggestion.
