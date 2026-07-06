@@ -602,25 +602,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           </div>
         )}
 
-        {filterState && (
-          <SwipeFilterSheet
-            open={showFilter}
-            onClose={handleFilterClose}
-            searchInput={filterState.searchInput}
-            onSearchInputChange={filterState.onSearchInputChange}
-            selectedCity={filterState.selectedCity}
-            onLocationChange={filterState.onLocationChange}
-            selectedCategory={filterState.selectedCategory}
-            onCategoryChange={filterState.onCategoryChange}
-            selectedEmploymentTypes={filterState.selectedEmploymentTypes}
-            onEmploymentTypesChange={filterState.onEmploymentTypesChange}
-            sortBy={filterState.sortBy}
-            onSortChange={filterState.onSortChange}
-            onClearAll={filterState.onClearAll}
-            jobCount={jobs.length}
-            activeFilterCount={filterState.activeFilterCount}
-          />
-        )}
+        {filterSheetElement}
 
         {overlayInteractionShieldActive && (
           <div
