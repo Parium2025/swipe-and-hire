@@ -84,11 +84,6 @@ export const JobSlide = memo(function JobSlide({
   const underlayScale = useMotionValue(0.68);
   const underlayOpacity = useMotionValue(0);
 
-  const swipedRef = useRef(false);
-  const lastTapTimestampRef = useRef(0);
-  const touchGestureRef = useRef<TouchGestureState | null>(null);
-  const [showTapHint, setShowTapHint] = useState(false);
-  const [tapHintSource, setTapHintSource] = useState<'title' | 'company' | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
