@@ -26,7 +26,7 @@ import AppOnboardingTour from '@/components/AppOnboardingTour';
 import Profile from '@/pages/Profile';
 import Consent from '@/pages/Consent';
 import SearchJobs from '@/pages/SearchJobs';
-import { JobListSkeleton } from '@/components/search/SearchPageSkeleton';
+import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
 import Subscription from '@/pages/Subscription';
 import Billing from '@/pages/Billing';
 import Support from '@/pages/Support';
