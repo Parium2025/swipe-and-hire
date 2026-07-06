@@ -450,7 +450,28 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     slideRefs.current[idx] = el;
   }, []);
 
-  /* ── Empty state (extracted) ──────────────────────────── */
+  /* ── Delade fragment (för att undvika duplicering mellan empty / main) ── */
+  const filterSheetElement = filterState ? (
+    <SwipeFilterSheet
+      open={showFilter}
+      onClose={handleFilterClose}
+      searchInput={filterState.searchInput}
+      onSearchInputChange={filterState.onSearchInputChange}
+      selectedCity={filterState.selectedCity}
+      onLocationChange={filterState.onLocationChange}
+      selectedCategory={filterState.selectedCategory}
+      onCategoryChange={filterState.onCategoryChange}
+      selectedEmploymentTypes={filterState.selectedEmploymentTypes}
+      onEmploymentTypesChange={filterState.onEmploymentTypesChange}
+      sortBy={filterState.sortBy}
+      onSortChange={filterState.onSortChange}
+      onClearAll={filterState.onClearAll}
+      jobCount={jobs.length}
+      activeFilterCount={filterState.activeFilterCount}
+    />
+  ) : null;
+
+  /* ── Empty state (behåller sin egen render-väg för att inte påverka UX) ── */
   if (jobs.length === 0) {
     return createPortal(
       <>
@@ -459,28 +480,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           hasFilter={!!filterState}
           activeFilterCount={filterState?.activeFilterCount ?? 0}
           onFilterOpen={handleFilterOpen}
-          canUndo={canUndo && !!onUndoSwipeAction}
+          canUndo={canUndo}
           onUndo={handleUndo}
         />
-        {filterState && (
-          <SwipeFilterSheet
-            open={showFilter}
-            onClose={handleFilterClose}
-            searchInput={filterState.searchInput}
-            onSearchInputChange={filterState.onSearchInputChange}
-            selectedCity={filterState.selectedCity}
-            onLocationChange={filterState.onLocationChange}
-            selectedCategory={filterState.selectedCategory}
-            onCategoryChange={filterState.onCategoryChange}
-            selectedEmploymentTypes={filterState.selectedEmploymentTypes}
-            onEmploymentTypesChange={filterState.onEmploymentTypesChange}
-            sortBy={filterState.sortBy}
-            onSortChange={filterState.onSortChange}
-            onClearAll={filterState.onClearAll}
-            jobCount={0}
-            activeFilterCount={filterState.activeFilterCount}
-          />
-        )}
+        {filterSheetElement}
       </>,
       document.body,
     );
