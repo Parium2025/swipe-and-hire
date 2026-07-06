@@ -366,20 +366,33 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
 
   useEffect(() => () => { clearTimers(); }, [clearTimers]);
 
+  // 🛟 KRITISKT: Använd 100svh (small viewport height) istället för
+  // visualViewport.height. På iOS Safari krymper visualViewport när URL-baren
+  // visas/döljs → sectionHeight fluktuerade → kort "krympte" mitt i sessionen
+  // och två kort fick plats i frame samtidigt. `svh` är alltid den minsta
+  // stabila viewporten (URL-bar synlig) och ändras ALDRIG under scroll.
+  // Vi uppdaterar bara vid orientationchange så snap-punkterna är exakta.
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const viewport = window.visualViewport;
 
     const updateHeight = () => {
-      setSectionHeight(`${Math.round(viewport?.height ?? window.innerHeight)}px`);
+      // Mät faktisk pixelhöjd av 100svh via ett dolt element så snap-scroll
+      // får en exakt px-siffra (CSS-strängen "100svh" skulle också fungera
+      // men snap-matte blir stabilare med px).
+      const probe = document.createElement('div');
+      probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100svh;pointer-events:none;visibility:hidden;';
+      document.body.appendChild(probe);
+      const px = probe.getBoundingClientRect().height || window.innerHeight;
+      document.body.removeChild(probe);
+      setSectionHeight(`${Math.round(px)}px`);
     };
 
     updateHeight();
-    window.addEventListener('resize', updateHeight);
-    viewport?.addEventListener('resize', updateHeight);
+    // Endast orientationchange — INTE resize eller visualViewport, eftersom
+    // Safaris URL-bar triggar resize-events som skulle krympa korten igen.
+    window.addEventListener('orientationchange', updateHeight);
     return () => {
-      window.removeEventListener('resize', updateHeight);
-      viewport?.removeEventListener('resize', updateHeight);
+      window.removeEventListener('orientationchange', updateHeight);
     };
   }, []);
 
