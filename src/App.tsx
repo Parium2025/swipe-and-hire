@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
+import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { initConnectivityManager } from "@/lib/connectivityManager";
 import { BrowserRouter, Routes, Route, useLocation, Navigate as RRNavigate } from "react-router-dom";
 
@@ -283,6 +284,11 @@ const App = () => {
     ? !isPublicLightweightPath(window.location.pathname)
     : true;
   useGlobalImagePreloader(preloadEnabled);
+
+  // 🖱️ Premium smooth-scroll för desktop-mus (Windows + Mac trackpad).
+  // Ger iOS-liknande "glide"-momentum istället för stegvis hackig scroll.
+  // Auto-skippar touch-enheter och prefers-reduced-motion.
+  useSmoothScroll(true);
 
   const [animReady, setAnimReady] = useState(false);
   useEffect(() => {
