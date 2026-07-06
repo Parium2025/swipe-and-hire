@@ -1,0 +1,166 @@
+import { useCallback, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
+import { useApplicationQuota } from '@/hooks/useApplicationQuota';
+
+interface UseApplySubmitOptions {
+  jobId: string;
+  jobTitle: string;
+  companyName: string;
+  answers: Record<string, any>;
+  userId?: string;
+  userEmail?: string | null;
+  onApplied: () => void;
+}
+
+/**
+ * Kapslar in hela ansökningsflödet med optimistic UI + rollback.
+ *
+ * Ordning:
+ *  1. Kvot-check (premium-gate) — visa ApplicationLimitDialog om över gränsen.
+ *  2. Optimistisk state: submitting=true, submitted=true, cache-invalidering.
+ *  3. Hämta profil, insert i job_applications, skicka mail + CV-summary.
+ *  4. Rollback + toast om error.
+ */
+export function useApplySubmit({
+  jobId,
+  jobTitle,
+  companyName,
+  answers,
+  userId,
+  userEmail,
+  onApplied,
+}: UseApplySubmitOptions) {
+  const queryClient = useQueryClient();
+  const { quota, refresh: refreshQuota } = useApplicationQuota();
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+
+  const handleSubmit = useCallback(async () => {
+    if (!userId || submitting) return;
+
+    // 🔒 Premium-gate
+    if (!quota.allowed && !quota.is_premium) {
+      setShowLimitDialog(true);
+      return;
+    }
+
+    // 🚀 Optimistic UI
+    setSubmitting(true);
+    setSubmitted(true);
+
+    clearMyApplicationsLocalCache();
+    queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId] });
+
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, phone, email, home_location, location, birth_date, bio, cv_url, availability, employment_type, profile_image_url, video_url')
+        .eq('user_id', userId)
+        .single();
+
+      let age: number | null = null;
+      if (profile?.birth_date) {
+        const birthYear = new Date(profile.birth_date).getFullYear();
+        age = new Date().getFullYear() - birthYear;
+      }
+
+      const { error } = await supabase.from('job_applications').insert({
+        job_id: jobId,
+        applicant_id: userId,
+        first_name: profile?.first_name || null,
+        last_name: profile?.last_name || null,
+        email: userEmail || profile?.email || null,
+        phone: profile?.phone || null,
+        location: profile?.home_location || profile?.location || null,
+        age,
+        bio: profile?.bio || null,
+        cv_url: profile?.cv_url || null,
+        availability: profile?.availability || null,
+        employment_status: profile?.employment_type || null,
+        profile_image_snapshot_url: profile?.profile_image_url || null,
+        video_snapshot_url: profile?.video_url || null,
+        custom_answers: answers,
+        status: 'pending',
+      });
+
+      if (error) throw error;
+
+      const emailPayload = {
+        applicant_email: userEmail || profile?.email || '',
+        applicant_first_name: profile?.first_name || 'Jobbsökare',
+        job_title: jobTitle,
+        company_name: companyName,
+      };
+      console.log('📧 Sending application confirmation email:', {
+        to: emailPayload.applicant_email,
+        job: emailPayload.job_title,
+      });
+      supabase.functions
+        .invoke('send-application-confirmation', { body: emailPayload })
+        .then(({ data, error }) => {
+          if (error) console.error('❌ Confirmation email failed:', error);
+          else console.log('✅ Confirmation email sent:', data);
+        })
+        .catch((e) => console.error('❌ Confirmation email network error:', e));
+
+      if (profile?.cv_url) {
+        supabase.functions
+          .invoke('generate-cv-summary', {
+            body: { applicant_id: userId, job_id: jobId },
+          })
+          .catch(() => {});
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['my-applications', userId] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId] });
+
+      toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats` });
+      refreshQuota();
+
+      setTimeout(() => {
+        onApplied();
+      }, 1500);
+    } catch (err: any) {
+      console.error('Error submitting application:', err);
+      setSubmitted(false);
+      clearMyApplicationsLocalCache();
+      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications', userId] });
+      toast({
+        title: 'Kunde inte skicka ansökan',
+        description: err.message || 'Försök igen',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [
+    userId,
+    userEmail,
+    submitting,
+    quota.allowed,
+    quota.is_premium,
+    jobId,
+    answers,
+    jobTitle,
+    companyName,
+    queryClient,
+    refreshQuota,
+    onApplied,
+  ]);
+
+  return {
+    submitting,
+    submitted,
+    setSubmitted,
+    showLimitDialog,
+    setShowLimitDialog,
+    quota,
+    handleSubmit,
+  };
+}

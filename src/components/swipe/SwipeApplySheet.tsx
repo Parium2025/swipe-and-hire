@@ -1,19 +1,15 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
-import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
-import { useApplicationQuota } from '@/hooks/useApplicationQuota';
 import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
-import type { JobQuestion } from '@/types/jobWizard';
 import type { SwipeJob } from './types';
+import { useApplyData, type ExtraJobDetails } from './hooks/useApplyData';
+import { useApplySubmit } from './hooks/useApplySubmit';
 
 interface SwipeApplySheetProps {
   jobId: string;
@@ -42,16 +38,6 @@ function DetailRow({ label, value }: { label: string; value: string }) {
       />
     </div>
   );
-}
-
-interface ExtraJobDetails {
-  workplace_address?: string | null;
-  workplace_postal_code?: string | null;
-  workplace_city?: string | null;
-  workplace_municipality?: string | null;
-  workplace_county?: string | null;
-  work_start_time?: string | null;
-  work_end_time?: string | null;
 }
 
 function cap(s?: string | null) {
@@ -125,98 +111,50 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
   );
 }
 
-
 export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const { quota, refresh: refreshQuota } = useApplicationQuota();
-  const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [contactEmail, setContactEmail] = useState<string | undefined>();
-  const [extraDetails, setExtraDetails] = useState<ExtraJobDetails | null>(null);
-  const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [showLimitDialog, setShowLimitDialog] = useState(false);
+
+  const {
+    questions,
+    answers,
+    setAnswers,
+    contactEmail,
+    extraDetails,
+    hasAlreadyApplied,
+    loading,
+  } = useApplyData(jobId, open, user?.id);
+
+  const {
+    submitting,
+    submitted,
+    setSubmitted,
+    showLimitDialog,
+    setShowLimitDialog,
+    quota,
+    handleSubmit,
+  } = useApplySubmit({
+    jobId,
+    jobTitle,
+    companyName,
+    answers,
+    userId: user?.id,
+    userEmail: user?.email,
+    onApplied,
+  });
 
   useEffect(() => {
     if (open) {
       setIsClosing(false);
-    }
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const fetchData = async () => {
-      setLoading(true);
       // 🐛 Flash-bug fix: nollställ submitted vid varje öppning så att
-      // "Ansökan skickad!"-skärmen inte blixtras för nästa jobb om
-      // användaren just ansökt på föregående.
+      // "Ansökan skickad!"-skärmen inte blixtras för nästa jobb.
       setSubmitted(false);
-      setHasAlreadyApplied(false);
-      try {
-        // 🚀 N+1 fix: hämta custom_answers direkt i samma parallella batch.
-        // Tidigare gjorde vi ett extra round-trip när hasAlreadyApplied===true,
-        // vilket fördröjde apply-sheet med 200-400ms på 3G för återkommande
-        // sökande.
-        const [questionsRes, jobRes, applicationRes] = await Promise.all([
-          supabase
-            .from('job_questions')
-            .select('*')
-            .eq('job_id', jobId)
-            .order('order_index'),
-          supabase
-            .from('job_postings')
-            .select('contact_email, workplace_address, workplace_postal_code, workplace_city, workplace_municipality, workplace_county, work_start_time, work_end_time')
-            .eq('id', jobId)
-            .single(),
-          user ? supabase
-            .from('job_applications')
-            .select('id, custom_answers')
-            .eq('job_id', jobId)
-            .eq('applicant_id', user.id)
-            .maybeSingle() : Promise.resolve({ data: null }),
-        ]);
-
-        if (questionsRes.data) {
-          setQuestions(questionsRes.data as (JobQuestion & { id: string })[]);
-        }
-        if (jobRes.data) {
-          if (jobRes.data.contact_email) setContactEmail(jobRes.data.contact_email);
-          setExtraDetails({
-            workplace_address: jobRes.data.workplace_address,
-            workplace_postal_code: jobRes.data.workplace_postal_code,
-            workplace_city: jobRes.data.workplace_city,
-            workplace_municipality: jobRes.data.workplace_municipality,
-            workplace_county: jobRes.data.workplace_county,
-            work_start_time: jobRes.data.work_start_time,
-            work_end_time: jobRes.data.work_end_time,
-          });
-        }
-        if (applicationRes.data) {
-          setHasAlreadyApplied(true);
-          // Pre-fill answers from existing application (samma fetch som ovan)
-          const existing = (applicationRes.data as { custom_answers?: unknown }).custom_answers;
-          if (existing && typeof existing === 'object') {
-            setAnswers(existing as Record<string, any>);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching apply data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [open, jobId, user]);
+    }
+  }, [open, setSubmitted]);
 
   const handleAnswerChange = useCallback((questionId: string, value: any) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
-  }, []);
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  }, [setAnswers]);
 
   const handleSheetClose = useCallback(() => {
     flushSync(() => {
@@ -237,126 +175,14 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
     handleSheetClose();
   }, [handleSheetClose]);
 
-  // 🚀 useMemo (inte useCallback): vi vill memoa RETURVÄRDET, inte funktionen.
-  // Tidigare användes useCallback men anropades direkt i JSX → ingen memoisation
-  // i praktiken. Nu räknar vi om bara när questions/answers ändras.
   const canSubmit = useMemo(() => {
     return questions
-      .filter(q => q.is_required)
-      .every(q => {
+      .filter((q) => q.is_required)
+      .every((q) => {
         const a = answers[q.id];
         return a !== undefined && a !== null && a !== '' && (typeof a !== 'string' || a.trim() !== '');
       });
   }, [questions, answers]);
-
-  const handleSubmit = useCallback(async () => {
-    if (!user || submitting) return;
-
-    // 🔒 Premium-gate: max 3 ansökningar/vecka på gratisplan.
-    if (!quota.allowed && !quota.is_premium) {
-      setShowLimitDialog(true);
-      return;
-    }
-
-    // 🚀 Optimistic UI: visa "Skickad!" omedelbart — användaren ska aldrig
-    // vänta på networken för en så viktig handling. Vi rullar tillbaka om
-    // insert misslyckas.
-    setSubmitting(true);
-    setSubmitted(true);
-
-    // Pre-flippa cachen så badges/listor visar "ansökt" direkt
-    clearMyApplicationsLocalCache();
-    queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
-
-    try {
-      // Fetch profile data to pre-fill application
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, phone, email, home_location, location, birth_date, bio, cv_url, availability, employment_type, profile_image_url, video_url')
-        .eq('user_id', user.id)
-        .single();
-
-      let age: number | null = null;
-      if (profile?.birth_date) {
-        const birthYear = new Date(profile.birth_date).getFullYear();
-        age = new Date().getFullYear() - birthYear;
-      }
-
-      const { error } = await supabase
-        .from('job_applications')
-        .insert({
-          job_id: jobId,
-          applicant_id: user.id,
-          first_name: profile?.first_name || null,
-          last_name: profile?.last_name || null,
-          email: user.email || profile?.email || null,
-          phone: profile?.phone || null,
-          location: profile?.home_location || profile?.location || null,
-          age,
-          bio: profile?.bio || null,
-          cv_url: profile?.cv_url || null,
-          availability: profile?.availability || null,
-          employment_status: profile?.employment_type || null,
-          profile_image_snapshot_url: profile?.profile_image_url || null,
-          video_snapshot_url: profile?.video_url || null,
-          custom_answers: answers,
-          status: 'pending',
-        });
-
-      if (error) throw error;
-
-      // Send confirmation email in background with detailed logging
-      const emailPayload = {
-        applicant_email: user.email || profile?.email || '',
-        applicant_first_name: profile?.first_name || 'Jobbsökare',
-        job_title: jobTitle,
-        company_name: companyName,
-      };
-      console.log('📧 Sending application confirmation email:', { to: emailPayload.applicant_email, job: emailPayload.job_title });
-      supabase.functions.invoke('send-application-confirmation', { body: emailPayload })
-        .then(({ data, error }) => {
-          if (error) console.error('❌ Confirmation email failed:', error);
-          else console.log('✅ Confirmation email sent:', data);
-        })
-        .catch((e) => console.error('❌ Confirmation email network error:', e));
-
-      // Trigger CV summary in background
-      if (profile?.cv_url) {
-        supabase.functions.invoke('generate-cv-summary', {
-          body: { applicant_id: user.id, job_id: jobId },
-        }).catch(() => {});
-      }
-
-      // Slutgiltig sync — bekräftar den optimistiska statusen
-      queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
-      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
-
-      toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats` });
-
-      // Uppdatera kvot-counter direkt
-      refreshQuota();
-
-      setTimeout(() => {
-        onApplied();
-      }, 1500);
-    } catch (err: any) {
-      console.error('Error submitting application:', err);
-      // 🔁 Rollback optimistic state
-      setSubmitted(false);
-      // Återställ cachen så badges försvinner igen
-      clearMyApplicationsLocalCache();
-      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
-      queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-      toast({
-        title: 'Kunde inte skicka ansökan',
-        description: err.message || 'Försök igen',
-        variant: 'destructive',
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  }, [user, jobId, answers, submitting, companyName, jobTitle, onApplied, queryClient, quota.allowed, quota.is_premium, refreshQuota]);
 
   return (
     <AnimatePresence>
@@ -385,7 +211,6 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={(_e, info) => {
-              // Dismiss if dragged down > 100px or with enough velocity
               if (info.offset.y > 100 || info.velocity.y > 500) {
                 handleSheetClose();
               }
@@ -409,7 +234,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
               </div>
             </button>
 
-            {/* Header — compact, with tap-to-preview on truncated title */}
+            {/* Header */}
             <div className="px-4 pr-14 pb-1 shrink-0">
               <TruncatedText
                 text={companyName}
@@ -431,7 +256,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
               />
             </div>
 
-            {/* Content — flex-1 fills remaining space */}
+            {/* Content */}
             <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-6 pt-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               {loading ? (
                 <div className="flex items-center justify-center py-20">
@@ -453,8 +278,11 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
                 </motion.div>
               ) : (
                 <>
-                  {/* Details section — above questions */}
-                  {job && <div className="mb-6"><JobDetailsSection job={job} extra={extraDetails} /></div>}
+                  {job && (
+                    <div className="mb-6">
+                      <JobDetailsSection job={job} extra={extraDetails} />
+                    </div>
+                  )}
 
                   {questions.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
