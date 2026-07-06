@@ -12,12 +12,14 @@ import { getImageVersion } from '@/lib/imageTransforms';
 
 import { SWIPE_IMG_TRANSFORM, SWIPE_LOGO_TRANSFORM } from './jobSlide/constants';
 import { getImageObjectPosition, getCompanyInitials } from './jobSlide/utils';
-import { JobSlideBadgesRow } from './jobSlide/JobSlideBadgesRow';
-import { JobSlideActions } from './jobSlide/JobSlideActions';
 import { NextCardUnderlay } from './jobSlide/NextCardUnderlay';
 import { useUndoEntryAnimation } from './jobSlide/useUndoEntryAnimation';
 import { useTapHint } from './jobSlide/useTapHint';
-import { useSwipeCardGesture } from './jobSlide/useSwipeCardGesture';
+import { useSwipeCardGesture, type SwipeDirection } from './jobSlide/useSwipeCardGesture';
+
+export interface JobSlideSwipeApi {
+  swipe: (direction: SwipeDirection) => void;
+}
 
 interface JobSlideProps {
   job: SwipeJob;
