@@ -139,17 +139,20 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
         <div className="flex-1 mx-3 mb-3 mt-2 rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden relative">
           <div className="absolute inset-0 bg-white/[0.03] animate-pulse" />
 
-          <div className="absolute inset-x-0 top-[25%] px-6 space-y-4">
-            <div className="h-5 w-32 bg-white/10 rounded animate-pulse" />
-            <div className="space-y-2">
-              <div className="h-8 w-[85%] bg-white/10 rounded animate-pulse" />
-              <div className="h-8 w-[55%] bg-white/10 rounded animate-pulse" />
-            </div>
-            <div className="flex flex-wrap gap-2 pt-2">
-              <div className="h-6 w-24 bg-white/10 rounded-full animate-pulse" />
-              <div className="h-6 w-20 bg-white/10 rounded-full animate-pulse" />
-              <div className="h-6 w-28 bg-white/10 rounded-full animate-pulse" />
-            </div>
+          {/* Kategori-chip uppe till vänster */}
+          <div className="absolute top-4 left-4">
+            <div className="h-7 w-32 rounded-full bg-white/10 animate-pulse" />
+          </div>
+
+          {/* Centrerad kortinnehåll: logo → företag-pill → titel → subtitel → info-pills */}
+          <div className="absolute inset-x-0 top-[38%] flex flex-col items-center gap-3 px-6">
+            <div className="h-14 w-14 rounded-full bg-white/10 animate-pulse" />
+            <div className="h-7 w-28 rounded-full bg-white/10 animate-pulse" />
+            <div className="h-8 w-56 max-w-[80%] rounded bg-white/15 animate-pulse" />
+            <div className="h-5 w-40 max-w-[70%] rounded bg-white/10 animate-pulse" />
+            <div className="h-8 w-48 rounded-full bg-white/10 animate-pulse mt-1" />
+            <div className="h-8 w-56 rounded-full bg-white/10 animate-pulse" />
+            <div className="h-8 w-32 rounded-full bg-white/10 animate-pulse" />
           </div>
 
           <div
