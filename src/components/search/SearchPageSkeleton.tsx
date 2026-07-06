@@ -57,26 +57,42 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
       >
         <SkeletonChrome />
 
-        <div className="flex-1 min-h-0 overflow-hidden p-3 space-y-3 md:space-y-4">
-          <div className="flex items-center justify-center mb-1 md:mb-4">
-            <div className="h-7 w-28 bg-white/10 rounded animate-pulse" />
+        <div className="flex-1 min-h-0 overflow-hidden p-3 space-y-4">
+          {/* "Sök Jobb" title */}
+          <div className="flex items-center justify-center">
+            <div className="h-6 w-24 bg-white/10 rounded animate-pulse" />
           </div>
 
-          <div>
+          {/* Search card: input + saved-searches pill + two filter pills */}
+          <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-3 space-y-3">
             <div className="h-11 w-full bg-white/5 border border-white/10 rounded-xl animate-pulse" />
+            <div className="flex justify-center">
+              <div className="h-9 w-52 bg-white/5 border border-white/10 rounded-full animate-pulse" />
+            </div>
+            <div className="flex items-center justify-center gap-3">
+              <div className="h-9 w-24 bg-white/5 border border-white/10 rounded-full animate-pulse" />
+              <div className="h-9 w-28 bg-white/5 border border-white/10 rounded-full animate-pulse" />
+            </div>
           </div>
 
+          {/* "Jobbsökresultat" title */}
+          <div className="flex items-center justify-center pt-1">
+            <div className="h-5 w-36 bg-white/10 rounded animate-pulse" />
+          </div>
+
+          {/* Count chips */}
           <div className="flex items-center justify-center gap-3">
             <div className="h-8 w-20 bg-white/5 border border-white/10 rounded-full animate-pulse" />
             <div className="h-8 w-24 bg-white/5 border border-white/10 rounded-full animate-pulse" />
           </div>
 
+          {/* Swipe Mode button */}
           <div className="flex items-center justify-center">
-            <div className="h-4 w-32 bg-white/10 rounded animate-pulse" />
+            <div className="h-11 w-44 bg-primary/60 rounded-full animate-pulse" />
           </div>
 
           <div className="flex-1 space-y-4 overflow-hidden">
-            {[1, 2, 3, 4].map(i => (
+            {[1, 2, 3].map(i => (
               <div key={i} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden animate-pulse">
                 <div className="h-36 bg-white/5" />
                 <div className="p-3 space-y-2">
