@@ -285,11 +285,6 @@ const App = () => {
     : true;
   useGlobalImagePreloader(preloadEnabled);
 
-  // 🖱️ Premium smooth-scroll för desktop-mus (Windows + Mac trackpad).
-  // Ger iOS-liknande "glide"-momentum istället för stegvis hackig scroll.
-  // Auto-skippar touch-enheter och prefers-reduced-motion.
-  useSmoothScroll(true);
-
   const [animReady, setAnimReady] = useState(false);
   useEffect(() => {
     const start = () => requestAnimationFrame(() => requestAnimationFrame(() => setAnimReady(true)));
