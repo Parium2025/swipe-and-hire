@@ -12,6 +12,7 @@ import { SwipeEmptyState } from '@/components/swipe/SwipeEmptyState';
 import { useSwipeImagePreloader } from '@/hooks/useSwipeImagePreloader';
 import { useSwipeUndo } from '@/components/swipe/hooks/useSwipeUndo';
 import { useOverlayCooldown } from '@/components/swipe/hooks/useOverlayCooldown';
+import { SwipeActionsBar } from '@/components/swipe/SwipeActionsBar';
 import type { SwipeJob } from '@/components/swipe/types';
 
 export type { SwipeJob };
