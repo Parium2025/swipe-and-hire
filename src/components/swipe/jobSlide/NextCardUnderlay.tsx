@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { motion, type MotionValue } from 'framer-motion';
-import { Bookmark, Building2, Heart, X } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import type { SwipeJob } from '../types';
 import { Badge } from '@/components/ui/badge';
 import { TruncatedText } from '@/components/TruncatedText';
