@@ -109,15 +109,6 @@ export const JobSlide = memo(function JobSlide({
     SWIPE_IMG_TRANSFORM,
   );
 
-  // Badges/pills använder INTE backdrop-blur — det orsakar synligt flimmer
-  // varje gång bakomliggande lager (bild, drag, next-underlay) uppdateras
-  // eftersom filter måste re-samplas per frame. Vi använder solid mörk
-  // chip-bakgrund istället (bg-black/45) → samma premium-läsbarhet, noll
-  // resampling, noll flimmer.
-  const [imageLoaded, setImageLoaded] = useState(false);
-  useEffect(() => { setImageLoaded(false); }, [imageUrl]);
-  void imageLoaded;
-  const blurClass = '';
 
   // 🚀 Logo i swipe-card är liten (~64px) → be om optimerad version
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(
