@@ -665,8 +665,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
             className="fixed inset-0 z-[10002] pointer-events-auto"
           />
         )}
-      </motion.div>
-    </AnimatePresence>,
+      </div>,
     document.body,
   );
+
 });
