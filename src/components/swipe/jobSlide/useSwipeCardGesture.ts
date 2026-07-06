@@ -105,7 +105,10 @@ export function useSwipeCardGesture({
   }, [overlayOpen]);
 
   const triggerSwipe = useCallback(
-    (direction: SwipeDirection, velocityX?: number) => {
+    // Andra argumentet (velocity) behålls i signaturen för bakåtkompat med
+    // anroparna, men används INTE längre — vi kör alltid den mjuka
+    // premium-exit som tidigare (velocity-driven kändes hetsig/inte premium).
+    (direction: SwipeDirection, _velocityX?: number) => {
       lastTapTimestampRef.current = 0;
       clearTapHint();
       hapticMedium();
@@ -118,26 +121,12 @@ export function useSwipeCardGesture({
 
       swipedRef.current = true;
 
-      // 🚀 Fix 5: låt fingerns velocity översätta till exit-hastighet.
-      // Snabb swipe → kortet "flyger" (styvare spring, högre initial velocity).
-      // Långsam swipe / knapp → mjuk standard-exit. Ger Tinder-känslan där
-      // gesten känns fysiskt kopplad till animationen.
-      const speed = Math.abs(velocityX ?? 0);
-      const isFlick = speed > VELOCITY_THRESHOLD;
-      const exitSpring = isFlick
-        ? {
-            ...EXIT_SPRING,
-            stiffness: 320,
-            damping: 30,
-            velocity: -Math.min(Math.max(speed, 800), 3000),
-          }
-        : EXIT_SPRING;
-
-      // Exit-animation för kortet (kör klart även efter att föräldern
-      // har advancerat — motion-instansen lever kvar tills unmount).
-      animate(x, -EXIT_X, exitSpring);
+      // Exit-animation för kortet — mjuk, förutsägbar, alltid samma känsla
+      // oavsett hur snabbt användaren swipear. Detta är den ursprungliga
+      // premium-exiten före velocity-experimentet.
+      animate(x, -EXIT_X, EXIT_SPRING);
       animate(exitOpacity, 0, {
-        duration: isFlick ? 0.28 : EXIT_OPACITY_DURATION,
+        duration: EXIT_OPACITY_DURATION,
         ease: PREMIUM_EASE,
       });
 
@@ -150,7 +139,8 @@ export function useSwipeCardGesture({
       });
 
       // 🚀 Tinder/TikTok-handoff: mounta nästa kort mid-exit istället för
-      // att vänta på att springen landar.
+      // att vänta på att springen landar. Timer trackas i ref → cleanup vid
+      // unmount + skrivs över om ny swipe triggas innan förra hunnit landa.
       if (exitHandoffTimerRef.current !== null) {
         window.clearTimeout(exitHandoffTimerRef.current);
       }
@@ -163,7 +153,7 @@ export function useSwipeCardGesture({
         underlayY.set(UNDERLAY_INITIAL_Y);
         underlayScale.set(UNDERLAY_INITIAL_SCALE);
         underlayOpacity.set(0);
-      }, isFlick ? 160 : EXIT_HANDOFF_MS);
+      }, EXIT_HANDOFF_MS);
     },
     [
       clearTapHint,
