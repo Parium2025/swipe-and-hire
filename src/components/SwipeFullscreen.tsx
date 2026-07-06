@@ -308,11 +308,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         // new position in the array — don't rely on clamping `prev`, which
         // would leave the user on whatever card now occupies the old index.
         let target = prev;
-        const pendingId = pendingUndoJobIdRef.current;
+        const pendingId = consumePendingUndo();
         if (pendingId) {
           const restoredIdx = jobs.findIndex(j => j.id === pendingId);
           if (restoredIdx >= 0) target = restoredIdx;
-          pendingUndoJobIdRef.current = null;
         }
         const clamped = Math.min(Math.max(target, 0), jobs.length - 1);
         // Snap to the correct slide position (instant, no smooth — avoids
