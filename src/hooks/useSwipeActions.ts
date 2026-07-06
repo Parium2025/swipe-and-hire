@@ -18,8 +18,10 @@ interface SwipeAction {
 
 export function useSwipeActions() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [actions, setActions] = useState<Map<string, SwipeActionType>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
+  
   
 
   // Fetch existing swipe actions
