@@ -343,14 +343,6 @@ export const JobSlide = memo(function JobSlide({
             </div>
           )}
 
-          <JobSlideActions
-            saved={saved}
-            canUndo={canUndo}
-            onUndo={onUndo}
-            onSave={onSave}
-            onDislike={() => triggerSwipe('left')}
-            onLike={() => triggerSwipe('right')}
-          />
         </motion.div>
       </div>
     </div>
