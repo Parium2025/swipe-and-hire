@@ -3,7 +3,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
-import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { initConnectivityManager } from "@/lib/connectivityManager";
 import { BrowserRouter, Routes, Route, useLocation, Navigate as RRNavigate } from "react-router-dom";
 
