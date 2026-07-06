@@ -197,7 +197,11 @@ export const JobSlide = memo(function JobSlide({
         )}
 
         <motion.div
-          className="relative h-full rounded-2xl overflow-hidden select-none [-webkit-tap-highlight-color:transparent]"
+          // bg-[hsl(215,85%,15%)] = solid mörk bas så app-bakgrunden aldrig
+          // lyser igenom den avrundade kanten under första framen eller under
+          // scale-in (nytt kort/ångra). Utan denna färg såg iOS Safari ett
+          // synligt vitt "rim" tills bilden dekodades.
+          className="relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)] select-none [-webkit-tap-highlight-color:transparent]"
           style={{
             x,
             opacity: exitOpacity,
