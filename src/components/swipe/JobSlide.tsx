@@ -226,7 +226,7 @@ export const JobSlide = memo(function JobSlide({
                 style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
                 loading={isVisible ? 'eager' : 'lazy'}
                 draggable={false}
-                onLoad={() => setImageLoaded(true)}
+                draggable={false}
                 onError={handleImageError}
               />
             ) : (
