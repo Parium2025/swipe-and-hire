@@ -74,17 +74,20 @@ export const JobSlide = memo(function JobSlide({
   const entryScale = useMotionValue(1);
   const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
-  const cardRotate = useTransform(x, [-200, 0, 200], [-10, 0, 10]);
-  const cardScale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
+  // Mjukare rotate/scale-utslag = mindre visuell wobble under drag.
+  // Rotate 10° → 6°, scale 0.95 → 0.98.
+  const cardRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
+  const cardScale = useTransform(x, [-200, 0, 200], [0.98, 1, 0.98]);
   const combinedScale = useTransform(
     [cardScale, entryScale],
     ([cs, es]) => (cs as number) * (es as number),
   );
-  const cardShadow = useTransform(x, [-200, 0, 200], [
-    '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
-    '0 10px 30px -8px rgba(0,0,0,0.25)',
-    '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
-  ]);
+  // 🚫 Ingen animerad boxShadow: att interpolera skuggsträngar per frame
+  // tvingar browsern att repainta hela kortet varje frame → lagg-känsla.
+  // Statisk skugga = ren kompositor-transform (GPU) på x/rotate/scale.
+  const STATIC_CARD_SHADOW =
+    '0 18px 45px -10px rgba(0,0,0,0.4), 0 6px 16px -4px rgba(0,0,0,0.25)';
+
   // Underlay: driven av explicit timed animation, INTE drag-progress
   const underlayY = useMotionValue(UNDERLAY_INITIAL_Y);
   const underlayScale = useMotionValue(UNDERLAY_INITIAL_SCALE);
