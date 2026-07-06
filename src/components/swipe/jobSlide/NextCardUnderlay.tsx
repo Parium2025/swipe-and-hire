@@ -27,7 +27,7 @@ interface NextCardUnderlayProps {
  * ingenting "blinkar" vid övergången. Skiljer sig från JobSlide-content:
  * - Ingen title/company tap-zone (inga data-attribut)
  * - Ingen titleRef, ingen onLoad, ingen onError
- * - Action-knapparna är dimmade placeholders (bg-*/70, text-white/70)
+ * - Action-knapparna är dimmade placeholders (bg med /70 opacity)
  */
 export const NextCardUnderlay = memo(function NextCardUnderlay({
   job,
