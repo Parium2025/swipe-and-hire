@@ -186,11 +186,11 @@ export function useSwipeCardGesture({
       const dragVelocity = Math.abs(velocity.x);
 
       if (offset.x > SWIPE_THRESHOLD || velocity.x > VELOCITY_THRESHOLD) {
-        triggerSwipe('right');
+        triggerSwipe('right', velocity.x);
         return;
       }
       if (offset.x < -SWIPE_THRESHOLD || velocity.x < -VELOCITY_THRESHOLD) {
-        triggerSwipe('left');
+        triggerSwipe('left', velocity.x);
         return;
       }
       if (dragDistance > TAP_MOVE_THRESHOLD || dragVelocity > TAP_RESET_VELOCITY_THRESHOLD) {
