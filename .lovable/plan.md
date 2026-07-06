@@ -1,48 +1,65 @@
-## Vad som byggs
+## Mål
 
-Lägga till **LIA** som anställningsform + villkorliga extra-fält per typ, sparade i databasen och synliga för sökande.
+Höj kodkvaliteten i Swipe Mode till minst 9/10 utan att ändra en enda pixel visuellt eller ändra beteende. All swipe, catching, animation, haptik och preload ska kännas premium — men det gör den redan visuellt. Fokus här är **koden bakom**.
 
-### 1. Anställningsformer
-Lägg till `lia` (LIA – lärande i arbete) i `src/lib/employmentTypes.ts`. Ny ordning: Heltid, Deltid, Konsult, Vikariat, Praktik, LIA, Sommarjobb.
+## Nuvarande problem (bedömning: 6/10)
 
-### 2. Extra-fält per typ (villkorligt i wizarden)
+- `JobSlide.tsx` = 887 rader, gör allt (media, badges, gester, hint-overlays, actions, salary-parsing, undo-logik, entry-animation).
+- `SwipeFullscreen.tsx` har dubbla render-vägar (empty state + main) med identiska undo-props → risk för drift.
+- Många parallella flags i JobSlide (`isVisible`, `isActive`, `overlayOpen`, `skipEntryAnimation`, `isUndoEntry`, `canUndo`) utan central state — svårt att resonera om.
+- Gester, haptik, preload och animationer är utspridda som inline-logik istället för hooks.
+- `SwipeJobDetail.tsx` (651 rader) och `SwipeApplySheet.tsx` (504 rader) har liknande blandning av UI + logik.
 
-| Typ | Extra input |
-|---|---|
-| Heltid | Inget |
-| Deltid | Kryssrutor Mån–Sön (flerval) |
-| Konsult | Antal + enhet (veckor/månader) |
-| Vikariat | Antal + enhet (veckor/månader) |
-| Praktik | Antal + enhet (veckor/månader) |
-| LIA | Antal + enhet (veckor/månader) |
-| Sommarjobb | Inget |
+## Vad refaktorn gör
 
-Fälten visas direkt under "Anställningsform"-dropdownen när relevant typ valts. Samma glassmorphism-stil som resten av wizarden. Veckodagar som pillar (Mån/Tis/…), varaktighet som en `Input type=number` + liten enhet-dropdown.
+### 1. Dela `JobSlide.tsx` (887 → ~250 rader) i rena presentational-delar
+```
+src/components/swipe/jobSlide/
+├── JobSlide.tsx              # Container: state, gester, layout
+├── JobSlideMedia.tsx         # Bild + gradient + preload-hint
+├── JobSlideBadges.tsx        # Top badges (företag, ort, lön)
+├── JobSlideActions.tsx       # ✕, spara, hjärta, ångra (alla alltid mounted)
+├── JobSlideHints.tsx         # Overlay-hints vid drag
+└── useJobSlideState.ts       # Reducer som samlar alla flags
+```
 
-### 3. Databas
-Nya kolumner på `job_postings` och `job_templates`:
-- `part_time_days text[]` – array med `['mon','tue',…]`
-- `duration_amount integer`
-- `duration_unit text` – `'weeks' | 'months'`
+### 2. Extrahera återanvändbara hooks
+- `useSwipeCardGesture` — hela drag/threshold/haptik-logiken (idag inline)
+- `useSlideEntryAnimation` — konsoliderar `skipEntryAnimation` + `isUndoEntry`
+- `useJobActions` — save/dislike/undo-orchestrering (idag i JobSlide + Fullscreen)
 
-Inga NOT NULL. RLS/grants oförändrade.
+### 3. Rensa `SwipeFullscreen.tsx`
+- Ta bort dubbelrendering; en enda render-väg med conditional inner-content.
+- Flytta all undo-state till en `useSwipeUndo` hook (redan halvvägs).
 
-### 4. Wizardfiler som uppdateras
-- `MobileJobWizard.tsx` – state, val, spar-payload, sammanfattnings-steget
-- `CreateTemplateWizard.tsx` – samma
-- `EditJobDialog.tsx` – samma + laddning från existerande job
+### 4. Splitta `SwipeJobDetail.tsx` och `SwipeApplySheet.tsx`
+- Bryt ut sektioner (header, salary-block, description, apply-CTA) till egna komponenter.
+- Ren separation: data-hooks vs. presentational.
 
-### 5. Visning för sökande
-En liten hjälpfunktion `formatEmploymentDetails(job)` som returnerar t.ex. *"Deltid · Mån, Ons, Fre"* eller *"Vikariat · ca 6 månader"* eller *"LIA · ca 10 veckor"*.
+### 5. Typer & konstanter
+- Samla alla magic numbers (threshold 80px, velocity 0.3, delays) i `swipe/constants.ts`.
+- Stärka `types.ts` med diskriminerade unions för slide-state.
 
-Uppdateras i:
-- `MobileJobCard.tsx`
-- `ReadOnlyMobileJobCard.tsx`
-- `JobPreview.tsx`
-- `JobTitleCell.tsx`
-- `getMetaLine` i wizarderna
+## Vad refaktorn INTE gör
 
-### Teknisk not
-- Reset av extra-fält när användaren byter typ (deltid-dagar rensas om man byter till Heltid osv.)
-- Validering: om deltid → minst en dag; om typ med varaktighet → tal > 0. Blockerar "Nästa" precis som andra required-fält.
-- Ingen ändring av befintliga annonser – nya kolumner är null-tåliga.
+- **Ingen visuell ändring.** Samma klasser, samma z-index, samma animationer, samma haptik-timing.
+- **Ingen beteendeändring.** Samma threshold, samma undo-fönster, samma preload-strategi.
+- Ingen ändring i data-hämtning eller Supabase-anrop.
+
+## Verifiering
+
+- `bun test` grönt.
+- `tsgo` grönt.
+- Playwright: öppna swipe mode, swipa 3 kort åt vardera hållet, tryck ångra — screenshot före/efter jämförs mot huvudbranch.
+
+## Omfattning
+
+~15–18 nya filer, ~5 filer refaktoreras. Ingen ny dependency. Uppskattat ~2 000 rader flyttad + omorganiserad kod.
+
+## Fråga innan jag börjar
+
+Refaktorn är stor och kommer att röra många filer i ett svep. Vill du att jag:
+- **A) Kör hela refaktorn i en session** (ca 20–30 min arbete från min sida, 1 stor diff), eller
+- **B) Delar upp i faser** (Fas 1: JobSlide → Fas 2: Fullscreen/Detail → Fas 3: ApplySheet), så du kan verifiera visuellt mellan varje?
+
+Jag rekommenderar **B** eftersom du då kan öppna swipe mode och känna efter mellan faserna att inget ändrats.
