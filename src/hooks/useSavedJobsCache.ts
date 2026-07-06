@@ -275,7 +275,10 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     enabled: !!user && enableSkipped,
     staleTime: 60_000,
     gcTime: Infinity,
-    refetchOnMount: false,
+    // 🔁 Refetcha alltid vid mount om data är stale. Utan detta visas gammal
+    // placeholderData (0 items) för alltid, även efter att användaren swipat
+    // bort nya jobb i Swipe Mode.
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     structuralSharing: false,
     placeholderData: () => {
