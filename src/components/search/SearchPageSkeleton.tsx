@@ -5,7 +5,14 @@ import { motion } from 'framer-motion';
 /**
  * Full-screen skeleton overlay for SearchJobs.
  * Portaled to document.body so app/layout containers can never clip it.
+ *
+ * COLOR STANDARD: All skeleton shapes use ONE unified tone (`bg-white/10`)
+ * — matches the tone of the logo-circle placeholder. Inspired by Lovable's
+ * skeleton system: uniform, calm, premium. No mixed opacities, no borders,
+ * no coloured accents (destructive/success/secondary) during loading.
  */
+
+const SKELETON_SHAPE = 'bg-white/10 animate-pulse';
 
 const fullscreenSkeletonStyle: CSSProperties = {
   position: 'fixed',
@@ -34,12 +41,12 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 
 const SkeletonChrome = memo(function SkeletonChrome() {
   return (
-    <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-      <div className="h-9 w-28 rounded-md bg-white/10 animate-pulse" />
-      <div className="absolute left-1/2 -translate-x-1/2 h-5 w-16 rounded bg-white/10 animate-pulse" />
+    <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/10 bg-transparent px-3">
+      <div className={`h-9 w-28 rounded-md ${SKELETON_SHAPE}`} />
+      <div className={`absolute left-1/2 -translate-x-1/2 h-5 w-16 rounded ${SKELETON_SHAPE}`} />
       <div className="flex items-center gap-2">
-        <div className="h-9 w-9 rounded-full bg-white/10 animate-pulse" />
-        <div className="h-8 w-8 rounded-full bg-white/10 ring-2 ring-white/20 animate-pulse" />
+        <div className={`h-9 w-9 rounded-full ${SKELETON_SHAPE}`} />
+        <div className={`h-8 w-8 rounded-full ${SKELETON_SHAPE}`} />
       </div>
     </header>
   );
@@ -60,47 +67,47 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
         <div className="flex-1 min-h-0 overflow-hidden p-3 space-y-4">
           {/* "Sök Jobb" title */}
           <div className="flex items-center justify-center">
-            <div className="h-6 w-24 bg-white/10 rounded animate-pulse" />
+            <div className={`h-6 w-24 rounded ${SKELETON_SHAPE}`} />
           </div>
 
           {/* Search card: input + saved-searches pill + two filter pills */}
-          <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-3 space-y-3">
-            <div className="h-11 w-full bg-white/5 border border-white/10 rounded-xl animate-pulse" />
+          <div className="rounded-2xl p-3 space-y-3">
+            <div className={`h-11 w-full rounded-xl ${SKELETON_SHAPE}`} />
             <div className="flex justify-center">
-              <div className="h-9 w-52 bg-white/5 border border-white/10 rounded-full animate-pulse" />
+              <div className={`h-9 w-52 rounded-full ${SKELETON_SHAPE}`} />
             </div>
             <div className="flex items-center justify-center gap-3">
-              <div className="h-9 w-24 bg-white/5 border border-white/10 rounded-full animate-pulse" />
-              <div className="h-9 w-28 bg-white/5 border border-white/10 rounded-full animate-pulse" />
+              <div className={`h-9 w-24 rounded-full ${SKELETON_SHAPE}`} />
+              <div className={`h-9 w-28 rounded-full ${SKELETON_SHAPE}`} />
             </div>
           </div>
 
           {/* "Jobbsökresultat" title */}
           <div className="flex items-center justify-center pt-1">
-            <div className="h-5 w-36 bg-white/10 rounded animate-pulse" />
+            <div className={`h-5 w-36 rounded ${SKELETON_SHAPE}`} />
           </div>
 
           {/* Count chips */}
           <div className="flex items-center justify-center gap-3">
-            <div className="h-8 w-20 bg-white/5 border border-white/10 rounded-full animate-pulse" />
-            <div className="h-8 w-24 bg-white/5 border border-white/10 rounded-full animate-pulse" />
+            <div className={`h-8 w-20 rounded-full ${SKELETON_SHAPE}`} />
+            <div className={`h-8 w-24 rounded-full ${SKELETON_SHAPE}`} />
           </div>
 
           {/* Swipe Mode button */}
           <div className="flex items-center justify-center">
-            <div className="h-11 w-44 bg-primary/60 rounded-full animate-pulse" />
+            <div className={`h-11 w-44 rounded-full ${SKELETON_SHAPE}`} />
           </div>
 
           <div className="flex-1 space-y-4 overflow-hidden">
             {[1, 2, 3].map(i => (
-              <div key={i} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden animate-pulse">
-                <div className="h-36 bg-white/5" />
+              <div key={i} className={`rounded-xl overflow-hidden ${SKELETON_SHAPE}`}>
+                <div className="h-36" />
                 <div className="p-3 space-y-2">
-                  <div className="h-5 w-3/4 bg-white/10 rounded" />
-                  <div className="h-3.5 w-1/2 bg-white/10 rounded" />
+                  <div className="h-5 w-3/4 rounded bg-white/10" />
+                  <div className="h-3.5 w-1/2 rounded bg-white/10" />
                   <div className="flex gap-2 pt-0.5">
-                    <div className="h-5 w-16 bg-white/10 rounded-full" />
-                    <div className="h-5 w-20 bg-white/10 rounded-full" />
+                    <div className="h-5 w-16 rounded-full bg-white/10" />
+                    <div className="h-5 w-20 rounded-full bg-white/10" />
                   </div>
                 </div>
               </div>
@@ -122,15 +129,6 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
         className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
         style={fullscreenSkeletonStyle}
       >
-        {/*
-          Mirror-perfect skeleton av SwipeFullscreen + JobSlide:
-          - Wrapper: px-3, pt-[safe+4.75rem], pb-[safe+1.25rem] (samma som JobSlide-wrapper)
-          - Kortet: relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)]
-          - Header (SwipeHeader) absolut ovanpå
-          - OccupationBadge top-5 left-5
-          - Innehållsblock absolute top-[20%] bottom-28 (identiskt med JobSlideContent)
-          - Actions-bar identisk med SwipeActionsBar (bottom safe+2.25rem, gap-4, 52x52)
-        */}
         <div className="relative flex-1 min-h-0">
           <div
             className="h-full w-full flex flex-col px-3"
@@ -140,80 +138,69 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
             }}
           >
             <div className="relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)] shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4),0_6px_16px_-4px_rgba(0,0,0,0.25)]">
-              {/* Bakgrundsplatta (jobbild + gradient) */}
+              {/* Bakgrundsplatta */}
               <div className="absolute inset-0 bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
-              <div className="absolute inset-0 bg-white/[0.02] animate-pulse" />
 
-              {/* OccupationBadge: top-5 left-5, px-3 py-1.5, text-xs */}
+              {/* OccupationBadge */}
               <div className="absolute top-5 left-5 z-10">
-                <div className="h-[26px] w-28 rounded-full bg-black/45 border border-white/10 animate-pulse" />
+                <div className={`h-[26px] w-28 rounded-full ${SKELETON_SHAPE}`} />
               </div>
 
-              {/* JobSlideContent: absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center */}
+              {/* JobSlideContent */}
               <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6">
                 <div className="mx-auto w-full max-w-[21rem] flex flex-col items-center">
-                  {/* Logo: w-14 h-14 rounded-full, mb-4 */}
-                  <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 shadow-lg animate-pulse mb-4" />
+                  {/* Logo */}
+                  <div className={`w-14 h-14 rounded-full mb-4 ${SKELETON_SHAPE}`} />
 
-                  {/* Företags-pill: h ~28px (py-1.5 + text-xs), rounded-full, max-w-[80%] */}
-                  <div className="h-[28px] w-40 max-w-[80%] rounded-full bg-black/45 border border-white/10 animate-pulse" />
+                  {/* Företags-pill */}
+                  <div className={`h-[28px] w-40 max-w-[80%] rounded-full ${SKELETON_SHAPE}`} />
 
-                  {/* Titel (h2, clamp 1.58-2.1rem, line-clamp-2) — reservera 2 rader ≈ 62px, mt-1 */}
+                  {/* Titel — 2 rader */}
                   <div className="mt-1 w-full flex flex-col items-center gap-1.5">
-                    <div className="h-7 w-[85%] rounded bg-white/20 animate-pulse" />
-                    <div className="h-7 w-[60%] rounded bg-white/20 animate-pulse" />
+                    <div className={`h-7 w-[85%] rounded ${SKELETON_SHAPE}`} />
+                    <div className={`h-7 w-[60%] rounded ${SKELETON_SHAPE}`} />
                   </div>
 
-                  {/* Subtitel (text-base, mt-2) */}
-                  <div className="mt-2 h-5 w-56 max-w-[75%] rounded bg-white/15 animate-pulse" />
+                  {/* Subtitel */}
+                  <div className={`mt-2 h-5 w-56 max-w-[75%] rounded ${SKELETON_SHAPE}`} />
 
-                  {/*
-                    JobSlideBadgesRow: flex-wrap, men i praktiken stackas
-                    pillsen alltid vertikalt på mobil eftersom texterna
-                    ("Publicerad 5 juli • 12 dagar kvar" etc) är för långa
-                    för att rymmas sida-vid-sida. Skeleton speglar det.
-                  */}
+                  {/* Info pills — stackade vertikalt */}
                   <div className="mt-3 flex flex-col items-center gap-2 w-full">
-                    <div className="h-7 w-48 max-w-[75%] rounded-full bg-black/45 border border-white/10 animate-pulse" />
-                    <div className="h-7 w-56 max-w-[85%] rounded-full bg-black/45 border border-white/10 animate-pulse" />
-                    <div className="h-7 w-32 max-w-[55%] rounded-full bg-black/45 border border-white/10 animate-pulse" />
+                    <div className={`h-7 w-48 max-w-[75%] rounded-full ${SKELETON_SHAPE}`} />
+                    <div className={`h-7 w-56 max-w-[85%] rounded-full ${SKELETON_SHAPE}`} />
+                    <div className={`h-7 w-32 max-w-[55%] rounded-full ${SKELETON_SHAPE}`} />
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* SwipeHeader (renderas utanför kort-wrappern i SwipeFullscreen) */}
+          {/* SwipeHeader */}
           <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
             <div className="py-3">
-              <div className="h-3 w-10 rounded bg-white/25 animate-pulse" />
+              <div className={`h-3 w-10 rounded ${SKELETON_SHAPE}`} />
             </div>
             <div className="flex h-11 w-11 items-center justify-center">
-              <div className="h-9 w-9 rounded-full bg-white/10 animate-pulse" />
+              <div className={`h-9 w-9 rounded-full ${SKELETON_SHAPE}`} />
             </div>
           </div>
           <div className="absolute top-0 left-1/2 z-20 -translate-x-1/2 pt-[env(safe-area-inset-top,0px)]">
             <div className="py-3">
-              <div className="h-12 w-[150px] rounded-full bg-white/10 border border-white/20 animate-pulse" />
+              <div className={`h-12 w-[150px] rounded-full ${SKELETON_SHAPE}`} />
             </div>
           </div>
 
-          {/*
-            SwipeActionsBar — position: fixed så knapparna sitter vid
-            faktisk viewport-botten. Containern (fullscreenSkeletonStyle)
-            sträcker sig medvetet 96px förbi viewport-botten för att dölja
-            eventuell bounce, så en `absolute bottom` skulle hamna off-screen.
-          */}
+          {/* SwipeActionsBar — unified color (no destructive/success/secondary during loading) */}
           <div
             className="fixed inset-x-0 z-[2147483647] px-5 pointer-events-none"
             style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
           >
             <div className="flex items-center justify-center gap-4">
-              <div className="w-[52px] h-[52px] rounded-full bg-destructive shadow-lg animate-pulse" />
-              <div className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 shadow-lg shadow-secondary/30 animate-pulse" />
-              <div className="w-[52px] h-[52px] rounded-full bg-success shadow-lg animate-pulse" />
-              <div className="w-[52px] h-[52px] rounded-full bg-white/15 border border-white/25 shadow-lg animate-pulse" />
+              <div className={`w-[52px] h-[52px] rounded-full ${SKELETON_SHAPE}`} />
+              <div className={`w-[52px] h-[52px] rounded-full ${SKELETON_SHAPE}`} />
+              <div className={`w-[52px] h-[52px] rounded-full ${SKELETON_SHAPE}`} />
+              <div className={`w-[52px] h-[52px] rounded-full ${SKELETON_SHAPE}`} />
             </div>
           </div>
         </div>
