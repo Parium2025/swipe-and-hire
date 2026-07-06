@@ -49,7 +49,7 @@ export const JobSlideContent = memo(function JobSlideContent({
         {(logoUrl || !hasImage) && displayCompanyName && (
           <div className="flex justify-center mb-4">
             {logoUrl ? (
-              <div className="w-14 h-14 rounded-full bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
+              <div className="w-14 h-14 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
                 <img
                   src={logoUrl}
                   alt={interactive ? displayCompanyName : ''}
