@@ -60,10 +60,16 @@ export function useSwipeUndo({ onUndoSwipeAction }: UseSwipeUndoOptions) {
     };
   }, []);
 
+  const consumePendingUndo = useCallback((): string | null => {
+    const id = pendingUndoJobIdRef.current;
+    pendingUndoJobIdRef.current = null;
+    return id;
+  }, []);
+
   return {
     canUndo: canUndo && !!onUndoSwipeAction,
     undoEntryJobId,
-    pendingUndoJobIdRef: pendingUndoJobIdRef as MutableRefObject<string | null>,
+    consumePendingUndo,
     pushSkipped,
     handleUndo,
   };
