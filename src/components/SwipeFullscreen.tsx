@@ -71,6 +71,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const overlayShieldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const undoEntryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const overlayShieldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const endBounceActiveRef = useRef(false);
   const currentIndexRef = useRef(0);
   const showEndBounceRef = useRef(false);
