@@ -88,7 +88,7 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
           {(!imageUrl || job.company_logo_url) && displayCompanyName && (
             <div className="flex justify-center mb-4">
               {job.company_logo_url ? (
-                <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg">
+                <div className="w-14 h-14 rounded-full bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
                   <img
                     src={logoUrl || ''}
                     alt=""
