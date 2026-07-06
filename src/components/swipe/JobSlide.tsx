@@ -81,8 +81,8 @@ export const JobSlide = memo(function JobSlide({
     '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
   ]);
   // Underlay: driven av explicit timed animation, INTE drag-progress
-  const underlayY = useMotionValue(800);
-  const underlayScale = useMotionValue(0.68);
+  const underlayY = useMotionValue(UNDERLAY_INITIAL_Y);
+  const underlayScale = useMotionValue(UNDERLAY_INITIAL_SCALE);
   const underlayOpacity = useMotionValue(0);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
