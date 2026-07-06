@@ -579,7 +579,15 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
             scrollBehavior: 'smooth',
           }}
         >
-          {jobs.map((job, idx) => (
+          {jobs.map((job, idx) => {
+            // 🚀 PERF: content-visibility:auto på slides långt från aktiv
+            // position → browsern hoppar över layout/paint/composite för dem
+            // helt. Aktiv ±2 renderas alltid (för snap-scroll + underlay).
+            // contain-intrinsic-size ger stabil scroll-höjd så scrollbar inte
+            // hoppar när slides "vaknar".
+            const distance = Math.abs(idx - currentIndex);
+            const skipRender = distance > 2;
+            return (
             <div
               key={job.id}
               ref={(el) => setSlideRef(el, idx)}
@@ -590,6 +598,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 height: sectionHeight,
                 contain: 'layout style paint',
                 willChange: 'auto',
+                contentVisibility: skipRender ? 'auto' : 'visible',
+                containIntrinsicSize: skipRender ? `${sectionHeight} 100vw` : undefined,
               }}
             >
               <JobSlide
@@ -612,7 +622,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 onRegisterSwipeApi={registerActiveSwipeApi}
               />
             </div>
-          ))}
+            );
+          })}
 
           <SwipeEndSection
             ref={endSectionRef}
