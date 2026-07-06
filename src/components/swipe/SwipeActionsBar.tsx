@@ -101,7 +101,7 @@ export const SwipeActionsBar = memo(function SwipeActionsBar({
           }}
           onClick={(e) => e.preventDefault()}
           data-swipe-action-button
-          className="w-[52px] h-[52px] rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation opacity-100"
+          className="w-[52px] h-[52px] rounded-full bg-white/15 border border-white/25 flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation opacity-100"
         >
           <Undo2
             className={`w-6 h-6 text-white transition-opacity duration-200 ${undoActive ? 'opacity-100' : 'opacity-40'}`}
