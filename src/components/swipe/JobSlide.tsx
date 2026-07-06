@@ -132,291 +132,39 @@ export const JobSlide = memo(function JobSlide({
     [job.overlay_text_color],
   );
 
-  const isTitleTruncated = useCallback(() => {
-    const el = titleRef.current;
-    if (!el) return false;
-    return el.scrollHeight > el.clientHeight + 1;
-  }, []);
+  // Tap-hint (title/company popover) — inklusive auto-hide-timer och
+  // stängning när overlayet öppnas.
+  const { showTapHint, tapHintSource, isTitleTruncated, armTapHint, clearTapHint } =
+    useTapHint({ overlayOpen, titleRef });
 
-  const tapHintTimerRef = useRef<ReturnType<typeof setTimeout>>();
-
-  const clearTapHint = useCallback(() => {
-    setShowTapHint(false);
-    setTapHintSource(null);
-    if (tapHintTimerRef.current) clearTimeout(tapHintTimerRef.current);
-  }, []);
-
-  const armTapHint = useCallback((source: 'title' | 'company') => {
-    clearTapHint();
-    setShowTapHint(true);
-    setTapHintSource(source);
-    if (source === 'title' && !isTitleTruncated()) {
-      tapHintTimerRef.current = setTimeout(() => setShowTapHint(false), 1800);
-    }
-  }, [clearTapHint, isTitleTruncated]);
-
-  useEffect(() => {
-    if (overlayOpen) clearTapHint();
-  }, [overlayOpen, clearTapHint]);
-
-  // 🧹 Städa tap-hint-timern vid unmount så att state
-  // inte uppdateras på en avmonterad komponent.
-  useEffect(() => {
-    return () => {
-      if (tapHintTimerRef.current) clearTimeout(tapHintTimerRef.current);
-    };
-  }, []);
-
-  const triggerSwipe = useCallback((direction: SwipeDirection) => {
-    lastTapTimestampRef.current = 0;
-    clearTapHint();
-
-    hapticMedium();
-
-    if (direction === 'right') {
-      animate(x, 0, SNAP_SPRING);
-      onSwipeRight();
-      return;
-    }
-
-    swipedRef.current = true;
-
-    animate(x, -EXIT_X, {
-      type: 'spring',
-      stiffness: 220,
-      damping: 26,
-      mass: 0.85,
-    });
-    animate(exitOpacity, 0, {
-      duration: 0.4,
-      ease: [0.22, 1, 0.36, 1],
-    });
-
-    animate(underlayY, 0, {
-      type: 'spring',
-      stiffness: 120,
-      damping: 22,
-      mass: 1.2,
-    });
-    animate(underlayScale, 1, {
-      type: 'spring',
-      stiffness: 120,
-      damping: 22,
-      mass: 1.2,
-    });
-    animate(underlayOpacity, 1, {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
-    });
-
-    setTimeout(() => {
-      onSwipeLeft();
-      swipedRef.current = false;
-      x.set(0);
-      exitOpacity.set(1);
-      underlayY.set(800);
-      underlayScale.set(0.68);
-      underlayOpacity.set(0);
-    }, 600);
-  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x, underlayY, underlayScale, underlayOpacity]);
-
-  const handleDragEnd = useCallback((_: any, info: PanInfo) => {
-    if (swipedRef.current) return;
-    const { offset, velocity } = info;
-    const dragDistance = Math.abs(offset.x);
-    const dragVelocity = Math.abs(velocity.x);
-
-    if (offset.x > SWIPE_THRESHOLD || velocity.x > VELOCITY_THRESHOLD) {
-      triggerSwipe('right');
-      return;
-    }
-
-    if (offset.x < -SWIPE_THRESHOLD || velocity.x < -VELOCITY_THRESHOLD) {
-      triggerSwipe('left');
-      return;
-    }
-
-    if (dragDistance > TAP_MOVE_THRESHOLD || dragVelocity > TAP_RESET_VELOCITY_THRESHOLD) {
-      lastTapTimestampRef.current = 0;
-      clearTapHint();
-    }
-
-    animate(x, 0, SNAP_SPRING);
-  }, [clearTapHint, triggerSwipe, x]);
-
-  // Track overlay close timing to prevent tap-through
-  const overlayClosedAtRef = useRef(0);
-  const prevOverlayOpenRef = useRef(overlayOpen);
-  useEffect(() => {
-    if (prevOverlayOpenRef.current && !overlayOpen) {
-      overlayClosedAtRef.current = Date.now();
-    }
-    prevOverlayOpenRef.current = overlayOpen;
-  }, [overlayOpen]);
-
-  const handleTouchStartCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (
-      !useTouchTunnel ||
-      swipedRef.current ||
-      overlayOpen ||
-      event.touches.length !== 1 ||
-      isWithinTapHintTarget(event.target) ||
-      isWithinInteractiveTarget(event.target)
-    ) return;
-
-    // Kill any ongoing scroll momentum so the card "lands" immediately
-    const scrollParent = (event.currentTarget as HTMLElement).closest('[class*="overflow-y"]');
-    if (scrollParent) {
-      scrollParent.scrollTop = scrollParent.scrollTop;
-    }
-
-    const touch = event.touches[0];
-    touchGestureRef.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
-      startTime: Date.now(),
-      isDragging: false,
-      cancelled: false,
-    };
-  }, [useTouchTunnel, overlayOpen]);
-
-  const thresholdHapticFiredRef = useRef(false);
-
-  const handleTouchMoveCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (
-      !useTouchTunnel ||
-      swipedRef.current ||
-      event.touches.length !== 1 ||
-      isWithinTapHintTarget(event.target) ||
-      isWithinInteractiveTarget(event.target)
-    ) return;
-
-    const gesture = touchGestureRef.current;
-    if (!gesture || gesture.cancelled) return;
-
-    const touch = event.touches[0];
-    const deltaX = touch.clientX - gesture.startX;
-    const deltaY = touch.clientY - gesture.startY;
-
-    if (!gesture.isDragging) {
-      if (Math.abs(deltaX) < TOUCH_DRAG_INTENT_THRESHOLD && Math.abs(deltaY) < TOUCH_DRAG_INTENT_THRESHOLD) {
-        return;
-      }
-
-      if (Math.abs(deltaY) > Math.abs(deltaX)) {
-        gesture.cancelled = true;
-        lastTapTimestampRef.current = 0;
-        clearTapHint();
-        return;
-      }
-
-      gesture.isDragging = true;
-      thresholdHapticFiredRef.current = false;
-      lastTapTimestampRef.current = 0;
-      clearTapHint();
-    }
-
-    if (event.cancelable) {
-      event.preventDefault();
-    }
-
-    x.set(deltaX);
-
-    if (!thresholdHapticFiredRef.current && Math.abs(deltaX) >= SWIPE_THRESHOLD) {
-      thresholdHapticFiredRef.current = true;
-      hapticLight();
-    }
-  }, [clearTapHint, useTouchTunnel, x]);
-
-  const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (
-      !useTouchTunnel ||
-      isWithinTapHintTarget(event.target) ||
-      isWithinInteractiveTarget(event.target)
-    ) {
-      touchGestureRef.current = null;
-      return;
-    }
-
-    if (overlayOpen || (Date.now() - overlayClosedAtRef.current < 500)) {
-      touchGestureRef.current = null;
-      return;
-    }
-    const gesture = touchGestureRef.current;
-    touchGestureRef.current = null;
-
-    if (!gesture || swipedRef.current || gesture.cancelled) return;
-
-    const touch = event.changedTouches[0];
-    const offsetX = touch.clientX - gesture.startX;
-    const offsetY = touch.clientY - gesture.startY;
-    const movedDistance = Math.hypot(offsetX, offsetY);
-    const pressDuration = Date.now() - gesture.startTime;
-    const velocityX = pressDuration > 0 ? (offsetX / pressDuration) * 1000 : 0;
-
-    if (gesture.isDragging) {
-      if (offsetX > SWIPE_THRESHOLD || velocityX > VELOCITY_THRESHOLD) {
-        triggerSwipe('right');
-        return;
-      }
-
-      if (offsetX < -SWIPE_THRESHOLD || velocityX < -VELOCITY_THRESHOLD) {
-        triggerSwipe('left');
-        return;
-      }
-
-      animate(x, 0, SNAP_SPRING);
-      return;
-    }
-
-    if (movedDistance > TAP_MOVE_THRESHOLD || pressDuration > TAP_MAX_DURATION) {
-      lastTapTimestampRef.current = 0;
-      clearTapHint();
-      return;
-    }
-
-    const now = Date.now();
-
-    if (showTapHint) {
-      clearTapHint();
-      lastTapTimestampRef.current = 0;
-      return;
-    }
-
-    const isTapOnTitle = event.target instanceof Element && Boolean(event.target.closest('[data-title-tap-zone]'));
-    const isTapOnCompany = event.target instanceof Element && Boolean(event.target.closest('[data-company-tap-zone]'));
-
-    if (isTapOnTitle) {
-      armTapHint('title');
-      return;
-    }
-
-    if (isTapOnCompany) {
-      armTapHint('company');
-      return;
-    }
-
-    if (now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
-      clearTapHint();
-      lastTapTimestampRef.current = 0;
-      onTap();
-      return;
-    }
-
-    lastTapTimestampRef.current = 0;
-    onTap();
-  }, [armTapHint, clearTapHint, onTap, triggerSwipe, useTouchTunnel, overlayOpen, x, showTapHint]);
-
-  const handleTouchCancelCapture = useCallback(() => {
-    clearTapHint();
-    touchGestureRef.current = null;
-    if (!swipedRef.current) {
-      animate(x, 0, SNAP_SPRING);
-    }
-  }, [clearTapHint, x]);
+  // All gestlogik (touch-tunnel + mouse-drag + trigger) i en hook.
+  const {
+    triggerSwipe,
+    handleDragEnd,
+    handleTouchStartCapture,
+    handleTouchMoveCapture,
+    handleTouchEndCapture,
+    handleTouchCancelCapture,
+  } = useSwipeCardGesture({
+    useTouchTunnel,
+    overlayOpen,
+    showTapHint,
+    x,
+    exitOpacity,
+    underlayY,
+    underlayScale,
+    underlayOpacity,
+    onSwipeLeft,
+    onSwipeRight,
+    onTap,
+    onTapTitle: () => armTapHint('title'),
+    onTapCompany: () => armTapHint('company'),
+    clearTapHint,
+  });
 
   // ✨ Ångra: mjuk premium "catch"-animation.
   useUndoEntryAnimation({ isUndoEntry, x, exitOpacity, entryScale });
+
 
   return (
     <div
