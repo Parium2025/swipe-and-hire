@@ -3,13 +3,21 @@ import { animate, type MotionValue, type PanInfo } from 'framer-motion';
 import { hapticLight, hapticMedium } from '@/lib/haptics';
 import {
   DOUBLE_TAP_DELAY,
+  EXIT_OPACITY_DURATION,
+  EXIT_SPRING,
   EXIT_X,
+  OVERLAY_CLOSE_INPUT_LOCK_MS,
+  PREMIUM_EASE,
   SNAP_SPRING,
   SWIPE_THRESHOLD,
   TAP_MAX_DURATION,
   TAP_MOVE_THRESHOLD,
   TAP_RESET_VELOCITY_THRESHOLD,
   TOUCH_DRAG_INTENT_THRESHOLD,
+  UNDERLAY_INITIAL_SCALE,
+  UNDERLAY_INITIAL_Y,
+  UNDERLAY_OPACITY_DURATION,
+  UNDERLAY_RISE_SPRING,
   VELOCITY_THRESHOLD,
 } from './constants';
 import { isWithinInteractiveTarget, isWithinTapHintTarget } from './utils';
@@ -95,34 +103,19 @@ export function useSwipeCardGesture({
 
       swipedRef.current = true;
 
-      // Exit-animation för kortet (spring med tydlig kurva så den syns).
-      const exitControls = animate(x, -EXIT_X, {
-        type: 'spring',
-        stiffness: 220,
-        damping: 26,
-        mass: 0.85,
-      });
+      // Exit-animation för kortet.
+      const exitControls = animate(x, -EXIT_X, EXIT_SPRING);
       animate(exitOpacity, 0, {
-        duration: 0.38,
-        ease: [0.22, 1, 0.36, 1],
+        duration: EXIT_OPACITY_DURATION,
+        ease: PREMIUM_EASE,
       });
 
       // Underlaget stiger upp bakom det utåkande kortet.
-      animate(underlayY, 0, {
-        type: 'spring',
-        stiffness: 140,
-        damping: 22,
-        mass: 1.1,
-      });
-      animate(underlayScale, 1, {
-        type: 'spring',
-        stiffness: 140,
-        damping: 22,
-        mass: 1.1,
-      });
+      animate(underlayY, 0, UNDERLAY_RISE_SPRING);
+      animate(underlayScale, 1, UNDERLAY_RISE_SPRING);
       animate(underlayOpacity, 1, {
-        duration: 0.42,
-        ease: [0.22, 1, 0.36, 1],
+        duration: UNDERLAY_OPACITY_DURATION,
+        ease: PREMIUM_EASE,
       });
 
       // Advance föräldern PRECIS när exit-animationen är klar — animationen
@@ -132,8 +125,8 @@ export function useSwipeCardGesture({
         swipedRef.current = false;
         x.set(0);
         exitOpacity.set(1);
-        underlayY.set(800);
-        underlayScale.set(0.68);
+        underlayY.set(UNDERLAY_INITIAL_Y);
+        underlayScale.set(UNDERLAY_INITIAL_SCALE);
         underlayOpacity.set(0);
       });
     },
@@ -263,7 +256,7 @@ export function useSwipeCardGesture({
         return;
       }
 
-      if (overlayOpen || Date.now() - overlayClosedAtRef.current < 150) {
+      if (overlayOpen || Date.now() - overlayClosedAtRef.current < OVERLAY_CLOSE_INPUT_LOCK_MS) {
         touchGestureRef.current = null;
         return;
       }

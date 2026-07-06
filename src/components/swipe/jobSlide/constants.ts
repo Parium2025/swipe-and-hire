@@ -30,9 +30,36 @@ export const SNAP_SPRING = {
   mass: 0.9,
 };
 
+// Exit-animation för aktivt kort när vänster-swipe committas.
+export const EXIT_SPRING = {
+  type: 'spring' as const,
+  stiffness: 220,
+  damping: 26,
+  mass: 0.85,
+};
+export const EXIT_OPACITY_DURATION = 0.38;
+
+// Underlay ("nästa kort") som stiger fram bakom det utåkande kortet.
+export const UNDERLAY_RISE_SPRING = {
+  type: 'spring' as const,
+  stiffness: 140,
+  damping: 22,
+  mass: 1.1,
+};
+export const UNDERLAY_OPACITY_DURATION = 0.42;
+export const UNDERLAY_INITIAL_Y = 800;
+export const UNDERLAY_INITIAL_SCALE = 0.68;
+
+export const PREMIUM_EASE = [0.22, 1, 0.36, 1] as const;
+
 // Tap-detektion
 export const DOUBLE_TAP_DELAY = 280;
 export const TAP_MAX_DURATION = 250;
 export const TAP_MOVE_THRESHOLD = 18;
 export const TAP_RESET_VELOCITY_THRESHOLD = 120;
 export const TOUCH_DRAG_INTENT_THRESHOLD = 12;
+
+// Låser input kort efter att overlay stängts så att stängnings-tap inte
+// råkar registreras som en swipe/tap på kortet under.
+export const OVERLAY_CLOSE_INPUT_LOCK_MS = 150;
+

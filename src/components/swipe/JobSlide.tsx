@@ -1,18 +1,19 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { Building2 } from 'lucide-react';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCardImage } from '@/hooks/useCardImage';
 import type { SwipeJob } from './types';
-import { TruncatedText } from '@/components/TruncatedText';
-import { Badge } from '@/components/ui/badge';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getImageVersion } from '@/lib/imageTransforms';
 
-import { SWIPE_IMG_TRANSFORM, SWIPE_LOGO_TRANSFORM } from './jobSlide/constants';
-import { getImageObjectPosition, getCompanyInitials } from './jobSlide/utils';
-import { JobSlideBadgesRow } from './jobSlide/JobSlideBadgesRow';
+import {
+  SWIPE_IMG_TRANSFORM,
+  SWIPE_LOGO_TRANSFORM,
+  UNDERLAY_INITIAL_SCALE,
+  UNDERLAY_INITIAL_Y,
+} from './jobSlide/constants';
+import { getImageObjectPosition } from './jobSlide/utils';
+import { JobSlideContent, OccupationBadge } from './jobSlide/JobSlideContent';
 import { NextCardUnderlay } from './jobSlide/NextCardUnderlay';
 import { useUndoEntryAnimation } from './jobSlide/useUndoEntryAnimation';
 import { useTapHint } from './jobSlide/useTapHint';
@@ -85,8 +86,8 @@ export const JobSlide = memo(function JobSlide({
     '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
   ]);
   // Underlay: driven av explicit timed animation, INTE drag-progress
-  const underlayY = useMotionValue(800);
-  const underlayScale = useMotionValue(0.68);
+  const underlayY = useMotionValue(UNDERLAY_INITIAL_Y);
+  const underlayScale = useMotionValue(UNDERLAY_INITIAL_SCALE);
   const underlayOpacity = useMotionValue(0);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -109,15 +110,6 @@ export const JobSlide = memo(function JobSlide({
     SWIPE_IMG_TRANSFORM,
   );
 
-  // Badges/pills använder INTE backdrop-blur — det orsakar synligt flimmer
-  // varje gång bakomliggande lager (bild, drag, next-underlay) uppdateras
-  // eftersom filter måste re-samplas per frame. Vi använder solid mörk
-  // chip-bakgrund istället (bg-black/45) → samma premium-läsbarhet, noll
-  // resampling, noll flimmer.
-  const [imageLoaded, setImageLoaded] = useState(false);
-  useEffect(() => { setImageLoaded(false); }, [imageUrl]);
-  void imageLoaded;
-  const blurClass = '';
 
   // 🚀 Logo i swipe-card är liten (~64px) → be om optimerad version
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(
@@ -235,7 +227,6 @@ export const JobSlide = memo(function JobSlide({
                 style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
                 loading={isVisible ? 'eager' : 'lazy'}
                 draggable={false}
-                onLoad={() => setImageLoaded(true)}
                 onError={handleImageError}
               />
             ) : (
@@ -247,13 +238,7 @@ export const JobSlide = memo(function JobSlide({
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
 
           {/* Kategori-badge */}
-          {job.occupation && (
-            <div className="absolute top-5 left-5 z-10 pointer-events-none">
-              <div className="px-3 py-1.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
-                <span className="text-white text-xs font-semibold tracking-wide [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">{job.occupation}</span>
-              </div>
-            </div>
-          )}
+          {job.occupation && <OccupationBadge occupation={job.occupation} />}
 
           {/* SÖK-stamp */}
           <motion.div
@@ -289,65 +274,17 @@ export const JobSlide = memo(function JobSlide({
             </div>
           )}
 
-          <div
-            className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center"
-            style={overlayTextStyle}
-          >
-            <div className="mx-auto w-full max-w-[21rem]">
-              {(logoUrl || !imageUrl) && displayCompanyName && (
-                <div className="flex justify-center mb-4">
-                  {logoUrl ? (
-                    <div className="w-14 h-14 rounded-full bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
-                      <img
-                        src={logoUrl}
-                        alt={displayCompanyName}
-                        className="w-full h-full object-cover"
-                        draggable={false}
-                        onError={handleLogoError}
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                      <span className="text-xl font-bold text-white/40 tracking-wide select-none">
-                        {getCompanyInitials(displayCompanyName)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-              <div className="flex justify-center" data-company-tap-zone>
-                <Badge variant="glass" className="inline-flex max-w-[80%] min-w-0 items-center gap-1.5 border-white/15 px-3 py-1 text-white">
-                  <Building2 className="h-3.5 w-3.5 shrink-0" />
-                  <TruncatedText
-                    text={displayCompanyName}
-                    className="min-w-0 flex-1 text-sm font-medium"
-                    tooltipSide="bottom"
-                    style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      wordBreak: 'break-word',
-                    }}
-                  />
-                </Badge>
-              </div>
+          <JobSlideContent
+            job={job}
+            logoUrl={logoUrl}
+            hasImage={Boolean(imageUrl)}
+            displayCompanyName={displayCompanyName}
+            overlayTextStyle={overlayTextStyle}
+            interactive
+            titleRef={titleRef}
+            onLogoError={handleLogoError}
+          />
 
-              <h2
-                ref={titleRef}
-                data-title-tap-zone
-                className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
-                style={overlayTextStyle}
-              >
-                {job.title}
-              </h2>
-              <p className="text-white font-semibold text-base mt-2 truncate" style={overlayTextStyle}>
-                {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
-              </p>
-
-              <JobSlideBadgesRow job={job} blurClass={blurClass} />
-            </div>
-          </div>
 
           {showTapHint && tapHintSource === 'title' && isTitleTruncated() && (
             <div className="absolute inset-x-4 bottom-24 z-30 pointer-events-none">

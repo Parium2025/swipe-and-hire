@@ -1,0 +1,143 @@
+import { memo, type CSSProperties, type Ref } from 'react';
+import { Building2 } from 'lucide-react';
+import type { SwipeJob } from '../types';
+import { Badge } from '@/components/ui/badge';
+import { TruncatedText } from '@/components/TruncatedText';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getCompanyInitials } from './utils';
+import { JobSlideBadgesRow } from './JobSlideBadgesRow';
+
+interface JobSlideContentProps {
+  job: SwipeJob;
+  logoUrl: string | null;
+  hasImage: boolean;
+  displayCompanyName: string;
+  overlayTextStyle: CSSProperties;
+  /**
+   * Aktivt kort → skickar in titleRef + data-attribut för tap-hint.
+   * Ghost/underlay → inget av det (rent visuell spegel).
+   */
+  interactive?: boolean;
+  titleRef?: Ref<HTMLHeadingElement>;
+  onLogoError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
+}
+
+/**
+ * Delad hero-block: logo + företag + titel + plats/anställning + badges.
+ * Renderas identiskt av både JobSlide (aktivt kort) och NextCardUnderlay
+ * (ghost) — enda skillnaden är tap-zon-attribut och titleRef.
+ *
+ * VIKTIGT: Ändras layouten här måste den se identisk ut i båda lägena,
+ * annars "hoppar" innehållet när användaren swipear.
+ */
+export const JobSlideContent = memo(function JobSlideContent({
+  job,
+  logoUrl,
+  hasImage,
+  displayCompanyName,
+  overlayTextStyle,
+  interactive,
+  titleRef,
+  onLogoError,
+}: JobSlideContentProps) {
+  return (
+    <div
+      className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center"
+      style={overlayTextStyle}
+    >
+      <div className="mx-auto w-full max-w-[21rem]">
+        {(logoUrl || !hasImage) && displayCompanyName && (
+          <div className="flex justify-center mb-4">
+            {logoUrl ? (
+              <div className="w-14 h-14 rounded-full bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
+                <img
+                  src={logoUrl}
+                  alt={interactive ? displayCompanyName : ''}
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                  onError={onLogoError}
+                />
+              </div>
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
+                <span className="text-xl font-bold text-white/40 tracking-wide select-none">
+                  {getCompanyInitials(displayCompanyName)}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div
+          className="flex justify-center"
+          {...(interactive ? { 'data-company-tap-zone': '' } : {})}
+        >
+          <Badge
+            variant="glass"
+            className="inline-flex max-w-[80%] min-w-0 items-center gap-1.5 border-white/15 px-3 py-1 text-white"
+          >
+            <Building2 className="h-3.5 w-3.5 shrink-0" />
+            <TruncatedText
+              text={displayCompanyName}
+              className="min-w-0 flex-1 text-sm font-medium"
+              tooltipSide="bottom"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                wordBreak: 'break-word',
+              }}
+            />
+          </Badge>
+        </div>
+
+        <h2
+          ref={titleRef}
+          {...(interactive ? { 'data-title-tap-zone': '' } : {})}
+          className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
+          style={overlayTextStyle}
+        >
+          {job.title}
+        </h2>
+        <p
+          className="text-white font-semibold text-base mt-2 truncate"
+          style={overlayTextStyle}
+        >
+          {[
+            job.employment_type && getEmploymentTypeLabel(job.employment_type),
+            job.location,
+          ]
+            .filter(Boolean)
+            .join(' • ')}
+        </p>
+
+        <JobSlideBadgesRow job={job} />
+      </div>
+    </div>
+  );
+});
+
+interface OccupationBadgeProps {
+  occupation: string;
+}
+
+/**
+ * Solid mörk chip längst upp till vänster. Ingen backdrop-blur — det
+ * orsakade synligt flimmer varje gång underliggande bild/animation
+ * ändrades (filter måste re-samplas per frame). bg-black/45 + text-shadow
+ * ger samma premium-läsbarhet utan resampling.
+ */
+export const OccupationBadge = memo(function OccupationBadge({
+  occupation,
+}: OccupationBadgeProps) {
+  return (
+    <div className="absolute top-5 left-5 z-10 pointer-events-none">
+      <div className="px-3 py-1.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+        <span className="text-white text-xs font-semibold tracking-wide [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+          {occupation}
+        </span>
+      </div>
+    </div>
+  );
+});
