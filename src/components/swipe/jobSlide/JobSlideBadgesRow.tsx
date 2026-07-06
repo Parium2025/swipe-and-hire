@@ -36,15 +36,6 @@ export const JobSlideBadgesRow = memo(function JobSlideBadgesRow({
     'px-3 py-1.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]';
   const textClass = 'text-white text-xs font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]';
 
-  // 🚫 INGEN backdrop-blur här. Blur på pills över en bakgrundsbild som
-  // laddar/animerar tvingar webbläsaren att resampla lagret varje frame →
-  // synligt flimmer när kortet växlar jobb eller när bilden avkodas.
-  // Solid mörk chip (bg-black/45) ger samma premium-läsbarhet utan
-  // resampling — kompositeras en gång, klart.
-  void blurClass;
-  const pillClass =
-    'px-3 py-1.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]';
-  const textClass = 'text-white text-xs font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]';
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
