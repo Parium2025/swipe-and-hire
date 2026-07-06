@@ -68,11 +68,11 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
       {/* Gradient — matchar aktivt kort exakt */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
 
-      {/* Kategori-badge */}
+      {/* Kategori-badge — solid chip, ingen backdrop-blur (undviker flimmer) */}
       {job.occupation && (
         <div className="absolute top-5 left-5 z-10">
-          <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md transform-gpu [will-change:transform]">
-            <span className="text-xs font-semibold tracking-wide text-white">
+          <div className="rounded-full border border-white/10 bg-black/45 px-3 py-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+            <span className="text-xs font-semibold tracking-wide text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
               {job.occupation}
             </span>
           </div>
@@ -88,7 +88,7 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
           {(!imageUrl || job.company_logo_url) && displayCompanyName && (
             <div className="flex justify-center mb-4">
               {job.company_logo_url ? (
-                <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg">
+                <div className="w-14 h-14 rounded-full bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
                   <img
                     src={logoUrl || ''}
                     alt=""
@@ -141,7 +141,7 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
               .join(' • ')}
           </p>
 
-          <JobSlideBadgesRow job={job} blurClass="backdrop-blur-md" />
+          <JobSlideBadgesRow job={job} blurClass="" />
         </div>
       </div>
 
