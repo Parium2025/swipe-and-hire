@@ -267,7 +267,7 @@ export function useSwipeCardGesture({
         return;
       }
 
-      if (overlayOpen || Date.now() - overlayClosedAtRef.current < 500) {
+      if (overlayOpen || Date.now() - overlayClosedAtRef.current < 150) {
         touchGestureRef.current = null;
         return;
       }
