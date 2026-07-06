@@ -19,7 +19,7 @@ interface JobSlideContentProps {
    */
   interactive?: boolean;
   titleRef?: Ref<HTMLHeadingElement>;
-  onLogoError?: () => void;
+  onLogoError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 }
 
 /**
