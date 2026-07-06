@@ -249,8 +249,8 @@ export const JobSlide = memo(function JobSlide({
           {/* Kategori-badge */}
           {job.occupation && (
             <div className="absolute top-5 left-5 z-10 pointer-events-none">
-              <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
-                <span className="text-white text-xs font-semibold tracking-wide">{job.occupation}</span>
+              <div className="px-3 py-1.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                <span className="text-white text-xs font-semibold tracking-wide [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">{job.occupation}</span>
               </div>
             </div>
           )}
