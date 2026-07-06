@@ -168,11 +168,16 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
                   {/* Subtitel (text-base, mt-2) */}
                   <div className="mt-2 h-5 w-56 max-w-[75%] rounded bg-white/15 animate-pulse" />
 
-                  {/* JobSlideBadgesRow (mt ~3, wrap centered) */}
-                  <div className="mt-3 flex flex-wrap justify-center gap-2 w-full">
-                    <div className="h-7 w-24 rounded-full bg-white/10 border border-white/10 animate-pulse" />
-                    <div className="h-7 w-28 rounded-full bg-white/10 border border-white/10 animate-pulse" />
-                    <div className="h-7 w-20 rounded-full bg-white/10 border border-white/10 animate-pulse" />
+                  {/*
+                    JobSlideBadgesRow: flex-wrap, men i praktiken stackas
+                    pillsen alltid vertikalt på mobil eftersom texterna
+                    ("Publicerad 5 juli • 12 dagar kvar" etc) är för långa
+                    för att rymmas sida-vid-sida. Skeleton speglar det.
+                  */}
+                  <div className="mt-3 flex flex-col items-center gap-2 w-full">
+                    <div className="h-7 w-48 max-w-[75%] rounded-full bg-black/45 border border-white/10 animate-pulse" />
+                    <div className="h-7 w-56 max-w-[85%] rounded-full bg-black/45 border border-white/10 animate-pulse" />
+                    <div className="h-7 w-32 max-w-[55%] rounded-full bg-black/45 border border-white/10 animate-pulse" />
                   </div>
                 </div>
               </div>
@@ -194,9 +199,14 @@ export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
             </div>
           </div>
 
-          {/* SwipeActionsBar — identisk positionering */}
+          {/*
+            SwipeActionsBar — position: fixed så knapparna sitter vid
+            faktisk viewport-botten. Containern (fullscreenSkeletonStyle)
+            sträcker sig medvetet 96px förbi viewport-botten för att dölja
+            eventuell bounce, så en `absolute bottom` skulle hamna off-screen.
+          */}
           <div
-            className="absolute inset-x-0 z-20 px-5"
+            className="fixed inset-x-0 z-[2147483647] px-5 pointer-events-none"
             style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
           >
             <div className="flex items-center justify-center gap-4">
