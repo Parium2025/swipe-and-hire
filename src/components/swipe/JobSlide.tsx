@@ -204,19 +204,20 @@ export const JobSlide = memo(function JobSlide({
           // lyser igenom den avrundade kanten under första framen eller under
           // scale-in (nytt kort/ångra). Utan denna färg såg iOS Safari ett
           // synligt vitt "rim" tills bilden dekodades.
-          className="relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)] select-none [-webkit-tap-highlight-color:transparent]"
+          className="relative h-full rounded-2xl overflow-hidden bg-[hsl(215,85%,15%)] select-none [-webkit-tap-highlight-color:transparent] will-change-transform"
           style={{
             x,
             opacity: exitOpacity,
             rotate: cardRotate,
             scale: combinedScale,
-            boxShadow: cardShadow,
+            boxShadow: STATIC_CARD_SHADOW,
             touchAction: useTouchTunnel ? 'pan-y' : 'auto',
           }}
           drag={useTouchTunnel ? false : 'x'}
           dragDirectionLock={!useTouchTunnel}
           dragConstraints={useTouchTunnel ? undefined : { left: 0, right: 0 }}
-          dragElastic={useTouchTunnel ? undefined : 0.7}
+          dragElastic={useTouchTunnel ? undefined : 0.18}
+
           onDragEnd={useTouchTunnel ? undefined : handleDragEnd}
           onTouchStartCapture={handleTouchStartCapture}
           onTouchMoveCapture={handleTouchMoveCapture}
