@@ -15,8 +15,6 @@ import {
   TAP_MOVE_THRESHOLD,
   TAP_RESET_VELOCITY_THRESHOLD,
   TOUCH_DRAG_INTENT_THRESHOLD,
-  UNDERLAY_INITIAL_SCALE,
-  UNDERLAY_INITIAL_Y,
   UNDERLAY_OPACITY_DURATION,
   UNDERLAY_RISE_SPRING,
   VELOCITY_THRESHOLD,
@@ -141,19 +139,26 @@ export function useSwipeCardGesture({
       // 🚀 Tinder/TikTok-handoff: mounta nästa kort mid-exit istället för
       // att vänta på att springen landar. Timer trackas i ref → cleanup vid
       // unmount + skrivs över om ny swipe triggas innan förra hunnit landa.
+      //
+      // ⚠️ VIKTIGT: Vi RESETTAR INTE motion values (x/opacity/underlay) här.
+      // Eftersom parent tar bort jobbet från arrayen och `key={job.id}`
+      // används i föräldern kommer denna JobSlide-instans att unmountas
+      // direkt efter `onSwipeLeft()`. Om vi skriver `x.set(0)` +
+      // `exitOpacity.set(1)` synkront går de rakt in i DOM:en (framer-motions
+      // imperative-path), medan React-re-rendern med unmount sker i nästa
+      // microtask. På långsammare enheter hinner browsern paint:a en frame
+      // där det utgående kortet är tillbaka i mitten OCH opaque OCH
+      // underlaget är osynligt → man ser den nakna mörkblå card-basen som
+      // ett "tomt kort" mellan reject och nästa kort. Låt unmount göra
+      // rensningen — inga sets krävs på en instans som ändå försvinner.
       if (exitHandoffTimerRef.current !== null) {
         window.clearTimeout(exitHandoffTimerRef.current);
       }
       exitHandoffTimerRef.current = window.setTimeout(() => {
         exitHandoffTimerRef.current = null;
         onSwipeLeft();
-        swipedRef.current = false;
-        x.set(0);
-        exitOpacity.set(1);
-        underlayY.set(UNDERLAY_INITIAL_Y);
-        underlayScale.set(UNDERLAY_INITIAL_SCALE);
-        underlayOpacity.set(0);
       }, EXIT_HANDOFF_MS);
+
     },
     [
       clearTapHint,
