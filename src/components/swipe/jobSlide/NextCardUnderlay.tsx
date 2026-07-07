@@ -1,14 +1,15 @@
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { motion, type MotionValue } from 'framer-motion';
 import type { SwipeJob } from '../types';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getImageObjectPosition } from './utils';
 import { JobSlideContent, OccupationBadge } from './JobSlideContent';
+import { useCardImage } from '@/hooks/useCardImage';
+import { getImageVersion } from '@/lib/imageTransforms';
+import { SWIPE_IMG_TRANSFORM, SWIPE_LOGO_TRANSFORM } from './constants';
 
 interface NextCardUnderlayProps {
   job: SwipeJob;
-  imageUrl: string | null;
-  logoUrl: string | null;
   y: MotionValue<number>;
   scale: MotionValue<number>;
   opacity: MotionValue<number>;
@@ -19,13 +20,16 @@ interface NextCardUnderlayProps {
  * upp när användaren swipear vänster. Får ALDRIG rendera interaktiva
  * element (pointer-events-none på wrappern) — den är rent visuell.
  *
+ * Bild-/logo-hooks bor HÄR (inte i JobSlide) så att inaktiva kort inte
+ * betalar för `useCardImage` × 2 utan anledning. Underlaget monteras
+ * bara för det aktiva kortet (via JobSlide) → exakt ett par extra
+ * image-hooks totalt istället för ett par per monterat kort.
+ *
  * Innehåll delas med JobSlide via `JobSlideContent` för att garantera
  * pixelperfekt paritet — annars "hoppar" innehållet vid övergången.
  */
 export const NextCardUnderlay = memo(function NextCardUnderlay({
   job,
-  imageUrl,
-  logoUrl,
   y,
   scale,
   opacity,
@@ -35,6 +39,33 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
     () => getJobOverlayTextStyle(job.overlay_text_color),
     [job.overlay_text_color],
   );
+
+  // KRITISKT: getImageVersion måste matcha useSwipeImagePreloader exakt,
+  // annars warmar preloadern en URL och kortet renderar en annan → cache-
+  // miss + synlig nätverksladdning på första frame.
+  const { displayUrl: imageUrl } = useCardImage(
+    job.job_image_url ?? null,
+    'job-images',
+    getImageVersion(job),
+    SWIPE_IMG_TRANSFORM,
+  );
+  const { displayUrl: logoUrl } = useCardImage(
+    job.company_logo_url ?? null,
+    'company-logos',
+    getImageVersion(job),
+    SWIPE_LOGO_TRANSFORM,
+  );
+
+  // 🚀 Proaktiv decode: när underlaget mountas har vi bilden redan i cache
+  // (preloader) men bitmapen är inte alltid dekodad. `img.decode()` gör
+  // det off-main-thread så första frame när kortet blir aktivt är utan
+  // hicka. Ignorera fel — bilden dyker upp ändå via normal load-path.
+  useEffect(() => {
+    if (!imageUrl) return;
+    const img = new Image();
+    img.src = imageUrl;
+    img.decode?.().catch(() => { /* decode() rejects om src ändras */ });
+  }, [imageUrl]);
 
   return (
     <motion.div
@@ -55,8 +86,6 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
             className="h-full w-full object-cover"
             style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
             loading="eager"
-            // 🚀 Fix 1: prio + async decode så bitmapen finns i minnet
-            // innan kortet blir aktivt → inga första-frame-hicka vid swap.
             decoding="async"
             {...({ fetchpriority: 'high' } as Record<string, string>)}
             draggable={false}
