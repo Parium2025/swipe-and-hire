@@ -1,5 +1,8 @@
 import { memo } from 'react';
+import { motion } from 'framer-motion';
 import { X, SlidersHorizontal, Undo2 } from 'lucide-react';
+
+const ease = [0.22, 1, 0.36, 1] as const;
 
 interface SwipeEmptyStateProps {
   onClose: () => void;
@@ -61,9 +64,24 @@ export const SwipeEmptyState = memo(function SwipeEmptyState({
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center gap-5 p-6">
-        <div className="bg-white/10 rounded-2xl px-8 py-5 border border-white/20">
-          <p className="text-white text-base font-medium text-center">Inga jobb hittades</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            opacity: { duration: 0.25, ease },
+            scale: { duration: 0.25, ease },
+          }}
+          className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
+        >
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24, ease, delay: 0.05 }}
+            className="text-center text-[15px] font-medium text-white sm:text-base"
+          >
+            Inga fler jobb just nu
+          </motion.p>
+        </motion.div>
 
         {canUndo && onUndo && (
           <button
