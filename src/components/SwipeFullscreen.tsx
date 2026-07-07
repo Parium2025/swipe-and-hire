@@ -606,40 +606,52 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
             scrollBehavior: 'smooth',
           }}
         >
-          {jobs.map((job, idx) => (
-            <div
-              key={job.id}
-              ref={(el) => setSlideRef(el, idx)}
-              data-index={idx}
-              className="w-full shrink-0 snap-start snap-always"
-              style={{
-                minHeight: sectionHeight,
-                height: sectionHeight,
-                contain: 'layout style paint',
-                willChange: 'auto',
-              }}
-            >
-              <JobSlide
-                job={job}
-                nextJob={idx === currentIndex ? jobs[idx + 1] : undefined}
-                applied={isApplied(job.id)}
-                saved={savedJobIds.has(job.id)}
-                skipped={skippedJobIds?.has(job.id) ?? false}
-                isVisible={Math.abs(idx - currentIndex) <= 1}
-                isActive={idx === currentIndex}
-                isLast={idx === jobs.length - 1}
-                sectionHeight={sectionHeight}
-                overlayOpen={showDetail || showApply || showFilter}
-                skipEntryAnimation={job.id === skipEntryAnimationForId}
-                isUndoEntry={job.id === undoEntryJobId}
-                onSwipeRight={handleSwipeRight}
-                onSwipeLeft={handleSwipeLeft}
-                onSave={() => onToggleSave(job.id)}
-                onTap={handleTap}
-                onRegisterSwipeApi={registerActiveSwipeApi}
-              />
-            </div>
-          ))}
+          {jobs.map((job, idx) => {
+            // 🚀 Virtualisering: mounta bara full JobSlide när kortet är
+            // inom ±2 av aktivt. Snap-mandatory gör att man aldrig ser mer
+            // än ~1 kort i taget under scroll, så placeholder-tomrum för
+            // långt bort-liggande kort märks ALDRIG visuellt. Vinsten:
+            // upp till 25 kort × (4 useCardImage + 6 motion values +
+            // decode-effekter + gesture-hook) monteras inte alls → snabb
+            // vertikal swipe har inga tunga re-renders att slåss mot.
+            const withinWindow = Math.abs(idx - currentIndex) <= 2;
+            return (
+              <div
+                key={job.id}
+                ref={(el) => setSlideRef(el, idx)}
+                data-index={idx}
+                className="w-full shrink-0 snap-start snap-always"
+                style={{
+                  minHeight: sectionHeight,
+                  height: sectionHeight,
+                  contain: 'layout style paint',
+                  willChange: 'auto',
+                }}
+              >
+                {withinWindow ? (
+                  <JobSlide
+                    job={job}
+                    nextJob={idx === currentIndex ? jobs[idx + 1] : undefined}
+                    applied={isApplied(job.id)}
+                    saved={savedJobIds.has(job.id)}
+                    skipped={skippedJobIds?.has(job.id) ?? false}
+                    isVisible={Math.abs(idx - currentIndex) <= 1}
+                    isActive={idx === currentIndex}
+                    isLast={idx === jobs.length - 1}
+                    sectionHeight={sectionHeight}
+                    overlayOpen={showDetail || showApply || showFilter}
+                    skipEntryAnimation={job.id === skipEntryAnimationForId}
+                    isUndoEntry={job.id === undoEntryJobId}
+                    onSwipeRight={handleSwipeRight}
+                    onSwipeLeft={handleSwipeLeft}
+                    onSave={() => onToggleSave(job.id)}
+                    onTap={handleTap}
+                    onRegisterSwipeApi={registerActiveSwipeApi}
+                  />
+                ) : null}
+              </div>
+            );
+          })}
 
           <SwipeEndSection
             ref={endSectionRef}
