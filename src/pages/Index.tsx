@@ -510,10 +510,6 @@ const Index = () => {
   if (user && profile && !role) {
     return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
-  // (fortsätt utan duplicerad boot-skeleton)
-  if (false) {
-    return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
-  }
   
   // isAdmin is now from database via useIsOrgAdmin hook
 
