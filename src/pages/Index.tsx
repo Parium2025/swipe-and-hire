@@ -26,7 +26,6 @@ import AppOnboardingTour from '@/components/AppOnboardingTour';
 import Profile from '@/pages/Profile';
 import Consent from '@/pages/Consent';
 import SearchJobs from '@/pages/SearchJobs';
-import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
 import Subscription from '@/pages/Subscription';
 import Billing from '@/pages/Billing';
 import Support from '@/pages/Support';
@@ -39,7 +38,7 @@ import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
 import EmployerAnalytics from '@/components/EmployerAnalytics';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRightLeft, Search, Loader2, CheckSquare, X } from 'lucide-react';
+import { ArrowRightLeft, Search } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import KeepAlive from '@/components/KeepAlive';
 import { useApplicationsData } from '@/hooks/useApplicationsData';
@@ -338,11 +337,6 @@ const Index = () => {
   const location = useLocation();
   const device = useDevice();
   const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
-  // NOTE: Boot-skeleton på /search-jobs ägs uteslutande av SearchJobs.tsx
-  // (både early-return och AnimatePresence-overlay där). Vi renderar
-  // medvetet INTE en Index-nivå skeleton här — det orsakade "dubbelkörning"
-  // där både Index-portalen och SearchJobs-portalen låg ovanpå varandra
-  // med samma z-index och visade olika chrome samtidigt.
 
   // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
   // den underliggande KeepAlive-vyn (SearchJobs/SavedJobs/etc) stå kvar
