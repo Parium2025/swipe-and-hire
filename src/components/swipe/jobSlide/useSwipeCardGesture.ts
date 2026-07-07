@@ -107,6 +107,8 @@ export function useSwipeCardGesture({
     // anroparna, men används INTE längre — vi kör alltid den mjuka
     // premium-exit som tidigare (velocity-driven kändes hetsig/inte premium).
     (direction: SwipeDirection, _velocityX?: number) => {
+      if (swipedRef.current) return;
+
       lastTapTimestampRef.current = 0;
       clearTapHint();
       hapticMedium();
