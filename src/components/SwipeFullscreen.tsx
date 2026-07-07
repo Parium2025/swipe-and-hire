@@ -391,7 +391,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     }
   }, [jobs, clearTimers, getRestoredIndex]);
 
-  useEffect(() => () => { clearTimers(); }, [clearTimers]);
+  useEffect(() => () => {
+    clearTimers();
+    if (suppressEndCheckTimerRef.current) {
+      clearTimeout(suppressEndCheckTimerRef.current);
+      suppressEndCheckTimerRef.current = null;
+    }
+  }, [clearTimers]);
 
   // 🛟 KRITISKT: Använd 100svh (small viewport height) istället för
   // visualViewport.height. På iOS Safari krymper visualViewport när URL-baren
