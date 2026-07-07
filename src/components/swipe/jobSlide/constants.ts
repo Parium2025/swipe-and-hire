@@ -47,8 +47,11 @@ export const UNDERLAY_RISE_SPRING = {
   mass: 0.9,
 };
 export const UNDERLAY_OPACITY_DURATION = 0.42;
-export const UNDERLAY_INITIAL_Y = 34;
-export const UNDERLAY_INITIAL_SCALE = 0.972;
+// Underlay ligger i EXAKT samma position/storlek som aktiva kortet.
+// Då syns inget krympt "spök-kort" bakom, men underlaget finns fortfarande
+// direkt bakom aktiva kortet → ingen vit/tom mellanframe vid exit.
+export const UNDERLAY_INITIAL_Y = 0;
+export const UNDERLAY_INITIAL_SCALE = 1;
 export const UNDERLAY_INITIAL_OPACITY = 1;
 
 export const PREMIUM_EASE = [0.22, 1, 0.36, 1] as const;
