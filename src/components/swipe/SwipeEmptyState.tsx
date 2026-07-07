@@ -1,5 +1,8 @@
 import { memo } from 'react';
+import { motion } from 'framer-motion';
 import { X, SlidersHorizontal, Undo2 } from 'lucide-react';
+
+const ease = [0.22, 1, 0.36, 1] as const;
 
 interface SwipeEmptyStateProps {
   onClose: () => void;
