@@ -42,13 +42,14 @@ export const EXIT_OPACITY_DURATION = 0.38;
 // Underlay ("nästa kort") som stiger fram bakom det utåkande kortet.
 export const UNDERLAY_RISE_SPRING = {
   type: 'spring' as const,
-  stiffness: 140,
-  damping: 22,
-  mass: 1.1,
+  stiffness: 190,
+  damping: 25,
+  mass: 0.9,
 };
 export const UNDERLAY_OPACITY_DURATION = 0.42;
-export const UNDERLAY_INITIAL_Y = 800;
-export const UNDERLAY_INITIAL_SCALE = 0.68;
+export const UNDERLAY_INITIAL_Y = 34;
+export const UNDERLAY_INITIAL_SCALE = 0.972;
+export const UNDERLAY_INITIAL_OPACITY = 1;
 
 export const PREMIUM_EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -63,13 +64,9 @@ export const TOUCH_DRAG_INTENT_THRESHOLD = 12;
 // råkar registreras som en swipe/tap på kortet under.
 export const OVERLAY_CLOSE_INPUT_LOCK_MS = 150;
 
-// Tinder/TikTok-känsla: släpp föräldern (mounta nästa kort och gör det
-// interaktivt) redan när exit-animationen passerat ~45 % av sin väg.
-// Underlaget har då rest sig så pass mycket att övergången ser smidig ut,
-// men användaren behöver INTE vänta på att gamla kortets spring landar.
-// Sänkt från 200 → 160 ms för snabbare respons; exit-fade fortsätter
-// visuellt i bakgrunden eftersom vi inte längre resettar motion-values
-// vid handoff (se useSwipeCardGesture — undviker "tomt kort"-flash).
-export const EXIT_HANDOFF_MS = 160;
+// Handoff när ghost-underlaget redan hunnit lägga sig nästan exakt i aktiv
+// position. För tidig array-mutation gör att det riktiga nästa kortet poppar
+// in och kan ge en ljus/tom mellanframe på iOS.
+export const EXIT_HANDOFF_MS = 240;
 
 
