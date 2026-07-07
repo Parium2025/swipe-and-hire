@@ -166,24 +166,8 @@ export const JobSlide = memo(function JobSlide({
   // ✨ Ångra: mjuk premium "catch"-animation.
   useUndoEntryAnimation({ isUndoEntry, x, exitOpacity, entryScale });
 
-  // 🚀 Fix 1: proaktiv decode av nästa korts bild medan det ligger som
-  // underlay. När det blir aktivt är bitmapen redan i minnet → första
-  // frame renderas utan hicka. Ignorera fel (bilden dyker upp ändå
-  // via normal load-path).
-  useEffect(() => {
-    if (!nextImageUrl || !isActive) return;
-    const img = new Image();
-    img.src = nextImageUrl;
-    let cancelled = false;
-    img.decode?.().catch(() => {
-      /* decode() rejects om src ändras — inte kritiskt */
-    }).finally(() => {
-      if (cancelled) return;
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [nextImageUrl, isActive]);
+  // (Nästa korts bild-decode sker nu inuti NextCardUnderlay självt så vi
+  // slipper mounta useCardImage för `nextJob` på varje kort.)
 
   // 🎛️ Registrera swipe-API för föräldern när kortet är aktivt.
   // Bar-knapparna (persistent längst ner i SwipeFullscreen) triggar
@@ -211,8 +195,6 @@ export const JobSlide = memo(function JobSlide({
         {nextJob && isActive && !overlayOpen && (
           <NextCardUnderlay
             job={nextJob}
-            imageUrl={nextImageUrl}
-            logoUrl={nextLogoUrl}
             y={underlayY}
             scale={underlayScale}
             opacity={underlayOpacity}
