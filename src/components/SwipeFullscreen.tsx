@@ -75,6 +75,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const showEndBounceRef = useRef(false);
   const isReturningRef = useRef(false);
   const rafRef = useRef<number>(0);
+  // 🛡️ Under array-mutation (skip / undo) hoppar endSection sin offsetTop
+  // uppåt/nedåt medan scrollTop står stilla. Innan effekt-scrollen hunnit
+  // återsnappa aktivt kort kan scroll-handlern läsa scrollTop >= nya endTop
+  // och blinka "Inga fler jobb" i en frame mellan korten. Suppresa
+  // end-check i några frames efter varje jobs-ändring.
+  const suppressEndCheckRef = useRef(false);
+  const suppressEndCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ── Session persistence ───────────────────────────────── */
   const SWIPE_INDEX_KEY = 'parium-swipe-index';
