@@ -75,6 +75,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const showEndBounceRef = useRef(false);
   const isReturningRef = useRef(false);
   const rafRef = useRef<number>(0);
+  // 🛡️ Under array-mutation (skip / undo) hoppar endSection sin offsetTop
+  // uppåt/nedåt medan scrollTop står stilla. Innan effekt-scrollen hunnit
+  // återsnappa aktivt kort kan scroll-handlern läsa scrollTop >= nya endTop
+  // och blinka "Inga fler jobb" i en frame mellan korten. Suppresa
+  // end-check i några frames efter varje jobs-ändring.
+  const suppressEndCheckRef = useRef(false);
+  const suppressEndCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ── Session persistence ───────────────────────────────── */
   const SWIPE_INDEX_KEY = 'parium-swipe-index';
@@ -264,12 +271,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       if (!container || showEndBounceRef.current || isReturningRef.current) return;
 
       const scrollTop = container.scrollTop;
-      const endStateTop = getEndStateScrollTop();
-      const hasReachedEndState = endStateTop !== null && scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
 
-      setEndStateVisible(hasReachedEndState);
-
-      // Find closest slide
+      // Find closest slide FIRST — end-state check måste veta om vi verkligen
+      // står på sista kortet, annars kan endSection blinka mitt i stacken när
+      // ett kort skippas och layout krymper (endSection flyttas upp).
       let bestIdx = 0;
       let bestDist = Infinity;
       slideRefs.current.forEach((el, idx) => {
@@ -281,6 +286,16 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       });
       setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
 
+      const atLastSlide = jobs.length > 0 && bestIdx === jobs.length - 1;
+      const endStateTop = getEndStateScrollTop();
+      const hasReachedEndState =
+        !suppressEndCheckRef.current &&
+        atLastSlide &&
+        endStateTop !== null &&
+        scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
+
+      setEndStateVisible(hasReachedEndState);
+
       // Debounced end-of-stack check
       if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
 
@@ -288,6 +303,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         const container = scrollRef.current;
         const st = container?.scrollTop;
         if (st == null || jobs.length === 0) return;
+        if (suppressEndCheckRef.current) return;
 
         const endTop = getEndStateScrollTop();
         const hasScrolledIntoEnd =
@@ -327,6 +343,17 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     isReturningRef.current = false;
     slideRefs.current = slideRefs.current.slice(0, jobs.length);
 
+    // 🛡️ Suppresa end-state-check under transitionen. När ett kort skippas
+    // krymper container-höjden → endSection åker uppåt. Utan denna gate
+    // hinner scroll-handlern läsa "vid slutet" i en enda frame och blinka
+    // "Inga fler jobb"-kortet mellan aktiva och nästa kort.
+    suppressEndCheckRef.current = true;
+    if (suppressEndCheckTimerRef.current) clearTimeout(suppressEndCheckTimerRef.current);
+    suppressEndCheckTimerRef.current = setTimeout(() => {
+      suppressEndCheckRef.current = false;
+      suppressEndCheckTimerRef.current = null;
+    }, 260);
+
     if (!hasRestoredRef.current && jobs.length > 0) {
       hasRestoredRef.current = true;
       const restored = getRestoredIndex();
@@ -364,7 +391,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     }
   }, [jobs, clearTimers, getRestoredIndex]);
 
-  useEffect(() => () => { clearTimers(); }, [clearTimers]);
+  useEffect(() => () => {
+    clearTimers();
+    if (suppressEndCheckTimerRef.current) {
+      clearTimeout(suppressEndCheckTimerRef.current);
+      suppressEndCheckTimerRef.current = null;
+    }
+  }, [clearTimers]);
 
   // 🛟 KRITISKT: Använd 100svh (small viewport height) istället för
   // visualViewport.height. På iOS Safari krymper visualViewport när URL-baren
