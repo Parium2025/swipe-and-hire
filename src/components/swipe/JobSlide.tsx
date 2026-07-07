@@ -120,25 +120,12 @@ export const JobSlide = memo(function JobSlide({
     getImageVersion(job),
     SWIPE_IMG_TRANSFORM,
   );
-  const { displayUrl: nextImageUrl } = useCardImage(
-    nextJob?.job_image_url ?? null,
-    'job-images',
-    getImageVersion(nextJob),
-    SWIPE_IMG_TRANSFORM,
-  );
-
 
   // 🚀 Logo i swipe-card är liten (~64px) → be om optimerad version
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(
     job.company_logo_url ?? null,
     'company-logos',
     getImageVersion(job),
-    SWIPE_LOGO_TRANSFORM,
-  );
-  const { displayUrl: nextLogoUrl } = useCardImage(
-    nextJob?.company_logo_url ?? null,
-    'company-logos',
-    getImageVersion(nextJob),
     SWIPE_LOGO_TRANSFORM,
   );
   const overlayTextStyle = useMemo(
