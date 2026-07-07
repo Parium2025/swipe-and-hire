@@ -96,6 +96,17 @@ export const JobSlide = memo(function JobSlide({
   const underlayScale = useMotionValue(UNDERLAY_INITIAL_SCALE);
   const underlayOpacity = useMotionValue(UNDERLAY_INITIAL_OPACITY);
 
+  // Om overlayet öppnas och stängs innan swipe committas kan underlay-värdena
+  // ha muterats av en avbruten drag/animation. Nolla dem när overlay stängs
+  // så nästa render alltid har ett rent underlag (inga krympta spök-kort).
+  useEffect(() => {
+    if (!overlayOpen) {
+      underlayY.set(UNDERLAY_INITIAL_Y);
+      underlayScale.set(UNDERLAY_INITIAL_SCALE);
+      underlayOpacity.set(UNDERLAY_INITIAL_OPACITY);
+    }
+  }, [overlayOpen, underlayY, underlayScale, underlayOpacity]);
+
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';

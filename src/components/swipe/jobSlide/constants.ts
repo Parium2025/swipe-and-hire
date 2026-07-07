@@ -47,12 +47,12 @@ export const UNDERLAY_RISE_SPRING = {
   mass: 0.9,
 };
 export const UNDERLAY_OPACITY_DURATION = 0.42;
-// Underlay ligger i EXAKT samma position/storlek som aktiva kortet.
-// Då syns inget krympt "spök-kort" bakom, men underlaget finns fortfarande
-// direkt bakom aktiva kortet → ingen vit/tom mellanframe vid exit.
-export const UNDERLAY_INITIAL_Y = 0;
-export const UNDERLAY_INITIAL_SCALE = 1;
-export const UNDERLAY_INITIAL_OPACITY = 1;
+// Underlay är osynligt/off-screen i vila. Det animeras in ENDAST under
+// swipe-exit (triggerSwipe → animate underlayY/scale/opacity till 0/1/1).
+// Så länge inget swipas syns bara det aktiva kortet — inga dubbletter.
+export const UNDERLAY_INITIAL_Y = 40;
+export const UNDERLAY_INITIAL_SCALE = 0.96;
+export const UNDERLAY_INITIAL_OPACITY = 0;
 
 export const PREMIUM_EASE = [0.22, 1, 0.36, 1] as const;
 
