@@ -338,11 +338,11 @@ const Index = () => {
   const location = useLocation();
   const device = useDevice();
   const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
-  const shouldShowSearchBootSkeleton = location.pathname === '/search-jobs';
-  const swipeModeBoot = (() => {
-    try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
-  })();
-  const SearchBootSkeleton = swipeModeBoot ? SwipeModeSkeleton : JobListSkeleton;
+  // NOTE: Boot-skeleton på /search-jobs ägs uteslutande av SearchJobs.tsx
+  // (både early-return och AnimatePresence-overlay där). Vi renderar
+  // medvetet INTE en Index-nivå skeleton här — det orsakade "dubbelkörning"
+  // där både Index-portalen och SearchJobs-portalen låg ovanpå varandra
+  // med samma z-index och visade olika chrome samtidigt.
 
   // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
   // den underliggande KeepAlive-vyn (SearchJobs/SavedJobs/etc) stå kvar
@@ -388,7 +388,6 @@ const Index = () => {
 
   // Vid logout/inloggning hanteras övergången av AuthSplashScreen - visa bara bakgrund
   if (loading && !user && authAction !== 'logout') {
-    if (shouldShowSearchBootSkeleton) return <SearchBootSkeleton />;
     return <div className="min-h-screen bg-gradient-parium" />;
   }
 
@@ -399,7 +398,6 @@ const Index = () => {
 
   // Vänta på profil men visa bakgrund
   if (!profile) {
-    if (shouldShowSearchBootSkeleton) return <SearchBootSkeleton />;
     return (
       <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />
     );
@@ -510,7 +508,6 @@ const Index = () => {
 
   // While role is resolving, keep seamless background
   if (user && profile && !role) {
-    if (shouldShowSearchBootSkeleton) return <SearchBootSkeleton />;
     return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
   
