@@ -343,6 +343,17 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     isReturningRef.current = false;
     slideRefs.current = slideRefs.current.slice(0, jobs.length);
 
+    // 🛡️ Suppresa end-state-check under transitionen. När ett kort skippas
+    // krymper container-höjden → endSection åker uppåt. Utan denna gate
+    // hinner scroll-handlern läsa "vid slutet" i en enda frame och blinka
+    // "Inga fler jobb"-kortet mellan aktiva och nästa kort.
+    suppressEndCheckRef.current = true;
+    if (suppressEndCheckTimerRef.current) clearTimeout(suppressEndCheckTimerRef.current);
+    suppressEndCheckTimerRef.current = setTimeout(() => {
+      suppressEndCheckRef.current = false;
+      suppressEndCheckTimerRef.current = null;
+    }, 260);
+
     if (!hasRestoredRef.current && jobs.length > 0) {
       hasRestoredRef.current = true;
       const restored = getRestoredIndex();
