@@ -388,7 +388,11 @@ const Index = () => {
 
   // Vid logout/inloggning hanteras övergången av AuthSplashScreen - visa bara bakgrund
   if (loading && !user && authAction !== 'logout') {
-    if (shouldShowSearchBootSkeleton) return <SearchBootSkeleton />;
+    return <div className="min-h-screen bg-gradient-parium" />;
+  }
+
+  // (borttagen duplicerad boot-skeleton — se kommentar ovan)
+  if (false) {
     return <div className="min-h-screen bg-gradient-parium" />;
   }
 
