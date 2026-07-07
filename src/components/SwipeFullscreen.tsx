@@ -271,12 +271,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       if (!container || showEndBounceRef.current || isReturningRef.current) return;
 
       const scrollTop = container.scrollTop;
-      const endStateTop = getEndStateScrollTop();
-      const hasReachedEndState = endStateTop !== null && scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
 
-      setEndStateVisible(hasReachedEndState);
-
-      // Find closest slide
+      // Find closest slide FIRST — end-state check måste veta om vi verkligen
+      // står på sista kortet, annars kan endSection blinka mitt i stacken när
+      // ett kort skippas och layout krymper (endSection flyttas upp).
       let bestIdx = 0;
       let bestDist = Infinity;
       slideRefs.current.forEach((el, idx) => {
@@ -288,6 +286,16 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       });
       setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
 
+      const atLastSlide = jobs.length > 0 && bestIdx === jobs.length - 1;
+      const endStateTop = getEndStateScrollTop();
+      const hasReachedEndState =
+        !suppressEndCheckRef.current &&
+        atLastSlide &&
+        endStateTop !== null &&
+        scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
+
+      setEndStateVisible(hasReachedEndState);
+
       // Debounced end-of-stack check
       if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
 
@@ -295,6 +303,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         const container = scrollRef.current;
         const st = container?.scrollTop;
         if (st == null || jobs.length === 0) return;
+        if (suppressEndCheckRef.current) return;
 
         const endTop = getEndStateScrollTop();
         const hasScrolledIntoEnd =
