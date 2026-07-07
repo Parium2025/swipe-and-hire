@@ -391,11 +391,6 @@ const Index = () => {
     return <div className="min-h-screen bg-gradient-parium" />;
   }
 
-  // (borttagen duplicerad boot-skeleton — se kommentar ovan)
-  if (false) {
-    return <div className="min-h-screen bg-gradient-parium" />;
-  }
-
   // Om ingen användare: redirecta omedelbart till /auth (säkerhetsnät för mobil)
   if (!user) {
     return <Navigate to="/auth" replace />;
@@ -403,7 +398,6 @@ const Index = () => {
 
   // Vänta på profil men visa bakgrund
   if (!profile) {
-    if (shouldShowSearchBootSkeleton) return <SearchBootSkeleton />;
     return (
       <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />
     );
