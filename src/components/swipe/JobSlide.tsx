@@ -9,6 +9,7 @@ import { getImageVersion } from '@/lib/imageTransforms';
 import {
   SWIPE_IMG_TRANSFORM,
   SWIPE_LOGO_TRANSFORM,
+  UNDERLAY_INITIAL_OPACITY,
   UNDERLAY_INITIAL_SCALE,
   UNDERLAY_INITIAL_Y,
 } from './jobSlide/constants';
@@ -88,10 +89,12 @@ export const JobSlide = memo(function JobSlide({
   const STATIC_CARD_SHADOW =
     '0 18px 45px -10px rgba(0,0,0,0.4), 0 6px 16px -4px rgba(0,0,0,0.25)';
 
-  // Underlay: driven av explicit timed animation, INTE drag-progress
+  // Underlay ligger redan färdig bakom aktiva kortet. Då finns det alltid ett
+  // riktigt kort bakom när reject-animationen börjar — ingen vit/tom frame när
+  // aktiva kortet lämnar och nästa tar över.
   const underlayY = useMotionValue(UNDERLAY_INITIAL_Y);
   const underlayScale = useMotionValue(UNDERLAY_INITIAL_SCALE);
-  const underlayOpacity = useMotionValue(0);
+  const underlayOpacity = useMotionValue(UNDERLAY_INITIAL_OPACITY);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
 
