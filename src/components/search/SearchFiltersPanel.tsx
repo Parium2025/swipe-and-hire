@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import LocationSearchInput from '@/components/LocationSearchInput';
 import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
+import { smartMatchScore } from '@/lib/seoSearch';
 import type { SearchCriteria } from '@/hooks/useSavedSearches';
 
 export type TimeFilter = 'all' | '12h' | '24h' | '3d' | '7d';
