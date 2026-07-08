@@ -279,37 +279,67 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     )}
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      onCategoryChange('all-categories');
-                      onSubcategoriesChange([]);
-                    }}
-                    className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white font-medium touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                <DropdownMenuContent
+                  side="bottom"
+                  avoidCollisions={false}
+                  onCloseAutoFocus={(e) => e.preventDefault()}
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]"
+                >
+                  <div
+                    className="sticky top-0 z-10 bg-slate-900 p-2 border-b border-white/20"
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
                   >
-                    Alla yrkesområden
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/20" />
-                  {OCCUPATION_CATEGORIES.map((category, index) => (
-                    <React.Fragment key={category.value}>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          onCategoryChange(category.value);
-                          onSubcategoriesChange([]);
-                        }}
-                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
-                      >
-                        <span>{category.label}</span>
-                        {selectedCategory === category.value && (
-                          <Check className="h-4 w-4 text-white" />
-                        )}
-                      </DropdownMenuItem>
-                      {index < OCCUPATION_CATEGORIES.length - 1 && (
-                        <DropdownMenuSeparator className="bg-white/20" />
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                      <Input
+                        autoFocus={false}
+                        value={categoryQuery}
+                        onChange={(e) => setCategoryQuery(e.target.value)}
+                        placeholder="Sök yrkesområde..."
+                        aria-label="Sök yrkesområde"
+                        className="pl-8 pr-8 !h-9 !min-h-0 text-base bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60"
+                      />
+                      {categoryQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setCategoryQuery('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-white/80 hover:bg-white/10 rounded-full p-0.5"
+                          aria-label="Rensa sök"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
                       )}
-                    </React.Fragment>
-                  ))}
+                    </div>
+                  </div>
+                  {filteredCategories.length === 0 ? (
+                    <div className="px-3 py-4 text-sm text-white/70 text-center">
+                      Inga träffar. Prova att söka på jobbtiteln i sökrutan ovan.
+                    </div>
+                  ) : (
+                    filteredCategories.map((category, index) => (
+                      <React.Fragment key={category.value}>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            onCategoryChange(category.value);
+                            onSubcategoriesChange([]);
+                            setCategoryQuery('');
+                          }}
+                          className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                        >
+                          <span>{category.label}</span>
+                          {selectedCategory === category.value && (
+                            <Check className="h-4 w-4 text-white" />
+                          )}
+                        </DropdownMenuItem>
+                        {index < filteredCategories.length - 1 && (
+                          <DropdownMenuSeparator className="bg-white/20" />
+                        )}
+                      </React.Fragment>
+                    ))
+                  )}
                 </DropdownMenuContent>
+
               </DropdownMenu>
             </div>
           </div>
