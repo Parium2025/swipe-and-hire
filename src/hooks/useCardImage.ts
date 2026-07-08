@@ -118,6 +118,17 @@ export function useCardImage(
     ? resolvedUrl
     : cachedBlobUrl || loadedBlobUrl || null;
 
+  // 🚀 Proaktiv decode: så fort vi har en URL, dekoda bitmapen off-main-thread.
+  // Eliminerar "decode-blinken" när ett kort re-mountas efter scroll — bilden
+  // finns redan i browserns decode-cache och första frame renderas klar.
+  // Osynlig ändring: ingen UI-effekt, ingen fade, inget extra nätverksanrop.
+  useEffect(() => {
+    if (!displayUrl) return;
+    const img = new Image();
+    img.src = displayUrl;
+    img.decode?.().catch(() => { /* src kan bytas ut → ignorera */ });
+  }, [displayUrl]);
+
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
       if (e.currentTarget.src.startsWith('blob:')) {
