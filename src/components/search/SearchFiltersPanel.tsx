@@ -87,6 +87,19 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   onClearAll,
 }: SearchFiltersPanelProps) {
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
+  const [categoryQuery, setCategoryQuery] = useState('');
+
+  const filteredCategories = useMemo(() => {
+    const q = categoryQuery.trim();
+    if (!q) return OCCUPATION_CATEGORIES;
+    const scored = OCCUPATION_CATEGORIES.map((c) => ({
+      c,
+      score: smartMatchScore(q, [c.label, ...(c.keywords || []), ...(c.subcategories || [])]),
+    })).filter((x) => x.score > 0);
+    scored.sort((a, b) => b.score - a.score);
+    return scored.map((x) => x.c);
+  }, [categoryQuery]);
+
 
   return (
     <Card className="bg-white/5 border-white/20">
