@@ -281,7 +281,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
+                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
                     aria-label="Välj yrkesområde"
                   >
                     <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
@@ -304,7 +304,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         <X className="h-4 w-4" />
                       </button>
                     ) : (
-                      <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
+                      <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                     )}
                   </button>
                 </DropdownMenuTrigger>
