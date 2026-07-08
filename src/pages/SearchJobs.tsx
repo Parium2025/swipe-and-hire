@@ -795,6 +795,7 @@ const SearchJobs = memo(() => {
         onClearAll={handleClearAllFilters}
         timeFilter={timeFilter}
         onTimeFilterChange={setTimeFilter}
+        jobTitles={useMemo(() => jobs.map(j => j.title).filter(Boolean) as string[], [jobs])}
       />
 
       {/* Company Suggestion Card - LinkedIn style */}
