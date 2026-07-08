@@ -50,6 +50,8 @@ interface SearchFiltersPanelProps {
   onOpenSaveDialog: () => void;
   // Clear all
   onClearAll: () => void;
+  // Custom job titles from active postings (already expired-filtered) for smart suggestions
+  jobTitles?: string[];
 }
 
 const sortLabels = {
