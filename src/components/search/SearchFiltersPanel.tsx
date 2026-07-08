@@ -87,6 +87,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   hasActiveFilters,
   onOpenSaveDialog,
   onClearAll,
+  jobTitles = [],
 }: SearchFiltersPanelProps) {
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
   const [categoryQuery, setCategoryQuery] = useState('');
@@ -101,6 +102,32 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
     scored.sort((a, b) => b.score - a.score);
     return scored.map((x) => x.c);
   }, [categoryQuery]);
+
+  // Dedupliserade unika jobbtitlar från aktiva annonser (utgångna filtreras redan bort i datalagret)
+  const uniqueJobTitles = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const t of jobTitles) {
+      const trimmed = (t || '').trim();
+      if (!trimmed) continue;
+      const key = trimmed.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(trimmed);
+    }
+    return out;
+  }, [jobTitles]);
+
+  // Matcha användarens sökning mot faktiska jobbtitlar (t.ex. "Chef inom bilförsäljning")
+  const matchingJobTitles = useMemo(() => {
+    const q = categoryQuery.trim();
+    if (!q) return [] as string[];
+    const scored = uniqueJobTitles
+      .map((title) => ({ title, score: smartMatchScore(q, [title]) }))
+      .filter((x) => x.score > 0);
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 6).map((x) => x.title);
+  }, [categoryQuery, uniqueJobTitles]);
 
 
   return (
