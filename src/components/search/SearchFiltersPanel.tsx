@@ -217,10 +217,10 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
         <div className="flex sm:hidden justify-center items-center gap-2 py-2">
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <button className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation">
+              <button className="group h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation">
                 <Clock className="h-3.5 w-3.5" />
                 <span>{timeFilter === 'all' ? 'Alla' : timeFilter === '12h' ? '12 tim' : timeFilter === '24h' ? '24 tim' : timeFilter === '3d' ? '3 dagar' : '7 dagar'}</span>
-                <ChevronDown className="h-3.5 w-3.5" />
+                <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-data-[state=open]:rotate-180" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" side="bottom" avoidCollisions={false} className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[160px]">
