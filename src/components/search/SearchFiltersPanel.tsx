@@ -50,6 +50,8 @@ interface SearchFiltersPanelProps {
   onOpenSaveDialog: () => void;
   // Clear all
   onClearAll: () => void;
+  // Custom job titles from active postings (already expired-filtered) for smart suggestions
+  jobTitles?: string[];
 }
 
 const sortLabels = {
@@ -85,6 +87,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   hasActiveFilters,
   onOpenSaveDialog,
   onClearAll,
+  jobTitles = [],
 }: SearchFiltersPanelProps) {
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
   const [categoryQuery, setCategoryQuery] = useState('');
@@ -99,6 +102,32 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
     scored.sort((a, b) => b.score - a.score);
     return scored.map((x) => x.c);
   }, [categoryQuery]);
+
+  // Dedupliserade unika jobbtitlar från aktiva annonser (utgångna filtreras redan bort i datalagret)
+  const uniqueJobTitles = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const t of jobTitles) {
+      const trimmed = (t || '').trim();
+      if (!trimmed) continue;
+      const key = trimmed.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(trimmed);
+    }
+    return out;
+  }, [jobTitles]);
+
+  // Matcha användarens sökning mot faktiska jobbtitlar (t.ex. "Chef inom bilförsäljning")
+  const matchingJobTitles = useMemo(() => {
+    const q = categoryQuery.trim();
+    if (!q) return [] as string[];
+    const scored = uniqueJobTitles
+      .map((title) => ({ title, score: smartMatchScore(q, [title]) }))
+      .filter((x) => x.score > 0);
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 6).map((x) => x.title);
+  }, [categoryQuery, uniqueJobTitles]);
 
 
   return (
@@ -312,31 +341,63 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       )}
                     </div>
                   </div>
-                  {filteredCategories.length === 0 ? (
+                  {filteredCategories.length === 0 && matchingJobTitles.length === 0 ? (
                     <div className="px-3 py-4 text-sm text-white/70 text-center">
                       Inga träffar. Prova att söka på jobbtiteln i sökrutan ovan.
                     </div>
                   ) : (
-                    filteredCategories.map((category, index) => (
-                      <React.Fragment key={category.value}>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            onCategoryChange(category.value);
-                            onSubcategoriesChange([]);
-                            setCategoryQuery('');
-                          }}
-                          className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
-                        >
-                          <span>{category.label}</span>
-                          {selectedCategory === category.value && (
-                            <Check className="h-4 w-4 text-white" />
+                    <>
+                      {filteredCategories.map((category, index) => (
+                        <React.Fragment key={category.value}>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              onCategoryChange(category.value);
+                              onSubcategoriesChange([]);
+                              setCategoryQuery('');
+                            }}
+                            className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                          >
+                            <span>{category.label}</span>
+                            {selectedCategory === category.value && (
+                              <Check className="h-4 w-4 text-white" />
+                            )}
+                          </DropdownMenuItem>
+                          {index < filteredCategories.length - 1 && (
+                            <DropdownMenuSeparator className="bg-white/20" />
                           )}
-                        </DropdownMenuItem>
-                        {index < filteredCategories.length - 1 && (
-                          <DropdownMenuSeparator className="bg-white/20" />
-                        )}
-                      </React.Fragment>
-                    ))
+                        </React.Fragment>
+                      ))}
+
+                      {matchingJobTitles.length > 0 && (
+                        <>
+                          {filteredCategories.length > 0 && (
+                            <DropdownMenuSeparator className="bg-white/20" />
+                          )}
+                          <div className="px-3 pt-2 pb-1 text-[11px] uppercase tracking-wider text-white/60">
+                            Specifika jobb just nu
+                          </div>
+                          {matchingJobTitles.map((title, index) => (
+                            <React.Fragment key={`jobtitle-${title}`}>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  onSearchInputChange(title);
+                                  onCategoryChange('all-categories');
+                                  onSubcategoriesChange([]);
+                                  setCategoryQuery('');
+                                }}
+                                className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center gap-2 touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                              >
+                                <Search className="h-3.5 w-3.5 text-white/60 flex-shrink-0" />
+                                <span className="truncate">{title}</span>
+                              </DropdownMenuItem>
+                              {index < matchingJobTitles.length - 1 && (
+                                <DropdownMenuSeparator className="bg-white/20" />
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </>
+                      )}
+                    </>
                   )}
                 </DropdownMenuContent>
 
