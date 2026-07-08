@@ -313,8 +313,8 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
                     aria-label="Välj specifik roll"
                   >
-                    <Users className="h-4 w-4 text-white flex-shrink-0" />
                     <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
+
                       {selectedSubcategories.length === 0
                         ? 'Alla roller'
                         : selectedSubcategories.length === 1
