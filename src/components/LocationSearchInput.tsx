@@ -202,7 +202,6 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
             aria-label="Välj plats"
             type="button"
           >
-            <MapPin className="h-4 w-4 text-white flex-shrink-0" />
             <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
               {triggerLabel}
             </span>
