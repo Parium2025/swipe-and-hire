@@ -202,7 +202,6 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
             aria-label="Välj plats"
             type="button"
           >
-            <MapPin className="h-4 w-4 text-white flex-shrink-0" />
             <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
               {triggerLabel}
             </span>
@@ -341,6 +340,34 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                             <ChevronRight className="h-4 w-4 flex-shrink-0" />
                           )}
                         </button>
+
+                        {expandedCounty === county && (() => {
+                          const allMunicipalities = swedishCountiesWithMunicipalities[county];
+                          const allSelected = allMunicipalities.every((m) => values.includes(m));
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (allSelected) {
+                                  onLocationsChange(values.filter((v) => !allMunicipalities.includes(v)));
+                                } else {
+                                  const merged = Array.from(new Set([...values, ...allMunicipalities]));
+                                  onLocationsChange(merged);
+                                }
+                              }}
+                              className="w-full flex items-center gap-3 pl-3 pr-3 py-3 md:py-2 text-left text-white active:bg-white/10 [@media(hover:hover)]:hover:bg-white/10 touch-manipulation border-t border-white/10"
+                            >
+                              <span className="min-w-0 flex-1 text-[15px] md:text-sm leading-tight py-0.5 font-medium">
+                                {allSelected ? `Avmarkera alla i ${county}` : `Välj alla i ${county}`}
+                              </span>
+                              {allSelected ? (
+                                <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                              ) : (
+                                <div className="h-4 w-4 flex-shrink-0" />
+                              )}
+                            </button>
+                          );
+                        })()}
 
                         {expandedCounty === county &&
                           swedishCountiesWithMunicipalities[county].map((municipality, municipalityIndex, municipalityArray) => {
