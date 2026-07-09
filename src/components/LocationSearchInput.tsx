@@ -366,6 +366,8 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                                 <div className="h-4 w-4 flex-shrink-0" />
                               )}
                             </button>
+                            <div className="h-px bg-white/20 mx-2" />
+
                           );
                         })()}
 
