@@ -2316,7 +2316,8 @@ const MobileJobWizard = ({
     setIsSavingDraft(true);
     
     try {
-      const category = categorizeJob(formData.title, formData.description, formData.occupation);
+      let category = categorizeJob(formData.title, formData.description, formData.occupation);
+      // AI-fallback för utkast: hoppa över (spar tid). Kategoriseras vid publicering istället.
       
       // For drafts, skip the postal code lookup to speed up saving
       // County/municipality will be fetched when the job is published
@@ -2497,7 +2498,26 @@ const MobileJobWizard = ({
       const now = new Date();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 14);
-      const category = categorizeJob(formData.title, formData.description, formData.occupation);
+      let category = categorizeJob(formData.title, formData.description, formData.occupation);
+
+      // AI-fallback: om regex-motorn är osäker, låt AI:n kategorisera baserat på titel + beskrivning.
+      // Detta täcker helt nya/kreativa yrkestitlar som inte finns i våra 449 subkategorier.
+      if (!category) {
+        try {
+          const { data: aiData, error: aiError } = await supabase.functions.invoke('categorize-job-ai', {
+            body: {
+              title: formData.title,
+              description: formData.description,
+              occupation: formData.occupation,
+            },
+          });
+          if (!aiError && aiData?.category) {
+            category = aiData.category as string;
+          }
+        } catch (e) {
+          console.warn('AI categorization failed, continuing without category', e);
+        }
+      }
       
       const jobData: Record<string, any> = {
         employer_id: user.id,
