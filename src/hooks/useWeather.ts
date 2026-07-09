@@ -181,7 +181,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       const gpsResult = await getCurrentPosition({
         timeout: 8000,
         enableHighAccuracy: true,
-        maximumAge: 0,
+        // Accept a GPS fix up to 2 minutes old — avoids waking the radio for a
+        // fresh lock on every periodic/visibility check when we don't need one.
+        maximumAge: 2 * 60 * 1000,
       });
 
       if (gpsResult && mountedRef.current) {
