@@ -155,7 +155,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
           </div>
           
           {/* Saved Searches Dropdown with Save button */}
-          <div className="flex justify-center items-center gap-2">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
             <SavedSearchesDropdown
               savedSearches={savedSearches}
               totalNewMatches={totalNewMatches}
