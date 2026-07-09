@@ -160,7 +160,10 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
         setDropdownSearch(postalCode);
       }
 
-      setPostalCodeCity(null);
+      // Keep the postal-code result visible after selection — show it as marked
+      // (with the check indicator) instead of hiding the row. Matches the
+      // "select stays visible" behaviour of municipalities inside a county.
+
       setIsLoading(false);
     },
     [onLocationsChange, values]
@@ -275,7 +278,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                     <div className="flex min-w-0 items-start gap-3 flex-1">
                       <div className="min-w-0">
                         <span className="block font-medium text-white leading-tight">{postalCodeCity.city}</span>
-                        <span className="block text-xs text-white/80 leading-tight mt-0.5">
+                        <span className="block text-xs text-white leading-tight mt-0.5">
                           {postalCodeCity.postalCode}
                           {postalCodeCity.municipality && ` · ${postalCodeCity.municipality}`}
                           {postalCodeCity.county && ` · ${postalCodeCity.county}`}
