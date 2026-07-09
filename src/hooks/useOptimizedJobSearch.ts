@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getTimeRemaining } from '@/lib/date';
-import { expandSearchTerms, detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
+import { detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
 import { safeSetItem } from '@/lib/safeStorage';
 import { imageCache } from '@/lib/imageCache';
 import { readThroughCache } from '@/lib/performanceGuards';
@@ -264,28 +264,6 @@ const typoCorrections: Record<string, string[]> = {
   uppsal: ['uppsala'],
 };
 
-const expandSearchWithFuzzy = (searchTerm: string): string[] => {
-  const normalizedTerm = normalizeSwedish(searchTerm.trim());
-  const expandedTerms = new Set(expandSearchTerms(searchTerm));
-
-  for (const [typo, corrections] of Object.entries(typoCorrections)) {
-    const maxDistance = normalizedTerm.length <= 4 ? 1 : 2;
-    if (levenshteinDistance(normalizedTerm, typo) <= maxDistance) {
-      corrections.forEach((correction) => expandedTerms.add(correction));
-    }
-  }
-
-  if (normalizedTerm.length >= 4) {
-    for (const [typo, corrections] of Object.entries(typoCorrections)) {
-      if (normalizedTerm.includes(typo) || typo.includes(normalizedTerm)) {
-        corrections.forEach((correction) => expandedTerms.add(correction));
-      }
-    }
-  }
-
-  return [...expandedTerms];
-};
-
 function mapEmploymentTypes(employmentTypes: string[]) {
   return employmentTypes.map((type) => {
     const typeMap: Record<string, string> = {
@@ -357,7 +335,7 @@ function useSearchParamsState(options: UseOptimizedJobSearchOptions) {
     }
 
     return {
-      expandedSearchQuery: expandSearchWithFuzzy(searchQuery).join(' '),
+      expandedSearchQuery: searchQuery.trim(),
       salarySearch: null,
     };
   }, [searchQuery, detectedLocationSearch]);

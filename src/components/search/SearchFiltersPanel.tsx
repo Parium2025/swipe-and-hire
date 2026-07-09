@@ -10,8 +10,6 @@ import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { smartMatchScore } from '@/lib/seoSearch';
-import { suggestCategoryFromSearch } from '@/lib/categorySuggestion';
-import { Sparkles } from 'lucide-react';
 
 import type { SearchCriteria } from '@/hooks/useSavedSearches';
 
@@ -53,8 +51,6 @@ interface SearchFiltersPanelProps {
   onOpenSaveDialog: () => void;
   // Clear all
   onClearAll: () => void;
-  // Custom job titles from active postings (already expired-filtered) for smart suggestions
-  jobTitles?: string[];
 }
 
 const sortLabels = {
@@ -90,7 +86,6 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   hasActiveFilters,
   onOpenSaveDialog,
   onClearAll,
-  jobTitles = [],
 }: SearchFiltersPanelProps) {
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
   const [categoryQuery, setCategoryQuery] = useState('');
@@ -98,41 +93,13 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   const filteredCategories = useMemo(() => {
     const q = categoryQuery.trim();
     if (!q) return OCCUPATION_CATEGORIES;
-    const directSuggestion = suggestCategoryFromSearch(q);
     const scored = OCCUPATION_CATEGORIES.map((c) => ({
       c,
-      score: smartMatchScore(q, [c.label, ...(c.keywords || []), ...(c.subcategories || [])]) + (directSuggestion?.value === c.value ? 1000 : 0),
+      score: smartMatchScore(q, [c.label, ...(c.keywords || []), ...(c.subcategories || [])]),
     })).filter((x) => x.score > 0);
     scored.sort((a, b) => b.score - a.score);
     return scored.map((x) => x.c);
   }, [categoryQuery]);
-
-  // Dedupliserade unika jobbtitlar från aktiva annonser (utgångna filtreras redan bort i datalagret)
-  const uniqueJobTitles = useMemo(() => {
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (const t of jobTitles) {
-      const trimmed = (t || '').trim();
-      if (!trimmed) continue;
-      const key = trimmed.toLowerCase();
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push(trimmed);
-    }
-    return out;
-  }, [jobTitles]);
-
-  // Matcha användarens sökning mot faktiska jobbtitlar (t.ex. "Chef inom bilförsäljning")
-  const matchingJobTitles = useMemo(() => {
-    const q = categoryQuery.trim();
-    if (!q) return [] as string[];
-    const scored = uniqueJobTitles
-      .map((title) => ({ title, score: smartMatchScore(q, [title]) }))
-      .filter((x) => x.score > 0);
-    scored.sort((a, b) => b.score - a.score);
-    return scored.slice(0, 6).map((x) => x.title);
-  }, [categoryQuery, uniqueJobTitles]);
-
 
   return (
     <Card className="bg-white/5 border-white/20">
@@ -158,27 +125,6 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             )}
           </div>
 
-          {/* Smart förslag: koppla toppsök → Yrkesområde-filter */}
-          {(() => {
-            const suggestion = suggestCategoryFromSearch(searchInput);
-            if (!suggestion || selectedCategory === suggestion.value) return null;
-            return (
-              <button
-                type="button"
-                onClick={() => onCategoryChange(suggestion.value)}
-                className="w-full flex items-center gap-2 rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.98] transition-all duration-200 px-4 py-2.5 text-left animate-fade-in touch-manipulation"
-                aria-label={`Filtrera på yrkesområde ${suggestion.label}`}
-              >
-                <Sparkles className="h-4 w-4 text-white flex-shrink-0" />
-                <span className="text-sm text-white leading-tight">
-                  Filtrera även på <span className="font-semibold">{suggestion.label}</span>
-                </span>
-              </button>
-            );
-          })()}
-
-
-          
           {/* Saved Searches Dropdown with Save button */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
             <SavedSearchesDropdown
@@ -366,7 +312,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       )}
                     </div>
                   </div>
-                  {filteredCategories.length === 0 && matchingJobTitles.length === 0 ? (
+                  {filteredCategories.length === 0 ? (
                     <div className="px-3 py-4 text-sm text-white text-center">
                       Inga träffar. Prova att söka på jobbtiteln i sökrutan ovan.
                     </div>
@@ -393,38 +339,6 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         </React.Fragment>
                       ))}
 
-                      {matchingJobTitles.length > 0 && (
-                        <>
-                          {filteredCategories.length > 0 && (
-                            <DropdownMenuSeparator className="bg-white/20" />
-                          )}
-                          <div className="px-3 pt-2 pb-1 text-[11px] uppercase tracking-wider text-white">
-                            Specifika jobb just nu
-                          </div>
-                          {matchingJobTitles.map((title, index) => (
-                            <React.Fragment key={`jobtitle-${title}`}>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  const titleSuggestion = suggestCategoryFromSearch(title) ?? suggestCategoryFromSearch(categoryQuery);
-                                  onSearchInputChange(title);
-                                  if (titleSuggestion) {
-                                    onCategoryChange(titleSuggestion.value);
-                                  }
-                                  onSubcategoriesChange([]);
-                                  setCategoryQuery('');
-                                }}
-                                className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center gap-2 touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
-                              >
-                                <Search className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                                <span className="truncate">{title}</span>
-                              </DropdownMenuItem>
-                              {index < matchingJobTitles.length - 1 && (
-                                <DropdownMenuSeparator className="bg-white/20" />
-                              )}
-                            </React.Fragment>
-                          ))}
-                        </>
-                      )}
                     </>
                   )}
                 </DropdownMenuContent>
