@@ -37,7 +37,7 @@ export const normalizeEmploymentType = (value: string): string => {
 
 // For search functionality - includes both Swedish display labels and code values
 export const SEARCH_EMPLOYMENT_TYPES = EMPLOYMENT_TYPES.map(type => ({
-  value: type.label,
+  value: type.value,
   label: type.label,
   code: type.value
 }));
