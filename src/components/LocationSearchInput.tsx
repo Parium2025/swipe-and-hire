@@ -220,7 +220,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                 <X className="h-4 w-4" />
               </button>
             ) : (
-              <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
+              <ChevronDown className={cn("h-4 w-4 text-white flex-shrink-0 transition-transform duration-200", open && "rotate-180")} />
             )}
           </button>
         </PopoverTrigger>
