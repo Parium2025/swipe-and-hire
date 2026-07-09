@@ -98,9 +98,10 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   const filteredCategories = useMemo(() => {
     const q = categoryQuery.trim();
     if (!q) return OCCUPATION_CATEGORIES;
+    const directSuggestion = suggestCategoryFromSearch(q);
     const scored = OCCUPATION_CATEGORIES.map((c) => ({
       c,
-      score: smartMatchScore(q, [c.label, ...(c.keywords || []), ...(c.subcategories || [])]),
+      score: smartMatchScore(q, [c.label, ...(c.keywords || []), ...(c.subcategories || [])]) + (directSuggestion?.value === c.value ? 1000 : 0),
     })).filter((x) => x.score > 0);
     scored.sort((a, b) => b.score - a.score);
     return scored.map((x) => x.c);
