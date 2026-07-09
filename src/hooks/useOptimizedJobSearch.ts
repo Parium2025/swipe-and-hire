@@ -357,7 +357,7 @@ function useSearchParamsState(options: UseOptimizedJobSearchOptions) {
     }
 
     return {
-      expandedSearchQuery: expandSearchWithFuzzy(searchQuery).join(' '),
+      expandedSearchQuery: searchQuery.trim(),
       salarySearch: null,
     };
   }, [searchQuery, detectedLocationSearch]);
