@@ -361,10 +361,9 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
   },
   { 
     value: 'logistics', 
-    label: 'Transport', 
-    keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans', 'kurir', 'bud', 'uber', 'drönare', 'drone'],
+    label: 'Transport, Bud och Förare', 
+    keywords: ['transport', 'distribution', 'chaufför', 'förare', 'lastbil', 'buss', 'taxi', 'leverans', 'kurir', 'bud', 'budbil', 'bilbud', 'uber', 'drönare', 'drone'],
     subcategories: [
-      'Arbetsledare inom lager och terminal',
       'Bangårdspersonal', 
       'Brevbärare och postterminalarbetare',
       'Budbilsförare',
@@ -376,7 +375,6 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Hamnarbetare',
       'Kabinpersonal',
       'Kurir',
-      'Lager- och terminalpersonal', 
       'Lastbilsförare',
       'Lokförare',
       'Maskinbefäl',
@@ -386,9 +384,23 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Reklamutdelare och tidningsdistributör',
       'Taxiförare',
       'Transportledare och transportsamordnare',
-      'Truckförare',
       'Tågvärd och ombordansvarig',
       'Uber-förare'
+    ]
+  },
+  {
+    value: 'warehouse',
+    label: 'Lager och Logistik',
+    keywords: ['lager', 'logistik', 'terminal', 'truck', 'gaffeltruck', 'varumottagning', 'plock', 'pack', 'packning', 'orderplock', 'lagerarbetare', 'lagermedarbetare'],
+    subcategories: [
+      'Arbetsledare inom lager och terminal',
+      'Lager- och terminalpersonal',
+      'Truckförare',
+      'Orderplockare',
+      'Lagerarbetare',
+      'Lagermedarbetare',
+      'Terminalarbetare',
+      'Varumottagare'
     ]
   },
   { 

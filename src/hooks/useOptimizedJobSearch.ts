@@ -267,16 +267,24 @@ const typoCorrections: Record<string, string[]> = {
 function mapEmploymentTypes(employmentTypes: string[]) {
   return employmentTypes.map((type) => {
     const typeMap: Record<string, string> = {
-      heltid: 'heltid',
-      deltid: 'deltid',
-      vikariat: 'vikariat',
-      provanstallning: 'provanstallning',
-      praktik: 'praktik',
-      sommarjobb: 'sommarjobb',
-      timanstallning: 'timanstallning',
+      full_time: 'full_time',
+      heltid: 'full_time',
+      part_time: 'part_time',
+      deltid: 'part_time',
+      contract: 'contract',
+      konsult: 'contract',
+      temporary: 'temporary',
+      vikariat: 'temporary',
+      interim: 'interim',
+      internship: 'internship',
+      praktik: 'internship',
+      lia: 'lia',
+      summer_job: 'summer_job',
+      sommarjobb: 'summer_job',
+      timanstallning: 'part_time',
     };
 
-    return typeMap[type] || type;
+    return typeMap[normalizeSwedish(type).replace(/\s+/g, '_')] || type;
   });
 }
 
