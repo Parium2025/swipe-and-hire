@@ -10,6 +10,9 @@ import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { smartMatchScore } from '@/lib/seoSearch';
+import { suggestCategoryFromSearch } from '@/lib/categorySuggestion';
+import { Sparkles } from 'lucide-react';
+
 import type { SearchCriteria } from '@/hooks/useSavedSearches';
 
 export type TimeFilter = 'all' | '12h' | '24h' | '3d' | '7d';
