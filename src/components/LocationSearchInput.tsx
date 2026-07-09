@@ -275,7 +275,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                     <div className="flex min-w-0 items-start gap-3 flex-1">
                       <div className="min-w-0">
                         <span className="block font-medium text-white leading-tight">{postalCodeCity.city}</span>
-                        <span className="block text-xs text-white/80 leading-tight mt-0.5">
+                        <span className="block text-xs text-white leading-tight mt-0.5">
                           {postalCodeCity.postalCode}
                           {postalCodeCity.municipality && ` · ${postalCodeCity.municipality}`}
                           {postalCodeCity.county && ` · ${postalCodeCity.county}`}
