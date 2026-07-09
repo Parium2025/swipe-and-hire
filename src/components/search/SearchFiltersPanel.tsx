@@ -397,7 +397,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                           {filteredCategories.length > 0 && (
                             <DropdownMenuSeparator className="bg-white/20" />
                           )}
-                          <div className="px-3 pt-2 pb-1 text-[11px] uppercase tracking-wider text-white/60">
+                          <div className="px-3 pt-2 pb-1 text-[11px] uppercase tracking-wider text-white">
                             Specifika jobb just nu
                           </div>
                           {matchingJobTitles.map((title, index) => (
