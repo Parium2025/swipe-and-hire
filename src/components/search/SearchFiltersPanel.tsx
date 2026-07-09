@@ -366,7 +366,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     </div>
                   </div>
                   {filteredCategories.length === 0 && matchingJobTitles.length === 0 ? (
-                    <div className="px-3 py-4 text-sm text-white/70 text-center">
+                    <div className="px-3 py-4 text-sm text-white text-center">
                       Inga träffar. Prova att söka på jobbtiteln i sökrutan ovan.
                     </div>
                   ) : (
