@@ -345,6 +345,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                           const allMunicipalities = swedishCountiesWithMunicipalities[county];
                           const allSelected = allMunicipalities.every((m) => values.includes(m));
                           return (
+                            <>
                             <button
                               type="button"
                               onClick={() => {
@@ -367,8 +368,9 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                               )}
                             </button>
                             <div className="h-px bg-white/20 mx-2" />
-
+                            </>
                           );
+
                         })()}
 
                         {expandedCounty === county &&
