@@ -45,21 +45,30 @@ Deno.serve(async (req) => {
     const occupation = String(body?.occupation || '').slice(0, 200);
 
     if (!title && !description && !occupation) {
-      return new Response(JSON.stringify({ category: null }), {
+      return new Response(JSON.stringify({ category: null, confidence: 0 }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const categoryList = CATEGORIES.map((c) => `- ${c.value}: ${c.label}`).join('\n');
+    const categoryList = CATEGORIES.map((c) => `- "${c.value}" = ${c.label}`).join('\n');
 
-    const systemPrompt = `Du är en klassificerare för svenska jobbannonser. Välj EXAKT ETT yrkesområde från listan som passar bäst för jobbet. Svara ENDAST med värdet (t.ex. "logistics"), inget annat.
+    const systemPrompt = `Du är en expertklassificerare för svenska jobbannonser. Din uppgift är att välja EXAKT ETT yrkesområde som passar bäst för jobbet, från denna lista:
 
-Kategorier:
 ${categoryList}
 
-Om jobbet inte tydligt passar in svara "none".`;
+Regler:
+- Läs titel, yrke och beskrivning noggrant.
+- Väg alla signaler: arbetsuppgifter, verktyg, bransch, kompetenser.
+- Om en titel är hybrid (t.ex. "Säljare + Chef") — välj det MEST framträdande området.
+- Om jobbet är helt otydligt — sätt category till null.
+- Confidence: 0.9-1.0 = mycket säker, 0.7-0.89 = säker, 0.5-0.69 = osäker, under 0.5 = gissning.
 
-    const userPrompt = `Titel: ${title}\nYrke: ${occupation}\nBeskrivning: ${description}`;
+Svara ENDAST med giltig JSON i detta format:
+{"category": "värde-från-listan-eller-null", "confidence": 0.0-1.0, "reasoning": "kort motivering på svenska (max 15 ord)"}`;
+
+    const userPrompt = `Titel: ${title || '(saknas)'}
+Yrke: ${occupation || '(saknas)'}
+Beskrivning: ${description || '(saknas)'}`;
 
     const resp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -68,38 +77,69 @@ Om jobbet inte tydligt passar in svara "none".`;
         'Lovable-API-Key': key,
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-lite',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
         temperature: 0,
-        max_tokens: 20,
+        response_format: { type: 'json_object' },
       }),
     });
 
     if (!resp.ok) {
       const errText = await resp.text();
       console.error('AI gateway error', resp.status, errText);
-      return new Response(JSON.stringify({ category: null, error: `AI ${resp.status}` }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      // 429 = rate limit, 402 = credits exhausted — meddela klienten men krascha inte publiceringen
+      return new Response(
+        JSON.stringify({ category: null, confidence: 0, error: `AI ${resp.status}` }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
     }
 
     const data = await resp.json();
-    const raw = String(data?.choices?.[0]?.message?.content || '').trim().toLowerCase();
-    const cleaned = raw.replace(/[^a-z]/g, '');
-    const category = VALID.has(cleaned) ? cleaned : null;
+    const rawContent = String(data?.choices?.[0]?.message?.content || '').trim();
 
-    return new Response(JSON.stringify({ category }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    let parsed: { category?: string | null; confidence?: number; reasoning?: string } = {};
+    try {
+      parsed = JSON.parse(rawContent);
+    } catch {
+      // Fallback: försök hitta ett giltigt värde i råtexten
+      const lower = rawContent.toLowerCase();
+      for (const c of CATEGORIES) {
+        if (lower.includes(`"${c.value}"`)) {
+          parsed = { category: c.value, confidence: 0.5 };
+          break;
+        }
+      }
+    }
+
+    const category = parsed.category && VALID.has(parsed.category) ? parsed.category : null;
+    const confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0;
+
+    // Under 0.5 confidence = för osäkert, spara som null istället för fel gissning
+    const finalCategory = confidence >= 0.5 ? category : null;
+
+    console.log('categorize-job-ai result:', {
+      title: title.slice(0, 50),
+      category: finalCategory,
+      confidence,
+      reasoning: parsed.reasoning,
     });
+
+    return new Response(
+      JSON.stringify({
+        category: finalCategory,
+        confidence,
+        reasoning: parsed.reasoning || null,
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
   } catch (err) {
     console.error('categorize-job-ai error', err);
-    return new Response(JSON.stringify({ category: null, error: String(err) }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ category: null, confidence: 0, error: String(err) }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
   }
 });
