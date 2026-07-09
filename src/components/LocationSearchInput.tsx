@@ -334,11 +334,13 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                         >
                           <MapPin className="h-4 w-4 flex-shrink-0" />
                           <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">{county}</span>
-                          {expandedCounty === county ? (
-                            <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 flex-shrink-0" />
-                          )}
+                          <ChevronRight
+                            className={cn(
+                              'h-4 w-4 flex-shrink-0 transition-transform duration-200',
+                              expandedCounty === county && 'rotate-90'
+                            )}
+                          />
+
                         </button>
 
                         {expandedCounty === county && (() => {
