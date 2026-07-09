@@ -2316,7 +2316,8 @@ const MobileJobWizard = ({
     setIsSavingDraft(true);
     
     try {
-      const category = categorizeJob(formData.title, formData.description, formData.occupation);
+      let category = categorizeJob(formData.title, formData.description, formData.occupation);
+      // AI-fallback för utkast: hoppa över (spar tid). Kategoriseras vid publicering istället.
       
       // For drafts, skip the postal code lookup to speed up saving
       // County/municipality will be fetched when the job is published
