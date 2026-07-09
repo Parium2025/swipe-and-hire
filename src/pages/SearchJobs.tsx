@@ -552,13 +552,6 @@ const SearchJobs = memo(() => {
 
   const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
 
-  // Unika jobbtitlar från aktiva annonser – används för smart-förslag i yrkesområdes-sök.
-  // `jobs` från useOptimizedJobSearch filtrerar redan bort utgångna annonser.
-  const activeJobTitles = useMemo(
-    () => jobs.map((j) => j.title).filter(Boolean) as string[],
-    [jobs]
-  );
-
   // Memoize swipe jobs – skipped OCH redan sökta jobb tas helt bort från stacken.
   // Sökta jobb finns kvar i den vanliga listan (med SÖKT-badge), men i swipe-mode
   // har de inget syfte: alla knappar (X / spara / hjärta) är meningslösa när
@@ -802,7 +795,6 @@ const SearchJobs = memo(() => {
         onClearAll={handleClearAllFilters}
         timeFilter={timeFilter}
         onTimeFilterChange={setTimeFilter}
-        jobTitles={activeJobTitles}
       />
 
       {/* Company Suggestion Card - LinkedIn style */}
