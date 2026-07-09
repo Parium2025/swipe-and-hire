@@ -10,6 +10,9 @@ import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { smartMatchScore } from '@/lib/seoSearch';
+import { suggestCategoryFromSearch } from '@/lib/categorySuggestion';
+import { Sparkles } from 'lucide-react';
+
 import type { SearchCriteria } from '@/hooks/useSavedSearches';
 
 export type TimeFilter = 'all' | '12h' | '24h' | '3d' | '7d';
@@ -153,6 +156,27 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
               </button>
             )}
           </div>
+
+          {/* Smart förslag: koppla toppsök → Yrkesområde-filter */}
+          {(() => {
+            const suggestion = suggestCategoryFromSearch(searchInput);
+            if (!suggestion || selectedCategory === suggestion.value) return null;
+            return (
+              <button
+                type="button"
+                onClick={() => onCategoryChange(suggestion.value)}
+                className="w-full flex items-center gap-2 rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.98] transition-all duration-200 px-4 py-2.5 text-left animate-fade-in touch-manipulation"
+                aria-label={`Filtrera på yrkesområde ${suggestion.label}`}
+              >
+                <Sparkles className="h-4 w-4 text-white flex-shrink-0" />
+                <span className="text-sm text-white leading-tight">
+                  Filtrera även på <span className="font-semibold">{suggestion.label}</span>
+                </span>
+              </button>
+            );
+          })()}
+
+
           
           {/* Saved Searches Dropdown with Save button */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
