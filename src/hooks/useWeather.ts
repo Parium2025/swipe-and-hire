@@ -306,12 +306,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       console.log('🛰️ Real-time GPS tracking started via watchPosition');
     }
 
-    // Fallback: Check every 3 minutes
+    // Fallback: Check every 10 minutes (watchPosition already handles movement in real time)
     const gpsTrackingInterval = setInterval(() => {
       if (mountedRef.current) {
         checkForLocationChange(true);
       }
-    }, 3 * 60 * 1000);
+    }, 10 * 60 * 1000);
 
     const handleOnline = () => {
       console.log('Network changed - checking location...');
@@ -320,6 +320,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && mountedRef.current) {
+        // Skip refresh if weather cache is still fresh (<3 min) — the user just
+        // tabbed back briefly, no need to hit GPS or the edge function.
+        const cachedWeather = getCachedWeather();
+        if (cachedWeather && Date.now() - cachedWeather.timestamp < 3 * 60 * 1000) {
+          return;
+        }
         console.log('Tab visible - checking for location change...');
         checkForLocationChange(true);
       }
