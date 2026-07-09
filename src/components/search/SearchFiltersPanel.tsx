@@ -366,7 +366,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     </div>
                   </div>
                   {filteredCategories.length === 0 && matchingJobTitles.length === 0 ? (
-                    <div className="px-3 py-4 text-sm text-white/70 text-center">
+                    <div className="px-3 py-4 text-sm text-white text-center">
                       Inga träffar. Prova att söka på jobbtiteln i sökrutan ovan.
                     </div>
                   ) : (
@@ -397,7 +397,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                           {filteredCategories.length > 0 && (
                             <DropdownMenuSeparator className="bg-white/20" />
                           )}
-                          <div className="px-3 pt-2 pb-1 text-[11px] uppercase tracking-wider text-white/60">
+                          <div className="px-3 pt-2 pb-1 text-[11px] uppercase tracking-wider text-white">
                             Specifika jobb just nu
                           </div>
                           {matchingJobTitles.map((title, index) => (
@@ -411,7 +411,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                                 }}
                                 className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center gap-2 touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
                               >
-                                <Search className="h-3.5 w-3.5 text-white/60 flex-shrink-0" />
+                                <Search className="h-3.5 w-3.5 text-white flex-shrink-0" />
                                 <span className="truncate">{title}</span>
                               </DropdownMenuItem>
                               {index < matchingJobTitles.length - 1 && (
