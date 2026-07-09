@@ -411,7 +411,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                                 }}
                                 className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center gap-2 touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
                               >
-                                <Search className="h-3.5 w-3.5 text-white/60 flex-shrink-0" />
+                                <Search className="h-3.5 w-3.5 text-white flex-shrink-0" />
                                 <span className="truncate">{title}</span>
                               </DropdownMenuItem>
                               {index < matchingJobTitles.length - 1 && (
