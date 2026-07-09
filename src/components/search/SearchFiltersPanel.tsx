@@ -404,8 +404,11 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                             <React.Fragment key={`jobtitle-${title}`}>
                               <DropdownMenuItem
                                 onClick={() => {
+                                  const titleSuggestion = suggestCategoryFromSearch(title) ?? suggestCategoryFromSearch(categoryQuery);
                                   onSearchInputChange(title);
-                                  onCategoryChange('all-categories');
+                                  if (titleSuggestion) {
+                                    onCategoryChange(titleSuggestion.value);
+                                  }
                                   onSubcategoriesChange([]);
                                   setCategoryQuery('');
                                 }}

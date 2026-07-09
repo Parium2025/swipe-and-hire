@@ -2497,6 +2497,7 @@ const MobileJobWizard = ({
       const now = new Date();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 14);
+      const category = categorizeJob(formData.title, formData.description, formData.occupation);
       
       const jobData: Record<string, any> = {
         employer_id: user.id,
@@ -2532,6 +2533,7 @@ const MobileJobWizard = ({
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
+        category: category || null,
         is_active: true
       };
       
