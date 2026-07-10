@@ -354,6 +354,24 @@ const SearchJobs = memo(() => {
     enabled: true,
   });
 
+  // 🔥 Auto-sync: när användaren skriver "titel i Malmö" i sökrutan, fyll
+  // platsfiltret automatiskt så det syns visuellt. Skriver bara över när
+  // platsfiltret är tomt — respekterar användarens egna val.
+  useEffect(() => {
+    if (!debouncedSearch.trim()) return;
+    if (selectedCity) return;
+    const extracted = extractPhraseLocation(debouncedSearch);
+    if (extracted && extracted.location && extracted.rest) {
+      // Kapitalisera för visning i filtret (matchar hur platsfiltret visar värden)
+      const displayLocation = extracted.location
+        .split(' ')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+      setSelectedCity(displayLocation);
+    }
+  }, [debouncedSearch, selectedCity, setSelectedCity]);
+
+
   // Branding (workplace_name, company_logo_url) is already merged in by
   // useOptimizedJobSearch via useLiveJobBranding — no extra fetch needed here.
   const jobs = searchJobs;
