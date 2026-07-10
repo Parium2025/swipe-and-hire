@@ -423,19 +423,17 @@ const addTermForms = (target: Set<string>, term: string) => {
     });
 };
 
-const occupationDerivedClusters: string[][] = OCCUPATION_CATEGORIES.map((category) => [
+const OCCUPATION_KNOWN_TERMS = OCCUPATION_CATEGORIES.flatMap((category) => [
   category.label,
   category.value,
   ...category.keywords,
   ...category.subcategories,
 ]);
 
-const ALL_SYNONYM_CLUSTERS = [...SYNONYM_CLUSTERS, ...occupationDerivedClusters];
-
 // Bygg lookup: normaliserat token → array av alla kluster-medlemmar i både originalform och normaliserad form.
 const CLUSTER_LOOKUP: Map<string, string[]> = (() => {
   const m = new Map<string, string[]>();
-  for (const cluster of ALL_SYNONYM_CLUSTERS) {
+  for (const cluster of SYNONYM_CLUSTERS) {
     const memberForms = new Set<string>();
     cluster.forEach((term) => addTermForms(memberForms, term));
 
@@ -452,7 +450,8 @@ const CLUSTER_LOOKUP: Map<string, string[]> = (() => {
 const knownCanonicalTerms: string[] = Array.from(
   new Set([
     ...Object.values(typoCorrections).map((v) => normalizeToken(v)),
-    ...ALL_SYNONYM_CLUSTERS.flat().map((v) => normalizeToken(v)),
+    ...SYNONYM_CLUSTERS.flat().map((v) => normalizeToken(v)),
+    ...OCCUPATION_KNOWN_TERMS.map((v) => normalizeToken(v)),
     ...Array.from(CLUSTER_LOOKUP.keys()),
   ])
 ).filter((t) => t.length >= 4);
