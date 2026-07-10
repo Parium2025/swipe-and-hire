@@ -200,159 +200,223 @@ const levenshteinDistance = (a: string, b: string): number => {
   return matrix[b.length][a.length];
 };
 
-const typoCorrections: Record<string, string[]> = {
-  utveklare: ['utvecklare'],
-  utvekalre: ['utvecklare'],
-  utvecklre: ['utvecklare'],
-  saljare: ['säljare'],
-  saeljare: ['säljare'],
-  seljare: ['säljare'],
-  ingenjor: ['ingenjör'],
-  ingenior: ['ingenjör'],
-  ingenjorr: ['ingenjör'],
-  sjukskotare: ['sjuksköterska'],
-  sjukskoetrska: ['sjuksköterska'],
-  sjukskoterska: ['sjuksköterska'],
-  larare: ['lärare'],
-  laerare: ['lärare'],
-  lerare: ['lärare'],
-  ekonom: ['ekonom', 'ekonomi'],
-  bokforing: ['bokföring'],
-  marknadsforing: ['marknadsföring'],
-  projektledning: ['projektledare'],
-  kundtjanst: ['kundtjänst'],
-  lastbilschauffor: ['lastbilschaufför', 'lastbilsförare'],
-  chauffeur: ['chaufför', 'förare'],
-  forare: ['förare'],
-  programerare: ['programmerare'],
-  programmare: ['programmerare'],
-  adminstrator: ['administratör'],
-  assitent: ['assistent'],
-  konsullt: ['konsult'],
-  recptionist: ['receptionist'],
-  chef: ['chef'],
-  cheff: ['chef'],
-  ledre: ['ledare'],
-  teknker: ['tekniker'],
-  stocholm: ['stockholm', 'stockholms'],
-  stockolm: ['stockholm', 'stockholms'],
-  stokholm: ['stockholm', 'stockholms'],
-  goteborg: ['göteborg', 'göteborgs'],
-  goeteborg: ['göteborg', 'göteborgs'],
-  malmo: ['malmö'],
-  malmoe: ['malmö'],
-  helsingbrog: ['helsingborg'],
-  hellsingborg: ['helsingborg'],
-  helsingbourg: ['helsingborg'],
-  linkoping: ['linköping'],
-  linkoepping: ['linköping'],
-  jonkoping: ['jönköping'],
-  jonkoeping: ['jönköping'],
-  norrkoping: ['norrköping'],
-  norkoping: ['norrköping'],
-  orebro: ['örebro'],
-  oerebro: ['örebro'],
-  vasteras: ['västerås'],
-  vaesteras: ['västerås'],
-  umea: ['umeå'],
-  lulea: ['luleå'],
-  sundvall: ['sundsvall'],
-  karlsatd: ['karlstad'],
-  vaxjo: ['växjö'],
-  vaexjoe: ['växjö'],
-  uppsla: ['uppsala'],
-  uppsal: ['uppsala'],
-};
-
-// 🔥 Title synonym map: informal/alternativ titel → kanonisk titel som finns i jobbdatan.
-// Används för att göra titelsökningen smartare utan att bryta DB-tokeniseringen —
-// vi ersätter ett enskilt token 1:1 så att sökningen fortfarande är stabil.
-const titleSynonyms: Record<string, string> = {
-  // Transport
-  budbil: 'chaufför',
-  budbilsforare: 'chaufför',
-  bud: 'chaufför',
-  leverans: 'chaufför',
-  leveransforare: 'chaufför',
-  kurir: 'chaufför',
-  taxichauffor: 'chaufför',
-  akare: 'chaufför',
-  // Bygg / hantverk
-  byggare: 'snickare',
-  bygg: 'snickare',
-  hantverkare: 'snickare',
-  elinstallator: 'elektriker',
-  rormokare: 'vvs-montör',
-  vvs: 'vvs-montör',
-  malare: 'målare',
-  // Restaurang
-  kokschef: 'kock',
-  servitor: 'servitör',
-  servitris: 'servitör',
-  diskare: 'köksbiträde',
-  // Handel / sälj
-  butik: 'butikssäljare',
-  butikssaljare: 'butikssäljare',
-  kassa: 'kassabiträde',
-  kassor: 'kassör',
-  telefonsaljare: 'säljare',
-  keyaccount: 'account manager',
-  kam: 'account manager',
-  affarsomradeschef: 'account manager',
+// ─────────────────────────────────────────────────────────────
+// TYPO-KORRIGERING: normaliserad token (utan å/ä/ö) → korrekt stavning.
+// Används INNAN kluster-expansion. Täcker vanliga svenska felstavningar.
+// ─────────────────────────────────────────────────────────────
+const typoCorrections: Record<string, string> = {
+  // IT / utvecklare
+  utveklare: 'utvecklare', utvekalre: 'utvecklare', utvecklre: 'utvecklare',
+  utveckalre: 'utvecklare', utveckare: 'utvecklare', utvekare: 'utvecklare',
+  programerare: 'programmerare', programmare: 'programmerare', programör: 'programmerare',
+  // Sälj
+  saljare: 'säljare', saeljare: 'säljare', seljare: 'säljare', sälare: 'säljare',
+  // Ingenjör
+  ingenjor: 'ingenjör', ingenior: 'ingenjör', ingenjorr: 'ingenjör', injengör: 'ingenjör',
   // Vård
-  usk: 'undersköterska',
-  underskoterska: 'undersköterska',
-  ssk: 'sjuksköterska',
-  sjukskoterska: 'sjuksköterska',
-  personligassistent: 'personlig assistent',
-  vardbitrade: 'vårdbiträde',
-  // Städ
-  stadare: 'lokalvårdare',
-  stad: 'lokalvårdare',
-  lokalvard: 'lokalvårdare',
-  // IT
-  dev: 'utvecklare',
-  developer: 'utvecklare',
-  programmerare: 'utvecklare',
-  frontend: 'frontendutvecklare',
-  backend: 'backendutvecklare',
-  fullstack: 'fullstackutvecklare',
-  // Lager / logistik
-  truckforare: 'truckförare',
-  lager: 'lagerarbetare',
-  plockare: 'lagerarbetare',
+  sjukskotare: 'sjuksköterska', sjukskoetrska: 'sjuksköterska', sjukskoterska: 'sjuksköterska',
+  sjuksköterksa: 'sjuksköterska', sjuksköterrska: 'sjuksköterska',
+  underskoterska: 'undersköterska', underskotare: 'undersköterska', undersköterksa: 'undersköterska',
+  vardbitrade: 'vårdbiträde', vårdbitrade: 'vårdbiträde',
+  // Lärare
+  larare: 'lärare', laerare: 'lärare', lerare: 'lärare', lärarr: 'lärare',
   // Kontor
-  reception: 'receptionist',
-  admin: 'administratör',
-  sekreterare: 'administratör',
-  // Övrigt
-  vaktare: 'väktare',
-  ordningsvakt: 'väktare',
-  parkering: 'parkeringsvakt',
+  bokforing: 'bokföring', bokforare: 'bokförare', bokförare: 'bokförare',
+  marknadsforing: 'marknadsföring', kundtjanst: 'kundtjänst', kundtjenst: 'kundtjänst',
+  projektledning: 'projektledare',
+  adminstrator: 'administratör', administrator: 'administratör', administratör: 'administratör',
+  assitent: 'assistent', assistent: 'assistent', assistant: 'assistent',
+  konsullt: 'konsult', konsulnt: 'konsult',
+  recptionist: 'receptionist', recepsionist: 'receptionist', receptionst: 'receptionist',
+  sektreterare: 'sekreterare',
+  // Transport
+  chef: 'chef', cheff: 'chef', shef: 'chef',
+  chauffeur: 'chaufför', chauffor: 'chaufför', chauför: 'chaufför', chafför: 'chaufför',
+  chuafför: 'chaufför', shufför: 'chaufför',
+  forare: 'förare', förar: 'förare', förere: 'förare',
+  lastbilschauffor: 'lastbilschaufför', lastbilsforare: 'lastbilsförare',
+  taxichauffor: 'taxichaufför',
+  ledre: 'ledare', ledrare: 'ledare',
+  teknker: 'tekniker', tekiker: 'tekniker', teknikker: 'tekniker',
+  // Restaurang
+  kokschef: 'kökschef', kock: 'kock', kokk: 'kock',
+  servitor: 'servitör', servitris: 'servitör',
+  diskare: 'diskare', diskar: 'diskare',
+  koksbitrade: 'köksbiträde', köksbitrade: 'köksbiträde',
+  // Städ / bygg
+  stadare: 'städare', stadning: 'städning', lokalvard: 'lokalvårdare', lokalvardare: 'lokalvårdare',
+  snikare: 'snickare', snickar: 'snickare',
+  elektikker: 'elektriker', eletriker: 'elektriker',
+  malare: 'målare', mallare: 'målare',
+  // Lager
+  truckforare: 'truckförare', lagerabetare: 'lagerarbetare', lageraretare: 'lagerarbetare',
+  plockar: 'plockare',
+  // Städer
+  stocholm: 'stockholm', stockolm: 'stockholm', stokholm: 'stockholm', stockhlm: 'stockholm',
+  goteborg: 'göteborg', goeteborg: 'göteborg', götborg: 'göteborg', gtbg: 'göteborg',
+  malmo: 'malmö', malmoe: 'malmö',
+  helsingbrog: 'helsingborg', hellsingborg: 'helsingborg', helsingbourg: 'helsingborg',
+  linkoping: 'linköping', linkoepping: 'linköping',
+  jonkoping: 'jönköping', jonkoeping: 'jönköping',
+  norrkoping: 'norrköping', norkoping: 'norrköping',
+  orebro: 'örebro', oerebro: 'örebro',
+  vasteras: 'västerås', vaesteras: 'västerås',
+  umea: 'umeå', lulea: 'luleå',
+  sundvall: 'sundsvall', karlsatd: 'karlstad',
+  vaxjo: 'växjö', vaexjoe: 'växjö',
+  uppsla: 'uppsala', uppsal: 'uppsala',
 };
 
-// Normalisera ett token (utan Å/Ä/Ö) för uppslag i typo/synonym-maps.
+// ─────────────────────────────────────────────────────────────
+// SYNONYMKLUSTER: ord som betyder ungefär samma sak — söker du på ETT
+// får du träffar på ALLA i klustret. Bidirektionellt, expansivt.
+// Målet: skriver du "chaufför" ska "Budbilsförare sökes" hittas, och tvärtom.
+// ─────────────────────────────────────────────────────────────
+const SYNONYM_CLUSTERS: string[][] = [
+  // ── TRANSPORT & LOGISTIK ──
+  [
+    'chaufför', 'chauffor', 'förare', 'forare', 'bud', 'budbil', 'budbilsförare',
+    'budbilsforare', 'kurir', 'kurirförare', 'leverans', 'leveransförare',
+    'leveransforare', 'utkörare', 'åkare', 'akare', 'taxichaufför', 'taxichauffor',
+    'taxi', 'lastbilschaufför', 'lastbilschauffor', 'lastbilsförare', 'lastbilsforare',
+    'yrkeschaufför', 'yrkeschauffor', 'distributionsförare', 'distributionsforare',
+    'bussförare', 'bussforare', 'busschaufför', 'busschauffor',
+  ],
+  ['truckförare', 'truckforare', 'truck', 'truckförare/lager', 'gaffeltruck'],
+  ['lagerarbetare', 'lager', 'lagermedarbetare', 'lagerpersonal', 'plockare', 'packare', 'orderplockare', 'lagerplockare'],
+  ['terminalarbetare', 'terminal', 'godsmottagning', 'godshantering'],
+
+  // ── BYGG & HANTVERK ──
+  ['snickare', 'byggare', 'bygg', 'byggnadsarbetare', 'hantverkare', 'timmerman', 'träarbetare', 'trarbetare'],
+  ['elektriker', 'el', 'elinstallatör', 'elinstallator', 'servicetekniker-el', 'installationselektriker'],
+  ['vvs-montör', 'vvsmontor', 'vvs', 'rörmokare', 'rormokare', 'rörläggare', 'rorlaggare', 'vvsinstallatör'],
+  ['målare', 'malare', 'byggmålare', 'industrimålare'],
+  ['betongarbetare', 'betong', 'anläggningsarbetare', 'anlaggningsarbetare', 'markarbetare'],
+  ['svetsare', 'svets', 'mig-svetsare', 'tig-svetsare', 'mag-svetsare'],
+  ['mekaniker', 'mekanik', 'bilmekaniker', 'servicetekniker', 'fordonstekniker', 'fordonsmekaniker'],
+
+  // ── RESTAURANG & LIVSMEDEL ──
+  ['kock', 'kokk', 'kökschef', 'kokschef', 'souschef', 'kallskänka', 'kallskanka', 'restaurangbiträde'],
+  ['servitör', 'servitor', 'servitris', 'servis', 'restaurangpersonal', 'runner', 'hovmästare', 'hovmastare'],
+  ['bartender', 'barpersonal', 'baristor', 'barista'],
+  ['diskare', 'köksbiträde', 'koksbitrade', 'kokspersonal', 'kökspersonal'],
+  ['bagare', 'konditor', 'bageri'],
+
+  // ── HANDEL & SÄLJ ──
+  [
+    'säljare', 'saljare', 'butikssäljare', 'butikssaljare', 'butik', 'butiksmedarbetare',
+    'butikspersonal', 'shopmedarbetare', 'säljmedarbetare', 'säljkonsulent',
+    'telefonförsäljare', 'telefonsaljare', 'telemarketing', 'innesäljare', 'innesaljare',
+    'utesäljare', 'utesaljare', 'fältsäljare', 'faltsaljare', 'account manager',
+    'accountmanager', 'kam', 'keyaccount', 'affärsutvecklare', 'affarsutvecklare',
+    'affärsområdeschef', 'affarsomradeschef', 'säljchef', 'saljchef',
+  ],
+  ['kassör', 'kassor', 'kassa', 'kassabiträde', 'kassabitrade', 'kassapersonal'],
+  ['lagerchef', 'butikschef', 'store manager', 'storemanager', 'butikssamordnare'],
+
+  // ── VÅRD & OMSORG ──
+  [
+    'sjuksköterska', 'sjukskoterska', 'ssk', 'legitimeradsjuksköterska', 'grundutbildadsjuksköterska',
+    'distriktssköterska', 'distriktsskoterska', 'anestesisjuksköterska', 'operationssjuksköterska',
+  ],
+  ['undersköterska', 'underskoterska', 'usk', 'vårdbiträde', 'vardbitrade', 'omsorgspersonal', 'vårdare', 'vardare'],
+  ['personlig assistent', 'personligassistent', 'personligassisent', 'assistent'],
+  ['barnskötare', 'barnskotare', 'förskollärare', 'forskollarare', 'fritidspedagog', 'fritidsledare'],
+  ['läkare', 'lakare', 'doktor', 'st-läkare', 'stlakare', 'allmänläkare'],
+  ['fysioterapeut', 'sjukgymnast', 'arbetsterapeut'],
+  ['tandläkare', 'tandlakare', 'tandsköterska', 'tandskoterska', 'tandhygienist'],
+  ['socialsekreterare', 'socionom', 'kurator', 'behandlingsassistent', 'behandlare'],
+
+  // ── SKOLA & PEDAGOGIK ──
+  ['lärare', 'larare', 'grundskollärare', 'gymnasielärare', 'ämneslärare', 'amneslarare', 'speciallärare', 'sva-lärare'],
+  ['förskollärare', 'forskollarare', 'förskolechef', 'rektor', 'skolledare'],
+  ['elevassistent', 'skolassistent', 'resurspedagog', 'fritidspedagog'],
+
+  // ── STÄD & FASTIGHET ──
+  ['lokalvårdare', 'lokalvardare', 'städare', 'stadare', 'städ', 'stad', 'städpersonal', 'stadpersonal', 'lokalvård', 'kontorsstädare', 'hemstädare'],
+  ['fastighetsskötare', 'fastighetsskotare', 'fastighet', 'vaktmästare', 'vaktmastare', 'fastighetstekniker'],
+  ['trädgårdsarbetare', 'tradgardsarbetare', 'trädgårdsmästare', 'markskötare'],
+
+  // ── IT / TEKNIK ──
+  [
+    'utvecklare', 'developer', 'dev', 'programmerare', 'kodare', 'software engineer',
+    'softwareengineer', 'systemutvecklare', 'systemutveklare', 'apputvecklare',
+    'webbutvecklare', 'webutvecklare',
+  ],
+  ['frontendutvecklare', 'frontend', 'frontendutveklare', 'frontend-utvecklare', 'ui-utvecklare'],
+  ['backendutvecklare', 'backend', 'backend-utvecklare', 'server-utvecklare'],
+  ['fullstackutvecklare', 'fullstack', 'full-stack', 'full-stackutvecklare'],
+  ['devops', 'sre', 'plattformsingenjör', 'plattformsingenjor', 'devopsingenjör'],
+  ['dataengineer', 'data engineer', 'datatekniker', 'dataarkitekt', 'datavetare'],
+  ['datascientist', 'data scientist', 'ml-ingenjör', 'ai-ingenjör', 'aiingenjor'],
+  ['systemadministratör', 'systemadministrator', 'sysadmin', 'it-tekniker', 'ittekniker', 'supporttekniker', 'helpdesk', 'it-support'],
+  ['produktägare', 'produktagare', 'product owner', 'productowner', 'produktchef', 'produktledare'],
+  ['projektledare', 'projekt', 'projektchef', 'projectmanager', 'programledare', 'pm'],
+  ['scrummaster', 'scrum master', 'agilcoach'],
+  ['ux-designer', 'ux', 'ui-designer', 'ui', 'produktdesigner', 'interaktionsdesigner', 'grafiskdesigner', 'formgivare'],
+
+  // ── EKONOMI / HR ──
+  ['ekonom', 'ekonomi', 'ekonomiassistent', 'ekonomichef', 'controller', 'redovisningsekonom', 'redovisningskonsult'],
+  ['bokförare', 'bokforare', 'bokföring', 'bokforing', 'redovisning'],
+  ['revisor', 'revision', 'revisorsassistent', 'auktoriseradrevisor'],
+  ['hr', 'hr-generalist', 'hrpartner', 'hrchef', 'hr-specialist', 'personaladministratör', 'personalchef', 'rekryterare', 'talent acquisition', 'talentacquisition'],
+  ['löneadministratör', 'loneadministrator', 'lönespecialist', 'lonespecialist', 'lön', 'lon'],
+
+  // ── MARKNAD & KOMMUNIKATION ──
+  ['marknadsförare', 'marknadsforare', 'marknadsföring', 'marknadsforing', 'marknadschef', 'marknadskoordinator'],
+  ['kommunikatör', 'kommunikator', 'kommunikation', 'informatör', 'informator', 'presskontakt', 'pr'],
+  ['sociala medier', 'socialmedia', 'social media', 'socialmediemanager', 'content creator', 'contentcreator', 'copywriter', 'skribent', 'redaktör', 'redaktor'],
+
+  // ── KONTOR / ADMINISTRATION ──
+  ['administratör', 'administratoer', 'administrator', 'sekreterare', 'kontorsassistent', 'kanslist', 'handläggare', 'handlaggare'],
+  ['receptionist', 'reception', 'kontorsreceptionist', 'front office', 'frontoffice'],
+  ['kundtjänst', 'kundtjanst', 'kundservice', 'kundsupport', 'customer support', 'customersupport', 'customer success'],
+
+  // ── SÄKERHET ──
+  ['väktare', 'vaktare', 'ordningsvakt', 'säkerhetsvakt', 'sakerhetsvakt', 'skyddsvakt', 'entrévärd', 'entrevard', 'dörrvakt', 'dorrvakt'],
+  ['parkeringsvakt', 'parkering', 'p-vakt'],
+  ['brandman', 'räddningstjänst', 'raddningstjanst'],
+
+  // ── INDUSTRI ──
+  ['industriarbetare', 'industri', 'produktionsarbetare', 'produktion', 'operatör', 'operator', 'processoperatör', 'maskinoperatör', 'maskinoperator'],
+  ['montör', 'montor', 'montering'],
+  ['kvalitetskontrollant', 'kvalitet', 'kvalitetstekniker'],
+
+  // ── ÖVRIGT ──
+  ['frisör', 'frisor', 'stylist', 'barberare'],
+  ['massör', 'massor', 'massage', 'terapeut'],
+  ['personaltrainer', 'personlig tränare', 'ptr', 'gyminstruktör', 'gyminstruktor'],
+  ['florist', 'blomsterdekoratör'],
+  ['fotograf', 'videograf', 'filmare'],
+];
+
+// Normalisera ett token (utan Å/Ä/Ö och mellanslag) för uppslag.
 const normalizeToken = (t: string): string =>
   t.toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/å/g, 'a')
     .replace(/ä/g, 'a')
-    .replace(/ö/g, 'o');
+    .replace(/ö/g, 'o')
+    .replace(/\s+/g, '');
 
-/**
- * Smart titelsökning: normalisera per token.
- * - Kända synonymer (budbil → chaufför) byts direkt.
- * - Kända typos (utveklare → utvecklare) byts till första korrigering.
- * - Ord som slutar på "s" strippas för fuzzy match.
- * - Levenshtein-fallback (≤1 fel för 5-7 tkn, ≤2 för 8+) fångar okända stavfel.
- * - Multi-word input bevaras token för token så DB-tokeniseringen fungerar stabilt.
- */
-// Pre-computed pool of known canonical terms för Levenshtein-fallback.
+// Bygg lookup: normaliserat token → array av alla kluster-medlemmar (normaliserade).
+const CLUSTER_LOOKUP: Map<string, string[]> = (() => {
+  const m = new Map<string, string[]>();
+  for (const cluster of SYNONYM_CLUSTERS) {
+    const normalizedMembers = Array.from(new Set(cluster.map(normalizeToken).filter((t) => t.length >= 2)));
+    for (const member of normalizedMembers) {
+      if (!m.has(member)) m.set(member, normalizedMembers);
+    }
+  }
+  return m;
+})();
+
+// Pre-computed pool av kända kanoniska termer för Levenshtein-fallback.
 const knownCanonicalTerms: string[] = Array.from(
   new Set([
-    ...Object.values(titleSynonyms).map((v) => normalizeToken(v.split(' ')[0])),
-    ...Object.values(typoCorrections).map((arr) => normalizeToken(arr[0])),
+    ...Object.values(typoCorrections).map((v) => normalizeToken(v)),
+    ...SYNONYM_CLUSTERS.flat().map((v) => normalizeToken(v)),
   ])
 ).filter((t) => t.length >= 4);
 
@@ -363,7 +427,6 @@ const fuzzyFindCanonical = (norm: string): string | null => {
 
   for (const term of knownCanonicalTerms) {
     if (Math.abs(term.length - norm.length) > allowedDistance) continue;
-    // Snabb prefix-skip: om första bokstaven inte matchar kräv större likhet
     if (term[0] !== norm[0] && allowedDistance < 2) continue;
     const dist = levenshteinDistance(term, norm);
     if (dist <= allowedDistance && (!best || dist < best.dist)) {
@@ -376,9 +439,6 @@ const fuzzyFindCanonical = (norm: string): string | null => {
 /**
  * 🔥 Fras-extraktion: hitta plats i multi-word input.
  * "affärsområdeschef i Malmö" → { location: "malmö", rest: "affärsområdeschef" }
- * "säljare i västra götaland" → { location: "västra götaland", rest: "säljare" }
- * Kollar sista 1-3 tokens (med/utan "i"/"på"/"vid"-prepositioner) mot kända platsnamn.
- * Exporterad så att UI kan auto-fylla platsfiltret för visuell feedback.
  */
 export function extractPhraseLocation(searchQuery: string): { location: string; rest: string } | null {
   const trimmed = searchQuery.trim();
@@ -387,11 +447,9 @@ export function extractPhraseLocation(searchQuery: string): { location: string; 
   const tokens = trimmed.split(/\s+/);
   if (tokens.length < 2) return null;
 
-  // Prova sista 3, 2, 1 tokens (längst först = Västra Götaland före Götaland)
   for (const take of [3, 2, 1]) {
     if (tokens.length <= take) continue;
     const candidateRaw = tokens.slice(-take).join(' ').toLowerCase();
-    // Strippa ledande preposition ("i malmö" → "malmö")
     const candidate = candidateRaw.replace(/^(i|pa|på|vid)\s+/, '').trim();
     if (candidate.length < 3) continue;
 
@@ -417,23 +475,17 @@ export function extractPhraseLocation(searchQuery: string): { location: string; 
 }
 
 /**
- * 🔥 Detektera plats i söksträngen — både enskilda ord ("Stockholm") och
- * fraser ("chef i Malmö"). Returnerar { location, rest } där rest är det som
- * ska sökas som titel (tom sträng om hela input var en plats).
- * Exporterad så UI kan auto-fylla platsfiltret för att spegla sökningen.
+ * 🔥 Detektera plats i söksträngen. Enskilt ord eller fras.
  */
 export function detectLocationInQuery(searchQuery: string): { location: string; rest: string } | null {
   const trimmed = searchQuery.trim().toLowerCase();
   if (!trimmed || trimmed.length < 3) return null;
 
-  // 1. Fras med preposition ("i Malmö") — högsta prio
   const phrase = extractPhraseLocation(searchQuery);
   if (phrase) return phrase;
 
-  // 2. Hela input är en känd plats
   if (allKnownLocationTerms.has(trimmed)) return { location: trimmed, rest: '' };
 
-  // 3. Prefix-match ("stock" → stockholm)
   let bestMatch: string | null = null;
   for (const term of allKnownLocationTerms) {
     if (term.startsWith(trimmed) && (!bestMatch || term.length < bestMatch.length)) {
@@ -442,7 +494,6 @@ export function detectLocationInQuery(searchQuery: string): { location: string; 
   }
   if (bestMatch) return { location: bestMatch, rest: '' };
 
-  // 4. Normaliserad prefix-match (utan Å/Ä/Ö)
   const normalized = normalizeSwedish(trimmed);
   for (const term of allKnownLocationTerms) {
     if (normalizeSwedish(term).startsWith(normalized) && (!bestMatch || term.length < bestMatch.length)) {
@@ -454,35 +505,78 @@ export function detectLocationInQuery(searchQuery: string): { location: string; 
   return null;
 }
 
+/**
+ * 🔥 Smart titelsökning — expansiv, bidirektionell, felstavningstolerant.
+ *
+ * För varje token i inputen:
+ *   1. Normalisera (utan å/ä/ö).
+ *   2. Kolla typo-korrigering (utveklare → utvecklare).
+ *   3. Kolla synonymkluster (chaufför ↔ bud ↔ budbil ↔ kurir ↔ ...).
+ *      → Returnerar ALLA kluster-medlemmar så DB:n får OR-match på alla.
+ *   4. "s"-suffix (chaufförs → chaufför) fångas.
+ *   5. Fuzzy Levenshtein för okända stavfel.
+ *
+ * Alla utökade termer sammanfogas med mellanslag → DB:ns tsquery blir en OR
+ * (via v_or_tsquery i search_jobs-RPC) så jobb som innehåller NÅGON av
+ * termerna matchar. Rank prioriterar exakta träffar först.
+ */
 const smartenTitleQuery = (raw: string): string => {
-  const tokens = raw.trim().split(/\s+/);
-  if (tokens.length === 0) return raw;
+  const tokens = raw.trim().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return '';
 
-  return tokens
-    .map((token) => {
-      if (token.length < 2) return token;
-      const norm = normalizeToken(token);
+  const expanded = new Set<string>();
 
-      if (titleSynonyms[norm]) return titleSynonyms[norm];
-      if (typoCorrections[norm]) return typoCorrections[norm][0];
+  for (const token of tokens) {
+    if (token.length < 2) {
+      expanded.add(token);
+      continue;
+    }
+    const norm = normalizeToken(token);
 
-      if (norm.length > 4 && norm.endsWith('s')) {
-        const stripped = norm.slice(0, -1);
-        if (titleSynonyms[stripped]) return titleSynonyms[stripped];
-        if (typoCorrections[stripped]) return typoCorrections[stripped][0];
+    // Alltid behåll originaltoken (så användarens exakta stavning finns med).
+    expanded.add(token.toLowerCase());
+    expanded.add(norm);
+
+    // 1. Typo-korrigering → kanonisk form.
+    let canonical = typoCorrections[norm];
+
+    // 2. Om ordet slutar på "s" prova utan.
+    if (!canonical && norm.length > 4 && norm.endsWith('s')) {
+      const stripped = norm.slice(0, -1);
+      canonical = typoCorrections[stripped];
+      if (canonical) expanded.add(stripped);
+    }
+
+    if (canonical) {
+      expanded.add(canonical);
+      expanded.add(normalizeToken(canonical));
+    }
+
+    // 3. Synonymkluster (för både originalet och den ev. korrigerade formen).
+    const lookupKeys = [norm, canonical ? normalizeToken(canonical) : null].filter(Boolean) as string[];
+    for (const key of lookupKeys) {
+      const cluster = CLUSTER_LOOKUP.get(key);
+      if (cluster) {
+        for (const member of cluster) expanded.add(member);
       }
+    }
 
-      // Fuzzy fallback: fångar okända stavfel (t.ex. "utveckalre" → "utvecklare")
+    // 4. Fuzzy fallback för okända stavfel.
+    if (!canonical && !CLUSTER_LOOKUP.has(norm)) {
       const fuzzy = fuzzyFindCanonical(norm);
       if (fuzzy) {
-        // Slå upp synonym igen ifall den fuzzy-matchade formen är en informell term
-        if (titleSynonyms[fuzzy]) return titleSynonyms[fuzzy];
-        return fuzzy;
+        expanded.add(fuzzy);
+        const fuzzyCluster = CLUSTER_LOOKUP.get(fuzzy);
+        if (fuzzyCluster) {
+          for (const member of fuzzyCluster) expanded.add(member);
+        }
       }
+    }
+  }
 
-      return token;
-    })
-    .join(' ');
+  // Filtrera bort för korta termer och begränsa till max 40 tokens (skydd mot query-explosion).
+  const result = Array.from(expanded).filter((t) => t.length >= 2).slice(0, 40);
+  return result.join(' ');
 };
 
 function mapEmploymentTypes(employmentTypes: string[]) {
