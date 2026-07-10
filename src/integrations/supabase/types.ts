@@ -2485,6 +2485,9 @@ export type Database = {
           salary_max: number | null
           salary_min: number | null
           search_query: string | null
+          sort_by: string | null
+          subcategories: string[] | null
+          time_filter: string | null
           updated_at: string
           user_id: string
         }
@@ -2502,6 +2505,9 @@ export type Database = {
           salary_max?: number | null
           salary_min?: number | null
           search_query?: string | null
+          sort_by?: string | null
+          subcategories?: string[] | null
+          time_filter?: string | null
           updated_at?: string
           user_id: string
         }
@@ -2519,6 +2525,9 @@ export type Database = {
           salary_max?: number | null
           salary_min?: number | null
           search_query?: string | null
+          sort_by?: string | null
+          subcategories?: string[] | null
+          time_filter?: string | null
           updated_at?: string
           user_id?: string
         }

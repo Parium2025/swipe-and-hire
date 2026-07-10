@@ -212,11 +212,17 @@ const SearchJobs = memo(() => {
     setSelectedCity(cityValue);
     setSelectedPostalCode('');
     setSelectedCategory(criteria.category || 'all-categories');
-    setSelectedSubcategories([]);
+    setSelectedSubcategories(criteria.subcategories || []);
     setSelectedEmploymentTypes(criteria.employment_types || []);
+    if (criteria.time_filter && ['all', '12h', '24h', '3d', '7d'].includes(criteria.time_filter)) {
+      setTimeFilter(criteria.time_filter as 'all' | '12h' | '24h' | '3d' | '7d');
+    }
+    if (criteria.sort_by && ['newest', 'oldest', 'most-views'].includes(criteria.sort_by)) {
+      setSortBy(criteria.sort_by as 'newest' | 'oldest' | 'most-views');
+    }
     
     // Expand filters if there are active filters to show
-    if (cityValue || criteria.category || criteria.employment_types?.length) {
+    if (cityValue || criteria.category || criteria.employment_types?.length || criteria.subcategories?.length) {
       setFiltersExpanded(true);
     }
     
@@ -1020,6 +1026,9 @@ const SearchJobs = memo(() => {
           county: selectedCity && selectedCity.endsWith(' län') ? selectedCity : undefined,
           employment_types: selectedEmploymentTypes.length > 0 ? selectedEmploymentTypes : undefined,
           category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
+          subcategories: selectedSubcategories.length > 0 ? selectedSubcategories : undefined,
+          time_filter: timeFilter !== 'all' ? timeFilter : undefined,
+          sort_by: sortBy !== 'newest' ? sortBy : undefined,
         }}
         onSave={saveSearch}
       />

@@ -56,6 +56,9 @@ export interface SavedSearch {
   county: string | null;
   employment_types: string[] | null;
   category: string | null;
+  subcategories: string[] | null;
+  time_filter: string | null;
+  sort_by: string | null;
   salary_min: number | null;
   salary_max: number | null;
   new_matches_count: number;
@@ -71,6 +74,9 @@ export interface SearchCriteria {
   county?: string;
   employment_types?: string[];
   category?: string;
+  subcategories?: string[];
+  time_filter?: string;
+  sort_by?: string;
   salary_min?: number;
   salary_max?: number;
 }
@@ -235,6 +241,9 @@ export const useSavedSearches = () => {
           county: criteria.county || null,
           employment_types: criteria.employment_types?.length ? criteria.employment_types : null,
           category: criteria.category || null,
+          subcategories: criteria.subcategories?.length ? criteria.subcategories : null,
+          time_filter: criteria.time_filter || null,
+          sort_by: criteria.sort_by || null,
           salary_min: criteria.salary_min || null,
           salary_max: criteria.salary_max || null,
         })

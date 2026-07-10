@@ -8,6 +8,91 @@ const corsHeaders = {
 
 const BATCH_SIZE = 500;
 
+// ─────────────────────────────────────────────────────────────
+// Synonym/typo-expansion (spegel av useOptimizedJobSearch).
+// Används så att sparad sökning "budbil" matchar jobb med titeln
+// "chaufför", precis som live-sökningen gör.
+// ─────────────────────────────────────────────────────────────
+const TITLE_SYNONYMS: Record<string, string> = {
+  budbil: 'chaufför', budbilsforare: 'chaufför', bud: 'chaufför',
+  leverans: 'chaufför', leveransforare: 'chaufför', kurir: 'chaufför',
+  taxichauffor: 'chaufför', akare: 'chaufför',
+  byggare: 'snickare', bygg: 'snickare', hantverkare: 'snickare',
+  elinstallator: 'elektriker', rormokare: 'vvs-montör', vvs: 'vvs-montör',
+  malare: 'målare',
+  kokschef: 'kock', servitor: 'servitör', servitris: 'servitör', diskare: 'köksbiträde',
+  butik: 'butikssäljare', butikssaljare: 'butikssäljare', kassa: 'kassabiträde',
+  kassor: 'kassör', telefonsaljare: 'säljare', keyaccount: 'account manager',
+  kam: 'account manager', affarsomradeschef: 'account manager',
+  usk: 'undersköterska', underskoterska: 'undersköterska', ssk: 'sjuksköterska',
+  sjukskoterska: 'sjuksköterska', personligassistent: 'personlig assistent',
+  vardbitrade: 'vårdbiträde',
+  stadare: 'lokalvårdare', stad: 'lokalvårdare', lokalvard: 'lokalvårdare',
+  dev: 'utvecklare', developer: 'utvecklare', programmerare: 'utvecklare',
+  frontend: 'frontendutvecklare', backend: 'backendutvecklare', fullstack: 'fullstackutvecklare',
+  truckforare: 'truckförare', lager: 'lagerarbetare', plockare: 'lagerarbetare',
+  reception: 'receptionist', admin: 'administratör', sekreterare: 'administratör',
+  vaktare: 'väktare', ordningsvakt: 'väktare', parkering: 'parkeringsvakt',
+};
+
+const TYPO_CORRECTIONS: Record<string, string> = {
+  utveklare: 'utvecklare', utvekalre: 'utvecklare', utvecklre: 'utvecklare',
+  saljare: 'säljare', saeljare: 'säljare', seljare: 'säljare',
+  ingenjor: 'ingenjör', ingenior: 'ingenjör', ingenjorr: 'ingenjör',
+  sjukskotare: 'sjuksköterska', sjukskoetrska: 'sjuksköterska',
+  larare: 'lärare', laerare: 'lärare', lerare: 'lärare',
+  bokforing: 'bokföring', marknadsforing: 'marknadsföring',
+  projektledning: 'projektledare', kundtjanst: 'kundtjänst',
+  lastbilschauffor: 'lastbilschaufför', chauffeur: 'chaufför', forare: 'förare',
+  programerare: 'programmerare', programmare: 'programmerare',
+  adminstrator: 'administratör', assitent: 'assistent', konsullt: 'konsult',
+  recptionist: 'receptionist', cheff: 'chef', ledre: 'ledare', teknker: 'tekniker',
+  stocholm: 'stockholm', stockolm: 'stockholm', stokholm: 'stockholm',
+  goteborg: 'göteborg', goeteborg: 'göteborg', malmo: 'malmö', malmoe: 'malmö',
+  helsingbrog: 'helsingborg', hellsingborg: 'helsingborg',
+  linkoping: 'linköping', jonkoping: 'jönköping', norrkoping: 'norrköping',
+  orebro: 'örebro', vasteras: 'västerås', umea: 'umeå', lulea: 'luleå',
+  sundvall: 'sundsvall', karlsatd: 'karlstad', vaxjo: 'växjö',
+  uppsla: 'uppsala', uppsal: 'uppsala',
+};
+
+const normToken = (t: string): string =>
+  t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o');
+
+/** Expandera en söksträng till en lista med alternativa termer att söka på. */
+function expandQueryTerms(raw: string): string[] {
+  const trimmed = (raw || '').trim().toLowerCase();
+  if (!trimmed) return [];
+  const out = new Set<string>([trimmed]);
+  const tokens = trimmed.split(/\s+/);
+  for (const t of tokens) {
+    if (t.length < 2) continue;
+    out.add(t);
+    const norm = normToken(t);
+    if (TITLE_SYNONYMS[norm]) out.add(TITLE_SYNONYMS[norm].toLowerCase());
+    if (TYPO_CORRECTIONS[norm]) out.add(TYPO_CORRECTIONS[norm].toLowerCase());
+    if (norm.length > 4 && norm.endsWith('s')) {
+      const s = norm.slice(0, -1);
+      if (TITLE_SYNONYMS[s]) out.add(TITLE_SYNONYMS[s].toLowerCase());
+      if (TYPO_CORRECTIONS[s]) out.add(TYPO_CORRECTIONS[s].toLowerCase());
+    }
+  }
+  return Array.from(out);
+}
+
+/** Returnerar true om något av termerna finns i något av haystack-fälten. */
+function anyTermMatches(terms: string[], haystacks: string[]): boolean {
+  if (terms.length === 0) return true;
+  const normHay = haystacks.map((h) => normToken(h || ''));
+  for (const term of terms) {
+    const normTerm = normToken(term);
+    if (!normTerm) continue;
+    if (normHay.some((h) => h.includes(normTerm))) return true;
+  }
+  return false;
+}
+
 interface NewJobPayload {
   job_id: string;
   title: string;
@@ -50,7 +135,7 @@ serve(async (req) => {
     while (true) {
       const { data: batch, error: batchError } = await supabase
         .from('saved_searches')
-        .select('id, user_id, name, search_query, city, county, employment_types, category, salary_min, salary_max')
+        .select('id, user_id, name, search_query, city, county, employment_types, category, subcategories, salary_min, salary_max')
         .range(offset, offset + BATCH_SIZE - 1);
 
       if (batchError) {
@@ -66,13 +151,22 @@ serve(async (req) => {
       const municipalityLower = (workplace_municipality || '').toLowerCase();
       const countyValue = workplace_county || '';
 
+      // Fetch subcategories column via select above (added below)
       for (const search of batch) {
         let matches = true;
 
-        // Text search
+        // Text search — expandera med synonymer/typos så "budbil" matchar "chaufför"
         if (search.search_query && search.search_query !== '') {
-          const q = search.search_query.toLowerCase();
-          if (!titleLower.includes(q) && !cityLower.includes(q) && !municipalityLower.includes(q)) {
+          const terms = expandQueryTerms(search.search_query);
+          if (!anyTermMatches(terms, [titleLower, cityLower, municipalityLower])) {
+            matches = false;
+          }
+        }
+
+        // Subcategories: minst en subkategori-term ska matcha titel/kategori/beskrivning
+        if (matches && Array.isArray(search.subcategories) && search.subcategories.length > 0) {
+          const subTerms = search.subcategories.flatMap((s: string) => expandQueryTerms(s));
+          if (!anyTermMatches(subTerms, [titleLower, (category || '').toLowerCase()])) {
             matches = false;
           }
         }
