@@ -3,6 +3,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import { supabase } from '@/integrations/supabase/client';
 import { getTimeRemaining } from '@/lib/date';
 import { detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
+import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { safeSetItem } from '@/lib/safeStorage';
 import { imageCache } from '@/lib/imageCache';
 import { readThroughCache } from '@/lib/performanceGuards';
@@ -400,13 +401,46 @@ const normalizeToken = (t: string): string =>
     .replace(/ö/g, 'o')
     .replace(/\s+/g, '');
 
-// Bygg lookup: normaliserat token → array av alla kluster-medlemmar (normaliserade).
+const SEARCH_STOP_WORDS = new Set([
+  'i', 'pa', 'på', 'vid', 'och', 'eller', 'med', 'som', 'till', 'for', 'för', 'av', 'en', 'ett', 'den', 'det',
+]);
+
+const addTermForms = (target: Set<string>, term: string) => {
+  const lower = term.trim().toLowerCase();
+  if (!lower) return;
+
+  target.add(lower);
+  const normalized = normalizeToken(lower);
+  if (normalized) target.add(normalized);
+
+  lower
+    .split(/[\s,/()&+-]+/)
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 3 && !SEARCH_STOP_WORDS.has(normalizeToken(part)))
+    .forEach((part) => {
+      target.add(part);
+      target.add(normalizeToken(part));
+    });
+};
+
+const OCCUPATION_KNOWN_TERMS = OCCUPATION_CATEGORIES.flatMap((category) => [
+  category.label,
+  category.value,
+  ...category.keywords,
+  ...category.subcategories,
+]);
+
+// Bygg lookup: normaliserat token → array av alla kluster-medlemmar i både originalform och normaliserad form.
 const CLUSTER_LOOKUP: Map<string, string[]> = (() => {
   const m = new Map<string, string[]>();
   for (const cluster of SYNONYM_CLUSTERS) {
-    const normalizedMembers = Array.from(new Set(cluster.map(normalizeToken).filter((t) => t.length >= 2)));
-    for (const member of normalizedMembers) {
-      if (!m.has(member)) m.set(member, normalizedMembers);
+    const memberForms = new Set<string>();
+    cluster.forEach((term) => addTermForms(memberForms, term));
+
+    const members = Array.from(memberForms).filter((t) => t.length >= 2 && !SEARCH_STOP_WORDS.has(normalizeToken(t)));
+    for (const member of members) {
+      const key = normalizeToken(member);
+      if (!m.has(key)) m.set(key, members);
     }
   }
   return m;
@@ -417,8 +451,37 @@ const knownCanonicalTerms: string[] = Array.from(
   new Set([
     ...Object.values(typoCorrections).map((v) => normalizeToken(v)),
     ...SYNONYM_CLUSTERS.flat().map((v) => normalizeToken(v)),
+    ...OCCUPATION_KNOWN_TERMS.map((v) => normalizeToken(v)),
+    ...Array.from(CLUSTER_LOOKUP.keys()),
   ])
 ).filter((t) => t.length >= 4);
+
+const resolveKnownLocationTerm = (raw: string, allowPrefix = false): string | null => {
+  const cleaned = raw.trim().toLowerCase();
+  if (!cleaned || cleaned.length < 3) return null;
+
+  const normalized = normalizeSwedish(cleaned);
+  const normalizedToken = normalizeToken(cleaned);
+  const corrected = typoCorrections[normalizedToken];
+  const candidates = [cleaned, normalized, corrected, corrected ? normalizeSwedish(corrected) : null]
+    .filter(Boolean) as string[];
+
+  for (const candidate of candidates) {
+    if (allKnownLocationTerms.has(candidate)) return candidate;
+  }
+
+  let bestMatch: string | null = null;
+  for (const term of allKnownLocationTerms) {
+    const termNorm = normalizeSwedish(term);
+    const exact = candidates.some((candidate) => termNorm === normalizeSwedish(candidate));
+    const prefix = allowPrefix && candidates.some((candidate) => termNorm.startsWith(normalizeSwedish(candidate)));
+    if ((exact || prefix) && (!bestMatch || term.length < bestMatch.length)) {
+      bestMatch = term;
+    }
+  }
+
+  return bestMatch;
+};
 
 const fuzzyFindCanonical = (norm: string): string | null => {
   if (norm.length < 5) return null;
@@ -453,16 +516,7 @@ export function extractPhraseLocation(searchQuery: string): { location: string; 
     const candidate = candidateRaw.replace(/^(i|pa|på|vid)\s+/, '').trim();
     if (candidate.length < 3) continue;
 
-    const matchTerm =
-      allKnownLocationTerms.has(candidate)
-        ? candidate
-        : (() => {
-            const normCandidate = normalizeSwedish(candidate);
-            for (const term of allKnownLocationTerms) {
-              if (normalizeSwedish(term) === normCandidate) return term;
-            }
-            return null;
-          })();
+    const matchTerm = resolveKnownLocationTerm(candidate);
 
     if (matchTerm) {
       let rest = tokens.slice(0, -take).join(' ').trim();
@@ -484,26 +538,59 @@ export function detectLocationInQuery(searchQuery: string): { location: string; 
   const phrase = extractPhraseLocation(searchQuery);
   if (phrase) return phrase;
 
-  if (allKnownLocationTerms.has(trimmed)) return { location: trimmed, rest: '' };
-
-  let bestMatch: string | null = null;
-  for (const term of allKnownLocationTerms) {
-    if (term.startsWith(trimmed) && (!bestMatch || term.length < bestMatch.length)) {
-      bestMatch = term;
-    }
-  }
-  if (bestMatch) return { location: bestMatch, rest: '' };
-
-  const normalized = normalizeSwedish(trimmed);
-  for (const term of allKnownLocationTerms) {
-    if (normalizeSwedish(term).startsWith(normalized) && (!bestMatch || term.length < bestMatch.length)) {
-      bestMatch = term;
-    }
-  }
-  if (bestMatch) return { location: bestMatch, rest: '' };
+  const match = resolveKnownLocationTerm(trimmed, true);
+  if (match) return { location: match, rest: '' };
 
   return null;
 }
+
+const stripSwedishEnding = (value: string): string => {
+  if (value.length <= 4) return value;
+  return value
+    .replace(/(ets|ens)$/i, '')
+    .replace(/(arnas|ernas|ornas)$/i, '')
+    .replace(/(arna|erna|orna)$/i, '')
+    .replace(/(ande|ende)$/i, '')
+    .replace(/(het|en|et|ar|er|or|s)$/i, '');
+};
+
+const getTokenLookupKeys = (token: string): string[] => {
+  const norm = normalizeToken(token);
+  const stripped = stripSwedishEnding(norm);
+  return Array.from(new Set([norm, stripped, typoCorrections[norm] ? normalizeToken(typoCorrections[norm]) : '', typoCorrections[stripped] ? normalizeToken(typoCorrections[stripped]) : '']))
+    .filter((key) => key.length >= 2 && !SEARCH_STOP_WORDS.has(key));
+};
+
+const addClusterExpansion = (expanded: Set<string>, key: string) => {
+  const cluster = CLUSTER_LOOKUP.get(normalizeToken(key));
+  if (!cluster) return false;
+  for (const member of cluster) expanded.add(member);
+  return true;
+};
+
+const buildCompoundCandidates = (leftRaw: string, rightRaw: string): string[] => {
+  const left = leftRaw.trim().toLowerCase();
+  const right = rightRaw.trim().toLowerCase();
+  const rightNorm = normalizeToken(right);
+  if (!left || !right || SEARCH_STOP_WORDS.has(normalizeToken(left)) || SEARCH_STOP_WORDS.has(rightNorm)) return [];
+
+  const leftBase = left
+    .replace(/(ets|ens)$/i, 'e')
+    .replace(/(arnas|ernas|ornas)$/i, '')
+    .replace(/(arna|erna|orna)$/i, '')
+    .replace(/(en|et)$/i, '')
+    .replace(/s$/i, '');
+
+  const normalizedBase = stripSwedishEnding(normalizeToken(left));
+  return Array.from(new Set([
+    `${left}${right}`,
+    `${left}s${right}`,
+    `${leftBase}${right}`,
+    `${leftBase}s${right}`,
+    `${normalizedBase}${rightNorm}`,
+    `${normalizedBase}s${rightNorm}`,
+  ])).filter((candidate) => candidate.length >= 5);
+};
 
 /**
  * 🔥 Smart titelsökning — expansiv, bidirektionell, felstavningstolerant.
@@ -526,12 +613,14 @@ const smartenTitleQuery = (raw: string): string => {
 
   const expanded = new Set<string>();
 
-  for (const token of tokens) {
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index];
     if (token.length < 2) {
       expanded.add(token);
       continue;
     }
     const norm = normalizeToken(token);
+    if (SEARCH_STOP_WORDS.has(norm)) continue;
 
     // Alltid behåll originaltoken (så användarens exakta stavning finns med).
     expanded.add(token.toLowerCase());
@@ -540,9 +629,9 @@ const smartenTitleQuery = (raw: string): string => {
     // 1. Typo-korrigering → kanonisk form.
     let canonical = typoCorrections[norm];
 
-    // 2. Om ordet slutar på "s" prova utan.
-    if (!canonical && norm.length > 4 && norm.endsWith('s')) {
-      const stripped = norm.slice(0, -1);
+    // 2. Prova svensk böjning/genitiv: "chaufförs", "affärsområdets", "elektrikern".
+    if (!canonical && norm.length > 4) {
+      const stripped = stripSwedishEnding(norm);
       canonical = typoCorrections[stripped];
       if (canonical) expanded.add(stripped);
     }
@@ -553,29 +642,39 @@ const smartenTitleQuery = (raw: string): string => {
     }
 
     // 3. Synonymkluster (för både originalet och den ev. korrigerade formen).
-    const lookupKeys = [norm, canonical ? normalizeToken(canonical) : null].filter(Boolean) as string[];
+    const lookupKeys = [...getTokenLookupKeys(token), canonical ? normalizeToken(canonical) : null].filter(Boolean) as string[];
+    let foundCluster = false;
     for (const key of lookupKeys) {
-      const cluster = CLUSTER_LOOKUP.get(key);
-      if (cluster) {
-        for (const member of cluster) expanded.add(member);
-      }
+      foundCluster = addClusterExpansion(expanded, key) || foundCluster;
     }
 
     // 4. Fuzzy fallback för okända stavfel.
-    if (!canonical && !CLUSTER_LOOKUP.has(norm)) {
-      const fuzzy = fuzzyFindCanonical(norm);
+    if (!canonical && !foundCluster) {
+      const fuzzy = lookupKeys.map((key) => fuzzyFindCanonical(key)).find(Boolean) || null;
       if (fuzzy) {
         expanded.add(fuzzy);
-        const fuzzyCluster = CLUSTER_LOOKUP.get(fuzzy);
-        if (fuzzyCluster) {
-          for (const member of fuzzyCluster) expanded.add(member);
+        addClusterExpansion(expanded, fuzzy);
+      }
+    }
+
+    // 5. Svenska sammansättningar: "affärsområdets chef" → "affärsområdeschef".
+    const nextToken = tokens[index + 1];
+    if (nextToken) {
+      for (const compound of buildCompoundCandidates(token, nextToken)) {
+        expanded.add(compound);
+        expanded.add(normalizeToken(compound));
+        const compoundFuzzy = fuzzyFindCanonical(normalizeToken(compound));
+        if (compoundFuzzy) {
+          expanded.add(compoundFuzzy);
+          addClusterExpansion(expanded, compoundFuzzy);
         }
+        addClusterExpansion(expanded, compound);
       }
     }
   }
 
-  // Filtrera bort för korta termer och begränsa till max 40 tokens (skydd mot query-explosion).
-  const result = Array.from(expanded).filter((t) => t.length >= 2).slice(0, 40);
+  // Filtrera bort för korta termer och begränsa till max 80 tokens (skydd mot query-explosion).
+  const result = Array.from(expanded).filter((t) => t.length >= 2 && !SEARCH_STOP_WORDS.has(normalizeToken(t))).slice(0, 80);
   return result.join(' ');
 };
 
@@ -636,11 +735,10 @@ function useSearchParamsState(options: UseOptimizedJobSearchOptions) {
     if (bestMatch) return bestMatch;
 
     const normalized = normalizeSwedish(trimmed);
-    for (const [typo, corrections] of Object.entries(typoCorrections)) {
+    for (const [typo, correction] of Object.entries(typoCorrections)) {
       if (normalized === typo || levenshteinDistance(normalized, typo) <= 1) {
-        for (const correction of corrections) {
-          if (allKnownLocationTerms.has(correction)) return correction;
-        }
+        const locationMatch = resolveKnownLocationTerm(correction);
+        if (locationMatch) return locationMatch;
       }
     }
 
