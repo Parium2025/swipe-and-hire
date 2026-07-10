@@ -442,7 +442,49 @@ function useSearchParamsState(options: UseOptimizedJobSearchOptions) {
   const baseCityFilter = hasMultipleLocations ? '' : isCounty ? '' : primaryLocation;
   const baseCountyFilter = hasMultipleLocations ? '' : isCounty ? primaryLocation : '';
 
+  // 🔥 Fras-extraktion: hitta plats i multi-word input.
+  // "affärsområdeschef i Malmö" → { location: "malmö", rest: "affärsområdeschef" }
+  // Kollar sista 1-2 tokens (med/utan "i"/"på"-prepositioner) mot kända platsnamn.
+  const phraseLocationExtract = useMemo(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed || !trimmed.includes(' ')) return null;
+
+    const tokens = trimmed.split(/\s+/);
+    if (tokens.length < 2) return null;
+
+    // Prova sista 1 och sista 2 tokens som kandidat-plats
+    for (const take of [2, 1]) {
+      if (tokens.length <= take) continue;
+      const candidateRaw = tokens.slice(-take).join(' ').toLowerCase();
+      // Strippa ledande preposition ("i malmö" → "malmö")
+      const candidate = candidateRaw.replace(/^(i|pa|på)\s+/, '').trim();
+      if (candidate.length < 3) continue;
+
+      if (allKnownLocationTerms.has(candidate)) {
+        // Rest = tokens före platsen, minus ev. preposition
+        let rest = tokens.slice(0, -take).join(' ').trim();
+        rest = rest.replace(/\s+(i|pa|på)$/i, '').trim();
+        return { location: candidate, rest };
+      }
+
+      // Fuzzy: kolla mot normaliserad form
+      const normCandidate = normalizeSwedish(candidate);
+      for (const term of allKnownLocationTerms) {
+        if (normalizeSwedish(term) === normCandidate) {
+          let rest = tokens.slice(0, -take).join(' ').trim();
+          rest = rest.replace(/\s+(i|pa|på)$/i, '').trim();
+          return { location: term, rest };
+        }
+      }
+    }
+
+    return null;
+  }, [searchQuery]);
+
   const detectedLocationSearch = useMemo(() => {
+    // 1. Fras-extraktion har högsta prio
+    if (phraseLocationExtract) return phraseLocationExtract.location;
+
     const trimmed = searchQuery.trim().toLowerCase();
     if (!trimmed || trimmed.length < 3) return null;
     if (allKnownLocationTerms.has(trimmed)) return trimmed;
@@ -471,10 +513,19 @@ function useSearchParamsState(options: UseOptimizedJobSearchOptions) {
     }
 
     return bestMatch;
-  }, [searchQuery]);
+  }, [searchQuery, phraseLocationExtract]);
 
   const { expandedSearchQuery, salarySearch } = useMemo(() => {
     if (!searchQuery.trim()) return { expandedSearchQuery: '', salarySearch: null };
+
+    // Fras med plats: sök på RESTEN som titel + använd platsen som filter
+    if (phraseLocationExtract && phraseLocationExtract.rest) {
+      return {
+        expandedSearchQuery: smartenTitleQuery(phraseLocationExtract.rest),
+        salarySearch: null,
+      };
+    }
+
     if (detectedLocationSearch) return { expandedSearchQuery: '', salarySearch: null };
 
     const salaryResult = detectSalarySearch(searchQuery);
@@ -486,7 +537,7 @@ function useSearchParamsState(options: UseOptimizedJobSearchOptions) {
       expandedSearchQuery: smartenTitleQuery(searchQuery),
       salarySearch: null,
     };
-  }, [searchQuery, detectedLocationSearch]);
+  }, [searchQuery, detectedLocationSearch, phraseLocationExtract]);
 
   const employmentCodes = useMemo(() => mapEmploymentTypes(employmentTypes), [employmentTypes]);
 
