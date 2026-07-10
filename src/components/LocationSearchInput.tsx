@@ -253,10 +253,11 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
 
             <CommandList
               ref={listRef}
-              className="max-h-[50vh] md:max-h-[320px] overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]"
+              className="max-h-[min(50vh,360px)] overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position] [&_[cmdk-list-sizer]]:!h-auto [&>[cmdk-list-sizer]]:block"
+              style={{ height: 'auto' }}
             >
               {!/^\d+$/.test(dropdownSearch.trim()) && dropdownSearch && !hasMatchingResults && (
-                <CommandEmpty className="text-white py-4 text-center text-sm">Ingen plats hittades.</CommandEmpty>
+                <CommandEmpty className="text-white py-3 text-center text-sm">Ingen plats hittades.</CommandEmpty>
               )}
 
               {dropdownSearch && /^\d+$/.test(dropdownSearch.trim()) && dropdownSearch.trim().length < 5 && (
