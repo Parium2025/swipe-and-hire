@@ -241,6 +241,9 @@ export const useSavedSearches = () => {
           county: criteria.county || null,
           employment_types: criteria.employment_types?.length ? criteria.employment_types : null,
           category: criteria.category || null,
+          subcategories: criteria.subcategories?.length ? criteria.subcategories : null,
+          time_filter: criteria.time_filter || null,
+          sort_by: criteria.sort_by || null,
           salary_min: criteria.salary_min || null,
           salary_max: criteria.salary_max || null,
         })
