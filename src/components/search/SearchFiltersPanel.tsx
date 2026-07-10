@@ -20,6 +20,7 @@ interface SearchFiltersPanelProps {
   // Search
   searchInput: string;
   onSearchInputChange: (value: string) => void;
+  jobs?: SearchJob[];
   // Location
   selectedCity: string;
   selectedPostalCode: string;
