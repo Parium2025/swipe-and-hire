@@ -129,6 +129,12 @@ const warmImageCacheBatch = (urls: string[], batchSize = 4) => {
   next();
 };
 
+const formatLocationLabel = (location: string) =>
+  location
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
 const shouldSkipSearchEnterEffects = () => {
   if (__searchJobsHasMountedOnce) return true;
   try {
@@ -273,8 +279,18 @@ const SearchJobs = memo(() => {
   const [selectedPostalCode, setSelectedPostalCodeRaw] = useState(savedFilters.postal || '');
   const setSelectedPostalCode = useCallback((v: string) => { setSelectedPostalCodeRaw(v); persistFilters({ postal: v }); }, [persistFilters]);
 
+  const autoFilledCityRef = useRef<string>(savedFilters.cityAuto || '');
   const [selectedCity, setSelectedCityRaw] = useState(savedFilters.city || '');
-  const setSelectedCity = useCallback((v: string) => { setSelectedCityRaw(v); persistFilters({ city: v }); }, [persistFilters]);
+  const setSelectedCity = useCallback((v: string) => {
+    autoFilledCityRef.current = '';
+    setSelectedCityRaw(v);
+    persistFilters({ city: v, cityAuto: '' });
+  }, [persistFilters]);
+  const setAutoFilledCity = useCallback((v: string) => {
+    autoFilledCityRef.current = v;
+    setSelectedCityRaw(v);
+    persistFilters({ city: v, cityAuto: v });
+  }, [persistFilters]);
 
   const [isPostalCodeValid, setIsPostalCodeValid] = useState(false);
 
@@ -364,30 +380,22 @@ const SearchJobs = memo(() => {
   // - Skriv "bud i stockholm" → fyll Stockholm automatiskt.
   // - Ändra till "chaufför" → auto-fyllt Stockholm rensas.
   // - Om användaren själv valt en plats i filtret rör vi inget.
-  const autoFilledCityRef = useRef<string>('');
   useEffect(() => {
     const q = debouncedSearch.trim();
     const detected = q ? detectLocationInQuery(debouncedSearch) : null;
-    const displayLocation = detected?.location
-      ? detected.location
-          .split(' ')
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(' ')
-      : '';
+    const displayLocation = detected?.location ? formatLocationLabel(detected.location) : '';
 
     // Respektera manuellt val: bara röra city om den är tom eller senast auto-fylld av oss.
     if (selectedCity && selectedCity !== autoFilledCityRef.current) return;
 
     if (displayLocation) {
       if (selectedCity !== displayLocation) {
-        autoFilledCityRef.current = displayLocation;
-        setSelectedCity(displayLocation);
+        setAutoFilledCity(displayLocation);
       }
     } else if (autoFilledCityRef.current) {
-      autoFilledCityRef.current = '';
       setSelectedCity('');
     }
-  }, [debouncedSearch, selectedCity, setSelectedCity]);
+  }, [debouncedSearch, selectedCity, setAutoFilledCity, setSelectedCity]);
 
 
   // Branding (workplace_name, company_logo_url) is already merged in by
@@ -783,10 +791,20 @@ const SearchJobs = memo(() => {
     try { sessionStorage.removeItem('parium-search-filters'); } catch {}
   }, [setSelectedPostalCode, setSelectedCity, setSelectedEmploymentTypes, setSelectedCategory, setSelectedSubcategories, setSearchInput, setTimeFilter, setSelectedCompanies]);
 
-  const handleLocationChange = (location: string, postalCode?: string) => {
+  const handleLocationChange = useCallback((location: string, postalCode?: string) => {
+    if (!location && autoFilledCityRef.current && selectedCity === autoFilledCityRef.current) {
+      const detected = detectLocationInQuery(searchInput);
+      const detectedLabel = detected?.location ? formatLocationLabel(detected.location) : '';
+      if (detected && detectedLabel === autoFilledCityRef.current) {
+        const nextSearch = detected.rest.trim();
+        setSearchInput(nextSearch);
+        setDebouncedSearch(nextSearch);
+      }
+    }
+
     setSelectedCity(location);
     setSelectedPostalCode(postalCode || '');
-  };
+  }, [searchInput, selectedCity, setSearchInput, setSelectedCity, setSelectedPostalCode]);
 
   if (!showContent) {
     return isTouchCapable && swipeModeActive ? <SwipeModeSkeleton /> : <JobListSkeleton />;
