@@ -373,6 +373,49 @@ const fuzzyFindCanonical = (norm: string): string | null => {
   return best ? best.term : null;
 };
 
+/**
+ * 🔥 Fras-extraktion: hitta plats i multi-word input.
+ * "affärsområdeschef i Malmö" → { location: "malmö", rest: "affärsområdeschef" }
+ * "säljare i västra götaland" → { location: "västra götaland", rest: "säljare" }
+ * Kollar sista 1-3 tokens (med/utan "i"/"på"/"vid"-prepositioner) mot kända platsnamn.
+ * Exporterad så att UI kan auto-fylla platsfiltret för visuell feedback.
+ */
+export function extractPhraseLocation(searchQuery: string): { location: string; rest: string } | null {
+  const trimmed = searchQuery.trim();
+  if (!trimmed || !trimmed.includes(' ')) return null;
+
+  const tokens = trimmed.split(/\s+/);
+  if (tokens.length < 2) return null;
+
+  // Prova sista 3, 2, 1 tokens (längst först = Västra Götaland före Götaland)
+  for (const take of [3, 2, 1]) {
+    if (tokens.length <= take) continue;
+    const candidateRaw = tokens.slice(-take).join(' ').toLowerCase();
+    // Strippa ledande preposition ("i malmö" → "malmö")
+    const candidate = candidateRaw.replace(/^(i|pa|på|vid)\s+/, '').trim();
+    if (candidate.length < 3) continue;
+
+    const matchTerm =
+      allKnownLocationTerms.has(candidate)
+        ? candidate
+        : (() => {
+            const normCandidate = normalizeSwedish(candidate);
+            for (const term of allKnownLocationTerms) {
+              if (normalizeSwedish(term) === normCandidate) return term;
+            }
+            return null;
+          })();
+
+    if (matchTerm) {
+      let rest = tokens.slice(0, -take).join(' ').trim();
+      rest = rest.replace(/\s+(i|pa|på|vid)$/i, '').trim();
+      return { location: matchTerm, rest };
+    }
+  }
+
+  return null;
+}
+
 const smartenTitleQuery = (raw: string): string => {
   const tokens = raw.trim().split(/\s+/);
   if (tokens.length === 0) return raw;
@@ -442,44 +485,7 @@ function useSearchParamsState(options: UseOptimizedJobSearchOptions) {
   const baseCityFilter = hasMultipleLocations ? '' : isCounty ? '' : primaryLocation;
   const baseCountyFilter = hasMultipleLocations ? '' : isCounty ? primaryLocation : '';
 
-  // 🔥 Fras-extraktion: hitta plats i multi-word input.
-  // "affärsområdeschef i Malmö" → { location: "malmö", rest: "affärsområdeschef" }
-  // Kollar sista 1-2 tokens (med/utan "i"/"på"-prepositioner) mot kända platsnamn.
-  const phraseLocationExtract = useMemo(() => {
-    const trimmed = searchQuery.trim();
-    if (!trimmed || !trimmed.includes(' ')) return null;
-
-    const tokens = trimmed.split(/\s+/);
-    if (tokens.length < 2) return null;
-
-    // Prova sista 1 och sista 2 tokens som kandidat-plats
-    for (const take of [2, 1]) {
-      if (tokens.length <= take) continue;
-      const candidateRaw = tokens.slice(-take).join(' ').toLowerCase();
-      // Strippa ledande preposition ("i malmö" → "malmö")
-      const candidate = candidateRaw.replace(/^(i|pa|på)\s+/, '').trim();
-      if (candidate.length < 3) continue;
-
-      if (allKnownLocationTerms.has(candidate)) {
-        // Rest = tokens före platsen, minus ev. preposition
-        let rest = tokens.slice(0, -take).join(' ').trim();
-        rest = rest.replace(/\s+(i|pa|på)$/i, '').trim();
-        return { location: candidate, rest };
-      }
-
-      // Fuzzy: kolla mot normaliserad form
-      const normCandidate = normalizeSwedish(candidate);
-      for (const term of allKnownLocationTerms) {
-        if (normalizeSwedish(term) === normCandidate) {
-          let rest = tokens.slice(0, -take).join(' ').trim();
-          rest = rest.replace(/\s+(i|pa|på)$/i, '').trim();
-          return { location: term, rest };
-        }
-      }
-    }
-
-    return null;
-  }, [searchQuery]);
+  const phraseLocationExtract = useMemo(() => extractPhraseLocation(searchQuery), [searchQuery]);
 
   const detectedLocationSearch = useMemo(() => {
     // 1. Fras-extraktion har högsta prio
