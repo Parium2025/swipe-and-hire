@@ -345,8 +345,34 @@ const normalizeToken = (t: string): string =>
  * - Kända synonymer (budbil → chaufför) byts direkt.
  * - Kända typos (utveklare → utvecklare) byts till första korrigering.
  * - Ord som slutar på "s" strippas för fuzzy match.
+ * - Levenshtein-fallback (≤1 fel för 5-7 tkn, ≤2 för 8+) fångar okända stavfel.
  * - Multi-word input bevaras token för token så DB-tokeniseringen fungerar stabilt.
  */
+// Pre-computed pool of known canonical terms för Levenshtein-fallback.
+const knownCanonicalTerms: string[] = Array.from(
+  new Set([
+    ...Object.values(titleSynonyms).map((v) => normalizeToken(v.split(' ')[0])),
+    ...Object.values(typoCorrections).map((arr) => normalizeToken(arr[0])),
+  ])
+).filter((t) => t.length >= 4);
+
+const fuzzyFindCanonical = (norm: string): string | null => {
+  if (norm.length < 5) return null;
+  const allowedDistance = norm.length >= 8 ? 2 : 1;
+  let best: { term: string; dist: number } | null = null;
+
+  for (const term of knownCanonicalTerms) {
+    if (Math.abs(term.length - norm.length) > allowedDistance) continue;
+    // Snabb prefix-skip: om första bokstaven inte matchar kräv större likhet
+    if (term[0] !== norm[0] && allowedDistance < 2) continue;
+    const dist = levenshteinDistance(term, norm);
+    if (dist <= allowedDistance && (!best || dist < best.dist)) {
+      best = { term, dist };
+    }
+  }
+  return best ? best.term : null;
+};
+
 const smartenTitleQuery = (raw: string): string => {
   const tokens = raw.trim().split(/\s+/);
   if (tokens.length === 0) return raw;
@@ -363,6 +389,14 @@ const smartenTitleQuery = (raw: string): string => {
         const stripped = norm.slice(0, -1);
         if (titleSynonyms[stripped]) return titleSynonyms[stripped];
         if (typoCorrections[stripped]) return typoCorrections[stripped][0];
+      }
+
+      // Fuzzy fallback: fångar okända stavfel (t.ex. "utveckalre" → "utvecklare")
+      const fuzzy = fuzzyFindCanonical(norm);
+      if (fuzzy) {
+        // Slå upp synonym igen ifall den fuzzy-matchade formen är en informell term
+        if (titleSynonyms[fuzzy]) return titleSynonyms[fuzzy];
+        return fuzzy;
       }
 
       return token;
