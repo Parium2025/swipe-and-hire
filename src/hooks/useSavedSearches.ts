@@ -56,6 +56,9 @@ export interface SavedSearch {
   county: string | null;
   employment_types: string[] | null;
   category: string | null;
+  subcategories: string[] | null;
+  time_filter: string | null;
+  sort_by: string | null;
   salary_min: number | null;
   salary_max: number | null;
   new_matches_count: number;
@@ -71,6 +74,9 @@ export interface SearchCriteria {
   county?: string;
   employment_types?: string[];
   category?: string;
+  subcategories?: string[];
+  time_filter?: string;
+  sort_by?: string;
   salary_min?: number;
   salary_max?: number;
 }
