@@ -826,6 +826,7 @@ const SearchJobs = memo(() => {
       <SearchFiltersPanel
         searchInput={searchInput}
         onSearchInputChange={setSearchInput}
+        jobs={jobs}
         selectedCity={selectedCity}
         selectedPostalCode={selectedPostalCode}
         onLocationChange={handleLocationChange}
