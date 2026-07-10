@@ -135,7 +135,7 @@ serve(async (req) => {
     while (true) {
       const { data: batch, error: batchError } = await supabase
         .from('saved_searches')
-        .select('id, user_id, name, search_query, city, county, employment_types, category, salary_min, salary_max')
+        .select('id, user_id, name, search_query, city, county, employment_types, category, subcategories, salary_min, salary_max')
         .range(offset, offset + BATCH_SIZE - 1);
 
       if (batchError) {
