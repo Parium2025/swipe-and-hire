@@ -151,13 +151,22 @@ serve(async (req) => {
       const municipalityLower = (workplace_municipality || '').toLowerCase();
       const countyValue = workplace_county || '';
 
+      // Fetch subcategories column via select above (added below)
       for (const search of batch) {
         let matches = true;
 
-        // Text search
+        // Text search — expandera med synonymer/typos så "budbil" matchar "chaufför"
         if (search.search_query && search.search_query !== '') {
-          const q = search.search_query.toLowerCase();
-          if (!titleLower.includes(q) && !cityLower.includes(q) && !municipalityLower.includes(q)) {
+          const terms = expandQueryTerms(search.search_query);
+          if (!anyTermMatches(terms, [titleLower, cityLower, municipalityLower])) {
+            matches = false;
+          }
+        }
+
+        // Subcategories: minst en subkategori-term ska matcha titel/kategori/beskrivning
+        if (matches && Array.isArray(search.subcategories) && search.subcategories.length > 0) {
+          const subTerms = search.subcategories.flatMap((s: string) => expandQueryTerms(s));
+          if (!anyTermMatches(subTerms, [titleLower, (category || '').toLowerCase()])) {
             matches = false;
           }
         }
