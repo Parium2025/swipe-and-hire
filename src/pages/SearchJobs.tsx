@@ -360,20 +360,32 @@ const SearchJobs = memo(() => {
     enabled: true,
   });
 
-  // 🔥 Auto-sync: när sökrutan innehåller en plats (enskilt ord "Stockholm"
-  // ELLER fras "titel i Malmö"), fyll platsfiltret automatiskt så det syns
-  // visuellt. Skriver bara över när platsfiltret är tomt — respekterar
-  // användarens egna val.
+  // 🔥 Live-sync: platsfiltret speglar sökrutan i realtid.
+  // - Skriv "bud i stockholm" → fyll Stockholm automatiskt.
+  // - Ändra till "chaufför" → auto-fyllt Stockholm rensas.
+  // - Om användaren själv valt en plats i filtret rör vi inget.
+  const autoFilledCityRef = useRef<string>('');
   useEffect(() => {
-    if (!debouncedSearch.trim()) return;
-    if (selectedCity) return;
-    const detected = detectLocationInQuery(debouncedSearch);
-    if (detected && detected.location) {
-      const displayLocation = detected.location
-        .split(' ')
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
-      setSelectedCity(displayLocation);
+    const q = debouncedSearch.trim();
+    const detected = q ? detectLocationInQuery(debouncedSearch) : null;
+    const displayLocation = detected?.location
+      ? detected.location
+          .split(' ')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ')
+      : '';
+
+    // Respektera manuellt val: bara röra city om den är tom eller senast auto-fylld av oss.
+    if (selectedCity && selectedCity !== autoFilledCityRef.current) return;
+
+    if (displayLocation) {
+      if (selectedCity !== displayLocation) {
+        autoFilledCityRef.current = displayLocation;
+        setSelectedCity(displayLocation);
+      }
+    } else if (autoFilledCityRef.current) {
+      autoFilledCityRef.current = '';
+      setSelectedCity('');
     }
   }, [debouncedSearch, selectedCity, setSelectedCity]);
 
