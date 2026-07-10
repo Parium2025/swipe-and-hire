@@ -97,24 +97,14 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
       <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
         {/* Search Field with Save Search Button */}
         <div className="space-y-2">
-          <div className="relative">
-            <Input
-              placeholder="Jobbtitel, Företag, Plats..."
-              value={searchInput}
-              onChange={(e) => onSearchInputChange(e.target.value)}
-              className="pl-9 pr-10 !h-12 !min-h-0 text-base bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
-            {searchInput && (
-              <button
-                onClick={() => onSearchInputChange('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 rounded-full p-1 transition-colors"
-                aria-label="Rensa sökning"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+          <SmartSearchInput
+            value={searchInput}
+            onChange={onSearchInputChange}
+            jobs={jobs || []}
+            placeholder="Sök yrke, företag eller plats…"
+          />
+
+
 
           {/* Saved Searches Dropdown with Save button */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
