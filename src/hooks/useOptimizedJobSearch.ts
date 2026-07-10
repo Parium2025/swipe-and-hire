@@ -264,6 +264,112 @@ const typoCorrections: Record<string, string[]> = {
   uppsal: ['uppsala'],
 };
 
+// 🔥 Title synonym map: informal/alternativ titel → kanonisk titel som finns i jobbdatan.
+// Används för att göra titelsökningen smartare utan att bryta DB-tokeniseringen —
+// vi ersätter ett enskilt token 1:1 så att sökningen fortfarande är stabil.
+const titleSynonyms: Record<string, string> = {
+  // Transport
+  budbil: 'chaufför',
+  budbilsforare: 'chaufför',
+  bud: 'chaufför',
+  leverans: 'chaufför',
+  leveransforare: 'chaufför',
+  kurir: 'chaufför',
+  taxichauffor: 'chaufför',
+  akare: 'chaufför',
+  // Bygg / hantverk
+  byggare: 'snickare',
+  bygg: 'snickare',
+  hantverkare: 'snickare',
+  elinstallator: 'elektriker',
+  rormokare: 'vvs-montör',
+  vvs: 'vvs-montör',
+  malare: 'målare',
+  // Restaurang
+  kokschef: 'kock',
+  servitor: 'servitör',
+  servitris: 'servitör',
+  diskare: 'köksbiträde',
+  // Handel / sälj
+  butik: 'butikssäljare',
+  butikssaljare: 'butikssäljare',
+  kassa: 'kassabiträde',
+  kassor: 'kassör',
+  telefonsaljare: 'säljare',
+  keyaccount: 'account manager',
+  kam: 'account manager',
+  affarsomradeschef: 'account manager',
+  // Vård
+  usk: 'undersköterska',
+  underskoterska: 'undersköterska',
+  ssk: 'sjuksköterska',
+  sjukskoterska: 'sjuksköterska',
+  personligassistent: 'personlig assistent',
+  vardbitrade: 'vårdbiträde',
+  // Städ
+  stadare: 'lokalvårdare',
+  stad: 'lokalvårdare',
+  lokalvard: 'lokalvårdare',
+  // IT
+  dev: 'utvecklare',
+  developer: 'utvecklare',
+  programmerare: 'utvecklare',
+  frontend: 'frontendutvecklare',
+  backend: 'backendutvecklare',
+  fullstack: 'fullstackutvecklare',
+  // Lager / logistik
+  truckforare: 'truckförare',
+  lager: 'lagerarbetare',
+  plockare: 'lagerarbetare',
+  // Kontor
+  reception: 'receptionist',
+  admin: 'administratör',
+  sekreterare: 'administratör',
+  // Övrigt
+  vaktare: 'väktare',
+  ordningsvakt: 'väktare',
+  parkering: 'parkeringsvakt',
+};
+
+// Normalisera ett token (utan Å/Ä/Ö) för uppslag i typo/synonym-maps.
+const normalizeToken = (t: string): string =>
+  t.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/å/g, 'a')
+    .replace(/ä/g, 'a')
+    .replace(/ö/g, 'o');
+
+/**
+ * Smart titelsökning: normalisera per token.
+ * - Kända synonymer (budbil → chaufför) byts direkt.
+ * - Kända typos (utveklare → utvecklare) byts till första korrigering.
+ * - Ord som slutar på "s" strippas för fuzzy match.
+ * - Multi-word input bevaras token för token så DB-tokeniseringen fungerar stabilt.
+ */
+const smartenTitleQuery = (raw: string): string => {
+  const tokens = raw.trim().split(/\s+/);
+  if (tokens.length === 0) return raw;
+
+  return tokens
+    .map((token) => {
+      if (token.length < 2) return token;
+      const norm = normalizeToken(token);
+
+      if (titleSynonyms[norm]) return titleSynonyms[norm];
+      if (typoCorrections[norm]) return typoCorrections[norm][0];
+
+      if (norm.length > 4 && norm.endsWith('s')) {
+        const stripped = norm.slice(0, -1);
+        if (titleSynonyms[stripped]) return titleSynonyms[stripped];
+        if (typoCorrections[stripped]) return typoCorrections[stripped][0];
+      }
+
+      return token;
+    })
+    .join(' ');
+};
+
 function mapEmploymentTypes(employmentTypes: string[]) {
   return employmentTypes.map((type) => {
     const typeMap: Record<string, string> = {
