@@ -41,7 +41,7 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { imageCache } from '@/lib/imageCache';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
-import { useOptimizedJobSearch, extractPhraseLocation } from '@/hooks/useOptimizedJobSearch';
+import { useOptimizedJobSearch, detectLocationInQuery } from '@/hooks/useOptimizedJobSearch';
 import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
 import { SaveSearchDialog } from '@/components/SaveSearchDialog';
 import { useBatchPrefetchReviews, useBatchPrefetchCompanyProfiles } from '@/hooks/useCompanyReviewsCache';
