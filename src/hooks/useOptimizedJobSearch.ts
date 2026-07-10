@@ -449,7 +449,7 @@ function useSearchParamsState(options: UseOptimizedJobSearchOptions) {
     }
 
     return {
-      expandedSearchQuery: searchQuery.trim(),
+      expandedSearchQuery: smartenTitleQuery(searchQuery),
       salarySearch: null,
     };
   }, [searchQuery, detectedLocationSearch]);
