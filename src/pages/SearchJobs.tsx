@@ -1026,6 +1026,9 @@ const SearchJobs = memo(() => {
           county: selectedCity && selectedCity.endsWith(' län') ? selectedCity : undefined,
           employment_types: selectedEmploymentTypes.length > 0 ? selectedEmploymentTypes : undefined,
           category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
+          subcategories: selectedSubcategories.length > 0 ? selectedSubcategories : undefined,
+          time_filter: timeFilter !== 'all' ? timeFilter : undefined,
+          sort_by: sortBy !== 'newest' ? sortBy : undefined,
         }}
         onSave={saveSearch}
       />
