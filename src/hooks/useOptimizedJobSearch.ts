@@ -416,6 +416,44 @@ export function extractPhraseLocation(searchQuery: string): { location: string; 
   return null;
 }
 
+/**
+ * 🔥 Detektera plats i söksträngen — både enskilda ord ("Stockholm") och
+ * fraser ("chef i Malmö"). Returnerar { location, rest } där rest är det som
+ * ska sökas som titel (tom sträng om hela input var en plats).
+ * Exporterad så UI kan auto-fylla platsfiltret för att spegla sökningen.
+ */
+export function detectLocationInQuery(searchQuery: string): { location: string; rest: string } | null {
+  const trimmed = searchQuery.trim().toLowerCase();
+  if (!trimmed || trimmed.length < 3) return null;
+
+  // 1. Fras med preposition ("i Malmö") — högsta prio
+  const phrase = extractPhraseLocation(searchQuery);
+  if (phrase) return phrase;
+
+  // 2. Hela input är en känd plats
+  if (allKnownLocationTerms.has(trimmed)) return { location: trimmed, rest: '' };
+
+  // 3. Prefix-match ("stock" → stockholm)
+  let bestMatch: string | null = null;
+  for (const term of allKnownLocationTerms) {
+    if (term.startsWith(trimmed) && (!bestMatch || term.length < bestMatch.length)) {
+      bestMatch = term;
+    }
+  }
+  if (bestMatch) return { location: bestMatch, rest: '' };
+
+  // 4. Normaliserad prefix-match (utan Å/Ä/Ö)
+  const normalized = normalizeSwedish(trimmed);
+  for (const term of allKnownLocationTerms) {
+    if (normalizeSwedish(term).startsWith(normalized) && (!bestMatch || term.length < bestMatch.length)) {
+      bestMatch = term;
+    }
+  }
+  if (bestMatch) return { location: bestMatch, rest: '' };
+
+  return null;
+}
+
 const smartenTitleQuery = (raw: string): string => {
   const tokens = raw.trim().split(/\s+/);
   if (tokens.length === 0) return raw;
