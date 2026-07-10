@@ -213,6 +213,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
             ) : values.length > 0 ? (
               <button
                 onClick={(event) => {
+                  event.preventDefault();
                   event.stopPropagation();
                   handleClear();
                 }}
