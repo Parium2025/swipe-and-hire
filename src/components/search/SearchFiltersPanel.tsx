@@ -64,6 +64,7 @@ const sortLabels = {
 export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   searchInput,
   onSearchInputChange,
+  jobs,
   selectedCity,
   selectedPostalCode,
   onLocationChange,
