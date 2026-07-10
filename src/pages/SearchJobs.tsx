@@ -50,6 +50,7 @@ import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
 import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard';
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
 import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
+import NoResultsRescue from '@/components/search/NoResultsRescue';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
@@ -825,6 +826,7 @@ const SearchJobs = memo(() => {
       <SearchFiltersPanel
         searchInput={searchInput}
         onSearchInputChange={setSearchInput}
+        jobs={jobs}
         selectedCity={selectedCity}
         selectedPostalCode={selectedPostalCode}
         onLocationChange={handleLocationChange}
@@ -959,10 +961,11 @@ const SearchJobs = memo(() => {
             ))}
           </div>
         ) : filteredAndSortedJobs.length === 0 ? (
-          <div className="text-center py-12 bg-white/5 border border-white/10 rounded-lg">
-            <Briefcase className="h-12 w-12 text-white mx-auto mb-4" />
-            <p className="text-white">Inga jobb hittades</p>
-          </div>
+          <NoResultsRescue
+            query={searchInput}
+            onSuggestionClick={(term) => setSearchInput(term)}
+            onClearAll={handleClearAllFilters}
+          />
         ) : (
           <>
             {/* Mobile: Swipe Mode Toggle */}
