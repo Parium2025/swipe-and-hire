@@ -241,10 +241,10 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                 className={`w-full h-14 rounded-full font-semibold text-base transition-all active:scale-[0.97] min-h-[44px] ${
                   hasApplied
                     ? 'bg-green-500 text-white cursor-not-allowed'
-                    : 'bg-secondary text-white shadow-lg shadow-secondary/30'
+                    : 'bg-green-500 text-white shadow-lg shadow-green-500/30'
                 }`}
               >
-                {hasApplied ? 'Redan sökt' : 'Ansök nu'}
+                {hasApplied ? 'Redan sökt' : 'Skicka ansökan'}
               </button>
             </div>
           </motion.div>
