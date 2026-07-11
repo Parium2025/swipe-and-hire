@@ -961,11 +961,12 @@ const SearchJobs = memo(() => {
             ))}
           </div>
         ) : filteredAndSortedJobs.length === 0 ? (
-          <NoResultsRescue
-            query={searchInput}
-            onSuggestionClick={(term) => setSearchInput(term)}
-            onClearAll={handleClearAllFilters}
-          />
+          <div className="text-center py-16 px-4">
+            <p className="text-white text-lg font-medium">Inga jobb hittades</p>
+            <p className="text-white/70 text-sm mt-2">
+              Prova att justera dina filter eller söka på något annat.
+            </p>
+          </div>)
         ) : (
           <>
             {/* Mobile: Swipe Mode Toggle */}

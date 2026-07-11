@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Briefcase, Users, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Heart } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import LocationSearchInput from '@/components/LocationSearchInput';
-import SmartSearchInput from '@/components/search/SmartSearchInput';
+
 import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
