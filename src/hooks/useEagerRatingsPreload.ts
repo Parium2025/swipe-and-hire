@@ -124,12 +124,16 @@ const clearAllAppCachesSync = () => {
  */
 export const clearAllAppCaches = () => {
   console.log('🗑️ Clearing all app caches on logout...');
-  
-  // On /auth route, defer entirely to avoid blocking touch responsiveness
+
+  // Weather cache is cleared SYNCHRONOUSLY on every call — it's a single
+  // localStorage removal with zero perf impact, and it guarantees no stale
+  // weather effects flash on the next login before the deferred clear runs.
+  try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
+
+  // On /auth route, defer the rest to avoid blocking touch responsiveness
   const isAuthRoute = typeof window !== 'undefined' && window.location.pathname === '/auth';
-  
+
   if (isAuthRoute) {
-    // Use idle callback for maximum deferral on mobile
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
       (window as any).requestIdleCallback(() => clearAllAppCachesSync(), { timeout: 3000 });
     } else {
