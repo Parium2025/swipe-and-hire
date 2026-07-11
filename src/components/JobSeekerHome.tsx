@@ -208,7 +208,7 @@ const JobSeekerHome = memo(() => {
             </h1>
           </div>
           <DateTimeDisplay />
-          {gpsGranted && !weather.isLoading && !weather.error && weather.description ? (
+          {weatherAllowed && !weather.isLoading && !weather.error && weather.description ? (
             <motion.p 
               className="text-white text-base"
               initial={{ opacity: 0, y: 4 }}
