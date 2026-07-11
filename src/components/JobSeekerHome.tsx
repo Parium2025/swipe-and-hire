@@ -95,30 +95,25 @@ const JobSeekerHome = memo(() => {
   // chain (GPS → client IP → server IP → cache) inside useWeather handles the
   // rest and gracefully degrades when GPS actually isn't available.
   const [weatherAllowed, setWeatherAllowed] = useState<boolean>(true);
-  const [gpsGranted, setGpsGranted] = useState<boolean | null>(null);
 
   useEffect(() => {
     let permissionStatus: PermissionStatus | null = null;
     const onChange = () => {
       if (!permissionStatus) return;
-      setGpsGranted(permissionStatus.state === 'granted');
       setWeatherAllowed(permissionStatus.state !== 'denied');
     };
     const checkGps = async () => {
       try {
         if ('permissions' in navigator) {
           permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
-          setGpsGranted(permissionStatus.state === 'granted');
           setWeatherAllowed(permissionStatus.state !== 'denied');
           permissionStatus.addEventListener('change', onChange);
         } else {
           // No Permissions API (Safari): assume allowed, let fallback chain decide.
-          setGpsGranted(false);
           setWeatherAllowed(true);
         }
       } catch {
         // Query threw (Safari): assume allowed, let fallback chain decide.
-        setGpsGranted(false);
         setWeatherAllowed(true);
       }
     };
