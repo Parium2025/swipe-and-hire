@@ -154,15 +154,7 @@ const EmployerHome = memo(() => {
     backgroundLocationEnabled,
   });
 
-  // 🎯 KRITISKT: Förhindra att gammal cachad vädereffekt visas vid login
-  const [mountedLongEnough, setMountedLongEnough] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMountedLongEnough(true), 200);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const showWeatherEffects = mountedLongEnough && !weather.isLoading && !weather.error;
+  const showWeatherEffects = !weather.isLoading && !weather.error;
   
   // Emoji logic based on time of day and weather
   const displayEmoji = useMemo(() => {
