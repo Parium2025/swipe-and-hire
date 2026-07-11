@@ -53,8 +53,19 @@ function cap(s?: string | null) {
 
 function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDetails | null }) {
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
+
+  const salaryTypeSuffix =
+    job.salary_type === 'hourly' || job.salary_type === 'rorlig' ? 'kr/tim' : 'kr/mån';
+
   const salaryLabel = (() => {
-    if (!job.salary_min && !job.salary_max && !job.salary_transparency) return null;
+    if (job.salary_min && job.salary_max) {
+      return `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${salaryTypeSuffix}`;
+    }
+    if (job.salary_min) return `Från ${job.salary_min.toLocaleString('sv-SE')} ${salaryTypeSuffix}`;
+    if (job.salary_max) return `Upp till ${job.salary_max.toLocaleString('sv-SE')} ${salaryTypeSuffix}`;
+    if (job.salary_transparency) return getSalaryTransparencyLabel(job.salary_transparency);
+    return null;
+  })();
     if (job.salary_transparency === 'after_interview' || job.salary_transparency === 'not_specified') {
       return job.salary_transparency === 'after_interview' ? 'Lön efter intervju' : 'Ej specificerad';
     }
