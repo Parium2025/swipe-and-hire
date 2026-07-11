@@ -50,8 +50,6 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 
 
 function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDetails | null }) {
-  const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
-
   const salaryTypeSuffix =
     job.salary_type === 'hourly' || job.salary_type === 'rorlig' ? 'kr/tim' : 'kr/mån';
 
@@ -65,51 +63,17 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
     return null;
   })();
 
-
-
-  const addressLabel = (() => {
-    if (!extra?.workplace_address) return null;
-    let v = extra.workplace_address;
-    if (extra.workplace_postal_code) v += `, ${extra.workplace_postal_code}`;
-    if (extra.workplace_city) v += ` ${extra.workplace_city}`;
-    if (extra.workplace_municipality && extra.workplace_municipality !== extra.workplace_city) v += ` (${extra.workplace_municipality})`;
-    return v;
-  })();
-
-  const cityLabel = (() => {
-    if (!extra?.workplace_city || extra.workplace_city === job.location || extra.workplace_address) return null;
-    let v = extra.workplace_city;
-    if (extra.workplace_municipality && extra.workplace_municipality !== extra.workplace_city) v += `, ${extra.workplace_municipality}`;
-    if (extra.workplace_county) v += `, ${extra.workplace_county}`;
-    return v;
-  })();
-
-  const showMunicipalityOnly =
-    extra?.workplace_municipality && !extra.workplace_address && (!extra.workplace_city || extra.workplace_city === job.location);
-
-  const scheduleValue = job.work_schedule;
   const workTimeLabel = (extra?.work_start_time || extra?.work_end_time)
     ? `${extra?.work_start_time ?? ''} – ${extra?.work_end_time ?? ''}`
     : null;
 
   return (
     <div className="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
-      <h3 className="text-white font-bold text-base">Detaljer om tjänsten</h3>
+      <h3 className="text-white font-bold text-base">Snabb info</h3>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
         {job.employment_type && <DetailRow label="Anställning" value={getEmploymentTypeLabel(job.employment_type)} />}
-        {job.location && <DetailRow label="Ort" value={cap(job.location) ?? ''} />}
-        {displayCompanyName && <DetailRow label="Bolagsnamn" value={cap(displayCompanyName) ?? ''} />}
         {job.occupation && <DetailRow label="Yrke" value={cap(job.occupation) ?? ''} />}
-        {addressLabel && <DetailRow label="Adress" value={addressLabel} />}
-        {cityLabel && <DetailRow label="Stad" value={cityLabel} />}
-        {showMunicipalityOnly && <DetailRow label="Kommun" value={extra!.workplace_municipality!} />}
-        {job.work_location_type && (
-          <DetailRow label="Platstyp" value={getWorkLocationLabel(job.work_location_type) ?? job.work_location_type} />
-        )}
-        {job.remote_work_possible && job.remote_work_possible !== 'no' && (
-          <DetailRow label="Distans" value={getRemoteWorkLabel(job.remote_work_possible) ?? job.remote_work_possible} />
-        )}
-        {scheduleValue && <DetailRow label="Schema" value={cap(scheduleValue) ?? ''} />}
+        {job.location && <DetailRow label="Ort" value={cap(job.location) ?? ''} />}
         {workTimeLabel && <DetailRow label="Arbetstid" value={workTimeLabel} />}
         {salaryLabel && <DetailRow label="Lön" value={salaryLabel} />}
         {job.positions_count && job.positions_count > 1 && <DetailRow label="Antal tjänster" value={`${job.positions_count} st`} />}
