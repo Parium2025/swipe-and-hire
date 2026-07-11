@@ -46,10 +46,8 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function cap(s?: string | null) {
-  if (!s) return '';
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
+
+
 
 function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDetails | null }) {
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
