@@ -271,7 +271,7 @@ const EmployerHome = memo(() => {
 
   return (
     <>
-      <GpsPrompt />
+      <GpsPrompt weatherAvailable={!weather.isLoading && !weather.error && !!weather.temperature} />
       {/* Visa vädereffekter endast efter kort mount-delay (ger cache-rensning tid) */}
       {showWeatherEffects && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
       <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 animate-fade-in relative z-10 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
