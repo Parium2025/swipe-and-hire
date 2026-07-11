@@ -150,6 +150,8 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
   };
 
   if (gpsStatus === 'granted') return null;
+  if (weatherAvailable) return null;
+
 
   const isDenied = gpsStatus === 'denied';
 
