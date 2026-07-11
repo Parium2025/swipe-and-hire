@@ -3,11 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import type { JobQuestion } from '@/types/jobWizard';
 
 export interface ExtraJobDetails {
-  workplace_address?: string | null;
-  workplace_postal_code?: string | null;
-  workplace_city?: string | null;
-  workplace_municipality?: string | null;
-  workplace_county?: string | null;
   work_start_time?: string | null;
   work_end_time?: string | null;
 }
