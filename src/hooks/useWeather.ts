@@ -265,46 +265,70 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   useEffect(() => {
     mountedRef.current = true;
     let watchId: number | null = null;
-    
+    let retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    let retryAttempt = 0;
+
     if (!enabled) {
       return () => { mountedRef.current = false; };
     }
-    
+
+    // Skip network calls when offline — keep any cached weather visible instead.
+    const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+
+    const scheduleRetry = () => {
+      // Exponential backoff on total failure: 30s → 2min → 5min (capped)
+      const delays = [30_000, 120_000, 300_000];
+      const delay = delays[Math.min(retryAttempt, delays.length - 1)];
+      retryAttempt += 1;
+      if (retryTimeoutId) clearTimeout(retryTimeoutId);
+      retryTimeoutId = setTimeout(() => {
+        if (mountedRef.current && navigator.onLine !== false) {
+          console.log(`🔁 Weather retry attempt ${retryAttempt}`);
+          checkForLocationChange(true).then(() => {
+            // Reset attempt counter on success (error cleared)
+            if (mountedRef.current) retryAttempt = 0;
+          });
+        }
+      }, delay);
+    };
+
     if (!initializedRef.current) {
       initializedRef.current = true;
-      
+
       const cachedLocation = getCachedLocation();
       const cachedWeather = getCachedWeather();
-      
+
       if (cachedLocation && cachedWeather) {
         locationRef.current = cachedLocation;
         console.log('Using preloaded weather cache for instant display');
-        
-        setTimeout(() => {
-          if (mountedRef.current) {
-            checkForLocationChange(true);
-          }
-        }, 2000);
-      } else {
+
+        if (!isOffline) {
+          setTimeout(() => {
+            if (mountedRef.current) checkForLocationChange(true);
+          }, 2000);
+        }
+      } else if (!isOffline) {
         checkForLocationChange(false);
+      } else {
+        // Offline with no cache — mark as error so UI can gracefully hide weather row.
+        updateWeather(safeFallback(fallbackCity || ''));
       }
     }
 
     // Real-time GPS via watchPosition (browser only)
-    if ('geolocation' in navigator && !isNativeApp()) {
+    if ('geolocation' in navigator && !isNativeApp() && !isOffline) {
       watchId = navigator.geolocation.watchPosition(
         async (position) => {
           const newLat = position.coords.latitude;
           const newLon = position.coords.longitude;
-          
+
           const cached = locationRef.current;
           if (cached) {
             const distance = getDistanceKm(cached.lat, cached.lon, newLat, newLon);
             if (distance < 0.5) return;
             console.log(`📍 GPS watchPosition: moved ${distance.toFixed(2)}km - updating!`);
           }
-          
-          // Don't call getCityName from client — edge function provides city server-side
+
           const cityHint = cached?.city || '';
           await updateLocation(newLat, newLon, cityHint || null, 'gps');
         },
@@ -320,22 +344,23 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       console.log('🛰️ Real-time GPS tracking started via watchPosition');
     }
 
-    // Fallback: Check every 10 minutes (watchPosition already handles movement in real time)
+    // Fallback: Check every 10 minutes
     const gpsTrackingInterval = setInterval(() => {
-      if (mountedRef.current) {
+      if (mountedRef.current && navigator.onLine !== false) {
         checkForLocationChange(true);
       }
     }, 10 * 60 * 1000);
 
     const handleOnline = () => {
       console.log('Network changed - checking location...');
+      retryAttempt = 0;
+      if (retryTimeoutId) { clearTimeout(retryTimeoutId); retryTimeoutId = null; }
       checkForLocationChange(true);
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && mountedRef.current) {
-        // Skip refresh if weather cache is still fresh (<3 min) — the user just
-        // tabbed back briefly, no need to hit GPS or the edge function.
+        if (navigator.onLine === false) return;
         const cachedWeather = getCachedWeather();
         if (cachedWeather && Date.now() - cachedWeather.timestamp < 3 * 60 * 1000) {
           return;
@@ -348,6 +373,11 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     window.addEventListener('online', handleOnline);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Retry watcher: whenever weather transitions to error state, schedule a retry.
+    if (weather.error && !isOffline) {
+      scheduleRetry();
+    }
+
     return () => {
       mountedRef.current = false;
       if (watchId !== null) {
@@ -355,10 +385,11 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         console.log('🛰️ Real-time GPS tracking stopped');
       }
       clearInterval(gpsTrackingInterval);
+      if (retryTimeoutId) clearTimeout(retryTimeoutId);
       window.removeEventListener('online', handleOnline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation]);
+  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback, weather.error]);
 
   return weather;
 };
