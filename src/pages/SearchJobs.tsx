@@ -966,7 +966,7 @@ const SearchJobs = memo(() => {
             <p className="text-white/70 text-sm mt-2">
               Prova att justera dina filter eller söka på något annat.
             </p>
-          </div>)
+          </div>
         ) : (
           <>
             {/* Mobile: Swipe Mode Toggle */}
