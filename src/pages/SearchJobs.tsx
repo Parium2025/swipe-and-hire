@@ -963,7 +963,7 @@ const SearchJobs = memo(() => {
         ) : filteredAndSortedJobs.length === 0 ? (
           <div className="text-center py-16 px-4">
             <p className="text-white text-lg font-medium">Inga jobb hittades</p>
-            <p className="text-white/70 text-sm mt-2">
+            <p className="text-white text-sm mt-2">
               Prova att justera dina filter eller söka på något annat.
             </p>
           </div>
