@@ -87,8 +87,7 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
   const showMunicipalityOnly =
     extra?.workplace_municipality && !extra.workplace_address && (!extra.workplace_city || extra.workplace_city === job.location);
 
-  // Prioritera fullständig detail för schema/arbetstid (SwipeJob har inte alltid dessa laddade)
-  const scheduleValue = extra?.work_schedule ?? job.work_schedule;
+  const scheduleValue = job.work_schedule;
   const workTimeLabel = (extra?.work_start_time || extra?.work_end_time)
     ? `${extra?.work_start_time ?? ''} – ${extra?.work_end_time ?? ''}`
     : null;
