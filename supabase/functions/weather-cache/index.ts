@@ -81,7 +81,56 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { lat, lon } = await req.json();
+    const body = await req.json();
+
+    // Server-side IP geolocation (fallback for browsers behind iCloud Private Relay)
+    if (body?.ipLookup === true) {
+      const ip =
+        req.headers.get('cf-connecting-ip') ||
+        req.headers.get('x-real-ip') ||
+        (req.headers.get('x-forwarded-for') || '').split(',')[0].trim();
+
+      let result: { lat: number; lon: number; city: string } | null = null;
+
+      // Try ipapi.co first (city-level accuracy, generous free tier)
+      try {
+        const url = ip ? `https://ipapi.co/${ip}/json/` : 'https://ipapi.co/json/';
+        const res = await fetch(url, { signal: AbortSignal.timeout(3500) });
+        if (res.ok) {
+          const d = await res.json();
+          if (typeof d.latitude === 'number' && typeof d.longitude === 'number') {
+            result = { lat: d.latitude, lon: d.longitude, city: (d.city || '').replace(/\s+kommun$/i, '').trim() };
+          }
+        }
+      } catch { /* try next */ }
+
+      // Fallback: ipwho.is
+      if (!result) {
+        try {
+          const url = ip ? `https://ipwho.is/${ip}` : 'https://ipwho.is/';
+          const res = await fetch(url, { signal: AbortSignal.timeout(3500) });
+          if (res.ok) {
+            const d = await res.json();
+            if (d.success && typeof d.latitude === 'number' && typeof d.longitude === 'number') {
+              result = { lat: d.latitude, lon: d.longitude, city: (d.city || '').replace(/\s+kommun$/i, '').trim() };
+            }
+          }
+        } catch { /* give up */ }
+      }
+
+      if (!result) {
+        return new Response(JSON.stringify({ error: 'ip-lookup-failed' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      return new Response(JSON.stringify(result), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { lat, lon } = body;
     if (typeof lat !== 'number' || typeof lon !== 'number') {
       return new Response(JSON.stringify({ error: 'lat and lon required' }), {
         status: 400,
