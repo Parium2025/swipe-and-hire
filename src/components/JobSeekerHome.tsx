@@ -179,7 +179,7 @@ const JobSeekerHome = memo(() => {
       return '🌙 ☁️';
     }
     return getEmojiForCode(weatherCode);
-  }, [weather.weatherCode, isEvening, gpsGranted, isDaytime]);
+  }, [weather.weatherCode, weather.error, isEvening, weatherAllowed, isDaytime]);
 
 
   if (!showContent) {
