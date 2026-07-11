@@ -1,20 +1,12 @@
-import { memo, useMemo, useEffect, useState, useRef } from 'react';
+import { memo, useMemo, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWeather } from '@/hooks/useWeather';
+import { useGreeting } from '@/hooks/useGreeting';
 import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
-
-const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 10) return { text: 'God morgon', isEvening: false, isDaytime: true };
-  if (hour >= 10 && hour < 12) return { text: 'God förmiddag', isEvening: false, isDaytime: true };
-  if (hour >= 12 && hour < 17) return { text: 'God eftermiddag', isEvening: false, isDaytime: true };
-  if (hour >= 17 && hour < 22) return { text: 'God kväll', isEvening: true, isDaytime: false };
-  return { text: 'God natt', isEvening: true, isDaytime: false };
-};
 
 const formatDateTime = (): { time: string; date: string } => {
   const now = new Date();
