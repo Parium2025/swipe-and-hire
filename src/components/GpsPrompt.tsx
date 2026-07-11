@@ -12,9 +12,11 @@ let gpsPromptHasBeenShown = false;
 
 interface GpsPromptProps {
   onEnableGps?: () => void;
+  weatherAvailable?: boolean;
 }
 
-const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
+const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProps) => {
+
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
