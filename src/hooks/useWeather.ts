@@ -10,6 +10,7 @@ import {
   getWeatherInfo,
   fetchCurrentWeather,
   getLocationByIP,
+  getServerSideIPLocation,
   geocodeCity,
   getTimeBasedEmoji,
 } from '@/lib/weatherApi';
