@@ -199,7 +199,7 @@ const EmployerHome = memo(() => {
   // Emoji logic based on time of day and weather
   const displayEmoji = useMemo(() => {
     // If weather is blocked/unavailable, use simple time-based icons
-    if (!weatherAllowed || weather.error) {
+    if (weather.error) {
       return isDaytime ? '☀️' : '🌙';
     }
     
@@ -228,7 +228,7 @@ const EmployerHome = memo(() => {
       return '🌙 ☁️';
     }
     return getEmojiForCode(weatherCode);
-  }, [weather.weatherCode, weather.error, isEvening, weatherAllowed, isDaytime]);
+  }, [weather.weatherCode, weather.error, isEvening, isDaytime]);
 
   if (!initialLoadDone) {
     return <EmployerHomeSkeleton />;
@@ -243,7 +243,7 @@ const EmployerHome = memo(() => {
 
   return (
     <>
-      <GpsPrompt weatherAvailable={!weather.isLoading && !weather.error && !!weather.temperature} />
+      <GpsPrompt weatherAvailable={hasConfirmedWeather(weather)} />
       {/* Visa vädereffekter endast efter kort mount-delay (ger cache-rensning tid) */}
       {showWeatherEffects && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
       <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 animate-fade-in relative z-10 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
@@ -262,7 +262,7 @@ const EmployerHome = memo(() => {
             </h1>
           </div>
           <DateTimeDisplay />
-          {weatherAllowed && !weather.isLoading && !weather.error && weather.description ? (
+          {!weather.isLoading && !weather.error && weather.description ? (
             <motion.p 
               className="text-white text-base"
               initial={{ opacity: 0, y: 4 }}
