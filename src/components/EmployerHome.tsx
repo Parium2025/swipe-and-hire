@@ -139,31 +139,7 @@ const EmployerHome = memo(() => {
 
   const firstName = profile?.first_name || 'du';
   
-  // Reactive greeting that updates automatically
-  const [greeting, setGreeting] = useState(() => getGreeting());
-  const greetingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  
-  useEffect(() => {
-    const now = new Date();
-    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
-    
-    const syncTimeout = setTimeout(() => {
-      setGreeting(getGreeting());
-      
-      greetingIntervalRef.current = setInterval(() => {
-        setGreeting(getGreeting());
-      }, 60000);
-    }, msUntilNextMinute);
-    
-    return () => {
-      clearTimeout(syncTimeout);
-      if (greetingIntervalRef.current) {
-        clearInterval(greetingIntervalRef.current);
-      }
-    };
-  }, []);
-  
-  const { text: greetingText, isEvening, isDaytime } = greeting;
+  const { text: greetingText, isEvening, isDaytime } = useGreeting();
   
   // Fetch weather independently of GPS permission. If GPS is denied, useWeather
   // still falls back to IP/server/profile city; blocking the hook here makes the
