@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Briefcase, Users, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Heart } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import LocationSearchInput from '@/components/LocationSearchInput';
-import SmartSearchInput from '@/components/search/SmartSearchInput';
+
 import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
@@ -97,12 +97,30 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
       <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
         {/* Search Field with Save Search Button */}
         <div className="space-y-2">
-          <SmartSearchInput
-            value={searchInput}
-            onChange={onSearchInputChange}
-            jobs={jobs || []}
-            placeholder="Sök yrke, företag eller plats…"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => onSearchInputChange(e.target.value)}
+              placeholder="Sök yrke, företag eller plats…"
+              autoComplete="off"
+              spellCheck={false}
+              className="w-full h-12 pl-10 pr-10 rounded-md text-base bg-white/5 border border-white/10 hover:border-white/50 text-white placeholder:text-white/60 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-white/25 transition-colors"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => onSearchInputChange('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 rounded-full p-1 transition-colors"
+                aria-label="Rensa sökning"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+
 
 
 
