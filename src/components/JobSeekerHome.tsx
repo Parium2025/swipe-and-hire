@@ -153,8 +153,6 @@ const JobSeekerHome = memo(() => {
     if (!weatherAllowed || weather.error) {
       return isDaytime ? '☀️' : '🌙';
     }
-      return isDaytime ? '☀️' : '🌙';
-    }
     
     const getEmojiForCode = (code: number) => {
       if (code === 0) return '☀️';
