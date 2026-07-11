@@ -7,6 +7,12 @@ import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWiz
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
 import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
+import {
+  capitalize as cap,
+  getWorkLocationLabel,
+  getRemoteWorkLabel,
+  getSalaryTransparencyLabel,
+} from '@/lib/jobViewHelpers';
 import type { SwipeJob } from './types';
 import { useApplyData, type ExtraJobDetails } from './hooks/useApplyData';
 import { useApplySubmit } from './hooks/useApplySubmit';
