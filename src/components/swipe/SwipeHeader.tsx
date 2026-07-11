@@ -46,14 +46,16 @@ export const SwipeHeader = memo(function SwipeHeader({
         <div />
       )}
 
-      {/* Right: close button */}
+      {/* Right: close button — synlig cirkel matchar filterpillens h-12 så
+          att centrum blir visuellt (inte bara matematiskt) i linje med
+          "Visa filter" och räknaren. */}
       <div className="flex items-center justify-end">
         <button
           onClick={onClose}
           className="flex h-12 w-12 items-center justify-center touch-manipulation"
           aria-label="Stäng"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 transition-colors">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 border border-white/20 [@media(hover:hover)]:hover:bg-white/20 transition-colors">
             <X className="h-5 w-5 text-white" />
           </div>
         </button>

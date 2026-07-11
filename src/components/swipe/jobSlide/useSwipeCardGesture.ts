@@ -29,6 +29,11 @@ interface TouchGestureState {
   startTime: number;
   isDragging: boolean;
   cancelled: boolean;
+  // Föräldrarnas scroll-snap stängs av under hela touch-livstiden så att
+  // native pan-y inte kan starta en snap-fight när fingret bara ligger på
+  // kortet. Restaureras i touchend/cancel.
+  scrollParent: HTMLElement | null;
+  prevSnapType: string;
 }
 
 interface UseSwipeCardGestureOptions {
