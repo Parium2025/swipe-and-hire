@@ -596,7 +596,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           className={`h-full w-full overflow-x-hidden overscroll-contain ${
             showDetail || showApply || showFilter ? 'overflow-y-hidden' : 'overflow-y-auto'
           } ${
-            isReturningFromEnd ? 'snap-none' : 'snap-y snap-mandatory'
+            isReturningFromEnd ? 'snap-none' : 'snap-y snap-proximity'
           }`}
           style={{
             WebkitOverflowScrolling: 'touch',
@@ -620,7 +620,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 key={job.id}
                 ref={(el) => setSlideRef(el, idx)}
                 data-index={idx}
-                className="w-full shrink-0 snap-start snap-always"
+                className="w-full shrink-0 snap-start"
                 style={{
                   minHeight: sectionHeight,
                   height: sectionHeight,
