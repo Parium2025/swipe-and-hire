@@ -216,10 +216,18 @@ export function useSwipeCardGesture({
       )
         return;
 
-      // Döda scroll-momentum så kortet "landar" direkt.
-      const scrollParent = (event.currentTarget as HTMLElement).closest('[class*="overflow-y"]');
+      // Döda scroll-momentum så kortet "landar" direkt, och stäng samtidigt
+      // av scroll-snap på föräldern under hela touch-livstiden. Utan detta
+      // triggar minsta finger-jitter native pan-y → snap-mandatory/proximity
+      // rycker tillbaka → "hold-lagg". Restaureras i touchend/cancel.
+      const scrollParent = (event.currentTarget as HTMLElement).closest(
+        '[class*="overflow-y"]',
+      ) as HTMLElement | null;
+      let prevSnapType = '';
       if (scrollParent) {
         scrollParent.scrollTop = scrollParent.scrollTop;
+        prevSnapType = scrollParent.style.scrollSnapType;
+        scrollParent.style.scrollSnapType = 'none';
       }
 
       const touch = event.touches[0];
@@ -229,6 +237,8 @@ export function useSwipeCardGesture({
         startTime: Date.now(),
         isDragging: false,
         cancelled: false,
+        scrollParent,
+        prevSnapType,
       };
     },
     [useTouchTunnel, overlayOpen],
