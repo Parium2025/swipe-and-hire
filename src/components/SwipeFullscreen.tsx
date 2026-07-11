@@ -308,6 +308,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         const st = container?.scrollTop;
         if (st == null || jobs.length === 0) return;
         if (suppressEndCheckRef.current) return;
+        // 🖐️ Skip helt medan fingret ligger kvar — snap-recovery och
+        // end-bounce körs istället i touchend-handlern nedan.
+        if (isTouchingRef.current) return;
 
         const endTop = getEndStateScrollTop();
         const hasScrolledIntoEnd =
