@@ -146,11 +146,13 @@ const JobSeekerHome = memo(() => {
     return () => clearTimeout(timer);
   }, []);
   
-  const showWeatherEffects = gpsGranted && mountedLongEnough && !weather.isLoading;
+  const showWeatherEffects = weatherAllowed && mountedLongEnough && !weather.isLoading && !weather.error;
   
   // Emoji logic
   const displayEmoji = useMemo(() => {
-    if (!gpsGranted) {
+    if (!weatherAllowed || weather.error) {
+      return isDaytime ? '☀️' : '🌙';
+    }
       return isDaytime ? '☀️' : '🌙';
     }
     
