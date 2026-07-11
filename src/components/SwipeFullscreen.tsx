@@ -82,6 +82,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   // end-check i några frames efter varje jobs-ändring.
   const suppressEndCheckRef = useRef(false);
   const suppressEndCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 🖐️ Track active touch on scroll container. Snap-recovery / end-bounce
+  // får ALDRIG köra `scrollTo({behavior:'smooth'})` medan användarens finger
+  // ligger kvar — då slåss iOS scroll-engine med vår kod och kortet skakar.
+  const isTouchingRef = useRef(false);
 
   /* ── Session persistence ───────────────────────────────── */
   const SWIPE_INDEX_KEY = 'parium-swipe-index';
