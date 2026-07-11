@@ -292,6 +292,18 @@ export function useSwipeCardGesture({
     [clearTapHint, useTouchTunnel, x],
   );
 
+  /**
+   * Restaurera scroll-snap på föräldern. Anropas i touchend/cancel så att
+   * snap-motorn slås på igen efter att fingret släppt kortet. Den
+   * befintliga `scrollEndTimer` i SwipeFullscreen force-alignar till
+   * närmsta slide om scrollen råkade stannat mellan två snap-punkter.
+   */
+  const restoreParentSnap = useCallback((gesture: TouchGestureState | null) => {
+    if (gesture?.scrollParent) {
+      gesture.scrollParent.style.scrollSnapType = gesture.prevSnapType;
+    }
+  }, []);
+
   const handleTouchEndCapture = useCallback(
     (event: ReactTouchEvent<HTMLDivElement>) => {
       if (
@@ -299,15 +311,18 @@ export function useSwipeCardGesture({
         isWithinTapHintTarget(event.target) ||
         isWithinInteractiveTarget(event.target)
       ) {
+        restoreParentSnap(touchGestureRef.current);
         touchGestureRef.current = null;
         return;
       }
 
       if (overlayOpen || Date.now() - overlayClosedAtRef.current < OVERLAY_CLOSE_INPUT_LOCK_MS) {
+        restoreParentSnap(touchGestureRef.current);
         touchGestureRef.current = null;
         return;
       }
       const gesture = touchGestureRef.current;
+      restoreParentSnap(gesture);
       touchGestureRef.current = null;
 
       if (!gesture || swipedRef.current || gesture.cancelled) return;
@@ -377,6 +392,7 @@ export function useSwipeCardGesture({
       onTapCompany,
       onTapTitle,
       overlayOpen,
+      restoreParentSnap,
       showTapHint,
       triggerSwipe,
       useTouchTunnel,
@@ -386,11 +402,12 @@ export function useSwipeCardGesture({
 
   const handleTouchCancelCapture = useCallback(() => {
     clearTapHint();
+    restoreParentSnap(touchGestureRef.current);
     touchGestureRef.current = null;
     if (!swipedRef.current) {
       animate(x, 0, SNAP_SPRING);
     }
-  }, [clearTapHint, x]);
+  }, [clearTapHint, restoreParentSnap, x]);
 
   return {
     triggerSwipe,
