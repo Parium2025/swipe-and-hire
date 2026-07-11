@@ -440,8 +440,57 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     const container = scrollRef.current;
     if (!container) return;
     container.addEventListener('scroll', handleScrollWithSnap, { passive: true });
-    return () => container.removeEventListener('scroll', handleScrollWithSnap);
-  }, [handleScrollWithSnap]);
+
+    // 🖐️ Håll koll på om fingret ligger kvar på scrollcontainern.
+    // Under en pågående touch får snap-recovery / end-bounce INTE köra
+    // `scrollTo({behavior:'smooth'})` — det skakar mot iOS scroll-engine.
+    const onTouchStart = () => {
+      isTouchingRef.current = true;
+    };
+    const onTouchEnd = () => {
+      isTouchingRef.current = false;
+      // När fingret släpps: kör en snap-check kort efter så vi landar på
+      // närmaste kort även om timern hoppade över under touchen.
+      if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
+      scrollEndTimerRef.current = setTimeout(() => {
+        scrollEndTimerRef.current = null;
+        const c = scrollRef.current;
+        if (!c || jobs.length === 0) return;
+        if (suppressEndCheckRef.current) return;
+        if (isTouchingRef.current) return;
+
+        const st = c.scrollTop;
+        const endTop = getEndStateScrollTop();
+        const hasScrolledIntoEnd =
+          currentIndexRef.current === jobs.length - 1 &&
+          endTop !== null &&
+          st >= endTop - END_BOUNCE_TRIGGER_OFFSET;
+
+        if (hasScrolledIntoEnd) {
+          triggerEndBounce();
+          return;
+        }
+        const nearestEl = slideRefs.current[currentIndexRef.current];
+        if (nearestEl) {
+          const targetTop = nearestEl.offsetTop;
+          if (Math.abs(targetTop - st) > 2) {
+            c.scrollTo({ top: targetTop, behavior: 'smooth' });
+          }
+        }
+      }, SCROLL_SNAP_DELAY);
+    };
+
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchend', onTouchEnd, { passive: true });
+    container.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener('scroll', handleScrollWithSnap);
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchend', onTouchEnd);
+      container.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [handleScrollWithSnap, getEndStateScrollTop, jobs.length, triggerEndBounce]);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
