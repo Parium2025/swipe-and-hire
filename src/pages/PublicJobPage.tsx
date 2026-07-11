@@ -366,9 +366,9 @@ const PublicJobPage = () => {
         <div className="flex flex-col sm:flex-row gap-3 mb-12">
           <Button
             onClick={() => goApply(job.id)}
-            className="bg-secondary text-white md:hover:bg-secondary rounded-full min-h-12 px-7 text-base font-medium"
+            className="bg-green-500 text-white md:hover:bg-green-600 rounded-full min-h-12 px-7 text-base font-medium shadow-lg shadow-green-500/30"
           >
-            Ansök nu
+            Skicka ansökan
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
           <Button
