@@ -34,7 +34,7 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
           supabase.from('job_questions').select('*').eq('job_id', jobId).order('order_index'),
           supabase
             .from('job_postings')
-            .select('contact_email, workplace_address, workplace_postal_code, workplace_city, workplace_municipality, workplace_county, work_start_time, work_end_time')
+            .select('contact_email, work_start_time, work_end_time')
             .eq('id', jobId)
             .single(),
           userId
@@ -55,11 +55,6 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
         if (jobRes.data) {
           if (jobRes.data.contact_email) setContactEmail(jobRes.data.contact_email);
           setExtraDetails({
-            workplace_address: jobRes.data.workplace_address,
-            workplace_postal_code: jobRes.data.workplace_postal_code,
-            workplace_city: jobRes.data.workplace_city,
-            workplace_municipality: jobRes.data.workplace_municipality,
-            workplace_county: jobRes.data.workplace_county,
             work_start_time: jobRes.data.work_start_time,
             work_end_time: jobRes.data.work_end_time,
           });
