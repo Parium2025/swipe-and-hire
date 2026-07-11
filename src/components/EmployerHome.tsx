@@ -2,6 +2,7 @@ import { memo, useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useWeather } from '@/hooks/useWeather';
+import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
@@ -172,25 +173,27 @@ const EmployerHome = memo(() => {
   
   const { text: greetingText, isEvening, isDaytime } = greeting;
   
-  // Check GPS permission status
-  const [gpsGranted, setGpsGranted] = useState<boolean | null>(null);
+  // Check GPS permission.
+  // Safari (iOS/macOS) reports geolocation as `prompt` even after allowing it,
+  // so weather must only be disabled when permission is explicitly denied.
+  const [weatherAllowed, setWeatherAllowed] = useState<boolean>(true);
   
   useEffect(() => {
     let permissionStatus: PermissionStatus | null = null;
     const onChange = () => {
-      if (permissionStatus) setGpsGranted(permissionStatus.state === 'granted');
+      if (permissionStatus) setWeatherAllowed(permissionStatus.state !== 'denied');
     };
     const checkGps = async () => {
       try {
         if ('permissions' in navigator) {
           permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
-          setGpsGranted(permissionStatus.state === 'granted');
+          setWeatherAllowed(permissionStatus.state !== 'denied');
           permissionStatus.addEventListener('change', onChange);
         } else {
-          setGpsGranted(false);
+          setWeatherAllowed(true);
         }
       } catch {
-        setGpsGranted(false);
+        setWeatherAllowed(true);
       }
     };
     checkGps();
@@ -199,10 +202,10 @@ const EmployerHome = memo(() => {
     };
   }, []);
   
-  // Only fetch weather if GPS is granted
+  // Fetch weather unless permission is explicitly denied.
   const weather = useWeather({
-    fallbackCity: gpsGranted ? (profile?.location || profile?.home_location || profile?.address || 'Stockholm') : undefined,
-    enabled: gpsGranted === true,
+    fallbackCity: weatherAllowed ? (profile?.location || profile?.home_location || profile?.address || 'Stockholm') : undefined,
+    enabled: weatherAllowed,
     backgroundLocationEnabled: (profile as any)?.background_location_enabled ?? false,
   });
   
@@ -219,12 +222,12 @@ const EmployerHome = memo(() => {
     return () => clearTimeout(timer);
   }, []);
   
-  const showWeatherEffects = gpsGranted && mountedLongEnough && !weather.isLoading;
+  const showWeatherEffects = weatherAllowed && mountedLongEnough && !weather.isLoading && !weather.error;
   
   // Emoji logic based on time of day and weather
   const displayEmoji = useMemo(() => {
-    // If GPS not granted, use simple time-based icons
-    if (!gpsGranted) {
+    // If weather is blocked/unavailable, use simple time-based icons
+    if (!weatherAllowed || weather.error) {
       return isDaytime ? '☀️' : '🌙';
     }
     
@@ -253,7 +256,7 @@ const EmployerHome = memo(() => {
       return '🌙 ☁️';
     }
     return getEmojiForCode(weatherCode);
-  }, [weather.weatherCode, isEvening, gpsGranted, isDaytime]);
+  }, [weather.weatherCode, weather.error, isEvening, weatherAllowed, isDaytime]);
 
   if (!initialLoadDone) {
     return <EmployerHomeSkeleton />;
@@ -287,18 +290,23 @@ const EmployerHome = memo(() => {
             </h1>
           </div>
           <DateTimeDisplay />
-          {gpsGranted && !weather.isLoading && !weather.error && weather.description ? (
+          {weatherAllowed && !weather.isLoading && !weather.error && weather.description ? (
             <motion.p 
               className="text-white text-base"
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              {weather.city ? `${weather.city}, ` : ''}{weather.temperature}°
-              {weather.feelsLike !== weather.temperature && (
-                <span className="text-white"> (känns som {weather.feelsLike}°)</span>
-              )}
-              {' '}{weather.description} <span className="text-xl">{displayEmoji}</span>
+              {hasConfirmedWeather(weather) ? (
+                <>
+                  {weather.city}, {weather.temperature}°
+                  {weather.feelsLike !== weather.temperature && (
+                    <span className="text-white"> (känns som {weather.feelsLike}°)</span>
+                  )}
+                  {' '}
+                </>
+              ) : null}
+              {weather.description} <span className="text-xl">{displayEmoji}</span>
             </motion.p>
           ) : null}
         </motion.div>
