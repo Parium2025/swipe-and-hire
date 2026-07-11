@@ -7,6 +7,12 @@ import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWiz
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
 import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
+import {
+  capitalize as cap,
+  getWorkLocationLabel,
+  getRemoteWorkLabel,
+  getSalaryTransparencyLabel,
+} from '@/lib/jobViewHelpers';
 import type { SwipeJob } from './types';
 import { useApplyData, type ExtraJobDetails } from './hooks/useApplyData';
 import { useApplySubmit } from './hooks/useApplySubmit';
@@ -40,26 +46,26 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function cap(s?: string | null) {
-  if (!s) return '';
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
+
+
 
 function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDetails | null }) {
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
+
+  const salaryTypeSuffix =
+    job.salary_type === 'hourly' || job.salary_type === 'rorlig' ? 'kr/tim' : 'kr/mån';
+
   const salaryLabel = (() => {
-    if (!job.salary_min && !job.salary_max && !job.salary_transparency) return null;
-    if (job.salary_transparency === 'after_interview' || job.salary_transparency === 'not_specified') {
-      return job.salary_transparency === 'after_interview' ? 'Lön efter intervju' : 'Ej specificerad';
+    if (job.salary_min && job.salary_max) {
+      return `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${salaryTypeSuffix}`;
     }
-    if (job.salary_min || job.salary_max) {
-      const suffix = job.salary_type === 'hourly' ? 'tim' : 'mån';
-      if (job.salary_min && job.salary_max) return `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} kr/${suffix}`;
-      if (job.salary_min) return `Från ${job.salary_min.toLocaleString('sv-SE')} kr/${suffix}`;
-      return `Upp till ${job.salary_max!.toLocaleString('sv-SE')} kr/${suffix}`;
-    }
+    if (job.salary_min) return `Från ${job.salary_min.toLocaleString('sv-SE')} ${salaryTypeSuffix}`;
+    if (job.salary_max) return `Upp till ${job.salary_max.toLocaleString('sv-SE')} ${salaryTypeSuffix}`;
+    if (job.salary_transparency) return getSalaryTransparencyLabel(job.salary_transparency);
     return null;
   })();
+
+
 
   const addressLabel = (() => {
     if (!extra?.workplace_address) return null;
@@ -81,6 +87,7 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
   const showMunicipalityOnly =
     extra?.workplace_municipality && !extra.workplace_address && (!extra.workplace_city || extra.workplace_city === job.location);
 
+  const scheduleValue = job.work_schedule;
   const workTimeLabel = (extra?.work_start_time || extra?.work_end_time)
     ? `${extra?.work_start_time ?? ''} – ${extra?.work_end_time ?? ''}`
     : null;
@@ -90,22 +97,22 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
       <h3 className="text-white font-bold text-base">Detaljer om tjänsten</h3>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
         {job.employment_type && <DetailRow label="Anställning" value={getEmploymentTypeLabel(job.employment_type)} />}
-        {job.location && <DetailRow label="Ort" value={cap(job.location)} />}
-        {displayCompanyName && <DetailRow label="Bolagsnamn" value={cap(displayCompanyName)} />}
-        {job.occupation && <DetailRow label="Yrke" value={job.occupation} />}
+        {job.location && <DetailRow label="Ort" value={cap(job.location) ?? ''} />}
+        {displayCompanyName && <DetailRow label="Bolagsnamn" value={cap(displayCompanyName) ?? ''} />}
+        {job.occupation && <DetailRow label="Yrke" value={cap(job.occupation) ?? ''} />}
         {addressLabel && <DetailRow label="Adress" value={addressLabel} />}
         {cityLabel && <DetailRow label="Stad" value={cityLabel} />}
         {showMunicipalityOnly && <DetailRow label="Kommun" value={extra!.workplace_municipality!} />}
         {job.work_location_type && (
-          <DetailRow label="Platstyp" value={job.work_location_type === 'on_site' ? 'På plats' : job.work_location_type === 'hybrid' ? 'Hybrid' : job.work_location_type === 'remote' ? 'Distans' : job.work_location_type} />
+          <DetailRow label="Platstyp" value={getWorkLocationLabel(job.work_location_type) ?? job.work_location_type} />
         )}
-        {job.remote_work_possible && (
-          <DetailRow label="Distans" value={job.remote_work_possible === 'yes' ? 'Ja' : job.remote_work_possible === 'no' ? 'Nej' : job.remote_work_possible} />
+        {job.remote_work_possible && job.remote_work_possible !== 'no' && (
+          <DetailRow label="Distans" value={getRemoteWorkLabel(job.remote_work_possible) ?? job.remote_work_possible} />
         )}
-        {job.work_schedule && <DetailRow label="Schema" value={cap(job.work_schedule)} />}
+        {scheduleValue && <DetailRow label="Schema" value={cap(scheduleValue) ?? ''} />}
         {workTimeLabel && <DetailRow label="Arbetstid" value={workTimeLabel} />}
         {salaryLabel && <DetailRow label="Lön" value={salaryLabel} />}
-        {job.positions_count && job.positions_count > 0 && <DetailRow label="Antal tjänster" value={`${job.positions_count} st`} />}
+        {job.positions_count && job.positions_count > 1 && <DetailRow label="Antal tjänster" value={`${job.positions_count} st`} />}
       </div>
     </div>
   );
