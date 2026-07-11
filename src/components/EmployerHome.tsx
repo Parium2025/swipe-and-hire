@@ -173,61 +173,33 @@ const EmployerHome = memo(() => {
   
   const { text: greetingText, isEvening, isDaytime } = greeting;
   
-  // Check GPS permission.
-  // Safari (iOS/macOS) reports geolocation as `prompt` even after allowing it,
-  // so weather must only be disabled when permission is explicitly denied.
-  const [weatherAllowed, setWeatherAllowed] = useState<boolean>(true);
-  
-  useEffect(() => {
-    let permissionStatus: PermissionStatus | null = null;
-    const onChange = () => {
-      if (permissionStatus) setWeatherAllowed(permissionStatus.state !== 'denied');
-    };
-    const checkGps = async () => {
-      try {
-        if ('permissions' in navigator) {
-          permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
-          setWeatherAllowed(permissionStatus.state !== 'denied');
-          permissionStatus.addEventListener('change', onChange);
-        } else {
-          setWeatherAllowed(true);
-        }
-      } catch {
-        setWeatherAllowed(true);
-      }
-    };
-    checkGps();
-    return () => {
-      permissionStatus?.removeEventListener('change', onChange);
-    };
-  }, []);
-  
-  // Fetch weather unless permission is explicitly denied.
+  // Fetch weather independently of GPS permission. If GPS is denied, useWeather
+  // still falls back to IP/server/profile city; blocking the hook here makes the
+  // whole weather row disappear for users who previously denied location.
+  const backgroundLocationEnabled = Boolean(
+    (profile as { background_location_enabled?: boolean | null } | null | undefined)?.background_location_enabled
+  );
+
   const weather = useWeather({
-    fallbackCity: weatherAllowed ? (profile?.location || profile?.home_location || profile?.address || 'Stockholm') : undefined,
-    enabled: weatherAllowed,
-    backgroundLocationEnabled: (profile as any)?.background_location_enabled ?? false,
+    fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
+    enabled: true,
+    backgroundLocationEnabled,
   });
-  
+
   // 🎯 KRITISKT: Förhindra att gammal cachad vädereffekt visas vid login
-  // useWeather kan returnera cachad data med isLoading=false DIREKT vid mount.
-  // Vi väntar tills komponenten har varit monterad en kort stund OCH väderdata
-  // inte längre laddar - detta ger clearAllAppCaches() tid att köra först.
   const [mountedLongEnough, setMountedLongEnough] = useState(false);
-  
+
   useEffect(() => {
-    // Vänta 200ms efter mount innan vi tillåter vädereffekter
-    // Detta ger cache-rensningen i signIn tid att exekvera
     const timer = setTimeout(() => setMountedLongEnough(true), 200);
     return () => clearTimeout(timer);
   }, []);
-  
-  const showWeatherEffects = weatherAllowed && mountedLongEnough && !weather.isLoading && !weather.error;
+
+  const showWeatherEffects = mountedLongEnough && !weather.isLoading && !weather.error;
   
   // Emoji logic based on time of day and weather
   const displayEmoji = useMemo(() => {
     // If weather is blocked/unavailable, use simple time-based icons
-    if (!weatherAllowed || weather.error) {
+    if (weather.error) {
       return isDaytime ? '☀️' : '🌙';
     }
     
@@ -256,7 +228,7 @@ const EmployerHome = memo(() => {
       return '🌙 ☁️';
     }
     return getEmojiForCode(weatherCode);
-  }, [weather.weatherCode, weather.error, isEvening, weatherAllowed, isDaytime]);
+  }, [weather.weatherCode, weather.error, isEvening, isDaytime]);
 
   if (!initialLoadDone) {
     return <EmployerHomeSkeleton />;
@@ -271,7 +243,7 @@ const EmployerHome = memo(() => {
 
   return (
     <>
-      <GpsPrompt weatherAvailable={!weather.isLoading && !weather.error && !!weather.temperature} />
+      <GpsPrompt weatherAvailable={hasConfirmedWeather(weather)} />
       {/* Visa vädereffekter endast efter kort mount-delay (ger cache-rensning tid) */}
       {showWeatherEffects && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
       <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 animate-fade-in relative z-10 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
@@ -290,7 +262,7 @@ const EmployerHome = memo(() => {
             </h1>
           </div>
           <DateTimeDisplay />
-          {weatherAllowed && !weather.isLoading && !weather.error && weather.description ? (
+          {!weather.isLoading && !weather.error && weather.description ? (
             <motion.p 
               className="text-white text-base"
               initial={{ opacity: 0, y: 4 }}
