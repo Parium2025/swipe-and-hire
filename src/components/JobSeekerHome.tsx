@@ -86,43 +86,6 @@ const JobSeekerHome = memo(() => {
   
   const { text: greetingText, isEvening, isDaytime } = greeting;
   
-  // Check GPS permission.
-  // NOTE: Safari (iOS/macOS) does NOT support Permissions API for 'geolocation'
-  // — the query throws or always returns 'prompt'. So we must NOT gate weather
-  // on `state === 'granted'` — that would leave Safari users with no weather
-  // forever. We only disable weather when we KNOW permission is denied.
-  // `weatherAllowed` = "permission is not explicitly denied"; the GPS fallback
-  // chain (GPS → client IP → server IP → cache) inside useWeather handles the
-  // rest and gracefully degrades when GPS actually isn't available.
-  const [weatherAllowed, setWeatherAllowed] = useState<boolean>(true);
-
-  useEffect(() => {
-    let permissionStatus: PermissionStatus | null = null;
-    const onChange = () => {
-      if (!permissionStatus) return;
-      setWeatherAllowed(permissionStatus.state !== 'denied');
-    };
-    const checkGps = async () => {
-      try {
-        if ('permissions' in navigator) {
-          permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
-          setWeatherAllowed(permissionStatus.state !== 'denied');
-          permissionStatus.addEventListener('change', onChange);
-        } else {
-          // No Permissions API (Safari): assume allowed, let fallback chain decide.
-          setWeatherAllowed(true);
-        }
-      } catch {
-        // Query threw (Safari): assume allowed, let fallback chain decide.
-        setWeatherAllowed(true);
-      }
-    };
-    checkGps();
-    return () => {
-      permissionStatus?.removeEventListener('change', onChange);
-    };
-  }, []);
-
   // Fetch weather independently of GPS permission. If GPS is denied, useWeather
   // still falls back to IP/server/profile city; blocking the hook here makes the
   // whole weather row disappear for users who previously denied location.
