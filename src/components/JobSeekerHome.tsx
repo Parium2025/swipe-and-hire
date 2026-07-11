@@ -86,25 +86,40 @@ const JobSeekerHome = memo(() => {
   
   const { text: greetingText, isEvening, isDaytime } = greeting;
   
-  // Check GPS permission
+  // Check GPS permission.
+  // NOTE: Safari (iOS/macOS) does NOT support Permissions API for 'geolocation'
+  // — the query throws or always returns 'prompt'. So we must NOT gate weather
+  // on `state === 'granted'` — that would leave Safari users with no weather
+  // forever. We only disable weather when we KNOW permission is denied.
+  // `weatherAllowed` = "permission is not explicitly denied"; the GPS fallback
+  // chain (GPS → client IP → server IP → cache) inside useWeather handles the
+  // rest and gracefully degrades when GPS actually isn't available.
+  const [weatherAllowed, setWeatherAllowed] = useState<boolean>(true);
   const [gpsGranted, setGpsGranted] = useState<boolean | null>(null);
-  
+
   useEffect(() => {
     let permissionStatus: PermissionStatus | null = null;
     const onChange = () => {
-      if (permissionStatus) setGpsGranted(permissionStatus.state === 'granted');
+      if (!permissionStatus) return;
+      setGpsGranted(permissionStatus.state === 'granted');
+      setWeatherAllowed(permissionStatus.state !== 'denied');
     };
     const checkGps = async () => {
       try {
         if ('permissions' in navigator) {
           permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
           setGpsGranted(permissionStatus.state === 'granted');
+          setWeatherAllowed(permissionStatus.state !== 'denied');
           permissionStatus.addEventListener('change', onChange);
         } else {
+          // No Permissions API (Safari): assume allowed, let fallback chain decide.
           setGpsGranted(false);
+          setWeatherAllowed(true);
         }
       } catch {
+        // Query threw (Safari): assume allowed, let fallback chain decide.
         setGpsGranted(false);
+        setWeatherAllowed(true);
       }
     };
     checkGps();
@@ -112,15 +127,15 @@ const JobSeekerHome = memo(() => {
       permissionStatus?.removeEventListener('change', onChange);
     };
   }, []);
-  
-  // Fetch weather if GPS granted
+
+  // Fetch weather unless permission is explicitly denied
   const backgroundLocationEnabled = Boolean(
     (profile as { background_location_enabled?: boolean | null } | null | undefined)?.background_location_enabled
   );
 
   const weather = useWeather({
-    fallbackCity: gpsGranted ? (profile?.location || profile?.home_location || profile?.address || 'Stockholm') : undefined,
-    enabled: gpsGranted === true,
+    fallbackCity: weatherAllowed ? (profile?.location || profile?.home_location || profile?.address || 'Stockholm') : undefined,
+    enabled: weatherAllowed,
     backgroundLocationEnabled,
   });
   // 🎯 KRITISKT: Förhindra att gammal cachad vädereffekt visas vid login
@@ -131,11 +146,11 @@ const JobSeekerHome = memo(() => {
     return () => clearTimeout(timer);
   }, []);
   
-  const showWeatherEffects = gpsGranted && mountedLongEnough && !weather.isLoading;
+  const showWeatherEffects = weatherAllowed && mountedLongEnough && !weather.isLoading && !weather.error;
   
   // Emoji logic
   const displayEmoji = useMemo(() => {
-    if (!gpsGranted) {
+    if (!weatherAllowed || weather.error) {
       return isDaytime ? '☀️' : '🌙';
     }
     
@@ -164,7 +179,7 @@ const JobSeekerHome = memo(() => {
       return '🌙 ☁️';
     }
     return getEmojiForCode(weatherCode);
-  }, [weather.weatherCode, isEvening, gpsGranted, isDaytime]);
+  }, [weather.weatherCode, weather.error, isEvening, weatherAllowed, isDaytime]);
 
 
   if (!showContent) {
@@ -193,7 +208,7 @@ const JobSeekerHome = memo(() => {
             </h1>
           </div>
           <DateTimeDisplay />
-          {gpsGranted && !weather.isLoading && !weather.error && weather.description ? (
+          {weatherAllowed && !weather.isLoading && !weather.error && weather.description ? (
             <motion.p 
               className="text-white text-base"
               initial={{ opacity: 0, y: 4 }}
