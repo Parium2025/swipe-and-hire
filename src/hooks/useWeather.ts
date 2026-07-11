@@ -10,6 +10,7 @@ import {
   getWeatherInfo,
   fetchCurrentWeather,
   getLocationByIP,
+  getServerSideIPLocation,
   geocodeCity,
   getTimeBasedEmoji,
 } from '@/lib/weatherApi';
@@ -177,10 +178,14 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   });
 
   const checkForLocationChange = useCallback(async (silent = true) => {
+    // On web (esp. iOS Safari) high accuracy often times out or takes 10-15s.
+    // Low accuracy = wifi/cell tower positioning, city-level, ~1-2s. Perfect for weather.
+    const useHighAccuracy = isNativeApp();
+
     try {
       const gpsResult = await getCurrentPosition({
-        timeout: 8000,
-        enableHighAccuracy: true,
+        timeout: useHighAccuracy ? 8000 : 5000,
+        enableHighAccuracy: useHighAccuracy,
         // Accept a GPS fix up to 2 minutes old — avoids waking the radio for a
         // fresh lock on every periodic/visibility check when we don't need one.
         maximumAge: 2 * 60 * 1000,
@@ -189,9 +194,6 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       if (gpsResult && mountedRef.current) {
         console.log(`🛰️ GPS coordinates: ${gpsResult.lat.toFixed(6)}, ${gpsResult.lon.toFixed(6)}`);
 
-        // Don't call getCityName directly — the edge function (fetchCurrentWeather)
-        // already returns a cached city via server-side reverse geocoding.
-        // Calling Nominatim from each client would hit its 1 req/s rate limit at scale.
         const cached = locationRef.current || getCachedLocation();
         const cityHint = cached?.city || '';
         await updateLocation(gpsResult.lat, gpsResult.lon, cityHint || null, 'gps');
@@ -212,6 +214,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     }
 
+    // Client-side IP lookup (works when Private Relay is off)
     const ipLocation = await getLocationByIP().catch((error) => {
       console.warn('IP location lookup failed, continuing with fallbacks:', error);
       return null;
@@ -226,6 +229,17 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       console.log(`📡 Using IP geolocation: ${ipLocation.city} (accuracy may vary)`);
       await updateLocation(ipLocation.lat, ipLocation.lon, ipLocation.city, 'ip');
       return;
+    }
+
+    // Server-side IP lookup — bypasses iCloud Private Relay blocking of client-side APIs.
+    // Edge function reads request IP; Private Relay egress still resolves to region.
+    if (mountedRef.current) {
+      const serverIp = await getServerSideIPLocation().catch(() => null);
+      if (serverIp && mountedRef.current) {
+        console.log(`🌐 Server-side IP geolocation: ${serverIp.city}`);
+        await updateLocation(serverIp.lat, serverIp.lon, serverIp.city, 'ip');
+        return;
+      }
     }
 
     if (cached && mountedRef.current) {

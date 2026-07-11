@@ -363,6 +363,33 @@ export const getLocationByIP = async (): Promise<{ lat: number; lon: number; cit
   }
 };
 
+/**
+ * Server-side IP geolocation via edge function.
+ * Bypasses iCloud Private Relay blocking of client-side IP services because
+ * the request comes from Supabase's edge (Private Relay egress IP still
+ * resolves to the user's region — city-level accuracy).
+ */
+export const getServerSideIPLocation = async (): Promise<{ lat: number; lon: number; city: string } | null> => {
+  if (!SUPABASE_PROJECT_ID) return null;
+  try {
+    const res = await fetch(
+      `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/weather-cache`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ipLookup: true }),
+        signal: AbortSignal.timeout(4000),
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (typeof data?.lat === 'number' && typeof data?.lon === 'number') {
+      return { lat: data.lat, lon: data.lon, city: data.city || '' };
+    }
+  } catch { /* Silent */ }
+  return null;
+};
+
 /** Forward geocode a city name to coordinates */
 export const geocodeCity = async (city: string): Promise<{ lat: number; lon: number; name: string }> => {
   const res = await fetch(
