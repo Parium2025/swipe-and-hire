@@ -108,15 +108,12 @@ export function useCardImage(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedUrl, cachedBlobUrl]);
 
-  // KRITISKT: Visa ENDAST blob-URL tills den är klar.
-  // Tidigare returnerades resolvedUrl som fallback → <img> startade en parallell
-  // browser-fetch samtidigt som imageCache.fetchAndCache körde sin egen fetch
-  // (med credentials:'omit' → annan browser-cache-key). Resultat: dubbel hämtning.
-  // Nu: null tills blob finns. Komponenten ansvarar för fallback-UI (initialer).
-  // Endast om blob-fetchen FAILADE faller vi tillbaka till raw URL.
-  const displayUrl = blobFailed
-    ? resolvedUrl
-    : cachedBlobUrl || loadedBlobUrl || null;
+  // Föredra blob-cache (snabbast, offline-vänligt), men fall ALLTID tillbaka
+  // till raw resolvedUrl så att bilden garanterat ritas även om blob-laddningen
+  // ännu inte hunnit klart eller service-worker/CDN gör att fetchen fastnar.
+  // (Tidigare returnerades null tills blob var klar → risk för permanent
+  // placeholder om blob-fetchen aldrig avslutades.)
+  const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
 
   // 🚀 Proaktiv decode: så fort vi har en URL, dekoda bitmapen off-main-thread.
   // Eliminerar "decode-blinken" när ett kort re-mountas efter scroll — bilden
