@@ -1196,11 +1196,9 @@ const MobileJobWizard = ({
   const fetchProfile = async () => {
     if (!user) return;
     
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
+    const { data: profileRows } = await supabase.rpc('get_my_profile');
+    const data = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
+
     
     setProfile(data);
     
