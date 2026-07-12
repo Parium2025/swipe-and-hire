@@ -24,6 +24,7 @@ interface Application {
     views_count: number | null;
     job_image_url: string | null;
     job_image_desktop_url: string | null;
+    image_focus_position: string | null;
     positions_count: number | null;
     workplace_name: string | null;
     company_logo_url: string | null;
@@ -122,7 +123,9 @@ export function useMyApplicationsCache() {
             applications_count,
             views_count,
             job_image_url,
+            job_image_url,
             job_image_desktop_url,
+            image_focus_position,
             positions_count,
             workplace_name,
             company_logo_url,
