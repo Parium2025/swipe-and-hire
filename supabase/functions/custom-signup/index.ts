@@ -90,15 +90,17 @@ const handler = async (req: Request): Promise<Response> => {
     if (signupError) {
       console.error('Signup error details:', signupError);
       
-      // Handle existing user case (fallback)
-      if (signupError.message.includes("already been registered") || 
+      // Handle existing user case (fallback) — generic response, no enumeration
+      if (signupError.message.includes("already been registered") ||
           signupError.message.includes("User already registered") ||
           signupError.message.includes("email_exists")) {
-        
-        return new Response(JSON.stringify({ 
-          error: "E-post redan registrerad. Vänta en minut och försök igen, eller använd en annan e-postadress." 
+
+        return new Response(JSON.stringify({
+          success: true,
+          message: "Om adressen är giltig har vi skickat ett mejl med nästa steg.",
+          needsConfirmation: true
         }), {
-          status: 400,
+          status: 200,
           headers: {
             "Content-Type": "application/json",
             ...corsHeaders,
@@ -106,6 +108,7 @@ const handler = async (req: Request): Promise<Response> => {
         });
       }
       throw new Error(signupError.message);
+
     }
 
     // 3. Skapa bekräftelsetoken och spara i databasen
