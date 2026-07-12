@@ -251,10 +251,11 @@ function isServiceRoleRequest(request: Request): boolean {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return false;
   const token = authHeader.slice('Bearer '.length).trim();
-  if (token === serviceRoleKey) return true;
-  const claims = parseJwtClaims(token);
-  return claims?.role === 'service_role';
+  // ⚠️ Only trust the literal service-role key. Never trust JWT `role` claim
+  // from a base64 decode — that is trivially forgeable when verify_jwt=false.
+  return token === serviceRoleKey;
 }
+
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
