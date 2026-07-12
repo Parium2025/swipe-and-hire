@@ -1,211 +1,74 @@
+// Skickar kontobekräftelse via Lovable Emails (send-transactional-email).
+// Ersätter tidigare Resend-baserad implementation. Callers behöver inte ändras.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { createClient } from "npm:@supabase/supabase-js@2.53.0";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 interface ConfirmationEmailRequest {
   email: string;
-  role: 'job_seeker' | 'employer';
+  role: "job_seeker" | "employer";
   first_name: string;
   confirmation_url: string;
   company_name?: string;
 }
 
-const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bekräfta ditt konto – Parium</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
-  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
-    <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
-          <tr>
-            <td style="background-color: #1E3A8A; padding: 32px 30px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0 0 4px 0; font-size: 24px; font-weight: bold; color: #ffffff;">Parium</h1>
-              <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8);">Framtiden börjar med ett swipe</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 30px;">
-              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Hej ${firstName}!
-              </p>
-              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Välkommen till Parium — nästa steg i ett smartare jobbsökande.
-                Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
-              </p>
-              <p style="margin: 0 0 12px 0; font-size: 16px; color: #333; line-height: 1.6; font-weight: bold;">
-                Med Parium kan du:
-              </p>
-              <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px 0 30px 0; max-width: 450px;">
-                <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
-                  <td style="color: #333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Hitta jobb som verkligen matchar din profil</td>
-                </tr>
-                <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
-                  <td style="color: #333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Swipea dig igenom alternativ och ansöka på några sekunder</td>
-                </tr>
-                <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
-                  <td style="color: #333; font-size: 16px; line-height: 1.6;">Spara tid med verktyg som gör processen både enkel och effektiv</td>
-                </tr>
-              </table>
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
-                <tr>
-                  <td align="center" style="padding: 0;">
-                    <a href="${confirmationUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 15px; font-weight: bold; line-height: 46px; text-align: center; text-decoration: none; width: 240px; -webkit-text-size-adjust: none;">Bekräfta mitt konto</a>
-                  </td>
-                </tr>
-              </table>
-              <p style="margin: 28px 0 0 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Tack för ditt förtroende.<br>
-                Det här kan bli början på något riktigt bra!
-              </p>
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                <tr>
-                  <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
-                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280;">Fungerar inte knappen? Kopiera länken nedan:</p>
-                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all;">${confirmationUrl}</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #F9FAFB; padding: 20px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
-              <p style="margin: 0; font-size: 13px; color: #9CA3AF;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett konto i Parium-appen.</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-`;
-
-const getEmployerTemplate = (firstName: string, confirmationUrl: string, companyName: string = 'ert företag') => `
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Välkommen till Parium – Bekräfta ditt företagskonto</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
-  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
-    <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
-          <tr>
-            <td style="background-color: #1E3A8A; padding: 32px 30px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0 0 4px 0; font-size: 24px; font-weight: bold; color: #ffffff;">Parium</h1>
-              <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8);">Framtiden börjar med ett swipe</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 30px;">
-              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Hej ${firstName}!
-              </p>
-              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Välkommen till Parium — plattformen där <strong>${companyName}</strong> möter framtida talanger. Vi hjälper er att rekrytera snabbare, mer effektivt och utan krångel.
-              </p>
-              <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px 0 30px 0; max-width: 450px;">
-                <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
-                  <td style="color: #333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">En smidig rekryteringsprocess från start till mål</td>
-                </tr>
-                <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
-                  <td style="color: #333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Direktkontakt med kandidater</td>
-                </tr>
-                <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
-                  <td style="color: #333; font-size: 16px; line-height: 1.6;">Effektiva verktyg som stödjer er rekrytering</td>
-                </tr>
-              </table>
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
-                <tr>
-                  <td align="center" style="padding: 0;">
-                    <a href="${confirmationUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 15px; font-weight: bold; line-height: 46px; text-align: center; text-decoration: none; width: 240px; -webkit-text-size-adjust: none;">Bekräfta företagskonto</a>
-                  </td>
-                </tr>
-              </table>
-              <p style="margin: 28px 0 0 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Tack för att du väljer Parium för er rekrytering.<br>
-                Tillsammans skapar vi framtidens arbetsliv!
-              </p>
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                <tr>
-                  <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
-                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280;">Fungerar inte knappen? Kopiera länken nedan:</p>
-                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all;">${confirmationUrl}</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #F9FAFB; padding: 20px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
-              <p style="margin: 0; font-size: 13px; color: #9CA3AF;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett företagskonto i Parium-appen.</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-`;
-
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { email, role, first_name, confirmation_url, company_name }: ConfirmationEmailRequest = await req.json();
+    const body = (await req.json()) as ConfirmationEmailRequest;
+    const { email, role, first_name, confirmation_url, company_name } = body;
 
-    console.log(`Sending confirmation email to ${email} with role ${role}`);
+    if (!email || !confirmation_url) {
+      return new Response(
+        JSON.stringify({ error: "email och confirmation_url krävs" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
-    const emailHtml = role === 'employer' 
-      ? getEmployerTemplate(first_name, confirmation_url, company_name || 'ert företag')
-      : getJobSeekerTemplate(first_name, confirmation_url);
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
 
-    const subject = role === 'employer' 
-      ? 'Välkommen till Parium – Bekräfta ditt företagskonto'
-      : 'Bekräfta ditt konto – Parium';
+    // Idempotens-nyckel: unik per (email + confirmation_url) så retries inte dubblerar.
+    const idempotencyKey = `account-confirm-${email}-${confirmation_url.slice(-32)}`;
 
-    const emailResponse = await resend.emails.send({
-      from: "Parium <noreply@parium.se>",
-      to: [email],
-      subject: subject,
-      html: emailHtml,
+    const { data, error } = await supabaseAdmin.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "account-confirmation",
+        recipientEmail: email,
+        idempotencyKey,
+        templateData: {
+          first_name: first_name || "där",
+          confirmation_url,
+          role: role === "employer" ? "employer" : "job_seeker",
+          company_name: company_name || "ert företag",
+        },
+      },
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    if (error) {
+      console.error("send-transactional-email failed:", error);
+      return new Response(
+        JSON.stringify({ error: error.message || "send-transactional-email failed" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
-    return new Response(JSON.stringify(emailResponse), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  } catch (error: any) {
-    console.error("Error in send-confirmation-email function:", error);
+    console.log(`Confirmation email queued via Lovable Emails for ${email} (${role})`);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      JSON.stringify({ success: true, data }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("send-confirmation-email error:", message);
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 };

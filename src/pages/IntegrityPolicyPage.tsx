@@ -281,8 +281,8 @@ export default function IntegrityPolicyPage() {
                 </li>
                 <li>
                   <strong>Underleverantörer (personuppgiftsbiträden):</strong> Supabase
-                  (databas och autentisering, EU), Resend (e-postutskick), Stripe
-                  (betalningar).
+                  (databas och autentisering, EU), Lovable Cloud (e-postutskick via
+                  notify.parium.se), Stripe (betalningar).
                 </li>
                 <li>
                   <strong>Myndigheter:</strong> om vi enligt lag är skyldiga att lämna
