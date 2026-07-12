@@ -629,7 +629,11 @@ async function getHealthSummary(supabase: any): Promise<any> {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const authErr = requireAuthenticated(req, corsHeaders);
+  if (authErr) return authErr;
+
   try {
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
