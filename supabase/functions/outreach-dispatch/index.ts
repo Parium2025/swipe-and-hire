@@ -275,6 +275,35 @@ Deno.serve(async (request) => {
         sends: Array<{ channel: OutreachChannel; templateId?: string | null; customBody?: string | null }>;
       };
 
+      if (!manual.recipientUserId || typeof manual.recipientUserId !== 'string') {
+        return new Response(JSON.stringify({ error: 'recipientUserId krävs' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      // 🔒 Relations-kontroll: förhindra att en användare skickar chat/email/push
+      // till en godtycklig annan användare. Tillåt bara om (a) kandidaten har
+      // ansökt hos avsändaren, (b) de tillhör samma organisation, eller
+      // (c) de redan delar en konversation.
+      if (manual.recipientUserId !== user.id) {
+        const [{ data: appliedRes }, { data: sameOrgRes }, { data: sharedConv }] = await Promise.all([
+          admin.rpc('has_applied_to_employer', { p_applicant_id: manual.recipientUserId, p_employer_id: user.id }),
+          admin.rpc('same_organization', { p_user_id_1: user.id, p_user_id_2: manual.recipientUserId }),
+          admin.from('conversation_members')
+            .select('conversation_id, conversation_members!inner(user_id)')
+            .eq('user_id', user.id)
+            .eq('conversation_members.user_id', manual.recipientUserId)
+            .limit(1)
+            .maybeSingle(),
+        ]);
+
+        const hasRelation = appliedRes === true || sameOrgRes === true || !!sharedConv;
+        if (!hasRelation) {
+          return new Response(
+            JSON.stringify({ error: 'Ingen relation till mottagaren' }),
+            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+
       for (const send of manual.sends) {
         const template = send.templateId ? await ensureTemplateAccess(send.templateId, user.id) : null;
         await admin.from('outreach_dispatch_logs').insert({
