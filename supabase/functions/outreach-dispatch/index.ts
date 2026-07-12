@@ -284,18 +284,26 @@ Deno.serve(async (request) => {
       // ansökt hos avsändaren, (b) de tillhör samma organisation, eller
       // (c) de redan delar en konversation.
       if (manual.recipientUserId !== user.id) {
-        const [{ data: appliedRes }, { data: sameOrgRes }, { data: sharedConv }] = await Promise.all([
+        const [{ data: appliedRes }, { data: sameOrgRes }, { data: callerConvs }] = await Promise.all([
           admin.rpc('has_applied_to_employer', { p_applicant_id: manual.recipientUserId, p_employer_id: user.id }),
           admin.rpc('same_organization', { p_user_id_1: user.id, p_user_id_2: manual.recipientUserId }),
-          admin.from('conversation_members')
-            .select('conversation_id, conversation_members!inner(user_id)')
-            .eq('user_id', user.id)
-            .eq('conversation_members.user_id', manual.recipientUserId)
-            .limit(1)
-            .maybeSingle(),
+          admin.from('conversation_members').select('conversation_id').eq('user_id', user.id),
         ]);
 
-        const hasRelation = appliedRes === true || sameOrgRes === true || !!sharedConv;
+        let sharedConv = false;
+        const convIds = (callerConvs ?? []).map((r) => r.conversation_id).filter(Boolean) as string[];
+        if (convIds.length > 0) {
+          const { data: shared } = await admin
+            .from('conversation_members')
+            .select('conversation_id')
+            .eq('user_id', manual.recipientUserId)
+            .in('conversation_id', convIds)
+            .limit(1)
+            .maybeSingle();
+          sharedConv = !!shared;
+        }
+
+        const hasRelation = appliedRes === true || sameOrgRes === true || sharedConv;
         if (!hasRelation) {
           return new Response(
             JSON.stringify({ error: 'Ingen relation till mottagaren' }),
