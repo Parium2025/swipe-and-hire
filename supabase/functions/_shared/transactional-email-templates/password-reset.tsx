@@ -50,6 +50,9 @@ const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
           Du får detta mail för att du begärde en lösenordsåterställning i{' '}
           <Link href="https://parium.se" style={link}>Parium-appen</Link>.
         </Text>
+        <Text style={noReply}>
+          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+        </Text>
       </Container>
     </Body>
   </Html>

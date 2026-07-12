@@ -74,6 +74,9 @@ const AccountConfirmationEmail = ({
             Du får detta mail för att du registrerat ett konto på{' '}
             <Link href="https://parium.se" style={link}>Parium</Link>.
           </Text>
+          <Text style={noReply}>
+            Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+          </Text>
         </Container>
       </Body>
     </Html>

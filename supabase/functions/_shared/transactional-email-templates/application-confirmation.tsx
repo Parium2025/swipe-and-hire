@@ -42,6 +42,9 @@ const ApplicationConfirmationEmail = ({
           Du får detta mail eftersom du skickat en ansökan via{' '}
           <Link href="https://parium.se" style={link}>Parium</Link>.
         </Text>
+        <Text style={noReply}>
+          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+        </Text>
       </Container>
     </Body>
   </Html>
