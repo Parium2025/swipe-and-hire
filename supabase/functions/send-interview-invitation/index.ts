@@ -126,6 +126,11 @@ const handler = async (req: Request): Promise<Response> => {
       locationType, normalizedLocationDetails, message || ''
     );
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const icsUrl = interviewId
+      ? `${supabaseUrl}/functions/v1/download-interview-ics?id=${interviewId}`
+      : '';
+
     const baseData = {
       company_name: companyName,
       job_title: jobTitle,
@@ -136,6 +141,7 @@ const handler = async (req: Request): Promise<Response> => {
       location_details: normalizedLocationDetails,
       message: message || '',
       google_calendar_url: googleCalendarUrl,
+      ics_url: icsUrl,
       maps_url: mapsUrl,
     };
 
