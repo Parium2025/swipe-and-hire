@@ -34,35 +34,9 @@ import CandidateInterviewCard from '@/components/CandidateInterviewCard';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { toast } from 'sonner';
 
-interface Application {
-  id: string;
-  job_id: string;
-  status: string;
-  applied_at: string;
-  created_at: string;
-  job_postings: {
-    id: string;
-    title: string;
-    location: string | null;
-    employment_type: string | null;
-    workplace_city: string | null;
-    workplace_county: string | null;
-    is_active: boolean | null;
-    created_at: string;
-    expires_at: string | null;
-    deleted_at: string | null;
-    applications_count: number | null;
-    views_count: number | null;
-    job_image_url: string | null;
-    job_image_desktop_url: string | null;
-    positions_count: number | null;
-      overlay_text_color: string | null;
-    profiles: {
-      company_name: string | null;
-      company_logo_url: string | null;
-    } | null;
-  } | null;
-}
+// Application shape lives in src/hooks/myApplicationsShared.ts —
+// single source of truth for the initial query, background sync and realtime.
+
 
 const getStatusLabel = (status: string, isExpiredOrDeleted: boolean) => {
   if (isExpiredOrDeleted) {
@@ -268,7 +242,7 @@ const MyApplications = () => {
                     created_at: job.created_at,
                     expires_at: job.expires_at || undefined,
                     job_image_url: job.job_image_url || undefined,
-                    job_image_desktop_url: (job as any).job_image_desktop_url || undefined,
+                    job_image_desktop_url: job.job_image_desktop_url || undefined,
                     company_name: companyName,
                     workplace_name: job.workplace_name || undefined,
                     company_logo_url: job.company_logo_url || undefined,

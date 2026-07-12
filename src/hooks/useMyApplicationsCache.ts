@@ -2,35 +2,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useCallback } from 'react';
+import {
+  MY_APPLICATIONS_SELECT,
+  type MyApplication as Application,
+} from './myApplicationsShared';
 
-interface Application {
-  id: string;
-  job_id: string;
-  status: string;
-  applied_at: string;
-  created_at: string;
-  job_postings: {
-    id: string;
-    title: string;
-    location: string | null;
-    employment_type: string | null;
-    workplace_city: string | null;
-    workplace_county: string | null;
-    is_active: boolean | null;
-    created_at: string;
-    expires_at: string | null;
-    deleted_at: string | null;
-    applications_count: number | null;
-    views_count: number | null;
-    job_image_url: string | null;
-    job_image_desktop_url: string | null;
-    image_focus_position: string | null;
-    positions_count: number | null;
-    workplace_name: string | null;
-    company_logo_url: string | null;
-      overlay_text_color: string | null;
-  } | null;
-}
+export type { MyApplication, MyApplicationsJobPosting } from './myApplicationsShared';
 
 // LocalStorage cache for instant load - no expiry, background sync keeps fresh
 const CACHE_KEY = 'parium_my_applications_cache_v2';
@@ -103,35 +80,7 @@ export function useMyApplicationsCache() {
 
       const { data, error } = await supabase
         .from('job_applications')
-        .select(`
-          id,
-          job_id,
-          status,
-          applied_at,
-          created_at,
-          job_postings (
-            id,
-            title,
-            location,
-            employment_type,
-            workplace_city,
-            workplace_county,
-            is_active,
-            created_at,
-            expires_at,
-            deleted_at,
-            applications_count,
-            views_count,
-            job_image_url,
-            job_image_url,
-            job_image_desktop_url,
-            image_focus_position,
-            positions_count,
-            workplace_name,
-            company_logo_url,
-            overlay_text_color
-          )
-        `)
+        .select(MY_APPLICATIONS_SELECT)
         .eq('applicant_id', user.id)
         .order('applied_at', { ascending: false });
 
@@ -197,28 +146,18 @@ export function useMyApplicationsCache() {
           table: 'job_postings',
         },
         (payload) => {
-          // Update cache with new job data
+          // Merge full row from realtime payload — spreading payload.new
+          // guarantees we never miss a field (payload.new contains ALL columns).
           queryClient.setQueryData(['my-applications', user.id], (oldData: Application[] | undefined) => {
             if (!oldData) return oldData;
             return oldData.map(application => {
-              if (application.job_postings && application.job_postings.id === payload.new.id) {
+              if (application.job_postings && application.job_postings.id === (payload.new as { id: string }).id) {
                 return {
                   ...application,
                   job_postings: {
                     ...application.job_postings,
-                    is_active: payload.new.is_active,
-                    expires_at: payload.new.expires_at,
-                    deleted_at: payload.new.deleted_at,
-                    views_count: payload.new.views_count,
-                    applications_count: payload.new.applications_count,
-                    job_image_url: payload.new.job_image_url,
-                    job_image_desktop_url: payload.new.job_image_desktop_url,
-                    image_focus_position: payload.new.image_focus_position,
-                    positions_count: payload.new.positions_count,
-                    workplace_name: payload.new.workplace_name,
-                    company_logo_url: payload.new.company_logo_url,
-                    overlay_text_color: payload.new.overlay_text_color,
-                  }
+                    ...(payload.new as Partial<NonNullable<Application['job_postings']>>),
+                  },
                 };
               }
               return application;
