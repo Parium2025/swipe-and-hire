@@ -220,35 +220,80 @@ const MyApplications = () => {
 
       {/* Applications Section */}
       <section>
-        <div className="text-center mb-6">
-          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar ({applications.length})</h1>
-          <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
+        <div className="text-center mb-5">
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
+            {activeTab === 'active'
+              ? `Under granskning (${activeApplications.length})`
+              : `Utgångna (${expiredApplications.length})`}
+          </h1>
+          <p className="text-sm text-white">
+            {activeTab === 'active'
+              ? 'Dina aktiva ansökningar som väntar på svar'
+              : 'Ansökningar där jobbet inte längre är aktivt'}
+          </p>
         </div>
 
-        {!applications || applications.length === 0 ? (
+        {/* Tab switcher — matches SavedJobs pattern */}
+        <div className="flex items-center justify-center gap-2 mb-5">
+          <button
+            type="button"
+            onClick={() => setActiveTab('active')}
+            aria-pressed={activeTab === 'active'}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
+              activeTab === 'active'
+                ? 'bg-white/20 text-white border border-white/30'
+                : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
+            }`}
+          >
+            <Hourglass className="h-3.5 w-3.5" />
+            Under granskning
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('expired')}
+            aria-pressed={activeTab === 'expired'}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
+              activeTab === 'expired'
+                ? 'bg-white/20 text-white border border-white/30'
+                : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
+            }`}
+          >
+            <Clock className="h-3.5 w-3.5" />
+            Utgångna
+          </button>
+        </div>
+
+        {visibleApplications.length === 0 ? (
           <Card className="bg-white/5 border-white/10">
             <CardContent className="p-8 text-center">
               <Briefcase className="h-12 w-12 text-white mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">Inga ansökningar än</h3>
+              <h3 className="text-lg font-medium text-white mb-2">
+                {applications.length === 0
+                  ? 'Inga ansökningar än'
+                  : activeTab === 'active'
+                    ? 'Inga aktiva ansökningar'
+                    : 'Inga utgångna ansökningar'}
+              </h3>
               <p className="text-white mb-4">
-                När du söker jobb kommer dina ansökningar att visas här
+                {applications.length === 0
+                  ? 'När du söker jobb kommer dina ansökningar att visas här'
+                  : activeTab === 'active'
+                    ? 'Alla dina ansökningar är avslutade — kika under Utgångna'
+                    : 'Dina aktiva ansökningar syns under Under granskning'}
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${applications.length === 1 ? ' job-card-grid-single' : applications.length === 2 ? ' job-card-grid-double' : ''}`}>
-            {applications.map((application) => {
+          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${visibleApplications.length === 1 ? ' job-card-grid-single' : visibleApplications.length === 2 ? ' job-card-grid-double' : ''}`}>
+            {visibleApplications.map((application) => {
               const job = application.job_postings;
               if (!job) return null;
 
               const location = job.workplace_city || job.location || '';
-
               const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
               const isExpiredOrDeleted = !!(job.deleted_at || timeInfo.isExpired);
-
               const companyName = job.workplace_name || 'Okänt företag';
 
-              // Build status badge
               const statusBadgeEl = (
                 <Badge className={`text-[11px] px-2 py-0.5 flex items-center gap-1 ${getStatusBadgeClasses(application.status, isExpiredOrDeleted)}`}>
                   {getStatusIcon(application.status, isExpiredOrDeleted)}
@@ -285,6 +330,7 @@ const MyApplications = () => {
           </div>
         )}
       </section>
+
 
       {/* Confirmation Dialog */}
       <AlertDialog open={!!applicationToRemove} onOpenChange={(open) => { if (!open) setApplicationToRemove(null); }}>
