@@ -107,34 +107,7 @@ export const useJobSeekerBackgroundSync = () => {
 
     const { data, error } = await supabase
       .from('job_applications')
-      .select(`
-        id,
-        job_id,
-        status,
-        applied_at,
-        created_at,
-        job_postings (
-          id,
-          title,
-          location,
-          employment_type,
-          workplace_city,
-          workplace_county,
-          workplace_name,
-          deleted_at,
-          is_active,
-          created_at,
-          expires_at,
-          views_count,
-          applications_count,
-          job_image_url,
-          job_image_desktop_url,
-          image_focus_position,
-          positions_count,
-          company_logo_url,
-          overlay_text_color
-        )
-      `)
+      .select(MY_APPLICATIONS_SELECT)
       .eq('applicant_id', userId)
       .order('applied_at', { ascending: false })
       .limit(50);
