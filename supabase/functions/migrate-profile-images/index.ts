@@ -3,6 +3,7 @@
 // and fix database fields to store permanent storage paths (never signed URLs).
 
 import { createClient } from 'npm:@supabase/supabase-js@2.53.0';
+import { requireAdmin } from '../_shared/admin-auth.ts';
 
 // CORS headers for web calls
 const corsHeaders = {
