@@ -72,14 +72,22 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     queryFn: async () => {
       if (!companyId) return null;
       const { data, error } = await supabase
-        .from("profiles")
-        .select("company_name, company_logo_url, company_description, website, industry, employee_count, address")
-        .eq("user_id", companyId)
+        .rpc('get_employer_public_profile', { target_user_id: companyId })
         .maybeSingle();
-      
+
       if (error) throw error;
-      return data;
+      if (!data) return null;
+      return {
+        company_name: data.company_name,
+        company_logo_url: data.company_logo_url,
+        company_description: data.company_description,
+        website: data.website,
+        industry: data.industry,
+        employee_count: data.employee_count,
+        address: data.address,
+      };
     },
+
     enabled: open && !!companyId,
     staleTime: 60 * 1000, // 1 minute
   });
