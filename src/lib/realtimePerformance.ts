@@ -96,7 +96,7 @@ function summarize(area: PerformanceArea): PerformanceSummary {
   const errorRate = areaSamples.length ? errorCount / areaSamples.length : 0;
   const p95 = percentile(latencies, 95);
   const p99 = percentile(latencies, 99);
-  const last = areaSamples.at(-1);
+  const last = areaSamples.length > 0 ? areaSamples[areaSamples.length - 1] : undefined;
   const warnings: string[] = [];
 
   if (p95 >= thresholds.p95Critical) warnings.push('p95 över 3s');
