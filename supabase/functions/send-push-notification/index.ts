@@ -136,6 +136,39 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // === AUTH: block unauthenticated callers ===
+    // Accept either (a) service-role key for internal server-to-server calls,
+    // or (b) a valid authenticated user JWT. This closes the anonymous-attack
+    // vector; granular per-recipient authorization is a follow-up.
+    const authHeader = req.headers.get('Authorization');
+    const providedToken = authHeader?.replace(/^Bearer\s+/i, '').trim();
+    let isServiceRole = providedToken && providedToken === supabaseServiceKey;
+    if (!isServiceRole) {
+      if (!providedToken) {
+        console.warn('Unauthorized send-push-notification: no bearer');
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      // Verify JWT is a real signed-in user
+      const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: `Bearer ${providedToken}` } },
+      });
+      const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(providedToken);
+      if (claimsError || !claimsData?.claims?.sub) {
+        console.warn('Unauthorized send-push-notification: invalid JWT');
+        return new Response(
+          JSON.stringify({ error: 'Invalid authentication' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+
+
     
     // Check for Firebase Service Account credentials (FCM HTTP v1)
     const fcmServiceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");

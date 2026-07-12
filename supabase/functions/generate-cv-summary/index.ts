@@ -14,7 +14,17 @@ serve(async (req) => {
   }
 
   try {
-    const { applicant_id, application_id, job_id, cv_url_override, proactive } = await req.json();
+    // === AUTH: require valid JWT ===
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { applicant_id, application_id, job_id, proactive } = await req.json();
+    // NOTE: cv_url_override intentionally removed — was an IDOR vector
     
     if (!applicant_id) {
       return new Response(
@@ -27,10 +37,68 @@ serve(async (req) => {
     const isProactiveAnalysis = proactive === true;
     console.log(`Generating CV summary for applicant ${applicant_id}${isProactiveAnalysis ? ' (PROACTIVE)' : ''}`);
 
-    // Initialize Supabase client
+    // Initialize Supabase clients
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify caller identity
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const callerId = claimsData.claims.sub as string;
+
+    // === AUTHORIZATION: caller must be applicant OR employer with access to their application ===
+    if (callerId !== applicant_id) {
+      // Employer path: must own a job the applicant has applied to
+      let allowed = false;
+      if (job_id) {
+        const { data: job } = await supabase
+          .from('job_postings')
+          .select('employer_id, organization_id')
+          .eq('id', job_id)
+          .single();
+        if (job) {
+          if (job.employer_id === callerId) {
+            allowed = true;
+          } else if (job.organization_id) {
+            const { data: sameOrg } = await supabase
+              .from('profiles')
+              .select('user_id')
+              .eq('user_id', callerId)
+              .eq('organization_id', job.organization_id)
+              .maybeSingle();
+            if (sameOrg) allowed = true;
+          }
+          // Also verify the applicant actually applied to this job
+          if (allowed) {
+            const { data: app } = await supabase
+              .from('job_applications')
+              .select('id')
+              .eq('job_id', job_id)
+              .eq('applicant_id', applicant_id)
+              .maybeSingle();
+            if (!app) allowed = false;
+          }
+        }
+      }
+      if (!allowed) {
+        console.warn(`Unauthorized generate-cv-summary: caller=${callerId} applicant=${applicant_id} job=${job_id}`);
+        return new Response(
+          JSON.stringify({ error: 'Forbidden' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     // Fetch applicant profile
     const { data: profile, error: profileError } = await supabase
@@ -44,7 +112,8 @@ serve(async (req) => {
     }
 
     // For proactive analysis, check if we already have an up-to-date summary
-    const cvUrl = cv_url_override || profile?.cv_url;
+    const cvUrl = profile?.cv_url;
+
     
     if (isProactiveAnalysis && cvUrl) {
       const { data: existingSummary } = await supabase
