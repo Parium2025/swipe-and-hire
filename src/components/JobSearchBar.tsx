@@ -195,6 +195,7 @@ export const JobSearchBar = memo(({
               <Button 
                 variant="ghost" 
                 size="icon"
+                aria-label="Filtrera på rekryterare"
                 className="dashboard-icon-control flex-shrink-0 text-white focus:outline-none focus-visible:outline-none focus:ring-0"
               >
                 <UserCheck className="h-4 w-4" />
