@@ -80,35 +80,7 @@ export function useMyApplicationsCache() {
 
       const { data, error } = await supabase
         .from('job_applications')
-        .select(`
-          id,
-          job_id,
-          status,
-          applied_at,
-          created_at,
-          job_postings (
-            id,
-            title,
-            location,
-            employment_type,
-            workplace_city,
-            workplace_county,
-            is_active,
-            created_at,
-            expires_at,
-            deleted_at,
-            applications_count,
-            views_count,
-            job_image_url,
-            job_image_url,
-            job_image_desktop_url,
-            image_focus_position,
-            positions_count,
-            workplace_name,
-            company_logo_url,
-            overlay_text_color
-          )
-        `)
+        .select(MY_APPLICATIONS_SELECT)
         .eq('applicant_id', user.id)
         .order('applied_at', { ascending: false });
 
