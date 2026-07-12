@@ -2,6 +2,8 @@
 // ROBUST VERSION: Same system as fetch-hr-news with retry-logic, health tracking and email-alerts
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireAuthenticated } from "../_shared/service-auth.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -627,7 +629,11 @@ async function getHealthSummary(supabase: any): Promise<any> {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const authErr = requireAuthenticated(req, corsHeaders);
+  if (authErr) return authErr;
+
   try {
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,

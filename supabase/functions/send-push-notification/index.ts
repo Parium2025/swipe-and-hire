@@ -138,34 +138,35 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // === AUTH: block unauthenticated callers ===
-    // Accept either (a) service-role key for internal server-to-server calls,
-    // or (b) a valid authenticated user JWT. This closes the anonymous-attack
-    // vector; granular per-recipient authorization is a follow-up.
+    // === AUTH + AUTHORIZATION ===
+    // Allowed callers:
+    //  (a) service_role (internal cron / DB trigger),
+    //  (b) authenticated user pushing to themselves, or
+    //  (c) authenticated user pushing to someone they share a conversation with.
     const authHeader = req.headers.get('Authorization');
     const providedToken = authHeader?.replace(/^Bearer\s+/i, '').trim();
-    let isServiceRole = providedToken && providedToken === supabaseServiceKey;
+    const isServiceRole = providedToken && providedToken === supabaseServiceKey;
+    let callerSub: string | null = null;
     if (!isServiceRole) {
       if (!providedToken) {
-        console.warn('Unauthorized send-push-notification: no bearer');
         return new Response(
           JSON.stringify({ error: 'Unauthorized' }),
           { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      // Verify JWT is a real signed-in user
       const authClient = createClient(supabaseUrl, supabaseAnonKey, {
         global: { headers: { Authorization: `Bearer ${providedToken}` } },
       });
       const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(providedToken);
       if (claimsError || !claimsData?.claims?.sub) {
-        console.warn('Unauthorized send-push-notification: invalid JWT');
         return new Response(
           JSON.stringify({ error: 'Invalid authentication' }),
           { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      callerSub = claimsData.claims.sub as string;
     }
+
 
 
 
@@ -216,6 +217,29 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // AUTHORIZATION: a non-service caller must be the recipient, or share a
+    // conversation with them. Blocks arbitrary user-to-user push spam.
+    if (!isServiceRole && callerSub && callerSub !== recipient_id) {
+      const { data: aRows } = await supabase
+        .from('conversation_members')
+        .select('conversation_id')
+        .eq('user_id', callerSub);
+      const { data: bRows } = await supabase
+        .from('conversation_members')
+        .select('conversation_id')
+        .eq('user_id', recipient_id);
+      const aSet = new Set((aRows ?? []).map((r) => r.conversation_id));
+      const shared = (bRows ?? []).some((r) => aSet.has(r.conversation_id));
+      if (!shared) {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden — no relationship with recipient' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+
 
     // Get all active push tokens for the recipient
     const { data: tokens, error: tokensError } = await supabase

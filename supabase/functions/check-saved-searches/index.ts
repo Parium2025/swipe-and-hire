@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireServiceRole } from "../_shared/service-auth.ts";
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -109,6 +111,12 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Cron/internal only — called by pg_net triggers and cron jobs.
+  const authErr = requireServiceRole(req, corsHeaders);
+  if (authErr) return authErr;
+
+
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

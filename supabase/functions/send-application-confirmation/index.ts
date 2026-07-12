@@ -18,13 +18,46 @@ interface ApplicationConfirmationRequest {
   application_id?: string;
 }
 
+import { parseJwtClaims } from "../_shared/service-auth.ts";
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // === AUTH: require authenticated caller, and lock recipient to caller's email ===
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+    const token = authHeader.slice("Bearer ".length).trim();
+    const isServiceRole = token === supabaseServiceKey;
+    let callerEmail: string | null = null;
+    if (!isServiceRole) {
+      const claims = parseJwtClaims(token);
+      if (!claims || typeof claims.sub !== "string") {
+        return new Response(JSON.stringify({ error: "Invalid token" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+      callerEmail = typeof claims.email === "string" ? claims.email.toLowerCase() : null;
+    }
+
     const { applicant_email, applicant_first_name, job_title, company_name, application_id }: ApplicationConfirmationRequest = await req.json();
+
+    // Prevent using this endpoint to send confirmation to arbitrary addresses.
+    if (!isServiceRole && callerEmail && applicant_email && applicant_email.toLowerCase() !== callerEmail) {
+      return new Response(JSON.stringify({ error: "Recipient must match caller" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
 
     // 1) First try outreach automation
     const dispatchResponse = await fetch(`${supabaseUrl}/functions/v1/outreach-dispatch`, {

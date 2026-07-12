@@ -44,11 +44,12 @@ const handler = async (req: Request): Promise<Response> => {
           // Kontrollera om användaren är bekräftad
           if (existingUser.email_confirmed_at) {
             console.log(`User ${email} already exists and is confirmed`);
-            return new Response(JSON.stringify({ 
-              success: false,
-              error: "Hoppsan! Den här adressen är redan registrerad.",
-              message: `Det ser ut som att du redan har ett konto med ${email}.\nLogga gärna in – eller återställ lösenordet om du har glömt det.`,
-              isExistingUser: true
+            // Generic response — do NOT reveal that this specific email is registered.
+            // Mirrors resend-confirmation / send-reset-password to prevent enumeration.
+            return new Response(JSON.stringify({
+              success: true,
+              message: "Om adressen är giltig har vi skickat ett mejl med nästa steg.",
+              needsConfirmation: true
             }), {
               status: 200,
               headers: {
@@ -56,6 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
                 ...corsHeaders,
               },
             });
+
           } else {
             // Användaren finns men är inte bekräftad - ta bort och skapa ny
             console.log(`Found existing unconfirmed user ${existingUser.id}, deleting first...`);
@@ -88,15 +90,17 @@ const handler = async (req: Request): Promise<Response> => {
     if (signupError) {
       console.error('Signup error details:', signupError);
       
-      // Handle existing user case (fallback)
-      if (signupError.message.includes("already been registered") || 
+      // Handle existing user case (fallback) — generic response, no enumeration
+      if (signupError.message.includes("already been registered") ||
           signupError.message.includes("User already registered") ||
           signupError.message.includes("email_exists")) {
-        
-        return new Response(JSON.stringify({ 
-          error: "E-post redan registrerad. Vänta en minut och försök igen, eller använd en annan e-postadress." 
+
+        return new Response(JSON.stringify({
+          success: true,
+          message: "Om adressen är giltig har vi skickat ett mejl med nästa steg.",
+          needsConfirmation: true
         }), {
-          status: 400,
+          status: 200,
           headers: {
             "Content-Type": "application/json",
             ...corsHeaders,
@@ -104,6 +108,7 @@ const handler = async (req: Request): Promise<Response> => {
         });
       }
       throw new Error(signupError.message);
+
     }
 
     // 3. Skapa bekräftelsetoken och spara i databasen

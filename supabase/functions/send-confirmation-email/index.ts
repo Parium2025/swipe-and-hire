@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { requireServiceRole } from "../_shared/service-auth.ts";
 
 interface ConfirmationEmailRequest {
   email: string;
@@ -16,6 +17,11 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  // Internal-only: called by custom-signup with service-role key.
+  const authErr = requireServiceRole(req, corsHeaders);
+  if (authErr) return authErr;
+
 
   try {
     const body = (await req.json()) as ConfirmationEmailRequest;
