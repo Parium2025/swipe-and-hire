@@ -578,7 +578,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   // Block anonymous callers — either service_role (cron) or an authenticated user
-  const authErr = requireAuthenticated(req, corsHeaders);
+  const authErr = await requireAuthenticated(req, corsHeaders);
   if (authErr) return authErr;
 
   try {

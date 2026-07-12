@@ -15,7 +15,7 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-  const authResp = requireAuthenticated(req, corsHeaders);
+  const authResp = await requireAuthenticated(req, corsHeaders);
   if (authResp) return authResp;
 
 

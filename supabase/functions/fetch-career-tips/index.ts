@@ -629,7 +629,7 @@ async function getHealthSummary(supabase: any): Promise<any> {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const authErr = requireAuthenticated(req, corsHeaders);
+  const authErr = await requireAuthenticated(req, corsHeaders);
   if (authErr) return authErr;
 
   try {
