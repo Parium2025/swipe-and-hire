@@ -17,6 +17,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  const authResp = await requireAdmin(req, corsHeaders);
+  if (authResp) return authResp;
+
 
   try {
     const supabaseClient = createClient(
