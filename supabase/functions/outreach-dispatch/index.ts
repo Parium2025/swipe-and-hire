@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { parseJwtClaims } from '../_shared/service-auth.ts';
+// (service-role check now uses literal key match — no JWT payload trust)
 // Ersätter tidigare Resend-import: outreach-mejl går nu via Lovable Emails (send-transactional-email).
 
 type OutreachChannel = 'chat' | 'email' | 'push';
