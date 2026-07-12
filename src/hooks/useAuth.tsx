@@ -985,7 +985,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     employee_count?: string;
   }) => {
     try {
-      // Använd din befintliga custom-signup Edge Function som använder Resend
+      // Anropar custom-signup Edge Function (skickar bekräftelsemejl via Lovable Emails)
       const { data, error } = await supabase.functions.invoke('custom-signup', {
         body: {
           email,
