@@ -70,6 +70,9 @@ const AdminAlertEmail = ({
 
           <Hr style={hr} />
           <Text style={footer}>Parium · Automatisk systemvarning</Text>
+          <Text style={noReply}>
+            Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+          </Text>
         </Container>
       </Body>
     </Html>
@@ -108,3 +111,4 @@ const errorBox = { backgroundColor: '#FEF2F2', padding: '14px 18px', borderRadiu
 const errorText = { margin: 0, fontSize: '13px', color: '#991B1B', lineHeight: '1.6', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }
 const hr = { borderColor: '#e2e8f0', margin: '24px 0 8px' }
 const footer = { fontSize: '12px', color: '#94a3b8', margin: '12px 0 0', textAlign: 'center' as const }
+const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const, fontStyle: 'italic' as const }
