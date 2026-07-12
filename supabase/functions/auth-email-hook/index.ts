@@ -39,7 +39,8 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 const SITE_NAME = "Parium"
 const SENDER_DOMAIN = "notify.parium.se"
 const ROOT_DOMAIN = "parium.se"
-const FROM_DOMAIN = "notify.parium.se" // Domain shown in From address (may be root or sender subdomain)
+const FROM_DOMAIN = "parium.se" // Visas i From: — root-domän för renare varumärke (DKIM signerar från notify.parium.se, DMARC alignment funkar via organisationens rot-domän)
+const FROM_LOCAL_PART = "notify" // Blir notify@parium.se
 
 // Sample data for preview mode ONLY (not used in actual email sending).
 const SAMPLE_PROJECT_URL = "https://parium.se"
@@ -254,7 +255,7 @@ async function handleWebhook(req: Request): Promise<Response> {
       run_id,
       message_id: messageId,
       to: payload.data.email,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+      from: `${SITE_NAME} <${FROM_LOCAL_PART}@${FROM_DOMAIN}>`,
       sender_domain: SENDER_DOMAIN,
       subject: EMAIL_SUBJECTS[emailType] || 'Notification',
       html,
