@@ -13,7 +13,7 @@ import { ABOUT_BANNER_URL, preloadAboutPageAssets } from '@/lib/aboutPagePreload
 const CANONICAL = 'https://parium.se/om-oss';
 const TITLE = 'Om Parium – Jobbappen som samlar allt på ett ställe';
 const DESCRIPTION =
-  'Parium bygger jobbsökandet från grunden — för både arbetsgivare och kandidater. Ett enda flöde. Inga genvägar. Läs om vår vision, vad vi tror på och hur vi jobbar.';
+  'Parium bygger jobbsökandet från grunden — för både arbetsgivare och kandidater. Ett enda flöde. Läs om vår vision och hur vi jobbar.';
 
 const visionPoints = [
   'Sveriges ledande jobbsökarapp',
