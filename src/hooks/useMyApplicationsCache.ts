@@ -203,12 +203,18 @@ export function useMyApplicationsCache() {
                   ...application,
                   job_postings: {
                     ...application.job_postings,
-                    applications_count: payload.new.applications_count,
                     is_active: payload.new.is_active,
                     expires_at: payload.new.expires_at,
                     deleted_at: payload.new.deleted_at,
+                    views_count: payload.new.views_count,
+                    applications_count: payload.new.applications_count,
+                    job_image_url: payload.new.job_image_url,
+                    job_image_desktop_url: payload.new.job_image_desktop_url,
+                    image_focus_position: payload.new.image_focus_position,
+                    positions_count: payload.new.positions_count,
                     workplace_name: payload.new.workplace_name,
                     company_logo_url: payload.new.company_logo_url,
+                    overlay_text_color: payload.new.overlay_text_color,
                   }
                 };
               }

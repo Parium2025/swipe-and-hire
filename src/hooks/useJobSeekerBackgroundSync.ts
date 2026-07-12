@@ -120,10 +120,16 @@ export const useJobSeekerBackgroundSync = () => {
           workplace_city,
           workplace_county,
           workplace_name,
+          deleted_at,
           is_active,
           created_at,
           expires_at,
+          views_count,
           applications_count,
+          job_image_url,
+          job_image_desktop_url,
+          image_focus_position,
+          positions_count,
           company_logo_url,
           overlay_text_color
         )
