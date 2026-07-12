@@ -46,6 +46,9 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailP
         <Text style={footer}>
           Om du inte förväntade dig denna inbjudan kan du ignorera mailet.
         </Text>
+        <Text style={noReply}>
+          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+        </Text>
       </Container>
     </Body>
   </Html>

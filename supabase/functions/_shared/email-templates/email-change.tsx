@@ -52,6 +52,9 @@ export const EmailChangeEmail = ({
         <Text style={footer}>
           Om du inte begärde detta byte, säkra ditt konto omedelbart genom att byta lösenord.
         </Text>
+        <Text style={noReply}>
+          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+        </Text>
       </Container>
     </Body>
   </Html>
