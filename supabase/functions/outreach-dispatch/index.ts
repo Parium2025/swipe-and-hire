@@ -166,20 +166,30 @@ async function dispatchLog(log: OutreachLog) {
 
     if (log.channel === 'email') {
       if (!context.recipientEmail) throw new Error('Kandidaten saknar e-postadress');
-      if (!resend) {
-        console.warn(`[outreach-dispatch] E-postkanal hoppad för logg ${log.id} — RESEND_API_KEY är inte konfigurerad.`);
-        await admin.from('outreach_dispatch_logs').update({ status: 'failed', error_message: 'E-post ej konfigurerad: RESEND_API_KEY saknas. Kontakta support.' }).eq('id', log.id);
-        return { error: 'RESEND_API_KEY saknas' };
-      }
       const trackingUrl = `${supabaseUrl}/functions/v1/outreach-open-track?logId=${encodeURIComponent(log.id)}`;
-      const result = await resend.emails.send({
-        from: `${context.companyName} via Parium <noreply@parium.se>`,
-        to: [context.recipientEmail],
-        subject: subject || `Meddelande från ${context.companyName}`,
-        html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background-color:#f0f4f8;font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f4f8;padding:32px 16px"><tr><td align="center"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08)"><tr><td style="padding:28px 40px 28px"><p style="margin:0;font-size:15px;line-height:1.7;color:#334155;white-space:pre-line">${body}</p></td></tr><tr><td style="padding:16px 40px 20px;border-top:1px solid #e2e8f0"><p style="margin:0;font-size:12px;color:#94a3b8;text-align:center">Skickat av ${context.companyName} via Parium</p></td></tr></table></td></tr></table><img src="${trackingUrl}" alt="" width="1" height="1" style="display:block;width:1px;height:1px;opacity:0;border:0;overflow:hidden"></body></html>`,
+      const emailSubject = subject || `Meddelande från ${context.companyName}`;
+
+      // Skickar via Lovable Emails — samma domän (notify.parium.se) och kösystem
+      // som övriga mejl, så leverans landar i inkorgen tack vare SPF/DKIM/DMARC.
+      const { data: sendData, error: sendError } = await admin.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'outreach-message',
+          recipientEmail: context.recipientEmail,
+          idempotencyKey: `outreach-${log.id}`,
+          templateData: {
+            body,
+            company_name: context.companyName,
+            subject: emailSubject,
+            tracking_url: trackingUrl,
+          },
+        },
       });
-      if ((result as { error?: unknown }).error) throw new Error('E-postutskicket misslyckades');
-      const emailMessageId = (result as { data?: { id?: string }; id?: string }).data?.id ?? (result as { id?: string }).id ?? null;
+
+      if (sendError) throw new Error(sendError.message || 'E-postutskicket misslyckades');
+      const emailMessageId = (sendData as { messageId?: string; id?: string } | null)?.messageId
+        ?? (sendData as { id?: string } | null)?.id
+        ?? null;
+
       await admin.from('outreach_dispatch_logs').update({
         status: 'sent',
         sent_at: new Date().toISOString(),
@@ -193,6 +203,7 @@ async function dispatchLog(log: OutreachLog) {
       }).eq('id', log.id);
       return {};
     }
+
 
     if (log.channel === 'push') {
       if (!log.recipient_user_id) throw new Error('Saknar mottagare för push');
