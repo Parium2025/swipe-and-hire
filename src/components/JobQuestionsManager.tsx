@@ -160,6 +160,7 @@ const SortableQuestionCard = ({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Redigera fråga"
                 className="h-8 w-8 text-white hover:text-white hover:bg-white/10"
                 onClick={() => onEdit(index)}
               >
@@ -170,6 +171,7 @@ const SortableQuestionCard = ({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Ta bort fråga"
                 className="h-8 w-8 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                 onClick={() => setShowDeleteConfirm(true)}
               >

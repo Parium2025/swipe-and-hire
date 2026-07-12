@@ -837,6 +837,7 @@ export function ChatView({
           <Button
             variant="glass"
             size="icon"
+            aria-label={editingMessageId ? "Spara ändring" : "Skicka meddelande"}
             onClick={handleSend}
             disabled={(!newMessage.trim() && !pendingFile) || sending}
             className={cn(

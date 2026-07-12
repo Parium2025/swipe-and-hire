@@ -326,6 +326,7 @@ const TeamManagement = () => {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label="Ta bort medlem"
                       onClick={() => handleRemoveMember(member.user_id)}
                       className="h-8 w-8 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                     >

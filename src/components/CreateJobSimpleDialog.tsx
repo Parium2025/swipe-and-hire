@@ -484,6 +484,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Stäng"
                 onClick={handleClose}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
