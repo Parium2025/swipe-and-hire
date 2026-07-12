@@ -7,6 +7,7 @@ import { template as supportTicketAlert } from './support-ticket-alert.tsx'
 import { template as adminAlert } from './admin-alert.tsx'
 import { template as accountConfirmation } from './account-confirmation.tsx'
 import { template as passwordReset } from './password-reset.tsx'
+import { template as outreachMessage } from './outreach-message.tsx'
 
 export interface TemplateEntry {
   component: (props: any) => React.ReactElement
@@ -24,4 +25,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'admin-alert': adminAlert,
   'account-confirmation': accountConfirmation,
   'password-reset': passwordReset,
+  'outreach-message': outreachMessage,
 }
