@@ -112,6 +112,12 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Cron/internal only — called by pg_net triggers and cron jobs.
+  const authErr = requireServiceRole(req, corsHeaders);
+  if (authErr) return authErr;
+
+
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
