@@ -234,6 +234,8 @@ const AnimatedRoutes = () => {
           <Route path="/reset-redirect" element={<ResetRedirect />} />
           <Route path="/migrate-media" element={<MediaMigration />} />
           <Route path="/cv-tunnel" element={<CvTunnel />} />
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
+          
           
           <Route path="*" element={<NotFound />} />
         </Routes>
