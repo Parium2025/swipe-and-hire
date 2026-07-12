@@ -213,7 +213,7 @@ const SavedJobs = () => {
           className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
             activeTab === 'saved'
               ? 'bg-white/20 text-white border border-white/30'
-              : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10'
+              : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
           }`}
         >
           <Heart className="h-3.5 w-3.5" />
@@ -224,7 +224,7 @@ const SavedJobs = () => {
           className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
             activeTab === 'skipped'
               ? 'bg-white/20 text-white border border-white/30'
-              : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10'
+              : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
           }`}
         >
           <EyeOff className="h-3.5 w-3.5" />
@@ -274,7 +274,7 @@ const SavedJobs = () => {
                     className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                       sortBy === key
                         ? 'bg-white/20 text-white border border-white/30'
-                        : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10 md:hover:text-white/80'
+                        : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
                     }`}
                   >
                     {label}
@@ -291,7 +291,7 @@ const SavedJobs = () => {
                     className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                       statusFilter === key
                         ? 'bg-white/20 text-white border border-white/30'
-                        : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10 md:hover:text-white/80'
+                        : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
                     }`}
                   >
                     {label}
@@ -306,7 +306,7 @@ const SavedJobs = () => {
                     <h3 className="text-lg font-medium text-white mb-2">
                       {statusFilter === 'active' ? 'Inga aktiva jobb' : statusFilter === 'expired' ? 'Inga utgångna jobb' : 'Inga jobb att visa'}
                     </h3>
-                    <p className="text-white/70 text-sm">
+                    <p className="text-white text-sm">
                       Justera filtret ovan för att visa fler jobb
                     </p>
                   </CardContent>
