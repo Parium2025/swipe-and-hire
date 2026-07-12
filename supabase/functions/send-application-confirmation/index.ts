@@ -107,6 +107,23 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
+    // Respect user's email notification preference for 'application_status'
+    try {
+      const { data: allowed } = await supabaseAdmin.rpc('is_email_notification_enabled', {
+        p_email: applicant_email,
+        p_type: 'application_status',
+      });
+      if (allowed === false) {
+        console.log(`Skipping application confirmation email for ${applicant_email} (email pref off)`);
+        return new Response(JSON.stringify({ success: true, skipped: 'email_disabled' }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    } catch (prefErr) {
+      console.warn('Preference check failed, defaulting to send:', prefErr);
+    }
+
     console.log(`Sending application confirmation to ${applicant_email} for job: ${job_title}`);
 
     const emailResponse = await resend.emails.send({
