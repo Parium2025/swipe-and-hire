@@ -428,11 +428,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         }
       }
       
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, phone, email, home_location, location, birth_date, bio, cv_url, availability, employment_type')
-        .eq('user_id', user?.id)
-        .maybeSingle();
+      const { data: profileRows } = await supabase.rpc('get_my_profile');
+      const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
+
       
       let age = null;
       if (profile?.birth_date) {
