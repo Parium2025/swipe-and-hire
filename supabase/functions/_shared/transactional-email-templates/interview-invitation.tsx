@@ -97,6 +97,9 @@ const InterviewInvitationEmail = ({
 
           <Hr style={hr} />
           <Text style={footer}>Parium · Sveriges nya jobbmatchning</Text>
+          <Text style={noReply}>
+            Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+          </Text>
         </Container>
       </Body>
     </Html>
@@ -160,3 +163,4 @@ const secondaryButton = {
   border: '1.5px solid #001F3D',
 }
 const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', paddingTop: '20px', textAlign: 'center' as const }
+const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const, fontStyle: 'italic' as const }

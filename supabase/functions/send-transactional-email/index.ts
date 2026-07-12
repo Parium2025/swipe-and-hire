@@ -15,7 +15,7 @@ const SENDER_DOMAIN = "notify.parium.se"
 // for cleaner branding — DKIM still signs via SENDER_DOMAIN and DMARC alignment
 // works because both share the same organizational domain (parium.se).
 const FROM_DOMAIN = "parium.se"
-const FROM_LOCAL_PART = "notify"
+const FROM_LOCAL_PART = "no-reply"
 
 // Generate a cryptographically random 32-byte hex token
 function generateToken(): string {

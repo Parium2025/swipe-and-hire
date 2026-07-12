@@ -50,6 +50,9 @@ const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
           Du får detta mail för att du begärde en lösenordsåterställning i{' '}
           <Link href="https://parium.se" style={link}>Parium-appen</Link>.
         </Text>
+        <Text style={noReply}>
+          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+        </Text>
       </Container>
     </Body>
   </Html>
@@ -87,3 +90,4 @@ const fallbackTitle = { fontSize: '13px', color: '#6B7280', margin: '0 0 8px' }
 const fallbackUrl = { fontSize: '12px', color: '#001F3D', margin: 0, wordBreak: 'break-all' as const }
 const link = { color: '#001F3D', textDecoration: 'underline' }
 const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', borderTop: '1px solid #e2e8f0', paddingTop: '20px', textAlign: 'center' as const }
+const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const, fontStyle: 'italic' as const }

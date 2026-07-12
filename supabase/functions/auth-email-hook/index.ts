@@ -40,7 +40,7 @@ const SITE_NAME = "Parium"
 const SENDER_DOMAIN = "notify.parium.se"
 const ROOT_DOMAIN = "parium.se"
 const FROM_DOMAIN = "parium.se" // Visas i From: — root-domän för renare varumärke (DKIM signerar från notify.parium.se, DMARC alignment funkar via organisationens rot-domän)
-const FROM_LOCAL_PART = "notify" // Blir notify@parium.se
+const FROM_LOCAL_PART = "no-reply" // Blir no-reply@parium.se
 
 // Sample data for preview mode ONLY (not used in actual email sending).
 const SAMPLE_PROJECT_URL = "https://parium.se"
