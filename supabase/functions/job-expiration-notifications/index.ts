@@ -48,15 +48,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Found ${expiringJobs?.length || 0} jobs expiring within 8 hours`);
 
-    // Send employer notification emails if Resend is configured
+    // Send employer notification emails via Lovable Emails (send-transactional-email)
     let emailsSent = 0;
-    if (resendApiKey && expiringJobs && expiringJobs.length > 0) {
-      const resend = new Resend(resendApiKey);
-
+    if (expiringJobs && expiringJobs.length > 0) {
       for (const job of expiringJobs) {
         const profile = job.profiles as any;
         const firstName = profile?.first_name || "Arbetsgivare";
-        
+
         let email = profile?.email;
         if (!email) {
           const { data: authUser } = await supabase.auth.admin.getUserById(job.employer_id);
@@ -70,81 +68,34 @@ const handler = async (req: Request): Promise<Response> => {
 
         const expiresDate = new Date(job.expires_at!);
         const hoursRemaining = Math.max(0, Math.ceil((expiresDate.getTime() - now.getTime()) / (1000 * 60 * 60)));
-        const timeText = hoursRemaining <= 1 
-          ? "mindre än en timme" 
-          : hoursRemaining < 24 
+        const timeText = hoursRemaining <= 1
+          ? "mindre än en timme"
+          : hoursRemaining < 24
             ? `${hoursRemaining} timmar`
             : `${Math.ceil(hoursRemaining / 24)} dag(ar)`;
 
         try {
-          await resend.emails.send({
-            from: "Parium <noreply@parium.se>",
-            to: [email],
-            subject: `Din annons "${job.title}" utgår snart!`,
-            html: `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #ffffff;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; overflow: hidden;">
-    <div style="background-color: #1a237e; padding: 40px 30px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Din annons utgår snart!</h1>
-      <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Lägg upp en ny annons för att fortsätta rekrytera</p>
-    </div>
-    <div style="padding: 40px 30px;">
-      <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
-        Hej ${firstName}!
-      </p>
-      <p style="color: #333333; margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; text-align: left;">
-        Din jobbannons <strong>"${job.title}"</strong> utgår om <strong style="color: #e53935;">${timeText}</strong>.
-      </p>
-      <p style="color: #333333; margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; text-align: left;">
-        När annonsen har utgått kommer den inte längre att synas för jobbsökare. 
-        Om du fortfarande letar efter kandidater rekommenderar vi att du skapar en ny annons.
-      </p>
-      <div style="margin: 30px 0; padding: 20px; background-color: #e3f2fd; border-radius: 8px; border-left: 4px solid #1a237e;">
-        <p style="color: #1a237e; font-size: 16px; font-weight: bold; margin: 0 0 10px 0;">Tips!</p>
-        <p style="color: #333333; font-size: 14px; margin: 0; line-height: 1.5;">
-          Med dina jobbmallar kan du skapa en ny annons på under 60 sekunder. 
-          All information är redan sparad - du behöver bara välja din mall och trycka på "Skapa ny annons" och sedan "Publicera".
-        </p>
-      </div>
-      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
-        <tr>
-          <td align="center" style="padding: 0;">
-            <a href="https://parium.se/my-jobs" 
-               style="background-color: #1a237e; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none;">
-              Gå till Mina Annonser
-            </a>
-          </td>
-        </tr>
-      </table>
-      <p style="color: #666666; margin: 20px 0 0 0; font-size: 16px; line-height: 1.6; text-align: center;">
-        Lycka till med rekryteringen!
-      </p>
-    </div>
-    <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
-      <p style="color: #333333; font-size: 16px; margin: 0; font-weight: bold;">
-        Med vänliga hälsningar,<br>Parium-teamet
-      </p>
-      <p style="color: #999999; font-size: 12px; margin: 20px 0 0 0;">
-        Parium – Framtidens jobbsök börjar här.<br>
-        Du får detta mail för att du har en aktiv jobbannons i Parium.
-      </p>
-    </div>
-  </div>
-</body>
-</html>`,
+          const { error: sendError } = await supabase.functions.invoke('send-transactional-email', {
+            body: {
+              templateName: 'job-expiration',
+              recipientEmail: email,
+              idempotencyKey: `job-expiration-${job.id}-${Math.floor(expiresDate.getTime() / (60 * 60 * 1000))}`,
+              templateData: {
+                first_name: firstName,
+                job_title: job.title,
+                time_text: timeText,
+              },
+            },
           });
+          if (sendError) throw sendError;
           emailsSent++;
-          console.log(`Sent expiration notification to ${email} for job "${job.title}"`);
+          console.log(`Enqueued job expiration email to ${email} for "${job.title}"`);
         } catch (emailError) {
-          console.error(`Failed to send email to ${email}:`, emailError);
+          console.error(`Failed to enqueue email to ${email}:`, emailError);
         }
       }
     }
+
 
     // Deactivate any jobs that have already expired
     const { data: expiredJobs, error: expireError } = await supabase
