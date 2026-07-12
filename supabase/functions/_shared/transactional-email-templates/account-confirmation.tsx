@@ -121,3 +121,4 @@ const fallbackTitle = { fontSize: '13px', color: '#6B7280', margin: '0 0 8px' }
 const fallbackUrl = { fontSize: '12px', color: '#001F3D', margin: 0, wordBreak: 'break-all' as const }
 const link = { color: '#001F3D', textDecoration: 'underline' }
 const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', borderTop: '1px solid #e2e8f0', paddingTop: '20px', textAlign: 'center' as const }
+const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const, fontStyle: 'italic' as const }
