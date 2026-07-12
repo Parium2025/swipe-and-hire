@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { Resend } from 'npm:resend@2.0.0';
+// Ersätter tidigare Resend-import: outreach-mejl går nu via Lovable Emails (send-transactional-email).
 
 type OutreachChannel = 'chat' | 'email' | 'push';
 type OutreachTrigger = 'application_received' | 'application_no_response_14d' | 'interview_before' | 'interview_after' | 'job_closed' | 'interview_scheduled' | 'manual_send';
@@ -33,10 +33,8 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
 const admin = createClient(supabaseUrl, serviceRoleKey);
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 const renderTemplate = (template: string | null | undefined, data: Record<string, string | number | null | undefined>) => {
   let output = template ?? '';
