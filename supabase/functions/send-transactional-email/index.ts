@@ -26,9 +26,9 @@ function generateToken(): string {
     .join('')
 }
 
-// Auth note: this function uses verify_jwt = true in config.toml, so Supabase's
-// gateway validates the caller's JWT (anon or service_role) before the request
-// reaches this code. No in-function auth check is needed.
+// Auth: Endast interna server-to-server-anrop (service-role JWT) tillåts.
+// Detta förhindrar att någon med den publika anon-nyckeln kan använda vår
+// verifierade domän för att skicka phishing-mejl.
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -49,6 +49,20 @@ Deno.serve(async (req) => {
       }
     )
   }
+
+  // 🔒 Kräv service-role JWT (samma mönster som process-email-queue)
+  const authHeader = req.headers.get('Authorization') ?? ''
+  if (authHeader !== `Bearer ${supabaseServiceKey}`) {
+    console.warn('send-transactional-email: rejected non-service-role caller')
+    return new Response(
+      JSON.stringify({ error: 'Forbidden — this endpoint is only callable by internal services' }),
+      {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
+  }
+
 
   // Parse request body
   let templateName: string
