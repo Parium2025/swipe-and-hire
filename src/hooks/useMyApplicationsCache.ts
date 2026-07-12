@@ -104,10 +104,10 @@ export function useMyApplicationsCache() {
       if (error) throw error;
       
       const apps = (data || []) as Application[];
-      
-      // Update cache with fresh data
-      writeCache(user.id, apps);
-      
+
+      // Debounced write to localStorage (batches bursts from realtime)
+      writeCacheDebounced(user.id, apps);
+
       return apps;
     },
     enabled: !!user,
