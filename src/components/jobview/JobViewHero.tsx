@@ -111,59 +111,70 @@ export const JobViewHero = memo(function JobViewHero({
         style={overlayTextStyle}
       />
       
-      {/* Mobile metadata — only show company badge when there's an image */}
-      <div className="mt-3.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
-        {(hasImage || !hasLogo) && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white max-w-full overflow-hidden">
-            <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <TruncatedText
-              text={companyName}
-              className="truncate font-medium min-w-0"
-              tooltipSide="bottom"
-            />
-          </Badge>
-        )}
-        {location && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
-            <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="truncate">{location}</span>
-          </Badge>
-        )}
-      </div>
+      {/* Mobile metadata — unified pill style matching swipe mode */}
+      {(() => {
+        const pillClass =
+          'px-2.5 py-1 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] inline-flex items-center gap-1 max-w-full';
+        const textClass =
+          'text-white text-[11px] font-semibold leading-snug [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]';
+        const expiredPillClass =
+          'px-2.5 py-1 rounded-full bg-red-500/30 border border-red-400/40 shadow-[0_1px_2px_rgba(0,0,0,0.35)] inline-flex items-center gap-1';
+        return (
+          <>
+            <div className="mt-3.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
+              {(hasImage || !hasLogo) && (
+                <div className={pillClass}>
+                  <Building2 className="h-3 w-3 text-white flex-shrink-0" />
+                  <TruncatedText
+                    text={companyName}
+                    className={`${textClass} truncate min-w-0`}
+                    tooltipSide="bottom"
+                  />
+                </div>
+              )}
+              {location && (
+                <div className={pillClass}>
+                  <MapPin className="h-3 w-3 text-white flex-shrink-0" />
+                  <span className={`${textClass} truncate`}>{location}</span>
+                </div>
+              )}
+            </div>
 
-      {/* Mobile badges — full set matching job cards */}
-      <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
-        {employmentType && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
-            <Briefcase className="h-3 w-3 mr-1 flex-shrink-0" />
-            <span className="leading-snug">{getEmploymentTypeLabel(employmentType)}</span>
-          </Badge>
-        )}
-        {salaryText && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
-            <Banknote className="h-3 w-3 mr-1 flex-shrink-0" />
-            <span className="leading-snug">{salaryText}</span>
-          </Badge>
-        )}
-        {timeInfo && (
-          <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white ${timeInfo.isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
-            <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-snug">{timeInfo.isExpired ? 'Utgången' : `${timeInfo.text} kvar`}</span>
-          </Badge>
-        )}
-        {benefits && benefits.length > 0 && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
-            <Gift className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-snug">
-              Förmåner {benefits.length <= 5 ? `${benefits.length} st` : `${Math.floor(benefits.length / 5) * 5}+`}
-            </span>
-          </Badge>
-        )}
-        <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
-          <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
-          <span className="leading-snug">{positionsText}</span>
-        </Badge>
-      </div>
+            <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
+              {employmentType && (
+                <div className={pillClass}>
+                  <Briefcase className="h-3 w-3 text-white flex-shrink-0" />
+                  <span className={textClass}>{getEmploymentTypeLabel(employmentType)}</span>
+                </div>
+              )}
+              {salaryText && (
+                <div className={pillClass}>
+                  <Banknote className="h-3 w-3 text-white flex-shrink-0" />
+                  <span className={textClass}>{salaryText}</span>
+                </div>
+              )}
+              {timeInfo && (
+                <div className={timeInfo.isExpired ? expiredPillClass : pillClass}>
+                  <Timer className="h-3 w-3 text-white flex-shrink-0" />
+                  <span className={textClass}>{timeInfo.isExpired ? 'Utgången' : `${timeInfo.text} kvar`}</span>
+                </div>
+              )}
+              {benefits && benefits.length > 0 && (
+                <div className={pillClass}>
+                  <Gift className="h-3 w-3 text-white flex-shrink-0" />
+                  <span className={textClass}>
+                    Förmåner {benefits.length <= 5 ? `${benefits.length} st` : `${Math.floor(benefits.length / 5) * 5}+`}
+                  </span>
+                </div>
+              )}
+              <div className={pillClass}>
+                <Users className="h-3 w-3 text-white flex-shrink-0" />
+                <span className={textClass}>{positionsText}</span>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* Desktop/tablet metadata */}
       <div className="mt-4 hidden sm:flex flex-wrap items-center justify-center gap-2 text-sm md:text-base text-white">
