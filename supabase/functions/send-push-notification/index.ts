@@ -136,6 +136,19 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // === AUTH: only allow service-role callers (internal server-to-server) ===
+    const authHeader = req.headers.get('Authorization');
+    const providedToken = authHeader?.replace(/^Bearer\s+/i, '').trim();
+    if (!providedToken || providedToken !== supabaseServiceKey) {
+      console.warn('Unauthorized send-push-notification attempt');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+
     
     // Check for Firebase Service Account credentials (FCM HTTP v1)
     const fcmServiceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");
