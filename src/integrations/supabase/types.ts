@@ -3136,6 +3136,10 @@ export type Database = {
         Args: { p_conversation_id: string }
         Returns: boolean
       }
+      is_email_notification_enabled: {
+        Args: { p_email?: string; p_type?: string; p_user_id?: string }
+        Returns: boolean
+      }
       is_notification_enabled: {
         Args: { p_type: string; p_user_id: string }
         Returns: boolean

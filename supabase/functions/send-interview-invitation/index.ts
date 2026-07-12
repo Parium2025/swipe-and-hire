@@ -1,8 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const supabaseAdmin = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -235,18 +240,35 @@ const handler = async (req: Request): Promise<Response> => {
     );
     const icsBase64 = btoa(unescape(encodeURIComponent(icsContent)));
 
-    const emailResponse = await resend.emails.send({
-      from: `${companyName} via Parium <noreply@parium.se>`,
-      to: [candidateEmail],
-      subject: `Intervjukallelse: ${jobTitle} – ${companyName}`,
-      text, html,
-      attachments: [{
-        filename: 'intervju.ics',
-        content: icsBase64,
-      }],
-    });
+    // Respect candidate's email notification preference for 'interview_scheduled'
+    let emailResponse: any = { skipped: false };
+    let candidateEmailAllowed = true;
+    try {
+      const { data: allowed } = await supabaseAdmin.rpc('is_email_notification_enabled', {
+        p_email: candidateEmail,
+        p_type: 'interview_scheduled',
+      });
+      candidateEmailAllowed = allowed !== false;
+    } catch (prefErr) {
+      console.warn('Preference check failed, defaulting to send:', prefErr);
+    }
 
-    console.log("Interview invitation sent to candidate:", emailResponse);
+    if (candidateEmailAllowed) {
+      emailResponse = await resend.emails.send({
+        from: `${companyName} via Parium <noreply@parium.se>`,
+        to: [candidateEmail],
+        subject: `Intervjukallelse: ${jobTitle} – ${companyName}`,
+        text, html,
+        attachments: [{
+          filename: 'intervju.ics',
+          content: icsBase64,
+        }],
+      });
+      console.log("Interview invitation sent to candidate:", emailResponse);
+    } else {
+      emailResponse = { skipped: 'email_disabled' };
+      console.log(`Skipped candidate email for ${candidateEmail} (email pref off)`);
+    }
 
     // --- Employer email (calendar confirmation) ---
     // Skip if employer email is the same as candidate email (avoids confusing duplicate)
