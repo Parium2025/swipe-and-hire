@@ -45,8 +45,7 @@ const JobExpirationEmail = ({
         </Section>
         <Text style={{ ...text, textAlign: 'center' as const }}>Lycka till med rekryteringen! 🍀</Text>
         <Text style={footer}>
-          Parium AB · Stockholm<br />
-          Du får detta mail för att du har en aktiv jobbannons på{' '}
+          Du får detta mail eftersom du har en aktiv jobbannons på{' '}
           <Link href="https://parium.se" style={link}>Parium</Link>.
         </Text>
       </Container>
