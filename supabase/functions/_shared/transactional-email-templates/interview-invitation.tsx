@@ -16,6 +16,7 @@ interface Props {
   location_details?: string
   message?: string
   google_calendar_url?: string
+  ics_url?: string
   maps_url?: string
   is_employer?: boolean
 }
@@ -31,6 +32,7 @@ const InterviewInvitationEmail = ({
   location_details = '',
   message = '',
   google_calendar_url = '#',
+  ics_url = '',
   maps_url = '',
   is_employer = false,
 }: Props) => {
@@ -72,28 +74,35 @@ const InterviewInvitationEmail = ({
 
           {message ? (
             <>
-              <Text style={{ ...smallLabel }}>{messageLabel}</Text>
+              <Text style={smallLabel}>{messageLabel}</Text>
               <Text style={{ ...text, whiteSpace: 'pre-line' as const }}>{message}</Text>
             </>
           ) : null}
 
           {isVideoLink ? (
-            <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
+            <Section style={{ textAlign: 'center' as const, margin: '28px 0 20px' }}>
               <Button style={button} href={location_details}>Anslut till videomötet</Button>
             </Section>
           ) : null}
 
-          <Hr style={hr} />
-          <Section style={{ textAlign: 'center' as const, margin: '16px 0' }}>
-            <Link href={google_calendar_url} style={calendarLink}>📅 Lägg till i Google Kalender</Link>
+          {ics_url ? (
+            <Section style={{ textAlign: 'center' as const, margin: '20px 0 8px' }}>
+              <Button style={secondaryButton} href={ics_url}>📅 Lägg till i kalender</Button>
+            </Section>
+          ) : null}
+
+          <Section style={{ textAlign: 'center' as const, margin: '4px 0 8px' }}>
+            <Link href={google_calendar_url} style={calendarLink}>Eller lägg till i Google Kalender</Link>
           </Section>
 
+          <Hr style={hr} />
           <Text style={footer}>Parium AB · Stockholm</Text>
         </Container>
       </Body>
     </Html>
   )
 }
+
 
 export const template = {
   component: InterviewInvitationEmail,
