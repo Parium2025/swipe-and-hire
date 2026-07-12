@@ -138,6 +138,48 @@ const handler = async (req: Request): Promise<Response> => {
       employerEmail, employerName, interviewId,
     } = parsed.data;
 
+    // === AUTHORIZATION: if interviewId provided, caller must own it ===
+    if (interviewId) {
+      const { data: interview } = await supabaseAdmin
+        .from('interviews')
+        .select('employer_id, job_id')
+        .eq('id', interviewId)
+        .maybeSingle();
+      if (!interview) {
+        return new Response(
+          JSON.stringify({ error: 'Interview not found' }),
+          { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+      let allowed = interview.employer_id === callerId;
+      if (!allowed && interview.job_id) {
+        const { data: job } = await supabaseAdmin
+          .from('job_postings')
+          .select('employer_id, organization_id')
+          .eq('id', interview.job_id)
+          .maybeSingle();
+        if (job?.employer_id === callerId) allowed = true;
+        else if (job?.organization_id) {
+          const { data: sameOrg } = await supabaseAdmin
+            .from('profiles')
+            .select('user_id')
+            .eq('user_id', callerId)
+            .eq('organization_id', job.organization_id)
+            .maybeSingle();
+          if (sameOrg) allowed = true;
+        }
+      }
+      if (!allowed) {
+        console.warn(`Unauthorized send-interview-invitation: caller=${callerId} interview=${interviewId}`);
+        return new Response(
+          JSON.stringify({ error: 'Forbidden' }),
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+    }
+
+
+
     const normalizedLocationDetails = normalizeLocationDetails(locationType, locationDetails || '');
     const dateStr = formatDate(scheduledAt);
     const timeStr = formatTime(scheduledAt);
