@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
+import { imageCache } from '@/lib/imageCache';
 import {
   MY_APPLICATIONS_SELECT,
   type MyApplication as Application,
@@ -45,15 +46,31 @@ function readCache(userId: string): Application[] | null {
 
 function writeCache(userId: string, applications: Application[]): void {
   try {
-    const cached: CachedData = { 
+    const cached: CachedData = {
       applications: applications.slice(0, 50), // Max 50 items to save space
-      userId, 
-      timestamp: Date.now() 
+      userId,
+      timestamp: Date.now(),
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
   } catch {
     // Storage full
   }
+}
+
+// Debounced writer — realtime can trigger many refetches per minute;
+// batching localStorage writes to at most once per 2s keeps main thread free.
+let writeCacheTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingCacheWrite: { userId: string; applications: Application[] } | null = null;
+function writeCacheDebounced(userId: string, applications: Application[]): void {
+  pendingCacheWrite = { userId, applications };
+  if (writeCacheTimer) return;
+  writeCacheTimer = setTimeout(() => {
+    writeCacheTimer = null;
+    if (pendingCacheWrite) {
+      writeCache(pendingCacheWrite.userId, pendingCacheWrite.applications);
+      pendingCacheWrite = null;
+    }
+  }, 2000);
 }
 
 /**
@@ -87,10 +104,10 @@ export function useMyApplicationsCache() {
       if (error) throw error;
       
       const apps = (data || []) as Application[];
-      
-      // Update cache with fresh data
-      writeCache(user.id, apps);
-      
+
+      // Debounced write to localStorage (batches bursts from realtime)
+      writeCacheDebounced(user.id, apps);
+
       return apps;
     },
     enabled: !!user,
@@ -106,6 +123,41 @@ export function useMyApplicationsCache() {
 
   // Only show loading if we have no data at all (no placeholder, no fetched data)
   const isLoading = queryLoading && applications.length === 0;
+
+  // 🖼️ Preload job images (mobile + desktop variants) into the blob cache
+  // as soon as data is available. Guarantees both tabs — "Under granskning"
+  // AND "Utgångna" — render instantly, no blink when switching tabs.
+  // Deduped per URL by imageCache; only newly-seen URLs actually fetch.
+  const preloadedUrlsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!applications.length) return;
+    const urls: string[] = [];
+    for (const app of applications) {
+      const job = app.job_postings;
+      if (!job) continue;
+      if (job.job_image_url && !preloadedUrlsRef.current.has(job.job_image_url)) {
+        preloadedUrlsRef.current.add(job.job_image_url);
+        urls.push(job.job_image_url);
+      }
+      if (job.job_image_desktop_url && !preloadedUrlsRef.current.has(job.job_image_desktop_url)) {
+        preloadedUrlsRef.current.add(job.job_image_desktop_url);
+        urls.push(job.job_image_desktop_url);
+      }
+      if (job.company_logo_url && !preloadedUrlsRef.current.has(job.company_logo_url)) {
+        preloadedUrlsRef.current.add(job.company_logo_url);
+        urls.push(job.company_logo_url);
+      }
+    }
+    if (urls.length === 0) return;
+    // Defer to idle so it never competes with animations/scrolling
+    const run = () => { void imageCache.preloadImages(urls); };
+    if (typeof requestIdleCallback !== 'undefined') {
+      const id = requestIdleCallback(run, { timeout: 2000 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = setTimeout(run, 100);
+    return () => clearTimeout(id);
+  }, [applications]);
 
   // Real-time subscription for application updates
   useEffect(() => {
@@ -132,9 +184,13 @@ export function useMyApplicationsCache() {
     };
   }, [user, queryClient]);
 
-  // Real-time subscription for job posting updates (applications_count, deleted_at, expires_at)
+  // Real-time subscription for job posting updates (applications_count,
+  // deleted_at, expires_at, image fields, etc.).
+  // Subscribed ONCE per user — no `applications.length` in deps, otherwise
+  // the channel tears down and re-subscribes on every application change,
+  // which is expensive on Realtime quota and causes brief update gaps.
   useEffect(() => {
-    if (!user || !applications.length) return;
+    if (!user) return;
 
     const channel = supabase
       .channel('my-applications-jobs')
@@ -149,19 +205,23 @@ export function useMyApplicationsCache() {
           // Merge full row from realtime payload — spreading payload.new
           // guarantees we never miss a field (payload.new contains ALL columns).
           queryClient.setQueryData(['my-applications', user.id], (oldData: Application[] | undefined) => {
-            if (!oldData) return oldData;
-            return oldData.map(application => {
-              if (application.job_postings && application.job_postings.id === (payload.new as { id: string }).id) {
+            if (!oldData || oldData.length === 0) return oldData;
+            const newRow = payload.new as { id: string } & Partial<NonNullable<Application['job_postings']>>;
+            let changed = false;
+            const next = oldData.map(application => {
+              if (application.job_postings && application.job_postings.id === newRow.id) {
+                changed = true;
                 return {
                   ...application,
                   job_postings: {
                     ...application.job_postings,
-                    ...(payload.new as Partial<NonNullable<Application['job_postings']>>),
+                    ...newRow,
                   },
                 };
               }
               return application;
             });
+            return changed ? next : oldData;
           });
         }
       )
@@ -170,7 +230,8 @@ export function useMyApplicationsCache() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, applications.length, queryClient]);
+  }, [user, queryClient]);
+
 
   // Optimistic delete function
   const deleteApplication = useCallback(async (applicationId: string) => {
