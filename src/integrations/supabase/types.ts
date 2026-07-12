@@ -3098,6 +3098,38 @@ export type Database = {
         }
         Returns: Json
       }
+      get_employer_public_profile: {
+        Args: { target_user_id: string }
+        Returns: {
+          address: string
+          company_description: string
+          company_logo_url: string
+          company_name: string
+          employee_count: string
+          first_name: string
+          industry: string
+          last_name: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+          website: string
+        }[]
+      }
+      get_employer_public_profiles: {
+        Args: { target_user_ids: string[] }
+        Returns: {
+          address: string
+          company_description: string
+          company_logo_url: string
+          company_name: string
+          employee_count: string
+          first_name: string
+          industry: string
+          last_name: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+          website: string
+        }[]
+      }
       get_jobseeker_dashboard_stats: {
         Args: { p_user_id: string }
         Returns: Json
