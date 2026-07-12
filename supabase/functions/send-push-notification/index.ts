@@ -218,6 +218,41 @@ Deno.serve(async (req) => {
       );
     }
 
+    // AUTHORIZATION: a non-service caller must be the recipient, or share a
+    // conversation with them. Blocks arbitrary user-to-user push spam.
+    if (!isServiceRole && callerSub && callerSub !== recipient_id) {
+      const { data: sharedRow } = await supabase.rpc('users_share_conversation', {
+        p_user_a: callerSub,
+        p_user_b: recipient_id,
+      });
+      const sharesConversation = sharedRow === true;
+      if (!sharesConversation) {
+        // Fallback: inline check in case RPC missing — direct table lookup
+        const { data: overlap } = await supabase
+          .from('conversation_members')
+          .select('conversation_id')
+          .in('user_id', [callerSub, recipient_id]);
+        const grouped = new Map<string, Set<string>>();
+        for (const row of overlap ?? []) {
+          const set = grouped.get(row.conversation_id) ?? new Set<string>();
+          set.add(row.conversation_id);
+          grouped.set(row.conversation_id, set);
+        }
+        // proper overlap detection: same conversation_id present for both users
+        const { data: aRows } = await supabase.from('conversation_members').select('conversation_id').eq('user_id', callerSub);
+        const { data: bRows } = await supabase.from('conversation_members').select('conversation_id').eq('user_id', recipient_id);
+        const aSet = new Set((aRows ?? []).map((r) => r.conversation_id));
+        const shared = (bRows ?? []).some((r) => aSet.has(r.conversation_id));
+        if (!shared) {
+          return new Response(
+            JSON.stringify({ error: 'Forbidden — no relationship with recipient' }),
+            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
+
     // Get all active push tokens for the recipient
     const { data: tokens, error: tokensError } = await supabase
       .from("device_push_tokens")
