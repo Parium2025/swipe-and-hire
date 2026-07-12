@@ -222,15 +222,9 @@ const MyApplications = () => {
       <section>
         <div className="text-center mb-5">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
-            {activeTab === 'active'
-              ? `Under granskning (${activeApplications.length})`
-              : `Utgångna (${expiredApplications.length})`}
+            Mina Ansökningar
           </h1>
-          <p className="text-sm text-white">
-            {activeTab === 'active'
-              ? 'Dina aktiva ansökningar som väntar på svar'
-              : 'Ansökningar där jobbet inte längre är aktivt'}
-          </p>
+          <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
         </div>
 
         {/* Tab switcher — matches SavedJobs pattern */}
@@ -239,29 +233,28 @@ const MyApplications = () => {
             type="button"
             onClick={() => setActiveTab('active')}
             aria-pressed={activeTab === 'active'}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
               activeTab === 'active'
                 ? 'bg-white/20 text-white border border-white/30'
                 : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
             }`}
           >
-            <Hourglass className="h-3.5 w-3.5" />
-            Under granskning
+            Under granskning ({activeApplications.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('expired')}
             aria-pressed={activeTab === 'expired'}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
               activeTab === 'expired'
                 ? 'bg-white/20 text-white border border-white/30'
                 : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
             }`}
           >
-            <Clock className="h-3.5 w-3.5" />
-            Utgångna
+            Utgångna ({expiredApplications.length})
           </button>
         </div>
+
 
         {visibleApplications.length === 0 ? (
           <Card className="bg-white/5 border-white/10">
