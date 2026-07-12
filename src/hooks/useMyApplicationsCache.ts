@@ -203,7 +203,6 @@ export function useMyApplicationsCache() {
                   ...application,
                   job_postings: {
                     ...application.job_postings,
-                    applications_count: payload.new.applications_count,
                     is_active: payload.new.is_active,
                     expires_at: payload.new.expires_at,
                     deleted_at: payload.new.deleted_at,
