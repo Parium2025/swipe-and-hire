@@ -274,7 +274,7 @@ const SavedJobs = () => {
                     className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                       sortBy === key
                         ? 'bg-white/20 text-white border border-white/30'
-                        : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10 md:hover:text-white/80'
+                        : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
                     }`}
                   >
                     {label}
