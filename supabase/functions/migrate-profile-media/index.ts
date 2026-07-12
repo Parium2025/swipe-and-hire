@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
+import { requireAdmin } from '../_shared/admin-auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +10,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  const authResp = await requireAdmin(req, corsHeaders);
+  if (authResp) return authResp;
+
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

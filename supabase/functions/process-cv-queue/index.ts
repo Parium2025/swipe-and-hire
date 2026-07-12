@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireAuthenticated } from "../_shared/service-auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,9 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  const authResp = requireAuthenticated(req, corsHeaders);
+  if (authResp) return authResp;
+
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -55,7 +59,8 @@ serve(async (req) => {
               applicant_id: item.applicant_id,
               application_id: item.application_id,
               job_id: item.job_id,
-              cv_url_override: item.cv_url,
+              // cv_url_override intentionally removed — was an IDOR vector.
+              // generate-cv-summary now reads the CV path server-side using the applicant_id.
             },
           }
         );

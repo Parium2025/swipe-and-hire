@@ -3,6 +3,7 @@
 // and fix database fields to store permanent storage paths (never signed URLs).
 
 import { createClient } from 'npm:@supabase/supabase-js@2.53.0';
+import { requireAdmin } from '../_shared/admin-auth.ts';
 
 // CORS headers for web calls
 const corsHeaders = {
@@ -58,6 +59,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  const authResp = await requireAdmin(req, corsHeaders);
+  if (authResp) return authResp;
+
 
   try {
     const { dryRun = false } = await req.json().catch(() => ({ dryRun: false }));

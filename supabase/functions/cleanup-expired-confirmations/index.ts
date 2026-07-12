@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
+import { requireAuthenticated } from "../_shared/service-auth.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -16,6 +17,10 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  const authResp = requireAuthenticated(req, corsHeaders);
+  if (authResp) return authResp;
+
+
 
   try {
     // Hämta utgångna bekräftelser

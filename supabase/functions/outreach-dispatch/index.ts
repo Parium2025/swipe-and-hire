@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { parseJwtClaims } from '../_shared/service-auth.ts';
 // Ersätter tidigare Resend-import: outreach-mejl går nu via Lovable Emails (send-transactional-email).
 
 type OutreachChannel = 'chat' | 'email' | 'push';
@@ -245,11 +246,22 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
   return { processedCount, chatConversationId };
 }
 
+
+function isServiceRoleRequest(request: Request): boolean {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return false;
+  const token = authHeader.slice('Bearer '.length).trim();
+  if (token === serviceRoleKey) return true;
+  const claims = parseJwtClaims(token);
+  return claims?.role === 'service_role';
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
     const user = await getUserFromRequest(request);
+    const serviceRole = isServiceRoleRequest(request);
     const body = request.method === 'POST' ? await request.json().catch(() => ({})) : {};
 
     if ((body as { mode?: string }).mode === 'manual') {
@@ -283,7 +295,19 @@ Deno.serve(async (request) => {
       return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const result = await processPending({ ownerUserId: user?.id, trigger: (body as { trigger?: OutreachTrigger }).trigger, interviewId: (body as { interviewId?: string | null }).interviewId ?? null });
+    // Non-manual path: require either an authenticated user (scoped to their own
+    // pending logs) or a service_role caller (cron/internal, unrestricted).
+    if (!user && !serviceRole) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const result = await processPending({
+      // service_role callers may process any pending log; authenticated users are
+      // strictly scoped to their own owner_user_id — never unscoped.
+      ownerUserId: serviceRole ? undefined : user!.id,
+      trigger: (body as { trigger?: OutreachTrigger }).trigger,
+      interviewId: (body as { interviewId?: string | null }).interviewId ?? null,
+    });
     return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error) {
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unexpected error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

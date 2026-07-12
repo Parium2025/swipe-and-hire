@@ -1,6 +1,7 @@
 // Admin Alert Sender — routes system alerts via Lovable Emails.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireServiceRole } from "../_shared/service-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +22,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  const authResp = requireServiceRole(req, corsHeaders);
+  if (authResp) return authResp;
+
+
 
   try {
     const supabase = createClient(

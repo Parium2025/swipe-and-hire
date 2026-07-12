@@ -84,19 +84,25 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify JWT and get caller identity
-    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims?.sub) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Verify JWT and get caller identity (allow service_role bypass for internal calls)
+    const token = authHeader.replace('Bearer ', '').trim();
+    const isServiceRole = token === supabaseServiceKey;
+    let callerId: string | null = null;
+    if (!isServiceRole) {
+      const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+      if (claimsError || !claimsData?.claims?.sub) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid authentication' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if ((claimsData.claims as { role?: string }).role !== 'service_role') {
+        callerId = claimsData.claims.sub as string;
+      }
     }
-    const callerId = claimsData.claims.sub as string;
 
     // Action: validate_criterion — AI-powered discrimination check
     if (action === 'validate_criterion') {
@@ -131,7 +137,7 @@ serve(async (req) => {
     }
 
     // === AUTHORIZATION: caller must be applicant OR employer of the job ===
-    if (callerId !== applicant_id) {
+    if (callerId !== null && callerId !== applicant_id) {
       const { data: canView, error: authzError } = await supabase
         .rpc('can_view_job_application', { _job_id: job_id }, { get: false })
         .single();

@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
 import { parse } from 'https://deno.land/std@0.224.0/csv/mod.ts';
+import { requireServiceRole } from "../_shared/service-auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -86,6 +87,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
+  const authResp = requireServiceRole(req, corsHeaders);
+  if (authResp) return authResp;
+
 
   try {
     const supabaseClient = createClient(

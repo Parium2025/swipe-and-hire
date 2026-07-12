@@ -70,7 +70,17 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Länkarna har ingen utgångstid - de fungerar alltid
+    // 3. Kontrollera utgångstid (24h) — leaked/gamla länkar ska inte fungera
+    if (confirmation.expires_at && new Date(confirmation.expires_at) < new Date()) {
+      return new Response(JSON.stringify({
+        error: "Bekräftelselänken har gått ut. Begär en ny bekräftelselänk.",
+        expired: true,
+      }), {
+        status: 410,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
 
     // 4. Bekräfta e-posten
     const { error: updateError } = await supabase.auth.admin.updateUserById(
