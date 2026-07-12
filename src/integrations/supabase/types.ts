@@ -306,31 +306,34 @@ export type Database = {
           comment: string | null
           company_id: string
           created_at: string
+          hidden_author_id: string | null
           id: string
           is_anonymous: boolean | null
           rating: number
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           comment?: string | null
           company_id: string
           created_at?: string
+          hidden_author_id?: string | null
           id?: string
           is_anonymous?: boolean | null
           rating: number
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           comment?: string | null
           company_id?: string
           created_at?: string
+          hidden_author_id?: string | null
           id?: string
           is_anonymous?: boolean | null
           rating?: number
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
