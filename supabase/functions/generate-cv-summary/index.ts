@@ -43,22 +43,33 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify caller identity
-    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims?.sub) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Detect service_role callers (internal invokes like process-cv-queue).
+    // These bypass the per-user ownership check because they are trusted server-to-server.
+    const rawToken = authHeader.replace('Bearer ', '').trim();
+    const isServiceRole = rawToken === supabaseServiceKey;
+
+    let callerId: string | null = null;
+    if (!isServiceRole) {
+      // Verify caller identity
+      const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(rawToken);
+      if (claimsError || !claimsData?.claims?.sub) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid authentication' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if ((claimsData.claims as { role?: string }).role === 'service_role') {
+        // signed service-role JWT — also trusted
+      } else {
+        callerId = claimsData.claims.sub as string;
+      }
     }
-    const callerId = claimsData.claims.sub as string;
 
     // === AUTHORIZATION: caller must be applicant OR employer with access to their application ===
-    if (callerId !== applicant_id) {
+    if (callerId !== null && callerId !== applicant_id) {
       // Employer path: must own a job the applicant has applied to
       let allowed = false;
       if (job_id) {

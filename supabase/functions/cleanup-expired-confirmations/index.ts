@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
+import { requireAuthenticated } from "../_shared/service-auth.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
