@@ -17,6 +17,10 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  const authResp = requireAuthenticated(req, corsHeaders);
+  if (authResp) return authResp;
+
+
 
   try {
     // Hämta utgångna bekräftelser
