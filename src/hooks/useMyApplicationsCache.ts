@@ -2,35 +2,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useCallback } from 'react';
+import {
+  MY_APPLICATIONS_SELECT,
+  type MyApplication as Application,
+} from './myApplicationsShared';
 
-interface Application {
-  id: string;
-  job_id: string;
-  status: string;
-  applied_at: string;
-  created_at: string;
-  job_postings: {
-    id: string;
-    title: string;
-    location: string | null;
-    employment_type: string | null;
-    workplace_city: string | null;
-    workplace_county: string | null;
-    is_active: boolean | null;
-    created_at: string;
-    expires_at: string | null;
-    deleted_at: string | null;
-    applications_count: number | null;
-    views_count: number | null;
-    job_image_url: string | null;
-    job_image_desktop_url: string | null;
-    image_focus_position: string | null;
-    positions_count: number | null;
-    workplace_name: string | null;
-    company_logo_url: string | null;
-      overlay_text_color: string | null;
-  } | null;
-}
+export type { MyApplication, MyApplicationsJobPosting } from './myApplicationsShared';
 
 // LocalStorage cache for instant load - no expiry, background sync keeps fresh
 const CACHE_KEY = 'parium_my_applications_cache_v2';
