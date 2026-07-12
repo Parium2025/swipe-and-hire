@@ -89,6 +89,9 @@ const AboutPage = () => {
         <meta name="twitter:description" content={DESCRIPTION} />
       </Helmet>
 
+      {/* Visuellt dold H1 för SEO/accessibility — huvudrubriken sitter grafiskt som H2 nedan */}
+      <h1 className="sr-only">Om Parium – Jobbappen som samlar allt på ett ställe</h1>
+
       <LandingNav onLoginClick={handleLogin} />
       <SeoBubbles />
 
