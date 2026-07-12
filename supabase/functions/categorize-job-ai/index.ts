@@ -1,4 +1,5 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const CATEGORIES: Array<{ value: string; label: string }> = [
   { value: 'administration', label: 'Administration, Ekonomi, Juridik' },
