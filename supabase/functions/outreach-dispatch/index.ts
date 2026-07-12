@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { parseJwtClaims } from '../_shared/service-auth.ts';
+// (service-role check now uses literal key match — no JWT payload trust)
 // Ersätter tidigare Resend-import: outreach-mejl går nu via Lovable Emails (send-transactional-email).
 
 type OutreachChannel = 'chat' | 'email' | 'push';
@@ -251,10 +251,11 @@ function isServiceRoleRequest(request: Request): boolean {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return false;
   const token = authHeader.slice('Bearer '.length).trim();
-  if (token === serviceRoleKey) return true;
-  const claims = parseJwtClaims(token);
-  return claims?.role === 'service_role';
+  // ⚠️ Only trust the literal service-role key. Never trust JWT `role` claim
+  // from a base64 decode — that is trivially forgeable when verify_jwt=false.
+  return token === serviceRoleKey;
 }
+
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });

@@ -18,7 +18,7 @@ interface ApplicationConfirmationRequest {
   application_id?: string;
 }
 
-import { parseJwtClaims } from "../_shared/service-auth.ts";
+import { verifyCaller } from "../_shared/service-auth.ts";
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -26,27 +26,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // === AUTH: require authenticated caller, and lock recipient to caller's email ===
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-    const token = authHeader.slice("Bearer ".length).trim();
-    const isServiceRole = token === supabaseServiceKey;
-    let callerEmail: string | null = null;
-    if (!isServiceRole) {
-      const claims = parseJwtClaims(token);
-      if (!claims || typeof claims.sub !== "string") {
-        return new Response(JSON.stringify({ error: "Invalid token" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        });
-      }
-      callerEmail = typeof claims.email === "string" ? claims.email.toLowerCase() : null;
-    }
+    // === AUTH: cryptographically verify caller. Lock recipient to caller's email. ===
+    const caller = await verifyCaller(req, corsHeaders);
+    if (caller instanceof Response) return caller;
+    const isServiceRole = caller.isServiceRole;
+    const callerEmail = caller.email;
+
 
     const { applicant_email, applicant_first_name, job_title, company_name, application_id }: ApplicationConfirmationRequest = await req.json();
 

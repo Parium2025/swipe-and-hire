@@ -151,11 +151,9 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
 
   const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
+      const { data: rows, error } = await supabase.rpc('get_my_profile');
+      const data = Array.isArray(rows) ? rows[0] ?? null : null;
+
 
       if (data) {
         setProfile(data);

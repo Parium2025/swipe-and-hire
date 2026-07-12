@@ -685,12 +685,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserData = async (userId: string) => {
     try {
-      // Fetch profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // Fetch OWN full profile via SECURITY DEFINER RPC — needed because
+      // sensitive columns (phone/email/org_number/address/…) are REVOKEd from
+      // the `authenticated` role to prevent cross-row leakage.
+      const { data: profileRows, error: profileError } = await supabase
+        .rpc('get_my_profile');
+      const profileData = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
+
  
       if (profileError) {
         console.error('Error fetching profile:', profileError);

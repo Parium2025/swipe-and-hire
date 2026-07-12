@@ -3098,9 +3098,102 @@ export type Database = {
         }
         Returns: Json
       }
+      get_employer_public_profile: {
+        Args: { target_user_id: string }
+        Returns: {
+          address: string
+          company_description: string
+          company_logo_url: string
+          company_name: string
+          employee_count: string
+          first_name: string
+          industry: string
+          last_name: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+          website: string
+        }[]
+      }
+      get_employer_public_profiles: {
+        Args: { target_user_ids: string[] }
+        Returns: {
+          address: string
+          company_description: string
+          company_logo_url: string
+          company_name: string
+          employee_count: string
+          first_name: string
+          industry: string
+          last_name: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+          website: string
+        }[]
+      }
       get_jobseeker_dashboard_stats: {
         Args: { p_user_id: string }
         Returns: Json
+      }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          address: string | null
+          availability: string | null
+          background_location_enabled: boolean | null
+          bio: string | null
+          birth_date: string | null
+          city: string | null
+          company_description: string | null
+          company_logo_original_url: string | null
+          company_logo_url: string | null
+          company_name: string | null
+          cover_image_url: string | null
+          created_at: string
+          cv_url: string | null
+          email: string | null
+          employee_count: string | null
+          employment_type: string | null
+          first_name: string | null
+          home_location: string | null
+          id: string
+          image_updated_at: string
+          industry: string | null
+          interests: string[] | null
+          interview_default_message: string | null
+          interview_office_address: string | null
+          interview_office_instructions: string | null
+          interview_video_default_message: string | null
+          interview_video_link: string | null
+          is_premium: boolean
+          is_profile_video: boolean | null
+          last_active_at: string | null
+          last_name: string | null
+          location: string | null
+          not_currently_looking: boolean | null
+          occupation: string | null
+          onboarding_completed: boolean | null
+          org_number: string | null
+          organization_id: string | null
+          phone: string | null
+          postal_code: string | null
+          premium_until: string | null
+          profile_file_name: string | null
+          profile_image_url: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          social_media_links: Json | null
+          updated_at: string
+          user_id: string
+          video_updated_at: string
+          video_url: string | null
+          website: string | null
+          work_schedule: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_outreach_automation_for_event: {
         Args: {
