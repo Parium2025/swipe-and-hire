@@ -306,7 +306,7 @@ const SavedJobs = () => {
                     <h3 className="text-lg font-medium text-white mb-2">
                       {statusFilter === 'active' ? 'Inga aktiva jobb' : statusFilter === 'expired' ? 'Inga utgångna jobb' : 'Inga jobb att visa'}
                     </h3>
-                    <p className="text-white/70 text-sm">
+                    <p className="text-white text-sm">
                       Justera filtret ovan för att visa fler jobb
                     </p>
                   </CardContent>
