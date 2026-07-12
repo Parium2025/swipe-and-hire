@@ -2,6 +2,8 @@
 // ROBUST VERSION: Same system as fetch-hr-news with retry-logic, health tracking and email-alerts
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireAuthenticated } from "../_shared/service-auth.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
