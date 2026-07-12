@@ -309,6 +309,25 @@ const handler = async (req: Request): Promise<Response> => {
             continue;
           }
 
+          // Skapa in-app notis för kandidaten (triggar automatiskt push via DB-trigger)
+          const { error: notifError } = await supabase
+            .from("notifications")
+            .insert({
+              user_id: applicant.applicant_id,
+              type: "job_closed",
+              title: "Jobbet är avslutat",
+              body: `Tjänsten "${job.title}" hos ${companyName} har avslutats. Se meddelande i chatten.`,
+              metadata: {
+                job_id: job.id,
+                application_id: applicant.id,
+                route: "/my-applications",
+              },
+            });
+
+          if (notifError) {
+            console.error(`Error creating notification for ${applicant.applicant_id}:`, notifError);
+          }
+
           autoCloseMessagesSent += 1;
         }
 
