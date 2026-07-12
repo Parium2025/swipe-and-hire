@@ -96,7 +96,7 @@ const InterviewInvitationEmail = ({
           </Section>
 
           <Hr style={hr} />
-          <Text style={footer}>Parium AB · Stockholm</Text>
+          <Text style={footer}>Parium · Sveriges nya jobbmatchning</Text>
         </Container>
       </Body>
     </Html>

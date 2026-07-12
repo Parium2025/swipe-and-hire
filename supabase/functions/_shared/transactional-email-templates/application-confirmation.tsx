@@ -39,8 +39,7 @@ const ApplicationConfirmationEmail = ({
         </Section>
         <Text style={{ ...text, textAlign: 'center' as const }}>Lycka till! 🍀</Text>
         <Text style={footer}>
-          Parium AB · Stockholm<br />
-          Du får detta mail för att du skickat en ansökan via{' '}
+          Du får detta mail eftersom du skickat en ansökan via{' '}
           <Link href="https://parium.se" style={link}>Parium</Link>.
         </Text>
       </Container>
