@@ -154,7 +154,7 @@ serve(async (req) => {
     }
 
     // Get CV URL - prioritize override, then application, then profile
-    const finalCvUrl = cv_url_override || application?.cv_url || profile?.cv_url;
+    const finalCvUrl = application?.cv_url || profile?.cv_url;
 
 let contentType = '';
     let userContent: string | any[] | null = null;
