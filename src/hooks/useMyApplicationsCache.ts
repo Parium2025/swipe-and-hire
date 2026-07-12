@@ -46,15 +46,31 @@ function readCache(userId: string): Application[] | null {
 
 function writeCache(userId: string, applications: Application[]): void {
   try {
-    const cached: CachedData = { 
+    const cached: CachedData = {
       applications: applications.slice(0, 50), // Max 50 items to save space
-      userId, 
-      timestamp: Date.now() 
+      userId,
+      timestamp: Date.now(),
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
   } catch {
     // Storage full
   }
+}
+
+// Debounced writer — realtime can trigger many refetches per minute;
+// batching localStorage writes to at most once per 2s keeps main thread free.
+let writeCacheTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingCacheWrite: { userId: string; applications: Application[] } | null = null;
+function writeCacheDebounced(userId: string, applications: Application[]): void {
+  pendingCacheWrite = { userId, applications };
+  if (writeCacheTimer) return;
+  writeCacheTimer = setTimeout(() => {
+    writeCacheTimer = null;
+    if (pendingCacheWrite) {
+      writeCache(pendingCacheWrite.userId, pendingCacheWrite.applications);
+      pendingCacheWrite = null;
+    }
+  }, 2000);
 }
 
 /**
