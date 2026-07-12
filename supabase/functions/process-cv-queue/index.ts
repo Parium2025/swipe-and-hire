@@ -59,7 +59,8 @@ serve(async (req) => {
               applicant_id: item.applicant_id,
               application_id: item.application_id,
               job_id: item.job_id,
-              cv_url_override: item.cv_url,
+              // cv_url_override intentionally removed — was an IDOR vector.
+              // generate-cv-summary now reads the CV path server-side using the applicant_id.
             },
           }
         );
