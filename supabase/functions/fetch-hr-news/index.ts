@@ -1,11 +1,13 @@
 // HR News Fetcher - Multi-source RSS with smart filtering, retry logic, and health tracking
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireAuthenticated } from "../_shared/service-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
 
 const TRUSTED_SOURCES = ['HRnytt.se', 'Chef.se', 'Arbetsvärlden', 'DN Ekonomi', 'Expressen Ekonomi', 'Dagens Industri', 'Breakit'];
 
