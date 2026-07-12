@@ -31,6 +31,7 @@ import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 import ValjPlan from "./pages/ValjPlan";
+import Unsubscribe from "./pages/Unsubscribe";
 
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
 // imported module" errors from freezing the app on a dark Suspense fallback.
@@ -233,6 +234,8 @@ const AnimatedRoutes = () => {
           <Route path="/reset-redirect" element={<ResetRedirect />} />
           <Route path="/migrate-media" element={<MediaMigration />} />
           <Route path="/cv-tunnel" element={<CvTunnel />} />
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
+          
           
           <Route path="*" element={<NotFound />} />
         </Routes>
