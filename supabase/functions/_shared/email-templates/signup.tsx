@@ -53,6 +53,9 @@ export const SignupEmail = ({
           Om du inte skapade ett konto på{' '}
           <Link href={siteUrl} style={link}>{siteName}</Link> kan du ignorera detta mail.
         </Text>
+        <Text style={noReply}>
+          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+        </Text>
       </Container>
     </Body>
   </Html>
