@@ -45,14 +45,11 @@ export function useEmployerPrefetch() {
       queryClient.prefetchQuery({
         queryKey: ['company-profile', userId],
         queryFn: async () => {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', userId)
-            .maybeSingle();
+          const { data: rows, error } = await supabase.rpc('get_my_profile');
           if (error) throw error;
-          return data;
+          return Array.isArray(rows) ? rows[0] ?? null : null;
         },
+
         staleTime: 60_000,
       }).catch(() => {});
 
