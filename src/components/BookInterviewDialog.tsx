@@ -204,6 +204,7 @@ export const BookInterviewDialog = ({
               message: message || undefined,
               employerEmail: user?.email || undefined,
               employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
+              interviewId: interviewRow?.id || undefined,
             },
           });
         }
