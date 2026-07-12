@@ -192,7 +192,7 @@ const handler = async (req: Request): Promise<Response> => {
       locationType, normalizedLocationDetails, message || ''
     );
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    
     const icsUrl = interviewId
       ? `${supabaseUrl}/functions/v1/download-interview-ics?id=${interviewId}`
       : '';
