@@ -62,11 +62,9 @@ const CompanyReviews = () => {
     queryFn: async () => {
       if (!user?.id) return null;
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const { data: rows, error } = await supabase.rpc('get_my_profile');
+      const data = Array.isArray(rows) ? rows[0] ?? null : null;
+
 
       if (error) {
         console.error('Error fetching company data:', error);
