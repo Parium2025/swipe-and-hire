@@ -322,11 +322,10 @@ export function useBatchPrefetchCompanyProfiles() {
 
     if (uncachedIds.length === 0) return;
 
-    // Batch fetch all company profiles at once
+    // Batch fetch all company profiles at once via safe RPC (public branding fields only)
     const { data: profiles } = await supabase
-      .from('profiles')
-      .select('user_id, company_name, company_logo_url, company_description, website, industry, employee_count, address')
-      .in('user_id', uncachedIds);
+      .rpc('get_employer_public_profiles', { target_user_ids: uncachedIds });
+
 
     if (!profiles) return;
 
