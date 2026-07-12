@@ -16,6 +16,8 @@ project_id = "jrjaegapuujushsiofoi"
     verify_jwt = false
   [functions.delete-test-user]
     verify_jwt = false
+  [functions.download-interview-ics]
+    verify_jwt = false
   [functions.email-confirm]
     verify_jwt = false
   [functions.evaluate-candidate]
