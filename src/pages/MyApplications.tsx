@@ -118,6 +118,34 @@ const MyApplications = () => {
   // Use cached applications hook for instant load + realtime sync
   const { applications, isLoading, error, deleteApplication } = useMyApplicationsCache();
 
+  // Tab state (persisted in URL like SavedJobs)
+  type TabValue = 'active' | 'expired';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab: TabValue = searchParams.get('tab') === 'expired' ? 'expired' : 'active';
+  const setActiveTab = useCallback((tab: TabValue) => {
+    const next = new URLSearchParams(searchParams);
+    if (tab === 'active') next.delete('tab');
+    else next.set('tab', tab);
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  // Split applications into active vs expired/deleted
+  const { activeApplications, expiredApplications } = useMemo(() => {
+    const active: typeof applications = [];
+    const expired: typeof applications = [];
+    for (const app of applications) {
+      const job = app.job_postings;
+      if (!job) continue;
+      const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
+      const isExpiredOrDeleted = !!(job.deleted_at || timeInfo.isExpired);
+      (isExpiredOrDeleted ? expired : active).push(app);
+    }
+    return { activeApplications: active, expiredApplications: expired };
+  }, [applications]);
+
+  const visibleApplications = activeTab === 'active' ? activeApplications : expiredApplications;
+
+
   const handleDeleteClick = (jobId: string, jobTitle: string) => {
     // Find the application by job_id
     const app = applications?.find(a => a.job_postings?.id === jobId);
