@@ -577,7 +577,12 @@ async function getHealthSummary(supabase: any): Promise<any> {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Block anonymous callers — either service_role (cron) or an authenticated user
+  const authErr = requireAuthenticated(req, corsHeaders);
+  if (authErr) return authErr;
+
   try {
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
