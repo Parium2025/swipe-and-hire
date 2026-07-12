@@ -148,4 +148,15 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', borderTop: '1px solid #e2e8f0', paddingTop: '20px', textAlign: 'center' as const }
+const secondaryButton = {
+  backgroundColor: '#ffffff',
+  color: '#001F3D',
+  fontSize: '15px',
+  fontWeight: 600 as const,
+  borderRadius: '10px',
+  padding: '13px 26px',
+  textDecoration: 'none',
+  display: 'inline-block',
+  border: '1.5px solid #001F3D',
+}
+const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', paddingTop: '20px', textAlign: 'center' as const }
