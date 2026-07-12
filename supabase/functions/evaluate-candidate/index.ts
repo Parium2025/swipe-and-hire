@@ -130,7 +130,47 @@ serve(async (req) => {
       );
     }
 
+    // === AUTHORIZATION: caller must be applicant OR employer of the job ===
+    if (callerId !== applicant_id) {
+      const { data: canView, error: authzError } = await supabase
+        .rpc('can_view_job_application', { _job_id: job_id }, { get: false })
+        .single();
+      // Fallback: check via employer_owns_job_for_question style check by querying job_postings
+      let allowed = false;
+      if (!authzError && canView === true) {
+        allowed = true;
+      } else {
+        // Direct ownership check as fallback
+        const { data: job } = await supabase
+          .from('job_postings')
+          .select('employer_id, organization_id')
+          .eq('id', job_id)
+          .single();
+        if (job) {
+          if (job.employer_id === callerId) {
+            allowed = true;
+          } else if (job.organization_id) {
+            const { data: sameOrg } = await supabase
+              .from('profiles')
+              .select('user_id')
+              .eq('user_id', callerId)
+              .eq('organization_id', job.organization_id)
+              .maybeSingle();
+            if (sameOrg) allowed = true;
+          }
+        }
+      }
+      if (!allowed) {
+        console.warn(`Unauthorized evaluate-candidate: caller=${callerId} job=${job_id} applicant=${applicant_id}`);
+        return new Response(
+          JSON.stringify({ error: 'Forbidden' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     console.log(`Evaluating candidate ${applicant_id} for job ${job_id}`);
+
 
     // Fetch ALL data in parallel
     const [jobResult, criteriaResult, questionsResult, applicationResult, profileResult, cvSummaryResult, profileCvResult, feedbackResult] = await Promise.all([
