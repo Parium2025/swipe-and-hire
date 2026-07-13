@@ -117,8 +117,7 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
         data-state={status}
         loading="eager"
         decoding="async"
-        // @ts-expect-error — fetchpriority is valid HTML, not yet in React DOM types
-        fetchpriority="high"
+        fetchPriority="high"
         {...props}
       />
     );

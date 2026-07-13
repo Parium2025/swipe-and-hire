@@ -123,8 +123,7 @@ export const HeroGlobe = () => {
           frameBorder={0}
           allow="autoplay; xr-spatial-tracking"
           loading="eager"
-          // @ts-expect-error — fetchpriority is valid HTML
-          fetchpriority="high"
+          {...({ fetchPriority: 'high' } as any)}
           allowTransparency={true}
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));

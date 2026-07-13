@@ -124,9 +124,9 @@ const CardItem = ({ item, index }: CardItemProps) => {
           loading={index < 3 ? 'eager' : 'lazy'}
           decoding="async"
           {...(index < 2
-            ? { fetchpriority: 'high' as any }
+            ? { fetchPriority: 'high' as any }
             : index >= 4
-              ? { fetchpriority: 'low' as any }
+              ? { fetchPriority: 'low' as any }
               : {})}
           draggable={false}
           style={{ objectPosition: item.position ?? '50% 50%' }}
