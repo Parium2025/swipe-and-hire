@@ -117,16 +117,6 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
       {/* Läsbarhetsgradient nertill */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
 
-      {/* Yrkesbadge top-left */}
-      {occupation && (
-        <div className="pointer-events-none absolute top-2 left-2 z-[3] max-w-[70%]">
-          <div className="px-1.5 py-[2px] md:px-2 md:py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
-            <span className="block truncate text-[8px] md:text-[10px] font-semibold tracking-wide text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-              {occupation}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Centrerat överlägg */}
       <div
