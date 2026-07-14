@@ -74,8 +74,6 @@ interface WizardSwipePreviewProps extends WizardPreviewData {
 
 export const WizardSwipePreview = memo(function WizardSwipePreview({
   title,
-  companyName,
-  companyLogoUrl,
   imageUrl,
   imageFocusPosition,
   occupation,
@@ -86,13 +84,11 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   daysLeftLabel,
   overlayTextColor,
   onOpenForm,
-  onOpenCompany,
 }: WizardSwipePreviewProps) {
   const overlayStyle: CSSProperties = useMemo(
     () => getJobOverlayTextStyle(overlayTextColor),
     [overlayTextColor],
   );
-  const initials = useMemo(() => getInitials(companyName || 'Företag'), [companyName]);
 
   return (
     <TooltipProvider delayDuration={150}>
