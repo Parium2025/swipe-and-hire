@@ -220,11 +220,11 @@ function SwipeActionButton({
   kind,
   onOpenForm,
 }: {
-  kind: 'dislike' | 'save' | 'like' | 'undo';
+  kind: 'dislike' | 'save' | 'like';
   onOpenForm?: (e: MouseEvent) => void;
 }) {
-  const common = 'w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center shadow-md';
-  const iconCls = 'w-3 h-3 md:w-4 md:h-4 text-white';
+  const common = 'w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg';
+  const iconCls = 'w-5 h-5 md:w-6 md:h-6 text-white';
   const handle = (e: MouseEvent) => {
     e.stopPropagation();
     onOpenForm?.(e);
@@ -248,25 +248,13 @@ function SwipeActionButton({
       </button>
     );
   }
-  if (kind === 'like') {
-    return (
-      <button type="button" onClick={handle} aria-label="Ansök" className={`${common} bg-success`}>
-        <Heart className={`${iconCls} fill-white`} />
-      </button>
-    );
-  }
   return (
-    <button
-      type="button"
-      onClick={handle}
-      aria-label="Ångra"
-      aria-disabled="true"
-      className={`${common} bg-white/15 border border-white/25`}
-    >
-      <Undo2 className={`${iconCls} opacity-40`} strokeWidth={2.25} />
+    <button type="button" onClick={handle} aria-label="Ansök" className={`${common} bg-success`}>
+      <Heart className={`${iconCls} fill-white`} />
     </button>
   );
 }
+
 
 /* -----------------------------------------------------------------------
  * List preview — inuti monitor-mockupen (Steg 4 → Datorvy)
