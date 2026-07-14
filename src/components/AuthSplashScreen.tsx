@@ -146,7 +146,9 @@ export function AuthSplashScreen() {
           fetchPriority="high"
         />
         
-        {/* Tagline - exakt samma som index.html */}
+        {/* Tagline - exakt samma som index.html. Byter text beroende på
+            senast kända roll (persisterad i localStorage av useAuth) så att
+            arbetsgivare får en tagline anpassad för dem. */}
         <p 
           style={{
             color: 'white',
@@ -159,7 +161,15 @@ export function AuthSplashScreen() {
             fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
           }}
         >
-          Din karriärresa börjar här
+          {(() => {
+            try {
+              return localStorage.getItem('parium-last-role') === 'employer'
+                ? 'Bygg ditt drömteam här'
+                : 'Din karriärresa börjar här';
+            } catch {
+              return 'Din karriärresa börjar här';
+            }
+          })()}
         </p>
         
         {/* Pulserande prickar - exakt samma som index.html */}
