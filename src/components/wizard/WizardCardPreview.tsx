@@ -206,7 +206,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
           )}
 
           {/* Badge-rad — matchar JobSlideBadgesRow */}
-          <div className="flex flex-wrap items-center justify-center gap-1 mt-1">
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
             {salaryText && <PreviewPill text={salaryText} />}
             {daysLeftLabel && <PreviewPill text={daysLeftLabel} />}
             {benefitsCount > 0 && (
