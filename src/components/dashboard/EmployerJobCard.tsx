@@ -123,7 +123,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
         {/* Status badge — top-left */}
         <div className="absolute top-2.5 left-2.5">
           {isExpired ? (
-            <Badge variant="glassDestructive" className="text-[11px] px-2 py-0.5">
+            <Badge className="bg-red-500/80 text-white border-0 text-[11px] px-2 py-0.5">
               Utgången
             </Badge>
           ) : job.is_active ? (
@@ -227,7 +227,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-between cursor-pointer">
                   <span className="text-sm leading-snug text-white">Status:</span>
-                  <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-300' : 'text-white'}`}>
+                  <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-400' : 'text-white'}`}>
                     {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
                   </span>
                 </div>
