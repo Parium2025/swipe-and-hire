@@ -493,6 +493,10 @@ interface BuildPreviewInput {
   applicationsCount?: number;
   expiresAt?: string | null;
   overlayTextColor?: string | null;
+  recruiterName?: string | null;
+  createdAt?: string | null;
+  viewsCount?: number;
+  isActive?: boolean;
 }
 
 export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewData {
@@ -520,14 +524,16 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
 
   // Days-left: från expires_at om satt, annars 30 dagar (standardpublicering).
   let daysLeftLabel: string | undefined;
+  let isExpired = false;
   if (input.expiresAt) {
-    const diff = Math.max(
-      0,
-      Math.floor(
-        (new Date(input.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-      ),
-    );
-    daysLeftLabel = diff === 0 ? 'Sista dagen' : `${diff} dagar kvar`;
+    const diffMs = new Date(input.expiresAt).getTime() - Date.now();
+    if (diffMs <= 0) {
+      isExpired = true;
+      daysLeftLabel = 'Utgången';
+    } else {
+      const diff = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      daysLeftLabel = diff === 0 ? 'Sista dagen' : `${diff} dagar kvar`;
+    }
   } else {
     daysLeftLabel = '30 dagar kvar';
   }
@@ -537,6 +543,10 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     .join(' · ');
 
   const metaParts = [employmentLabelWithDetail, input.location].filter(Boolean);
+
+  const publishedLabel = input.createdAt
+    ? formatDateShortSv(input.createdAt)
+    : formatDateShortSv(new Date().toISOString());
 
   return {
     title: input.title,
@@ -553,5 +563,10 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     applicationsCount: input.applicationsCount ?? 0,
     daysLeftLabel,
     overlayTextColor: normalizeJobOverlayTextColor(input.overlayTextColor ?? DEFAULT_JOB_OVERLAY_TEXT_COLOR),
+    recruiterName: input.recruiterName ?? null,
+    publishedLabel,
+    viewsCount: input.viewsCount ?? 0,
+    isExpired,
+    isActive: input.isActive,
   };
 }
