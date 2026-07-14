@@ -2968,7 +2968,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 {/* Dynamic Island-style notch */}
                                 <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-2 w-10 rounded-full bg-black border border-gray-800"></div>
 
-                                <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden bg-parium-gradient">
+                                <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden bg-card-parium">
                                   
                                   <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
                                      <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem] gap-1">
