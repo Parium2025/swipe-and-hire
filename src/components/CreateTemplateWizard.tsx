@@ -1765,7 +1765,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   )}
 
                   {/* Övrigt / Custom benefit */}
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <Input
                       type="text"
                       value={customBenefitInput}
@@ -1778,7 +1778,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         }
                       }}
                       placeholder="Lägg till egen förmån"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 text-sm focus:border-white/40 flex-1"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40 flex-1"
                     />
                     <div
                       onClick={() => {
