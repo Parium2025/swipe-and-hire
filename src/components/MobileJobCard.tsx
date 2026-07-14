@@ -159,13 +159,15 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
       </div>
 
       <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
-        {displayUrl && logoUrl && (
-          <div className="flex justify-center mt-1 mb-1">
+        <div className="flex justify-center mt-1 mb-1">
+          {displayUrl && logoUrl ? (
             <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg">
               <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="w-14 h-14" aria-hidden="true" />
+          )}
+        </div>
         <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] items-start justify-center px-2">
           <TruncatedText
             text={job.title}
