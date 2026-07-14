@@ -4366,10 +4366,7 @@ const MobileJobWizard = ({
                         {/* Screen bezel */}
                         <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                           {/* Innehåll med Parium bakgrund */}
-                          <div 
-                            className="absolute inset-0"
-                            style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
-                          >
+                          <div className="absolute inset-0 bg-parium-gradient">
                             {/* Application Form View (when clicked) - IDENTICAL to mobile */}
                             {showDesktopApplicationForm && (
                               <div className="flex flex-col h-full">
