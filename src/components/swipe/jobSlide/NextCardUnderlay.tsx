@@ -87,7 +87,7 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
             style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
             loading="eager"
             decoding="async"
-            {...({ fetchPriority: 'high' } as Record<string, string>)}
+            fetchPriority="high"
             draggable={false}
           />
         ) : (
