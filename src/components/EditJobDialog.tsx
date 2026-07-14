@@ -3466,8 +3466,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       salaryType: formData.salary_type,
                                       salaryTransparency: formData.salary_transparency,
                                       benefits: formData.benefits,
-                                      expiresAt: formData.expires_at,
-                                      applicationsCount: (formData as any).applications_count,
+                                      expiresAt: (formData as any).expires_at ?? (job as any)?.expires_at ?? null,
+                                      applicationsCount: (job as any)?.applications_count,
                                       overlayTextColor: formData.overlay_text_color,
                                     })}
                                     onOpenForm={() => setShowApplicationForm(true)}
