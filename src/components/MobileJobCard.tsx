@@ -20,6 +20,8 @@ interface MobileJobCardProps {
   onPrefetch?: (jobId: string) => void;
   /** Card index in list — first 6 load eagerly, rest lazy */
   cardIndex?: number;
+  /** Hide Redigera/Ta bort action buttons (used on read-only dashboard view) */
+  hideActions?: boolean;
 }
 
 const GRADIENTS = [
