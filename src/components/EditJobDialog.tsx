@@ -107,6 +107,7 @@ interface JobPosting {
   part_time_days?: string[] | null;
   duration_amount?: number | null;
   duration_unit?: string | null;
+  overlay_text_color?: string | null;
 }
 
 interface JobFormData {
