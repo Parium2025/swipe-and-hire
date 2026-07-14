@@ -22,7 +22,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
-import { WizardSwipeCardOverlay } from '@/components/wizard/WizardSwipeCardOverlay';
+import { WizardSwipePreview, WizardListPreview, buildWizardPreviewData } from '@/components/wizard/WizardCardPreview';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, formatEmploymentDetails, type DurationUnit } from '@/lib/employmentTypes';
 import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
@@ -3445,51 +3445,34 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 </div>
 
                                 {!showApplicationForm && (
-                                  <div className="absolute inset-0 z-10">
-                                    {jobImageDisplayUrl ? (
-                                      <img
-                                        src={jobImageDisplayUrl}
-                                        alt={`Jobbbild för ${formData.title}`}
-                                        className="absolute inset-0 w-full h-full object-cover select-none"
-                                        loading="eager"
-                                        decoding="async"
-                                      />
-                                    ) : null}
-                                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                                    <div 
-                                      className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain"
-                                      onClick={() => setShowApplicationForm(true)}
-                                    >
-                                      {(() => {
-                                        const textSizes = getSmartTextSizes();
-                                        return (
-                                          <WizardSwipeCardOverlay
-                                            size="sm"
-                                            companyName={profile?.company_name || 'Företag'}
-                                            companyLogoUrl={profile?.company_logo_url}
-                                            title={getDisplayTitle()}
-                                            occupation={formData.occupation}
-                                            metaLine={getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
-                                            overlayTextColor={formData.overlay_text_color}
-                                            onCompanyClick={() => setShowCompanyProfile(true)}
-                                            titleMinFontPx={15}
-                                            titleMaxFontPx={26}
-                                          />
-                                        );
-                                      })()}
-                                    </div>
-                                    <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
-                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
-                                        <X className="h-4 w-4 text-white" />
-                                      </button>
-                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
-                                        <Bookmark className="h-4 w-4 text-white" />
-                                      </button>
-                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                        <Heart className="h-4 w-4 text-white fill-white" />
-                                      </button>
-                                    </div>
-                                  </div>
+                                  <WizardSwipePreview
+                                    {...buildWizardPreviewData({
+                                      title: getDisplayTitle(),
+                                      occupation: formData.occupation,
+                                      companyName: profile?.company_name || 'Företag',
+                                      companyLogoUrl: profile?.company_logo_url,
+                                      imageUrl: jobImageDisplayUrl,
+                                      imageFocusPosition: formData.image_focus_position,
+                                      employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
+                                      employmentTypeDetail: formatEmploymentDetails({
+                                        employment_type: formData.employment_type,
+                                        part_time_days: formData.part_time_days,
+                                        duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+                                        duration_unit: formData.duration_unit,
+                                      }),
+                                      location: [formData.workplace_city || formData.location, formData.workplace_county].filter(Boolean).join(', '),
+                                      salaryMin: formData.salary_min,
+                                      salaryMax: formData.salary_max,
+                                      salaryType: formData.salary_type,
+                                      salaryTransparency: formData.salary_transparency,
+                                      benefits: formData.benefits,
+                                      expiresAt: (formData as any).expires_at ?? (job as any)?.expires_at ?? null,
+                                      applicationsCount: (job as any)?.applications_count,
+                                      overlayTextColor: formData.overlay_text_color,
+                                    })}
+                                    onOpenForm={() => setShowApplicationForm(true)}
+                                    onOpenCompany={() => setShowCompanyProfile(true)}
+                                  />
                                 )}
                               </div>
                             </div>
@@ -3981,53 +3964,34 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                   {/* Job card view (when form is closed) */}
                                    {!showDesktopApplicationForm && (
-                                    <div className="absolute inset-0 z-10 group/card">
-                                      {/* ONLY use desktop image, no fallback */}
-                                      {jobImageDesktopDisplayUrl ? (
-                                        <img
-                                          src={jobImageDesktopDisplayUrl}
-                                          alt={`Jobbbild för ${formData.title}`}
-                                          className="absolute inset-0 w-full h-full object-cover select-none"
-                                          loading="eager"
-                                          decoding="async"
-                                        />
-                                      ) : null}
-                                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                                      <div 
-                                        className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
-                                        onClick={() => setShowDesktopApplicationForm(true)}
-                                      >
-                                        {(() => {
-                                          const textSizes = getSmartTextSizes();
-                                          return (
-                                            <WizardSwipeCardOverlay
-                                              size="md"
-                                              companyName={profile?.company_name || 'Företag'}
-                                              companyLogoUrl={profile?.company_logo_url}
-                                              title={formData.title || 'Jobbtitel'}
-                                              occupation={formData.occupation}
-                                              metaLine={getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
-                                              overlayTextColor={formData.overlay_text_color}
-                                              onCompanyClick={() => setShowCompanyProfile(true)}
-                                              titleMinFontPx={15}
-                                              titleMaxFontPx={33}
-                                            />
-                                          );
-                                        })()}
-                                      </div>
-                                      <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
-                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
-                                          <X className="h-3.5 w-3.5 text-white" />
-                                        </button>
-                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
-                                          <Bookmark className="h-3.5 w-3.5 text-white" />
-                                        </button>
-                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                          <Heart className="h-3.5 w-3.5 text-white fill-white" />
-                                        </button>
-                                      </div>
-                                    </div>
-                                  )}
+                                     <WizardListPreview
+                                       {...buildWizardPreviewData({
+                                         title: formData.title || 'Jobbtitel',
+                                         occupation: formData.occupation,
+                                         companyName: profile?.company_name || 'Företag',
+                                         companyLogoUrl: profile?.company_logo_url,
+                                         imageUrl: jobImageDesktopDisplayUrl,
+                                         imageFocusPosition: formData.image_focus_position,
+                                         employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
+                                         employmentTypeDetail: formatEmploymentDetails({
+                                           employment_type: formData.employment_type,
+                                           part_time_days: formData.part_time_days,
+                                           duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+                                           duration_unit: formData.duration_unit,
+                                         }),
+                                         location: [formData.workplace_city || formData.location, formData.workplace_county].filter(Boolean).join(', '),
+                                         salaryMin: formData.salary_min,
+                                         salaryMax: formData.salary_max,
+                                         salaryType: formData.salary_type,
+                                         salaryTransparency: formData.salary_transparency,
+                                         benefits: formData.benefits,
+                                         expiresAt: (formData as any).expires_at ?? (job as any)?.expires_at ?? null,
+                                         applicationsCount: (job as any)?.applications_count,
+                                         overlayTextColor: formData.overlay_text_color,
+                                       })}
+                                       onOpenForm={() => setShowDesktopApplicationForm(true)}
+                                     />
+                                   )}
                                 </div>
                               </div>
                             </div>
