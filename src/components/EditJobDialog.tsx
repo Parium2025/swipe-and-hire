@@ -4109,7 +4109,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               
                               <div className="mt-4 space-y-3">
                                 <div className="flex justify-center items-center gap-2 sm:gap-3">
-                                  <div className="w-[30px]" aria-hidden="true"></div>
                                   <button
                                     type="button"
                                     onClick={openImageEditor}
@@ -4212,7 +4211,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               
                               <div className="mt-4 space-y-3">
                                 <div className="flex justify-center items-center gap-2 sm:gap-3">
-                                  <div className="w-[30px]" aria-hidden="true"></div>
                                   <button
                                     type="button"
                                     onClick={openDesktopImageEditor}
