@@ -1,7 +1,6 @@
 import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import {
   Bookmark,
-  Building2,
   ChevronDown,
   Eye,
   Gift,
@@ -57,16 +56,6 @@ export interface WizardPreviewData {
   isActive?: boolean;
 }
 
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return '?';
-  if (words.length === 1) {
-    const w = words[0];
-    return (w[0] + (w[w.length - 1] || '')).toUpperCase();
-  }
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-}
-
 function getObjectPosition(v?: string): string {
   if (!v || v === 'center') return 'center 50%';
   if (v === 'top') return 'center 20%';
@@ -85,8 +74,6 @@ interface WizardSwipePreviewProps extends WizardPreviewData {
 
 export const WizardSwipePreview = memo(function WizardSwipePreview({
   title,
-  companyName,
-  companyLogoUrl,
   imageUrl,
   imageFocusPosition,
   occupation,
@@ -97,13 +84,11 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   daysLeftLabel,
   overlayTextColor,
   onOpenForm,
-  onOpenCompany,
 }: WizardSwipePreviewProps) {
   const overlayStyle: CSSProperties = useMemo(
     () => getJobOverlayTextStyle(overlayTextColor),
     [overlayTextColor],
   );
-  const initials = useMemo(() => getInitials(companyName || 'Företag'), [companyName]);
 
   return (
     <TooltipProvider delayDuration={150}>
@@ -135,50 +120,6 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
         style={overlayStyle}
       >
         <div className="w-full max-w-[95%]">
-          {/* Logga */}
-          <div className="flex justify-center mb-1">
-            {companyLogoUrl ? (
-              <div className="w-7 h-7 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
-                <img
-                  src={companyLogoUrl}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                />
-              </div>
-            ) : (
-              <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                <span className="text-[9px] font-bold text-white/70 tracking-wide">
-                  {initials}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Företagspill */}
-          <div className="flex justify-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenCompany?.(e);
-                  }}
-                  className="inline-flex max-w-[90%] items-center gap-1 px-1.5 py-[2px] rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
-                >
-                  <Building2 className="h-2 w-2 shrink-0 text-white" />
-                  <span className="text-[8px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-                    {companyName || 'Företag'}
-                  </span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={6}>
-                {companyName || 'Företag'}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
           {/* Titel */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -322,13 +263,10 @@ function SwipeActionButton({
 
 interface WizardListPreviewProps extends WizardPreviewData {
   onOpenForm?: (e: MouseEvent) => void;
-  onOpenCompany?: (e: MouseEvent) => void;
 }
 
 export const WizardListPreview = memo(function WizardListPreview({
   title,
-  companyName,
-  companyLogoUrl,
   imageUrl,
   imageFocusPosition,
   employmentTypeLabel,
@@ -348,7 +286,6 @@ export const WizardListPreview = memo(function WizardListPreview({
     () => getJobOverlayTextStyle(overlayTextColor),
     [overlayTextColor],
   );
-  const initials = useMemo(() => getInitials(companyName || 'Företag'), [companyName]);
 
   return (
     <div
@@ -371,23 +308,7 @@ export const WizardListPreview = memo(function WizardListPreview({
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-indigo-900/50 to-slate-900/70 flex flex-col items-center justify-center gap-2">
-            {companyLogoUrl ? (
-              <>
-                <div className="w-12 h-12 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                  <img src={companyLogoUrl} alt="" className="w-full h-full object-cover" draggable={false} />
-                </div>
-                <div className="text-[10px] px-2 py-0.5 border border-white/15 bg-white/10 leading-snug inline-flex items-center max-w-[80%] rounded-full" style={overlayStyle}>
-                  <Building2 className="h-3 w-3 mr-1 flex-shrink-0" />
-                  <span className="truncate font-medium">{companyName || 'Företag'}</span>
-                </div>
-              </>
-            ) : (
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-                <span className="text-lg font-bold text-white/60 tracking-wide">{initials}</span>
-              </div>
-            )}
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-indigo-900/50 to-slate-900/70" />
         )}
 
         {/* Centrerad titel över bilden */}
