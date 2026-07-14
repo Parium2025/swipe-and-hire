@@ -144,6 +144,7 @@ interface JobFormData {
   part_time_days?: string[];
   duration_amount?: string;
   duration_unit?: string;
+  overlay_text_color: string;
 }
 
 interface EditJobDialogProps {
