@@ -185,7 +185,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
               <div className="cursor-default">
                 <AutoFitTitle
                   text={title || 'Jobbtitel'}
-                  className="mt-0.5 w-full font-extrabold leading-[1.05] tracking-tight line-clamp-2"
+                  className="mt-0.5 w-full font-extrabold leading-[1.05] tracking-tight"
                   style={overlayStyle}
                   minFontPx={11}
                   maxFontPx={14}
