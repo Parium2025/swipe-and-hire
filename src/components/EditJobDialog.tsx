@@ -3993,6 +3993,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          expiresAt: (formData as any).expires_at ?? (job as any)?.expires_at ?? null,
                                          applicationsCount: (job as any)?.applications_count,
                                          overlayTextColor: formData.overlay_text_color,
+                                         recruiterName: profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : null,
+                                         createdAt: (job as any)?.created_at ?? null,
+                                         viewsCount: (job as any)?.views_count ?? 0,
+                                         isActive: (job as any)?.is_active,
                                        })}
                                        onOpenForm={() => setShowDesktopApplicationForm(true)}
                                      />
