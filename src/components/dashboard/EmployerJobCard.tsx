@@ -164,7 +164,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
       {/* Content body */}
       <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
         {/* Logo + Title */}
-        <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] flex-col items-center justify-start gap-1.5 px-2 pt-2">
+        <div className="flex h-[clamp(5.25rem,4.6rem+2vw,6.5rem)] flex-col items-center justify-start gap-1.5 px-2 pt-2">
           {logoUrl ? (
             <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0">
               <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
@@ -176,7 +176,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
           )}
           <TruncatedText
             text={job.title}
-            className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] line-clamp-2"
+            className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] line-clamp-2 min-h-[calc(2*1.32*clamp(1.02rem,0.98rem+0.18vw,1.12rem))]"
             style={{ color: job.overlay_text_color || '#FFFFFF' }}
           />
         </div>
