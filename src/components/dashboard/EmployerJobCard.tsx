@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
 import { ResilientImage } from '@/components/ui/ResilientImage';
+import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 
 interface EmployerJobCardProps {
   job: {
