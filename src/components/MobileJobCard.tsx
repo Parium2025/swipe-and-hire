@@ -201,41 +201,44 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           </div>
         </div>
 
-        <div className="h-px bg-white/10 mx-2" />
+        {!hideActions && (
+          <>
+            <div className="h-px bg-white/10 mx-2" />
 
-        <div className={`flex gap-2 px-2 py-1.5 ${isExpired ? 'justify-center' : ''}`}>
-          {!isExpired && (
-            <Button
-              variant="glass"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (isDraft && onEditDraft) {
-                  onEditDraft(job);
-                } else {
-                  onEdit(job);
-                }
-              }}
-              className="flex-1 h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Redigera
-            </Button>
-          )}
-          <Button
-            variant="glass"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(job);
-            }}
-            className={`${isExpired ? 'px-8' : 'flex-1'} h-11 rounded-full border-destructive/40 bg-destructive/20 text-white transition-[background-color,border-color,color,transform] duration-150 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-[0.97]`}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Ta bort
-          </Button>
-        </div>
-      </div>
+            <div className={`flex gap-2 px-2 py-1.5 ${isExpired ? 'justify-center' : ''}`}>
+              {!isExpired && (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isDraft && onEditDraft) {
+                      onEditDraft(job);
+                    } else {
+                      onEdit(job);
+                    }
+                  }}
+                  className="flex-1 h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Redigera
+                </Button>
+              )}
+              <Button
+                variant="glass"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(job);
+                }}
+                className={`${isExpired ? 'px-8' : 'flex-1'} h-11 rounded-full border-destructive/40 bg-destructive/20 text-white transition-[background-color,border-color,color,transform] duration-150 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-[0.97]`}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Ta bort
+              </Button>
+            </div>
+          </>
+        )}
     </Card>
   );
 });
