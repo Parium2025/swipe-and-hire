@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
-import { WizardSwipeCardOverlay } from '@/components/wizard/WizardSwipeCardOverlay';
+import { WizardSwipePreview, WizardListPreview, buildWizardPreviewData } from '@/components/wizard/WizardCardPreview';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useHasActivePlan } from '@/hooks/useHasActivePlan';
