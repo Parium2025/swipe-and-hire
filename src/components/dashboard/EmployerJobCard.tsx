@@ -163,13 +163,33 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
 
       {/* Content body */}
       <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
-        {/* Title */}
-        <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] items-start justify-center px-2">
-          <TruncatedText
-            text={job.title}
-            className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] line-clamp-2"
-            style={{ color: job.overlay_text_color || '#FFFFFF' }}
-          />
+        {/* Logo + Title */}
+        <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] flex-col items-center justify-start gap-1.5 px-2 pt-2">
+          {logoUrl ? (
+            <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
+            </div>
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-[11px] font-bold text-white/70 tracking-wide">{initials}</span>
+            </div>
+          )}
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="w-full">
+                  <TruncatedText
+                    text={job.title}
+                    className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] line-clamp-2"
+                    style={{ color: job.overlay_text_color || '#FFFFFF' }}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white max-w-[280px]">
+                <p className="text-xs leading-snug">{job.title}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Divider */}
