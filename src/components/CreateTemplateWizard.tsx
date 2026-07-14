@@ -1780,17 +1780,18 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       placeholder="Lägg till egen förmån"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 text-sm focus:border-white/40 flex-1"
                     />
-                    <div
+                    <button
+                      type="button"
                       onClick={() => {
                         if (customBenefitInput.trim()) {
                           setFormData(prev => ({ ...prev, benefits: [...prev.benefits, customBenefitInput.trim()] }));
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="bg-white/10 border border-white/20 text-white hover:border-white/40 h-9 w-9 min-w-[2.25rem] flex-shrink-0 aspect-square flex items-center justify-center rounded-full cursor-pointer transition-all duration-300"
+                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
                     >
-                      <Plus className="w-4 h-4" />
-                    </div>
+                      <Plus className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
 
