@@ -8,8 +8,11 @@ import {
 } from 'lucide-react';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import {
+  DEFAULT_JOB_OVERLAY_TEXT_COLOR,
   getJobOverlayTextStyle,
+  normalizeJobOverlayTextColor,
 } from '@/lib/jobOverlayText';
+
 
 
 /**
