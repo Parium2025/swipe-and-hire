@@ -52,7 +52,7 @@ function getCompanyInitials(name: string): string {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, cardIndex = 0 }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, cardIndex = 0, hideActions = false }: MobileJobCardProps) => {
   const navigate = useNavigate();
   const isDraft = isEmployerJobDraft(job);
   const isExpired = isEmployerJobExpired(job);
