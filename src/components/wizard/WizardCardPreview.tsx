@@ -97,6 +97,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   const initials = useMemo(() => getInitials(companyName || 'Företag'), [companyName]);
 
   return (
+    <TooltipProvider delayDuration={150}>
     <div
       className="absolute inset-0 z-10 select-none"
       onClick={onOpenForm}
@@ -147,38 +148,61 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
 
           {/* Företagspill */}
           <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenCompany?.(e);
-              }}
-              className="inline-flex max-w-[90%] items-center gap-1 px-1.5 py-[2px] md:px-2 md:py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
-            >
-              <Building2 className="h-2 w-2 md:h-2.5 md:w-2.5 shrink-0 text-white" />
-              <span className="text-[8px] md:text-[10px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenCompany?.(e);
+                  }}
+                  className="inline-flex max-w-[90%] items-center gap-1 px-1.5 py-[2px] md:px-2 md:py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+                >
+                  <Building2 className="h-2 w-2 md:h-2.5 md:w-2.5 shrink-0 text-white" />
+                  <span className="text-[8px] md:text-[10px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+                    {companyName || 'Företag'}
+                  </span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={6}>
                 {companyName || 'Företag'}
-              </span>
-            </button>
+              </TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Titel */}
-          <AutoFitTitle
-            text={title || 'Jobbtitel'}
-            className="mt-0.5 md:mt-1 w-full font-extrabold leading-[1.05] tracking-tight line-clamp-2"
-            style={overlayStyle}
-            minFontPx={11}
-            maxFontPx={18}
-          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="cursor-default">
+                <AutoFitTitle
+                  text={title || 'Jobbtitel'}
+                  className="mt-0.5 md:mt-1 w-full font-extrabold leading-[1.05] tracking-tight line-clamp-2"
+                  style={overlayStyle}
+                  minFontPx={11}
+                  maxFontPx={18}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={6} className="max-w-[280px] text-center">
+              {title || 'Jobbtitel'}
+            </TooltipContent>
+          </Tooltip>
 
           {/* Meta */}
           {metaLine && (
-            <p
-              className="mt-0.5 text-[8px] md:text-[10px] font-semibold truncate"
-              style={overlayStyle}
-            >
-              {metaLine}
-            </p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p
+                  className="mt-0.5 text-[8px] md:text-[10px] font-semibold truncate cursor-default"
+                  style={overlayStyle}
+                >
+                  {metaLine}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={6} className="max-w-[280px] text-center">
+                {metaLine}
+              </TooltipContent>
+            </Tooltip>
           )}
 
           {/* Badge-rad — matchar JobSlideBadgesRow */}
@@ -197,14 +221,13 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
 
       {/* Action-knappar — 3 st (Neka / Spara / Gilla) med tooltip */}
       <div className="absolute inset-x-0 bottom-3 md:bottom-4 z-[3] flex items-center justify-center gap-3 md:gap-4">
-        <TooltipProvider delayDuration={150}>
-          <SwipeActionButton kind="dislike" onOpenForm={onOpenForm} />
-          <SwipeActionButton kind="save" onOpenForm={onOpenForm} />
-          <SwipeActionButton kind="like" onOpenForm={onOpenForm} />
-        </TooltipProvider>
+        <SwipeActionButton kind="dislike" onOpenForm={onOpenForm} />
+        <SwipeActionButton kind="save" onOpenForm={onOpenForm} />
+        <SwipeActionButton kind="like" onOpenForm={onOpenForm} />
       </div>
 
     </div>
+    </TooltipProvider>
   );
 });
 
