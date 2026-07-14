@@ -239,6 +239,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
             </div>
           </>
         )}
+      </div>
     </Card>
   );
 });
