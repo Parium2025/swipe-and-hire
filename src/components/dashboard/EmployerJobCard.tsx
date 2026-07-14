@@ -30,6 +30,10 @@ interface EmployerJobCardProps {
     job_image_url?: string;
     company_logo_url?: string;
     image_focus_position?: string;
+    salary_min?: number;
+    salary_max?: number;
+    salary_type?: string;
+    salary_transparency?: string;
     employer_profile?: {
       first_name: string;
       last_name: string;
