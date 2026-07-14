@@ -2699,15 +2699,17 @@ const MobileJobWizard = ({
           {/* Header */}
           <div className="premium-edit-header">
             <DialogHeader className="text-center sm:text-center">
-              <DialogTitle className="premium-edit-title">
-                {steps[currentStep].title}
-              </DialogTitle>
+              {currentStep !== steps.length - 1 && (
+                <DialogTitle className="premium-edit-title">
+                  {steps[currentStep].title}
+                </DialogTitle>
+              )}
               {currentStep === steps.length - 1 && (
                 <p className="text-white text-[11px] font-medium tracking-wide mb-0.5">
                   (förhandsvisning från swipe mode)
                 </p>
               )}
-              <div className="premium-edit-step-meta">
+              <div className="premium-edit-step-meta !text-white">
                 Steg {currentStep + 1} av {steps.length}
               </div>
             </DialogHeader>
