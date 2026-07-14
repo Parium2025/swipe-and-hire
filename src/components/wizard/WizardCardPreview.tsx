@@ -226,35 +226,51 @@ function SwipeActionButton({
   kind: 'dislike' | 'save' | 'like';
   onOpenForm?: (e: MouseEvent) => void;
 }) {
-  const common = 'w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg';
-  const iconCls = 'w-5 h-5 md:w-6 md:h-6 text-white';
+  const common =
+    'w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform';
+  const iconCls = 'w-4 h-4 md:w-[18px] md:h-[18px] text-white';
   const handle = (e: MouseEvent) => {
     e.stopPropagation();
     onOpenForm?.(e);
   };
+
+  let btn: ReactNode;
+  let label: string;
   if (kind === 'dislike') {
-    return (
-      <button type="button" onClick={handle} aria-label="Nej tack" className={`${common} bg-destructive`}>
+    label = 'Nej tack';
+    btn = (
+      <button type="button" onClick={handle} aria-label={label} className={`${common} bg-destructive`}>
         <X className={iconCls} strokeWidth={2.5} />
       </button>
     );
-  }
-  if (kind === 'save') {
-    return (
+  } else if (kind === 'save') {
+    label = 'Spara jobbet';
+    btn = (
       <button
         type="button"
         onClick={handle}
-        aria-label="Spara"
+        aria-label={label}
         className={`${common} bg-secondary border border-white/25`}
       >
         <Bookmark className={iconCls} strokeWidth={2.25} />
       </button>
     );
+  } else {
+    label = 'Sök jobbet';
+    btn = (
+      <button type="button" onClick={handle} aria-label={label} className={`${common} bg-success`}>
+        <Heart className={`${iconCls} fill-white`} />
+      </button>
+    );
   }
+
   return (
-    <button type="button" onClick={handle} aria-label="Ansök" className={`${common} bg-success`}>
-      <Heart className={`${iconCls} fill-white`} />
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>{btn}</TooltipTrigger>
+      <TooltipContent side="top" sideOffset={6}>
+        {label}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
