@@ -25,7 +25,10 @@ import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, formatEmploymentDetails, type DurationUnit } from '@/lib/employmentTypes';
 import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare, Copy } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare, Copy, Palette } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { HexColorPicker } from 'react-colorful';
+import { DEFAULT_JOB_OVERLAY_TEXT_COLOR, getJobOverlayTextStyle, normalizeJobOverlayTextColor } from '@/lib/jobOverlayText';
 import { BenefitsList } from '@/components/wizard/BenefitsList';
 import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
@@ -104,6 +107,7 @@ interface JobPosting {
   part_time_days?: string[] | null;
   duration_amount?: number | null;
   duration_unit?: string | null;
+  overlay_text_color?: string | null;
 }
 
 interface JobFormData {
@@ -140,6 +144,7 @@ interface JobFormData {
   part_time_days?: string[];
   duration_amount?: string;
   duration_unit?: string;
+  overlay_text_color: string;
 }
 
 interface EditJobDialogProps {
@@ -244,7 +249,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     job_image_url: '',
     job_image_desktop_url: '',
     image_focus_position: 'center',
-    image_focus_position_desktop: 'center'
+    image_focus_position_desktop: 'center',
+    overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
   });
 
   const { user } = useAuth();
@@ -971,6 +977,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         part_time_days: (job as any).part_time_days || [],
         duration_amount: (job as any).duration_amount != null ? String((job as any).duration_amount) : '',
         duration_unit: (job as any).duration_unit || 'months',
+        overlay_text_color: normalizeJobOverlayTextColor((job as any).overlay_text_color),
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
@@ -1074,6 +1081,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         job_image_desktop_url: formData.job_image_desktop_url || null,
         image_focus_position: formData.image_focus_position || 'center',
         image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
+        overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         // Explicitly do NOT set is_active, created_at, or expires_at — keep as draft
       };
 
@@ -1804,6 +1812,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         job_image_desktop_url: formData.job_image_desktop_url || null,
         image_focus_position: formData.image_focus_position || 'center',
         image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
+        overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         ...(isDraft ? {
           is_active: true,
           created_at: new Date().toISOString(),
@@ -3456,17 +3465,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           <>
                                             <button 
                                               onClick={() => setShowCompanyProfile(true)}
-                                              className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
+                                              className={`${textSizes.company} font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
+                                              style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                             >
                                               {profile?.company_name || 'Företag'}
                                             </button>
                                               <AutoFitTitle
                                               text={getDisplayTitle()}
-                                               className={`${textSizes.title} w-full text-white font-bold leading-tight mb-1 cursor-default`}
+                                               className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-default`}
+                                               style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                               minFontPx={15}
                                                maxFontPx={26}
                                             />
-                                            <div className={`${textSizes.meta} text-white`}>
+                                            <div className={`${textSizes.meta}`} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                             </div>
                                           </>
@@ -3998,17 +4009,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             <>
                                               <button 
                                                 onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                                className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
+                                                className={`${textSizes.company} font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
+                                                style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                               >
                                                 {profile?.company_name || 'Företag'}
                                               </button>
                                               <AutoFitTitle
                                                 text={formData.title || 'Jobbtitel'}
-                                                className={`${textSizes.title} w-full text-white font-bold leading-tight mb-1 cursor-default`}
+                                                className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-default`}
+                                                style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                                 minFontPx={15}
                                                 maxFontPx={33}
                                               />
-                                              <div className={`${textSizes.meta} text-white`}>
+                                              <div className={`${textSizes.meta}`} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                                 {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                               </div>
                                             </>
@@ -4044,6 +4057,56 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       )}
                       {/* Image upload section - separate for mobile and desktop */}
                       <div className="space-y-4">
+                        {/* Overlay text color picker */}
+                        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <Label className="text-white font-medium text-sm sm:text-base">Textfärg på jobbkort</Label>
+                              <p className="text-white text-xs sm:text-sm mt-1">Välj färgen som visas ovanpå annonsbilden.</p>
+                            </div>
+                            <Popover modal={false}>
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="flex h-11 w-16 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white/10 transition-colors md:hover:bg-white/15"
+                                  aria-label="Välj textfärg på jobbkort"
+                                >
+                                  <span
+                                    className="h-6 w-9 rounded-sm border border-white/30 shadow-inner"
+                                    style={{ backgroundColor: normalizeJobOverlayTextColor(formData.overlay_text_color) }}
+                                  />
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                align={isMobile ? 'center' : 'end'}
+                                side="bottom"
+                                sideOffset={8}
+                                className="z-[9999] w-[min(92vw,260px)] rounded-lg border-white/20 bg-card-parium p-3 shadow-2xl [&_.react-colorful]:!h-[190px] [&_.react-colorful]:!w-full"
+                              >
+                                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-white">
+                                  <Palette className="h-4 w-4" />
+                                  Välj färg
+                                </div>
+                                <HexColorPicker
+                                  color={normalizeJobOverlayTextColor(formData.overlay_text_color)}
+                                  onChange={(color) => handleInputChange('overlay_text_color', normalizeJobOverlayTextColor(color))}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                          <div className="mt-3 flex items-center gap-2">
+                            {['#FFFFFF', '#111827', '#FACC15', '#38BDF8'].map((color) => (
+                              <button
+                                key={color}
+                                type="button"
+                                onClick={() => handleInputChange('overlay_text_color', color)}
+                                className="h-8 w-8 rounded-full border border-white/30 transition-transform active:scale-95"
+                                style={{ backgroundColor: color }}
+                                aria-label={`Välj färg ${color}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
                         {/* Mobile image section */}
                         <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                           <div className="flex items-center gap-2 mb-2">
