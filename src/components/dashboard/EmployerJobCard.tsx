@@ -174,22 +174,11 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
               <span className="text-[11px] font-bold text-white/70 tracking-wide">{initials}</span>
             </div>
           )}
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="w-full">
-                  <TruncatedText
-                    text={job.title}
-                    className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] line-clamp-2"
-                    style={{ color: job.overlay_text_color || '#FFFFFF' }}
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white max-w-[280px]">
-                <p className="text-xs leading-snug">{job.title}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TruncatedText
+            text={job.title}
+            className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] line-clamp-2"
+            style={{ color: job.overlay_text_color || '#FFFFFF' }}
+          />
         </div>
 
         {/* Divider */}
