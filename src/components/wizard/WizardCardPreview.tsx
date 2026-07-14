@@ -2,23 +2,15 @@ import { memo, useMemo, type CSSProperties, type MouseEvent } from 'react';
 import {
   Bookmark,
   Building2,
-  Briefcase,
-  Banknote,
   Gift,
   Heart,
-  MapPin,
-  Timer,
-  Undo2,
-  Users,
   X,
 } from 'lucide-react';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
-import { TruncatedText } from '@/components/TruncatedText';
 import {
-  DEFAULT_JOB_OVERLAY_TEXT_COLOR,
   getJobOverlayTextStyle,
-  normalizeJobOverlayTextColor,
 } from '@/lib/jobOverlayText';
+
 
 /**
  * Delade förhandsvisningar för wizarden (Skapa/Redigera jobb).
