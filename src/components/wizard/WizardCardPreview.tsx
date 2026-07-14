@@ -195,11 +195,13 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
         </div>
       </div>
 
-      {/* Action-knappar — 3 st fulla size (Neka / Spara / Gilla) */}
+      {/* Action-knappar — 3 st (Neka / Spara / Gilla) med tooltip */}
       <div className="absolute inset-x-0 bottom-3 md:bottom-4 z-[3] flex items-center justify-center gap-3 md:gap-4">
-        <SwipeActionButton kind="dislike" onOpenForm={onOpenForm} />
-        <SwipeActionButton kind="save" onOpenForm={onOpenForm} />
-        <SwipeActionButton kind="like" onOpenForm={onOpenForm} />
+        <TooltipProvider delayDuration={150}>
+          <SwipeActionButton kind="dislike" onOpenForm={onOpenForm} />
+          <SwipeActionButton kind="save" onOpenForm={onOpenForm} />
+          <SwipeActionButton kind="like" onOpenForm={onOpenForm} />
+        </TooltipProvider>
       </div>
 
     </div>
