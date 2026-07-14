@@ -4,7 +4,11 @@ import { MapPin, X, AlertCircle } from 'lucide-react';
 import { checkGpsPermission, requestGpsPermission, isNativeApp } from '@/lib/gpsUtils';
 import GpsHelpModal from '@/components/GpsHelpModal';
 
-const GPS_PROMPT_DELAY_MS = 3000;
+// Vänta 10s innan GPS-ikonen visas — så att vädret (som oftast kommer inom
+// 2–3s) hinner landa först. När vädret finns tillgängligt returnerar
+// komponenten null via `weatherAvailable`, så ikonen visas aldrig alls i
+// normalfallet. Endast om vädret verkligen misslyckas dyker den upp.
+const GPS_PROMPT_DELAY_MS = 10000;
 
 // Dismissed state that survives SPA navigation but resets on full page reload
 let gpsPromptDismissedUntilReload = false;
