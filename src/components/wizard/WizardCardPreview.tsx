@@ -190,21 +190,17 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
                 text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
               />
             )}
-            <PreviewPill
-              icon={<Users className="h-2 w-2 md:h-2.5 md:w-2.5 text-white" />}
-              text={`${applicationsCount} sökande`}
-            />
           </div>
         </div>
       </div>
 
-      {/* Action-knappar — matchar JobSlideActions men i mini-skala */}
-      <div className="absolute inset-x-0 bottom-2 md:bottom-3 z-[3] flex items-center justify-center gap-1.5 md:gap-2">
+      {/* Action-knappar — 3 st fulla size (Neka / Spara / Gilla) */}
+      <div className="absolute inset-x-0 bottom-3 md:bottom-4 z-[3] flex items-center justify-center gap-3 md:gap-4">
         <SwipeActionButton kind="dislike" onOpenForm={onOpenForm} />
         <SwipeActionButton kind="save" onOpenForm={onOpenForm} />
         <SwipeActionButton kind="like" onOpenForm={onOpenForm} />
-        <SwipeActionButton kind="undo" onOpenForm={onOpenForm} />
       </div>
+
     </div>
   );
 });
