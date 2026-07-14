@@ -391,13 +391,20 @@ export const WizardListPreview = memo(function WizardListPreview({
         )}
 
         {/* Centrerad titel över bilden */}
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-[2] px-3 text-center pointer-events-none">
-          <p
-            className="w-full text-center text-[14px] font-extrabold leading-[1.2] line-clamp-2 [text-shadow:0_2px_6px_rgba(0,0,0,0.55)]"
-            style={overlayStyle}
-          >
-            {title || 'Jobbtitel'}
-          </p>
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-[2] px-3 text-center">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p
+                className="w-full text-center text-[14px] font-extrabold leading-[1.2] line-clamp-2 [text-shadow:0_2px_6px_rgba(0,0,0,0.55)] cursor-default"
+                style={overlayStyle}
+              >
+                {title || 'Jobbtitel'}
+              </p>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={6} className="max-w-[280px] text-center">
+              {title || 'Jobbtitel'}
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Scroll-indikator — pil nedåt */}
