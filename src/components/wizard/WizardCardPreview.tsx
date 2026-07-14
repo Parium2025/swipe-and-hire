@@ -2,6 +2,7 @@ import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } fr
 import {
   Bookmark,
   Building2,
+  ChevronDown,
   Eye,
   Gift,
   Heart,
@@ -389,41 +390,27 @@ export const WizardListPreview = memo(function WizardListPreview({
           </div>
         )}
 
-        {/* Status badge — top-left */}
-        <div className="absolute top-2 left-2">
-          {isExpired ? (
-            <span className="inline-flex items-center rounded-full bg-red-500/90 text-white text-[10px] font-semibold px-2 py-0.5 border border-white/10">
-              Utgången
-            </span>
-          ) : isActive === false ? (
-            <span className="inline-flex items-center rounded-full bg-amber-500/90 text-white text-[10px] font-semibold px-2 py-0.5">
-              Utkast
-            </span>
-          ) : (
-            <span className="inline-flex items-center rounded-full bg-green-500/90 text-white text-[10px] font-semibold px-2 py-0.5">
-              Aktiv
-            </span>
-          )}
+        {/* Centrerad titel över bilden */}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-[2] px-3 text-center pointer-events-none">
+          <p
+            className="w-full text-center text-[14px] font-extrabold leading-[1.2] line-clamp-2 [text-shadow:0_2px_6px_rgba(0,0,0,0.55)]"
+            style={overlayStyle}
+          >
+            {title || 'Jobbtitel'}
+          </p>
         </div>
 
-        {/* Views badge — top-right */}
-        <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/60 rounded-full px-2 py-0.5 border border-white/15">
-          <Eye className="h-3 w-3 text-white" />
-          <span className="text-[10px] font-medium text-white">{viewsCount || 0}</span>
+        {/* Scroll-indikator — pil nedåt */}
+        <div className="absolute inset-x-0 bottom-2 z-[2] flex justify-center pointer-events-none">
+          <div className="flex items-center gap-1 bg-black/50 border border-white/15 rounded-full px-2 py-0.5 animate-bounce">
+            <ChevronDown className="h-3 w-3 text-white" />
+          </div>
         </div>
       </div>
 
       {/* Info-block — under bilden, syns när man scrollar */}
       <div className="w-full bg-[hsl(215,85%,10%)]/95 backdrop-blur-sm border-t border-white/10 px-3 py-2">
-        <p
-          className="w-full text-center text-[12px] font-bold leading-[1.3] line-clamp-2 mb-1.5"
-          style={overlayStyle}
-        >
-          {title || 'Jobbtitel'}
-        </p>
-        <div className="h-px bg-white/10 mb-2" />
         <div className="space-y-1.5">
-          <PreviewRow label="Rekryterare" value={recruiterName || '–'} />
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
           <PreviewRow
             label="Ansökningar"
@@ -435,8 +422,8 @@ export const WizardListPreview = memo(function WizardListPreview({
             }
           />
           <PreviewRow label="Plats" value={location || '–'} />
+          <PreviewRow label="Rekryterare" value={recruiterName || '–'} />
           <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
-          <PreviewRow label="Lön" value={salaryText || '–'} />
           <PreviewRow
             label="Status"
             value={
