@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Users, Edit, Trash2, Building2 } from 'lucide-react';
+import { Eye, Users, Edit, Trash2 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
@@ -117,22 +117,8 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2 pb-6`}>
-            {logoUrl ? (
-              <>
-                <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                  <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
-                </div>
-                <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] overflow-hidden">
-                  <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
-                  <span className="leading-snug truncate font-medium text-white">{companyName}</span>
-                </Badge>
-              </>
-            ) : (
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-                <span className="text-xl font-bold text-white/50 tracking-wide">{initials}</span>
-              </div>
-            )}
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+            <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
           </div>
         )}
 
@@ -160,12 +146,14 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
 
       <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
         <div className="flex justify-center mt-1 mb-1">
-          {displayUrl && logoUrl ? (
+          {logoUrl ? (
             <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg">
               <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
             </div>
           ) : (
-            <div className="w-14 h-14" aria-hidden="true" />
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <span className="text-base font-bold text-white/80 tracking-wide">{initials}</span>
+            </div>
           )}
         </div>
         <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] items-start justify-center px-2">

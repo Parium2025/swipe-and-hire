@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, Building2 } from 'lucide-react';
+import { Eye, Users } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
@@ -115,25 +115,8 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2 pb-6`}>
-            {logoUrl ? (
-              <>
-                <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                  <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
-                </div>
-                <div className="text-[11px] px-2 py-0.5 border border-white/15 bg-white/10 text-white leading-snug inline-flex items-center max-w-[80%] min-w-0 overflow-hidden rounded-full">
-                  <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
-                  <TruncatedText
-                    text={companyName}
-                    className="block min-w-0 flex-1 truncate leading-snug font-medium text-white"
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-                <span className="text-xl font-bold text-white/50 tracking-wide">{initials}</span>
-              </div>
-            )}
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+            <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
           </div>
         )}
 
