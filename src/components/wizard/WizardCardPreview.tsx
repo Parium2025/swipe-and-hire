@@ -1,4 +1,4 @@
-import { memo, useMemo, type CSSProperties, type MouseEvent } from 'react';
+import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import {
   Bookmark,
   Building2,
@@ -7,6 +7,12 @@ import {
   X,
 } from 'lucide-react';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   DEFAULT_JOB_OVERLAY_TEXT_COLOR,
   getJobOverlayTextStyle,
@@ -189,11 +195,13 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
         </div>
       </div>
 
-      {/* Action-knappar — 3 st fulla size (Neka / Spara / Gilla) */}
+      {/* Action-knappar — 3 st (Neka / Spara / Gilla) med tooltip */}
       <div className="absolute inset-x-0 bottom-3 md:bottom-4 z-[3] flex items-center justify-center gap-3 md:gap-4">
-        <SwipeActionButton kind="dislike" onOpenForm={onOpenForm} />
-        <SwipeActionButton kind="save" onOpenForm={onOpenForm} />
-        <SwipeActionButton kind="like" onOpenForm={onOpenForm} />
+        <TooltipProvider delayDuration={150}>
+          <SwipeActionButton kind="dislike" onOpenForm={onOpenForm} />
+          <SwipeActionButton kind="save" onOpenForm={onOpenForm} />
+          <SwipeActionButton kind="like" onOpenForm={onOpenForm} />
+        </TooltipProvider>
       </div>
 
     </div>
@@ -218,35 +226,51 @@ function SwipeActionButton({
   kind: 'dislike' | 'save' | 'like';
   onOpenForm?: (e: MouseEvent) => void;
 }) {
-  const common = 'w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg';
-  const iconCls = 'w-5 h-5 md:w-6 md:h-6 text-white';
+  const common =
+    'w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform';
+  const iconCls = 'w-4 h-4 md:w-[18px] md:h-[18px] text-white';
   const handle = (e: MouseEvent) => {
     e.stopPropagation();
     onOpenForm?.(e);
   };
+
+  let btn: ReactNode;
+  let label: string;
   if (kind === 'dislike') {
-    return (
-      <button type="button" onClick={handle} aria-label="Nej tack" className={`${common} bg-destructive`}>
+    label = 'Nej tack';
+    btn = (
+      <button type="button" onClick={handle} aria-label={label} className={`${common} bg-destructive`}>
         <X className={iconCls} strokeWidth={2.5} />
       </button>
     );
-  }
-  if (kind === 'save') {
-    return (
+  } else if (kind === 'save') {
+    label = 'Spara jobbet';
+    btn = (
       <button
         type="button"
         onClick={handle}
-        aria-label="Spara"
+        aria-label={label}
         className={`${common} bg-secondary border border-white/25`}
       >
         <Bookmark className={iconCls} strokeWidth={2.25} />
       </button>
     );
+  } else {
+    label = 'Sök jobbet';
+    btn = (
+      <button type="button" onClick={handle} aria-label={label} className={`${common} bg-success`}>
+        <Heart className={`${iconCls} fill-white`} />
+      </button>
+    );
   }
+
   return (
-    <button type="button" onClick={handle} aria-label="Ansök" className={`${common} bg-success`}>
-      <Heart className={`${iconCls} fill-white`} />
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>{btn}</TooltipTrigger>
+      <TooltipContent side="top" sideOffset={6}>
+        {label}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
