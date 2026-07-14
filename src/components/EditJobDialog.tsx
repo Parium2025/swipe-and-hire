@@ -4000,25 +4000,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         {(() => {
                                           const textSizes = getSmartTextSizes();
                                           return (
-                                            <>
-                                              <button 
-                                                onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                                className={`${textSizes.company} font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
-                                                style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                                              >
-                                                {profile?.company_name || 'Företag'}
-                                              </button>
-                                              <AutoFitTitle
-                                                text={formData.title || 'Jobbtitel'}
-                                                className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-default`}
-                                                style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                                                minFontPx={15}
-                                                maxFontPx={33}
-                                              />
-                                              <div className={`${textSizes.meta}`} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
-                                                {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
-                                              </div>
-                                            </>
+                                            <WizardSwipeCardOverlay
+                                              size="md"
+                                              companyName={profile?.company_name || 'Företag'}
+                                              companyLogoUrl={profile?.company_logo_url}
+                                              title={formData.title || 'Jobbtitel'}
+                                              occupation={formData.occupation}
+                                              metaLine={getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
+                                              overlayTextColor={formData.overlay_text_color}
+                                              onCompanyClick={() => setShowCompanyProfile(true)}
+                                              titleMinFontPx={15}
+                                              titleMaxFontPx={33}
+                                            />
                                           );
                                         })()}
                                       </div>
