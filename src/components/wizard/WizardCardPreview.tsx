@@ -2,8 +2,10 @@ import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } fr
 import {
   Bookmark,
   Building2,
+  Eye,
   Gift,
   Heart,
+  Users,
   X,
 } from 'lucide-react';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
@@ -18,6 +20,7 @@ import {
   getJobOverlayTextStyle,
   normalizeJobOverlayTextColor,
 } from '@/lib/jobOverlayText';
+import { formatDateShortSv } from '@/lib/date';
 
 
 
