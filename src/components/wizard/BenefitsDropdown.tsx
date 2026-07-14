@@ -120,7 +120,7 @@ export const BenefitsDropdown = ({
             
             {/* Custom benefit input */}
             <div className="p-2 border-t border-white/10">
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Input
                   value={customBenefitInput}
                   onChange={(e) => setCustomBenefitInput(e.target.value)}
