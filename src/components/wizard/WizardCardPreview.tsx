@@ -135,50 +135,6 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
         style={overlayStyle}
       >
         <div className="w-full max-w-[95%]">
-          {/* Logga */}
-          <div className="flex justify-center mb-1">
-            {companyLogoUrl ? (
-              <div className="w-7 h-7 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
-                <img
-                  src={companyLogoUrl}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                />
-              </div>
-            ) : (
-              <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                <span className="text-[9px] font-bold text-white/70 tracking-wide">
-                  {initials}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Företagspill */}
-          <div className="flex justify-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenCompany?.(e);
-                  }}
-                  className="inline-flex max-w-[90%] items-center gap-1 px-1.5 py-[2px] rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
-                >
-                  <Building2 className="h-2 w-2 shrink-0 text-white" />
-                  <span className="text-[8px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-                    {companyName || 'Företag'}
-                  </span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={6}>
-                {companyName || 'Företag'}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
           {/* Titel */}
           <Tooltip>
             <TooltipTrigger asChild>
