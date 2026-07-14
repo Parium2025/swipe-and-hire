@@ -56,16 +56,6 @@ export interface WizardPreviewData {
   isActive?: boolean;
 }
 
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return '?';
-  if (words.length === 1) {
-    const w = words[0];
-    return (w[0] + (w[w.length - 1] || '')).toUpperCase();
-  }
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-}
-
 function getObjectPosition(v?: string): string {
   if (!v || v === 'center') return 'center 50%';
   if (v === 'top') return 'center 20%';
