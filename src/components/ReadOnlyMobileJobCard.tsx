@@ -281,6 +281,19 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
       {/* Content */}
        <div className="job-card-mobile-body space-y-2.5">
+        {/* Logo circle — always shown, matches employer card */}
+        <div className="flex justify-center pt-1">
+          {logoUrl ? (
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg">
+              <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
+            </div>
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <span className="text-base font-bold text-white/80 tracking-wide">{initials}</span>
+            </div>
+          )}
+        </div>
+
         {/* Title */}
         <div>
           <TruncatedText
@@ -291,22 +304,20 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         </div>
 
         {/* Company + Location — glass badges, centered, truncation-safe */}
-        {/* Only show company badge when there's a job image (otherwise it's already in the gradient) */}
         <div className="flex items-center justify-center gap-1.5 flex-wrap min-w-0">
-          {(displayUrl || !logoUrl) && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[55%] min-w-0 overflow-hidden text-white">
-              <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
-              <TruncatedText
-                text={companyName}
-                className="leading-snug font-medium whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1"
-              />
-            </Badge>
-          )}
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[55%] min-w-0 overflow-hidden text-white">
+            <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <TruncatedText
+              text={companyName}
+              className="leading-snug font-medium whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1"
+            />
+          </Badge>
           <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[42%] overflow-hidden text-white">
             <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
             <span className="leading-snug truncate">{job.location}</span>
           </Badge>
         </div>
+
 
         {/* Tags row — badges restored, centered */}
         <div className="flex items-center justify-center gap-1.5 flex-wrap">
