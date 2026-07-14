@@ -258,126 +258,20 @@ function SwipeActionButton({
 
 /* -----------------------------------------------------------------------
  * List preview — inuti monitor-mockupen (Steg 4 → Datorvy)
- * Matchar ReadOnlyMobileJobCard: bild överst, panel under med
- * titel + glass-pill-rader.
+ * Använder samma layout som swipe mode så mockuperna matchar exakt.
  * ---------------------------------------------------------------------*/
 
 interface WizardListPreviewProps extends WizardPreviewData {
   onOpenForm?: (e: MouseEvent) => void;
+  onOpenCompany?: (e: MouseEvent) => void;
 }
 
-export const WizardListPreview = memo(function WizardListPreview({
-  title,
-  companyName,
-  companyLogoUrl,
-  imageUrl,
-  imageFocusPosition,
-  employmentTypeLabel,
-  location,
-  salaryText,
-  benefitsCount = 0,
-  applicationsCount = 0,
-  daysLeftLabel,
-  overlayTextColor,
-  onOpenForm,
-}: WizardListPreviewProps) {
-  const overlayStyle: CSSProperties = useMemo(
-    () => getJobOverlayTextStyle(overlayTextColor),
-    [overlayTextColor],
-  );
-  const initials = useMemo(() => getInitials(companyName || 'Företag'), [companyName]);
-
-  return (
-    <div
-      className="absolute inset-0 z-10 flex items-center justify-center p-3 overflow-hidden cursor-pointer"
-      onClick={onOpenForm}
-    >
-      {/* Skalad kopia av riktiga listkortet */}
-      <div className="relative w-full max-w-[300px] rounded-xl overflow-hidden border border-white/20 bg-white/5 shadow-2xl">
-        {/* Bild-header */}
-        <div className="relative w-full" style={{ aspectRatio: '16 / 10' }}>
-          {imageUrl ? (
-            <>
-              <img
-                src={imageUrl}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ objectPosition: getObjectPosition(imageFocusPosition) }}
-                draggable={false}
-                loading="eager"
-                decoding="async"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </>
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-900/50 via-indigo-900/40 to-slate-900/60 flex flex-col items-center justify-center gap-1">
-              {companyLogoUrl ? (
-                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 overflow-hidden">
-                  <img src={companyLogoUrl} alt="" className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-white/60">{initials}</span>
-                </div>
-              )}
-            </div>
-          )}
-          {/* Heart top-right — matchar riktiga kortet */}
-          <div className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/50 border border-white/20 flex items-center justify-center">
-            <Heart className="h-3 w-3 text-white" />
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="px-2 py-2 space-y-1.5">
-          <TruncatedText
-            text={title || 'Jobbtitel'}
-            className="text-[11px] font-bold leading-snug line-clamp-2 text-center"
-            style={overlayStyle}
-          />
-
-          {/* Företag + plats */}
-          <div className="flex items-center justify-center gap-1 flex-wrap">
-            <ListPill icon={<Building2 className="h-2.5 w-2.5" />} text={companyName || 'Företag'} />
-            {location && <ListPill icon={<MapPin className="h-2.5 w-2.5" />} text={location} />}
-          </div>
-
-          {/* Tags-rad */}
-          <div className="flex items-center justify-center gap-1 flex-wrap">
-            {employmentTypeLabel && (
-              <ListPill icon={<Briefcase className="h-2.5 w-2.5" />} text={employmentTypeLabel} />
-            )}
-            {salaryText && (
-              <ListPill icon={<Banknote className="h-2.5 w-2.5" />} text={salaryText} />
-            )}
-            {daysLeftLabel && (
-              <ListPill icon={<Timer className="h-2.5 w-2.5" />} text={daysLeftLabel} />
-            )}
-            {benefitsCount > 0 && (
-              <ListPill
-                icon={<Gift className="h-2.5 w-2.5" />}
-                text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
-              />
-            )}
-            <ListPill
-              icon={<Users className="h-2.5 w-2.5" />}
-              text={`${applicationsCount} sökande`}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+export const WizardListPreview = memo(function WizardListPreview(
+  props: WizardListPreviewProps,
+) {
+  return <WizardSwipePreview {...props} />;
 });
 
-function ListPill({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <span className="inline-flex items-center gap-0.5 px-1.5 py-[2px] rounded-full border border-white/15 bg-white/10 text-[8px] font-medium leading-snug text-white max-w-full">
-      <span className="shrink-0">{icon}</span>
-      <span className="truncate">{text}</span>
-    </span>
-  );
-}
 
 /* -----------------------------------------------------------------------
  * Hjälpare: bygg WizardPreviewData från wizardens formData.
