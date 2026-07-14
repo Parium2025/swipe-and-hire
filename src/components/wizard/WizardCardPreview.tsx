@@ -327,23 +327,7 @@ export const WizardListPreview = memo(function WizardListPreview({
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-indigo-900/50 to-slate-900/70 flex flex-col items-center justify-center gap-2">
-            {companyLogoUrl ? (
-              <>
-                <div className="w-12 h-12 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                  <img src={companyLogoUrl} alt="" className="w-full h-full object-cover" draggable={false} />
-                </div>
-                <div className="text-[10px] px-2 py-0.5 border border-white/15 bg-white/10 leading-snug inline-flex items-center max-w-[80%] rounded-full" style={overlayStyle}>
-                  <Building2 className="h-3 w-3 mr-1 flex-shrink-0" />
-                  <span className="truncate font-medium">{companyName || 'Företag'}</span>
-                </div>
-              </>
-            ) : (
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-                <span className="text-lg font-bold text-white/60 tracking-wide">{initials}</span>
-              </div>
-            )}
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-indigo-900/50 to-slate-900/70" />
         )}
 
         {/* Centrerad titel över bilden */}
