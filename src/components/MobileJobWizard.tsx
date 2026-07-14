@@ -3824,12 +3824,12 @@ const MobileJobWizard = ({
                     {/* iPhone-stil telefonram */}
                     <div className="relative w-full h-full rounded-[2rem] bg-black p-1 shadow-xl">
                       {/* Skärm */}
-                      <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
+                      <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-card-parium">
                         {/* Dynamic Island-style notch */}
                         <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-2 w-10 rounded-full bg-black border border-gray-800"></div>
 
                         {/* Mobilansökningsformulär med korrekt Parium bakgrund */}
-                        <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
+                        <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden bg-card-parium">
                           
                            {/* Form container (toggle) */}
                            <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
@@ -4366,10 +4366,7 @@ const MobileJobWizard = ({
                         {/* Screen bezel */}
                         <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                           {/* Innehåll med Parium bakgrund */}
-                          <div 
-                            className="absolute inset-0"
-                            style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
-                          >
+                          <div className="absolute inset-0 bg-card-parium">
                             {/* Application Form View (when clicked) - IDENTICAL to mobile */}
                             {showDesktopApplicationForm && (
                               <div className="flex flex-col h-full">
