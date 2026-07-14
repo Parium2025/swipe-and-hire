@@ -22,6 +22,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
+import { WizardSwipeCardOverlay } from '@/components/wizard/WizardSwipeCardOverlay';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, formatEmploymentDetails, type DurationUnit } from '@/lib/employmentTypes';
 import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
