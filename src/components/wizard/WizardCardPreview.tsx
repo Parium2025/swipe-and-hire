@@ -1,4 +1,4 @@
-import { memo, useMemo, type CSSProperties, type MouseEvent } from 'react';
+import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import {
   Bookmark,
   Building2,
@@ -7,6 +7,12 @@ import {
   X,
 } from 'lucide-react';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   DEFAULT_JOB_OVERLAY_TEXT_COLOR,
   getJobOverlayTextStyle,
