@@ -3465,17 +3465,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           <>
                                             <button 
                                               onClick={() => setShowCompanyProfile(true)}
-                                              className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
+                                              className={`${textSizes.company} font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
+                                              style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                             >
                                               {profile?.company_name || 'Företag'}
                                             </button>
                                               <AutoFitTitle
                                               text={getDisplayTitle()}
-                                               className={`${textSizes.title} w-full text-white font-bold leading-tight mb-1 cursor-default`}
+                                               className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-default`}
+                                               style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                               minFontPx={15}
                                                maxFontPx={26}
                                             />
-                                            <div className={`${textSizes.meta} text-white`}>
+                                            <div className={`${textSizes.meta}`} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                             </div>
                                           </>
