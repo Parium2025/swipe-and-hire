@@ -2,8 +2,10 @@ import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } fr
 import {
   Bookmark,
   Building2,
+  Eye,
   Gift,
   Heart,
+  Users,
   X,
 } from 'lucide-react';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
@@ -18,6 +20,7 @@ import {
   getJobOverlayTextStyle,
   normalizeJobOverlayTextColor,
 } from '@/lib/jobOverlayText';
+import { formatDateShortSv } from '@/lib/date';
 
 
 
@@ -46,6 +49,11 @@ export interface WizardPreviewData {
   applicationsCount?: number;
   daysLeftLabel?: string;
   overlayTextColor?: string | null;
+  recruiterName?: string | null;
+  publishedLabel?: string | null;
+  viewsCount?: number;
+  isExpired?: boolean;
+  isActive?: boolean;
 }
 
 function getInitials(name: string): string {
@@ -307,7 +315,8 @@ function SwipeActionButton({
 
 /* -----------------------------------------------------------------------
  * List preview — inuti monitor-mockupen (Steg 4 → Datorvy)
- * Använder samma layout som swipe mode så mockuperna matchar exakt.
+ * Matchar riktiga /my-jobs-kortet (EmployerJobCard) — bild överst,
+ * scrollbara info-rader nedanför. Inga Redigera/Ta bort-knappar.
  * ---------------------------------------------------------------------*/
 
 interface WizardListPreviewProps extends WizardPreviewData {
@@ -315,11 +324,151 @@ interface WizardListPreviewProps extends WizardPreviewData {
   onOpenCompany?: (e: MouseEvent) => void;
 }
 
-export const WizardListPreview = memo(function WizardListPreview(
-  props: WizardListPreviewProps,
-) {
-  return <WizardSwipePreview {...props} />;
+export const WizardListPreview = memo(function WizardListPreview({
+  title,
+  companyName,
+  companyLogoUrl,
+  imageUrl,
+  imageFocusPosition,
+  employmentTypeLabel,
+  location,
+  salaryText,
+  applicationsCount = 0,
+  daysLeftLabel,
+  overlayTextColor,
+  recruiterName,
+  publishedLabel,
+  viewsCount = 0,
+  isExpired,
+  isActive,
+  onOpenForm,
+}: WizardListPreviewProps) {
+  const overlayStyle: CSSProperties = useMemo(
+    () => getJobOverlayTextStyle(overlayTextColor),
+    [overlayTextColor],
+  );
+  const initials = useMemo(() => getInitials(companyName || 'Företag'), [companyName]);
+
+  return (
+    <div
+      className="absolute inset-0 z-10 flex justify-center overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain"
+      onClick={onOpenForm}
+    >
+      <div className="w-full max-w-[260px] my-2 rounded-xl overflow-hidden bg-white/5 border border-white/20 shadow-lg">
+        {/* Bildheader */}
+        <div className="relative w-full aspect-[4/3] overflow-hidden">
+          {imageUrl ? (
+            <>
+              <img
+                src={imageUrl}
+                alt=""
+                className="w-full h-full object-cover"
+                style={{ objectPosition: getObjectPosition(imageFocusPosition) }}
+                draggable={false}
+                loading="eager"
+                decoding="async"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            </>
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-blue-900/50 via-indigo-900/40 to-slate-900/60 flex flex-col items-center justify-center gap-1.5">
+              {companyLogoUrl ? (
+                <>
+                  <div className="w-9 h-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
+                    <img src={companyLogoUrl} alt="" className="w-full h-full object-cover" draggable={false} />
+                  </div>
+                  <div className="text-[9px] px-1.5 py-0.5 border border-white/15 bg-white/10 leading-snug inline-flex items-center max-w-[80%] rounded-full" style={overlayStyle}>
+                    <Building2 className="h-2.5 w-2.5 mr-0.5 flex-shrink-0" />
+                    <span className="truncate font-medium">{companyName || 'Företag'}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+                  <span className="text-sm font-bold text-white/60 tracking-wide">{initials}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Status badge — top-left */}
+          <div className="absolute top-1.5 left-1.5">
+            {isExpired ? (
+              <span className="inline-flex items-center rounded-full bg-red-500/90 text-white text-[9px] font-semibold px-1.5 py-0.5 border border-white/10">
+                Utgången
+              </span>
+            ) : isActive === false ? (
+              <span className="inline-flex items-center rounded-full bg-amber-500/90 text-white text-[9px] font-semibold px-1.5 py-0.5">
+                Utkast
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-full bg-green-500/90 text-white text-[9px] font-semibold px-1.5 py-0.5">
+                Aktiv
+              </span>
+            )}
+          </div>
+
+          {/* Views badge — top-right */}
+          <div className="absolute top-1.5 right-1.5 flex items-center gap-1 bg-black/60 rounded-full px-1.5 py-0.5 border border-white/15">
+            <Eye className="h-2.5 w-2.5 text-white" />
+            <span className="text-[9px] font-medium text-white">{viewsCount || 0}</span>
+          </div>
+        </div>
+
+        {/* Innehåll */}
+        <div className="flex flex-col gap-0.5 py-1">
+          {/* Titel */}
+          <div className="px-2 pt-0.5 pb-1">
+            <p
+              className="w-full text-center text-[11px] font-bold leading-[1.3] line-clamp-2"
+              style={overlayStyle}
+            >
+              {title || 'Jobbtitel'}
+            </p>
+          </div>
+
+          <div className="h-px bg-white/10 mx-2" />
+
+          <div className="space-y-1 px-2.5 py-1">
+            <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
+            <PreviewRow
+              label="Ansökningar"
+              value={
+                <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium">
+                  <Users className="h-2.5 w-2.5 flex-shrink-0" />
+                  {applicationsCount || 0}
+                </span>
+              }
+            />
+            <PreviewRow label="Plats" value={location || '–'} />
+            <PreviewRow label="Rekryterare" value={recruiterName || '–'} />
+            <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
+            {salaryText && <PreviewRow label="Lön" value={salaryText} />}
+            <PreviewRow
+              label="Status"
+              value={
+                <span className={isExpired ? 'text-red-300 font-medium' : 'font-medium'}>
+                  {isExpired ? 'Utgången' : `${daysLeftLabel || '30 dagar kvar'}`}
+                </span>
+              }
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 });
+
+function PreviewRow({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="flex items-start justify-between gap-2">
+      <span className="text-[10px] leading-snug text-white">{label}</span>
+      <span className="text-[10px] leading-snug text-white font-medium text-right max-w-[62%] break-words">
+        {value}
+      </span>
+    </div>
+  );
+}
+
 
 
 /* -----------------------------------------------------------------------
@@ -344,6 +493,10 @@ interface BuildPreviewInput {
   applicationsCount?: number;
   expiresAt?: string | null;
   overlayTextColor?: string | null;
+  recruiterName?: string | null;
+  createdAt?: string | null;
+  viewsCount?: number;
+  isActive?: boolean;
 }
 
 export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewData {
@@ -371,14 +524,16 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
 
   // Days-left: från expires_at om satt, annars 30 dagar (standardpublicering).
   let daysLeftLabel: string | undefined;
+  let isExpired = false;
   if (input.expiresAt) {
-    const diff = Math.max(
-      0,
-      Math.floor(
-        (new Date(input.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-      ),
-    );
-    daysLeftLabel = diff === 0 ? 'Sista dagen' : `${diff} dagar kvar`;
+    const diffMs = new Date(input.expiresAt).getTime() - Date.now();
+    if (diffMs <= 0) {
+      isExpired = true;
+      daysLeftLabel = 'Utgången';
+    } else {
+      const diff = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      daysLeftLabel = diff === 0 ? 'Sista dagen' : `${diff} dagar kvar`;
+    }
   } else {
     daysLeftLabel = '30 dagar kvar';
   }
@@ -388,6 +543,10 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     .join(' · ');
 
   const metaParts = [employmentLabelWithDetail, input.location].filter(Boolean);
+
+  const publishedLabel = input.createdAt
+    ? formatDateShortSv(input.createdAt)
+    : formatDateShortSv(new Date().toISOString());
 
   return {
     title: input.title,
@@ -404,5 +563,10 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     applicationsCount: input.applicationsCount ?? 0,
     daysLeftLabel,
     overlayTextColor: normalizeJobOverlayTextColor(input.overlayTextColor ?? DEFAULT_JOB_OVERLAY_TEXT_COLOR),
+    recruiterName: input.recruiterName ?? null,
+    publishedLabel,
+    viewsCount: input.viewsCount ?? 0,
+    isExpired,
+    isActive: input.isActive,
   };
 }
