@@ -164,14 +164,14 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
       {/* Content body */}
       <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
         {/* Logo + Title */}
-        <div className="flex h-[clamp(5.25rem,4.6rem+2vw,6.5rem)] flex-col items-center justify-start gap-1.5 px-2 pt-2">
+        <div className="flex flex-col items-center justify-start gap-1.5 px-2 pt-2">
           {logoUrl ? (
-            <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
               <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
             </div>
           ) : (
-            <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-[11px] font-bold text-white/70 tracking-wide">{initials}</span>
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-lg">
+              <span className="text-base font-bold text-white/70 tracking-wide">{initials}</span>
             </div>
           )}
           <TruncatedText
@@ -187,11 +187,11 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
         {/* Info rows */}
         <div className="space-y-2 px-3 pb-1">
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Rekryterare</span>
+            <span className="text-sm leading-snug text-white">Rekryterare:</span>
             <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{recruiterName || '–'}</span>
           </div>
           <div className="flex items-start justify-between gap-3">
-            <span className="text-sm leading-snug text-white">Anställningsform</span>
+            <span className="text-sm leading-snug text-white">Anställningsform:</span>
             {(() => {
               const details = formatEmploymentDetails({
                 employment_type: job.employment_type,
@@ -209,18 +209,18 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             })()}
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Ansökningar</span>
+            <span className="text-sm leading-snug text-white">Ansökningar:</span>
             <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
               <Users className="h-3.5 w-3.5 flex-shrink-0" />
               {job.applications_count || 0}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Plats</span>
+            <span className="text-sm leading-snug text-white">Plats:</span>
             <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{job.location || '–'}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Publicerad</span>
+            <span className="text-sm leading-snug text-white">Publicerad:</span>
             <span className="text-sm leading-snug text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
           </div>
           {(() => {
@@ -232,7 +232,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             });
             return (
               <div className="flex items-start justify-between gap-3">
-                <span className="text-sm leading-snug text-white">Lön</span>
+                <span className="text-sm leading-snug text-white">Lön:</span>
                 <span className="text-sm leading-snug text-white font-medium text-right max-w-[65%] break-words">
                   {salaryText || '–'}
                 </span>
@@ -243,7 +243,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-between cursor-pointer">
-                  <span className="text-sm leading-snug text-white">Status</span>
+                  <span className="text-sm leading-snug text-white">Status:</span>
                   <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-300' : 'text-white'}`}>
                     {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
                   </span>
