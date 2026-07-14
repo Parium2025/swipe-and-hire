@@ -257,8 +257,8 @@ function SwipeActionButton({
   onOpenForm?: (e: MouseEvent) => void;
 }) {
   const common =
-    'w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform';
-  const iconCls = 'w-4 h-4 md:w-[18px] md:h-[18px] text-white';
+    'w-8 h-8 rounded-full flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform';
+  const iconCls = 'w-4 h-4 text-white';
   const handle = (e: MouseEvent) => {
     e.stopPropagation();
     onOpenForm?.(e);
