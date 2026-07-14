@@ -1812,6 +1812,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         job_image_desktop_url: formData.job_image_desktop_url || null,
         image_focus_position: formData.image_focus_position || 'center',
         image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
+        overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         ...(isDraft ? {
           is_active: true,
           created_at: new Date().toISOString(),
