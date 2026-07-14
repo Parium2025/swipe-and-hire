@@ -219,26 +219,9 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
         ) : (
-          /* Gradient placeholder with company initials */
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2 pb-6`}>
-            {logoUrl ? (
-              <>
-                <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                  <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
-                </div>
-                <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] min-w-0 overflow-hidden">
-                  <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
-                  <TruncatedText
-                    text={companyName}
-                    className="leading-snug font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1"
-                  />
-                </Badge>
-              </>
-            ) : (
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-                <span className="text-xl font-bold text-white/50 tracking-wide">{initials}</span>
-              </div>
-            )}
+          /* Gradient placeholder with large company initials — matches employer card */
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+            <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
           </div>
         )}
         
