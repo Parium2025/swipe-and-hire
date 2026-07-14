@@ -180,30 +180,30 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
 
         <div className="space-y-2 px-3 pb-1">
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Rekryterare</span>
+            <span className="text-sm leading-snug text-white">Rekryterare:</span>
             <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{recruiterName || '–'}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Anställningsform</span>
+            <span className="text-sm leading-snug text-white">Anställningsform:</span>
             <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Ansökningar</span>
+            <span className="text-sm leading-snug text-white">Ansökningar:</span>
             <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
               <Users className="h-3.5 w-3.5 flex-shrink-0" />
               {job.applications_count || 0}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Plats</span>
+            <span className="text-sm leading-snug text-white">Plats:</span>
             <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{job.location || '–'}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Publicerad</span>
+            <span className="text-sm leading-snug text-white">Publicerad:</span>
             <span className="text-sm leading-snug text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Status</span>
+            <span className="text-sm leading-snug text-white">Status:</span>
             <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-300' : isDraft ? 'text-amber-300' : 'text-white'}`}>
               {isExpired ? 'Utgången' : isDraft ? 'Utkast' : `${timeInfo.text} kvar`}
             </span>
