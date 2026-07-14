@@ -645,10 +645,31 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     const titleLength = jobTitle.length;
     const metaLength = metaLine.length;
 
-    // Fixed sizes for consistent appearance regardless of text length
-    const companySizeClass = 'text-xs';
-    const titleSizeClass = 'text-xl';
-    const metaSizeClass = 'text-xs';
+    let companySizeClass = 'text-sm';
+    let titleSizeClass = 'text-2xl';
+    let metaSizeClass = 'text-sm';
+
+    if (titleLength > 50) {
+      titleSizeClass = 'text-base';
+    } else if (titleLength > 35) {
+      titleSizeClass = 'text-lg';
+    } else if (titleLength > 20) {
+      titleSizeClass = 'text-xl';
+    } else {
+      titleSizeClass = 'text-2xl';
+    }
+
+    if (companyLength > 15) {
+      companySizeClass = 'text-sm';
+    } else if (companyLength < 8) {
+      companySizeClass = 'text-sm';
+    }
+
+    if (metaLength > 20) {
+      metaSizeClass = 'text-sm';
+    } else if (metaLength < 10) {
+      metaSizeClass = 'text-sm';
+    }
 
     return {
       company: companySizeClass,
@@ -2046,7 +2067,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         )}
 
                         {/* Custom benefit input - matching MobileJobWizard */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex gap-2">
                           <Input
                             type="text"
                             value={customBenefitInput}
@@ -2059,7 +2080,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               }
                             }}
                             placeholder="Lägg till egen förmån"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40 flex-1"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 text-sm focus:border-white/40 flex-1"
                           />
                           <div
                             onClick={() => {
@@ -2220,7 +2241,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
                           onMouseDown={(e) => e.currentTarget.blur()}
                           onMouseUp={(e) => e.currentTarget.blur()}
-                          className="h-9 w-9 min-w-[2.25rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 !rounded-full text-white hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-0"
+                         className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
                         >
                           <Minus className="h-4 w-4" />
                         </button>
@@ -2229,7 +2250,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
                           onMouseDown={(e) => e.currentTarget.blur()}
                           onMouseUp={(e) => e.currentTarget.blur()}
-                          className="h-9 w-9 min-w-[2.25rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 !rounded-full text-white hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-0"
+                          className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
                         >
                           <Plus className="h-4 w-4" />
                         </button>
@@ -3442,40 +3463,36 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         const textSizes = getSmartTextSizes();
                                         return (
                                           <>
-                                            <button
+                                            <button 
                                               onClick={() => setShowCompanyProfile(true)}
-                                              className="inline-flex max-w-[80%] items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] mb-1"
-                                            >
-                                              <Building2 className="h-3 w-3 shrink-0 text-white" />
-                                              <span className={`${textSizes.company} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
-                                                {profile?.company_name || 'Företag'}
-                                              </span>
-                                            </button>
-                                            <AutoFitTitle
-                                              text={getDisplayTitle()}
-                                              className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-default`}
+                                              className={`${textSizes.company} font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
                                               style={getJobOverlayTextStyle(formData.overlay_text_color)}
+                                            >
+                                              {profile?.company_name || 'Företag'}
+                                            </button>
+                                              <AutoFitTitle
+                                              text={getDisplayTitle()}
+                                               className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-default`}
+                                               style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                               minFontPx={15}
-                                              maxFontPx={20}
+                                               maxFontPx={26}
                                             />
-                                            <div className="inline-flex max-w-[90%] items-center px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
-                                              <span className={`${textSizes.meta} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
-                                                {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
-                                              </span>
+                                            <div className={`${textSizes.meta}`} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
+                                              {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                             </div>
                                           </>
                                         );
                                       })()}
                                     </div>
                                     <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
-                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Nej tack" className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
-                                        <X className="h-3.5 w-3.5 text-white" />
+                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
+                                        <X className="h-4 w-4 text-white" />
                                       </button>
-                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Spara" className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
-                                        <Bookmark className="h-3.5 w-3.5 text-white" />
+                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
+                                        <Bookmark className="h-4 w-4 text-white" />
                                       </button>
-                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                        <Heart className="h-3.5 w-3.5 text-white fill-white" />
+                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
+                                        <Heart className="h-4 w-4 text-white fill-white" />
                                       </button>
                                     </div>
                                   </div>
@@ -3990,39 +4007,35 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           const textSizes = getSmartTextSizes();
                                           return (
                                             <>
-                                              <button
+                                              <button 
                                                 onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                                className="inline-flex max-w-[80%] items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] mb-1"
+                                                className={`${textSizes.company} font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
+                                                style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                               >
-                                                <Building2 className="h-3 w-3 shrink-0 text-white" />
-                                                <span className={`${textSizes.company} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
-                                                  {profile?.company_name || 'Företag'}
-                                                </span>
+                                                {profile?.company_name || 'Företag'}
                                               </button>
                                               <AutoFitTitle
                                                 text={formData.title || 'Jobbtitel'}
                                                 className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-default`}
                                                 style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                                 minFontPx={15}
-                                                maxFontPx={20}
+                                                maxFontPx={33}
                                               />
-                                              <div className="inline-flex max-w-[90%] items-center px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
-                                                <span className={`${textSizes.meta} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
-                                                  {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
-                                                </span>
+                                              <div className={`${textSizes.meta}`} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
+                                                {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                               </div>
                                             </>
                                           );
                                         })()}
                                       </div>
                                       <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
-                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Nej tack" className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
+                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
                                           <X className="h-3.5 w-3.5 text-white" />
                                         </button>
-                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Spara" className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
+                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
                                           <Bookmark className="h-3.5 w-3.5 text-white" />
                                         </button>
-                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
+                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
                                           <Heart className="h-3.5 w-3.5 text-white fill-white" />
                                         </button>
                                       </div>

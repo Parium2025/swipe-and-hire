@@ -692,10 +692,36 @@ const MobileJobWizard = ({
     const titleLength = jobTitle.length;
     const metaLength = metaLine.length;
 
-    // Fixed sizes for consistent appearance regardless of text length
-    const companySizeClass = 'text-xs';
-    const titleSizeClass = 'text-xl';
-    const metaSizeClass = 'text-xs';
+    // Title is the hero element: make it as large as possible while still
+    // fitting on a single line. AutoFitTitle will shrink from these base sizes
+    // down to minFontPx if needed, but never wrap.
+    let companySizeClass = 'text-sm';
+    let titleSizeClass = 'text-xl';
+    let metaSizeClass = 'text-sm';
+
+    if (titleLength > 50) {
+      titleSizeClass = 'text-base';
+    } else if (titleLength > 35) {
+      titleSizeClass = 'text-lg';
+    } else if (titleLength > 20) {
+      titleSizeClass = 'text-xl';
+    } else {
+      titleSizeClass = 'text-2xl';
+    }
+
+    // Adjust company name - keep it subtle but readable
+    if (companyLength > 15) {
+      companySizeClass = 'text-xs';
+    } else if (companyLength < 8) {
+      companySizeClass = 'text-sm';
+    }
+
+    // Ensure meta info is always readable but smaller than the title
+    if (metaLength > 25) {
+      metaSizeClass = 'text-xs';
+    } else if (metaLength < 10) {
+      metaSizeClass = 'text-sm';
+    }
 
     return {
       company: companySizeClass,
@@ -2860,7 +2886,7 @@ const MobileJobWizard = ({
                   )}
 
                   {/* Övrigt / Custom benefit */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex gap-2">
                     <Input
                       type="text"
                       value={customBenefitInput}
@@ -3035,14 +3061,14 @@ const MobileJobWizard = ({
                     <button
                       type="button"
                       onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
-                      className="h-9 w-9 min-w-[2.25rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 !rounded-full text-white hover:bg-white/20 transition-all duration-300"
+                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
-                      className="h-9 w-9 min-w-[2.25rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 !rounded-full text-white hover:bg-white/20 transition-all duration-300"
+                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -4303,46 +4329,43 @@ const MobileJobWizard = ({
                             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                             <div 
                               className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-center cursor-pointer overflow-y-auto overscroll-contain"
+                              style={getJobOverlayTextStyle(formData.overlay_text_color)}
                               onClick={() => setShowApplicationForm(true)}
                             >
               {(() => {
                 const textSizes = getSmartTextSizes();
                 return (
                   <>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                      className="inline-flex max-w-[80%] items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] mb-1"
+                    <button 
+                      onClick={() => setShowCompanyProfile(true)}
+                      className={`${textSizes.company} font-medium mb-1 cursor-pointer text-left line-clamp-1`}
+                      style={getJobOverlayTextStyle(formData.overlay_text_color)}
                     >
-                      <Building2 className="h-3 w-3 shrink-0 text-white" />
-                      <span className={`${textSizes.company} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
-                        {profile?.company_name || 'Företag'}
-                      </span>
+                      {profile?.company_name || 'Företag'}
                     </button>
                     <AutoFitTitle
                       text={getDisplayTitle()}
                       className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-pointer`}
                       style={getJobOverlayTextStyle(formData.overlay_text_color)}
                       minFontPx={15}
-                      maxFontPx={20}
+                      maxFontPx={26}
                     />
-                    <div className="inline-flex max-w-[90%] items-center px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
-                      <span className={`${textSizes.meta} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
-                        {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
-                      </span>
+                    <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
+                      {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                     </div>
                   </>
                 );
               })()}
                             </div>
                             <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
-                              <button onClick={() => setShowApplicationForm(true)} aria-label="Nej tack" className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
-                                <X className="h-3.5 w-3.5 text-white" />
+                              <button onClick={() => setShowApplicationForm(true)} aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
+                                <X className="h-4 w-4 text-white" />
                               </button>
-                              <button onClick={() => setShowApplicationForm(true)} aria-label="Spara" className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
-                                <Bookmark className="h-3.5 w-3.5 text-white" />
+                              <button onClick={() => setShowApplicationForm(true)} aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
+                                <Bookmark className="h-4 w-4 text-white" />
                               </button>
-                              <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                <Heart className="h-3.5 w-3.5 text-white fill-white" />
+                              <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
+                                <Heart className="h-4 w-4 text-white fill-white" />
                               </button>
                             </div>
                           </div>
@@ -4880,32 +4903,29 @@ const MobileJobWizard = ({
                                 {/* Content - clickable to show form */}
                                 <div 
                                   className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
+                                  style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                   onClick={() => setShowDesktopApplicationForm(true)}
                                 >
                                   {(() => {
                                     const textSizes = getSmartTextSizes();
                                     return (
                                       <>
-                                        <button
-                                          onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                          className="inline-flex max-w-[80%] items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] mb-1"
-                                        >
-                                          <Building2 className="h-3 w-3 shrink-0 text-white" />
-                                          <span className={`${textSizes.company} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
-                                            {profile?.company_name || 'Företag'}
-                                          </span>
+                                         <button 
+                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
+ className={`${textSizes.company} font-medium mb-1 cursor-pointer text-left line-clamp-1`}
+                                            style={getJobOverlayTextStyle(formData.overlay_text_color)}
+                                         >
+                                          {profile?.company_name || 'Företag'}
                                         </button>
-                                        <AutoFitTitle
-                                          text={formData.title || 'Jobbtitel'}
-                                          className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-pointer`}
-                                          style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                                          minFontPx={15}
-                                          maxFontPx={20}
-                                        />
-                                        <div className="inline-flex max-w-[90%] items-center px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
-                                          <span className={`${textSizes.meta} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
-                                            {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
-                                          </span>
+                                         <AutoFitTitle
+                                           text={formData.title || 'Jobbtitel'}
+                                           className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-pointer`}
+                                           style={getJobOverlayTextStyle(formData.overlay_text_color)}
+                                           minFontPx={15}
+                                           maxFontPx={33}
+                                         />
+                                        <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
+                                          {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                         </div>
                                       </>
                                     );
@@ -4917,21 +4937,21 @@ const MobileJobWizard = ({
                                   <button 
                                     onClick={() => setShowDesktopApplicationForm(true)}
                                     aria-label="Nej tack" 
-                                    className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto"
+                                    className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto"
                                   >
                                     <X className="h-3.5 w-3.5 text-white" />
                                   </button>
                                   <button 
                                     onClick={() => setShowDesktopApplicationForm(true)}
                                     aria-label="Spara" 
-                                    className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto"
+                                    className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto"
                                   >
                                     <Bookmark className="h-3.5 w-3.5 text-white" />
                                   </button>
                                   <button 
                                     onClick={() => setShowDesktopApplicationForm(true)} 
                                     aria-label="Ansök" 
-                                    className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto"
+                                    className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto"
                                   >
                                     <Heart className="h-3.5 w-3.5 text-white fill-white" />
                                   </button>

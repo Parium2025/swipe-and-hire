@@ -119,14 +119,14 @@ export const BenefitsDropdown = ({
             </div>
             
             {/* Custom benefit input */}
-            <div className="pl-2 pr-0 border-t border-white/10">
-              <div className="flex items-center gap-2">
+            <div className="p-2 border-t border-white/10">
+              <div className="flex gap-2">
                 <Input
                   value={customBenefitInput}
                   onChange={(e) => setCustomBenefitInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Lägg till egen förmån"
-                  className="flex-1 h-11 !min-h-0 bg-white/10 border-white/20 text-white text-sm placeholder:text-white"
+                  className="flex-1 h-11 bg-white/10 border-white/20 text-white text-sm placeholder:text-white"
                   onClick={(e) => e.stopPropagation()}
                 />
                 <button

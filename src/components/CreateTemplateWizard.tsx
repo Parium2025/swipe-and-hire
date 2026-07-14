@@ -1765,7 +1765,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   )}
 
                   {/* Övrigt / Custom benefit */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex gap-2">
                     <Input
                       type="text"
                       value={customBenefitInput}
@@ -1778,7 +1778,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         }
                       }}
                       placeholder="Lägg till egen förmån"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40 flex-1"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 text-sm focus:border-white/40 flex-1"
                     />
                     <div
                       onClick={() => {
@@ -1921,7 +1921,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="h-9 w-9 min-w-[2.25rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 !rounded-full text-white hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-0"
+                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
@@ -1930,7 +1930,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="h-9 w-9 min-w-[2.25rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 !rounded-full text-white hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-0"
+                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
