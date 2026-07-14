@@ -1788,9 +1788,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
+                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square inline-flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors leading-none p-0"
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="h-4 w-4 block" />
                     </button>
                   </div>
                 </div>
