@@ -49,6 +49,11 @@ export interface WizardPreviewData {
   applicationsCount?: number;
   daysLeftLabel?: string;
   overlayTextColor?: string | null;
+  recruiterName?: string | null;
+  publishedLabel?: string | null;
+  viewsCount?: number;
+  isExpired?: boolean;
+  isActive?: boolean;
 }
 
 function getInitials(name: string): string {
