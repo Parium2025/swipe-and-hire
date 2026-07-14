@@ -3824,12 +3824,12 @@ const MobileJobWizard = ({
                     {/* iPhone-stil telefonram */}
                     <div className="relative w-full h-full rounded-[2rem] bg-black p-1 shadow-xl">
                       {/* Skärm */}
-                      <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-parium-gradient">
+                      <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-card-parium">
                         {/* Dynamic Island-style notch */}
                         <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-2 w-10 rounded-full bg-black border border-gray-800"></div>
 
                         {/* Mobilansökningsformulär med korrekt Parium bakgrund */}
-                        <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden bg-parium-gradient">
+                        <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden bg-card-parium">
                           
                            {/* Form container (toggle) */}
                            <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
