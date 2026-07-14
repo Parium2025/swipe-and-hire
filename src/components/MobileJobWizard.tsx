@@ -3061,14 +3061,14 @@ const MobileJobWizard = ({
                     <button
                       type="button"
                       onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
-                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
+                      className="h-9 w-9 min-w-[2.25rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 !rounded-full text-white hover:bg-white/20 transition-all duration-300"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
-                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
+                      className="h-9 w-9 min-w-[2.25rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 !rounded-full text-white hover:bg-white/20 transition-all duration-300"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
