@@ -353,10 +353,10 @@ const Dashboard = memo(() => {
                 { key: 'expired', jobs: pagedBuckets.expired as any },
               ]}
               renderCard={(job) => (
-                <ReadOnlyMobileJobCard
+                <EmployerJobCard
                   job={job as any}
-                  hideSaveButton
-                  onCardClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
+                  activeTab={activeTab as 'active' | 'expired'}
+                  onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                 />
               )}
             />
