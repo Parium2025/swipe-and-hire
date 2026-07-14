@@ -235,9 +235,9 @@ function PreviewPill({ icon, text }: { icon?: React.ReactNode; text: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="inline-flex items-center gap-0.5 px-1.5 py-[2px] rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] max-w-full cursor-default">
+        <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] max-w-full cursor-default">
           {icon}
-          <span className="text-[7px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+          <span className="text-[9px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
             {text}
           </span>
         </div>
