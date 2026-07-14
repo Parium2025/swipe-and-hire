@@ -423,6 +423,7 @@ export const WizardListPreview = memo(function WizardListPreview({
         </p>
         <div className="h-px bg-white/10 mb-2" />
         <div className="space-y-1.5">
+          <PreviewRow label="Rekryterare" value={recruiterName || '–'} />
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
           <PreviewRow
             label="Ansökningar"
@@ -434,9 +435,8 @@ export const WizardListPreview = memo(function WizardListPreview({
             }
           />
           <PreviewRow label="Plats" value={location || '–'} />
-          <PreviewRow label="Rekryterare" value={recruiterName || '–'} />
           <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
-          {salaryText && <PreviewRow label="Lön" value={salaryText} />}
+          <PreviewRow label="Lön" value={salaryText || '–'} />
           <PreviewRow
             label="Status"
             value={
