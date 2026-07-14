@@ -977,6 +977,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         part_time_days: (job as any).part_time_days || [],
         duration_amount: (job as any).duration_amount != null ? String((job as any).duration_amount) : '',
         duration_unit: (job as any).duration_unit || 'months',
+        overlay_text_color: normalizeJobOverlayTextColor((job as any).overlay_text_color),
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
