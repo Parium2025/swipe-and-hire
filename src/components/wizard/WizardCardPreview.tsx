@@ -1,7 +1,6 @@
 import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import {
   Bookmark,
-  Building2,
   ChevronDown,
   Eye,
   Gift,
