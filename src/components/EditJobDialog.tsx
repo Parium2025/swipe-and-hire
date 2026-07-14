@@ -3496,7 +3496,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               {/* Screen bezel */}
                               <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                                 {/* Content with Parium background */}
-                                <div className="absolute inset-0 bg-parium-gradient">
+                                <div className="absolute inset-0 bg-card-parium">
                                   {/* Application Form View (when clicked) */}
                                   {showDesktopApplicationForm && (
                                     <div className="flex flex-col h-full">
