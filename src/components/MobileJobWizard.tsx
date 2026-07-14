@@ -2702,8 +2702,8 @@ const MobileJobWizard = ({
               <DialogTitle className="premium-edit-title">
                 {steps[currentStep].title}
               </DialogTitle>
-              {currentStep === steps.length - 1 && (
-                <p className="text-white text-[11px] font-medium tracking-wide mb-0.5 block md:hidden">
+              {currentStep === steps.length - 1 && previewMode === 'mobile' && (
+                <p className="text-white text-[11px] font-medium tracking-wide mb-0.5">
                   (från swipe mode)
                 </p>
               )}
