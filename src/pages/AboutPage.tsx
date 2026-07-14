@@ -104,7 +104,7 @@ const AboutPage = () => {
             className="absolute inset-0 h-full w-full object-cover object-center"
             loading="eager"
             decoding="sync"
-            {...({ fetchPriority: 'high' } as any)}
+            fetchPriority="high"
           />
           {/* Mörkningslager — kraftig kontrast så texten alltid är läsbar */}
           <div className="absolute inset-0 bg-black/60" />
