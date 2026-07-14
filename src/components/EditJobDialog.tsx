@@ -3444,7 +3444,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           <>
                                             <button
                                               onClick={() => setShowCompanyProfile(true)}
-                                              className="inline-flex max-w-[80%] items-center gap-1.5 px-3 py-1 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] mb-1"
+                                              className="inline-flex max-w-[80%] items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] mb-1"
                                             >
                                               <Building2 className="h-3 w-3 shrink-0 text-white" />
                                               <span className={`${textSizes.company} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
@@ -3456,9 +3456,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-default`}
                                               style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                               minFontPx={15}
-                                              maxFontPx={26}
+                                              maxFontPx={20}
                                             />
-                                            <div className="inline-flex max-w-[90%] items-center px-3 py-1 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                                            <div className="inline-flex max-w-[90%] items-center px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
                                               <span className={`${textSizes.meta} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
                                                 {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                               </span>
@@ -3468,14 +3468,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       })()}
                                     </div>
                                     <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
-                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
-                                        <X className="h-4 w-4 text-white" />
+                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Nej tack" className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
+                                        <X className="h-3.5 w-3.5 text-white" />
                                       </button>
-                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
-                                        <Bookmark className="h-4 w-4 text-white" />
+                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Spara" className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
+                                        <Bookmark className="h-3.5 w-3.5 text-white" />
                                       </button>
-                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                        <Heart className="h-4 w-4 text-white fill-white" />
+                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
+                                        <Heart className="h-3.5 w-3.5 text-white fill-white" />
                                       </button>
                                     </div>
                                   </div>
@@ -3992,7 +3992,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             <>
                                               <button
                                                 onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                                className="inline-flex max-w-[80%] items-center gap-1.5 px-3 py-1 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] mb-1"
+                                                className="inline-flex max-w-[80%] items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] mb-1"
                                               >
                                                 <Building2 className="h-3 w-3 shrink-0 text-white" />
                                                 <span className={`${textSizes.company} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
@@ -4004,9 +4004,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-default`}
                                                 style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                                 minFontPx={15}
-                                                maxFontPx={33}
+                                                maxFontPx={20}
                                               />
-                                              <div className="inline-flex max-w-[90%] items-center px-3 py-1 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                                              <div className="inline-flex max-w-[90%] items-center px-2 py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
                                                 <span className={`${textSizes.meta} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
                                                   {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                                 </span>
@@ -4016,13 +4016,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         })()}
                                       </div>
                                       <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
-                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
+                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Nej tack" className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
                                           <X className="h-3.5 w-3.5 text-white" />
                                         </button>
-                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
+                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Spara" className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
                                           <Bookmark className="h-3.5 w-3.5 text-white" />
                                         </button>
-                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
+                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
                                           <Heart className="h-3.5 w-3.5 text-white fill-white" />
                                         </button>
                                       </div>
