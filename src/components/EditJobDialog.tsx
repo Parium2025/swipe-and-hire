@@ -645,31 +645,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     const titleLength = jobTitle.length;
     const metaLength = metaLine.length;
 
-    let companySizeClass = 'text-sm';
-    let titleSizeClass = 'text-2xl';
-    let metaSizeClass = 'text-sm';
-
-    if (titleLength > 50) {
-      titleSizeClass = 'text-base';
-    } else if (titleLength > 35) {
-      titleSizeClass = 'text-lg';
-    } else if (titleLength > 20) {
-      titleSizeClass = 'text-xl';
-    } else {
-      titleSizeClass = 'text-2xl';
-    }
-
-    if (companyLength > 15) {
-      companySizeClass = 'text-sm';
-    } else if (companyLength < 8) {
-      companySizeClass = 'text-sm';
-    }
-
-    if (metaLength > 20) {
-      metaSizeClass = 'text-sm';
-    } else if (metaLength < 10) {
-      metaSizeClass = 'text-sm';
-    }
+    // Fixed sizes for consistent appearance regardless of text length
+    const companySizeClass = 'text-xs';
+    const titleSizeClass = 'text-xl';
+    const metaSizeClass = 'text-xs';
 
     return {
       company: companySizeClass,
