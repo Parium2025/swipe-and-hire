@@ -233,12 +233,19 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
 
 function PreviewPill({ icon, text }: { icon?: React.ReactNode; text: string }) {
   return (
-    <div className="inline-flex items-center gap-0.5 px-1.5 py-[2px] md:px-2 md:py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] max-w-full">
-      {icon}
-      <span className="text-[7px] md:text-[9px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="inline-flex items-center gap-0.5 px-1.5 py-[2px] md:px-2 md:py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] max-w-full cursor-default">
+          {icon}
+          <span className="text-[7px] md:text-[9px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+            {text}
+          </span>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={6}>
         {text}
-      </span>
-    </div>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
