@@ -454,8 +454,8 @@ export const WizardListPreview = memo(function WizardListPreview({
 function PreviewRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-2">
-      <span className="text-[10px] leading-snug text-white">{label}</span>
-      <span className="text-[10px] leading-snug text-white font-medium text-right max-w-[62%] break-words">
+      <span className="text-[11px] leading-snug text-white">{label}</span>
+      <span className="text-[11px] leading-snug text-white font-medium text-right max-w-[62%] break-words">
         {value}
       </span>
     </div>
