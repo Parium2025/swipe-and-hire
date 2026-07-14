@@ -119,7 +119,7 @@ export const BenefitsDropdown = ({
             </div>
             
             {/* Custom benefit input */}
-            <div className="p-2 border-t border-white/10">
+            <div className="py-2 pl-2 pr-0 border-t border-white/10">
               <div className="flex items-center gap-2">
                 <Input
                   value={customBenefitInput}
