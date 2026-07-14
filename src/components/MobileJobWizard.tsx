@@ -3769,13 +3769,8 @@ const MobileJobWizard = ({
                 {/* Preview Mode Toggle */}
                 <div className="flex flex-col items-center space-y-4">
                   <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} swipeContainerRef={previewSwipeRef} />
-                  {previewMode === 'desktop' && (
-                    <p className="text-white/70 text-xs text-center -mt-1">
-                      (förhandsvisning från swipe mode)
-                    </p>
-                  )}
                   
-                  <h3 
+                  <h3
                     className="text-white font-medium text-center text-sm cursor-pointer hover:text-white transition-colors underline underline-offset-2"
                     onClick={() => previewMode === 'mobile' ? setShowApplicationForm(true) : setShowDesktopApplicationForm(true)}
                   >
