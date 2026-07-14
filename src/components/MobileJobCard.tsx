@@ -228,7 +228,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   e.stopPropagation();
                   onDelete(job);
                 }}
-                className={`${isExpired ? 'px-8' : 'flex-1'} h-11 rounded-full border-destructive/40 bg-destructive/20 text-white transition-[background-color,border-color,color,transform] duration-150 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-[0.97]`}
+                className={`${isExpired ? 'px-8' : 'flex-1'} h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Ta bort
