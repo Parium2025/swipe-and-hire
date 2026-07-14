@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
 import { ResilientImage } from '@/components/ui/ResilientImage';
+import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 
 interface EmployerJobCardProps {
   job: {
@@ -29,6 +30,10 @@ interface EmployerJobCardProps {
     job_image_url?: string;
     company_logo_url?: string;
     image_focus_position?: string;
+    salary_min?: number;
+    salary_max?: number;
+    salary_type?: string;
+    salary_transparency?: string;
     employer_profile?: {
       first_name: string;
       last_name: string;
@@ -170,8 +175,12 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
         {/* Divider */}
         <div className="h-px bg-white/10 mx-2" />
 
-        {/* Info rows — always show all 6 rows for consistent card height */}
+        {/* Info rows */}
         <div className="space-y-2 px-3 pb-1">
+          <div className="flex items-center justify-between">
+            <span className="text-sm leading-snug text-white">Rekryterare</span>
+            <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{recruiterName || '–'}</span>
+          </div>
           <div className="flex items-start justify-between gap-3">
             <span className="text-sm leading-snug text-white">Anställningsform</span>
             {(() => {
@@ -202,13 +211,25 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{job.location || '–'}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Rekryterare</span>
-            <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{recruiterName || '–'}</span>
-          </div>
-          <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Publicerad</span>
             <span className="text-sm leading-snug text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
           </div>
+          {(() => {
+            const salaryText = getJobBadgeSalary({
+              salary_min: job.salary_min,
+              salary_max: job.salary_max,
+              salary_type: job.salary_type,
+              salary_transparency: job.salary_transparency,
+            });
+            return (
+              <div className="flex items-start justify-between gap-3">
+                <span className="text-sm leading-snug text-white">Lön</span>
+                <span className="text-sm leading-snug text-white font-medium text-right max-w-[65%] break-words">
+                  {salaryText || '–'}
+                </span>
+              </div>
+            );
+          })()}
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -225,6 +246,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             </Tooltip>
           </TooltipProvider>
         </div>
+
       </div>
     </Card>
   );
