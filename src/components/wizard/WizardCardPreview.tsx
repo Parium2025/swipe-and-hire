@@ -129,7 +129,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
           {/* Logga */}
           <div className="flex justify-center mb-1">
             {companyLogoUrl ? (
-              <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
+              <div className="w-7 h-7 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
                 <img
                   src={companyLogoUrl}
                   alt=""
@@ -138,8 +138,8 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
                 />
               </div>
             ) : (
-              <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                <span className="text-[9px] md:text-xs font-bold text-white/70 tracking-wide">
+              <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
+                <span className="text-[9px] font-bold text-white/70 tracking-wide">
                   {initials}
                 </span>
               </div>
@@ -156,10 +156,10 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
                     e.stopPropagation();
                     onOpenCompany?.(e);
                   }}
-                  className="inline-flex max-w-[90%] items-center gap-1 px-1.5 py-[2px] md:px-2 md:py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+                  className="inline-flex max-w-[90%] items-center gap-1 px-1.5 py-[2px] rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
                 >
-                  <Building2 className="h-2 w-2 md:h-2.5 md:w-2.5 shrink-0 text-white" />
-                  <span className="text-[8px] md:text-[10px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+                  <Building2 className="h-2 w-2 shrink-0 text-white" />
+                  <span className="text-[8px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
                     {companyName || 'Företag'}
                   </span>
                 </button>
@@ -176,10 +176,10 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
               <div className="cursor-default">
                 <AutoFitTitle
                   text={title || 'Jobbtitel'}
-                  className="mt-0.5 md:mt-1 w-full font-extrabold leading-[1.05] tracking-tight line-clamp-2"
+                  className="mt-0.5 w-full font-extrabold leading-[1.05] tracking-tight line-clamp-2"
                   style={overlayStyle}
                   minFontPx={11}
-                  maxFontPx={18}
+                  maxFontPx={14}
                 />
               </div>
             </TooltipTrigger>
@@ -193,7 +193,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             <Tooltip>
               <TooltipTrigger asChild>
                 <p
-                  className="mt-0.5 text-[8px] md:text-[10px] font-semibold truncate cursor-default"
+                  className="mt-0.5 text-[8px] font-semibold truncate cursor-default"
                   style={overlayStyle}
                 >
                   {metaLine}
@@ -211,7 +211,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             {daysLeftLabel && <PreviewPill text={daysLeftLabel} />}
             {benefitsCount > 0 && (
               <PreviewPill
-                icon={<Gift className="h-2 w-2 md:h-2.5 md:w-2.5 text-white" />}
+                icon={<Gift className="h-2 w-2 text-white" />}
                 text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
               />
             )}
@@ -220,7 +220,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
       </div>
 
       {/* Action-knappar — 3 st (Neka / Spara / Gilla) med tooltip */}
-      <div className="absolute inset-x-0 bottom-3 md:bottom-4 z-[3] flex items-center justify-center gap-3 md:gap-4">
+      <div className="absolute inset-x-0 bottom-3 z-[3] flex items-center justify-center gap-3">
         <SwipeActionButton kind="dislike" onOpenForm={onOpenForm} />
         <SwipeActionButton kind="save" onOpenForm={onOpenForm} />
         <SwipeActionButton kind="like" onOpenForm={onOpenForm} />
@@ -235,9 +235,9 @@ function PreviewPill({ icon, text }: { icon?: React.ReactNode; text: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="inline-flex items-center gap-0.5 px-1.5 py-[2px] md:px-2 md:py-0.5 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] max-w-full cursor-default">
+        <div className="inline-flex items-center gap-0.5 px-1.5 py-[2px] rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] max-w-full cursor-default">
           {icon}
-          <span className="text-[7px] md:text-[9px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+          <span className="text-[7px] font-semibold text-white truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
             {text}
           </span>
         </div>
@@ -257,8 +257,8 @@ function SwipeActionButton({
   onOpenForm?: (e: MouseEvent) => void;
 }) {
   const common =
-    'w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform';
-  const iconCls = 'w-4 h-4 md:w-[18px] md:h-[18px] text-white';
+    'w-8 h-8 rounded-full flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform';
+  const iconCls = 'w-4 h-4 text-white';
   const handle = (e: MouseEvent) => {
     e.stopPropagation();
     onOpenForm?.(e);
