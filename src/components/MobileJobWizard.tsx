@@ -4906,29 +4906,32 @@ const MobileJobWizard = ({
                                 {/* Content - clickable to show form */}
                                 <div 
                                   className="absolute inset-0 flex flex-col items-center pt-10 px-2 pb-3 text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
-                                  style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                   onClick={() => setShowDesktopApplicationForm(true)}
                                 >
                                   {(() => {
                                     const textSizes = getSmartTextSizes();
                                     return (
                                       <>
-                                         <button 
-                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
- className={`${textSizes.company} font-medium mb-1 cursor-pointer text-left line-clamp-1`}
-                                            style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                                         >
-                                          {profile?.company_name || 'Företag'}
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
+                                          className="inline-flex max-w-[80%] items-center gap-1.5 px-3 py-1 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] mb-1"
+                                        >
+                                          <Building2 className="h-3 w-3 shrink-0 text-white" />
+                                          <span className={`${textSizes.company} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
+                                            {profile?.company_name || 'Företag'}
+                                          </span>
                                         </button>
-                                         <AutoFitTitle
-                                           text={formData.title || 'Jobbtitel'}
-                                           className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-pointer`}
-                                           style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                                           minFontPx={15}
-                                           maxFontPx={33}
-                                         />
-                                        <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
-                                          {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
+                                        <AutoFitTitle
+                                          text={formData.title || 'Jobbtitel'}
+                                          className={`${textSizes.title} w-full font-bold leading-tight mb-1 cursor-pointer`}
+                                          style={getJobOverlayTextStyle(formData.overlay_text_color)}
+                                          minFontPx={15}
+                                          maxFontPx={33}
+                                        />
+                                        <div className="inline-flex max-w-[90%] items-center px-3 py-1 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                                          <span className={`${textSizes.meta} font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate`}>
+                                            {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
+                                          </span>
                                         </div>
                                       </>
                                     );
