@@ -5061,7 +5061,7 @@ const MobileJobWizard = ({
                         </div>
                         
                         <div className="mt-4 space-y-3">
-                          <div className="flex justify-center items-center gap-3">
+                          <div className="flex justify-center items-center gap-2 sm:gap-3">
                             <div className="w-[30px]" aria-hidden="true"></div>
                             <button
                               type="button"
@@ -5157,7 +5157,7 @@ const MobileJobWizard = ({
                         </div>
                         
                         <div className="mt-4 space-y-3">
-                          <div className="flex justify-center items-center gap-3">
+                          <div className="flex justify-center items-center gap-2 sm:gap-3">
                             <div className="w-[30px]" aria-hidden="true"></div>
                             <button
                               type="button"
