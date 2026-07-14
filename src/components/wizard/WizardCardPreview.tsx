@@ -205,8 +205,8 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             </Tooltip>
           )}
 
-          {/* Badge-rad — matchar JobSlideBadgesRow */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
+          {/* Badge-rad — i samma ordning som swipe mode, staplade vertikalt */}
+          <div className="flex flex-col items-center justify-center gap-2 mt-3">
             {salaryText && <PreviewPill text={salaryText} />}
             {daysLeftLabel && <PreviewPill text={daysLeftLabel} />}
             {benefitsCount > 0 && (
