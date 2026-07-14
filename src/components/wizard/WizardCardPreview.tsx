@@ -263,13 +263,10 @@ function SwipeActionButton({
 
 interface WizardListPreviewProps extends WizardPreviewData {
   onOpenForm?: (e: MouseEvent) => void;
-  onOpenCompany?: (e: MouseEvent) => void;
 }
 
 export const WizardListPreview = memo(function WizardListPreview({
   title,
-  companyName,
-  companyLogoUrl,
   imageUrl,
   imageFocusPosition,
   employmentTypeLabel,
@@ -289,7 +286,6 @@ export const WizardListPreview = memo(function WizardListPreview({
     () => getJobOverlayTextStyle(overlayTextColor),
     [overlayTextColor],
   );
-  const initials = useMemo(() => getInitials(companyName || 'Företag'), [companyName]);
 
   return (
     <div
