@@ -936,6 +936,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           is_active: roleData?.is_active ?? true,
         });
 
+        // 💾 Persistera senaste kända roll så splash-skärmen (både index.html
+        // och AuthSplashScreen) kan visa korrekt tagline vid nästa inloggning
+        // eller utloggning — utan att behöva vänta på ett profil-fetch.
+        try {
+          localStorage.setItem('parium-last-role', profileRole);
+        } catch { /* localStorage kan vara blockerad */ }
+
         if (membershipOrgId) {
           try {
             safeSetItem('org_id', membershipOrgId);

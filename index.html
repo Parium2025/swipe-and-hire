@@ -571,6 +571,14 @@
           if ((path === '/auth' || path === '/auth/') && !skipSplash) {
             var splash = document.getElementById('auth-splash');
             var logo = document.getElementById('auth-splash-logo');
+            var tagline = document.getElementById('auth-splash-tagline');
+            // Byt tagline baserat på senast kända roll (satt av useAuth.tsx)
+            // så arbetsgivare får en anpassad text vid in-/utloggning.
+            try {
+              if (tagline && localStorage.getItem('parium-last-role') === 'employer') {
+                tagline.textContent = 'Bygg ditt drömteam här';
+              }
+            } catch(e) {}
             if (splash && logo) {
               // Display container IMMEDIATELY with dark background to block auth content
               splash.style.display = 'flex';
