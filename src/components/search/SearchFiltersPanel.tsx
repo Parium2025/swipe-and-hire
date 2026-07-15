@@ -105,6 +105,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   // string-jämförelse (ingen parsing behövs).
   const salaryOptions: { value: string; label: string }[] = [
     { value: '', label: 'Alla löner' },
+    { value: '0-5000', label: '0 – 5 000 kr/mån' },
     { value: '5000-10000', label: '5 000 – 10 000 kr/mån' },
     { value: '10000-15000', label: '10 000 – 15 000 kr/mån' },
     { value: '15000-20000', label: '15 000 – 20 000 kr/mån' },
