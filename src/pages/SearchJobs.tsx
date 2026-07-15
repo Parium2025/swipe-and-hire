@@ -308,8 +308,15 @@ const SearchJobs = memo(() => {
     setSelectedEmploymentTypesRaw(prev => { const next = typeof v === 'function' ? v(prev) : v; persistFilters({ empTypes: next }); return next; });
   }, [persistFilters]);
 
+  // 🆕 Salary filter (minimum monthly, SEK). 0 = inget filter.
+  const [salaryMin, setSalaryMinRaw] = useState<number>(() => {
+    const v = Number(savedFilters.salaryMin);
+    return Number.isFinite(v) && v > 0 ? v : 0;
+  });
+  const setSalaryMin = useCallback((v: number) => { setSalaryMinRaw(v); persistFilters({ salaryMin: v }); }, [persistFilters]);
+
   const [filtersExpanded, setFiltersExpanded] = useState(() => {
-    return !!(savedFilters.city || (savedFilters.cat && savedFilters.cat !== 'all-categories') || savedFilters.empTypes?.length);
+    return !!(savedFilters.city || (savedFilters.cat && savedFilters.cat !== 'all-categories') || savedFilters.empTypes?.length || (Number(savedFilters.salaryMin) > 0));
   });
   
   // Company suggestion state
