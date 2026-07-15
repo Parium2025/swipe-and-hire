@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Building2, ChevronDown, Star, X } from 'lucide-react';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 interface CompanySuggestionCardProps {
   company: {

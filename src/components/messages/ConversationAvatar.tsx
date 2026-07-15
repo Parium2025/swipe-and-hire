@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { cn } from '@/lib/utils';
 import { Users } from 'lucide-react';
+import { getCompanyInitials } from '@/lib/companyInitials';
 import type { ConversationProfileData as ProfileData } from '@/types/conversation';
 
 interface ConversationAvatarProps {
