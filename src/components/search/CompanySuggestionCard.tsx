@@ -33,7 +33,7 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
               <Avatar className="h-12 w-12 flex-shrink-0">
                 <AvatarImage src={company.logo || ''} alt={company.name} />
                 <AvatarFallback className="bg-white/20 text-white text-lg font-bold" delayMs={150}>
-                  {company.name.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()}
+                  {getCompanyInitials(company.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">

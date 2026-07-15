@@ -35,7 +35,7 @@ export function ConversationAvatar({
     }
     if (!profile) return '··';
     if (profile.role === 'employer' && profile.company_name) {
-      return profile.company_name.substring(0, 2).toUpperCase();
+      return getCompanyInitials(profile.company_name);
     }
     const first = profile.first_name?.[0] || '';
     const last = profile.last_name?.[0] || '';

@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trash2 } from 'lucide-react';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 interface CompanyLogoSectionProps {
   companyLogoUrl: string;
@@ -13,14 +14,6 @@ interface CompanyLogoSectionProps {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-// Generate up to 2 initials from the company name (first letter of first 2 words).
-const getCompanyInitials = (name: string): string => {
-  const trimmed = name?.trim();
-  if (!trimmed) return '?';
-  const words = trimmed.split(/\s+/).filter(Boolean);
-  const initials = words.slice(0, 2).map((w) => w[0]?.toUpperCase() || '').join('');
-  return initials || '?';
-};
 
 export const CompanyLogoSection = ({
   companyLogoUrl,
