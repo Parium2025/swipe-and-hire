@@ -221,6 +221,7 @@ const SearchJobs = memo(() => {
     setSelectedCategory(criteria.category || 'all-categories');
     setSelectedSubcategories(criteria.subcategories || []);
     setSelectedEmploymentTypes(criteria.employment_types || []);
+    setSalaryMin(typeof criteria.salary_min === 'number' && criteria.salary_min > 0 ? criteria.salary_min : 0);
     if (criteria.time_filter && ['all', '12h', '24h', '3d', '7d'].includes(criteria.time_filter)) {
       setTimeFilter(criteria.time_filter as 'all' | '12h' | '24h' | '3d' | '7d');
     }
@@ -229,7 +230,7 @@ const SearchJobs = memo(() => {
     }
     
     // Expand filters if there are active filters to show
-    if (cityValue || criteria.category || criteria.employment_types?.length || criteria.subcategories?.length) {
+    if (cityValue || criteria.category || criteria.employment_types?.length || criteria.subcategories?.length || (typeof criteria.salary_min === 'number' && criteria.salary_min > 0)) {
       setFiltersExpanded(true);
     }
     
