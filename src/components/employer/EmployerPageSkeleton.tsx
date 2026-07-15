@@ -45,10 +45,12 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 const SkeletonChrome = memo(function SkeletonChrome() {
   return (
     <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-      {/* Left: Parium logo (real: h-10 w-40) */}
-      <div className={`h-10 w-40 rounded-md ${SHAPE}`} />
-      {/* Center: "Parium" wordmark */}
-      <div className={`absolute left-1/2 -translate-x-1/2 h-5 w-16 rounded ${SHAPE}`} />
+      {/* Left: logo shape sized to the *visible* Parium graphic (not the full
+          h-10 w-40 background container) so it never overlaps the centered
+          wordmark placeholder on narrow mobile widths. */}
+      <div className={`h-7 w-24 rounded-md ${SHAPE}`} />
+      {/* Center: "Parium" wordmark (text-base, ~w-16) */}
+      <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SHAPE}`} />
       {/* Right: Plus + Notifications + Avatar */}
       <div className="flex items-center gap-2">
         <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
@@ -58,6 +60,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
     </header>
   );
 });
+
 
 /**
  * Skeleton for /dashboard and /my-jobs — mirrors the real EmployerDashboard:
