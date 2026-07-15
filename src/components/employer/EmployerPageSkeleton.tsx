@@ -45,10 +45,12 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 const SkeletonChrome = memo(function SkeletonChrome() {
   return (
     <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-      {/* Left: Parium logo (real: h-10 w-40) */}
-      <div className={`h-10 w-40 rounded-md ${SHAPE}`} />
-      {/* Center: "Parium" wordmark */}
-      <div className={`absolute left-1/2 -translate-x-1/2 h-5 w-16 rounded ${SHAPE}`} />
+      {/* Left: logo shape sized to the *visible* Parium graphic (not the full
+          h-10 w-40 background container) so it never overlaps the centered
+          wordmark placeholder on narrow mobile widths. */}
+      <div className={`h-7 w-24 rounded-md ${SHAPE}`} />
+      {/* Center: "Parium" wordmark (text-base, ~w-16) */}
+      <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SHAPE}`} />
       {/* Right: Plus + Notifications + Avatar */}
       <div className="flex items-center gap-2">
         <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
@@ -58,6 +60,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
     </header>
   );
 });
+
 
 /**
  * Skeleton for /dashboard and /my-jobs — mirrors the real EmployerDashboard:
@@ -89,18 +92,18 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             <div className={`h-7 w-48 rounded ${SHAPE}`} />
           </div>
 
-          {/* StatsGrid — mobile shape:
-              (1) full-width multi-col card (Aktiva | Utgångna | Utkast)
-              (2) 3-col grid with 3 short cards (Annonser / Visningar / Ansökningar) */}
+          {/* StatsGrid — mobile shape mirrors the real dashboard exactly:
+              (1) full-width multi-col card with TWO cells (Aktiva | Utgångna)
+              (2) 3-col grid: Annonser / Visningar / Ansökningar */}
           <div className="md:hidden space-y-2">
-            <div className="rounded-lg overflow-hidden border border-white/10 bg-white/[0.03]">
+            <div className="rounded-lg overflow-hidden border border-white/20 bg-white/5">
               <div className="flex h-[62px]">
-                {[1, 2, 3].map(i => (
+                {[1, 2].map(i => (
                   <div
                     key={i}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1.5 ${i > 1 ? 'border-l border-white/10' : ''}`}
+                    className={`flex-1 flex flex-col items-center justify-center gap-1.5 ${i > 1 ? 'border-l border-white/20' : ''}`}
                   >
-                    <div className={`h-3 w-12 rounded ${SHAPE}`} />
+                    <div className={`h-3 w-14 rounded ${SHAPE}`} />
                     <div className={`h-4 w-6 rounded ${SHAPE}`} />
                   </div>
                 ))}
@@ -110,7 +113,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
               {[1, 2, 3].map(i => (
                 <div
                   key={i}
-                  className="rounded-lg h-[62px] flex flex-col items-center justify-center gap-1.5 border border-white/10 bg-white/[0.03]"
+                  className="rounded-lg h-[62px] flex flex-col items-center justify-center gap-1.5 border border-white/20 bg-white/5"
                 >
                   <div className={`h-3 w-14 rounded ${SHAPE}`} />
                   <div className={`h-4 w-6 rounded ${SHAPE}`} />
@@ -118,6 +121,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
               ))}
             </div>
           </div>
+
 
           {/* StatsGrid desktop shape — 5 columns */}
           <div className="hidden md:grid md:grid-cols-5 gap-2">
@@ -220,3 +224,187 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
     </FullscreenSkeletonPortal>
   );
 });
+
+/**
+ * Skeleton for /my-candidates — mirrors MyCandidatesHeader + mobile list.
+ */
+export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
+  return (
+    <FullscreenSkeletonPortal>
+      <motion.div
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
+        style={fullscreenSkeletonStyle}
+      >
+        <SkeletonChrome />
+        <div className="flex-1 min-h-0 overflow-hidden p-3">
+          <div className="responsive-container-wide space-y-4">
+            {/* Page title */}
+            <div className="flex justify-center items-center mb-4">
+              <div className={`h-7 w-40 rounded ${SHAPE}`} />
+            </div>
+            {/* Search + selection toggle */}
+            <div className="flex items-center gap-2">
+              <div className={`flex-1 h-11 rounded-xl ${SHAPE}`} />
+              <div className={`h-11 w-11 rounded-xl ${SHAPE}`} />
+            </div>
+            {/* Stage filter pills (scrollable) */}
+            <div className="flex gap-2 overflow-hidden">
+              {[20, 24, 20, 28, 20].map((w, i) => (
+                <div key={i} className={`h-9 w-${w} rounded-full ${SHAPE}`} style={{ width: `${w * 4}px` }} />
+              ))}
+            </div>
+            {/* Candidate cards */}
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/20">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
+                    <div className="flex-1 space-y-2">
+                      <div className={`h-4 w-2/3 rounded ${SHAPE}`} />
+                      <div className={`h-3 w-1/2 rounded ${SHAPE}`} />
+                    </div>
+                    <div className={`h-6 w-16 rounded-full ${SHAPE}`} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </FullscreenSkeletonPortal>
+  );
+});
+
+/**
+ * Skeleton for /messages — mirrors conversation list (mobile) / split view (desktop).
+ */
+export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton() {
+  return (
+    <FullscreenSkeletonPortal>
+      <motion.div
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
+        style={fullscreenSkeletonStyle}
+      >
+        <SkeletonChrome />
+        <div className="flex-1 min-h-0 overflow-hidden p-3">
+          <div className="responsive-container-wide space-y-4 h-full flex flex-col">
+            {/* Page title */}
+            <div className="flex justify-center items-center">
+              <div className={`h-7 w-40 rounded ${SHAPE}`} />
+            </div>
+            {/* Tabs */}
+            <div className="flex justify-center gap-2">
+              <div className={`h-9 w-20 rounded-full ${SHAPE}`} />
+              <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
+              <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
+            </div>
+            {/* Search */}
+            <div className={`h-11 w-full rounded-xl ${SHAPE}`} />
+            {/* Conversation rows */}
+            <div className="flex-1 space-y-2 rounded-xl border border-white/20 bg-white/5 p-2">
+              {[1, 2, 3, 4, 5, 6, 7].map(i => (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03]">
+                  <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
+                  <div className="flex-1 space-y-2 min-w-0">
+                    <div className={`h-4 w-1/2 rounded ${SHAPE}`} />
+                    <div className={`h-3 w-3/4 rounded ${SHAPE}`} />
+                  </div>
+                  <div className={`h-3 w-10 rounded ${SHAPE}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </FullscreenSkeletonPortal>
+  );
+});
+
+/**
+ * Skeleton for /company-profile — mirrors sections: logo, form fields, social media.
+ */
+export const EmployerCompanyProfileSkeleton = memo(function EmployerCompanyProfileSkeleton() {
+  return (
+    <FullscreenSkeletonPortal>
+      <motion.div
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
+        style={fullscreenSkeletonStyle}
+      >
+        <SkeletonChrome />
+        <div className="flex-1 min-h-0 overflow-hidden p-3">
+          <div className="responsive-container-wide space-y-5">
+            <div className="flex justify-center items-center mb-2">
+              <div className={`h-7 w-48 rounded ${SHAPE}`} />
+            </div>
+            {/* Logo section */}
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className={`h-24 w-24 rounded-full ${SHAPE}`} />
+              <div className={`h-4 w-32 rounded ${SHAPE}`} />
+            </div>
+            {/* Form fields */}
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="space-y-2">
+                  <div className={`h-3 w-24 rounded ${SHAPE}`} />
+                  <div className={`h-11 w-full rounded-lg ${SHAPE}`} />
+                </div>
+              ))}
+              <div className="space-y-2">
+                <div className={`h-3 w-32 rounded ${SHAPE}`} />
+                <div className={`h-28 w-full rounded-lg ${SHAPE}`} />
+              </div>
+            </div>
+            {/* Save button */}
+            <div className={`h-11 w-full rounded-lg ${SHAPE}`} />
+          </div>
+        </div>
+      </motion.div>
+    </FullscreenSkeletonPortal>
+  );
+});
+
+/**
+ * Skeleton for /employer-settings — mirrors panel/list layout.
+ */
+export const EmployerSettingsSkeleton = memo(function EmployerSettingsSkeleton() {
+  return (
+    <FullscreenSkeletonPortal>
+      <motion.div
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
+        style={fullscreenSkeletonStyle}
+      >
+        <SkeletonChrome />
+        <div className="flex-1 min-h-0 overflow-hidden p-3">
+          <div className="responsive-container-wide space-y-4">
+            <div className="flex justify-center items-center mb-2">
+              <div className={`h-7 w-32 rounded ${SHAPE}`} />
+            </div>
+            {[1, 2, 3, 4].map(section => (
+              <div key={section} className="rounded-xl border border-white/20 bg-white/5 p-4 space-y-3">
+                <div className={`h-5 w-40 rounded ${SHAPE}`} />
+                <div className={`h-3 w-56 rounded ${SHAPE}`} />
+                <div className="space-y-2 pt-2">
+                  <div className={`h-11 w-full rounded-lg ${SHAPE}`} />
+                  <div className={`h-11 w-full rounded-lg ${SHAPE}`} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </FullscreenSkeletonPortal>
+  );
+});
+

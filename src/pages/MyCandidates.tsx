@@ -49,6 +49,8 @@ import { MyCandidatesDesktopActionBar } from '@/pages/myCandidates/MyCandidatesD
 import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMobileActionBar';
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 import { useTouchCapable } from '@/hooks/useInputCapability';
+import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
+
 
 const MyCandidates = () => {
   const { user } = useAuth();
@@ -555,12 +557,9 @@ const MyCandidates = () => {
   }, [selectedCandidate, mapCandidateToAppData]);
 
   if (isLoading || !showContent) {
-    return (
-       <div className="responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
-        {/* Invisible placeholder to prevent layout shift */}
-      </div>
-    );
+    return <EmployerMyCandidatesSkeleton />;
   }
+
 
   return (
      <div className="responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
