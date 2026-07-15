@@ -102,14 +102,25 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
 
   const salaryOptions: { value: number; label: string }[] = [
     { value: 0, label: 'Alla löner' },
-    { value: 25000, label: '25 000+' },
-    { value: 30000, label: '30 000+' },
-    { value: 35000, label: '35 000+' },
-    { value: 40000, label: '40 000+' },
-    { value: 45000, label: '45 000+' },
-    { value: 50000, label: '50 000+' },
-    { value: 60000, label: '60 000+' },
-    { value: 70000, label: '70 000+' },
+    { value: 5000, label: '5 000+ kr/mån' },
+    { value: 10000, label: '10 000+ kr/mån' },
+    { value: 15000, label: '15 000+ kr/mån' },
+    { value: 20000, label: '20 000+ kr/mån' },
+    { value: 25000, label: '25 000+ kr/mån' },
+    { value: 30000, label: '30 000+ kr/mån' },
+    { value: 35000, label: '35 000+ kr/mån' },
+    { value: 40000, label: '40 000+ kr/mån' },
+    { value: 45000, label: '45 000+ kr/mån' },
+    { value: 50000, label: '50 000+ kr/mån' },
+    { value: 55000, label: '55 000+ kr/mån' },
+    { value: 60000, label: '60 000+ kr/mån' },
+    { value: 65000, label: '65 000+ kr/mån' },
+    { value: 70000, label: '70 000+ kr/mån' },
+    { value: 75000, label: '75 000+ kr/mån' },
+    { value: 80000, label: '80 000+ kr/mån' },
+    { value: 85000, label: '85 000+ kr/mån' },
+    { value: 90000, label: '90 000+ kr/mån' },
+    { value: 100000, label: '100 000+ kr/mån' },
   ];
   const activeSalaryLabel = salaryOptions.find(o => o.value === salaryMin)?.label ?? 'Alla löner';
 
