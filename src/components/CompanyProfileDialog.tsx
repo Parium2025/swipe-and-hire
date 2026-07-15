@@ -275,7 +275,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
           <div className="p-6 text-white">
             <DialogHeader className="mb-6">
               <div className="flex items-center gap-4 min-w-0">
-                <Avatar className="h-16 w-16 shrink-0">
+                <Avatar className="h-16 w-16 shrink-0 ring-2 ring-white/15 shadow-lg shadow-black/30">
                   <AvatarImage src={company.company_logo_url || ''} alt={company.company_name} />
                   <AvatarFallback className="bg-white/20 text-white text-xl font-bold" delayMs={150}>
                     {getCompanyInitials(company.company_name)}
@@ -286,7 +286,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                     <TruncatedTitle
                       fullText={company.company_name}
                       side="bottom"
-                      className="text-2xl font-semibold text-white leading-tight"
+                      className="text-2xl font-semibold text-white leading-tight tracking-tight"
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
@@ -297,10 +297,28 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                       {company.company_name}
                     </TruncatedTitle>
                   </DialogTitle>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 shrink-0" />
-                    <span className="text-sm text-white">
-                      {averageRating} ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        const rating = avgRating || 0;
+                        const filled = star <= Math.round(rating);
+                        return (
+                          <Star
+                            key={star}
+                            className={`h-4 w-4 ${
+                              filled
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "fill-transparent text-white/40 stroke-white/40 stroke-[1.5]"
+                            }`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <span className="text-sm text-white font-medium">
+                      {averageRating}
+                    </span>
+                    <span className="text-sm text-white/70">
+                      ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
                     </span>
                   </div>
                 </div>
@@ -308,30 +326,40 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
             </DialogHeader>
 
             {/* Översikt */}
-            <div className="space-y-4 mb-6">
+            <div className="space-y-3 mb-6">
               <h3 className="font-semibold text-lg text-white">Översikt</h3>
-              <p className="text-white">
-                {company.company_description || "Ingen beskrivning tillgänglig."}
-              </p>
+              {company.company_description ? (
+                <p className="text-white leading-relaxed">
+                  {company.company_description}
+                </p>
+              ) : (
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <p className="text-white/70 text-sm italic">
+                    Företaget har inte lagt till någon beskrivning ännu.
+                  </p>
+                </div>
+              )}
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-6 bg-white/10" />
 
             {/* Företagsinformation */}
             <div className="space-y-4 mb-6">
               <h3 className="font-semibold text-lg text-white">Företagsinformation</h3>
-              
-              <div className="grid gap-3">
+
+              <div className="grid gap-2.5">
                 {company.website && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-white" />
-                    <div>
-                      <p className="text-sm font-medium text-white">Webbplats</p>
-                      <a 
-                        href={company.website.startsWith('http') ? company.website : `https://${company.website}`} 
-                        target="_blank" 
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] transition-colors">
+                    <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Globe className="h-4.5 w-4.5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-white/60 uppercase tracking-wide">Webbplats</p>
+                      <a
+                        href={company.website.startsWith('http') ? company.website : `https://${company.website}`}
+                        target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-white hover:underline"
+                        className="text-sm text-white hover:underline truncate block"
                       >
                         {company.website}
                       </a>
@@ -340,30 +368,36 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 )}
 
                 {company.industry && (
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="h-5 w-5 text-white" />
-                    <div>
-                      <p className="text-sm font-medium text-white">Bransch</p>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Briefcase className="h-4.5 w-4.5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-white/60 uppercase tracking-wide">Bransch</p>
                       <p className="text-sm text-white">{company.industry}</p>
                     </div>
                   </div>
                 )}
 
                 {company.employee_count && (
-                  <div className="flex items-center gap-3">
-                    <Users className="h-5 w-5 text-white" />
-                    <div>
-                      <p className="text-sm font-medium text-white">Företagsstorlek</p>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Users className="h-4.5 w-4.5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-white/60 uppercase tracking-wide">Företagsstorlek</p>
                       <p className="text-sm text-white">{company.employee_count}</p>
                     </div>
                   </div>
                 )}
 
                 {company.address && (
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-5 w-5 text-white" />
-                    <div>
-                      <p className="text-sm font-medium text-white">Huvudkontor</p>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <MapPin className="h-4.5 w-4.5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-white/60 uppercase tracking-wide">Huvudkontor</p>
                       <p className="text-sm text-white">{company.address}</p>
                     </div>
                   </div>
