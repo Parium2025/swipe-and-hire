@@ -607,7 +607,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds, salaryMin]);
+  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds, salaryRange]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
