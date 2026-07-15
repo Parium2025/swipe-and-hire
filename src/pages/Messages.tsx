@@ -22,6 +22,8 @@ import {
   Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EmployerMessagesSkeleton } from '@/components/employer/EmployerPageSkeleton';
+
 
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
 
