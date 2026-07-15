@@ -706,12 +706,12 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
        <div className="jobview-container py-4">
         {/* Combined header */}
-        <div className={`flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg ${user ? 'justify-between' : 'justify-center gap-3'}`}>
+        <div className={`flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg gap-3 ${user ? 'justify-between' : 'justify-center'}`}>
           {user && (
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-sm border border-white/15 touch-manipulation"
+              className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-sm border border-white/15 touch-manipulation shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
               Tillbaka
@@ -721,7 +721,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
               onClick={handleOpenCompanyProfile}
-              className="flex min-w-0 flex-1 items-center space-x-2 overflow-hidden hover:bg-white/10 active:bg-white/15 p-1.5 rounded-lg transition-all cursor-pointer"
+              className="flex min-w-0 flex-1 items-center space-x-2 overflow-hidden [@media(hover:hover)]:hover:bg-white/10 active:bg-white/15 py-1.5 pl-2 pr-1.5 rounded-lg transition-all cursor-pointer"
               aria-label="Visa företagsprofil"
             >
               <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center cursor-pointer active:scale-95 transition-transform [@media(hover:hover)]:hover:ring-2 [@media(hover:hover)]:hover:ring-white/30">
