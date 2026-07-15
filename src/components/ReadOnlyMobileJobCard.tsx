@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { saveScrollNow } from '@/lib/scrollRestoration';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { hapticLight } from '@/lib/haptics';
 
 
 interface ReadOnlyMobileJobCardProps {
@@ -137,6 +138,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const canOpenCompanyProfile = Boolean(job.employer_id && onCompanyClick);
   const openCompanyProfile = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
+    hapticLight();
     if (job.employer_id) onCompanyClick?.(job.employer_id);
   }, [job.employer_id, onCompanyClick]);
   const handleCompanyKeyDown = useCallback((e: React.KeyboardEvent) => {
