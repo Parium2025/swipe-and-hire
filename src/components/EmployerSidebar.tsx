@@ -8,6 +8,7 @@ import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
 import { useSidebarRoutePrefetch } from '@/hooks/useSidebarRoutePrefetch';
 import { preloadImages } from "@/lib/serviceWorkerManager";
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
+import { getCompanyInitials } from '@/lib/companyInitials';
 import {
   Sidebar,
   SidebarContent,
@@ -204,17 +205,6 @@ export function EmployerSidebar() {
   });
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [logoError, setLogoError] = useState(false);
-
-  // Helper function to get company initials
-  const getCompanyInitials = () => {
-    if (!profile?.company_name) return 'FA';
-    return profile.company_name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   // Keep last known logo; don't reset state unless value actually changes
   useEffect(() => {
