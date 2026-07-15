@@ -15,6 +15,7 @@ import { imageCache } from '@/lib/imageCache';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { saveScrollNow } from '@/lib/scrollRestoration';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 
 interface ReadOnlyMobileJobCardProps {

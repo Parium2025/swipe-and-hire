@@ -11,6 +11,7 @@ import { isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 interface MobileJobCardProps {
   job: JobPosting;
