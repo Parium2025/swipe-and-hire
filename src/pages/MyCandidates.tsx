@@ -49,6 +49,8 @@ import { MyCandidatesDesktopActionBar } from '@/pages/myCandidates/MyCandidatesD
 import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMobileActionBar';
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 import { useTouchCapable } from '@/hooks/useInputCapability';
+import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
+
 
 const MyCandidates = () => {
   const { user } = useAuth();
