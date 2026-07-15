@@ -268,25 +268,67 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
   const isOwnProfile = currentUserId === companyId;
 
+  const ratingValue = avgRating || 0;
+
+  const infoItems = [
+    company.website && {
+      icon: Globe,
+      label: "Webbplats",
+      value: (
+        <a
+          href={company.website.startsWith('http') ? company.website : `https://${company.website}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-white hover:underline break-all"
+        >
+          {company.website}
+        </a>
+      ),
+    },
+    company.industry && { icon: Briefcase, label: "Bransch", value: <p className="text-sm text-white">{company.industry}</p> },
+    company.employee_count && { icon: Users, label: "Företagsstorlek", value: <p className="text-sm text-white">{company.employee_count}</p> },
+    company.address && { icon: MapPin, label: "Huvudkontor", value: <p className="text-sm text-white">{company.address}</p> },
+  ].filter(Boolean) as { icon: any; label: string; value: React.ReactNode }[];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus className="max-w-2xl max-h-[90vh] p-0 bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4">
+      <DialogContentNoFocus className="max-w-2xl max-h-[90vh] p-0 overflow-hidden bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4 [&>button.absolute]:z-20 [&>button.absolute]:bg-black/30 [&>button.absolute]:backdrop-blur-md [&>button.absolute]:border [&>button.absolute]:border-white/20 [&>button.absolute]:rounded-full">
         <ScrollArea className="max-h-[90vh] [&>div>div]:!overflow-y-scroll [&>div>div]:scrollbar-hide">
-          <div className="p-6 text-white">
+          {/* Banner */}
+          <div
+            aria-hidden
+            className="relative h-28 w-full overflow-hidden"
+            style={{
+              background:
+                'radial-gradient(120% 140% at 0% 0%, hsl(215 100% 28% / 0.9) 0%, transparent 55%), radial-gradient(120% 140% at 100% 0%, hsl(190 90% 35% / 0.55) 0%, transparent 55%), linear-gradient(135deg, hsl(215 90% 22%), hsl(215 100% 14%))',
+            }}
+          >
+            <div
+              className="absolute inset-0 opacity-[0.12] mix-blend-overlay"
+              style={{
+                backgroundImage:
+                  'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)',
+                backgroundSize: '14px 14px',
+              }}
+            />
+            <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-b from-transparent to-[hsl(215,100%,12%)]/80" />
+          </div>
+
+          <div className="px-6 pb-6 -mt-12 text-white">
             <DialogHeader className="mb-6">
-              <div className="flex items-center gap-4 min-w-0">
-                <Avatar className="h-16 w-16 shrink-0">
+              <div className="flex flex-col items-center text-center gap-3">
+                <Avatar className="h-24 w-24 shrink-0 ring-4 ring-[hsl(215,100%,12%)] shadow-2xl shadow-black/40">
                   <AvatarImage src={company.company_logo_url || ''} alt={company.company_name} />
-                  <AvatarFallback className="bg-white/20 text-white text-xl font-bold" delayMs={150}>
+                  <AvatarFallback className="bg-white/15 text-white text-2xl font-bold" delayMs={150}>
                     {getCompanyInitials(company.company_name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="min-w-0 flex-1 pr-8">
+                <div className="min-w-0 w-full px-6">
                   <DialogTitle asChild>
                     <TruncatedTitle
                       fullText={company.company_name}
                       side="bottom"
-                      className="text-2xl font-semibold text-white leading-tight"
+                      className="text-2xl font-semibold text-white leading-tight tracking-tight"
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
@@ -297,10 +339,29 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                       {company.company_name}
                     </TruncatedTitle>
                   </DialogTitle>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 shrink-0" />
-                    <span className="text-sm text-white">
-                      {averageRating} ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
+                  {company.industry && (
+                    <p className="text-sm text-white/70 mt-1">{company.industry}</p>
+                  )}
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <div className="flex" aria-label={`Betyg ${averageRating} av 5`}>
+                      {[1, 2, 3, 4, 5].map((s) => {
+                        const filled = ratingValue >= s;
+                        const half = !filled && ratingValue >= s - 0.5;
+                        return (
+                          <span key={s} className="relative inline-block h-4 w-4">
+                            <Star className="absolute inset-0 h-4 w-4 fill-transparent text-white/40 stroke-white/50 stroke-[1.5]" />
+                            {(filled || half) && (
+                              <span className="absolute inset-0 overflow-hidden" style={{ width: half ? '50%' : '100%' }}>
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              </span>
+                            )}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <span className="text-sm text-white/80 font-medium">{averageRating}</span>
+                    <span className="text-xs text-white/60">
+                      ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
                     </span>
                   </div>
                 </div>
@@ -308,67 +369,41 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
             </DialogHeader>
 
             {/* Översikt */}
-            <div className="space-y-4 mb-6">
+            <div className="space-y-3 mb-6">
               <h3 className="font-semibold text-lg text-white">Översikt</h3>
-              <p className="text-white">
-                {company.company_description || "Ingen beskrivning tillgänglig."}
-              </p>
+              <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4">
+                <p className="text-sm leading-relaxed text-white">
+                  {company.company_description || "Ingen beskrivning tillgänglig."}
+                </p>
+              </div>
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-6 bg-white/10" />
 
             {/* Företagsinformation */}
-            <div className="space-y-4 mb-6">
+            <div className="space-y-3 mb-6">
               <h3 className="font-semibold text-lg text-white">Företagsinformation</h3>
-              
-              <div className="grid gap-3">
-                {company.website && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-white" />
-                    <div>
-                      <p className="text-sm font-medium text-white">Webbplats</p>
-                      <a 
-                        href={company.website.startsWith('http') ? company.website : `https://${company.website}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-white hover:underline"
-                      >
-                        {company.website}
-                      </a>
-                    </div>
-                  </div>
-                )}
 
-                {company.industry && (
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="h-5 w-5 text-white" />
-                    <div>
-                      <p className="text-sm font-medium text-white">Bransch</p>
-                      <p className="text-sm text-white">{company.industry}</p>
+              {infoItems.length > 0 ? (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {infoItems.map(({ icon: Icon, label, value }) => (
+                    <div
+                      key={label}
+                      className="flex items-start gap-3 rounded-xl bg-white/[0.04] border border-white/10 p-3 hover:bg-white/[0.06] transition-colors"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/10">
+                        <Icon className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] uppercase tracking-wider font-medium text-white/60">{label}</p>
+                        <div className="mt-0.5">{value}</div>
+                      </div>
                     </div>
-                  </div>
-                )}
-
-                {company.employee_count && (
-                  <div className="flex items-center gap-3">
-                    <Users className="h-5 w-5 text-white" />
-                    <div>
-                      <p className="text-sm font-medium text-white">Företagsstorlek</p>
-                      <p className="text-sm text-white">{company.employee_count}</p>
-                    </div>
-                  </div>
-                )}
-
-                {company.address && (
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-5 w-5 text-white" />
-                    <div>
-                      <p className="text-sm font-medium text-white">Huvudkontor</p>
-                      <p className="text-sm text-white">{company.address}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-white/60">Ingen företagsinformation tillgänglig.</p>
+              )}
             </div>
 
             <Separator className="my-6" />
