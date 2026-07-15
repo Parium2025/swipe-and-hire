@@ -40,9 +40,14 @@ interface SearchFiltersPanelProps {
   // Time filter
   timeFilter: TimeFilter;
   onTimeFilterChange: (value: TimeFilter) => void;
+  // Salary
+  salaryMin: number;
+  onSalaryMinChange: (value: number) => void;
   // Filter expansion
   filtersExpanded: boolean;
   onFiltersExpandedChange: (value: boolean) => void;
+  // Active filter count (visas som badge på "Visa filter")
+  activeFilterCount: number;
   // Saved searches
   savedSearches: any[];
   totalNewMatches: number;
