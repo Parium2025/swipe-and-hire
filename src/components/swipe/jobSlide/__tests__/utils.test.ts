@@ -21,13 +21,17 @@ describe('getImageObjectPosition', () => {
 });
 
 describe('getCompanyInitials', () => {
-  it('takes first letter of each word, uppercased, max 2', () => {
+  it('uses first + last word for multi-word names', () => {
     expect(getCompanyInitials('Parium AB')).toBe('PA');
     expect(getCompanyInitials('spotify technology')).toBe('ST');
-    expect(getCompanyInitials('Volvo Cars Group')).toBe('VC');
+    expect(getCompanyInitials('Volvo Cars Group')).toBe('VG');
   });
-  it('handles single word', () => {
-    expect(getCompanyInitials('Apple')).toBe('A');
+  it('uses first + last letter for single word', () => {
+    expect(getCompanyInitials('Apple')).toBe('AE');
+    expect(getCompanyInitials('Hoffstens')).toBe('HS');
+  });
+  it('falls back to ? for missing name', () => {
+    expect(getCompanyInitials('')).toBe('?');
   });
 });
 

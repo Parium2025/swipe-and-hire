@@ -19,6 +19,7 @@ import { imageCache } from '@/lib/imageCache';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
 import { TruncatedText } from '@/components/TruncatedText';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
+import { getCompanyInitials } from '@/lib/companyInitials';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { Helmet } from 'react-helmet-async';
 
@@ -760,9 +761,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                   />
                 ) : (
                   <span className="text-white font-semibold text-sm">
-                    {getDisplayCompanyName(job)
-                      ? getDisplayCompanyName(job).substring(0, 2).toUpperCase()
-                      : 'FÖ'}
+                    {getCompanyInitials(getDisplayCompanyName(job))}
                   </span>
                 )}
               </div>

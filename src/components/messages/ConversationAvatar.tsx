@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { cn } from '@/lib/utils';
 import { Users } from 'lucide-react';
+import { getCompanyInitials } from '@/lib/companyInitials';
 import type { ConversationProfileData as ProfileData } from '@/types/conversation';
 
 interface ConversationAvatarProps {
@@ -35,7 +36,7 @@ export function ConversationAvatar({
     }
     if (!profile) return '··';
     if (profile.role === 'employer' && profile.company_name) {
-      return profile.company_name.substring(0, 2).toUpperCase();
+      return getCompanyInitials(profile.company_name);
     }
     const first = profile.first_name?.[0] || '';
     const last = profile.last_name?.[0] || '';

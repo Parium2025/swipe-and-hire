@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { getCompanyInitials } from "@/lib/companyInitials";
 import { Separator } from "@/components/ui/separator";
 import { 
   Building2, 
@@ -277,7 +278,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 <Avatar className="h-16 w-16 shrink-0">
                   <AvatarImage src={company.company_logo_url || ''} alt={company.company_name} />
                   <AvatarFallback className="bg-white/20 text-white text-xl font-bold" delayMs={150}>
-                    {company.company_name?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() || 'AB'}
+                    {getCompanyInitials(company.company_name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1 pr-8">

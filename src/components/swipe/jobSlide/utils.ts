@@ -1,5 +1,6 @@
 // Rena helpers utan side-effects — enkla att unit-testa och delas mellan
 // JobSlide-container och dess subkomponenter.
+import { getCompanyInitials as getSharedCompanyInitials } from '@/lib/companyInitials';
 
 export function getImageObjectPosition(value?: string): string {
   if (!value || value === 'center') return 'center 50%';
@@ -27,10 +28,5 @@ export function isWithinInteractiveTarget(target: EventTarget | null): boolean {
 }
 
 export function getCompanyInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  return getSharedCompanyInitials(name);
 }

@@ -8,6 +8,7 @@ import type { JobPosting } from '@/hooks/useJobsData';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { SystemHealthButton, SystemHealthPanelContent } from "@/components/SystemHealthPanel";
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { getCompanyInitials } from '@/lib/companyInitials';
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import {
   DropdownMenu,
@@ -145,11 +146,6 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   };
 
   // prefetchApplications is now provided by usePrefetchApplications hook
-
-  const getCompanyInitials = () => {
-    if (!profile?.company_name) return 'FA';
-    return profile.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
-  };
 
   const getUserInitials = () => {
     const firstName = profile?.first_name || '';
@@ -329,7 +325,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                   />
                 ) : profile?.company_name ? (
                   <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-semibold text-white relative z-10">
-                    {profile.company_name.substring(0, 2).toUpperCase()}
+                    {getCompanyInitials(profile.company_name)}
                   </div>
                 ) : profile ? (
                   <Building className="h-4 w-4 relative z-10" />
