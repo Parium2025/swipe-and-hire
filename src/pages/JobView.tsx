@@ -14,6 +14,7 @@ import { ArrowLeft, Send, Users, CheckCircle, Share2 } from 'lucide-react';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
+import { hapticLight } from '@/lib/haptics';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { imageCache } from '@/lib/imageCache';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
