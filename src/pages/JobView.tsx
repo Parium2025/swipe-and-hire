@@ -182,9 +182,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     } catch { return {}; }
   });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
-  const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
-  const companyTapArmedRef = useRef(false);
-  const companyTapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
     if (typeof navigationImageState.initialHeroImageUrl === 'string' && navigationImageState.initialHeroImageUrl) {
       return navigationImageState.initialHeroImageUrl;
