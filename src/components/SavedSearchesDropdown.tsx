@@ -69,6 +69,9 @@ export function SavedSearchesDropdown({
       county: search.county || undefined,
       employment_types: search.employment_types || undefined,
       category: search.category || undefined,
+      subcategories: search.subcategories || undefined,
+      time_filter: search.time_filter || undefined,
+      sort_by: search.sort_by || undefined,
       salary_min: search.salary_min || undefined,
       salary_max: search.salary_max || undefined,
     };
