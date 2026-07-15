@@ -221,6 +221,7 @@ const SearchJobs = memo(() => {
     setSelectedCategory(criteria.category || 'all-categories');
     setSelectedSubcategories(criteria.subcategories || []);
     setSelectedEmploymentTypes(criteria.employment_types || []);
+    setSalaryMin(typeof criteria.salary_min === 'number' && criteria.salary_min > 0 ? criteria.salary_min : 0);
     if (criteria.time_filter && ['all', '12h', '24h', '3d', '7d'].includes(criteria.time_filter)) {
       setTimeFilter(criteria.time_filter as 'all' | '12h' | '24h' | '3d' | '7d');
     }
@@ -229,7 +230,7 @@ const SearchJobs = memo(() => {
     }
     
     // Expand filters if there are active filters to show
-    if (cityValue || criteria.category || criteria.employment_types?.length || criteria.subcategories?.length) {
+    if (cityValue || criteria.category || criteria.employment_types?.length || criteria.subcategories?.length || (typeof criteria.salary_min === 'number' && criteria.salary_min > 0)) {
       setFiltersExpanded(true);
     }
     
@@ -308,8 +309,15 @@ const SearchJobs = memo(() => {
     setSelectedEmploymentTypesRaw(prev => { const next = typeof v === 'function' ? v(prev) : v; persistFilters({ empTypes: next }); return next; });
   }, [persistFilters]);
 
+  // 🆕 Salary filter (minimum monthly, SEK). 0 = inget filter.
+  const [salaryMin, setSalaryMinRaw] = useState<number>(() => {
+    const v = Number(savedFilters.salaryMin);
+    return Number.isFinite(v) && v > 0 ? v : 0;
+  });
+  const setSalaryMin = useCallback((v: number) => { setSalaryMinRaw(v); persistFilters({ salaryMin: v }); }, [persistFilters]);
+
   const [filtersExpanded, setFiltersExpanded] = useState(() => {
-    return !!(savedFilters.city || (savedFilters.cat && savedFilters.cat !== 'all-categories') || savedFilters.empTypes?.length);
+    return !!(savedFilters.city || (savedFilters.cat && savedFilters.cat !== 'all-categories') || savedFilters.empTypes?.length || (Number(savedFilters.salaryMin) > 0));
   });
   
   // Company suggestion state
@@ -574,6 +582,16 @@ const SearchJobs = memo(() => {
       result = result.filter(j => selectedCompanies.includes(j.company_name));
     }
 
+    // 🆕 Lönefilter (klient-sidig): matcha om job.salary_max ≥ salaryMin, eller
+    // (om max saknas) job.salary_min ≥ salaryMin. Jobb utan någon lön filtreras bort
+    // när användaren aktivt satt ett lönegolv.
+    if (salaryMin > 0) {
+      result = result.filter(j => {
+        const top = typeof j.salary_max === 'number' ? j.salary_max : (typeof j.salary_min === 'number' ? j.salary_min : null);
+        return top !== null && top >= salaryMin;
+      });
+    }
+
     // Sort based on user preference
     switch (sortBy) {
       case 'newest':
@@ -588,7 +606,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds]);
+  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds, salaryMin]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
@@ -713,7 +731,7 @@ const SearchJobs = memo(() => {
 
     setDisplayCount(20);
     setSortBy('newest');
-  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, setSortBy]);
+  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, salaryMin, setSortBy]);
 
   // Reset loading flag deterministically when displayCount actually changes
   // (replaces the previous setTimeout-based unlock that could race on fast scroll).
@@ -789,8 +807,9 @@ const SearchJobs = memo(() => {
     setSearchInput('');
     setTimeFilter('all');
     setSelectedCompanies([]);
+    setSalaryMin(0);
     try { sessionStorage.removeItem('parium-search-filters'); } catch {}
-  }, [setSelectedPostalCode, setSelectedCity, setSelectedEmploymentTypes, setSelectedCategory, setSelectedSubcategories, setSearchInput, setTimeFilter, setSelectedCompanies]);
+  }, [setSelectedPostalCode, setSelectedCity, setSelectedEmploymentTypes, setSelectedCategory, setSelectedSubcategories, setSearchInput, setTimeFilter, setSelectedCompanies, setSalaryMin]);
 
   const handleLocationChange = useCallback((location: string, postalCode?: string) => {
     if (!location && autoFilledCityRef.current && selectedCity === autoFilledCityRef.current) {
@@ -839,8 +858,18 @@ const SearchJobs = memo(() => {
         onEmploymentTypesChange={setSelectedEmploymentTypes}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        salaryMin={salaryMin}
+        onSalaryMinChange={setSalaryMin}
         filtersExpanded={filtersExpanded}
         onFiltersExpandedChange={setFiltersExpanded}
+        activeFilterCount={
+          (selectedCity ? 1 : 0) +
+          (selectedCategory && selectedCategory !== 'all-categories' ? 1 : 0) +
+          (selectedSubcategories.length > 0 ? 1 : 0) +
+          (selectedEmploymentTypes.length > 0 ? 1 : 0) +
+          (salaryMin > 0 ? 1 : 0) +
+          (sortBy !== 'newest' ? 1 : 0)
+        }
         savedSearches={savedSearches}
         totalNewMatches={totalNewMatches}
         onApplySavedSearch={handleApplySavedSearch}
@@ -1063,6 +1092,7 @@ const SearchJobs = memo(() => {
           subcategories: selectedSubcategories.length > 0 ? selectedSubcategories : undefined,
           time_filter: timeFilter !== 'all' ? timeFilter : undefined,
           sort_by: sortBy !== 'newest' ? sortBy : undefined,
+          salary_min: salaryMin > 0 ? salaryMin : undefined,
         }}
         onSave={saveSearch}
       />

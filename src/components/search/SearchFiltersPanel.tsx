@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Briefcase, Users, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Heart } from 'lucide-react';
+import { MapPin, Briefcase, Users, Clock, X, ChevronDown, Check, Search, ArrowDownWideNarrow, Heart, Wallet } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import LocationSearchInput from '@/components/LocationSearchInput';
 
@@ -40,9 +40,14 @@ interface SearchFiltersPanelProps {
   // Time filter
   timeFilter: TimeFilter;
   onTimeFilterChange: (value: TimeFilter) => void;
+  // Salary
+  salaryMin: number;
+  onSalaryMinChange: (value: number) => void;
   // Filter expansion
   filtersExpanded: boolean;
   onFiltersExpandedChange: (value: boolean) => void;
+  // Active filter count (visas som badge på "Visa filter")
+  activeFilterCount: number;
   // Saved searches
   savedSearches: any[];
   totalNewMatches: number;
@@ -79,8 +84,11 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   onSortChange,
   timeFilter,
   onTimeFilterChange,
+  salaryMin,
+  onSalaryMinChange,
   filtersExpanded,
   onFiltersExpandedChange,
+  activeFilterCount,
   savedSearches,
   totalNewMatches,
   onApplySavedSearch,
@@ -91,6 +99,19 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   onClearAll,
 }: SearchFiltersPanelProps) {
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
+
+  const salaryOptions: { value: number; label: string }[] = [
+    { value: 0, label: 'Alla löner' },
+    { value: 25000, label: '25 000+' },
+    { value: 30000, label: '30 000+' },
+    { value: 35000, label: '35 000+' },
+    { value: 40000, label: '40 000+' },
+    { value: 45000, label: '45 000+' },
+    { value: 50000, label: '50 000+' },
+    { value: 60000, label: '60 000+' },
+    { value: 70000, label: '70 000+' },
+  ];
+  const activeSalaryLabel = salaryOptions.find(o => o.value === salaryMin)?.label ?? 'Alla löner';
 
   return (
     <Card className="bg-white/5 border-white/20">
@@ -179,6 +200,14 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             className="h-11 px-6 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
           >
             <span>{filtersExpanded ? 'Dölj filter' : 'Visa filter'}</span>
+            {activeFilterCount > 0 && (
+              <span
+                aria-label={`${activeFilterCount} aktiva filter`}
+                className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-white text-slate-900 text-[11px] font-semibold leading-none"
+              >
+                {activeFilterCount}
+              </span>
+            )}
             <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${filtersExpanded ? 'rotate-180' : ''}`} />
           </button>
         </div>
@@ -220,6 +249,14 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation"
           >
             <span>{filtersExpanded ? 'Dölj filter' : 'Visa filter'}</span>
+            {activeFilterCount > 0 && (
+              <span
+                aria-label={`${activeFilterCount} aktiva filter`}
+                className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-white text-slate-900 text-[11px] font-semibold leading-none"
+              >
+                {activeFilterCount}
+              </span>
+            )}
             <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${filtersExpanded ? 'rotate-180' : ''}`} />
           </button>
         </div>
@@ -467,7 +504,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 {/* Sort Dropdown */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                    <ArrowUpDown className="h-4 w-4 flex-shrink-0" />
+                    <ArrowDownWideNarrow className="h-4 w-4 flex-shrink-0" />
                     <span className="leading-none">Sortering</span>
                   </Label>
                   <DropdownMenu>
@@ -508,6 +545,52 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
+              </div>
+
+              {/* Lön (min per månad) */}
+              <div className="space-y-2 mt-4">
+                <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
+                  <Wallet className="h-4 w-4 flex-shrink-0" />
+                  <span className="leading-none">Lön (min per månad)</span>
+                </Label>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
+                      aria-label="Välj minimilön"
+                    >
+                      <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
+                        {activeSalaryLabel}
+                      </span>
+                      {salaryMin > 0 ? (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); onSalaryMinChange(0); }}
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+                          aria-label="Rensa lönefilter"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                      )}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
+                    {salaryOptions.map((opt, idx, arr) => (
+                      <React.Fragment key={opt.value}>
+                        <DropdownMenuItem
+                          onClick={() => onSalaryMinChange(opt.value)}
+                          className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                        >
+                          <span>{opt.value === 0 ? opt.label : `${opt.label} kr/mån`}</span>
+                          {salaryMin === opt.value && <Check className="h-4 w-4 text-white" />}
+                        </DropdownMenuItem>
+                        {idx < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
+                      </React.Fragment>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Show selected employment types as badges */}
