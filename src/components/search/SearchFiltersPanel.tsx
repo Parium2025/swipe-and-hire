@@ -130,65 +130,59 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   return (
     <Card className="bg-white/5 border-white/20">
       <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
-        {/* Search Field with Save Search Button */}
-        <div className="space-y-2">
-          <div className="relative">
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => onSearchInputChange(e.target.value)}
-              placeholder="Sök yrke, företag eller plats…"
-              autoComplete="off"
-              spellCheck={false}
-              className="w-full h-12 pl-10 pr-10 rounded-md text-base bg-white/5 border border-white/10 hover:border-white/50 text-white placeholder:text-white/60 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-white/25 transition-colors"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={() => onSearchInputChange('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 rounded-full p-1 transition-colors"
-                aria-label="Rensa sökning"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+        {/* Search Field */}
+        <div className="relative">
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => onSearchInputChange(e.target.value)}
+            placeholder="Sök yrke, företag eller plats…"
+            autoComplete="off"
+            spellCheck={false}
+            className="w-full h-12 pl-10 pr-10 rounded-md text-base bg-white/5 border border-white/10 hover:border-white/50 text-white placeholder:text-white/60 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-white/25 transition-colors"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={() => onSearchInputChange('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 rounded-full p-1 transition-colors"
+              aria-label="Rensa sökning"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
 
-
-
-
-
-          {/* Saved Searches Dropdown with Save button */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
-            <SavedSearchesDropdown
-              savedSearches={savedSearches}
-              totalNewMatches={totalNewMatches}
-              onApplySearch={onApplySavedSearch}
-              onDeleteSearch={onDeleteSearch}
-              onClearNewMatches={onClearNewMatches}
-            />
-            {hasActiveFilters({
-              search_query: searchInput,
-              city: selectedCity,
-              county: selectedPostalCode,
-              employment_types: selectedEmploymentTypes,
-              category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
-            }) && (
-              <button
-                onClick={onOpenSaveDialog}
-                className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
-              >
-                <Heart className="h-3.5 w-3.5 text-white" />
-                Spara
-              </button>
-            )}
-          </div>
+        {/* Saved Searches Dropdown with Save button */}
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
+          <SavedSearchesDropdown
+            savedSearches={savedSearches}
+            totalNewMatches={totalNewMatches}
+            onApplySearch={onApplySavedSearch}
+            onDeleteSearch={onDeleteSearch}
+            onClearNewMatches={onClearNewMatches}
+          />
+          {hasActiveFilters({
+            search_query: searchInput,
+            city: selectedCity,
+            county: selectedPostalCode,
+            employment_types: selectedEmploymentTypes,
+            category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
+          }) && (
+            <button
+              onClick={onOpenSaveDialog}
+              className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
+            >
+              <Heart className="h-3.5 w-3.5 text-white" />
+              Spara
+            </button>
+          )}
         </div>
 
         {/* Time filter chips + Expand/Collapse Filters Button */}
         {/* Desktop: show all chips inline */}
-        <div className="hidden sm:flex flex-wrap justify-center items-center gap-2 py-2">
+        <div className="hidden sm:flex flex-wrap justify-center items-center gap-2">
           {([
             { value: '12h' as TimeFilter, label: '12 tim' },
             { value: '24h' as TimeFilter, label: '24 tim' },
@@ -227,7 +221,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
         </div>
 
         {/* Mobile: time filter as dropdown + Visa filter button */}
-        <div className="flex sm:hidden justify-center items-center gap-2 py-2">
+        <div className="flex sm:hidden justify-center items-center gap-2">
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <button className="group h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation">
