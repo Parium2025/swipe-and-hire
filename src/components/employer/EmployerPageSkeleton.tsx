@@ -44,13 +44,16 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 
 const SkeletonChrome = memo(function SkeletonChrome() {
   return (
-    <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/10 bg-transparent px-3">
-      <div className={`h-9 w-28 rounded-md ${SHAPE}`} />
+    <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
+      {/* Left: Parium logo (real: h-10 w-40) */}
+      <div className={`h-10 w-40 rounded-md ${SHAPE}`} />
+      {/* Center: "Parium" wordmark */}
       <div className={`absolute left-1/2 -translate-x-1/2 h-5 w-16 rounded ${SHAPE}`} />
+      {/* Right: Plus + Notifications + Avatar */}
       <div className="flex items-center gap-2">
         <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
         <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
-        <div className={`h-8 w-8 rounded-full ${SHAPE}`} />
+        <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
       </div>
     </header>
   );
