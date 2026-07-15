@@ -135,10 +135,17 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   };
 
   const canOpenCompanyProfile = Boolean(job.employer_id && onCompanyClick);
-  const handleCompanyClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const openCompanyProfile = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
     if (job.employer_id) onCompanyClick?.(job.employer_id);
-  };
+  }, [job.employer_id, onCompanyClick]);
+  const handleCompanyKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openCompanyProfile(e);
+    }
+  }, [openCompanyProfile]);
+  const stopPointer = useCallback((e: React.PointerEvent) => e.stopPropagation(), []);
 
   // Determine which action button to show
   const showDeleteButton = !!onDeleteClick;
