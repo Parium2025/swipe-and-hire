@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { saveScrollNow } from '@/lib/scrollRestoration';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { hapticLight } from '@/lib/haptics';
 
 
 interface ReadOnlyMobileJobCardProps {
