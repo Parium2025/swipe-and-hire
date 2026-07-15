@@ -720,35 +720,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
-              onClick={() => {
-                // Touch devices: first tap = show tooltip (kept open ~3s), second tap = navigate.
-                // Hover-capable devices (desktop): navigate immediately.
-                const isTouchDevice =
-                  typeof window !== 'undefined' &&
-                  window.matchMedia('(hover: none)').matches;
-                if (!isTouchDevice) {
-                  setShowCompanyProfile(true);
-                  return;
-                }
-                if (companyTapArmedRef.current) {
-                  companyTapArmedRef.current = false;
-                  if (companyTapTimeoutRef.current) {
-                    clearTimeout(companyTapTimeoutRef.current);
-                    companyTapTimeoutRef.current = null;
-                  }
-                  setShowCompanyProfile(true);
-                } else {
-                  companyTapArmedRef.current = true;
-                  setShowCompanyTooltip(true);
-                  if (companyTapTimeoutRef.current) clearTimeout(companyTapTimeoutRef.current);
-                  companyTapTimeoutRef.current = setTimeout(() => {
-                    companyTapArmedRef.current = false;
-                    setShowCompanyTooltip(false);
-                    companyTapTimeoutRef.current = null;
-                  }, 3000);
-                }
-              }}
-              className="flex min-w-0 flex-1 items-center space-x-2 overflow-hidden hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
+              onClick={handleOpenCompanyProfile}
+              className="flex min-w-0 flex-1 items-center space-x-2 overflow-hidden hover:bg-white/10 active:bg-white/15 p-1.5 rounded-lg transition-all cursor-pointer"
+              aria-label="Visa företagsprofil"
             >
               <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center">
                 {companyLogoUrl ? (
