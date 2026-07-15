@@ -138,6 +138,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const canOpenCompanyProfile = Boolean(job.employer_id && onCompanyClick);
   const openCompanyProfile = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
+    hapticLight();
     if (job.employer_id) onCompanyClick?.(job.employer_id);
   }, [job.employer_id, onCompanyClick]);
   const handleCompanyKeyDown = useCallback((e: React.KeyboardEvent) => {
