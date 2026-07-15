@@ -760,9 +760,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                   />
                 ) : (
                   <span className="text-white font-semibold text-sm">
-                    {getDisplayCompanyName(job)
-                      ? getDisplayCompanyName(job).substring(0, 2).toUpperCase()
-                      : 'FÖ'}
+                    {getCompanyInitials(getDisplayCompanyName(job))}
                   </span>
                 )}
               </div>
