@@ -1026,6 +1026,7 @@ const SearchJobs = memo(() => {
                       image_focus_position: job.image_focus_position,
                       company_name: job.company_name,
                       workplace_name: job.workplace_name,
+                      employer_id: job.employer_id,
                       company_logo_url: job.company_logo_url,
                       updated_at: (job as any).image_updated_at ?? job.updated_at,
                       salary_min: job.salary_min,
@@ -1039,6 +1040,10 @@ const SearchJobs = memo(() => {
                     onUnsaveClick={handleUnsaveClick}
                     isSavedExternal={isJobSaved(job.id)}
                     onToggleSave={toggleSaveJob}
+                    onCompanyClick={(companyId) => {
+                      setSelectedCompanyId(companyId);
+                      setCompanyDialogOpen(true);
+                    }}
                   />
                 </CardErrorBoundary>
               ))}

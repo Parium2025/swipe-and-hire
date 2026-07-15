@@ -34,6 +34,7 @@ interface ReadOnlyMobileJobCardProps {
     image_focus_position?: string;
     company_name?: string;
     workplace_name?: string;
+    employer_id?: string;
     company_logo_url?: string;
     overlay_text_color?: string | null;
     updated_at?: string;
@@ -67,6 +68,8 @@ interface ReadOnlyMobileJobCardProps {
   hideSaveButton?: boolean;
   /** Override default card click navigation */
   onCardClick?: (jobId: string, imageState?: { initialHeroImageUrl?: string; initialCompanyLogoUrl?: string }) => void;
+  /** Opens the company profile without triggering the card navigation */
+  onCompanyClick?: (companyId: string) => void;
   /** Extra content rendered below the tags row (e.g. edit/delete buttons) */
   footer?: ReactNode;
   /** Card index in list — first 6 load eagerly, rest lazy */
@@ -93,7 +96,7 @@ function getGradientForId(id: string) {
 }
 
 
-export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false, onCardClick, footer, cardIndex = 0 }: ReadOnlyMobileJobCardProps) => {
+export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false, onCardClick, onCompanyClick, footer, cardIndex = 0 }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -129,6 +132,12 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDeleteClick?.(job.id, job.title);
+  };
+
+  const canOpenCompanyProfile = Boolean(job.employer_id && onCompanyClick);
+  const handleCompanyClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (job.employer_id) onCompanyClick?.(job.employer_id);
   };
 
   // Determine which action button to show
@@ -271,7 +280,21 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
        <div className="job-card-mobile-body space-y-2.5">
         {/* Logo circle — always shown, matches employer card */}
         <div className="flex justify-center pt-1">
-          {logoUrl ? (
+          {canOpenCompanyProfile ? (
+            <button
+              type="button"
+              aria-label={`Visa företagsprofil för ${companyName}`}
+              className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg active:scale-95 transition-transform"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={handleCompanyClick}
+            >
+              {logoUrl ? (
+                <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
+              ) : (
+                <span className="text-base font-bold text-white/80 tracking-wide">{initials}</span>
+              )}
+            </button>
+          ) : logoUrl ? (
             <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg">
               <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
             </div>
