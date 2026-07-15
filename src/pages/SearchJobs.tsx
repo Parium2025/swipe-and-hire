@@ -806,8 +806,9 @@ const SearchJobs = memo(() => {
     setSearchInput('');
     setTimeFilter('all');
     setSelectedCompanies([]);
+    setSalaryMin(0);
     try { sessionStorage.removeItem('parium-search-filters'); } catch {}
-  }, [setSelectedPostalCode, setSelectedCity, setSelectedEmploymentTypes, setSelectedCategory, setSelectedSubcategories, setSearchInput, setTimeFilter, setSelectedCompanies]);
+  }, [setSelectedPostalCode, setSelectedCity, setSelectedEmploymentTypes, setSelectedCategory, setSelectedSubcategories, setSearchInput, setTimeFilter, setSelectedCompanies, setSalaryMin]);
 
   const handleLocationChange = useCallback((location: string, postalCode?: string) => {
     if (!location && autoFilledCityRef.current && selectedCity === autoFilledCityRef.current) {
