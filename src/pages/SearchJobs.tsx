@@ -1092,6 +1092,7 @@ const SearchJobs = memo(() => {
           subcategories: selectedSubcategories.length > 0 ? selectedSubcategories : undefined,
           time_filter: timeFilter !== 'all' ? timeFilter : undefined,
           sort_by: sortBy !== 'newest' ? sortBy : undefined,
+          salary_min: salaryMin > 0 ? salaryMin : undefined,
         }}
         onSave={saveSearch}
       />
