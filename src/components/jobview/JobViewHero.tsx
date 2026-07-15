@@ -44,15 +44,6 @@ function getGradientForName(name: string) {
   return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
 }
 
-function getCompanyInitials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return '?';
-  if (words.length === 1) {
-    const w = words[0];
-    return (w[0] + w[w.length - 1]).toUpperCase();
-  }
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-}
 
 function getSalaryText(salaryMin?: number | null, salaryMax?: number | null, salaryType?: string | null, salaryTransparency?: string | null): string | null {
   const typeLabel = salaryType === 'monthly' || salaryType === 'fast' ? 'kr/mån'

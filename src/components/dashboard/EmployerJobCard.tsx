@@ -63,15 +63,6 @@ function getGradientForId(id: string) {
   return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
 }
 
-function getCompanyInitials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return '?';
-  if (words.length === 1) {
-    const w = words[0];
-    return (w[0] + w[w.length - 1]).toUpperCase();
-  }
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-}
 
 export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCardProps) => {
   const isExpired = isEmployerJobExpired(job);
