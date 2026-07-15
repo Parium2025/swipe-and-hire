@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { criteriaToSavedSearchColumns } from '@/lib/savedSearchMapping';
 
 const CACHE_KEY = 'parium_saved_searches_cache';
 
@@ -236,16 +237,7 @@ export const useSavedSearches = () => {
         .insert({
           user_id: user.id,
           name,
-          search_query: criteria.search_query || null,
-          city: criteria.city || null,
-          county: criteria.county || null,
-          employment_types: criteria.employment_types?.length ? criteria.employment_types : null,
-          category: criteria.category || null,
-          subcategories: criteria.subcategories?.length ? criteria.subcategories : null,
-          time_filter: criteria.time_filter || null,
-          sort_by: criteria.sort_by || null,
-          salary_min: criteria.salary_min || null,
-          salary_max: criteria.salary_max || null,
+          ...criteriaToSavedSearchColumns(criteria),
         })
         .select()
         .single();

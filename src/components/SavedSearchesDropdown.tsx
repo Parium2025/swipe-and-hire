@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { SavedSearch, SearchCriteria } from '@/hooks/useSavedSearches';
+import { savedSearchToCriteria } from '@/lib/savedSearchMapping';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
 import { cn } from '@/lib/utils';
 
@@ -61,23 +62,10 @@ export function SavedSearchesDropdown({
   const handleApplySearch = (search: SavedSearch) => {
     // Close popover FIRST for instant UI response
     setOpen(false);
-    
-    // Build criteria from saved search
-    const criteria: SearchCriteria = {
-      search_query: search.search_query || undefined,
-      city: search.city || undefined,
-      county: search.county || undefined,
-      employment_types: search.employment_types || undefined,
-      category: search.category || undefined,
-      subcategories: search.subcategories || undefined,
-      time_filter: search.time_filter || undefined,
-      sort_by: search.sort_by || undefined,
-      salary_min: search.salary_min || undefined,
-      salary_max: search.salary_max || undefined,
-    };
-    
-    onApplySearch(criteria);
-    
+
+    // Bygg kriterier via central mappning (håller save/apply synkade)
+    onApplySearch(savedSearchToCriteria(search));
+
     // Clear new matches in background (non-blocking)
     if (search.new_matches_count > 0) {
       onClearNewMatches(search.id).catch(() => {});
