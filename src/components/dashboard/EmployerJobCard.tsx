@@ -10,6 +10,7 @@ import { isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 interface EmployerJobCardProps {
   job: {

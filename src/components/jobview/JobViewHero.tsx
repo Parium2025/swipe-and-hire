@@ -6,6 +6,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { ResilientImage } from '@/components/ui/ResilientImage';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 interface JobViewHeroProps {
   title: string;
