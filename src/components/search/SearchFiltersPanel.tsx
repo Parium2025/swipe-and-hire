@@ -575,10 +575,10 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
                         {activeSalaryLabel}
                       </span>
-                      {salaryMin > 0 ? (
+                      {salaryRange ? (
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); onSalaryMinChange(0); }}
+                          onClick={(e) => { e.stopPropagation(); onSalaryRangeChange(''); }}
                           className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
                           aria-label="Rensa lönefilter"
                         >
@@ -591,13 +591,13 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
                     {salaryOptions.map((opt, idx, arr) => (
-                      <React.Fragment key={opt.value}>
+                      <React.Fragment key={opt.value || 'all'}>
                         <DropdownMenuItem
-                          onClick={() => onSalaryMinChange(opt.value)}
+                          onClick={() => onSalaryRangeChange(opt.value)}
                           className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
                         >
-                          <span>{opt.value === 0 ? opt.label : `${opt.label} kr/mån`}</span>
-                          {salaryMin === opt.value && <Check className="h-4 w-4 text-white" />}
+                          <span>{opt.label}</span>
+                          {salaryRange === opt.value && <Check className="h-4 w-4 text-white" />}
                         </DropdownMenuItem>
                         {idx < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
                       </React.Fragment>
