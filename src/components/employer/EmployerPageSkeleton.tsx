@@ -92,18 +92,18 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             <div className={`h-7 w-48 rounded ${SHAPE}`} />
           </div>
 
-          {/* StatsGrid — mobile shape:
-              (1) full-width multi-col card (Aktiva | Utgångna | Utkast)
-              (2) 3-col grid with 3 short cards (Annonser / Visningar / Ansökningar) */}
+          {/* StatsGrid — mobile shape mirrors the real dashboard exactly:
+              (1) full-width multi-col card with TWO cells (Aktiva | Utgångna)
+              (2) 3-col grid: Annonser / Visningar / Ansökningar */}
           <div className="md:hidden space-y-2">
-            <div className="rounded-lg overflow-hidden border border-white/10 bg-white/[0.03]">
+            <div className="rounded-lg overflow-hidden border border-white/20 bg-white/5">
               <div className="flex h-[62px]">
-                {[1, 2, 3].map(i => (
+                {[1, 2].map(i => (
                   <div
                     key={i}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1.5 ${i > 1 ? 'border-l border-white/10' : ''}`}
+                    className={`flex-1 flex flex-col items-center justify-center gap-1.5 ${i > 1 ? 'border-l border-white/20' : ''}`}
                   >
-                    <div className={`h-3 w-12 rounded ${SHAPE}`} />
+                    <div className={`h-3 w-14 rounded ${SHAPE}`} />
                     <div className={`h-4 w-6 rounded ${SHAPE}`} />
                   </div>
                 ))}
@@ -113,7 +113,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
               {[1, 2, 3].map(i => (
                 <div
                   key={i}
-                  className="rounded-lg h-[62px] flex flex-col items-center justify-center gap-1.5 border border-white/10 bg-white/[0.03]"
+                  className="rounded-lg h-[62px] flex flex-col items-center justify-center gap-1.5 border border-white/20 bg-white/5"
                 >
                   <div className={`h-3 w-14 rounded ${SHAPE}`} />
                   <div className={`h-4 w-6 rounded ${SHAPE}`} />
@@ -121,6 +121,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
               ))}
             </div>
           </div>
+
 
           {/* StatsGrid desktop shape — 5 columns */}
           <div className="hidden md:grid md:grid-cols-5 gap-2">
