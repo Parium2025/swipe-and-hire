@@ -120,8 +120,7 @@ export function SavedSearchesDropdown({
             <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
             {totalNewMatches > 0 && (
               <Badge 
-                variant="glass" 
-                className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] h-5 px-1.5"
+                className="bg-green-500/90 text-white border-0 text-[10px] h-5 px-1.5"
               >
                 {totalNewMatches} nya
               </Badge>
