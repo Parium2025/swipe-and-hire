@@ -309,15 +309,16 @@ const SearchJobs = memo(() => {
     setSelectedEmploymentTypesRaw(prev => { const next = typeof v === 'function' ? v(prev) : v; persistFilters({ empTypes: next }); return next; });
   }, [persistFilters]);
 
-  // 🆕 Salary filter (minimum monthly, SEK). 0 = inget filter.
-  const [salaryMin, setSalaryMinRaw] = useState<number>(() => {
-    const v = Number(savedFilters.salaryMin);
-    return Number.isFinite(v) && v > 0 ? v : 0;
+  // 🆕 Lönefilter: exakt range-sträng (matchar job_postings.salary_transparency
+  // som skrivs av MobileJobWizard, t.ex. "45000-50000"). '' = inget filter.
+  const [salaryRange, setSalaryRangeRaw] = useState<string>(() => {
+    const v = savedFilters.salaryRange;
+    return typeof v === 'string' ? v : '';
   });
-  const setSalaryMin = useCallback((v: number) => { setSalaryMinRaw(v); persistFilters({ salaryMin: v }); }, [persistFilters]);
+  const setSalaryRange = useCallback((v: string) => { setSalaryRangeRaw(v); persistFilters({ salaryRange: v }); }, [persistFilters]);
 
   const [filtersExpanded, setFiltersExpanded] = useState(() => {
-    return !!(savedFilters.city || (savedFilters.cat && savedFilters.cat !== 'all-categories') || savedFilters.empTypes?.length || (Number(savedFilters.salaryMin) > 0));
+    return !!(savedFilters.city || (savedFilters.cat && savedFilters.cat !== 'all-categories') || savedFilters.empTypes?.length || savedFilters.salaryRange);
   });
   
   // Company suggestion state
