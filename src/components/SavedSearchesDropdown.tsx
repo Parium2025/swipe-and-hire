@@ -202,8 +202,7 @@ export function SavedSearchesDropdown({
                           </span>
                           {search.new_matches_count > 0 && (
                             <Badge 
-                              variant="glass" 
-                              className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] h-4 px-1 shrink-0"
+                              className="bg-green-500/90 text-white border-0 text-[10px] h-4 px-1 shrink-0"
                             >
                               +{search.new_matches_count}
                             </Badge>
