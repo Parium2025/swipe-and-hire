@@ -221,7 +221,10 @@ const SearchJobs = memo(() => {
     setSelectedCategory(criteria.category || 'all-categories');
     setSelectedSubcategories(criteria.subcategories || []);
     setSelectedEmploymentTypes(criteria.employment_types || []);
-    setSalaryMin(typeof criteria.salary_min === 'number' && criteria.salary_min > 0 ? criteria.salary_min : 0);
+    // Rekonstruera range-strängen från saved_searches (som fortfarande lagrar min/max som nummer).
+    const sMin = typeof criteria.salary_min === 'number' ? criteria.salary_min : null;
+    const sMax = typeof criteria.salary_max === 'number' ? criteria.salary_max : null;
+    setSalaryRange(sMin && sMax ? `${sMin}-${sMax}` : sMin ? `${sMin}+` : '');
     if (criteria.time_filter && ['all', '12h', '24h', '3d', '7d'].includes(criteria.time_filter)) {
       setTimeFilter(criteria.time_filter as 'all' | '12h' | '24h' | '3d' | '7d');
     }
@@ -309,15 +312,16 @@ const SearchJobs = memo(() => {
     setSelectedEmploymentTypesRaw(prev => { const next = typeof v === 'function' ? v(prev) : v; persistFilters({ empTypes: next }); return next; });
   }, [persistFilters]);
 
-  // 🆕 Salary filter (minimum monthly, SEK). 0 = inget filter.
-  const [salaryMin, setSalaryMinRaw] = useState<number>(() => {
-    const v = Number(savedFilters.salaryMin);
-    return Number.isFinite(v) && v > 0 ? v : 0;
+  // 🆕 Lönefilter: exakt range-sträng (matchar job_postings.salary_transparency
+  // som skrivs av MobileJobWizard, t.ex. "45000-50000"). '' = inget filter.
+  const [salaryRange, setSalaryRangeRaw] = useState<string>(() => {
+    const v = savedFilters.salaryRange;
+    return typeof v === 'string' ? v : '';
   });
-  const setSalaryMin = useCallback((v: number) => { setSalaryMinRaw(v); persistFilters({ salaryMin: v }); }, [persistFilters]);
+  const setSalaryRange = useCallback((v: string) => { setSalaryRangeRaw(v); persistFilters({ salaryRange: v }); }, [persistFilters]);
 
   const [filtersExpanded, setFiltersExpanded] = useState(() => {
-    return !!(savedFilters.city || (savedFilters.cat && savedFilters.cat !== 'all-categories') || savedFilters.empTypes?.length || (Number(savedFilters.salaryMin) > 0));
+    return !!(savedFilters.city || (savedFilters.cat && savedFilters.cat !== 'all-categories') || savedFilters.empTypes?.length || savedFilters.salaryRange);
   });
   
   // Company suggestion state
@@ -582,36 +586,11 @@ const SearchJobs = memo(() => {
       result = result.filter(j => selectedCompanies.includes(j.company_name));
     }
 
-    // 🆕 Lönefilter (klient-sidig): matcha om jobbets högsta lön ≥ salaryMin.
-    // Många jobb lagrar lönen i salary_transparency som "45000-50000" istället för
-    // i salary_min/salary_max — så vi läser BÅDA. Endast "monthly"/"fast"-liknande
-    // löner jämförs mot månadsgolvet; timlöner räknas till månad (× 165h).
-    if (salaryMin > 0) {
-      result = result.filter(j => {
-        let top: number | null = null;
-        if (typeof j.salary_max === 'number') top = j.salary_max;
-        else if (typeof j.salary_min === 'number') top = j.salary_min;
-        // Fallback: parse "min-max" ur salary_transparency
-        if (top === null && typeof j.salary_transparency === 'string') {
-          const m = j.salary_transparency.match(/(\d[\d\s]*)\s*[-–]\s*(\d[\d\s]*)/);
-          if (m) {
-            const max = parseInt(m[2].replace(/\s/g, ''), 10);
-            if (!isNaN(max)) top = max;
-          } else {
-            const single = j.salary_transparency.match(/\d[\d\s]*/);
-            if (single) {
-              const v = parseInt(single[0].replace(/\s/g, ''), 10);
-              if (!isNaN(v)) top = v;
-            }
-          }
-        }
-        if (top === null) return false;
-        // Om timlön: normalisera till månad (approx 165h heltid)
-        if (j.salary_type === 'hourly' || j.salary_type === 'rorlig') {
-          top = top * 165;
-        }
-        return top >= salaryMin;
-      });
+    // 🆕 Lönefilter: exakt string-matchning mot job_postings.salary_transparency.
+    // Både filtret och MobileJobWizard använder samma range-format (t.ex.
+    // "45000-50000"), så vi kan jämföra rakt av — ingen parsing behövs.
+    if (salaryRange) {
+      result = result.filter(j => j.salary_transparency === salaryRange);
     }
 
     // Sort based on user preference
@@ -628,7 +607,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds, salaryMin]);
+  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds, salaryRange]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
@@ -753,7 +732,7 @@ const SearchJobs = memo(() => {
 
     setDisplayCount(20);
     setSortBy('newest');
-  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, salaryMin, setSortBy]);
+  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, salaryRange, setSortBy]);
 
   // Reset loading flag deterministically when displayCount actually changes
   // (replaces the previous setTimeout-based unlock that could race on fast scroll).
@@ -829,9 +808,9 @@ const SearchJobs = memo(() => {
     setSearchInput('');
     setTimeFilter('all');
     setSelectedCompanies([]);
-    setSalaryMin(0);
+    setSalaryRange('');
     try { sessionStorage.removeItem('parium-search-filters'); } catch {}
-  }, [setSelectedPostalCode, setSelectedCity, setSelectedEmploymentTypes, setSelectedCategory, setSelectedSubcategories, setSearchInput, setTimeFilter, setSelectedCompanies, setSalaryMin]);
+  }, [setSelectedPostalCode, setSelectedCity, setSelectedEmploymentTypes, setSelectedCategory, setSelectedSubcategories, setSearchInput, setTimeFilter, setSelectedCompanies, setSalaryRange]);
 
   const handleLocationChange = useCallback((location: string, postalCode?: string) => {
     if (!location && autoFilledCityRef.current && selectedCity === autoFilledCityRef.current) {
@@ -880,8 +859,8 @@ const SearchJobs = memo(() => {
         onEmploymentTypesChange={setSelectedEmploymentTypes}
         sortBy={sortBy}
         onSortChange={setSortBy}
-        salaryMin={salaryMin}
-        onSalaryMinChange={setSalaryMin}
+        salaryRange={salaryRange}
+        onSalaryRangeChange={setSalaryRange}
         filtersExpanded={filtersExpanded}
         onFiltersExpandedChange={setFiltersExpanded}
         activeFilterCount={
@@ -889,7 +868,7 @@ const SearchJobs = memo(() => {
           (selectedCategory && selectedCategory !== 'all-categories' ? 1 : 0) +
           (selectedSubcategories.length > 0 ? 1 : 0) +
           (selectedEmploymentTypes.length > 0 ? 1 : 0) +
-          (salaryMin > 0 ? 1 : 0) +
+          (salaryRange ? 1 : 0) +
           (sortBy !== 'newest' ? 1 : 0)
         }
         savedSearches={savedSearches}
@@ -1114,7 +1093,8 @@ const SearchJobs = memo(() => {
           subcategories: selectedSubcategories.length > 0 ? selectedSubcategories : undefined,
           time_filter: timeFilter !== 'all' ? timeFilter : undefined,
           sort_by: sortBy !== 'newest' ? sortBy : undefined,
-          salary_min: salaryMin > 0 ? salaryMin : undefined,
+          salary_min: (() => { const m = salaryRange.match(/^(\d+)/); return m ? parseInt(m[1], 10) : undefined; })(),
+          salary_max: (() => { const m = salaryRange.match(/^\d+-(\d+)$/); return m ? parseInt(m[1], 10) : undefined; })(),
         }}
         onSave={saveSearch}
       />

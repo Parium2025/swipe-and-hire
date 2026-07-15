@@ -41,8 +41,8 @@ interface SearchFiltersPanelProps {
   timeFilter: TimeFilter;
   onTimeFilterChange: (value: TimeFilter) => void;
   // Salary
-  salaryMin: number;
-  onSalaryMinChange: (value: number) => void;
+  salaryRange: string;
+  onSalaryRangeChange: (value: string) => void;
   // Filter expansion
   filtersExpanded: boolean;
   onFiltersExpandedChange: (value: boolean) => void;
@@ -84,8 +84,8 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   onSortChange,
   timeFilter,
   onTimeFilterChange,
-  salaryMin,
-  onSalaryMinChange,
+  salaryRange,
+  onSalaryRangeChange,
   filtersExpanded,
   onFiltersExpandedChange,
   activeFilterCount,
@@ -100,29 +100,31 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
 }: SearchFiltersPanelProps) {
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
-  const salaryOptions: { value: number; label: string }[] = [
-    { value: 0, label: 'Alla löner' },
-    { value: 5000, label: '5 000+ kr/mån' },
-    { value: 10000, label: '10 000+ kr/mån' },
-    { value: 15000, label: '15 000+ kr/mån' },
-    { value: 20000, label: '20 000+ kr/mån' },
-    { value: 25000, label: '25 000+ kr/mån' },
-    { value: 30000, label: '30 000+ kr/mån' },
-    { value: 35000, label: '35 000+ kr/mån' },
-    { value: 40000, label: '40 000+ kr/mån' },
-    { value: 45000, label: '45 000+ kr/mån' },
-    { value: 50000, label: '50 000+ kr/mån' },
-    { value: 55000, label: '55 000+ kr/mån' },
-    { value: 60000, label: '60 000+ kr/mån' },
-    { value: 65000, label: '65 000+ kr/mån' },
-    { value: 70000, label: '70 000+ kr/mån' },
-    { value: 75000, label: '75 000+ kr/mån' },
-    { value: 80000, label: '80 000+ kr/mån' },
-    { value: 85000, label: '85 000+ kr/mån' },
-    { value: 90000, label: '90 000+ kr/mån' },
-    { value: 100000, label: '100 000+ kr/mån' },
+  // Måste matcha exakt de värden som skrivs av MobileJobWizard till
+  // job_postings.salary_transparency — så filtret kan matcha via ren
+  // string-jämförelse (ingen parsing behövs).
+  const salaryOptions: { value: string; label: string }[] = [
+    { value: '', label: 'Alla löner' },
+    { value: '5000-10000', label: '5 000 – 10 000 kr/mån' },
+    { value: '10000-15000', label: '10 000 – 15 000 kr/mån' },
+    { value: '15000-20000', label: '15 000 – 20 000 kr/mån' },
+    { value: '20000-25000', label: '20 000 – 25 000 kr/mån' },
+    { value: '25000-30000', label: '25 000 – 30 000 kr/mån' },
+    { value: '30000-40000', label: '30 000 – 40 000 kr/mån' },
+    { value: '40000-45000', label: '40 000 – 45 000 kr/mån' },
+    { value: '45000-50000', label: '45 000 – 50 000 kr/mån' },
+    { value: '50000-55000', label: '50 000 – 55 000 kr/mån' },
+    { value: '55000-60000', label: '55 000 – 60 000 kr/mån' },
+    { value: '60000-65000', label: '60 000 – 65 000 kr/mån' },
+    { value: '65000-70000', label: '65 000 – 70 000 kr/mån' },
+    { value: '70000-75000', label: '70 000 – 75 000 kr/mån' },
+    { value: '75000-80000', label: '75 000 – 80 000 kr/mån' },
+    { value: '80000-85000', label: '80 000 – 85 000 kr/mån' },
+    { value: '85000-90000', label: '85 000 – 90 000 kr/mån' },
+    { value: '90000-100000', label: '90 000 – 100 000 kr/mån' },
+    { value: '100000+', label: '100 000+ kr/mån' },
   ];
-  const activeSalaryLabel = salaryOptions.find(o => o.value === salaryMin)?.label ?? 'Alla löner';
+  const activeSalaryLabel = salaryOptions.find(o => o.value === salaryRange)?.label ?? 'Alla löner';
 
   return (
     <Card className="bg-white/5 border-white/20">
@@ -573,10 +575,10 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
                         {activeSalaryLabel}
                       </span>
-                      {salaryMin > 0 ? (
+                      {salaryRange ? (
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); onSalaryMinChange(0); }}
+                          onClick={(e) => { e.stopPropagation(); onSalaryRangeChange(''); }}
                           className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
                           aria-label="Rensa lönefilter"
                         >
@@ -589,13 +591,13 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
                     {salaryOptions.map((opt, idx, arr) => (
-                      <React.Fragment key={opt.value}>
+                      <React.Fragment key={opt.value || 'all'}>
                         <DropdownMenuItem
-                          onClick={() => onSalaryMinChange(opt.value)}
+                          onClick={() => onSalaryRangeChange(opt.value)}
                           className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
                         >
-                          <span>{opt.value === 0 ? opt.label : `${opt.label} kr/mån`}</span>
-                          {salaryMin === opt.value && <Check className="h-4 w-4 text-white" />}
+                          <span>{opt.label}</span>
+                          {salaryRange === opt.value && <Check className="h-4 w-4 text-white" />}
                         </DropdownMenuItem>
                         {idx < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
                       </React.Fragment>
