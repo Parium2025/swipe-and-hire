@@ -47,9 +47,12 @@ export const JobSlideContent = memo(function JobSlideContent({
     >
       <div className="mx-auto w-full max-w-[21rem]">
         {(logoUrl || !hasImage) && displayCompanyName && (
-          <div className="flex justify-center mb-4">
+          <div
+            className="flex justify-center mb-4"
+            {...(interactive ? { 'data-company-tap-zone': '' } : {})}
+          >
             {logoUrl ? (
-              <div className="w-14 h-14 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
+              <div className="w-14 h-14 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg active:scale-95 transition-transform">
                 <img
                   src={logoUrl}
                   alt={interactive ? displayCompanyName : ''}
@@ -59,7 +62,7 @@ export const JobSlideContent = memo(function JobSlideContent({
                 />
               </div>
             ) : (
-              <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center active:scale-95 transition-transform">
                 <span className="text-xl font-bold text-white/40 tracking-wide select-none">
                   {getCompanyInitials(displayCompanyName)}
                 </span>
