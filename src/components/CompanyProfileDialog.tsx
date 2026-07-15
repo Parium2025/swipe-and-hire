@@ -351,7 +351,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 {company.website && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] transition-colors">
                     <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                      <Globe className="h-4.5 w-4.5 text-white" />
+                      <Globe className="h-[18px] w-[18px] text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-white/60 uppercase tracking-wide">Webbplats</p>
@@ -370,7 +370,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 {company.industry && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
                     <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                      <Briefcase className="h-4.5 w-4.5 text-white" />
+                      <Briefcase className="h-[18px] w-[18px] text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-white/60 uppercase tracking-wide">Bransch</p>
@@ -382,7 +382,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 {company.employee_count && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
                     <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                      <Users className="h-4.5 w-4.5 text-white" />
+                      <Users className="h-[18px] w-[18px] text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-white/60 uppercase tracking-wide">Företagsstorlek</p>
@@ -394,7 +394,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 {company.address && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
                     <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                      <MapPin className="h-4.5 w-4.5 text-white" />
+                      <MapPin className="h-[18px] w-[18px] text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-white/60 uppercase tracking-wide">Huvudkontor</p>
