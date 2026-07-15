@@ -84,8 +84,11 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   onSortChange,
   timeFilter,
   onTimeFilterChange,
+  salaryMin,
+  onSalaryMinChange,
   filtersExpanded,
   onFiltersExpandedChange,
+  activeFilterCount,
   savedSearches,
   totalNewMatches,
   onApplySavedSearch,
@@ -96,6 +99,19 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   onClearAll,
 }: SearchFiltersPanelProps) {
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
+
+  const salaryOptions: { value: number; label: string }[] = [
+    { value: 0, label: 'Alla löner' },
+    { value: 25000, label: '25 000+' },
+    { value: 30000, label: '30 000+' },
+    { value: 35000, label: '35 000+' },
+    { value: 40000, label: '40 000+' },
+    { value: 45000, label: '45 000+' },
+    { value: 50000, label: '50 000+' },
+    { value: 60000, label: '60 000+' },
+    { value: 70000, label: '70 000+' },
+  ];
+  const activeSalaryLabel = salaryOptions.find(o => o.value === salaryMin)?.label ?? 'Alla löner';
 
   return (
     <Card className="bg-white/5 border-white/20">
