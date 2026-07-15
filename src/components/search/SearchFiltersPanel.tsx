@@ -547,6 +547,52 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 </div>
               </div>
 
+              {/* Lön (min per månad) */}
+              <div className="space-y-2 mt-4">
+                <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
+                  <Wallet className="h-4 w-4 flex-shrink-0" />
+                  <span className="leading-none">Lön (min per månad)</span>
+                </Label>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
+                      aria-label="Välj minimilön"
+                    >
+                      <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
+                        {activeSalaryLabel}
+                      </span>
+                      {salaryMin > 0 ? (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); onSalaryMinChange(0); }}
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+                          aria-label="Rensa lönefilter"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                      )}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
+                    {salaryOptions.map((opt, idx, arr) => (
+                      <React.Fragment key={opt.value}>
+                        <DropdownMenuItem
+                          onClick={() => onSalaryMinChange(opt.value)}
+                          className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                        >
+                          <span>{opt.value === 0 ? opt.label : `${opt.label} kr/mån`}</span>
+                          {salaryMin === opt.value && <Check className="h-4 w-4 text-white" />}
+                        </DropdownMenuItem>
+                        {idx < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
+                      </React.Fragment>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
               {/* Show selected employment types as badges */}
               {selectedEmploymentTypes.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
