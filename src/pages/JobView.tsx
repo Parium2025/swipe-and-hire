@@ -379,6 +379,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const isJobExpired = job ? getTimeRemaining(job.created_at, job.expires_at).isExpired : false;
   const { isOnline, showOfflineToast } = useOnline();
 
+  const handleOpenCompanyProfile = async () => {
+    await hapticLight();
+    setShowCompanyProfile(true);
+  };
+
   const handleApplicationSubmit = async () => {
     // Block employers from applying
     if (isEmployer) {
