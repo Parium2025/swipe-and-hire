@@ -586,36 +586,11 @@ const SearchJobs = memo(() => {
       result = result.filter(j => selectedCompanies.includes(j.company_name));
     }
 
-    // 🆕 Lönefilter (klient-sidig): matcha om jobbets högsta lön ≥ salaryMin.
-    // Många jobb lagrar lönen i salary_transparency som "45000-50000" istället för
-    // i salary_min/salary_max — så vi läser BÅDA. Endast "monthly"/"fast"-liknande
-    // löner jämförs mot månadsgolvet; timlöner räknas till månad (× 165h).
-    if (salaryMin > 0) {
-      result = result.filter(j => {
-        let top: number | null = null;
-        if (typeof j.salary_max === 'number') top = j.salary_max;
-        else if (typeof j.salary_min === 'number') top = j.salary_min;
-        // Fallback: parse "min-max" ur salary_transparency
-        if (top === null && typeof j.salary_transparency === 'string') {
-          const m = j.salary_transparency.match(/(\d[\d\s]*)\s*[-–]\s*(\d[\d\s]*)/);
-          if (m) {
-            const max = parseInt(m[2].replace(/\s/g, ''), 10);
-            if (!isNaN(max)) top = max;
-          } else {
-            const single = j.salary_transparency.match(/\d[\d\s]*/);
-            if (single) {
-              const v = parseInt(single[0].replace(/\s/g, ''), 10);
-              if (!isNaN(v)) top = v;
-            }
-          }
-        }
-        if (top === null) return false;
-        // Om timlön: normalisera till månad (approx 165h heltid)
-        if (j.salary_type === 'hourly' || j.salary_type === 'rorlig') {
-          top = top * 165;
-        }
-        return top >= salaryMin;
-      });
+    // 🆕 Lönefilter: exakt string-matchning mot job_postings.salary_transparency.
+    // Både filtret och MobileJobWizard använder samma range-format (t.ex.
+    // "45000-50000"), så vi kan jämföra rakt av — ingen parsing behövs.
+    if (salaryRange) {
+      result = result.filter(j => j.salary_transparency === salaryRange);
     }
 
     // Sort based on user preference
