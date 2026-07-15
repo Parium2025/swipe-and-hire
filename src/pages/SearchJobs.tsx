@@ -730,7 +730,7 @@ const SearchJobs = memo(() => {
 
     setDisplayCount(20);
     setSortBy('newest');
-  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, setSortBy]);
+  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, salaryMin, setSortBy]);
 
   // Reset loading flag deterministically when displayCount actually changes
   // (replaces the previous setTimeout-based unlock that could race on fast scroll).
