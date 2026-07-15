@@ -252,7 +252,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             {activeFilterCount > 0 && (
               <span
                 aria-label={`${activeFilterCount} aktiva filter`}
-                className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-white text-slate-900 text-[11px] font-semibold leading-none"
+                className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-[hsl(var(--primary-glow))] text-white text-[11px] font-semibold leading-none shadow-[0_0_0_1px_hsl(var(--primary-glow)/0.4),0_2px_8px_hsl(var(--primary-glow)/0.35)]"
               >
                 {activeFilterCount}
               </span>
