@@ -163,6 +163,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
               <div key={i} className={`rounded-xl h-64 ${SHAPE}`} />
             ))}
           </div>
+          </div>
         </div>
       </motion.div>
     </FullscreenSkeletonPortal>
