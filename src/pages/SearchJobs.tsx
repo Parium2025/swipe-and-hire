@@ -221,7 +221,10 @@ const SearchJobs = memo(() => {
     setSelectedCategory(criteria.category || 'all-categories');
     setSelectedSubcategories(criteria.subcategories || []);
     setSelectedEmploymentTypes(criteria.employment_types || []);
-    setSalaryMin(typeof criteria.salary_min === 'number' && criteria.salary_min > 0 ? criteria.salary_min : 0);
+    // Rekonstruera range-strängen från saved_searches (som fortfarande lagrar min/max som nummer).
+    const sMin = typeof criteria.salary_min === 'number' ? criteria.salary_min : null;
+    const sMax = typeof criteria.salary_max === 'number' ? criteria.salary_max : null;
+    setSalaryRange(sMin && sMax ? `${sMin}-${sMax}` : sMin ? `${sMin}+` : '');
     if (criteria.time_filter && ['all', '12h', '24h', '3d', '7d'].includes(criteria.time_filter)) {
       setTimeFilter(criteria.time_filter as 'all' | '12h' | '24h' | '3d' | '7d');
     }
