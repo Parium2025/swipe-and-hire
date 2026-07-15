@@ -343,7 +343,7 @@ export function EmployerSidebar() {
                 <CompanyAvatar
                   companyLogoUrl={companyLogoUrl}
                   companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-                  initials={getCompanyInitials()}
+                  initials={getCompanyInitials(profile?.company_name || `${profile?.first_name} ${profile?.last_name}`)}
                 />
                 <div className="flex-1 min-w-0">
                   <TruncatedText
