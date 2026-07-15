@@ -581,6 +581,16 @@ const SearchJobs = memo(() => {
       result = result.filter(j => selectedCompanies.includes(j.company_name));
     }
 
+    // 🆕 Lönefilter (klient-sidig): matcha om job.salary_max ≥ salaryMin, eller
+    // (om max saknas) job.salary_min ≥ salaryMin. Jobb utan någon lön filtreras bort
+    // när användaren aktivt satt ett lönegolv.
+    if (salaryMin > 0) {
+      result = result.filter(j => {
+        const top = typeof j.salary_max === 'number' ? j.salary_max : (typeof j.salary_min === 'number' ? j.salary_min : null);
+        return top !== null && top >= salaryMin;
+      });
+    }
+
     // Sort based on user preference
     switch (sortBy) {
       case 'newest':
@@ -595,7 +605,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds]);
+  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds, salaryMin]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
