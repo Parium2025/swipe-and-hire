@@ -81,7 +81,9 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
       >
         <SkeletonChrome />
 
-        <div className="flex-1 min-h-0 overflow-hidden responsive-container-wide space-y-4 pt-3">
+        {/* Mirror EmployerMobileShell <main class="p-3"> + inner responsive-container-wide */}
+        <div className="flex-1 min-h-0 overflow-hidden p-3">
+          <div className="responsive-container-wide space-y-4">
           {/* Page title — "Mina jobbannonser" (text-xl mobile / md:text-2xl) */}
           <div className="flex justify-center items-center mb-6">
             <div className={`h-7 w-48 rounded ${SHAPE}`} />
