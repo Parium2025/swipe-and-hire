@@ -858,8 +858,18 @@ const SearchJobs = memo(() => {
         onEmploymentTypesChange={setSelectedEmploymentTypes}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        salaryMin={salaryMin}
+        onSalaryMinChange={setSalaryMin}
         filtersExpanded={filtersExpanded}
         onFiltersExpandedChange={setFiltersExpanded}
+        activeFilterCount={
+          (selectedCity ? 1 : 0) +
+          (selectedCategory && selectedCategory !== 'all-categories' ? 1 : 0) +
+          (selectedSubcategories.length > 0 ? 1 : 0) +
+          (selectedEmploymentTypes.length > 0 ? 1 : 0) +
+          (salaryMin > 0 ? 1 : 0) +
+          (sortBy !== 'newest' ? 1 : 0)
+        }
         savedSearches={savedSearches}
         totalNewMatches={totalNewMatches}
         onApplySavedSearch={handleApplySavedSearch}
