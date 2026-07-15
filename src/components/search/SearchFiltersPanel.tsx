@@ -454,181 +454,177 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2 md:col-span-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Employment Type */}
-                <div className="space-y-2">
-                   <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                    <Clock className="h-4 w-4 flex-shrink-0" />
-                    <span className="leading-none">Anställning</span>
-                  </Label>
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
-                        aria-label="Välj anställningstyp"
-                      >
-                        <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
+            {/* Employment Type */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
+                <Clock className="h-4 w-4 flex-shrink-0" />
+                <span className="leading-none">Anställning</span>
+              </Label>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
+                    aria-label="Välj anställningstyp"
+                  >
+                    <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
 
-                          {selectedEmploymentTypes.length === 0 
-                            ? 'Alla anställningar' 
-                            : selectedEmploymentTypes.length === 1
-                            ? '1 vald'
-                            : `${selectedEmploymentTypes.length} valda`
-                          }
-                        </span>
-                        <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
+                      {selectedEmploymentTypes.length === 0 
+                        ? 'Alla anställningar' 
+                        : selectedEmploymentTypes.length === 1
+                        ? '1 vald'
+                        : `${selectedEmploymentTypes.length} valda`
+                      }
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
+                  <DropdownMenuItem
+                    onClick={() => onEmploymentTypesChange([])}
+                    className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white font-medium touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                  >
+                    Alla anställningar
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  {employmentTypes.map((type, index) => (
+                    <React.Fragment key={type.value}>
                       <DropdownMenuItem
-                        onClick={() => onEmploymentTypesChange([])}
-                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white font-medium touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
-                      >
-                        Alla anställningar
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-white/20" />
-                      {employmentTypes.map((type, index) => (
-                        <React.Fragment key={type.value}>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              const isSelected = selectedEmploymentTypes.includes(type.value);
-                              if (isSelected) {
-                                onEmploymentTypesChange(selectedEmploymentTypes.filter(t => t !== type.value));
-                              } else {
-                                onEmploymentTypesChange([...selectedEmploymentTypes, type.value]);
-                              }
-                            }}
-                            className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
-                          >
-                            <span>{type.label}</span>
-                            {selectedEmploymentTypes.includes(type.value) && (
-                              <Check className="h-4 w-4 text-white" />
-                            )}
-                          </DropdownMenuItem>
-                          {index < employmentTypes.length - 1 && (
-                            <DropdownMenuSeparator className="bg-white/20" />
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                {/* Sort Dropdown */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                    <ArrowDownWideNarrow className="h-4 w-4 flex-shrink-0" />
-                    <span className="leading-none">Sortering</span>
-                  </Label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
-                        aria-label="Välj sortering"
-                      >
-                        <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">{sortLabels[sortBy]}</span>
-
-                        <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] z-[10000] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white">
-                      <DropdownMenuItem 
-                        onClick={() => onSortChange('newest')}
-                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
-                      >
-                        <span>{sortLabels.newest}</span>
-                        {sortBy === 'newest' && <Check className="h-4 w-4 text-white" />}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-white/20" />
-                      <DropdownMenuItem 
-                        onClick={() => onSortChange('oldest')}
-                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
-                      >
-                        <span>{sortLabels.oldest}</span>
-                        {sortBy === 'oldest' && <Check className="h-4 w-4 text-white" />}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-white/20" />
-                      <DropdownMenuItem 
-                        onClick={() => onSortChange('most-views')}
-                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
-                      >
-                        <span>{sortLabels['most-views']}</span>
-                        {sortBy === 'most-views' && <Check className="h-4 w-4 text-white" />}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-
-              {/* Lön (min per månad) */}
-              <div className="space-y-2 mt-4">
-                <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                  <Wallet className="h-4 w-4 flex-shrink-0" />
-                  <span className="leading-none">Lön (min per månad)</span>
-                </Label>
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
-                      aria-label="Välj minimilön"
-                    >
-                      <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
-                        {activeSalaryLabel}
-                      </span>
-                      {salaryRange ? (
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); onSalaryRangeChange(''); }}
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
-                          aria-label="Rensa lönefilter"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      ) : (
-                        <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
-                      )}
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
-                    {salaryOptions.map((opt, idx, arr) => (
-                      <React.Fragment key={opt.value || 'all'}>
-                        <DropdownMenuItem
-                          onClick={() => onSalaryRangeChange(opt.value)}
-                          className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
-                        >
-                          <span>{opt.label}</span>
-                          {salaryRange === opt.value && <Check className="h-4 w-4 text-white" />}
-                        </DropdownMenuItem>
-                        {idx < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
-                      </React.Fragment>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              {/* Show selected employment types as badges */}
-              {selectedEmploymentTypes.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedEmploymentTypes.map((type) => (
-                    <Badge 
-                      key={type}
-                      variant="secondary"
-                      className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
-                    >
-                      {employmentTypes.find(t => t.value === type)?.label}
-                      <X 
-                        className="h-3 w-3" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEmploymentTypesChange(selectedEmploymentTypes.filter(t => t !== type));
+                        onClick={() => {
+                          const isSelected = selectedEmploymentTypes.includes(type.value);
+                          if (isSelected) {
+                            onEmploymentTypesChange(selectedEmploymentTypes.filter(t => t !== type.value));
+                          } else {
+                            onEmploymentTypesChange([...selectedEmploymentTypes, type.value]);
+                          }
                         }}
-                      />
-                    </Badge>
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                      >
+                        <span>{type.label}</span>
+                        {selectedEmploymentTypes.includes(type.value) && (
+                          <Check className="h-4 w-4 text-white" />
+                        )}
+                      </DropdownMenuItem>
+                      {index < employmentTypes.length - 1 && (
+                        <DropdownMenuSeparator className="bg-white/20" />
+                      )}
+                    </React.Fragment>
                   ))}
-                </div>
-              )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+
+            {/* Lön */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
+                <Wallet className="h-4 w-4 flex-shrink-0" />
+                <span className="leading-none">Lön</span>
+              </Label>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
+                    aria-label="Välj lön"
+                  >
+                    <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
+                      {activeSalaryLabel}
+                    </span>
+                    {salaryRange ? (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); onSalaryRangeChange(''); }}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+                        aria-label="Rensa lönefilter"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
+                  {salaryOptions.map((opt, idx, arr) => (
+                    <React.Fragment key={opt.value || 'all'}>
+                      <DropdownMenuItem
+                        onClick={() => onSalaryRangeChange(opt.value)}
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                      >
+                        <span>{opt.label}</span>
+                        {salaryRange === opt.value && <Check className="h-4 w-4 text-white" />}
+                      </DropdownMenuItem>
+                      {idx < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
+                    </React.Fragment>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
+                <ArrowDownWideNarrow className="h-4 w-4 flex-shrink-0" />
+                <span className="leading-none">Sortering</span>
+              </Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
+                    aria-label="Välj sortering"
+                  >
+                    <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">{sortLabels[sortBy]}</span>
+
+                    <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] z-[10000] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white">
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('newest')}
+                    className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                  >
+                    <span>{sortLabels.newest}</span>
+                    {sortBy === 'newest' && <Check className="h-4 w-4 text-white" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('oldest')}
+                    className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                  >
+                    <span>{sortLabels.oldest}</span>
+                    {sortBy === 'oldest' && <Check className="h-4 w-4 text-white" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('most-views')}
+                    className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                  >
+                    <span>{sortLabels['most-views']}</span>
+                    {sortBy === 'most-views' && <Check className="h-4 w-4 text-white" />}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Show selected employment types as badges */}
+            {selectedEmploymentTypes.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2 md:col-span-2">
+                {selectedEmploymentTypes.map((type) => (
+                  <Badge 
+                    key={type}
+                    variant="secondary"
+                    className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
+                  >
+                    {employmentTypes.find(t => t.value === type)?.label}
+                    <X 
+                      className="h-3 w-3" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEmploymentTypesChange(selectedEmploymentTypes.filter(t => t !== type));
+                      }}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Clear all filters button */}
