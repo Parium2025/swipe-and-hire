@@ -41,8 +41,8 @@ interface SearchFiltersPanelProps {
   timeFilter: TimeFilter;
   onTimeFilterChange: (value: TimeFilter) => void;
   // Salary
-  salaryMin: number;
-  onSalaryMinChange: (value: number) => void;
+  salaryRange: string;
+  onSalaryRangeChange: (value: string) => void;
   // Filter expansion
   filtersExpanded: boolean;
   onFiltersExpandedChange: (value: boolean) => void;
