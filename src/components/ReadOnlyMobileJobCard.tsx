@@ -135,10 +135,17 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   };
 
   const canOpenCompanyProfile = Boolean(job.employer_id && onCompanyClick);
-  const handleCompanyClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const openCompanyProfile = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
     if (job.employer_id) onCompanyClick?.(job.employer_id);
-  };
+  }, [job.employer_id, onCompanyClick]);
+  const handleCompanyKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openCompanyProfile(e);
+    }
+  }, [openCompanyProfile]);
+  const stopPointer = useCallback((e: React.PointerEvent) => e.stopPropagation(), []);
 
   // Determine which action button to show
   const showDeleteButton = !!onDeleteClick;
@@ -281,23 +288,17 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         {/* Logo circle — always shown, matches employer card */}
         <div className="flex justify-center pt-1">
           <div
-            className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg shrink-0"
+            className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg shrink-0 touch-manipulation select-none"
             role={canOpenCompanyProfile ? 'button' : undefined}
             aria-label={canOpenCompanyProfile ? `Visa företagsprofil för ${companyName}` : undefined}
             tabIndex={canOpenCompanyProfile ? 0 : undefined}
-            onPointerDown={canOpenCompanyProfile ? (e) => e.stopPropagation() : undefined}
-            onClick={canOpenCompanyProfile ? (e) => { e.stopPropagation(); if (job.employer_id) onCompanyClick?.(job.employer_id); } : undefined}
-            onKeyDown={canOpenCompanyProfile ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                e.stopPropagation();
-                if (job.employer_id) onCompanyClick?.(job.employer_id);
-              }
-            } : undefined}
-            style={canOpenCompanyProfile ? { cursor: 'pointer', borderRadius: '9999px' } : { borderRadius: '9999px' }}
+            onPointerDown={canOpenCompanyProfile ? stopPointer : undefined}
+            onClick={canOpenCompanyProfile ? openCompanyProfile : undefined}
+            onKeyDown={canOpenCompanyProfile ? handleCompanyKeyDown : undefined}
+            style={canOpenCompanyProfile ? { cursor: 'pointer' } : undefined}
           >
             {logoUrl ? (
-              <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover rounded-full" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full rounded-full" />
+              <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover rounded-full" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
             ) : (
               <span className="text-base font-bold text-white/80 tracking-wide">{initials}</span>
             )}
