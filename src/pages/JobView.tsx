@@ -14,6 +14,7 @@ import { ArrowLeft, Send, Users, CheckCircle, Share2 } from 'lucide-react';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
+import { hapticLight } from '@/lib/haptics';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { imageCache } from '@/lib/imageCache';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
@@ -181,9 +182,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     } catch { return {}; }
   });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
-  const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
-  const companyTapArmedRef = useRef(false);
-  const companyTapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
     if (typeof navigationImageState.initialHeroImageUrl === 'string' && navigationImageState.initialHeroImageUrl) {
       return navigationImageState.initialHeroImageUrl;
@@ -380,6 +378,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const canSubmitApplication = allRequiredQuestionsAnswered();
   const isJobExpired = job ? getTimeRemaining(job.created_at, job.expires_at).isExpired : false;
   const { isOnline, showOfflineToast } = useOnline();
+
+  const handleOpenCompanyProfile = async () => {
+    await hapticLight();
+    setShowCompanyProfile(true);
+  };
 
   const handleApplicationSubmit = async () => {
     // Block employers from applying
@@ -717,37 +720,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
-              onClick={() => {
-                // Touch devices: first tap = show tooltip (kept open ~3s), second tap = navigate.
-                // Hover-capable devices (desktop): navigate immediately.
-                const isTouchDevice =
-                  typeof window !== 'undefined' &&
-                  window.matchMedia('(hover: none)').matches;
-                if (!isTouchDevice) {
-                  setShowCompanyProfile(true);
-                  return;
-                }
-                if (companyTapArmedRef.current) {
-                  companyTapArmedRef.current = false;
-                  if (companyTapTimeoutRef.current) {
-                    clearTimeout(companyTapTimeoutRef.current);
-                    companyTapTimeoutRef.current = null;
-                  }
-                  setShowCompanyProfile(true);
-                } else {
-                  companyTapArmedRef.current = true;
-                  setShowCompanyTooltip(true);
-                  if (companyTapTimeoutRef.current) clearTimeout(companyTapTimeoutRef.current);
-                  companyTapTimeoutRef.current = setTimeout(() => {
-                    companyTapArmedRef.current = false;
-                    setShowCompanyTooltip(false);
-                    companyTapTimeoutRef.current = null;
-                  }, 3000);
-                }
-              }}
-              className="flex min-w-0 flex-1 items-center space-x-2 overflow-hidden hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
+              onClick={handleOpenCompanyProfile}
+              className="flex min-w-0 flex-1 items-center space-x-2 overflow-hidden hover:bg-white/10 active:bg-white/15 p-1.5 rounded-lg transition-all cursor-pointer"
+              aria-label="Visa företagsprofil"
             >
-              <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center">
+              <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center cursor-pointer active:scale-95 transition-transform [@media(hover:hover)]:hover:ring-2 [@media(hover:hover)]:hover:ring-white/30">
                 {companyLogoUrl ? (
                   <ResilientImage
                     src={companyLogoUrl}
