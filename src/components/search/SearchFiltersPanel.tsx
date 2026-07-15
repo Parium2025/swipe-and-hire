@@ -249,6 +249,14 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation"
           >
             <span>{filtersExpanded ? 'Dölj filter' : 'Visa filter'}</span>
+            {activeFilterCount > 0 && (
+              <span
+                aria-label={`${activeFilterCount} aktiva filter`}
+                className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-white text-slate-900 text-[11px] font-semibold leading-none"
+              >
+                {activeFilterCount}
+              </span>
+            )}
             <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${filtersExpanded ? 'rotate-180' : ''}`} />
           </button>
         </div>
