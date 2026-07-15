@@ -467,7 +467,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 {/* Sort Dropdown */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                    <ArrowUpDown className="h-4 w-4 flex-shrink-0" />
+                    <ArrowDownWideNarrow className="h-4 w-4 flex-shrink-0" />
                     <span className="leading-none">Sortering</span>
                   </Label>
                   <DropdownMenu>
