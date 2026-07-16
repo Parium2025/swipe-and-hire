@@ -54,7 +54,7 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
   // tunn avdelare mellan raderna. En kolumn, ren och stram.
   const rowClass =
     'flex items-start justify-between gap-4 py-2.5 border-b border-white/10 last:border-b-0 text-[15px] sm:text-sm';
-  const labelClass = 'shrink-0 text-white/60 font-normal';
+  const labelClass = 'shrink-0 text-white font-normal';
   const valueClass = 'text-right font-medium text-white min-w-0 [overflow-wrap:anywhere]';
 
   const employmentValue = employmentType
@@ -172,7 +172,7 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
             <span className={valueClass}>
               <span className="font-semibold">{salaryValue}</span>
               {salaryType && (
-                <span className="text-white/60 ml-1.5 text-[13px] sm:text-xs">({getSalaryTypeLabel(salaryType)})</span>
+                <span className="text-white ml-1.5 text-[13px] sm:text-xs">({getSalaryTypeLabel(salaryType)})</span>
               )}
             </span>
           </div>
