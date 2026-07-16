@@ -93,7 +93,9 @@ export const JobViewHero = memo(function JobViewHero({
   const timeInfo = useMemo(() => createdAt ? getTimeRemaining(createdAt, expiresAt ?? undefined) : null, [createdAt, expiresAt]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(overlayTextColor), [overlayTextColor]);
 
-  // Shared overlay content for both image and gradient fallback
+  // Shared overlay content for both image and gradient fallback.
+  // Endast titel visas — all detaljinfo flyttad till "Detaljer om tjänsten"
+  // för att undvika upprepning från jobbkort → hero → detaljer.
   const overlayContent = (
     <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 py-4 sm:px-6 sm:py-6">
       <TruncatedText
@@ -102,104 +104,6 @@ export const JobViewHero = memo(function JobViewHero({
         tooltipSide="bottom"
         style={overlayTextStyle}
       />
-      
-      {/* Mobile metadata — unified pill style matching swipe mode */}
-      {(() => {
-        const pillClass =
-          'px-2.5 py-1 rounded-full bg-black/45 border border-white/10 shadow-[0_1px_2px_rgba(0,0,0,0.35)] inline-flex items-center gap-1 max-w-full';
-        const textClass =
-          'text-white text-[11px] font-semibold leading-snug [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]';
-        const expiredPillClass =
-          'px-2.5 py-1 rounded-full bg-red-500/30 border border-red-400/40 shadow-[0_1px_2px_rgba(0,0,0,0.35)] inline-flex items-center gap-1';
-        return (
-          <>
-            <div className="mt-3.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
-              {(hasImage || !hasLogo) && (
-                <div className={pillClass}>
-                  <Building2 className="h-3 w-3 text-white flex-shrink-0" />
-                  <TruncatedText
-                    text={companyName}
-                    className={`${textClass} truncate min-w-0`}
-                    tooltipSide="bottom"
-                  />
-                </div>
-              )}
-              {location && (
-                <div className={pillClass}>
-                  <MapPin className="h-3 w-3 text-white flex-shrink-0" />
-                  <span className={`${textClass} truncate`}>{location}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
-              {employmentType && (
-                <div className={pillClass}>
-                  <Briefcase className="h-3 w-3 text-white flex-shrink-0" />
-                  <span className={textClass}>{getEmploymentTypeLabel(employmentType)}</span>
-                </div>
-              )}
-              {salaryText && (
-                <div className={pillClass}>
-                  <Banknote className="h-3 w-3 text-white flex-shrink-0" />
-                  <span className={textClass}>{salaryText}</span>
-                </div>
-              )}
-              {timeInfo && (
-                <div className={timeInfo.isExpired ? expiredPillClass : pillClass}>
-                  <Timer className="h-3 w-3 text-white flex-shrink-0" />
-                  <span className={textClass}>{timeInfo.isExpired ? 'Utgången' : `${timeInfo.text} kvar`}</span>
-                </div>
-              )}
-              {benefits && benefits.length > 0 && (
-                <div className={pillClass}>
-                  <Gift className="h-3 w-3 text-white flex-shrink-0" />
-                  <span className={textClass}>
-                    Förmåner {benefits.length <= 5 ? `${benefits.length} st` : `${Math.floor(benefits.length / 5) * 5}+`}
-                  </span>
-                </div>
-              )}
-              <div className={pillClass}>
-                <Users className="h-3 w-3 text-white flex-shrink-0" />
-                <span className={textClass}>{positionsText}</span>
-              </div>
-            </div>
-          </>
-        );
-      })()}
-
-      {/* Desktop/tablet metadata */}
-      <div className="mt-4 hidden sm:flex flex-wrap items-center justify-center gap-2 text-sm md:text-base text-white">
-        {employmentType && (
-          <span className="inline-flex items-center gap-1 text-white">
-            <Briefcase className="h-3.5 w-3.5" />
-            {getEmploymentTypeLabel(employmentType).toUpperCase()}
-          </span>
-        )}
-        {employmentType && location && (
-          <span className="text-white/60">·</span>
-        )}
-        {location && (
-          <span className="inline-flex items-center gap-1 text-white">
-            <MapPin className="h-3.5 w-3.5" />
-            {location.toUpperCase()}
-          </span>
-        )}
-        {salaryText && (
-          <>
-            <span className="text-white/60">·</span>
-            <span className="inline-flex items-center gap-1 text-white">
-              <Banknote className="h-3.5 w-3.5" />
-              {salaryText}
-            </span>
-          </>
-        )}
-        <span className="text-white/60">·</span>
-        <span className="inline-flex items-center gap-1 text-white">
-          <Users className="h-3.5 w-3.5" />
-          {positionsText}
-        </span>
-      </div>
     </div>
   );
 
