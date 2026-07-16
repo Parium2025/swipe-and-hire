@@ -812,8 +812,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 för att matcha arbetsgivar-preview (bild i toppen, titel under). */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden">
               <h1
-                className="text-center font-bold text-lg sm:text-xl md:text-2xl leading-snug break-words"
+                className="text-center font-bold text-lg sm:text-xl md:text-2xl leading-snug break-words line-clamp-2 [overflow-wrap:anywhere]"
                 style={{ color: job.overlay_text_color || '#FACC15' }}
+                title={job.title}
               >
                 {job.title}
               </h1>
