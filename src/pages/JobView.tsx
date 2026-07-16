@@ -704,62 +704,21 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         </Helmet>
       )}
 
-       <div className="jobview-container py-4">
-        {/* Combined header */}
-        <div className={`flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg gap-3 ${user ? 'justify-between' : 'justify-center'}`}>
-          {user && (
-            <button
-              type="button"
-              onClick={handleBack}
-              className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-sm border border-white/15 touch-manipulation shrink-0"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Tillbaka
-            </button>
-          )}
-          
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <button
-              onClick={handleOpenCompanyProfile}
-              className="flex min-w-0 flex-1 items-center space-x-2 overflow-hidden [@media(hover:hover)]:hover:bg-white/10 active:bg-white/15 py-1.5 pl-2 pr-1.5 rounded-lg transition-all cursor-pointer"
-              aria-label="Visa företagsprofil"
-            >
-              <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center cursor-pointer active:scale-95 transition-transform [@media(hover:hover)]:hover:ring-2 [@media(hover:hover)]:hover:ring-white/30">
-                {companyLogoUrl ? (
-                  <ResilientImage
-                    src={companyLogoUrl}
-                    alt={getDisplayCompanyName(job)}
-                    className="w-full h-full object-cover"
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="sync"
-                    draggable={false}
-                    fallbackClassName="w-full h-full"
-                  />
-                ) : (
-                  <span className="text-white font-semibold text-sm">
-                    {getCompanyInitials(getDisplayCompanyName(job))}
-                  </span>
-                )}
-              </div>
-              <div className="min-w-0 flex-1 overflow-hidden text-left">
-                <TruncatedText
-                  text={getDisplayCompanyName(job)}
-                  alwaysShowTooltip="desktop-only"
-                  tooltipSide="bottom"
-                  className="block w-full overflow-hidden text-sm font-bold leading-tight text-white line-clamp-2"
-                  style={{
-                    overflowWrap: 'anywhere',
-                    wordBreak: 'break-word',
-                  }}
-                />
-                <div className="flex items-center text-[10px] mt-0.5 text-white">
-                  <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
-                  Se företagsprofil
-                </div>
-              </div>
-            </button>
-
+        <div className="jobview-container py-4">
+          {/* Header */}
+          <div className="flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg gap-3 justify-between">
+            {user ? (
+              <button
+                type="button"
+                onClick={handleBack}
+                className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-sm border border-white/15 touch-manipulation shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Tillbaka
+              </button>
+            ) : (
+              <div className="w-11 shrink-0" aria-hidden="true" />
+            )}
             <button
               onClick={async () => {
                 const shareUrl = `${window.location.origin}/job/${jobId}`;
@@ -783,7 +742,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               <Share2 className="h-5 w-5 text-white" />
             </button>
           </div>
-        </div>
 
         {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -808,9 +766,49 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               overlayTextColor={job.overlay_text_color}
             />
 
-            {/* Job title — flyttad ut från hero-overlay till egen sektion
-                för att matcha arbetsgivar-preview (bild i toppen, titel under). */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden">
+            {/* Company profile + title - matchar arbetsgivar-preview */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden space-y-3">
+              <button
+                onClick={handleOpenCompanyProfile}
+                className="flex items-center gap-3 w-full cursor-pointer hover:bg-white/10 active:bg-white/15 p-2 -ml-2 rounded-xl transition-all"
+                aria-label="Visa företagsprofil"
+              >
+                <div className="h-12 w-12 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform [@media(hover:hover)]:hover:ring-2 [@media(hover:hover)]:hover:ring-white/30">
+                  {companyLogoUrl ? (
+                    <ResilientImage
+                      src={companyLogoUrl}
+                      alt={getDisplayCompanyName(job)}
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="sync"
+                      draggable={false}
+                      fallbackClassName="w-full h-full"
+                    />
+                  ) : (
+                    <span className="text-white font-semibold text-sm">
+                      {getCompanyInitials(getDisplayCompanyName(job))}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1 overflow-hidden text-left">
+                  <TruncatedText
+                    text={getDisplayCompanyName(job)}
+                    alwaysShowTooltip="desktop-only"
+                    tooltipSide="bottom"
+                    className="block w-full overflow-hidden text-base font-bold leading-tight text-white line-clamp-2"
+                    style={{
+                      overflowWrap: 'anywhere',
+                      wordBreak: 'break-word',
+                    }}
+                  />
+                  <div className="flex items-center text-xs mt-0.5 text-white">
+                    <Users className="h-3 w-3 mr-1 text-white" />
+                    Se företagsprofil
+                  </div>
+                </div>
+              </button>
+
               <h1
                 className="text-center font-bold text-lg sm:text-xl md:text-2xl leading-snug break-words [overflow-wrap:anywhere]"
                 style={{ color: job.overlay_text_color || '#FACC15' }}
