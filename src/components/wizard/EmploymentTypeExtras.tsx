@@ -27,9 +27,11 @@ interface EmploymentTypeExtrasProps {
 export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
   employmentType,
   partTimeDays,
+  partTimeShifts = [],
   durationAmount,
   durationUnit,
   onPartTimeDaysChange,
+  onPartTimeShiftsChange,
   onDurationAmountChange,
   onDurationUnitChange,
 }) => {
