@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
 import {
   capitalize as cap,
