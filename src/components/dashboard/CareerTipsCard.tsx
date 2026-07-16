@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Lightbulb, Newspaper, Clock, ExternalLink } from 'lucide-react';
+import { Lightbulb, Newspaper, Clock, ExternalLink, Sparkles } from 'lucide-react';
 import { useCareerTips } from '@/hooks/useCareerTips';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
