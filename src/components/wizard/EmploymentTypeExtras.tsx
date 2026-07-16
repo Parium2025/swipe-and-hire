@@ -62,28 +62,64 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
         );
       }
     };
+    const toggleShift = (v: string) => {
+      if (!onPartTimeShiftsChange) return;
+      if (partTimeShifts.includes(v)) {
+        onPartTimeShiftsChange(partTimeShifts.filter(s => s !== v));
+      } else {
+        const order = PART_TIME_SHIFTS.map(s => s.value);
+        onPartTimeShiftsChange(
+          [...partTimeShifts, v].sort((a, b) => order.indexOf(a) - order.indexOf(b))
+        );
+      }
+    };
     return (
-      <div className="mt-3 space-y-2">
-        <div className="text-white text-xs font-medium">Vilka dagar? (välj en eller flera)</div>
-        <div className="flex flex-wrap gap-1.5">
-          {WEEKDAYS.map(day => {
-            const active = partTimeDays.includes(day.value);
-            return (
-              <button
-                key={day.value}
-                type="button"
-                aria-pressed={active}
-                onClick={() => toggle(day.value)}
-                className={`h-9 min-w-[3rem] px-3 rounded-full text-xs font-medium transition-all duration-200 border ${
-                  active
-                    ? 'bg-white/20 border-white/40 text-white'
-                    : 'bg-white/5 border-white/15 text-white hover:bg-white/10'
-                }`}
-              >
-                {day.short}
-              </button>
-            );
-          })}
+      <div className="mt-3 space-y-3">
+        <div className="space-y-2">
+          <div className="text-white text-xs font-medium">Vilka dagar? (välj en eller flera)</div>
+          <div className="flex flex-wrap gap-1.5">
+            {WEEKDAYS.map(day => {
+              const active = partTimeDays.includes(day.value);
+              return (
+                <button
+                  key={day.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => toggle(day.value)}
+                  className={`h-9 min-w-[3rem] px-3 rounded-full text-xs font-medium transition-all duration-200 border ${
+                    active
+                      ? 'bg-white/20 border-white/40 text-white'
+                      : 'bg-white/5 border-white/15 text-white hover:bg-white/10'
+                  }`}
+                >
+                  {day.short}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="text-white text-xs font-medium">Arbetspass (välj en eller flera)</div>
+          <div className="flex flex-wrap gap-1.5">
+            {PART_TIME_SHIFTS.map(shift => {
+              const active = partTimeShifts.includes(shift.value);
+              return (
+                <button
+                  key={shift.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => toggleShift(shift.value)}
+                  className={`h-9 min-w-[3rem] px-4 rounded-full text-xs font-medium transition-all duration-200 border ${
+                    active
+                      ? 'bg-white/20 border-white/40 text-white'
+                      : 'bg-white/5 border-white/15 text-white hover:bg-white/10'
+                  }`}
+                >
+                  {shift.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
