@@ -34,9 +34,20 @@ export const JobDetailInfoGrid = memo(function JobDetailInfoGrid({
       <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Detaljer om tjänsten</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
         {detail.employment_type && (
-          <div className="flex text-white text-[15px] sm:text-sm">
+          <div className="flex text-white text-[15px] sm:text-sm sm:col-span-2">
             <span className="shrink-0 w-[110px] text-white">Anställning:</span>
-            <span className="font-medium">{getEmploymentTypeLabel(detail.employment_type)}</span>
+            <span className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]">
+              {[
+                getEmploymentTypeLabel(detail.employment_type),
+                formatEmploymentDetails({
+                  employment_type: detail.employment_type,
+                  part_time_days: detail.part_time_days,
+                  part_time_shifts: detail.part_time_shifts,
+                  duration_amount: detail.duration_amount,
+                  duration_unit: detail.duration_unit,
+                }),
+              ].filter(Boolean).join(' · ')}
+            </span>
           </div>
         )}
 
