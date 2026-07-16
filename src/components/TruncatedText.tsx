@@ -292,9 +292,19 @@ export function TruncatedText({
     return () => unregisterOpenTooltip(closeSelf);
   }, [isOpen, closeSelf]);
 
+  const clampStyles: React.CSSProperties = lines
+    ? {
+        display: '-webkit-box',
+        WebkitLineClamp: lines,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+      }
+    : {};
+
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
+    ...clampStyles,
     ...style,
   };
 
