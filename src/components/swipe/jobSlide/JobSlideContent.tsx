@@ -3,7 +3,7 @@ import { Building2 } from 'lucide-react';
 import type { SwipeJob } from '../types';
 import { Badge } from '@/components/ui/badge';
 import { TruncatedText } from '@/components/TruncatedText';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { getCompanyInitials } from './utils';
 import { JobSlideBadgesRow } from './JobSlideBadgesRow';
 
