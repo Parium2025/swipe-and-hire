@@ -12,6 +12,13 @@ interface TruncatedTextProps {
   forceClosed?: boolean;
   instantClose?: boolean;
   style?: React.CSSProperties;
+  /**
+   * Number of lines to clamp to. When set, the component owns the clamp
+   * via inline styles (source of truth), overriding any `line-clamp-*`
+   * class in `className`. Omit to keep the legacy behaviour where the
+   * className drives the clamp.
+   */
+  lines?: number;
 }
 
 // Module-level lazy detection of touch/hover capability — runs ONCE for the
@@ -69,6 +76,7 @@ export function TruncatedText({
   forceClosed = false,
   instantClose = false,
   style,
+  lines,
 }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const tooltipContentRef = useRef<HTMLDivElement>(null);
@@ -284,9 +292,19 @@ export function TruncatedText({
     return () => unregisterOpenTooltip(closeSelf);
   }, [isOpen, closeSelf]);
 
+  const clampStyles: React.CSSProperties = lines
+    ? {
+        display: '-webkit-box',
+        WebkitLineClamp: lines,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+      }
+    : {};
+
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
+    ...clampStyles,
     ...style,
   };
 
