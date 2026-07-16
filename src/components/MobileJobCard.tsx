@@ -158,7 +158,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
 
         <div className="h-px bg-white/10 mx-2" />
 
-        <div className="space-y-2 px-3 pb-1">
+        <div className="flex flex-col px-3 pb-1 [&>div]:py-2.5 [&>div]:border-b [&>div]:border-white/10 [&>div:last-child]:border-b-0">
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Rekryterare:</span>
             <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{recruiterName || '–'}</span>
