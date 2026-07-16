@@ -1230,6 +1230,7 @@ export type Database = {
           occupation: string | null
           overlay_text_color: string
           part_time_days: string[] | null
+          part_time_shifts: string[] | null
           pitch: string | null
           positions_count: number | null
           remote_work_possible: string | null
@@ -1282,6 +1283,7 @@ export type Database = {
           occupation?: string | null
           overlay_text_color?: string
           part_time_days?: string[] | null
+          part_time_shifts?: string[] | null
           pitch?: string | null
           positions_count?: number | null
           remote_work_possible?: string | null
@@ -1334,6 +1336,7 @@ export type Database = {
           occupation?: string | null
           overlay_text_color?: string
           part_time_days?: string[] | null
+          part_time_shifts?: string[] | null
           pitch?: string | null
           positions_count?: number | null
           remote_work_possible?: string | null
@@ -1523,6 +1526,7 @@ export type Database = {
           name: string
           occupation: string | null
           part_time_days: string[] | null
+          part_time_shifts: string[] | null
           pitch: string | null
           positions_count: string | null
           questions: Json | null
@@ -1559,6 +1563,7 @@ export type Database = {
           name: string
           occupation?: string | null
           part_time_days?: string[] | null
+          part_time_shifts?: string[] | null
           pitch?: string | null
           positions_count?: string | null
           questions?: Json | null
@@ -1595,6 +1600,7 @@ export type Database = {
           name?: string
           occupation?: string | null
           part_time_days?: string[] | null
+          part_time_shifts?: string[] | null
           pitch?: string | null
           positions_count?: string | null
           questions?: Json | null
@@ -3387,6 +3393,7 @@ export type Database = {
           occupation: string
           overlay_text_color: string
           part_time_days: string[]
+          part_time_shifts: string[]
           pitch: string
           positions_count: number
           remote_work_possible: string
