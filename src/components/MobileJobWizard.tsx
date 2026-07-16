@@ -121,6 +121,7 @@ interface ExistingJob {
   overlay_text_color?: string | null;
   is_active?: boolean;
   part_time_days?: string[] | null;
+  part_time_shifts?: string[] | null;
   duration_amount?: number | null;
   duration_unit?: string | null;
 }
@@ -320,6 +321,7 @@ const MobileJobWizard = ({
           workplace_municipality: existingJob.workplace_municipality || '',
           employment_type: existingJob.employment_type || '',
           part_time_days: existingJob.part_time_days || [],
+          part_time_shifts: existingJob.part_time_shifts || [],
           duration_amount: existingJob.duration_amount != null ? String(existingJob.duration_amount) : '',
           duration_unit: existingJob.duration_unit || 'months',
           work_schedule: existingJob.work_schedule || '',
@@ -400,6 +402,7 @@ const MobileJobWizard = ({
           benefits: selectedTemplate.benefits || [],
           employment_type: selectedTemplate.employment_type || '',
           part_time_days: (selectedTemplate as any).part_time_days || [],
+          part_time_shifts: (selectedTemplate as any).part_time_shifts || [],
           duration_amount: (selectedTemplate as any).duration_amount != null ? String((selectedTemplate as any).duration_amount) : '',
           duration_unit: (selectedTemplate as any).duration_unit || 'months',
           work_location_type: selectedTemplate.work_location_type || 'på-plats',
@@ -460,6 +463,7 @@ const MobileJobWizard = ({
           benefits: [],
           employment_type: '',
           part_time_days: [],
+          part_time_shifts: [],
           duration_amount: '',
           duration_unit: 'months',
           work_location_type: 'på-plats',
@@ -590,6 +594,7 @@ const MobileJobWizard = ({
     const details = formatEmploymentDetails({
       employment_type: employment,
       part_time_days: formData.part_time_days,
+      part_time_shifts: formData.part_time_shifts,
       duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
       duration_unit: formData.duration_unit,
     });
@@ -1538,6 +1543,7 @@ const MobileJobWizard = ({
       if (field === 'employment_type') {
         // Reset detail-fields whenever the type changes so old values don't leak
         next.part_time_days = [];
+        next.part_time_shifts = [];
         next.duration_amount = '';
         next.duration_unit = prev.duration_unit || 'months';
       }
@@ -2070,7 +2076,7 @@ const MobileJobWizard = ({
              formData.occupation.trim() && 
              formData.description.trim() && 
              formData.employment_type &&
-             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || (formData.part_time_days && formData.part_time_days.length > 0)) &&
+             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || ((formData.part_time_days && formData.part_time_days.length > 0) && (formData.part_time_shifts && formData.part_time_shifts.length > 0))) &&
              (!TYPES_WITH_DURATION.has(formData.employment_type) || (formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) &&
              formData.salary_type &&
              formData.salary_transparency &&
@@ -2108,6 +2114,7 @@ const MobileJobWizard = ({
       if (!formData.description.trim()) missing.push('Beskrivning');
       if (!formData.employment_type) missing.push('Anställningsform');
       if (formData.employment_type && TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && !(formData.part_time_days && formData.part_time_days.length > 0)) missing.push('Arbetsdagar (deltid)');
+      if (formData.employment_type && TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && !(formData.part_time_shifts && formData.part_time_shifts.length > 0)) missing.push('Arbetspass (deltid)');
       if (formData.employment_type && TYPES_WITH_DURATION.has(formData.employment_type) && !(formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) missing.push('Varaktighet');
       if (!formData.salary_type) missing.push('Lönetyp');
       if (!formData.salary_transparency) missing.push('Lönetransparens');
@@ -2330,6 +2337,7 @@ const MobileJobWizard = ({
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
         part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        part_time_shifts: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_shifts && formData.part_time_shifts.length > 0 ? formData.part_time_shifts : null,
         duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
         duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         salary_type: formData.salary_type || null,
@@ -2528,6 +2536,7 @@ const MobileJobWizard = ({
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
         part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        part_time_shifts: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_shifts && formData.part_time_shifts.length > 0 ? formData.part_time_shifts : null,
         duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
         duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         salary_type: formData.salary_type || null,
@@ -3965,11 +3974,13 @@ const MobileJobWizard = ({
                                         {formatEmploymentDetails({
                                           employment_type: formData.employment_type,
                                           part_time_days: formData.part_time_days,
+                                          part_time_shifts: formData.part_time_shifts,
                                           duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                           duration_unit: formData.duration_unit,
                                         }) && ` · ${formatEmploymentDetails({
                                           employment_type: formData.employment_type,
                                           part_time_days: formData.part_time_days,
+                                          part_time_shifts: formData.part_time_shifts,
                                           duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                           duration_unit: formData.duration_unit,
                                         })}`}
@@ -4335,6 +4346,7 @@ const MobileJobWizard = ({
                               employmentTypeDetail: formatEmploymentDetails({
                                 employment_type: formData.employment_type,
                                 part_time_days: formData.part_time_days,
+                                part_time_shifts: formData.part_time_shifts,
                                 duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                 duration_unit: formData.duration_unit,
                               }),
@@ -4501,11 +4513,13 @@ const MobileJobWizard = ({
                                            {formatEmploymentDetails({
                                              employment_type: formData.employment_type,
                                              part_time_days: formData.part_time_days,
+                                             part_time_shifts: formData.part_time_shifts,
                                              duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                              duration_unit: formData.duration_unit,
                                            }) && ` · ${formatEmploymentDetails({
                                              employment_type: formData.employment_type,
                                              part_time_days: formData.part_time_days,
+                                             part_time_shifts: formData.part_time_shifts,
                                              duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                              duration_unit: formData.duration_unit,
                                            })}`}
@@ -4876,6 +4890,7 @@ const MobileJobWizard = ({
                                   employmentTypeDetail: formatEmploymentDetails({
                                     employment_type: formData.employment_type,
                                     part_time_days: formData.part_time_days,
+                                    part_time_shifts: formData.part_time_shifts,
                                     duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                     duration_unit: formData.duration_unit,
                                   }),
