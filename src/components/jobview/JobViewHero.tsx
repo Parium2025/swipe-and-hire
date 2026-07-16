@@ -93,19 +93,9 @@ export const JobViewHero = memo(function JobViewHero({
   const timeInfo = useMemo(() => createdAt ? getTimeRemaining(createdAt, expiresAt ?? undefined) : null, [createdAt, expiresAt]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(overlayTextColor), [overlayTextColor]);
 
-  // Shared overlay content for both image and gradient fallback.
-  // Endast titel visas — all detaljinfo flyttad till "Detaljer om tjänsten"
-  // för att undvika upprepning från jobbkort → hero → detaljer.
-  const overlayContent = (
-    <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 py-4 sm:px-6 sm:py-6">
-      <TruncatedText
-        text={title}
-        className="text-white text-[15px] sm:text-xl md:text-2xl lg:text-3xl font-bold leading-snug sm:leading-tight max-w-4xl w-full text-center line-clamp-2 sm:line-clamp-3 break-words"
-        tooltipSide="bottom"
-        style={overlayTextStyle}
-      />
-    </div>
-  );
+  // Ren bild/gradient utan overlay-titel — titeln flyttad till egen sektion
+  // under hero för att matcha arbetsgivar-preview och undvika text ovanpå bild.
+  const overlayContent = null;
 
   if (!imageUrl) {
     return (
