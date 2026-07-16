@@ -2,7 +2,7 @@ import { memo, useMemo, useCallback, type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift, Banknote } from 'lucide-react';
+import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift, Banknote, Clock } from 'lucide-react';
 import { getEmploymentTypeLabel, formatEmploymentDetails, formatPartTimeDays, formatPartTimeShifts } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
@@ -347,9 +347,12 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
               return (
                 <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-start text-white">
                   <Briefcase className="h-3 w-3 mr-1 mt-[3px] flex-shrink-0" />
-                  <span className="leading-snug flex flex-col items-start text-left">
+                  <span className="leading-snug flex flex-col items-start text-left gap-0.5">
                     <span>{label} · {daysStr}</span>
-                    <span>{shiftsStr}</span>
+                    <span className="inline-flex items-center gap-1 text-white/95">
+                      <Clock className="h-3 w-3 flex-shrink-0" />
+                      {shiftsStr}
+                    </span>
                   </span>
                 </Badge>
               );
