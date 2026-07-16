@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Briefcase, Calendar, Building2, Users, Timer, CheckCircle, Heart } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 
 interface DesktopJobCardProps {
@@ -14,6 +14,10 @@ interface DesktopJobCardProps {
     company_name: string;
     location: string;
     employment_type: string;
+    part_time_days?: string[] | null;
+    part_time_shifts?: string[] | null;
+    duration_amount?: number | null;
+    duration_unit?: string | null;
     created_at: string;
     expires_at?: string;
     applications_count: number;
@@ -82,7 +86,18 @@ export const DesktopJobCard = memo(function DesktopJobCard({
               {job.employment_type && (
                 <div className="flex items-center gap-1">
                   <Briefcase className="h-3.5 w-3.5" />
-                  <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                  <span>
+                    {[
+                      getEmploymentTypeLabel(job.employment_type),
+                      formatEmploymentDetails({
+                        employment_type: job.employment_type,
+                        part_time_days: job.part_time_days,
+                        part_time_shifts: job.part_time_shifts,
+                        duration_amount: job.duration_amount,
+                        duration_unit: job.duration_unit,
+                      }),
+                    ].filter(Boolean).join(' · ')}
+                  </span>
                 </div>
               )}
               <div className="flex items-center gap-1">

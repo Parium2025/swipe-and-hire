@@ -101,23 +101,41 @@ export const JobSlideContent = memo(function JobSlideContent({
         >
           {job.title}
         </h2>
-        <p
-          className="text-white font-semibold text-base mt-2 truncate"
-          style={overlayTextStyle}
-        >
-          {(() => {
-            const label = job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '';
-            const detail = formatEmploymentDetails({
-              employment_type: job.employment_type,
-              duration_amount: job.duration_amount,
-              duration_unit: job.duration_unit,
-              part_time_days: job.part_time_days,
-              part_time_shifts: job.part_time_shifts,
-            });
-            const employmentPart = [label, detail].filter(Boolean).join(' · ');
-            return [employmentPart, job.location].filter(Boolean).join(' • ');
-          })()}
-        </p>
+        {(() => {
+          const label = job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '';
+          const detail = formatEmploymentDetails({
+            employment_type: job.employment_type,
+            duration_amount: job.duration_amount,
+            duration_unit: job.duration_unit,
+            part_time_days: job.part_time_days,
+            part_time_shifts: job.part_time_shifts,
+          });
+          const employmentPart = [label, detail].filter(Boolean).join(' · ');
+          // När vi har både anställningstyp-detaljer OCH ort → två rader
+          // så inget trunkeras (t.ex. Deltid · Mån–Sön · Dag, Kväll, Natt).
+          const twoLines = Boolean(employmentPart && job.location);
+          if (twoLines) {
+            return (
+              <div className="mt-2 space-y-0.5" style={overlayTextStyle}>
+                <p className="text-white font-semibold text-[15px] leading-snug line-clamp-2 [text-wrap:balance]">
+                  {employmentPart}
+                </p>
+                <p className="text-white/95 font-medium text-sm leading-snug truncate">
+                  {job.location}
+                </p>
+              </div>
+            );
+          }
+          const single = [employmentPart, job.location].filter(Boolean).join(' • ');
+          return (
+            <p
+              className="text-white font-semibold text-base mt-2 line-clamp-2 [text-wrap:balance]"
+              style={overlayTextStyle}
+            >
+              {single}
+            </p>
+          );
+        })()}
 
         <JobSlideBadgesRow job={job} />
       </div>
