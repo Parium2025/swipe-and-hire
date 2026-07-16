@@ -94,6 +94,7 @@ export interface JobTemplate {
   benefits?: string[];
   questions?: JobQuestion[];
   part_time_days?: string[];
+  part_time_shifts?: string[];
   duration_amount?: number | string;
   duration_unit?: string;
 }
