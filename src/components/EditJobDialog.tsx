@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { WizardSwipePreview, WizardListPreview, buildWizardPreviewData } from '@/components/wizard/WizardCardPreview';
@@ -3019,9 +3018,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             )}
                                              <button 
                                                onClick={() => setShowCompanyProfile(true)}
-                                               className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer whitespace-normal break-words leading-tight"
+                                               className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer leading-tight text-left min-w-0"
                                              >
-                                               {profile?.company_name || 'Företagsnamn'}
+                                               <TruncatedText text={profile?.company_name || 'Företagsnamn'} className="line-clamp-2 text-xs font-bold text-white leading-tight" tooltipSide="bottom" />
                                              </button>
                                           </div>
                                         </div>
@@ -3551,9 +3550,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 )}
                                                 <button 
                                                   onClick={() => setShowCompanyProfile(true)}
-                                                  className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer"
+                                                  className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer min-w-0 text-left"
                                                 >
-                                                  {profile?.company_name || 'Företagsnamn'}
+                                                  <TruncatedText text={profile?.company_name || 'Företagsnamn'} className="line-clamp-2 text-sm font-bold text-white" tooltipSide="bottom" />
                                                 </button>
                                               </div>
                                               {/* Tooltip pointing at company name */}

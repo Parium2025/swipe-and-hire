@@ -28,7 +28,6 @@ import {
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
@@ -3896,9 +3895,9 @@ const MobileJobWizard = ({
                                        onClick={() => {
                                          setShowCompanyProfile(true);
                                        }}
-                                       className="text-xs font-bold text-white hover:text-white transition-colors cursor-pointer whitespace-normal break-words leading-tight outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                       className="text-xs font-bold text-white hover:text-white transition-colors cursor-pointer leading-tight text-left min-w-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                                      >
-                                       {profile?.company_name || 'Företagsnamn'}
+                                       <TruncatedText text={profile?.company_name || 'Företagsnamn'} className="line-clamp-2 text-xs font-bold text-white leading-tight" tooltipSide="bottom" />
                                      </button>
                                    </div>
                                   </div>

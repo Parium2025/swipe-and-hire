@@ -18,6 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
+import { TruncatedText } from '@/components/TruncatedText';
 import {
   JOB_CARD_TRANSFORM as JOB_CARD_IMAGE_TRANSFORM,
   JOB_VIEW_HERO_TRANSFORM,
@@ -1167,7 +1168,7 @@ const SearchJobs = memo(() => {
             <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {jobToUnsave && (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{jobToUnsave.title}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <TruncatedText text={`"${jobToUnsave.title}"`} className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom" />? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>

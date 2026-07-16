@@ -15,6 +15,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
  import { setPendingJob } from '@/lib/pendingJobIntent';
  import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
  import { OCCUPATIONS } from '@/data/jobOccupations';
+ import { TruncatedText } from '@/components/TruncatedText';
  
 
 const BASE = 'https://parium.se';
@@ -341,7 +342,7 @@ const PublicJobPage = () => {
           <span>/</span>
           <Link to={`/jobb/${slugify(city)}`} className="hover:text-white/80">{city}</Link>
           <span>/</span>
-          <span className="text-white/80 truncate">{job.title}</span>
+          <TruncatedText text={job.title} className="text-white/80 truncate max-w-[200px] sm:max-w-[320px]" />
         </nav>
 
         <motion.header
@@ -350,7 +351,7 @@ const PublicJobPage = () => {
           transition={{ duration: 0.4 }}
           className="mb-8"
         >
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight mb-4">{job.title}</h1>
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight mb-4 break-words [overflow-wrap:anywhere]">{job.title}</h1>
           <div className="flex flex-wrap gap-3 text-white/70 text-sm">
             <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4" />{company}</span>
             <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" />{city}</span>
