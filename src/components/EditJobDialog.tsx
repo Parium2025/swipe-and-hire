@@ -105,6 +105,7 @@ interface JobPosting {
   is_active?: boolean | null;
   expires_at?: string | null;
   part_time_days?: string[] | null;
+  part_time_shifts?: string[] | null;
   duration_amount?: number | null;
   duration_unit?: string | null;
   overlay_text_color?: string | null;
@@ -142,6 +143,7 @@ interface JobFormData {
   image_focus_position: string;
   image_focus_position_desktop: string;
   part_time_days?: string[];
+  part_time_shifts?: string[];
   duration_amount?: string;
   duration_unit?: string;
   overlay_text_color: string;
@@ -624,6 +626,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     const details = formatEmploymentDetails({
       employment_type: employment,
       part_time_days: formData.part_time_days,
+      part_time_shifts: formData.part_time_shifts,
       duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
       duration_unit: formData.duration_unit,
     });
@@ -975,6 +978,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         image_focus_position: (job as any).image_focus_position || 'center',
         image_focus_position_desktop: (job as any).image_focus_position_desktop || 'center',
         part_time_days: (job as any).part_time_days || [],
+        part_time_shifts: (job as any).part_time_shifts || [],
         duration_amount: (job as any).duration_amount != null ? String((job as any).duration_amount) : '',
         duration_unit: (job as any).duration_unit || 'months',
         overlay_text_color: normalizeJobOverlayTextColor((job as any).overlay_text_color),
@@ -1057,6 +1061,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
         part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        part_time_shifts: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_shifts && formData.part_time_shifts.length > 0 ? formData.part_time_shifts : null,
         duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
         duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         salary_type: formData.salary_type || null,
@@ -1133,6 +1138,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       const next: any = { ...prev, [field]: value };
       if (field === 'employment_type') {
         next.part_time_days = [];
+        next.part_time_shifts = [];
         next.duration_amount = '';
         next.duration_unit = prev.duration_unit || 'months';
       }
@@ -1723,7 +1729,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
              formData.occupation.trim() && 
              formData.description.trim() && 
              formData.employment_type &&
-             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || (formData.part_time_days && formData.part_time_days.length > 0)) &&
+             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || ((formData.part_time_days && formData.part_time_days.length > 0) && (formData.part_time_shifts && formData.part_time_shifts.length > 0))) &&
              (!TYPES_WITH_DURATION.has(formData.employment_type) || (formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) &&
              formData.salary_type &&
              formData.salary_transparency &&
@@ -1788,6 +1794,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
         part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        part_time_shifts: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_shifts && formData.part_time_shifts.length > 0 ? formData.part_time_shifts : null,
         duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
         duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         salary_type: formData.salary_type || null,
@@ -2139,9 +2146,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <EmploymentTypeExtras
                           employmentType={formData.employment_type}
                           partTimeDays={formData.part_time_days || []}
+                          partTimeShifts={formData.part_time_shifts || []}
                           durationAmount={formData.duration_amount ? parseInt(formData.duration_amount, 10) : null}
                           durationUnit={(formData.duration_unit as DurationUnit) || 'months'}
                           onPartTimeDaysChange={(days) => setFormData(prev => ({ ...prev, part_time_days: days }))}
+                          onPartTimeShiftsChange={(shifts) => setFormData(prev => ({ ...prev, part_time_shifts: shifts }))}
                           onDurationAmountChange={(n) => setFormData(prev => ({ ...prev, duration_amount: n == null ? '' : String(n) }))}
                           onDurationUnitChange={(u) => setFormData(prev => ({ ...prev, duration_unit: u }))}
                         />
@@ -3083,11 +3092,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   {formatEmploymentDetails({
                                                     employment_type: formData.employment_type,
                                                     part_time_days: formData.part_time_days,
+                                                    part_time_shifts: formData.part_time_shifts,
                                                     duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                                     duration_unit: formData.duration_unit,
                                                   }) && ` · ${formatEmploymentDetails({
                                                     employment_type: formData.employment_type,
                                                     part_time_days: formData.part_time_days,
+                                                    part_time_shifts: formData.part_time_shifts,
                                                     duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                                     duration_unit: formData.duration_unit,
                                                   })}`}
@@ -3462,6 +3473,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       employmentTypeDetail: formatEmploymentDetails({
                                         employment_type: formData.employment_type,
                                         part_time_days: formData.part_time_days,
+                                        part_time_shifts: formData.part_time_shifts,
                                         duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                         duration_unit: formData.duration_unit,
                                       }),
@@ -3613,11 +3625,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                  {formatEmploymentDetails({
                                                    employment_type: formData.employment_type,
                                                    part_time_days: formData.part_time_days,
+                                                   part_time_shifts: formData.part_time_shifts,
                                                    duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                                    duration_unit: formData.duration_unit,
                                                  }) && ` · ${formatEmploymentDetails({
                                                    employment_type: formData.employment_type,
                                                    part_time_days: formData.part_time_days,
+                                                   part_time_shifts: formData.part_time_shifts,
                                                    duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                                    duration_unit: formData.duration_unit,
                                                  })}`}
@@ -3978,6 +3992,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          employmentTypeDetail: formatEmploymentDetails({
                                            employment_type: formData.employment_type,
                                            part_time_days: formData.part_time_days,
+                                           part_time_shifts: formData.part_time_shifts,
                                            duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                            duration_unit: formData.duration_unit,
                                          }),

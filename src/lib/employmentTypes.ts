@@ -68,6 +68,24 @@ export const WEEKDAYS: WeekdayOption[] = [
   { value: 'sun', short: 'Sön', label: 'Söndag' },
 ];
 
+export interface ShiftOption {
+  value: string;
+  label: string;
+}
+
+export const PART_TIME_SHIFTS: ShiftOption[] = [
+  { value: 'day', label: 'Dag' },
+  { value: 'evening', label: 'Kväll' },
+  { value: 'night', label: 'Natt' },
+];
+
+export const formatPartTimeShifts = (shifts?: string[] | null): string => {
+  if (!shifts || shifts.length === 0) return '';
+  const order = PART_TIME_SHIFTS.map(s => s.value);
+  const sorted = [...shifts].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  return sorted.map(v => PART_TIME_SHIFTS.find(s => s.value === v)?.label || v).join(', ');
+};
+
 export type DurationUnit = 'weeks' | 'months';
 
 export const DURATION_UNIT_LABEL: Record<DurationUnit, { singular: string; plural: string }> = {
@@ -100,12 +118,15 @@ export const formatPartTimeDays = (days?: string[] | null): string => {
 export const formatEmploymentDetails = (job: {
   employment_type?: string | null;
   part_time_days?: string[] | null;
+  part_time_shifts?: string[] | null;
   duration_amount?: number | null;
   duration_unit?: string | null;
 }): string => {
   if (!job.employment_type) return '';
   if (TYPES_WITH_PART_TIME_DAYS.has(job.employment_type)) {
-    return formatPartTimeDays(job.part_time_days);
+    const days = formatPartTimeDays(job.part_time_days);
+    const shifts = formatPartTimeShifts(job.part_time_shifts);
+    return [days, shifts].filter(Boolean).join(' · ');
   }
   if (TYPES_WITH_DURATION.has(job.employment_type)) {
     const d = formatDuration(job.duration_amount, job.duration_unit);

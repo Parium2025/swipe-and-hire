@@ -112,6 +112,7 @@ export const JobSlideContent = memo(function JobSlideContent({
               duration_amount: job.duration_amount,
               duration_unit: job.duration_unit,
               part_time_days: job.part_time_days,
+              part_time_shifts: job.part_time_shifts,
             });
             const employmentPart = [label, detail].filter(Boolean).join(' · ');
             return [employmentPart, job.location].filter(Boolean).join(' • ');

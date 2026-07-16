@@ -11,6 +11,7 @@ export interface SwipeJob {
   duration_amount?: number | null;
   duration_unit?: string | null;
   part_time_days?: string[] | null;
+  part_time_shifts?: string[] | null;
   job_image_url?: string;
   image_focus_position?: string;
   views_count: number;

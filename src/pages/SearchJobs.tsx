@@ -635,6 +635,7 @@ const SearchJobs = memo(() => {
       duration_amount: (job as any).duration_amount,
       duration_unit: (job as any).duration_unit,
       part_time_days: (job as any).part_time_days,
+      part_time_shifts: (job as any).part_time_shifts,
       job_image_url: job.job_image_url,
       image_focus_position: job.image_focus_position,
       views_count: job.views_count,

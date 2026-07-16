@@ -7,15 +7,17 @@ interface JobTitleCellProps {
   title: string;
   employmentType?: string | null;
   partTimeDays?: string[] | null;
+  partTimeShifts?: string[] | null;
   durationAmount?: number | null;
   durationUnit?: string | null;
   className?: string;
 }
 
-export function JobTitleCell({ title, employmentType, partTimeDays, durationAmount, durationUnit, className }: JobTitleCellProps) {
+export function JobTitleCell({ title, employmentType, partTimeDays, partTimeShifts, durationAmount, durationUnit, className }: JobTitleCellProps) {
   const details = formatEmploymentDetails({
     employment_type: employmentType || undefined,
     part_time_days: partTimeDays || undefined,
+    part_time_shifts: partTimeShifts || undefined,
     duration_amount: durationAmount,
     duration_unit: durationUnit,
   });

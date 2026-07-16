@@ -41,6 +41,8 @@ export interface BaseFormData {
   benefits: string[];
   /** Weekday codes ('mon','tue',...) for part-time positions. */
   part_time_days?: string[];
+  /** Shifts ('day','evening','night') for part-time positions. */
+  part_time_shifts?: string[];
   /** Duration amount for contract/temporary/internship/lia. */
   duration_amount?: string;
   /** 'weeks' | 'months' */
@@ -92,6 +94,7 @@ export interface JobTemplate {
   benefits?: string[];
   questions?: JobQuestion[];
   part_time_days?: string[];
+  part_time_shifts?: string[];
   duration_amount?: number | string;
   duration_unit?: string;
 }
