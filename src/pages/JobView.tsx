@@ -770,10 +770,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden space-y-3">
               <button
                 onClick={handleOpenCompanyProfile}
-                className="flex items-center gap-3 w-full cursor-pointer hover:bg-white/10 active:bg-white/15 p-2 -ml-2 rounded-xl transition-all"
+                className="flex flex-col items-center gap-2 w-full cursor-pointer hover:bg-white/10 active:bg-white/15 p-2 rounded-xl transition-all"
                 aria-label="Visa företagsprofil"
               >
-                <div className="h-12 w-12 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform [@media(hover:hover)]:hover:ring-2 [@media(hover:hover)]:hover:ring-white/30">
+                <div className="h-14 w-14 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform [@media(hover:hover)]:hover:ring-2 [@media(hover:hover)]:hover:ring-white/30">
                   {companyLogoUrl ? (
                     <ResilientImage
                       src={companyLogoUrl}
@@ -791,19 +791,20 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                     </span>
                   )}
                 </div>
-                <div className="min-w-0 flex-1 overflow-hidden text-left">
+                <div className="min-w-0 w-full overflow-hidden text-center flex flex-col items-center">
                   <TruncatedText
                     text={getDisplayCompanyName(job)}
                     alwaysShowTooltip="desktop-only"
                     tooltipSide="bottom"
-                    className="block w-full overflow-hidden text-base font-bold leading-tight text-white line-clamp-2"
+                    className="block w-full overflow-hidden text-base font-bold leading-tight text-white line-clamp-2 text-center"
                     style={{
+                      color: '#FFFFFF',
                       overflowWrap: 'anywhere',
                       wordBreak: 'break-word',
                     }}
                   />
-                  <div className="flex items-center text-xs mt-0.5 text-white">
-                    <Users className="h-3 w-3 mr-1 text-white" />
+                  <div className="flex items-center justify-center text-xs mt-0.5" style={{ color: '#FFFFFF' }}>
+                    <Users className="h-3 w-3 mr-1" style={{ color: '#FFFFFF' }} />
                     Se företagsprofil
                   </div>
                 </div>
