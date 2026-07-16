@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift, Banknote } from 'lucide-react';
-import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails, formatPartTimeDays, formatPartTimeShifts } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useCardImage } from '@/hooks/useCardImage';
