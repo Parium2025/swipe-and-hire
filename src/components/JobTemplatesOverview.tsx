@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface JobTemplate {
   id: string;
@@ -396,7 +397,7 @@ const JobTemplatesOverview = () => {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <CardTitle className="text-xl text-white">{template.name}</CardTitle>
+                      <TruncatedText text={template.name} className="line-clamp-2 text-xl font-semibold leading-none tracking-tight text-white" />
                       {template.is_default && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-500/20 text-blue-200 border border-blue-400/30">
                           <Star size={12} className="mr-1" />
@@ -404,9 +405,7 @@ const JobTemplatesOverview = () => {
                         </span>
                       )}
                     </div>
-                    <CardDescription className="text-white">
-                      {template.title} • {template.location}
-                    </CardDescription>
+                    <TruncatedText text={`${template.title} • ${template.location}`} className="line-clamp-2 text-sm text-white" />
                   </div>
                   <div className="flex items-center gap-2">
                     <Button

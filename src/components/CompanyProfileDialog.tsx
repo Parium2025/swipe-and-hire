@@ -23,7 +23,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { TruncatedText } from "@/components/TruncatedText";
-import { TruncatedTitle } from "@/components/ui/truncated-title";
 import { resolveCompanyLogoUrl } from "@/lib/companyLogoUrl";
 
 interface CompanyProfileDialogProps {
@@ -284,19 +283,11 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 </Avatar>
                 <div className="min-w-0 flex-1 pr-8">
                   <DialogTitle asChild>
-                    <TruncatedTitle
-                      fullText={company.company_name}
-                      side="bottom"
-                      className="text-2xl font-semibold text-white leading-tight tracking-tight"
-                      style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      } as React.CSSProperties}
-                    >
-                      {company.company_name}
-                    </TruncatedTitle>
+                    <TruncatedText
+                      text={company.company_name}
+                      tooltipSide="bottom"
+                      className="text-2xl font-semibold text-white leading-tight tracking-tight line-clamp-2"
+                    />
                   </DialogTitle>
                   <div className="flex items-center gap-2 mt-1.5">
                     <div className="flex items-center gap-0.5">

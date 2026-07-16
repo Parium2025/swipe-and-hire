@@ -179,7 +179,10 @@ const CompanyReviews = () => {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="text-xl font-semibold text-white">{company.company_name}</h2>
+              <TruncatedText
+                text={company.company_name}
+                className="text-xl font-semibold text-white line-clamp-2 tracking-tight"
+              />
               <div className="flex items-center gap-2 mt-0.5">
                 <Star className="h-3.5 w-3.5 fill-transparent text-white stroke-white stroke-[1.5]" />
                 <span className="text-sm text-white">

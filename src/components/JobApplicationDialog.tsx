@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart, X } from 'lucide-react';
+import { TruncatedText } from '@/components/TruncatedText';
 
 // Draft key for localStorage
 const JOB_DIALOG_DRAFT_PREFIX = 'parium_draft_job-dialog-';
@@ -510,8 +511,16 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
                 </button>
               </div>
               <div className="mt-1.5 md:mt-2">
-                <h3 className="font-semibold text-sm md:text-lg leading-tight">{job.title}</h3>
-                <p className="text-xs md:text-sm text-white">{companyName}</p>
+                <TruncatedText
+                  text={job.title}
+                  className="font-semibold text-sm md:text-lg leading-tight line-clamp-2 text-white"
+                  tooltipSide="bottom"
+                />
+                <TruncatedText
+                  text={companyName}
+                  className="text-xs md:text-sm text-white line-clamp-2 mt-0.5"
+                  tooltipSide="bottom"
+                />
               </div>
             </div>
 

@@ -20,6 +20,7 @@ import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
+import { TruncatedText } from '@/components/TruncatedText';
 
 
 type SortOption = 'newest' | 'oldest';
@@ -459,7 +460,7 @@ const SavedJobs = () => {
             <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {jobToRemove && (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{jobToRemove.title}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <TruncatedText text={`"${jobToRemove.title}"`} className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom" />? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>

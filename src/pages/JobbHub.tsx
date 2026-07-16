@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { ArrowRight, MapPin, Briefcase } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { TruncatedTitle } from '@/components/ui/truncated-title';
+import { TruncatedText } from '@/components/TruncatedText';
 import { CITIES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 import { smartMatchScore } from '@/lib/seoSearch';
@@ -227,12 +227,10 @@ const JobbHub = () => {
                       <MapPin className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <TruncatedTitle
-                        fullText={title}
+                      <TruncatedText
+                        text={title}
                         className="truncate text-lg font-semibold text-white"
-                      >
-                        {title}
-                      </TruncatedTitle>
+                      />
                       <p className="mt-1 truncate text-sm text-white">{c.county}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />

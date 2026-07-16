@@ -11,6 +11,7 @@ import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { MobileJobCard } from '@/components/MobileJobCard';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { TruncatedText } from '@/components/TruncatedText';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { formatDateShortSv } from '@/lib/date';
 import { getEmployerJobStatus, isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
@@ -587,7 +588,7 @@ const EmployerDashboard = memo(() => {
             <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
               {jobToDelete && (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <TruncatedText text={`"${jobToDelete.title}"`} className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom" />? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>

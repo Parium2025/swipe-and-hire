@@ -13,6 +13,7 @@ import { MapPin, Briefcase, Building2, Search, Zap, MessageSquare } from 'lucide
 import { KOMMUNER, KOMMUN_BY_SLUG } from '@/data/jobMunicipalities';
 import { CITY_BY_SLUG } from '@/data/jobCities';
 import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
+import { TruncatedText } from '@/components/TruncatedText';
 
 type PublicJobRow = {
   id: string;
@@ -253,7 +254,11 @@ const JobbKommun = () => {
                       <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
                         <Briefcase className="h-5 w-5 text-white" aria-hidden="true" />
                       </div>
-                      <h3 className="text-lg font-semibold leading-snug text-white">{job.title}</h3>
+                      <TruncatedText
+                        text={job.title}
+                        className="text-lg font-semibold leading-snug text-white line-clamp-2"
+                      />
+
                     </div>
                     <div className="mt-5 space-y-2 text-sm text-white">
                       <p className="flex items-center gap-2"><Building2 className="h-4 w-4 text-white" aria-hidden="true" />{job.company}</p>
