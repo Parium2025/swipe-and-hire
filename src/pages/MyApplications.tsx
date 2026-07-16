@@ -314,6 +314,10 @@ const MyApplications = () => {
                     company_logo_url: job.company_logo_url || undefined,
                     overlay_text_color: job.overlay_text_color,
                     positions_count: job.positions_count || undefined,
+                    part_time_days: (job as any).part_time_days,
+                    part_time_shifts: (job as any).part_time_shifts,
+                    duration_amount: (job as any).duration_amount,
+                    duration_unit: (job as any).duration_unit,
                   }}
                   onDeleteClick={handleDeleteClick}
                   statusBadge={statusBadgeEl}

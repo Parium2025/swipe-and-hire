@@ -344,6 +344,10 @@ const SavedJobs = () => {
                           salary_type: job.salary_type,
                           salary_transparency: job.salary_transparency,
                           benefits: job.benefits,
+                          part_time_days: (job as any).part_time_days,
+                          part_time_shifts: (job as any).part_time_shifts,
+                          duration_amount: (job as any).duration_amount,
+                          duration_unit: (job as any).duration_unit,
                         }}
                         cardIndex={index}
                         hasApplied={appliedJobIds.has(job.id)}
@@ -415,6 +419,10 @@ const SavedJobs = () => {
                           salary_type: job.salary_type,
                           salary_transparency: job.salary_transparency,
                           benefits: job.benefits,
+                          part_time_days: (job as any).part_time_days,
+                          part_time_shifts: (job as any).part_time_shifts,
+                          duration_amount: (job as any).duration_amount,
+                          duration_unit: (job as any).duration_unit,
                         }}
                         cardIndex={index}
                         hasApplied={appliedJobIds.has(job.id)}
