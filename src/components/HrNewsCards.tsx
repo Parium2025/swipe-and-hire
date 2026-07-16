@@ -144,10 +144,18 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
             {publishedTime && (
               <span className="text-xs text-white">{publishedTime}</span>
             )}
-            {news.source_url && (
+            {news.source_url ? (
               <div className="flex items-center gap-1 text-white transition-colors ml-auto">
                 <span className="text-xs font-medium">Läs mer</span>
                 <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </div>
+            ) : (
+              <div
+                className="flex items-center gap-1 text-white/90 ml-auto"
+                title="Denna artikel är genererad av vår AI när inga aktuella RSS-artiklar finns tillgängliga."
+              >
+                <Sparkles className="h-3 w-3" />
+                <span className="text-[11px] font-medium">AI-genererad</span>
               </div>
             )}
           </div>
