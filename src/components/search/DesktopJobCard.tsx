@@ -14,6 +14,10 @@ interface DesktopJobCardProps {
     company_name: string;
     location: string;
     employment_type: string;
+    part_time_days?: string[] | null;
+    part_time_shifts?: string[] | null;
+    duration_amount?: number | null;
+    duration_unit?: string | null;
     created_at: string;
     expires_at?: string;
     applications_count: number;
