@@ -104,8 +104,9 @@ async function getFeedStats(supabase: any, table: string) {
 async function getSourceHealth(supabase: any, sourceType: "hr_news" | "career_tips") {
   const { data, error } = await supabase
     .from("rss_source_health")
-    .select("source_name, source_type, is_healthy, last_success_at, last_check_at, consecutive_failures, last_error_message, last_error")
-    .eq("source_type", sourceType);
+    .select("source_name, source_type, is_healthy, last_success_at, last_check_at, consecutive_failures, last_error_message, last_error, is_active")
+    .eq("source_type", sourceType)
+    .eq("is_active", true);
 
   if (error) throw new Error(`rss_source_health/${sourceType}: ${error.message}`);
 
