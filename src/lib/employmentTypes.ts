@@ -68,6 +68,24 @@ export const WEEKDAYS: WeekdayOption[] = [
   { value: 'sun', short: 'Sön', label: 'Söndag' },
 ];
 
+export interface ShiftOption {
+  value: string;
+  label: string;
+}
+
+export const PART_TIME_SHIFTS: ShiftOption[] = [
+  { value: 'day', label: 'Dag' },
+  { value: 'evening', label: 'Kväll' },
+  { value: 'night', label: 'Natt' },
+];
+
+export const formatPartTimeShifts = (shifts?: string[] | null): string => {
+  if (!shifts || shifts.length === 0) return '';
+  const order = PART_TIME_SHIFTS.map(s => s.value);
+  const sorted = [...shifts].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  return sorted.map(v => PART_TIME_SHIFTS.find(s => s.value === v)?.label || v).join(', ');
+};
+
 export type DurationUnit = 'weeks' | 'months';
 
 export const DURATION_UNIT_LABEL: Record<DurationUnit, { singular: string; plural: string }> = {
