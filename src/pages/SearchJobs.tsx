@@ -1040,6 +1040,10 @@ const SearchJobs = memo(() => {
                       salary_transparency: job.salary_transparency,
                       overlay_text_color: job.overlay_text_color,
                       benefits: job.benefits,
+                      part_time_days: (job as any).part_time_days,
+                      part_time_shifts: (job as any).part_time_shifts,
+                      duration_amount: (job as any).duration_amount,
+                      duration_unit: (job as any).duration_unit,
                     }}
                     hasApplied={appliedJobIds.has(job.id)}
                     onUnsaveClick={handleUnsaveClick}
