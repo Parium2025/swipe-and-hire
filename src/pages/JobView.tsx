@@ -766,9 +766,49 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               overlayTextColor={job.overlay_text_color}
             />
 
-            {/* Job title — flyttad ut från hero-overlay till egen sektion
-                för att matcha arbetsgivar-preview (bild i toppen, titel under). */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden">
+            {/* Company profile + title - matchar arbetsgivar-preview */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden space-y-3">
+              <button
+                onClick={handleOpenCompanyProfile}
+                className="flex items-center gap-3 w-full cursor-pointer hover:bg-white/10 active:bg-white/15 p-2 -ml-2 rounded-xl transition-all"
+                aria-label="Visa företagsprofil"
+              >
+                <div className="h-12 w-12 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform [@media(hover:hover)]:hover:ring-2 [@media(hover:hover)]:hover:ring-white/30">
+                  {companyLogoUrl ? (
+                    <ResilientImage
+                      src={companyLogoUrl}
+                      alt={getDisplayCompanyName(job)}
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="sync"
+                      draggable={false}
+                      fallbackClassName="w-full h-full"
+                    />
+                  ) : (
+                    <span className="text-white font-semibold text-sm">
+                      {getCompanyInitials(getDisplayCompanyName(job))}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1 overflow-hidden text-left">
+                  <TruncatedText
+                    text={getDisplayCompanyName(job)}
+                    alwaysShowTooltip="desktop-only"
+                    tooltipSide="bottom"
+                    className="block w-full overflow-hidden text-base font-bold leading-tight text-white line-clamp-2"
+                    style={{
+                      overflowWrap: 'anywhere',
+                      wordBreak: 'break-word',
+                    }}
+                  />
+                  <div className="flex items-center text-xs mt-0.5 text-white">
+                    <Users className="h-3 w-3 mr-1 text-white" />
+                    Se företagsprofil
+                  </div>
+                </div>
+              </button>
+
               <h1
                 className="text-center font-bold text-lg sm:text-xl md:text-2xl leading-snug break-words [overflow-wrap:anywhere]"
                 style={{ color: job.overlay_text_color || '#FACC15' }}
