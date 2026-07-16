@@ -8,11 +8,15 @@ import {
   getRemoteWorkLabel,
   getSalaryTransparencyLabel,
 } from '@/lib/jobViewHelpers';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 
 
 interface JobViewDetailsProps {
   employmentType?: string;
+  partTimeDays?: string[] | null;
+  partTimeShifts?: string[] | null;
+  durationAmount?: number | null;
+  durationUnit?: string | null;
   workSchedule?: string;
   location?: string;
   workplaceName?: string;
