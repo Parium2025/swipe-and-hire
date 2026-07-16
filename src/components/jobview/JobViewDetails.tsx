@@ -80,25 +80,25 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
       <div className="flex flex-col">
         {employmentValue && (
           <div className={rowClass}>
-            <span className={labelClass}>Anställning</span>
+            <span className={labelClass}>Anställning:</span>
             <span className={valueClass}>{employmentValue}</span>
           </div>
         )}
         {workSchedule && (
           <div className={rowClass}>
-            <span className={labelClass}>Schema</span>
+            <span className={labelClass}>Schema:</span>
             <span className={valueClass}>{cap(workSchedule)}</span>
           </div>
         )}
         {location && (
           <div className={rowClass}>
-            <span className={labelClass}>Ort</span>
+            <span className={labelClass}>Ort:</span>
             <span className={valueClass}>{cap(location)}</span>
           </div>
         )}
         {workplaceName && (
           <div className={rowClass}>
-            <span className={labelClass}>Bolagsnamn</span>
+            <span className={labelClass}>Bolagsnamn:</span>
             <TruncatedText
               text={cap(workplaceName) as string}
               className={valueClass}
@@ -113,7 +113,7 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
         )}
         {workplaceAddress && (
           <div className={rowClass}>
-            <span className={labelClass}>Adress</span>
+            <span className={labelClass}>Adress:</span>
             <span className={valueClass}>
               {workplaceAddress}
               {workplacePostalCode && `, ${workplacePostalCode}`}
@@ -124,7 +124,7 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
         )}
         {workplaceCity && workplaceCity !== location && !workplaceAddress && (
           <div className={rowClass}>
-            <span className={labelClass}>Stad</span>
+            <span className={labelClass}>Stad:</span>
             <span className={valueClass}>
               {workplaceCity}
               {workplaceMunicipality && workplaceMunicipality !== workplaceCity ? `, ${workplaceMunicipality}` : ''}
@@ -134,41 +134,41 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
         )}
         {workplaceMunicipality && !workplaceAddress && (!workplaceCity || workplaceCity === location) && (
           <div className={rowClass}>
-            <span className={labelClass}>Kommun</span>
+            <span className={labelClass}>Kommun:</span>
             <span className={valueClass}>{workplaceMunicipality}</span>
           </div>
         )}
         {workLocationType && (
           <div className={rowClass}>
-            <span className={labelClass}>Platstyp</span>
+            <span className={labelClass}>Platstyp:</span>
             <span className={valueClass}>{getWorkLocationLabel(workLocationType)}</span>
           </div>
         )}
         {remoteWorkPossible && remoteWorkPossible !== 'no' && (
           <div className={rowClass}>
-            <span className={labelClass}>Distans</span>
+            <span className={labelClass}>Distans:</span>
             <span className={valueClass}>{getRemoteWorkLabel(remoteWorkPossible)}</span>
           </div>
         )}
         {(workStartTime || workEndTime) && (
           <div className={rowClass}>
-            <span className={labelClass}>Arbetstid</span>
+            <span className={labelClass}>Arbetstid:</span>
             <span className={valueClass}>{workStartTime} – {workEndTime}</span>
           </div>
         )}
         <div className={rowClass}>
-          <span className={labelClass}>Antal tjänster</span>
+          <span className={labelClass}>Antal tjänster:</span>
           <span className={valueClass}>{(positionsCount || 1)} st</span>
         </div>
         {occupation && (
           <div className={rowClass}>
-            <span className={labelClass}>Yrke</span>
+            <span className={labelClass}>Yrke:</span>
             <span className={valueClass}>{cap(occupation)}</span>
           </div>
         )}
         {salaryValue && (
           <div className={rowClass}>
-            <span className={labelClass}>Lön</span>
+            <span className={labelClass}>Lön:</span>
             <span className={valueClass}>
               <span className="font-semibold">{salaryValue}</span>
               {salaryType && (
@@ -179,13 +179,13 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
         )}
         {!salaryValue && salaryTransparency && (
           <div className={rowClass}>
-            <span className={labelClass}>Lön</span>
+            <span className={labelClass}>Lön:</span>
             <span className={valueClass}>{getSalaryTransparencyLabel(salaryTransparency)}</span>
           </div>
         )}
         {contactEmail && (
           <div className={rowClass}>
-            <span className={labelClass}>Kontakt</span>
+            <span className={labelClass}>Kontakt:</span>
             <a
               href={`mailto:${contactEmail}?subject=Fråga om tjänsten: ${jobTitle}`}
               className={`${valueClass} underline underline-offset-2 hover:text-white/80 transition-colors`}
