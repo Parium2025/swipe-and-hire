@@ -55,9 +55,20 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
       <h2 className="text-section-title mb-3">Detaljer om tjänsten</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
         {employmentType && (
-          <div className="flex text-white text-[15px] sm:text-sm">
+          <div className="flex text-white text-[15px] sm:text-sm sm:col-span-2">
             <span className="shrink-0 w-[110px] text-white">Anställning:</span>
-            <span className="font-medium">{getEmploymentTypeLabel(employmentType)}</span>
+            <span className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]">
+              {[
+                getEmploymentTypeLabel(employmentType),
+                formatEmploymentDetails({
+                  employment_type: employmentType,
+                  part_time_days: partTimeDays,
+                  part_time_shifts: partTimeShifts,
+                  duration_amount: durationAmount,
+                  duration_unit: durationUnit,
+                }),
+              ].filter(Boolean).join(' · ')}
+            </span>
           </div>
         )}
         {workSchedule && (
