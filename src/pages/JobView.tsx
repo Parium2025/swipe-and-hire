@@ -808,6 +808,17 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               overlayTextColor={job.overlay_text_color}
             />
 
+            {/* Job title — flyttad ut från hero-overlay till egen sektion
+                för att matcha arbetsgivar-preview (bild i toppen, titel under). */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden">
+              <h1
+                className="text-center font-bold text-lg sm:text-xl md:text-2xl leading-snug break-words"
+                style={{ color: job.overlay_text_color || '#FACC15' }}
+              >
+                {job.title}
+              </h1>
+            </div>
+
             {/* Description */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
               <h2 className="text-section-title mb-3">Om tjänsten</h2>
