@@ -315,6 +315,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         pitch: templateToEdit.pitch || '',
         employment_type: templateToEdit.employment_type || '',
         part_time_days: (templateToEdit as any).part_time_days || [],
+        part_time_shifts: (templateToEdit as any).part_time_shifts || [],
         duration_amount: (templateToEdit as any).duration_amount != null ? String((templateToEdit as any).duration_amount) : '',
         duration_unit: (templateToEdit as any).duration_unit || 'months',
         work_schedule: templateToEdit.work_schedule || '',
@@ -703,6 +704,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       const next: any = { ...prev, [field]: value };
       if (field === 'employment_type') {
         next.part_time_days = [];
+        next.part_time_shifts = [];
         next.duration_amount = '';
         next.duration_unit = prev.duration_unit || 'months';
       }
@@ -916,7 +918,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
              formData.occupation.trim() && 
              formData.description.trim() &&
              formData.employment_type &&
-             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || (formData.part_time_days && formData.part_time_days.length > 0)) &&
+             (!TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) || ((formData.part_time_days && formData.part_time_days.length > 0) && (formData.part_time_shifts && formData.part_time_shifts.length > 0))) &&
              (!TYPES_WITH_DURATION.has(formData.employment_type) || (formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) &&
              formData.salary_type &&
              formData.salary_transparency &&
@@ -1051,6 +1053,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         occupation: formData.occupation || null,
         employment_type: formData.employment_type || null,
         part_time_days: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_days && formData.part_time_days.length > 0 ? formData.part_time_days : null,
+        part_time_shifts: TYPES_WITH_PART_TIME_DAYS.has(formData.employment_type) && formData.part_time_shifts && formData.part_time_shifts.length > 0 ? formData.part_time_shifts : null,
         duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
         duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         work_schedule: formData.work_schedule || null,
@@ -1826,9 +1829,11 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <EmploymentTypeExtras
                     employmentType={formData.employment_type}
                     partTimeDays={formData.part_time_days || []}
+                    partTimeShifts={formData.part_time_shifts || []}
                     durationAmount={formData.duration_amount ? parseInt(formData.duration_amount, 10) : null}
                     durationUnit={(formData.duration_unit as DurationUnit) || 'months'}
                     onPartTimeDaysChange={(days) => setFormData(prev => ({ ...prev, part_time_days: days }))}
+                    onPartTimeShiftsChange={(shifts) => setFormData(prev => ({ ...prev, part_time_shifts: shifts }))}
                     onDurationAmountChange={(n) => setFormData(prev => ({ ...prev, duration_amount: n == null ? '' : String(n) }))}
                     onDurationUnitChange={(u) => setFormData(prev => ({ ...prev, duration_unit: u }))}
                   />
