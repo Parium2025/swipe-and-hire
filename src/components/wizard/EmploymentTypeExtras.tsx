@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import {
   WEEKDAYS,
+  PART_TIME_SHIFTS,
   TYPES_WITH_DURATION,
   TYPES_WITH_PART_TIME_DAYS,
   type DurationUnit,
@@ -9,9 +10,11 @@ import {
 interface EmploymentTypeExtrasProps {
   employmentType?: string;
   partTimeDays: string[];
+  partTimeShifts?: string[];
   durationAmount: number | null;
   durationUnit: DurationUnit;
   onPartTimeDaysChange: (days: string[]) => void;
+  onPartTimeShiftsChange?: (shifts: string[]) => void;
   onDurationAmountChange: (n: number | null) => void;
   onDurationUnitChange: (u: DurationUnit) => void;
 }
