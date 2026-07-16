@@ -105,12 +105,17 @@ export const JobSlideContent = memo(function JobSlideContent({
           className="text-white font-semibold text-base mt-2 truncate"
           style={overlayTextStyle}
         >
-          {[
-            job.employment_type && getEmploymentTypeLabel(job.employment_type),
-            job.location,
-          ]
-            .filter(Boolean)
-            .join(' • ')}
+          {(() => {
+            const label = job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '';
+            const detail = formatEmploymentDetails({
+              employment_type: job.employment_type,
+              duration_amount: job.duration_amount,
+              duration_unit: job.duration_unit,
+              part_time_days: job.part_time_days,
+            });
+            const employmentPart = [label, detail].filter(Boolean).join(' · ');
+            return [employmentPart, job.location].filter(Boolean).join(' • ');
+          })()}
         </p>
 
         <JobSlideBadgesRow job={job} />
