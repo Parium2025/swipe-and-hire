@@ -17,6 +17,7 @@ import {
   Building2,
 } from 'lucide-react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
+import { TruncatedText } from '@/components/TruncatedText';
 
 // Map icon names to components - supports all category icons
 const iconMap: Record<string, React.ElementType> = {
@@ -123,10 +124,11 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
           </div>
           
           {/* Title */}
-          <h3 className="text-sm font-semibold text-white mb-2 leading-snug line-clamp-2 flex-shrink-0">
-            {news.title}
-          </h3>
-          
+          <TruncatedText
+            text={news.title}
+            className="text-sm font-semibold text-white mb-2 leading-snug line-clamp-2 flex-shrink-0"
+          />
+
           {/* Summary - scrollable area */}
           <div 
             className="flex-1 overflow-y-auto overscroll-contain pr-1 min-h-0"
@@ -135,7 +137,7 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
               scrollbarColor: 'rgba(255,255,255,0.3) transparent'
             }}
           >
-            <p className="text-xs text-white/85 leading-relaxed">
+            <p className="text-xs text-white leading-relaxed">
               {news.summary}
             </p>
           </div>
