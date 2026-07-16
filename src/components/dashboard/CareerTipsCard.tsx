@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Lightbulb, Newspaper, Clock, ExternalLink } from 'lucide-react';
 import { useCareerTips } from '@/hooks/useCareerTips';
+import { TruncatedText } from '@/components/TruncatedText';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS, formatTipPublishedTime } from './dashboardConstants';
@@ -121,9 +122,10 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
                 className={`h-[104px] w-full flex flex-col justify-center overflow-hidden ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
               >
-                <h3 className="h-[39px] text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
-                  {currentTip.title}
-                </h3>
+                <TruncatedText
+                  text={currentTip.title}
+                  className="h-[39px] text-sm font-semibold text-white leading-snug mb-1 line-clamp-2"
+                />
                 <p className="h-[18px] text-sm leading-[18px] text-white truncate mb-1">
                   {currentTip.summary || currentTip.title}
                 </p>

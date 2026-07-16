@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Newspaper, Clock, ExternalLink } from 'lucide-react';
 import { useHrNews } from '@/hooks/useHrNews';
+import { TruncatedText } from '@/components/TruncatedText';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS } from './dashboardConstants';
@@ -112,7 +113,10 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
                 className={`h-[104px] w-full flex flex-col justify-center overflow-hidden ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
               >
-                <h3 className="h-[39px] text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">{currentNews.title}</h3>
+                <TruncatedText
+                  text={currentNews.title}
+                  className="h-[39px] text-sm font-semibold text-white leading-snug mb-1 line-clamp-2"
+                />
                 <p className="h-[18px] text-sm leading-[18px] text-white truncate mb-1">{currentNews.summary || currentNews.title}</p>
                 {currentNews.published_at && (
                   <div className="h-[14px] flex items-center gap-1.5 text-white text-[10px] leading-none mb-1">
