@@ -8,6 +8,10 @@ export interface FullJobData {
   pitch?: string;
   benefits?: string[];
   employment_type?: string;
+  part_time_days?: string[] | null;
+  part_time_shifts?: string[] | null;
+  duration_amount?: number | null;
+  duration_unit?: string | null;
   work_schedule?: string;
   work_start_time?: string;
   work_end_time?: string;
@@ -63,6 +67,7 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
           .from('job_postings')
           .select(`
             description, requirements, pitch, benefits, employment_type,
+            part_time_days, part_time_shifts, duration_amount, duration_unit,
             work_schedule, work_start_time, work_end_time,
             work_location_type, remote_work_possible,
             salary_min, salary_max, salary_type, salary_transparency,

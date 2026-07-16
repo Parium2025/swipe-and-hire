@@ -819,6 +819,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             {/* Details */}
              <JobViewDetails
               employmentType={job.employment_type}
+              partTimeDays={(job as any).part_time_days}
+              partTimeShifts={(job as any).part_time_shifts}
+              durationAmount={(job as any).duration_amount}
+              durationUnit={(job as any).duration_unit}
               workSchedule={job.work_schedule}
               location={job.location}
                 workplaceName={getDisplayCompanyName(job)}
