@@ -71,7 +71,21 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
     <div className="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
       <h3 className="text-white font-bold text-base">Snabb info</h3>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
-        {job.employment_type && <DetailRow label="Anställning" value={getEmploymentTypeLabel(job.employment_type)} />}
+        {job.employment_type && (
+          <DetailRow
+            label="Anställning"
+            value={[
+              getEmploymentTypeLabel(job.employment_type),
+              formatEmploymentDetails({
+                employment_type: job.employment_type,
+                part_time_days: job.part_time_days,
+                part_time_shifts: job.part_time_shifts,
+                duration_amount: job.duration_amount,
+                duration_unit: job.duration_unit,
+              }),
+            ].filter(Boolean).join(' · ')}
+          />
+        )}
         {job.occupation && <DetailRow label="Yrke" value={cap(job.occupation) ?? ''} />}
         {job.location && <DetailRow label="Ort" value={cap(job.location) ?? ''} />}
         {workTimeLabel && <DetailRow label="Arbetstid" value={workTimeLabel} />}
