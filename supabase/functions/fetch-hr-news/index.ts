@@ -216,6 +216,7 @@ async function updateSourceHealth(
       .from('rss_source_health')
       .select('*')
       .eq('source_name', source.name)
+      .eq('source_type', 'hr_news')
       .single();
 
     const now = new Date().toISOString();
@@ -224,6 +225,9 @@ async function updateSourceHealth(
       // Update existing record
       const updates: any = {
         is_healthy: success,
+        source_type: 'hr_news',
+        last_check_at: now,
+        total_fetches: (existing.total_fetches || 0) + 1,
         updated_at: now,
       };
 
@@ -231,12 +235,15 @@ async function updateSourceHealth(
         updates.last_success_at = now;
         updates.consecutive_failures = 0;
         updates.total_successes = (existing.total_successes || 0) + 1;
+        updates.successful_fetches = (existing.successful_fetches || 0) + 1;
         updates.last_error_message = null;
+        updates.last_error = null;
       } else {
         updates.last_failure_at = now;
         updates.consecutive_failures = (existing.consecutive_failures || 0) + 1;
         updates.total_failures = (existing.total_failures || 0) + 1;
         updates.last_error_message = errorMessage || 'Unknown error';
+        updates.last_error = errorMessage || 'Unknown error';
       }
 
       await supabase
@@ -253,13 +260,19 @@ async function updateSourceHealth(
       await supabase.from('rss_source_health').insert({
         source_name: source.name,
         source_url: source.url,
+        source_type: 'hr_news',
         is_healthy: success,
+        last_check_at: now,
         consecutive_failures: success ? 0 : 1,
         last_success_at: success ? now : null,
         last_failure_at: success ? null : now,
         last_error_message: success ? null : errorMessage,
+        last_error: success ? null : errorMessage,
         total_successes: success ? 1 : 0,
         total_failures: success ? 0 : 1,
+        total_fetches: 1,
+        successful_fetches: success ? 1 : 0,
+        is_active: true,
       });
 
       return {
