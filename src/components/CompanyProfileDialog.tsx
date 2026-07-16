@@ -24,6 +24,7 @@ import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { TruncatedText } from "@/components/TruncatedText";
 import { TruncatedTitle } from "@/components/ui/truncated-title";
+import { resolveCompanyLogoUrl } from "@/lib/companyLogoUrl";
 
 interface CompanyProfileDialogProps {
   open: boolean;
@@ -276,7 +277,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
             <DialogHeader className="mb-6">
               <div className="flex items-center gap-4 min-w-0">
                 <Avatar className="h-16 w-16 shrink-0 ring-2 ring-white/15 shadow-lg shadow-black/30">
-                  <AvatarImage src={company.company_logo_url || ''} alt={company.company_name} />
+                  <AvatarImage src={resolveCompanyLogoUrl(company.company_logo_url) || ''} alt={company.company_name} />
                   <AvatarFallback className="bg-white/20 text-white text-xl font-bold" delayMs={150}>
                     {getCompanyInitials(company.company_name)}
                   </AvatarFallback>
