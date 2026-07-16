@@ -1096,7 +1096,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
             } as any));
 
             if (error) throw error;
-            return (data || []) as SearchJob[];
+            return (data || []) as unknown as SearchJob[];
           },
           Array.isArray,
         );
