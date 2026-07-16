@@ -11,7 +11,7 @@ const corsHeaders = {
 const ADMIN_EMAIL = "pariumab@hotmail.com";
 
 interface AlertPayload {
-  type: 'rss_source_failure' | 'system_critical' | 'storage_warning';
+  type: 'rss_source_failure' | 'system_critical' | 'storage_warning' | 'news_watchdog';
   source_name?: string;
   consecutive_failures?: number;
   error_message?: string;
@@ -90,6 +90,21 @@ serve(async (req) => {
           ],
         };
         idempotencyKey = `storage-${payload.details?.percentage}-${new Date().toISOString().slice(0, 10)}`;
+        break;
+
+      case 'news_watchdog':
+        templateData = {
+          alert_title: payload.details?.message || 'Nyhetsflödet behöver kontrolleras',
+          alert_emoji: payload.details?.severity === 'critical' ? '🚨' : '⚠️',
+          severity: payload.details?.severity === 'critical' ? 'critical' : 'warning',
+          timestamp,
+          summary: payload.details?.summary || 'Watchdoggen hittade ett problem i nyhetsflödet.',
+          fields: Object.entries(payload.details || {})
+            .filter(([k]) => !['message', 'summary', 'severity'].includes(k))
+            .map(([k, v]) => ({ label: k, value: typeof v === 'string' ? v : JSON.stringify(v) })),
+          error_message: payload.error_message || '',
+        };
+        idempotencyKey = `news-watchdog-${new Date().toISOString().slice(0, 10)}-${payload.details?.feed || 'all'}-${payload.details?.code || 'check'}`;
         break;
 
       default:

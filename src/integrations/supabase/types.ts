@@ -3195,6 +3195,15 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_news_cron_health: {
+        Args: never
+        Returns: {
+          active: boolean
+          command: string
+          jobname: string
+          schedule: string
+        }[]
+      }
       get_outreach_automation_for_event: {
         Args: {
           p_channel: Database["public"]["Enums"]["outreach_channel"]
@@ -3482,6 +3491,7 @@ export type Database = {
       }
       trigger_career_tips_fetch: { Args: never; Returns: undefined }
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
+      trigger_news_health_watchdog: { Args: never; Returns: undefined }
       try_uuid: { Args: { p_text: string }; Returns: string }
     }
     Enums: {
