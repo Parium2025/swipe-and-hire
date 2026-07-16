@@ -41,7 +41,8 @@ interface JobViewDetailsProps {
 
 export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetailsProps) {
   const {
-    employmentType, workSchedule, location, workplaceName,
+    employmentType, partTimeDays, partTimeShifts, durationAmount, durationUnit,
+    workSchedule, location, workplaceName,
     workplaceAddress, workplacePostalCode, workplaceCity,
     workplaceMunicipality, workplaceCounty, workLocationType,
     remoteWorkPossible, workStartTime, workEndTime,
