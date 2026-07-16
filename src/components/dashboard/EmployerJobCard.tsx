@@ -172,6 +172,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
               const details = formatEmploymentDetails({
                 employment_type: job.employment_type,
                 part_time_days: job.part_time_days,
+                part_time_shifts: job.part_time_shifts,
                 duration_amount: job.duration_amount,
                 duration_unit: job.duration_unit,
               });
