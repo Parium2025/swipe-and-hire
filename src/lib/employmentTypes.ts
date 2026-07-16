@@ -118,12 +118,15 @@ export const formatPartTimeDays = (days?: string[] | null): string => {
 export const formatEmploymentDetails = (job: {
   employment_type?: string | null;
   part_time_days?: string[] | null;
+  part_time_shifts?: string[] | null;
   duration_amount?: number | null;
   duration_unit?: string | null;
 }): string => {
   if (!job.employment_type) return '';
   if (TYPES_WITH_PART_TIME_DAYS.has(job.employment_type)) {
-    return formatPartTimeDays(job.part_time_days);
+    const days = formatPartTimeDays(job.part_time_days);
+    const shifts = formatPartTimeShifts(job.part_time_shifts);
+    return [days, shifts].filter(Boolean).join(' · ');
   }
   if (TYPES_WITH_DURATION.has(job.employment_type)) {
     const d = formatDuration(job.duration_amount, job.duration_unit);
