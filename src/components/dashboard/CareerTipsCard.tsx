@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Lightbulb, Newspaper, Clock, ExternalLink } from 'lucide-react';
+import { Lightbulb, Newspaper, Clock, ExternalLink, Sparkles } from 'lucide-react';
 import { useCareerTips } from '@/hooks/useCareerTips';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
@@ -141,13 +141,21 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
         {/* Footer: Läs mer · källa | dots | datum */}
         <div className="mt-auto flex items-center justify-between gap-2 shrink-0 h-6">
           <div className="flex-1 min-w-0">
-            {currentTip?.source_url && (
+            {currentTip?.source_url ? (
               <div className="flex items-center gap-1.5 text-white min-w-0 overflow-hidden whitespace-nowrap">
                 <span className="text-xs shrink-0">Läs mer</span>
                 <span className="text-[10px] text-white truncate">· {currentTip.source}</span>
                 <ExternalLink className="h-3 w-3 shrink-0" />
               </div>
-            )}
+            ) : currentTip ? (
+              <div
+                className="flex items-center gap-1 text-white/90 min-w-0 overflow-hidden whitespace-nowrap"
+                title="Denna text är genererad av vår AI-karriärcoach när inga aktuella RSS-artiklar finns tillgängliga."
+              >
+                <Sparkles className="h-3 w-3 shrink-0" />
+                <span className="text-[10px] font-medium truncate">AI-genererad</span>
+              </div>
+            ) : null}
           </div>
           <div className="shrink-0">
             <DashboardCarouselDots count={tipsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" />
