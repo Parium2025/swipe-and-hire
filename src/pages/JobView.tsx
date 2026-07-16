@@ -900,19 +900,17 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                     <div className="flex justify-center pt-2">
                       {hasAlreadyApplied ? (
                         <Button
-                          variant="glass"
-                          className="px-8 bg-green-500/20 text-green-300 border-green-500/30"
                           disabled
+                          className="px-8 rounded-full bg-green-500 text-white cursor-not-allowed"
                         >
                           <CheckCircle className="mr-1.5 h-4 w-4" />
                           Redan sökt
                         </Button>
                       ) : (
                         <Button
-                          variant={canSubmitApplication ? "glassGreen" : "glass"}
                           onClick={handleApplicationSubmit}
                           disabled={applying || !canSubmitApplication}
-                          className={`px-8 ${!canSubmitApplication ? 'opacity-50' : ''}`}
+                          className={`px-8 rounded-full bg-green-500 text-white shadow-lg shadow-green-500/30 transition-all active:scale-[0.97] ${!canSubmitApplication ? 'opacity-50' : ''}`}
                         >
                           {applying ? 'Skickar...' : (
                             <>
