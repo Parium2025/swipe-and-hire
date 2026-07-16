@@ -126,9 +126,12 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                   text={currentTip.title}
                   className="h-[39px] text-sm font-semibold text-white leading-snug mb-1 line-clamp-2"
                 />
-                <p className="h-[18px] text-sm leading-[18px] text-white truncate mb-1">
-                  {currentTip.summary || currentTip.title}
-                </p>
+                <TruncatedText
+                  text={currentTip.summary || currentTip.title}
+                  lines={2}
+                  className="h-[36px] text-sm leading-[18px] text-white mb-1"
+                />
+
                 {currentTip.published_at && (
                   <div className="h-[14px] flex items-center gap-1.5 text-white text-[10px] leading-none mb-1">
                     <Clock className="h-3 w-3 shrink-0" />
