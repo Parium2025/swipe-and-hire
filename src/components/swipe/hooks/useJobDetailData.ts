@@ -8,6 +8,10 @@ export interface FullJobData {
   pitch?: string;
   benefits?: string[];
   employment_type?: string;
+  part_time_days?: string[] | null;
+  part_time_shifts?: string[] | null;
+  duration_amount?: number | null;
+  duration_unit?: string | null;
   work_schedule?: string;
   work_start_time?: string;
   work_end_time?: string;
