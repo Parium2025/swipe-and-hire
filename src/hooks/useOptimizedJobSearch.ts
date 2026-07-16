@@ -123,6 +123,7 @@ export interface SearchJob {
   duration_amount: number | null;
   duration_unit: string | null;
   part_time_days: string[] | null;
+  part_time_shifts: string[] | null;
   work_schedule: string | null;
   salary_min: number | null;
   salary_max: number | null;
