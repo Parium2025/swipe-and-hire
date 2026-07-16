@@ -50,45 +50,58 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
     salaryType, salaryTransparency, contactEmail, jobTitle,
   } = props;
 
+  // Arbetsgivar-preview-stil: label v\u00e4nster (dimmad), v\u00e4rde h\u00f6gerjusterat (vitt),
+  // tunn avdelare mellan raderna. En kolumn, ren och stram.
+  const rowClass =
+    'flex items-start justify-between gap-4 py-2.5 border-b border-white/10 last:border-b-0 text-[15px] sm:text-sm';
+  const labelClass = 'shrink-0 text-white/60 font-normal';
+  const valueClass = 'text-right font-medium text-white min-w-0 [overflow-wrap:anywhere]';
+
+  const employmentValue = employmentType
+    ? [
+        getEmploymentTypeLabel(employmentType),
+        formatEmploymentDetails({
+          employment_type: employmentType,
+          part_time_days: partTimeDays,
+          part_time_shifts: partTimeShifts,
+          duration_amount: durationAmount,
+          duration_unit: durationUnit,
+        }),
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : null;
+
+  const salaryValue = formatSalary(salaryMin, salaryMax, salaryType);
+
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
-      <h2 className="text-section-title mb-3">Detaljer om tjänsten</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
-        {employmentType && (
-          <div className="flex text-white text-[15px] sm:text-sm sm:col-span-2">
-            <span className="shrink-0 w-[110px] text-white">Anställning:</span>
-            <span className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]">
-              {[
-                getEmploymentTypeLabel(employmentType),
-                formatEmploymentDetails({
-                  employment_type: employmentType,
-                  part_time_days: partTimeDays,
-                  part_time_shifts: partTimeShifts,
-                  duration_amount: durationAmount,
-                  duration_unit: durationUnit,
-                }),
-              ].filter(Boolean).join(' · ')}
-            </span>
+      <h2 className="text-section-title mb-2">Detaljer om tjänsten</h2>
+      <div className="flex flex-col">
+        {employmentValue && (
+          <div className={rowClass}>
+            <span className={labelClass}>Anställning</span>
+            <span className={valueClass}>{employmentValue}</span>
           </div>
         )}
         {workSchedule && (
-          <div className="flex text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Schema:</span>
-            <span className="font-medium">{cap(workSchedule)}</span>
+          <div className={rowClass}>
+            <span className={labelClass}>Schema</span>
+            <span className={valueClass}>{cap(workSchedule)}</span>
           </div>
         )}
         {location && (
-          <div className="flex text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Ort:</span>
-            <span className="font-medium">{cap(location)}</span>
+          <div className={rowClass}>
+            <span className={labelClass}>Ort</span>
+            <span className={valueClass}>{cap(location)}</span>
           </div>
         )}
         {workplaceName && (
-          <div className="flex text-white text-[15px] sm:text-sm min-w-0">
-            <span className="shrink-0 w-[110px] text-white">Bolagsnamn:</span>
+          <div className={rowClass}>
+            <span className={labelClass}>Bolagsnamn</span>
             <TruncatedText
-              text={cap(workplaceName)}
-              className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]"
+              text={cap(workplaceName) as string}
+              className={valueClass}
               style={{
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -99,9 +112,9 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
           </div>
         )}
         {workplaceAddress && (
-          <div className="flex text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Adress:</span>
-            <span className="font-medium">
+          <div className={rowClass}>
+            <span className={labelClass}>Adress</span>
+            <span className={valueClass}>
               {workplaceAddress}
               {workplacePostalCode && `, ${workplacePostalCode}`}
               {workplaceCity && ` ${workplaceCity}`}
@@ -110,9 +123,9 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
           </div>
         )}
         {workplaceCity && workplaceCity !== location && !workplaceAddress && (
-          <div className="flex text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Stad:</span>
-            <span className="font-medium">
+          <div className={rowClass}>
+            <span className={labelClass}>Stad</span>
+            <span className={valueClass}>
               {workplaceCity}
               {workplaceMunicipality && workplaceMunicipality !== workplaceCity ? `, ${workplaceMunicipality}` : ''}
               {workplaceCounty ? `, ${workplaceCounty}` : ''}
@@ -120,62 +133,62 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
           </div>
         )}
         {workplaceMunicipality && !workplaceAddress && (!workplaceCity || workplaceCity === location) && (
-          <div className="flex text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Kommun:</span>
-            <span className="font-medium">{workplaceMunicipality}</span>
+          <div className={rowClass}>
+            <span className={labelClass}>Kommun</span>
+            <span className={valueClass}>{workplaceMunicipality}</span>
           </div>
         )}
         {workLocationType && (
-          <div className="flex text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Platstyp:</span>
-            <span className="font-medium">{getWorkLocationLabel(workLocationType)}</span>
+          <div className={rowClass}>
+            <span className={labelClass}>Platstyp</span>
+            <span className={valueClass}>{getWorkLocationLabel(workLocationType)}</span>
           </div>
         )}
         {remoteWorkPossible && remoteWorkPossible !== 'no' && (
-          <div className="flex text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Distans:</span>
-            <span className="font-medium">{getRemoteWorkLabel(remoteWorkPossible)}</span>
+          <div className={rowClass}>
+            <span className={labelClass}>Distans</span>
+            <span className={valueClass}>{getRemoteWorkLabel(remoteWorkPossible)}</span>
           </div>
         )}
         {(workStartTime || workEndTime) && (
-          <div className="flex items-center text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Arbetstid:</span>
-            <span className="font-medium">{workStartTime} – {workEndTime}</span>
+          <div className={rowClass}>
+            <span className={labelClass}>Arbetstid</span>
+            <span className={valueClass}>{workStartTime} – {workEndTime}</span>
           </div>
         )}
-        <div className="flex text-white text-[15px] sm:text-sm">
-          <span className="shrink-0 w-[110px] text-white">Antal tjänster:</span>
-          <span className="font-medium">{(positionsCount || 1)} st</span>
+        <div className={rowClass}>
+          <span className={labelClass}>Antal tjänster</span>
+          <span className={valueClass}>{(positionsCount || 1)} st</span>
         </div>
         {occupation && (
-          <div className="flex text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Yrke:</span>
-            <span className="font-medium">{cap(occupation)}</span>
+          <div className={rowClass}>
+            <span className={labelClass}>Yrke</span>
+            <span className={valueClass}>{cap(occupation)}</span>
           </div>
         )}
-        {formatSalary(salaryMin, salaryMax, salaryType) && (
-          <div className="flex items-center text-white text-[15px] sm:text-sm sm:col-span-2 pt-1">
-            <span className="shrink-0 w-[110px] text-white">Lön:</span>
-            <span className="font-semibold">
-              {formatSalary(salaryMin, salaryMax, salaryType)}
+        {salaryValue && (
+          <div className={rowClass}>
+            <span className={labelClass}>Lön</span>
+            <span className={valueClass}>
+              <span className="font-semibold">{salaryValue}</span>
               {salaryType && (
-                <span className="text-white ml-1.5 text-[13px] sm:text-xs">({getSalaryTypeLabel(salaryType)})</span>
+                <span className="text-white/60 ml-1.5 text-[13px] sm:text-xs">({getSalaryTypeLabel(salaryType)})</span>
               )}
             </span>
           </div>
         )}
-        {!formatSalary(salaryMin, salaryMax, salaryType) && salaryTransparency && (
-          <div className="flex items-center text-white text-[15px] sm:text-sm">
-            <span className="shrink-0 w-[110px] text-white">Lön:</span>
-            <span className="font-medium">{getSalaryTransparencyLabel(salaryTransparency)}</span>
+        {!salaryValue && salaryTransparency && (
+          <div className={rowClass}>
+            <span className={labelClass}>Lön</span>
+            <span className={valueClass}>{getSalaryTransparencyLabel(salaryTransparency)}</span>
           </div>
         )}
         {contactEmail && (
-          <div className="flex text-white text-[15px] sm:text-sm sm:col-span-2 pt-1">
-            <span className="shrink-0 w-[110px] text-white">Kontakt:</span>
-            <a 
+          <div className={rowClass}>
+            <span className={labelClass}>Kontakt</span>
+            <a
               href={`mailto:${contactEmail}?subject=Fråga om tjänsten: ${jobTitle}`}
-              className="font-medium underline underline-offset-2 hover:text-white/80 transition-colors"
+              className={`${valueClass} underline underline-offset-2 hover:text-white/80 transition-colors`}
             >
               {contactEmail}
             </a>
