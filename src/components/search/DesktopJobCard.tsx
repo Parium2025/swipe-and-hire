@@ -86,7 +86,18 @@ export const DesktopJobCard = memo(function DesktopJobCard({
               {job.employment_type && (
                 <div className="flex items-center gap-1">
                   <Briefcase className="h-3.5 w-3.5" />
-                  <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                  <span>
+                    {[
+                      getEmploymentTypeLabel(job.employment_type),
+                      formatEmploymentDetails({
+                        employment_type: job.employment_type,
+                        part_time_days: job.part_time_days,
+                        part_time_shifts: job.part_time_shifts,
+                        duration_amount: job.duration_amount,
+                        duration_unit: job.duration_unit,
+                      }),
+                    ].filter(Boolean).join(' · ')}
+                  </span>
                 </div>
               )}
               <div className="flex items-center gap-1">
