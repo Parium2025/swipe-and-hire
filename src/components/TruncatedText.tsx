@@ -12,6 +12,13 @@ interface TruncatedTextProps {
   forceClosed?: boolean;
   instantClose?: boolean;
   style?: React.CSSProperties;
+  /**
+   * Number of lines to clamp to. When set, the component owns the clamp
+   * via inline styles (source of truth), overriding any `line-clamp-*`
+   * class in `className`. Omit to keep the legacy behaviour where the
+   * className drives the clamp.
+   */
+  lines?: number;
 }
 
 // Module-level lazy detection of touch/hover capability — runs ONCE for the
