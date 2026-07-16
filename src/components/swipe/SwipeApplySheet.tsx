@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
 import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
 import {
