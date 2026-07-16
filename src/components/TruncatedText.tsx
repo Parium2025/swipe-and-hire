@@ -76,6 +76,7 @@ export function TruncatedText({
   forceClosed = false,
   instantClose = false,
   style,
+  lines,
 }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const tooltipContentRef = useRef<HTMLDivElement>(null);
