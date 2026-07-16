@@ -120,6 +120,9 @@ export interface SearchJob {
   workplace_name: string | null;
   workplace_postal_code: string | null;
   employment_type: string | null;
+  duration_amount: number | null;
+  duration_unit: string | null;
+  part_time_days: string[] | null;
   work_schedule: string | null;
   salary_min: number | null;
   salary_max: number | null;
@@ -1096,7 +1099,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
             } as any));
 
             if (error) throw error;
-            return (data || []) as SearchJob[];
+            return (data || []) as unknown as SearchJob[];
           },
           Array.isArray,
         );
