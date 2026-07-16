@@ -129,18 +129,15 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
             className="text-sm font-semibold text-white mb-2 leading-snug line-clamp-2 flex-shrink-0"
           />
 
-          {/* Summary - scrollable area */}
-          <div 
-            className="flex-1 overflow-y-auto overscroll-contain pr-1 min-h-0"
-            style={{
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'rgba(255,255,255,0.3) transparent'
-            }}
-          >
-            <p className="text-xs text-white leading-relaxed">
-              {news.summary}
-            </p>
+          {/* Summary - 2 rows with tooltip on overflow */}
+          <div className="flex-1 min-h-0 pr-1">
+            <TruncatedText
+              text={news.summary}
+              lines={2}
+              className="text-xs text-white leading-relaxed"
+            />
           </div>
+
           
           {/* Published time and link */}
           <div className="flex items-center justify-between mt-3 flex-shrink-0">
