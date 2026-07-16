@@ -110,7 +110,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
         </div>
         
         {/* News content */}
-        <div className="flex-1 min-h-0 flex flex-col justify-center overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden pt-3 sm:pt-4">
           <AnimatePresence mode="wait" initial={false}>
             {currentTip ? (
               <motion.div
@@ -120,40 +120,47 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
-                className={`h-[104px] w-full flex flex-col justify-center overflow-hidden ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
+                className={`w-full flex flex-col overflow-hidden ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
               >
                 <TruncatedText
                   text={currentTip.title}
-                  className="h-[39px] text-sm font-semibold text-white leading-snug mb-1 line-clamp-2"
+                  className="h-[39px] text-sm font-semibold text-white leading-snug mb-2.5 sm:mb-3 line-clamp-2"
                 />
                 <TruncatedText
                   text={currentTip.summary || currentTip.title}
                   lines={2}
-                  className="h-[36px] text-sm leading-[18px] text-white mb-1"
+                  className="h-[36px] text-sm leading-[18px] text-white"
                 />
-
-                {currentTip.published_at && (
-                  <div className="h-[14px] flex items-center gap-1.5 text-white text-[10px] leading-none mb-1">
-                    <Clock className="h-3 w-3 shrink-0" />
-                    <span>{formatTipPublishedTime(currentTip.published_at)}</span>
-                  </div>
-                )}
-                {currentTip.source_url && (
-                  <div className="h-4 flex items-center gap-1.5 text-white transition-colors min-w-0 overflow-hidden whitespace-nowrap">
-                    <span className="text-xs shrink-0">Läs mer</span>
-                    <span className="text-[10px] text-white truncate">· {currentTip.source}</span>
-                    <ExternalLink className="h-3 w-3 shrink-0" />
-                  </div>
-                )}
               </motion.div>
             ) : (
               <p className="text-xs text-white/60 text-center">Inga nyheter just nu</p>
             )}
           </AnimatePresence>
         </div>
-        
-        {/* Footer with dots - centered */}
-        <DashboardCarouselDots count={tipsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" />
+
+        {/* Footer: Läs mer · källa | dots | datum */}
+        <div className="mt-auto flex items-center justify-between gap-2 shrink-0 h-6">
+          <div className="flex-1 min-w-0">
+            {currentTip?.source_url && (
+              <div className="flex items-center gap-1.5 text-white min-w-0 overflow-hidden whitespace-nowrap">
+                <span className="text-xs shrink-0">Läs mer</span>
+                <span className="text-[10px] text-white truncate">· {currentTip.source}</span>
+                <ExternalLink className="h-3 w-3 shrink-0" />
+              </div>
+            )}
+          </div>
+          <div className="shrink-0">
+            <DashboardCarouselDots count={tipsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" />
+          </div>
+          <div className="flex-1 min-w-0 flex justify-end">
+            {currentTip?.published_at && (
+              <div className="flex items-center gap-1 text-white text-[10px] leading-none whitespace-nowrap">
+                <Clock className="h-3 w-3 shrink-0" />
+                <span>{formatTipPublishedTime(currentTip.published_at)}</span>
+              </div>
+            )}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
