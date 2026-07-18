@@ -79,6 +79,7 @@ interface Job {
   job_image_url?: string;
   job_image_desktop_url?: string;
   image_focus_position?: string;
+  image_focus_position_desktop?: string;
   employer_id?: string;
   employer_profile?: {
     first_name: string;
@@ -1029,6 +1030,7 @@ const SearchJobs = memo(() => {
                       job_image_url: job.job_image_url,
                       job_image_desktop_url: job.job_image_desktop_url,
                       image_focus_position: job.image_focus_position,
+                      image_focus_position_desktop: (job as any).image_focus_position_desktop,
                       company_name: job.company_name,
                       workplace_name: job.workplace_name,
                       employer_id: job.employer_id,

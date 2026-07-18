@@ -1,4 +1,4 @@
-import { memo, useMemo, useCallback, type ReactNode } from 'react';
+import { memo, useMemo, useCallback, useState, useEffect, type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +37,7 @@ interface ReadOnlyMobileJobCardProps {
     job_image_url?: string;
     job_image_desktop_url?: string;
     image_focus_position?: string;
+    image_focus_position_desktop?: string;
     company_name?: string;
     workplace_name?: string;
     employer_id?: string;
@@ -109,7 +110,23 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   // Använder samma hook som MobileJobCard så båda korten har identisk render-kostnad.
   // 🚀 Transform: kortbild ~600x400 (5-10× mindre), logo ~64px
   const imageVersion = getImageVersion(job);
-  const cardImageSource = job.job_image_url ?? job.job_image_desktop_url ?? null;
+  // Kortet ska spegla vad JobView visar på samma enhet: desktop → desktopbild + desktopfokus, mobil → mobilbild + mobilfokus.
+  const [isDesktopViewport, setIsDesktopViewport] = useState<boolean>(() =>
+    typeof window !== 'undefined' && window.innerWidth >= 1024
+  );
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const onChange = () => setIsDesktopViewport(mq.matches);
+    mq.addEventListener?.('change', onChange);
+    return () => mq.removeEventListener?.('change', onChange);
+  }, []);
+  const cardImageSource = isDesktopViewport
+    ? (job.job_image_desktop_url ?? job.job_image_url ?? null)
+    : (job.job_image_url ?? job.job_image_desktop_url ?? null);
+  const activeFocusValue = isDesktopViewport
+    ? (job.image_focus_position_desktop || job.image_focus_position)
+    : (job.image_focus_position || job.image_focus_position_desktop);
   const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
 
@@ -219,7 +236,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
               alt={`${job.title} hos ${companyName}`}
               className="w-full h-full object-cover"
               style={{ objectPosition: `center ${(() => {
-                const v = job.image_focus_position;
+                const v = activeFocusValue;
                 if (!v || v === 'center') return '50%';
                 if (v === 'top') return '20%';
                 if (v === 'bottom') return '80%';
