@@ -336,6 +336,7 @@ const SavedJobs = () => {
                           job_image_url: job.job_image_url || undefined,
                           job_image_desktop_url: job.job_image_desktop_url || undefined,
                           image_focus_position: job.image_focus_position || undefined,
+                          image_focus_position_desktop: (job as any).image_focus_position_desktop || undefined,
                           company_name: companyName,
                           company_logo_url: job.company_logo_url || undefined,
                           positions_count: job.positions_count || undefined,
