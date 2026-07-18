@@ -16,22 +16,13 @@ interface JobImagePositionerProps {
   imageUrl: string;
   focusPercent: number;
   onFocusChange: (percent: number) => void;
-  /**
-   * Optional CSS aspect-ratio (e.g. "3 / 1") to match the target surface.
-   * When set, overrides the default mobile-card height so the preview crops
-   * exactly like the destination (e.g. desktop JobView hero banner).
-   */
-  aspectRatio?: string;
-  /** Optional label shown under the positioner. */
-  hintLabel?: string;
 }
 
 /**
- * A preview where the user can drag the image vertically to set the exact
- * crop position. Stores a 0-100 percentage value. Aspect ratio can be
- * overridden to match the destination surface (mobile card vs desktop hero).
+ * A card-shaped preview where the user can drag the image vertically
+ * to set the exact crop position. Stores a 0-100 percentage value.
  */
-export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, aspectRatio, hintLabel }: JobImagePositionerProps) {
+export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: JobImagePositionerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
@@ -50,10 +41,9 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, aspe
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging || !containerRef.current) return;
     const containerHeight = containerRef.current.clientHeight;
-    // Direct manipulation: dragging the image up should move the bitmap up in
-    // the final crop, which in CSS object-position means a higher percentage.
+    // Sensitivity: moving pointer down → image shifts up → higher % (shows lower part)
     const deltaY = e.clientY - startY.current;
-    const deltaPct = (-deltaY / containerHeight) * 100;
+    const deltaPct = (deltaY / containerHeight) * 100;
     onFocusChange(clamp(startPercent.current + deltaPct));
   }, [isDragging, onFocusChange]);
 
@@ -71,10 +61,8 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, aspe
           isDragging ? 'border-white/60' : 'border-white/20'
         }`}
         style={{
-          /* Match target surface: desktop hero (aspectRatio) or mobile card height. */
-          ...(aspectRatio
-            ? { aspectRatio }
-            : { height: 'var(--job-card-mobile-media-height, 13rem)' }),
+          /* Match job card media proportions from CSS variables */
+          height: 'var(--job-card-mobile-media-height, 13rem)',
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none',
         }}
@@ -111,7 +99,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, aspe
         />
       </div>
       <p className="text-white text-[10px] text-center">
-        {hintLabel ?? 'Så här kommer bilden att klippas i jobbkorten'}
+        Så här kommer bilden att klippas i jobbkorten
       </p>
     </div>
   );

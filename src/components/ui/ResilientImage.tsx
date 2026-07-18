@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, ImgHTMLAttributes } from "react";
-import { imageCache } from "@/lib/imageCache";
 
 /**
  * ResilientImage
@@ -37,7 +36,6 @@ export function ResilientImage({
 
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
-      if (src) imageCache.evict(src);
       if (attempt < 2) {
         // Retry with backoff: 600ms, 1500ms
         const delay = attempt === 0 ? 600 : 1500;
@@ -47,20 +45,13 @@ export function ResilientImage({
         onError?.(e);
       }
     },
-    [attempt, onError, src]
+    [attempt, onError]
   );
 
   const handleManualRetry = useCallback(() => {
     setAttempt(0);
     setFailed(false);
   }, []);
-
-  const handleRetryKeyDown = useCallback((e: React.KeyboardEvent<HTMLSpanElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleManualRetry();
-    }
-  }, [handleManualRetry]);
 
   if (!src) {
     // Empty src — render nothing visible (parent controls placeholder)
@@ -78,23 +69,20 @@ export function ResilientImage({
         aria-label={alt || "Bilden kunde inte laddas"}
       >
         <span className="leading-tight">Bilden kunde inte laddas</span>
-        <span
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           onClick={handleManualRetry}
-          onKeyDown={handleRetryKeyDown}
           className="text-white/90 underline underline-offset-2 hover:text-white transition-colors"
         >
           Försök igen
-        </span>
+        </button>
       </div>
     );
   }
 
   // Cache-bust on retry attempts only (not initial load — keeps cache benefits)
-  // Never append query params to blob: URLs; reload the source through imageCache instead.
   const finalSrc =
-    attempt > 0 && !src.startsWith('blob:')
+    attempt > 0
       ? `${src}${src.includes("?") ? "&" : "?"}_r=${attempt}`
       : src;
 

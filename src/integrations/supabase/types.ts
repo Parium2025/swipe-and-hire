@@ -3385,7 +3385,6 @@ export type Database = {
           expires_at: string
           id: string
           image_focus_position: string
-          image_focus_position_desktop: string
           image_updated_at: string
           is_active: boolean
           job_image_desktop_url: string

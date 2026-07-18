@@ -151,7 +151,6 @@ export interface SearchJob {
   expires_at: string | null;
   search_rank: number;
   image_focus_position: string;
-  image_focus_position_desktop?: string | null;
   company_name: string;
   company_logo_url?: string;
   overlay_text_color?: string | null;

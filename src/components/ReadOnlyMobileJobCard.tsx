@@ -1,4 +1,4 @@
-import { memo, useMemo, useCallback, useState, useEffect, type ReactNode } from 'react';
+import { memo, useMemo, useCallback, type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +37,6 @@ interface ReadOnlyMobileJobCardProps {
     job_image_url?: string;
     job_image_desktop_url?: string;
     image_focus_position?: string;
-    image_focus_position_desktop?: string;
     company_name?: string;
     workplace_name?: string;
     employer_id?: string;
@@ -110,23 +109,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   // Använder samma hook som MobileJobCard så båda korten har identisk render-kostnad.
   // 🚀 Transform: kortbild ~600x400 (5-10× mindre), logo ~64px
   const imageVersion = getImageVersion(job);
-  // Kortet ska spegla vad JobView visar på samma enhet: desktop → desktopbild + desktopfokus, mobil → mobilbild + mobilfokus.
-  const [isDesktopViewport, setIsDesktopViewport] = useState<boolean>(() =>
-    typeof window !== 'undefined' && window.innerWidth >= 1024
-  );
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(min-width: 1024px)');
-    const onChange = () => setIsDesktopViewport(mq.matches);
-    mq.addEventListener?.('change', onChange);
-    return () => mq.removeEventListener?.('change', onChange);
-  }, []);
-  const cardImageSource = isDesktopViewport
-    ? (job.job_image_desktop_url ?? job.job_image_url ?? null)
-    : (job.job_image_url ?? job.job_image_desktop_url ?? null);
-  const activeFocusValue = isDesktopViewport
-    ? (job.image_focus_position_desktop || job.image_focus_position)
-    : (job.image_focus_position || job.image_focus_position_desktop);
+  const cardImageSource = job.job_image_url ?? job.job_image_desktop_url ?? null;
   const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
 
@@ -136,10 +119,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
   const getCachedJobViewHeroUrl = useCallback(() => {
-    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
-    const raw = isDesktop
-      ? ((job as any).job_image_desktop_url || job.job_image_url)
-      : (job.job_image_url || (job as any).job_image_desktop_url);
+    const raw = job.job_image_url || (job as any).job_image_desktop_url;
     if (!raw) return null;
     try {
       const base = raw.startsWith('http')
@@ -148,7 +128,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             transform: JOB_VIEW_HERO_TRANSFORM,
           }).data.publicUrl;
       const resolved = appendVersionToUrl(base, imageVersion);
-      return resolved && imageCache.isCached(resolved) ? resolved : null;
+      return resolved ? imageCache.getCachedUrl(resolved) : null;
     } catch {
       return null;
     }
@@ -181,8 +161,8 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   // Warm imageCache with the full-size JobView hero on pointerdown so it's
   // instantly available when the JobView page mounts (no right-to-left load).
   const warmJobViewImage = useCallback(() => {
-        // Warm BOTH mobile- and desktop-source hero URLs with the SAME transform JobView
-        // applies. Any mismatch creates a parallel cache entry
+    // Warm BOTH mobile- and desktop-source hero URLs with the SAME transform JobView
+    // applies (contain, 1200x800, q75). Any mismatch creates a parallel cache entry
     // and triggers the visible "right-to-left" reload on navigation.
     const candidates = [
       job.job_image_url,
@@ -217,10 +197,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         try { saveScrollNow(window.location.pathname); } catch {}
       }}
       onClick={() => {
-        const instantHeroUrl = getCachedJobViewHeroUrl();
+        const instantHeroUrl = getCachedJobViewHeroUrl() || displayUrl;
         const imageState = {
           ...(instantHeroUrl ? { initialHeroImageUrl: instantHeroUrl } : {}),
-          ...(logoUrl && !logoUrl.startsWith('blob:') ? { initialCompanyLogoUrl: logoUrl } : {}),
+          ...(logoUrl ? { initialCompanyLogoUrl: logoUrl } : {}),
         };
         onCardClick
           ? onCardClick(job.id, imageState)
@@ -236,7 +216,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
               alt={`${job.title} hos ${companyName}`}
               className="w-full h-full object-cover"
               style={{ objectPosition: `center ${(() => {
-                const v = activeFocusValue;
+                const v = job.image_focus_position;
                 if (!v || v === 'center') return '50%';
                 if (v === 'top') return '20%';
                 if (v === 'bottom') return '80%';
