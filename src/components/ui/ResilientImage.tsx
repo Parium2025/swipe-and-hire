@@ -25,21 +25,38 @@ export function ResilientImage({
 }: ResilientImageProps) {
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
-  const [loadedOnce, setLoadedOnce] = useState(false);
 
   // Reset when src changes
   useEffect(() => {
     setAttempt(0);
     setFailed(false);
-    setLoadedOnce(false);
   }, [src]);
+
+  // Auto-recover when tab regains focus or network comes back online
+  useEffect(() => {
+    if (!failed) return;
+    const retry = () => {
+      setAttempt(0);
+      setFailed(false);
+    };
+    const onVis = () => {
+      if (document.visibilityState === "visible") retry();
+    };
+    window.addEventListener("online", retry);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.removeEventListener("online", retry);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [failed]);
 
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
-      if (attempt < 2) {
-        // Retry with backoff: 600ms, 1500ms
-        const delay = attempt === 0 ? 600 : 1500;
-        setTimeout(() => setAttempt((a) => a + 1), delay);
+      // 5 attempts total, gentle backoff. Keeps CDN cache benefits since
+      // we only cache-bust after attempt 3 (transient blip vs. stuck cache).
+      if (attempt < 4) {
+        const delays = [500, 1200, 2500, 4500];
+        setTimeout(() => setAttempt((a) => a + 1), delays[attempt]);
       } else {
         setFailed(true);
         onError?.(e);
@@ -54,7 +71,6 @@ export function ResilientImage({
   }, []);
 
   if (!src) {
-    // Empty src — render nothing visible (parent controls placeholder)
     return null;
   }
 
@@ -80,9 +96,10 @@ export function ResilientImage({
     );
   }
 
-  // Cache-bust on retry attempts only (not initial load — keeps cache benefits)
+  // Only cache-bust after multiple failures — preserves Supabase transform CDN cache
+  // on happy path (avoids re-render cost and hitting transform rate limits).
   const finalSrc =
-    attempt > 0
+    attempt >= 3
       ? `${src}${src.includes("?") ? "&" : "?"}_r=${attempt}`
       : src;
 
@@ -92,10 +109,7 @@ export function ResilientImage({
       src={finalSrc}
       alt={alt}
       className={className}
-      onLoad={(e) => {
-        setLoadedOnce(true);
-        onLoad?.(e);
-      }}
+      onLoad={onLoad}
       onError={handleError}
     />
   );
