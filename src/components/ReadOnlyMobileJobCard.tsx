@@ -119,7 +119,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
   const getCachedJobViewHeroUrl = useCallback(() => {
-    const raw = job.job_image_url || (job as any).job_image_desktop_url;
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+    const raw = isDesktop
+      ? ((job as any).job_image_desktop_url || job.job_image_url)
+      : (job.job_image_url || (job as any).job_image_desktop_url);
     if (!raw) return null;
     try {
       const base = raw.startsWith('http')
@@ -128,7 +131,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             transform: JOB_VIEW_HERO_TRANSFORM,
           }).data.publicUrl;
       const resolved = appendVersionToUrl(base, imageVersion);
-      return resolved ? imageCache.getCachedUrl(resolved) : null;
+      return resolved && imageCache.isCached(resolved) ? resolved : null;
     } catch {
       return null;
     }
@@ -161,8 +164,8 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   // Warm imageCache with the full-size JobView hero on pointerdown so it's
   // instantly available when the JobView page mounts (no right-to-left load).
   const warmJobViewImage = useCallback(() => {
-    // Warm BOTH mobile- and desktop-source hero URLs with the SAME transform JobView
-    // applies (contain, 1200x800, q75). Any mismatch creates a parallel cache entry
+        // Warm BOTH mobile- and desktop-source hero URLs with the SAME transform JobView
+        // applies. Any mismatch creates a parallel cache entry
     // and triggers the visible "right-to-left" reload on navigation.
     const candidates = [
       job.job_image_url,
@@ -197,10 +200,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         try { saveScrollNow(window.location.pathname); } catch {}
       }}
       onClick={() => {
-        const instantHeroUrl = getCachedJobViewHeroUrl() || displayUrl;
+        const instantHeroUrl = getCachedJobViewHeroUrl();
         const imageState = {
           ...(instantHeroUrl ? { initialHeroImageUrl: instantHeroUrl } : {}),
-          ...(logoUrl ? { initialCompanyLogoUrl: logoUrl } : {}),
+          ...(logoUrl && !logoUrl.startsWith('blob:') ? { initialCompanyLogoUrl: logoUrl } : {}),
         };
         onCardClick
           ? onCardClick(job.id, imageState)

@@ -118,6 +118,8 @@ interface ExistingJob {
   pitch?: string | null;
   job_image_url?: string | null;
   job_image_desktop_url?: string | null;
+  image_focus_position?: string | null;
+  image_focus_position_desktop?: string | null;
   overlay_text_color?: string | null;
   is_active?: boolean;
   part_time_days?: string[] | null;
@@ -2360,6 +2362,8 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        image_focus_position: formData.image_focus_position || 'center',
+        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         expires_at: null,
@@ -2559,6 +2563,8 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        image_focus_position: formData.image_focus_position || 'center',
+        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         is_active: true
@@ -5177,7 +5183,7 @@ const MobileJobWizard = ({
             onSave={handleImageEdit}
             onRestoreOriginal={handleRestoreOriginal}
             isCircular={false}
-            aspectRatio={16/9}
+            aspectRatio={editingImageType === 'desktop' ? 3 : 16/9}
           />
         )}
 

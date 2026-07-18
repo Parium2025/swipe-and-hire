@@ -4381,7 +4381,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             }
           }}
           isCircular={false}
-          aspectRatio={16 / 9}
+          aspectRatio={editingImageType === 'desktop' ? 3 : 16 / 9}
         />
       )}
     </>
