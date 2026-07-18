@@ -21,6 +21,7 @@ export interface HrNewsItem {
 
 // LocalStorage cache for instant load - syncs based on cron schedule
 const CACHE_KEY = 'parium_hr_news_cache';
+const MAX_VISIBLE_NEWS_AGE_MS = 12 * 60 * 60 * 1000;
 
 // Cron runs at 06, 11, 18, 23 UTC — calculate ms until next slot
 function msUntilNextCronSlot(): number {
@@ -66,6 +67,16 @@ function writeCache(items: HrNewsItem[]): void {
   }
 }
 
+function hasStaleVisibleNews(items: HrNewsItem[] | null | undefined): boolean {
+  if (!items?.length) return true;
+  const newest = items.reduce((latest, item) => {
+    if (!item.published_at) return latest;
+    const time = new Date(item.published_at).getTime();
+    return Number.isNaN(time) ? latest : Math.max(latest, time);
+  }, 0);
+  return newest === 0 || Date.now() - newest > MAX_VISIBLE_NEWS_AGE_MS;
+}
+
 /**
  * BULLETPROOF NEWS FETCHER
  * 
@@ -84,16 +95,16 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(4);
 
-  // Happy path: we have articles (1-4 is fine, we show what's available)
-  if (!error && allNews && allNews.length > 0) {
+  // Happy path: we have fresh articles (1-4 is fine, we show what's available)
+  if (!error && allNews && allNews.length > 0 && !hasStaleVisibleNews(allNews)) {
     // Update cache with fresh data
     writeCache(allNews);
     return allNews;
   }
 
-  // Not enough articles - trigger backend to fetch more
+  // Not enough/fresh articles - trigger backend to fetch more
   const currentCount = allNews?.length || 0;
-  console.log(`[HR News] Only ${currentCount} articles, triggering backend refresh...`);
+  console.log(`[HR News] ${currentCount} stale/missing articles, triggering backend refresh...`);
 
   try {
     const { error: fnError } = await supabase.functions.invoke('fetch-hr-news', {
