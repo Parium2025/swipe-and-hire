@@ -7,6 +7,7 @@ import { getTimeRemaining } from '@/lib/date';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 
 interface JobViewHeroProps {
   title: string;
@@ -27,14 +28,6 @@ interface JobViewHeroProps {
   imageFocusPosition?: string | null;
 }
 
-function focusToObjectPosition(v?: string | null): string {
-  if (!v || v === 'center') return 'center 50%';
-  if (v === 'top') return 'center 20%';
-  if (v === 'bottom') return 'center 80%';
-  const num = parseInt(v, 10);
-  if (isNaN(num)) return 'center 50%';
-  return `center ${Math.max(0, Math.min(100, num))}%`;
-}
 
 const GRADIENTS = [
   'from-blue-900/40 via-indigo-900/30 to-slate-900/50',
@@ -103,7 +96,7 @@ export const JobViewHero = memo(function JobViewHero({
   const salaryText = useMemo(() => getSalaryText(salaryMin, salaryMax, salaryType, salaryTransparency), [salaryMin, salaryMax, salaryType, salaryTransparency]);
   const timeInfo = useMemo(() => createdAt ? getTimeRemaining(createdAt, expiresAt ?? undefined) : null, [createdAt, expiresAt]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(overlayTextColor), [overlayTextColor]);
-  const objectPosition = useMemo(() => focusToObjectPosition(imageFocusPosition), [imageFocusPosition]);
+  const objectPosition = useMemo(() => toObjectPosition(imageFocusPosition), [imageFocusPosition]);
 
   // Ren bild/gradient utan overlay-titel — titeln flyttad till egen sektion
   // under hero för att matcha arbetsgivar-preview och undvika text ovanpå bild.
@@ -111,7 +104,7 @@ export const JobViewHero = memo(function JobViewHero({
 
   if (!imageUrl) {
     return (
-      <div className="relative w-full aspect-[2/1] overflow-hidden rounded-lg">
+      <div className="relative w-full overflow-hidden rounded-lg" style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }}>
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         {overlayContent}
@@ -120,7 +113,7 @@ export const JobViewHero = memo(function JobViewHero({
   }
 
   return (
-    <div className="relative w-full aspect-[2/1] overflow-hidden rounded-lg">
+    <div className="relative w-full overflow-hidden rounded-lg" style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }}>
       <ResilientImage
         src={imageUrl}
         alt={`${title} hos ${companyName}`}

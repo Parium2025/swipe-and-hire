@@ -11,6 +11,7 @@ import { JOB_VIEW_HERO_TRANSFORM, getImageVersion } from '@/lib/imageTransforms'
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 import { imageCache } from '@/lib/imageCache';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
@@ -215,13 +216,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
               src={displayUrl}
               alt={`${job.title} hos ${companyName}`}
               className="w-full h-full object-cover"
-              style={{ objectPosition: `center ${(() => {
-                const v = job.image_focus_position;
-                if (!v || v === 'center') return '50%';
-                if (v === 'top') return '20%';
-                if (v === 'bottom') return '80%';
-                return `${v}%`;
-              })()}` }}
+              style={{ objectPosition: toObjectPosition(job.image_focus_position) }}
               loading={cardIndex < 6 ? 'eager' : 'lazy'}
               onError={handleImageError}
               fallbackClassName="w-full h-full"
