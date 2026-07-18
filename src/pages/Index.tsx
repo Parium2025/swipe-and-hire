@@ -507,6 +507,18 @@ const Index = () => {
   
   // isAdmin is now from database via useIsOrgAdmin hook
 
+  // Job seekers should never land on employer-only routes. If they do (via a
+  // stale link, back-navigation efter rollbyte, eller en tabb som glömt bort
+  // rollen), skicka dem till /home istället för att falla igenom till den
+  // gamla fallback-vyn längst ner i filen.
+  const employerOnlyRoutes = ['/my-jobs', '/dashboard', '/candidates', '/my-candidates', '/company-profile', '/reviews', '/reports', '/employer-profile', '/templates'];
+  if (
+    role !== 'employer' &&
+    employerOnlyRoutes.some((r) => location.pathname === r || location.pathname.startsWith(r + '/'))
+  ) {
+    return <Navigate to="/home" replace />;
+  }
+
   // Render sidebar layout for profile pages and employer routes
   const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/status', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
