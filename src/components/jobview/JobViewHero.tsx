@@ -28,14 +28,6 @@ interface JobViewHeroProps {
   imageFocusPosition?: string | null;
 }
 
-function focusToObjectPosition(v?: string | null): string {
-  if (!v || v === 'center') return 'center 50%';
-  if (v === 'top') return 'center 20%';
-  if (v === 'bottom') return 'center 80%';
-  const num = parseInt(v, 10);
-  if (isNaN(num)) return 'center 50%';
-  return `center ${Math.max(0, Math.min(100, num))}%`;
-}
 
 const GRADIENTS = [
   'from-blue-900/40 via-indigo-900/30 to-slate-900/50',
