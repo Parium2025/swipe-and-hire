@@ -4254,6 +4254,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   imageUrl={jobImageDesktopDisplayUrl}
                                   focusPercent={parseFocusPosition(formData.image_focus_position_desktop)}
                                   onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
+                                  aspectRatio="3 / 1"
+                                  hintLabel="Så här kommer bilden att klippas på datorn"
                                 />
                               </div>
                             </>
