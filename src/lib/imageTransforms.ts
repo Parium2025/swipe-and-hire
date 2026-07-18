@@ -23,11 +23,13 @@ export const JOB_CARD_TRANSFORM: ImageTransform = {
   resize: 'cover',
 };
 
-// Hero/detaljsida — skala bara bredden, beskär aldrig server-side.
-// All beskärning måste ske i CSS med arbetsgivarens sparade fokuspunkt;
-// annars kan uppladdnings-preview, kort och JobView aldrig bli pixel-paritet.
+// Hero/detaljsida — begränsa både bredd OCH höjd på servern så att
+// portrait-källor (t.ex. 4284×5712) inte skickas i full storlek till klienten.
+// CSS `object-position` sköter fortfarande den finala beskärningen med
+// arbetsgivarens sparade fokuspunkt (`image_focus_position_desktop`).
 export const JOB_VIEW_HERO_TRANSFORM: ImageTransform = {
   width: 1600,
+  height: 1600,
   quality: 78,
   resize: 'contain',
 };
