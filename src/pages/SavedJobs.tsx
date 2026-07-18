@@ -186,17 +186,35 @@ const SavedJobs = () => {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Cacha antalet så skeleton kan rendera exakt lika många kort nästa cold-load.
+  useEffect(() => {
+    if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.savedJobs, savedJobs.length);
+  }, [isLoading, savedJobs.length]);
+  useEffect(() => {
+    if (!isLoadingSkipped) writeCachedCount(SKELETON_COUNT_KEYS.skippedJobs, skippedJobs.length);
+  }, [isLoadingSkipped, skippedJobs.length]);
+
 
   if (!showContent) {
+    const skeletonCount = readCachedCount(
+      activeTab === 'skipped' ? SKELETON_COUNT_KEYS.skippedJobs : SKELETON_COUNT_KEYS.savedJobs,
+      3,
+    );
     return (
-      <div className="responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true">
+      <div className="responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         <div className="text-center mb-5">
-          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb</h1>
-          <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
+            {activeTab === 'skipped' ? 'Skippade Jobb' : 'Sparade Jobb'}
+          </h1>
+          <p className="text-sm text-white">
+            {activeTab === 'skipped' ? 'Jobb du har svipat förbi — återställ de du ångrar' : 'Dina favorit-jobb samlade på ett ställe'}
+          </p>
         </div>
+        <JobCardGridSkeleton count={skeletonCount} />
       </div>
     );
   }
+
 
   return (
     <div className="responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
