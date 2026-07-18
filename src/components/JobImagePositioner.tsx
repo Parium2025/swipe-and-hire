@@ -1,15 +1,13 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { Move } from 'lucide-react';
+import { parseFocusPercent, type FocusValue } from '@/lib/jobImageFocus';
 
 /**
  * Converts legacy focus values ('top'/'center'/'bottom') to a percentage.
+ * @deprecated Use `parseFocusPercent` from `@/lib/jobImageFocus` instead.
  */
-export function parseFocusPosition(value: string | undefined | null): number {
-  if (!value || value === 'center') return 50;
-  if (value === 'top') return 20;
-  if (value === 'bottom') return 80;
-  const num = parseInt(value, 10);
-  return isNaN(num) ? 50 : Math.max(0, Math.min(100, num));
+export function parseFocusPosition(value: FocusValue): number {
+  return parseFocusPercent(value);
 }
 
 interface JobImagePositionerProps {
