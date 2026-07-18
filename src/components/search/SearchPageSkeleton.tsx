@@ -102,13 +102,13 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
-                  {/* Bild — samma aspekt som riktiga jobbkortet */}
-                  <div className={`w-full ${SKELETON_SHAPE}`} style={{ height: 'var(--job-card-mobile-media-height, 13rem)' }} />
+                  {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
+                  <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: '2 / 1' }} />
                   {/* Kortkropp */}
                   <div className="p-4 space-y-3">
-                    {/* Logo + företagsnamn */}
+                    {/* Logo + företagsnamn — enhetlig ton (ingen ring) */}
                     <div className="flex justify-center -mt-8 relative z-10">
-                      <div className={`h-12 w-12 rounded-full ring-4 ring-[hsl(215_100%_12%)] ${SKELETON_SHAPE}`} />
+                      <div className={`h-12 w-12 rounded-full ${SKELETON_SHAPE}`} />
                     </div>
                     {/* Titel */}
                     <div className="space-y-2 pt-1">
