@@ -145,6 +145,15 @@ const MyApplications = () => {
     return { activeApplications: active, expiredApplications: expired };
   }, [applications]);
 
+  // Cacha antalet så skeleton kan rendera exakt lika många kort nästa cold-load.
+  useEffect(() => {
+    if (!isLoading) {
+      writeCachedCount(SKELETON_COUNT_KEYS.myApplicationsActive, activeApplications.length);
+      writeCachedCount(SKELETON_COUNT_KEYS.myApplicationsExpired, expiredApplications.length);
+    }
+  }, [isLoading, activeApplications.length, expiredApplications.length]);
+
+
   const visibleApplications = activeTab === 'active' ? activeApplications : expiredApplications;
 
 
