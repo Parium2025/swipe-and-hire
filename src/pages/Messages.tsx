@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EmployerMessagesSkeleton } from '@/components/employer/EmployerPageSkeleton';
+import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
