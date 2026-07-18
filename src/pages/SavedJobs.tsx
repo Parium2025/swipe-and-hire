@@ -257,9 +257,7 @@ const SavedJobs = () => {
       {activeTab === 'saved' && (
         <>
           {(isLoading && savedJobs.length === 0) ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 text-white animate-spin" />
-            </div>
+            <JobCardGridSkeleton count={readCachedCount(SKELETON_COUNT_KEYS.savedJobs, 3)} />
           ) : savedJobs.filter(hasRenderableJobPosting).length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
