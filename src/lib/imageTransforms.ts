@@ -10,9 +10,9 @@
 
 export interface ImageTransform {
   width: number;
-  height: number;
+  height?: number;
   quality: number;
-  resize: 'cover' | 'contain' | 'fill';
+  resize?: 'cover' | 'contain' | 'fill';
 }
 
 // Card thumbnail (jobblista, swipe-kort baksida etc.)
@@ -23,14 +23,13 @@ export const JOB_CARD_TRANSFORM: ImageTransform = {
   resize: 'cover',
 };
 
-// Hero/detaljsida — MÅSTE matcha byte-för-byte mellan card-preload,
-// background-warmer, swipe-preload och själva <img> i JobViewHero,
-// annars stämmer inte cache-key och bilden laddas synligt.
+// Hero/detaljsida — bevara originalets vertikala bildyta så CSS object-position
+// kan applicera arbetsgivarens fokuspunkt exakt. Servern får därför INTE crop:a
+// bilden till en fast höjd här; annars kapas topp/botten innan JobView hinner
+// använda image_focus_position_desktop.
 export const JOB_VIEW_HERO_TRANSFORM: ImageTransform = {
-  width: 1200,
-  height: 800,
-  quality: 75,
-  resize: 'cover',
+  width: 1600,
+  quality: 78,
 };
 
 // Swipe-kortet — täcker viewporten (~400px bred på mobil), ~800px räcker för 2× retina.
