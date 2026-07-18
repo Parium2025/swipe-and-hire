@@ -22,6 +22,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
+import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { Helmet } from 'react-helmet-async';
 
 interface JobPosting {
@@ -127,6 +128,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const navigationImageState = (location.state ?? {}) as {
     initialHeroImageUrl?: string;
     initialCompanyLogoUrl?: string;
+    hasApplied?: boolean;
   };
 
   // Robust employer check: also verify from profiles table directly
@@ -202,7 +204,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     const resolvedLogo = resolveCompanyLogoUrl(rawLogo);
     return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
   });
-  const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
+  const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? navigationImageState.hasApplied === true);
+  const [applicationStatusChecked, setApplicationStatusChecked] = useState(Boolean(cached) || navigationImageState.hasApplied === true);
+  const { data: appliedJobIds = new Set<string>(), isFetched: appliedJobIdsFetched } = useAppliedJobIds();
+  const alreadyAppliedForUi = hasAlreadyApplied || navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
+  const applicationStatusKnown = alreadyAppliedForUi || applicationStatusChecked || appliedJobIdsFetched || !user || isEmployer;
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close
   const [pullY, setPullY] = useState(0);
@@ -255,8 +261,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               .select('id, custom_answers')
               .eq('job_id', jobId!)
               .eq('applicant_id', user.id)
+              .limit(1)
               .maybeSingle()
-          : Promise.resolve({ data: null }),
+          : Promise.resolve({ data: null, error: null }),
       ]);
 
       if (jobResult.error) {
@@ -280,7 +287,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       }
 
       const questions = (!questionsResult.error && questionsResult.data) ? questionsResult.data as JobQuestion[] : [];
-      const applied = !!applicationResult.data;
+      const appliedFromSharedState = navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
+      const applied = appliedFromSharedState || !!applicationResult.data;
 
       if (jobId) {
         _jobCache.set(jobId, { job: data, questions, applied });
@@ -289,6 +297,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       setJob(data);
       setJobQuestions(questions);
       setHasAlreadyApplied(applied);
+      setApplicationStatusChecked(!user || !applicationResult.error || appliedFromSharedState);
 
       // If already applied, load saved answers from the application
       if (applied && applicationResult.data?.custom_answers) {
@@ -385,6 +394,12 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   };
 
   const handleApplicationSubmit = async () => {
+    if (alreadyAppliedForUi) {
+      setHasAlreadyApplied(true);
+      toast({ title: 'Redan sökt', description: 'Du har redan skickat en ansökan för den här tjänsten.' });
+      return;
+    }
+
     // Block employers from applying
     if (isEmployer) {
       toast({
@@ -414,6 +429,22 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
       // Double-check role from database to prevent race conditions
       if (user?.id) {
+        const { data: existingApplication } = await supabase
+          .from('job_applications')
+          .select('id')
+          .eq('job_id', jobId!)
+          .eq('applicant_id', user.id)
+          .limit(1)
+          .maybeSingle();
+
+        if (existingApplication) {
+          setHasAlreadyApplied(true);
+          setApplicationStatusChecked(true);
+          toast({ title: 'Redan sökt', description: 'Du har redan skickat en ansökan för den här tjänsten.' });
+          setApplying(false);
+          return;
+        }
+
         const { data: roleCheck } = await supabase
           .from('user_roles')
           .select('role')
@@ -491,6 +522,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         description: 'Din ansökan har skickats till arbetsgivaren',
       });
 
+      setHasAlreadyApplied(true);
+      setApplicationStatusChecked(true);
       try { localStorage.removeItem(`job-answers-draft-${jobId}`); } catch {}
       setTimeout(() => { navigate('/search-jobs'); }, 1500);
     } catch (error: any) {
@@ -875,7 +908,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             {user && !isEmployer && (
               <>
                 {/* Application questions */}
-                {jobQuestions.length > 0 && !isJobExpired && (
+                {jobQuestions.length > 0 && !isJobExpired && applicationStatusKnown && (
                   <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06]">
                     <h2 className="text-section-title mb-3">Ansökningsfrågor</h2>
                     <ApplicationQuestionsWizard
@@ -885,7 +918,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       onSubmit={handleApplicationSubmit}
                       isSubmitting={applying}
                       canSubmit={canSubmitApplication}
-                      hasAlreadyApplied={hasAlreadyApplied}
+                      hasAlreadyApplied={alreadyAppliedForUi}
                       contactEmail={job.contact_email}
                       jobTitle={job.title}
                     />
@@ -893,7 +926,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 )}
 
                 {/* No questions - direct submit */}
-                {jobQuestions.length === 0 && !isJobExpired && (
+                {jobQuestions.length === 0 && !isJobExpired && applicationStatusKnown && (
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
                     <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
                     <p className="text-sm text-white">Detta jobb kräver inga extra frågor.</p>
@@ -911,7 +944,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                     )}
 
                     <div className="flex justify-center pt-2">
-                      {hasAlreadyApplied ? (
+                      {alreadyAppliedForUi ? (
                         <Button
                           disabled
                           className="px-8 rounded-full bg-green-500 text-white cursor-not-allowed"
