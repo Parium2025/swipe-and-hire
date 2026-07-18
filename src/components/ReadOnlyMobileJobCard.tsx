@@ -236,7 +236,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
               alt={`${job.title} hos ${companyName}`}
               className="w-full h-full object-cover"
               style={{ objectPosition: `center ${(() => {
-                const v = job.image_focus_position;
+                const v = activeFocusValue;
                 if (!v || v === 'center') return '50%';
                 if (v === 'top') return '20%';
                 if (v === 'bottom') return '80%';
