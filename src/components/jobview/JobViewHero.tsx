@@ -24,6 +24,16 @@ interface JobViewHeroProps {
   createdAt?: string;
   expiresAt?: string | null;
   overlayTextColor?: string | null;
+  imageFocusPosition?: string | null;
+}
+
+function focusToObjectPosition(v?: string | null): string {
+  if (!v || v === 'center') return 'center 50%';
+  if (v === 'top') return 'center 20%';
+  if (v === 'bottom') return 'center 80%';
+  const num = parseInt(v, 10);
+  if (isNaN(num)) return 'center 50%';
+  return `center ${Math.max(0, Math.min(100, num))}%`;
 }
 
 const GRADIENTS = [
