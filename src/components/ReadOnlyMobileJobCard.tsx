@@ -11,6 +11,7 @@ import { JOB_VIEW_HERO_TRANSFORM, getImageVersion } from '@/lib/imageTransforms'
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 import { imageCache } from '@/lib/imageCache';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
