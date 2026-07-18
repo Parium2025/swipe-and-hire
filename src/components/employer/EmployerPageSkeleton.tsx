@@ -284,6 +284,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
  * Skeleton for /messages — mirrors conversation list (mobile) / split view (desktop).
  */
 export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton() {
+  const messageCount = readCachedCount(SKELETON_COUNT_KEYS.messages, 7);
   return (
     <FullscreenSkeletonPortal>
       <motion.div
