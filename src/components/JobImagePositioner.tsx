@@ -60,7 +60,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
           isDragging ? 'border-white/60' : 'border-white/20'
         }`}
         style={{
-          aspectRatio: '2 / 1',
+          aspectRatio: 'var(--job-media-aspect, 2 / 1)',
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none',
         }}
