@@ -70,8 +70,10 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, aspe
           isDragging ? 'border-white/60' : 'border-white/20'
         }`}
         style={{
-          /* Match job card media proportions from CSS variables */
-          height: 'var(--job-card-mobile-media-height, 13rem)',
+          /* Match target surface: desktop hero (aspectRatio) or mobile card height. */
+          ...(aspectRatio
+            ? { aspectRatio }
+            : { height: 'var(--job-card-mobile-media-height, 13rem)' }),
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none',
         }}
