@@ -35,9 +35,9 @@ export function ResilientImage({
     () => [src, ...fallbackSrcs].filter((value, index, array): value is string => {
       return typeof value === "string" && value.trim().length > 0 && array.indexOf(value) === index;
     }),
-    [src, fallbackSrcSignature]
+    [src, fallbackSrcs, fallbackSrcSignature]
   );
-  const activeSrc = sources[sourceIndex] ?? null;
+  const activeSrc = sources[Math.min(sourceIndex, Math.max(sources.length - 1, 0))] ?? null;
 
   // Reset when src changes
   useEffect(() => {
