@@ -1146,9 +1146,10 @@ All colors MUST be HSL.
 
 
   .job-card-mobile-media {
-    /* Fast aspect-ratio (2:1) så att kort och JobView-hero croppar identiskt
-       oavsett viewport — object-position % matchar bara vid samma proportion. */
-    aspect-ratio: 2 / 1;
+    /* Delat aspect-ratio-token — se `src/lib/jobImageFocus.ts` (JOB_MEDIA_ASPECT).
+       Samma ratio används av positioneraren och JobView-hero, annars croppar
+       samma object-position % olika mycket. */
+    aspect-ratio: var(--job-media-aspect, 2 / 1);
     height: auto;
   }
 
