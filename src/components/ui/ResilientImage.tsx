@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, ImgHTMLAttributes } from "react";
+import { useState, useEffect, useCallback, useMemo, ImgHTMLAttributes } from "react";
 
 /**
  * ResilientImage
@@ -28,9 +28,13 @@ export function ResilientImage({
   const [attempt, setAttempt] = useState(0);
   const [sourceIndex, setSourceIndex] = useState(0);
   const [failed, setFailed] = useState(false);
-  const sources = [src, ...fallbackSrcs].filter((value, index, array): value is string => {
-    return typeof value === "string" && value.trim().length > 0 && array.indexOf(value) === index;
-  });
+  const fallbackSrcSignature = fallbackSrcs.filter(Boolean).join("|");
+  const sources = useMemo(
+    () => [src, ...fallbackSrcs].filter((value, index, array): value is string => {
+      return typeof value === "string" && value.trim().length > 0 && array.indexOf(value) === index;
+    }),
+    [src, fallbackSrcSignature]
+  );
   const activeSrc = sources[sourceIndex] ?? null;
 
   // Reset when src changes
@@ -38,7 +42,7 @@ export function ResilientImage({
     setAttempt(0);
     setSourceIndex(0);
     setFailed(false);
-  }, [src, fallbackSrcs.join("|")]);
+  }, [src, fallbackSrcSignature]);
 
   // Auto-recover when tab regains focus or network comes back online
   useEffect(() => {
