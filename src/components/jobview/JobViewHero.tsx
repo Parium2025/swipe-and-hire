@@ -111,7 +111,7 @@ export const JobViewHero = memo(function JobViewHero({
 
   if (!imageUrl) {
     return (
-      <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-lg">
+      <div className="relative w-full aspect-[2/1] overflow-hidden rounded-lg">
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         {overlayContent}
@@ -120,7 +120,7 @@ export const JobViewHero = memo(function JobViewHero({
   }
 
   return (
-    <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-lg">
+    <div className="relative w-full aspect-[2/1] overflow-hidden rounded-lg">
       <ResilientImage
         src={imageUrl}
         alt={`${title} hos ${companyName}`}

@@ -98,20 +98,40 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
             <div className={`h-11 w-44 rounded-full ${SKELETON_SHAPE}`} />
           </div>
 
-          <div className="flex-1 space-y-4 overflow-hidden">
-            {[1, 2, 3].map(i => (
-              <div key={i} className={`rounded-xl overflow-hidden ${SKELETON_SHAPE}`}>
-                <div className="h-36" />
-                <div className="p-3 space-y-2">
-                  <div className="h-5 w-3/4 rounded bg-white/10" />
-                  <div className="h-3.5 w-1/2 rounded bg-white/10" />
-                  <div className="flex gap-2 pt-0.5">
-                    <div className="h-5 w-16 rounded-full bg-white/10" />
-                    <div className="h-5 w-20 rounded-full bg-white/10" />
+          <div className="flex-1 overflow-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
+                  {/* Bild — samma aspekt som riktiga jobbkortet */}
+                  <div className={`w-full ${SKELETON_SHAPE}`} style={{ height: 'var(--job-card-mobile-media-height, 13rem)' }} />
+                  {/* Kortkropp */}
+                  <div className="p-4 space-y-3">
+                    {/* Logo + företagsnamn */}
+                    <div className="flex justify-center -mt-8 relative z-10">
+                      <div className={`h-12 w-12 rounded-full ring-4 ring-[hsl(215_100%_12%)] ${SKELETON_SHAPE}`} />
+                    </div>
+                    {/* Titel */}
+                    <div className="space-y-2 pt-1">
+                      <div className={`h-5 w-4/5 mx-auto rounded ${SKELETON_SHAPE}`} />
+                      <div className={`h-5 w-3/5 mx-auto rounded ${SKELETON_SHAPE}`} />
+                    </div>
+                    {/* Info-pills */}
+                    <div className="flex flex-wrap justify-center gap-2 pt-1">
+                      <div className={`h-6 w-20 rounded-full ${SKELETON_SHAPE}`} />
+                      <div className={`h-6 w-24 rounded-full ${SKELETON_SHAPE}`} />
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <div className={`h-6 w-28 rounded-full ${SKELETON_SHAPE}`} />
+                      <div className={`h-6 w-24 rounded-full ${SKELETON_SHAPE}`} />
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <div className={`h-6 w-20 rounded-full ${SKELETON_SHAPE}`} />
+                      <div className={`h-6 w-16 rounded-full ${SKELETON_SHAPE}`} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </motion.div>
