@@ -57,6 +57,8 @@ interface JobPosting {
   employer_id: string;
   job_image_url?: string;
   job_image_desktop_url?: string;
+  image_focus_position?: string | null;
+  image_focus_position_desktop?: string | null;
   company_logo_url?: string | null;
   overlay_text_color?: string | null;
   // Legacy: callers may still pass profiles; we no longer query it.
@@ -203,6 +205,34 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
   });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState<boolean>(() =>
+    typeof window !== 'undefined' && window.innerWidth >= 1024
+  );
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const onChange = () => setIsDesktopViewport(mq.matches);
+    mq.addEventListener?.('change', onChange);
+    return () => mq.removeEventListener?.('change', onChange);
+  }, []);
+  const heroFocusPosition = isDesktopViewport
+    ? (job?.image_focus_position_desktop || job?.image_focus_position || 'center')
+    : (job?.image_focus_position || job?.image_focus_position_desktop || 'center');
+
+  // When viewport crosses the desktop breakpoint, swap to the matching image variant
+  useEffect(() => {
+    if (!job) return;
+    const rawImg = isDesktopViewport
+      ? (job.job_image_desktop_url || job.job_image_url)
+      : (job.job_image_url || job.job_image_desktop_url);
+    if (!rawImg) return;
+    const resolved = appendVersionToUrl(resolveJobImageUrl(rawImg), (job as any)?.image_updated_at ?? (job as any)?.updated_at);
+    if (!resolved) return;
+    const cachedBlob = imageCache.getCachedUrl(resolved);
+    setImageUrl(cachedBlob || resolved);
+    if (!cachedBlob) imageCache.loadImage(resolved).catch(() => {});
+  }, [isDesktopViewport, job?.job_image_url, job?.job_image_desktop_url]);
+
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close
   const [pullY, setPullY] = useState(0);
@@ -764,6 +794,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               createdAt={job.created_at}
               expiresAt={job.expires_at}
               overlayTextColor={job.overlay_text_color}
+              imageFocusPosition={heroFocusPosition}
             />
 
             {/* Company profile + title - matchar arbetsgivar-preview */}
