@@ -7,6 +7,7 @@ import { getTimeRemaining } from '@/lib/date';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 
 interface JobViewHeroProps {
   title: string;
