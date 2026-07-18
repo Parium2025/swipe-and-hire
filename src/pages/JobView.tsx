@@ -219,6 +219,20 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     ? (job?.image_focus_position_desktop || job?.image_focus_position || 'center')
     : (job?.image_focus_position || job?.image_focus_position_desktop || 'center');
 
+  // When viewport crosses the desktop breakpoint, swap to the matching image variant
+  useEffect(() => {
+    if (!job) return;
+    const rawImg = isDesktopViewport
+      ? (job.job_image_desktop_url || job.job_image_url)
+      : (job.job_image_url || job.job_image_desktop_url);
+    if (!rawImg) return;
+    const resolved = appendVersionToUrl(resolveJobImageUrl(rawImg), (job as any)?.image_updated_at ?? (job as any)?.updated_at);
+    if (!resolved) return;
+    const cachedBlob = imageCache.getCachedUrl(resolved);
+    setImageUrl(cachedBlob || resolved);
+    if (!cachedBlob) imageCache.loadImage(resolved).catch(() => {});
+  }, [isDesktopViewport, job?.job_image_url, job?.job_image_desktop_url]);
+
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close
   const [pullY, setPullY] = useState(0);
