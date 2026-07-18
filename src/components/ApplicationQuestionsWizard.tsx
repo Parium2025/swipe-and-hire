@@ -18,8 +18,6 @@ interface ApplicationQuestionsWizardProps {
   isSubmitting: boolean;
   canSubmit: boolean;
   hasAlreadyApplied: boolean;
-  contactEmail?: string;
-  jobTitle?: string;
   /** Preview mode: allows navigation but disables inputs and hides submit */
   previewMode?: boolean;
 }
@@ -32,8 +30,6 @@ export function ApplicationQuestionsWizard({
   isSubmitting,
   canSubmit,
   hasAlreadyApplied,
-  contactEmail,
-  jobTitle,
   previewMode = false,
 }: ApplicationQuestionsWizardProps) {
   // If already applied, start directly on the review step
@@ -291,9 +287,10 @@ export function ApplicationQuestionsWizard({
     'rounded-full bg-green-500 hover:bg-green-600 md:hover:bg-green-600 text-white px-6 py-2 text-sm shadow-lg shadow-green-500/30 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
 
   const navRef = useRef<HTMLDivElement>(null);
+  const wizardMinHeightClass = isSubmitStep ? 'min-h-0' : 'min-h-[320px] sm:min-h-[360px]';
 
   return (
-    <div className="relative flex flex-col h-full min-h-[60dvh]">
+    <div className={`relative flex flex-col h-full ${wizardMinHeightClass}`}>
       {/* Quick-return to review — positioned top-right of parent card, aligned with section title */}
       {hasReachedReview && !previewMode && !hasAlreadyApplied && !isSubmitStep && (
         <button
@@ -368,7 +365,7 @@ export function ApplicationQuestionsWizard({
           ) : isSubmitStep ? (
             <div
               key="submit-step"
-              className="flex-1 flex flex-col transition-opacity duration-100"
+              className="flex flex-col transition-opacity duration-100"
             >
               {/* Header */}
               <div className="text-center mb-3">
@@ -379,7 +376,7 @@ export function ApplicationQuestionsWizard({
               </div>
 
               {/* Answers summary - improved cards */}
-              <div className="flex-1 overflow-y-auto max-h-[260px] space-y-2 px-1">
+              <div className="overflow-y-auto max-h-[260px] space-y-2 px-1">
                 {questions.map((q, idx) => {
                   const answer = answers[q.id];
                   let displayAnswer = answer || '—';
@@ -429,17 +426,6 @@ export function ApplicationQuestionsWizard({
                 })}
               </div>
 
-              {/* Contact email */}
-              {contactEmail && (
-                <div className="mt-3 text-center">
-                  <a 
-                    href={`mailto:${contactEmail}?subject=Fråga om tjänsten: ${jobTitle || ''}`}
-                    className="text-xs text-white hover:text-white/80 transition-colors underline underline-offset-2"
-                  >
-                    {contactEmail}
-                  </a>
-                </div>
-              )}
             </div>
           ) : null}
       </div>
