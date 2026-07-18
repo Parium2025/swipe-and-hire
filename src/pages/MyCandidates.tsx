@@ -133,6 +133,12 @@ const MyCandidates = () => {
       }
     }
   }, [isLoading, showContent]);
+
+  // Cacha antalet så skeleton kan rendera exakt lika många kort nästa cold-load.
+  useEffect(() => {
+    if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.myCandidates, candidates.length);
+  }, [isLoading, candidates.length]);
+
   
   // Active candidates to display (hook already deduplicates by applicant_id)
   const displayedCandidates = useMemo(() => {
