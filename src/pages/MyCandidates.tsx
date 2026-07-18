@@ -50,6 +50,7 @@ import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMo
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
+import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 
 const MyCandidates = () => {
