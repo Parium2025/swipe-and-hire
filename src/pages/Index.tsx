@@ -686,45 +686,9 @@ const Index = () => {
     );
   }
 
-  // Fallback for job seekers: use the same live job pipeline as /search-jobs
-  return (
-    <div className="min-h-screen smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
-      <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex-1 min-w-0 mr-3">
-            <h1 className="text-2xl font-bold text-white">Parium</h1>
-            <TruncatedText
-              text={`Jobbsökare: ${profile.first_name} ${profile.last_name}`}
-              className="text-sm text-white truncate block"
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <Button 
-              onClick={() => navigate('/profile')}
-              variant="outline"
-              size="sm"
-              className="border-white/20 text-white hover:bg-white/20"
-            >
-              Min Profil
-            </Button>
-            {isAdmin && (
-              <DeveloperControls 
-                onViewChange={setDeveloperView}
-                currentView={developerView}
-              />
-            )}
-            <Button onClick={signOut} variant="outline" className="border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
-              Logga ut
-            </Button>
-          </div>
-        </div>
-      </header>
-      
-      <main className="py-8">
-        <SearchJobs />
-      </main>
-    </div>
-  );
+  // Safety net: any unmatched route redirects to the role-appropriate home page.
+  // This prevents any accidental fall-through between job seeker and employer views.
+  return <Navigate to={role === 'employer' ? '/home' : '/search-jobs'} replace />;
 };
 
 export default Index;
