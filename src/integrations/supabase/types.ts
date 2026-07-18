@@ -3448,6 +3448,10 @@ export type Database = {
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
       trigger_news_health_watchdog: { Args: never; Returns: undefined }
       try_uuid: { Args: { p_text: string }; Returns: string }
+      verify_cron_secret: {
+        Args: { _secret_name?: string; _token: string }
+        Returns: boolean
+      }
     }
     Enums: {
       outreach_channel: "chat" | "email" | "push"
