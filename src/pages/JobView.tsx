@@ -814,7 +814,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       fetchPriority="high"
                       decoding="sync"
                       draggable={false}
-                      fallbackClassName="w-full h-full"
+                      onError={() => setCompanyLogoUrl(null)}
                     />
                   ) : (
                     <span className="text-white font-semibold text-sm">
