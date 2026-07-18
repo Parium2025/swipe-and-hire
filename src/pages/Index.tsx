@@ -39,7 +39,7 @@ import DeveloperControls from '@/components/DeveloperControls';
 import EmployerAnalytics from '@/components/EmployerAnalytics';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft, Search } from 'lucide-react';
-import { AnimatedBackground } from '@/components/AnimatedBackground';
+
 import KeepAlive from '@/components/KeepAlive';
 import { useApplicationsData } from '@/hooks/useApplicationsData';
 import { CandidatesTable } from '@/components/CandidatesTable';
