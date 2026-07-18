@@ -26,6 +26,7 @@ interface ReadOnlyMobileJobCardProps {
     location: string;
     employment_type?: string;
     part_time_days?: string[] | null;
+    image_focus_position_desktop?: string;
     part_time_shifts?: string[] | null;
     duration_amount?: number | null;
     duration_unit?: string | null;
