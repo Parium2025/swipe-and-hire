@@ -110,7 +110,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, aspe
         />
       </div>
       <p className="text-white text-[10px] text-center">
-        Så här kommer bilden att klippas i jobbkorten
+        {hintLabel ?? 'Så här kommer bilden att klippas i jobbkorten'}
       </p>
     </div>
   );
