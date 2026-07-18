@@ -231,7 +231,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     const cachedBlob = imageCache.getCachedUrl(resolved);
     setImageUrl(cachedBlob || resolved);
     if (!cachedBlob) imageCache.loadImage(resolved).catch(() => {});
-  }, [isDesktopViewport, job?.job_image_url, job?.job_image_desktop_url]);
+  }, [isDesktopViewport, job?.job_image_url, job?.job_image_desktop_url, (job as any)?.image_updated_at, (job as any)?.updated_at]);
 
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close
@@ -340,8 +340,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         const resolved = appendVersionToUrl(resolveJobImageUrl(rawImageUrl), (data as any)?.image_updated_at ?? (data as any)?.updated_at);
         if (resolved) {
           const cachedBlob = imageCache.getCachedUrl(resolved);
-          // Only set if we don't already display a valid URL (prevents src swap → reflow flash)
-          setImageUrl(prev => prev || cachedBlob || resolved);
+          // Always sync to the latest persisted image version/focus source.
+          // A stale URL from card navigation can otherwise survive reloads/edits.
+          setImageUrl(cachedBlob || resolved);
           if (!cachedBlob) {
             // Warm the cache in background — do NOT swap src after; let the browser keep its loaded bitmap
             imageCache.loadImage(resolved).catch(() => {});
@@ -814,7 +815,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       fetchPriority="high"
                       decoding="sync"
                       draggable={false}
-                      fallbackClassName="w-full h-full"
+                      onError={() => setCompanyLogoUrl(null)}
                     />
                   ) : (
                     <span className="text-white font-semibold text-sm">

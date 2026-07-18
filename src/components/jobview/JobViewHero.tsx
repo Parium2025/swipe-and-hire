@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Users, Building2, MapPin, Timer, Gift, Briefcase, Banknote } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -96,12 +96,17 @@ export const JobViewHero = memo(function JobViewHero({
   const timeInfo = useMemo(() => createdAt ? getTimeRemaining(createdAt, expiresAt ?? undefined) : null, [createdAt, expiresAt]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(overlayTextColor), [overlayTextColor]);
   const objectPosition = useMemo(() => getImageObjectPosition(imageFocusPosition ?? undefined), [imageFocusPosition]);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [imageUrl]);
 
   // Ren bild/gradient utan overlay-titel — titeln flyttad till egen sektion
   // under hero för att matcha arbetsgivar-preview och undvika text ovanpå bild.
   const overlayContent = null;
 
-  if (!imageUrl) {
+  if (!imageUrl || imageFailed) {
     return (
       <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-lg">
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
@@ -121,6 +126,7 @@ export const JobViewHero = memo(function JobViewHero({
         loading="eager"
         fetchPriority="high"
         decoding="sync"
+        onError={() => setImageFailed(true)}
         fallbackClassName="w-full h-full"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
