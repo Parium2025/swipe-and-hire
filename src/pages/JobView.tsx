@@ -263,7 +263,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               .eq('applicant_id', user.id)
               .limit(1)
               .maybeSingle()
-          : Promise.resolve({ data: null }),
+          : Promise.resolve({ data: null, error: null }),
       ]);
 
       if (jobResult.error) {
