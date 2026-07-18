@@ -276,7 +276,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         )}
         {!statusBadge && hasApplied && (
           <div className="absolute top-2.5 left-2.5">
-            <Badge className="bg-green-500/90 text-white border-0 text-[11px] px-2 py-0.5">
+            <Badge className="bg-green-500 text-white border-0 text-[11px] px-2 py-0.5">
               <CheckCircle className="h-3 w-3 mr-1" />
               Redan sökt
             </Badge>
