@@ -311,7 +311,7 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton()
             <div className={`h-11 w-full rounded-xl ${SHAPE}`} />
             {/* Conversation rows */}
             <div className="flex-1 space-y-2 rounded-xl border border-white/20 bg-white/5 p-2">
-              {[1, 2, 3, 4, 5, 6, 7].map(i => (
+              {Array.from({ length: messageCount }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03]">
                   <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
                   <div className="flex-1 space-y-2 min-w-0">
