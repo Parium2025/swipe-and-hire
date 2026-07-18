@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, ImgHTMLAttributes } from "react";
 
+const EMPTY_FALLBACK_SRCS: Array<string | null | undefined> = [];
+
 /**
  * ResilientImage
  * Drop-in replacement for <img> with:
@@ -17,7 +19,7 @@ interface ResilientImageProps extends ImgHTMLAttributes<HTMLImageElement> {
 
 export function ResilientImage({
   src,
-  fallbackSrcs = [],
+  fallbackSrcs = EMPTY_FALLBACK_SRCS,
   alt,
   className,
   fallbackClassName,
@@ -28,7 +30,7 @@ export function ResilientImage({
   const [attempt, setAttempt] = useState(0);
   const [sourceIndex, setSourceIndex] = useState(0);
   const [failed, setFailed] = useState(false);
-  const fallbackSrcSignature = useMemo(() => fallbackSrcs.filter(Boolean).join("|"), [fallbackSrcs]);
+  const fallbackSrcSignature = fallbackSrcs.filter(Boolean).join("|");
   const sources = useMemo(
     () => [src, ...fallbackSrcs].filter((value, index, array): value is string => {
       return typeof value === "string" && value.trim().length > 0 && array.indexOf(value) === index;
