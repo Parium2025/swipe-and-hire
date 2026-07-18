@@ -230,7 +230,7 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
  * Skeleton for /my-candidates — mirrors MyCandidatesHeader + mobile list.
  */
 export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
-  return (
+  const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
     <FullscreenSkeletonPortal>
       <motion.div
         initial={{ opacity: 1 }}
