@@ -73,7 +73,7 @@ interface ReadOnlyMobileJobCardProps {
   /** Hide the save/heart button entirely */
   hideSaveButton?: boolean;
   /** Override default card click navigation */
-  onCardClick?: (jobId: string, imageState?: { initialHeroImageUrl?: string; initialCompanyLogoUrl?: string }) => void;
+  onCardClick?: (jobId: string, imageState?: { initialHeroImageUrl?: string; initialCompanyLogoUrl?: string; hasApplied?: boolean }) => void;
   /** Opens the company profile without triggering the card navigation */
   onCompanyClick?: (companyId: string) => void;
   /** Extra content rendered below the tags row (e.g. edit/delete buttons) */
@@ -202,6 +202,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         const imageState = {
           ...(instantHeroUrl ? { initialHeroImageUrl: instantHeroUrl } : {}),
           ...(logoUrl ? { initialCompanyLogoUrl: logoUrl } : {}),
+          ...(hasApplied ? { hasApplied: true } : {}),
         };
         onCardClick
           ? onCardClick(job.id, imageState)
