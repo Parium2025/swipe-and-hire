@@ -182,18 +182,21 @@ const MyApplications = () => {
   };
 
   if (!showContent || isLoading) {
+    const skeletonKey = activeTab === 'expired'
+      ? SKELETON_COUNT_KEYS.myApplicationsExpired
+      : SKELETON_COUNT_KEYS.myApplicationsActive;
+    const skeletonCount = readCachedCount(skeletonKey, 3);
     return (
-       <div className="responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true">
-        <div className="text-center mb-6">
+      <div className="responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+        <div className="text-center mb-5">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
           <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
         </div>
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 text-white animate-spin" />
-        </div>
+        <JobCardGridSkeleton count={skeletonCount} />
       </div>
     );
   }
+
 
   if (error) {
     return (
