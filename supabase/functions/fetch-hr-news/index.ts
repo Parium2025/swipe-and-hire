@@ -823,7 +823,9 @@ serve(async (req) => {
         
         // STEG 2: Om det fortfarande behövs plats, ta bort äldsta RSS
         if (remaining > 0) {
-          const rssToDelete = rssItems.slice(-remaining);
+          const rssToDelete = rssItems
+            .filter(i => !idsToDelete.includes(i.id))
+            .slice(-remaining);
           for (const item of rssToDelete) {
             idsToDelete.push(item.id);
           }
