@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, ImgHTMLAttributes } from "react";
+import { imageCache } from "@/lib/imageCache";
 
 /**
  * ResilientImage
@@ -36,6 +37,7 @@ export function ResilientImage({
 
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
+      if (src) imageCache.evict(src);
       if (attempt < 2) {
         // Retry with backoff: 600ms, 1500ms
         const delay = attempt === 0 ? 600 : 1500;
@@ -45,7 +47,7 @@ export function ResilientImage({
         onError?.(e);
       }
     },
-    [attempt, onError]
+    [attempt, onError, src]
   );
 
   const handleManualRetry = useCallback(() => {
