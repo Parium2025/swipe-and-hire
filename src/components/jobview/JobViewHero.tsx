@@ -25,6 +25,7 @@ interface JobViewHeroProps {
   createdAt?: string;
   expiresAt?: string | null;
   overlayTextColor?: string | null;
+  imageFocusPosition?: string | null;
 }
 
 const GRADIENTS = [
