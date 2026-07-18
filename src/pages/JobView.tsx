@@ -830,6 +830,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       onError={() => {
                         if (stableCompanyLogoFallbackUrl && companyLogoUrl !== stableCompanyLogoFallbackUrl) {
                           setCompanyLogoUrl(stableCompanyLogoFallbackUrl);
+                        } else {
+                          setCompanyLogoUrl(null);
                         }
                       }}
                     />
