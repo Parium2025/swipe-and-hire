@@ -18,7 +18,7 @@ export interface ImageTransform {
 // Card thumbnail (jobblista, swipe-kort baksida etc.)
 export const JOB_CARD_TRANSFORM: ImageTransform = {
   width: 600,
-  height: 400,
+  height: 300,
   quality: 75,
   resize: 'cover',
 };
@@ -28,7 +28,7 @@ export const JOB_CARD_TRANSFORM: ImageTransform = {
 // annars stämmer inte cache-key och bilden laddas synligt.
 export const JOB_VIEW_HERO_TRANSFORM: ImageTransform = {
   width: 1200,
-  height: 800,
+  height: 600,
   quality: 75,
   resize: 'cover',
 };

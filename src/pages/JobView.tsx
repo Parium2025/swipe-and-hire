@@ -196,6 +196,13 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     if (!resolved) return null;
     return imageCache.getCachedUrl(resolved) || resolved;
   });
+  const [canonicalImageUrl, setCanonicalImageUrl] = useState<string | null>(() => {
+    const isDesktopInit = typeof window !== 'undefined' && window.innerWidth >= 1024;
+    const rawImg = isDesktopInit
+      ? (initialJob?.job_image_desktop_url || initialJob?.job_image_url)
+      : (initialJob?.job_image_url || initialJob?.job_image_desktop_url);
+    return appendVersionToUrl(resolveJobImageUrl(rawImg), (initialJob as any)?.image_updated_at ?? (initialJob as any)?.updated_at);
+  });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
     if (typeof navigationImageState.initialCompanyLogoUrl === 'string' && navigationImageState.initialCompanyLogoUrl) {
       return navigationImageState.initialCompanyLogoUrl;
@@ -318,9 +325,13 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       if (rawImageUrl) {
         const resolved = appendVersionToUrl(resolveJobImageUrl(rawImageUrl), (data as any)?.image_updated_at ?? (data as any)?.updated_at);
         if (resolved) {
+          setCanonicalImageUrl(resolved);
           const cachedBlob = imageCache.getCachedUrl(resolved);
-          // Only set if we don't already display a valid URL (prevents src swap → reflow flash)
-          setImageUrl(prev => prev || cachedBlob || resolved);
+          setImageUrl(prev => {
+            if (!prev) return cachedBlob || resolved;
+            if (prev.startsWith('blob:') || prev === navigationImageState.initialHeroImageUrl) return cachedBlob || resolved;
+            return prev;
+          });
           if (!cachedBlob) {
             // Warm the cache in background — do NOT swap src after; let the browser keep its loaded bitmap
             imageCache.loadImage(resolved).catch(() => {});
@@ -328,6 +339,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         } else if (rawImageUrl) {
           convertToSignedUrl(rawImageUrl, 'job-applications', 3600).then(signed => {
             if (signed) {
+              setCanonicalImageUrl(signed);
               setImageUrl(prev => prev || signed);
               imageCache.loadImage(signed).catch(() => {});
             }
@@ -784,6 +796,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             <JobViewHero
               title={job.title}
               imageUrl={imageUrl}
+        fallbackImageUrl={canonicalImageUrl}
               companyName={getDisplayCompanyName(job)}
               location={job.location}
               employmentType={job.employment_type}

@@ -11,11 +11,13 @@ import { useState, useEffect, useCallback, ImgHTMLAttributes } from "react";
  */
 interface ResilientImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   src?: string | null;
+  fallbackSrcs?: Array<string | null | undefined>;
   fallbackClassName?: string;
 }
 
 export function ResilientImage({
   src,
+  fallbackSrcs = [],
   alt,
   className,
   fallbackClassName,
@@ -24,19 +26,26 @@ export function ResilientImage({
   ...rest
 }: ResilientImageProps) {
   const [attempt, setAttempt] = useState(0);
+  const [sourceIndex, setSourceIndex] = useState(0);
   const [failed, setFailed] = useState(false);
+  const sources = [src, ...fallbackSrcs].filter((value, index, array): value is string => {
+    return typeof value === "string" && value.trim().length > 0 && array.indexOf(value) === index;
+  });
+  const activeSrc = sources[sourceIndex] ?? null;
 
   // Reset when src changes
   useEffect(() => {
     setAttempt(0);
+    setSourceIndex(0);
     setFailed(false);
-  }, [src]);
+  }, [src, fallbackSrcs.join("|")]);
 
   // Auto-recover when tab regains focus or network comes back online
   useEffect(() => {
     if (!failed) return;
     const retry = () => {
       setAttempt(0);
+      setSourceIndex(0);
       setFailed(false);
     };
     const onVis = () => {
@@ -52,6 +61,12 @@ export function ResilientImage({
 
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
+      if (sourceIndex < sources.length - 1) {
+        setAttempt(0);
+        setSourceIndex((index) => index + 1);
+        return;
+      }
+
       // 5 attempts total, gentle backoff. Keeps CDN cache benefits since
       // we only cache-bust after attempt 3 (transient blip vs. stuck cache).
       if (attempt < 4) {
@@ -62,15 +77,16 @@ export function ResilientImage({
         onError?.(e);
       }
     },
-    [attempt, onError]
+    [attempt, onError, sourceIndex, sources.length]
   );
 
   const handleManualRetry = useCallback(() => {
     setAttempt(0);
+    setSourceIndex(0);
     setFailed(false);
   }, []);
 
-  if (!src) {
+  if (!activeSrc) {
     return null;
   }
 
@@ -100,8 +116,8 @@ export function ResilientImage({
   // on happy path (avoids re-render cost and hitting transform rate limits).
   const finalSrc =
     attempt >= 3
-      ? `${src}${src.includes("?") ? "&" : "?"}_r=${attempt}`
-      : src;
+      ? `${activeSrc}${activeSrc.includes("?") ? "&" : "?"}_r=${attempt}`
+      : activeSrc;
 
   return (
     <img
