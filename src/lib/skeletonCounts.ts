@@ -24,7 +24,9 @@ export const SKELETON_COUNT_KEYS = {
 export function readCachedCount(key: string, fallback = 6, max = 9): number {
   if (typeof window === 'undefined') return fallback;
   try {
-    const raw = sessionStorage.getItem(key);
+    // Prefer localStorage (persists across app restarts) but fall back to
+    // sessionStorage for backwards compat with earlier writes this session.
+    const raw = localStorage.getItem(key) ?? sessionStorage.getItem(key);
     if (!raw) return fallback;
     const n = parseInt(raw, 10);
     if (!Number.isFinite(n) || n <= 0) return fallback;
@@ -37,7 +39,7 @@ export function readCachedCount(key: string, fallback = 6, max = 9): number {
 export function writeCachedCount(key: string, n: number): void {
   if (typeof window === 'undefined') return;
   try {
-    sessionStorage.setItem(key, String(Math.max(0, Math.floor(n))));
+    localStorage.setItem(key, String(Math.max(0, Math.floor(n))));
   } catch {
     /* noop */
   }
