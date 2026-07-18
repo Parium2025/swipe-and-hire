@@ -919,8 +919,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       isSubmitting={applying}
                       canSubmit={canSubmitApplication}
                       hasAlreadyApplied={alreadyAppliedForUi}
-                      contactEmail={job.contact_email}
-                      jobTitle={job.title}
                     />
                   </div>
                 )}
@@ -931,18 +929,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                     <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
                     <p className="text-sm text-white">Detta jobb kräver inga extra frågor.</p>
                     
-                    {job.contact_email && (
-                      <div className="pt-2">
-                        <p className="text-xs text-white mb-1">Har du frågor?</p>
-                        <a 
-                          href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
-                          className="text-sm text-white hover:text-white/80 transition-colors underline underline-offset-2"
-                        >
-                          {job.contact_email}
-                        </a>
-                      </div>
-                    )}
-
                     <div className="flex justify-center pt-2">
                       {alreadyAppliedForUi ? (
                         <Button
