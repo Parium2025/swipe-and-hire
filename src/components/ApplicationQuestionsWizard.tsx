@@ -58,6 +58,16 @@ export function ApplicationQuestionsWizard({
     if (isSubmitStep) setHasReachedReview(true);
   }, [isSubmitStep]);
 
+  // När hasAlreadyApplied flippar från false→true (t.ex. efter att JobView hunnit
+  // hämta applikationsstatus från servern, eller direkt efter en lyckad submit),
+  // hoppa till review-steget så knappen visar "Redan sökt" istället för "Skicka ansökan".
+  useEffect(() => {
+    if (hasAlreadyApplied && !previewMode) {
+      setCurrentStep(questions.length);
+      setHasReachedReview(true);
+    }
+  }, [hasAlreadyApplied, previewMode, questions.length]);
+
   const handleNext = useCallback(() => {
     if (currentStep < totalSteps - 1) {
       (document.activeElement as HTMLElement)?.blur();
