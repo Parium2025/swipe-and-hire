@@ -48,7 +48,7 @@ export const DesktopJobCard = memo(function DesktopJobCard({
     >
       <CardContent className="job-card-desktop-body p-5 relative">
         {hasApplied && (
-          <Badge variant="glass" className="absolute top-3 right-3 bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2.5 py-1">
+          <Badge className="absolute top-3 right-3 bg-green-500 text-white border-0 text-xs px-2.5 py-1">
             <CheckCircle className="h-3 w-3 mr-1" />
             Redan sökt
           </Badge>
