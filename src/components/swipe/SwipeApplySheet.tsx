@@ -295,8 +295,6 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
                       isSubmitting={submitting}
                       canSubmit={canSubmit}
                       hasAlreadyApplied={hasAlreadyApplied}
-                      contactEmail={contactEmail}
-                      jobTitle={jobTitle}
                     />
                   )}
                 </>
