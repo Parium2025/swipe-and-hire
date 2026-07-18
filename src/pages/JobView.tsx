@@ -261,6 +261,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               .select('id, custom_answers')
               .eq('job_id', jobId!)
               .eq('applicant_id', user.id)
+              .limit(1)
               .maybeSingle()
           : Promise.resolve({ data: null }),
       ]);
@@ -432,6 +433,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           .select('id')
           .eq('job_id', jobId!)
           .eq('applicant_id', user.id)
+          .limit(1)
           .maybeSingle();
 
         if (existingApplication) {
