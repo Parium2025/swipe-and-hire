@@ -205,8 +205,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
   });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? navigationImageState.hasApplied === true);
-  const { data: appliedJobIds = new Set<string>() } = useAppliedJobIds();
+  const [applicationStatusChecked, setApplicationStatusChecked] = useState(Boolean(cached) || navigationImageState.hasApplied === true);
+  const { data: appliedJobIds = new Set<string>(), isFetched: appliedJobIdsFetched } = useAppliedJobIds();
   const alreadyAppliedForUi = hasAlreadyApplied || navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
+  const applicationStatusKnown = alreadyAppliedForUi || applicationStatusChecked || appliedJobIdsFetched || !user || isEmployer;
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close
   const [pullY, setPullY] = useState(0);
@@ -293,6 +295,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       setJob(data);
       setJobQuestions(questions);
       setHasAlreadyApplied(applied);
+      setApplicationStatusChecked(true);
 
       // If already applied, load saved answers from the application
       if (applied && applicationResult.data?.custom_answers) {
@@ -885,7 +888,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             {user && !isEmployer && (
               <>
                 {/* Application questions */}
-                {jobQuestions.length > 0 && !isJobExpired && (
+                {jobQuestions.length > 0 && !isJobExpired && applicationStatusKnown && (
                   <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06]">
                     <h2 className="text-section-title mb-3">Ansökningsfrågor</h2>
                     <ApplicationQuestionsWizard
@@ -903,7 +906,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 )}
 
                 {/* No questions - direct submit */}
-                {jobQuestions.length === 0 && !isJobExpired && (
+                {jobQuestions.length === 0 && !isJobExpired && applicationStatusKnown && (
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
                     <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
                     <p className="text-sm text-white">Detta jobb kräver inga extra frågor.</p>
