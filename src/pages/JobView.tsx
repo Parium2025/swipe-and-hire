@@ -22,6 +22,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
+import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { Helmet } from 'react-helmet-async';
 
 interface JobPosting {
@@ -127,6 +128,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const navigationImageState = (location.state ?? {}) as {
     initialHeroImageUrl?: string;
     initialCompanyLogoUrl?: string;
+    hasApplied?: boolean;
   };
 
   // Robust employer check: also verify from profiles table directly
@@ -202,7 +204,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     const resolvedLogo = resolveCompanyLogoUrl(rawLogo);
     return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
   });
-  const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
+  const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? navigationImageState.hasApplied === true);
+  const { data: appliedJobIds = new Set<string>() } = useAppliedJobIds();
+  const alreadyAppliedForUi = hasAlreadyApplied || navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close
   const [pullY, setPullY] = useState(0);
@@ -385,6 +389,12 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   };
 
   const handleApplicationSubmit = async () => {
+    if (alreadyAppliedForUi) {
+      setHasAlreadyApplied(true);
+      toast({ title: 'Redan sökt', description: 'Du har redan skickat en ansökan för den här tjänsten.' });
+      return;
+    }
+
     // Block employers from applying
     if (isEmployer) {
       toast({
@@ -885,7 +895,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       onSubmit={handleApplicationSubmit}
                       isSubmitting={applying}
                       canSubmit={canSubmitApplication}
-                      hasAlreadyApplied={hasAlreadyApplied}
+                      hasAlreadyApplied={alreadyAppliedForUi}
                       contactEmail={job.contact_email}
                       jobTitle={job.title}
                     />
@@ -911,7 +921,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                     )}
 
                     <div className="flex justify-center pt-2">
-                      {hasAlreadyApplied ? (
+                      {alreadyAppliedForUi ? (
                         <Button
                           disabled
                           className="px-8 rounded-full bg-green-500 text-white cursor-not-allowed"
