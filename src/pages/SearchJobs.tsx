@@ -51,6 +51,7 @@ import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
 import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard';
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
 import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
+import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
