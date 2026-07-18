@@ -51,6 +51,7 @@ import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
 import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard';
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
 import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
+import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
@@ -574,9 +575,7 @@ const SearchJobs = memo(() => {
       seedJobsFromSearch(jobs);
       // Cacha senaste resultatantal så JobListSkeleton kan rendera exakt
       // rätt antal kort vid nästa cold-load — inga fejkade 6 kort.
-      try {
-        sessionStorage.setItem('parium:searchJobs:lastCount', String(jobs.length));
-      } catch { /* noop */ }
+      writeCachedCount(SKELETON_COUNT_KEYS.searchJobs, jobs.length);
     }
   }, [jobs, seedJobsFromSearch]);
 

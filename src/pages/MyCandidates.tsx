@@ -50,6 +50,7 @@ import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMo
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
+import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 
 const MyCandidates = () => {
@@ -132,6 +133,12 @@ const MyCandidates = () => {
       }
     }
   }, [isLoading, showContent]);
+
+  // Cacha antalet så skeleton kan rendera exakt lika många kort nästa cold-load.
+  useEffect(() => {
+    if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.myCandidates, candidates.length);
+  }, [isLoading, candidates.length]);
+
   
   // Active candidates to display (hook already deduplicates by applicant_id)
   const displayedCandidates = useMemo(() => {

@@ -52,27 +52,10 @@ const SkeletonChrome = memo(function SkeletonChrome() {
   );
 });
 
-/**
- * Läs cachead resultatlängd från senaste sökning så skeleton
- * rendrar exakt rätt antal kort (t.ex. 2 om användaren hade 2 jobb).
- * Fallback: 6 kort — vår gamla "har inte laddat än"-default.
- * Clamp: 1–9 för att aldrig visa tomt eller överväldigande många.
- */
-function readCachedJobCount(): number {
-  if (typeof window === 'undefined') return 6;
-  try {
-    const raw = sessionStorage.getItem('parium:searchJobs:lastCount');
-    if (!raw) return 6;
-    const n = parseInt(raw, 10);
-    if (!Number.isFinite(n) || n <= 0) return 6;
-    return Math.min(9, Math.max(1, n));
-  } catch {
-    return 6;
-  }
-}
+import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 export const JobListSkeleton = memo(function JobListSkeleton() {
-  const cardCount = readCachedJobCount();
+  const cardCount = readCachedCount(SKELETON_COUNT_KEYS.searchJobs);
   return (
     <FullscreenSkeletonPortal>
       <motion.div

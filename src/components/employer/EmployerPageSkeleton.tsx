@@ -1,6 +1,7 @@
 import { memo, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 /**
  * Full-screen skeleton overlays for the employer side, mirroring
@@ -229,6 +230,7 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
  * Skeleton for /my-candidates — mirrors MyCandidatesHeader + mobile list.
  */
 export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
+  const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
   return (
     <FullscreenSkeletonPortal>
       <motion.div
@@ -258,7 +260,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
             </div>
             {/* Candidate cards */}
             <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map(i => (
+              {Array.from({ length: candidateCount }).map((_, i) => (
                 <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/20">
                   <div className="flex items-center gap-3">
                     <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
@@ -282,6 +284,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
  * Skeleton for /messages — mirrors conversation list (mobile) / split view (desktop).
  */
 export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton() {
+  const messageCount = readCachedCount(SKELETON_COUNT_KEYS.messages, 7);
   return (
     <FullscreenSkeletonPortal>
       <motion.div
@@ -308,7 +311,7 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton()
             <div className={`h-11 w-full rounded-xl ${SHAPE}`} />
             {/* Conversation rows */}
             <div className="flex-1 space-y-2 rounded-xl border border-white/20 bg-white/5 p-2">
-              {[1, 2, 3, 4, 5, 6, 7].map(i => (
+              {Array.from({ length: messageCount }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03]">
                   <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
                   <div className="flex-1 space-y-2 min-w-0">

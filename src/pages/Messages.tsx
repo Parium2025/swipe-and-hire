@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EmployerMessagesSkeleton } from '@/components/employer/EmployerPageSkeleton';
+import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
@@ -50,6 +51,12 @@ export default function Messages() {
       }
     }
   }, [isLoading, showContentFade]);
+
+  // Cacha antalet så skeleton kan rendera exakt lika många rader nästa cold-load.
+  useEffect(() => {
+    if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.messages, conversations.length);
+  }, [isLoading, conversations.length]);
+
   const { deleteConversation, isDeleting } = useDeleteConversation();
   const { hasTeam } = useTeamMembers();
   const [searchParams, setSearchParams] = useSearchParams();
