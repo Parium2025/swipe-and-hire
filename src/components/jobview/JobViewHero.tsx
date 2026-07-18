@@ -96,7 +96,7 @@ export const JobViewHero = memo(function JobViewHero({
   const salaryText = useMemo(() => getSalaryText(salaryMin, salaryMax, salaryType, salaryTransparency), [salaryMin, salaryMax, salaryType, salaryTransparency]);
   const timeInfo = useMemo(() => createdAt ? getTimeRemaining(createdAt, expiresAt ?? undefined) : null, [createdAt, expiresAt]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(overlayTextColor), [overlayTextColor]);
-  const objectPosition = useMemo(() => focusToObjectPosition(imageFocusPosition), [imageFocusPosition]);
+  const objectPosition = useMemo(() => toObjectPosition(imageFocusPosition), [imageFocusPosition]);
 
   // Ren bild/gradient utan overlay-titel — titeln flyttad till egen sektion
   // under hero för att matcha arbetsgivar-preview och undvika text ovanpå bild.
