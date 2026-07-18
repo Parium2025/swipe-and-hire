@@ -260,7 +260,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
             </div>
             {/* Candidate cards */}
             <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map(i => (
+              {Array.from({ length: candidateCount }).map((_, i) => (
                 <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/20">
                   <div className="flex items-center gap-3">
                     <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
