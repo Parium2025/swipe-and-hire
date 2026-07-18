@@ -287,7 +287,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       }
 
       const questions = (!questionsResult.error && questionsResult.data) ? questionsResult.data as JobQuestion[] : [];
-      const applied = !!applicationResult.data;
+      const appliedFromSharedState = navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
+      const applied = appliedFromSharedState || !!applicationResult.data;
 
       if (jobId) {
         _jobCache.set(jobId, { job: data, questions, applied });
@@ -296,7 +297,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       setJob(data);
       setJobQuestions(questions);
       setHasAlreadyApplied(applied);
-      setApplicationStatusChecked(true);
+      setApplicationStatusChecked(!user || !applicationResult.error || appliedFromSharedState);
 
       // If already applied, load saved answers from the application
       if (applied && applicationResult.data?.custom_answers) {
