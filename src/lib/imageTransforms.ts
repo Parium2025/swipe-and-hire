@@ -29,6 +29,7 @@ export const JOB_CARD_TRANSFORM: ImageTransform = {
 export const JOB_VIEW_HERO_TRANSFORM: ImageTransform = {
   width: 1600,
   quality: 78,
+  resize: 'contain',
 };
 
 // Swipe-kortet — täcker viewporten (~400px bred på mobil), ~800px räcker för 2× retina.

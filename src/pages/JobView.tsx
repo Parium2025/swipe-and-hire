@@ -113,6 +113,21 @@ const resolveCompanyLogoUrl = (raw: string | null | undefined) => {
   }
 };
 
+const resolveCompanyLogoFallbackUrl = (raw: string | null | undefined) => {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  try {
+    const path = trimmed.startsWith('http')
+      ? new URL(trimmed).pathname.match(/\/storage\/v1\/(?:object|render\/image)\/(?:public|sign)\/company-logos\/(.+)$/)?.[1]
+      : trimmed;
+    if (!path) return trimmed;
+    return supabase.storage.from('company-logos').getPublicUrl(decodeURIComponent(path)).data.publicUrl || trimmed;
+  } catch {
+    return trimmed;
+  }
+};
+
 const isStableImageUrl = (url: unknown): url is string =>
   typeof url === 'string' && url.trim().length > 0 && !url.startsWith('blob:');
 
@@ -221,6 +236,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const heroFocusPosition = isDesktopViewport
     ? (job?.image_focus_position_desktop || job?.image_focus_position || 'center')
     : (job?.image_focus_position || job?.image_focus_position_desktop || 'center');
+  const stableCompanyLogoFallbackUrl = resolveCompanyLogoFallbackUrl(job?.company_logo_url || job?.profiles?.company_logo_url);
 
   // When viewport crosses the desktop breakpoint, swap to the matching image variant
   useEffect(() => {
@@ -811,7 +827,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       fetchPriority="high"
                       decoding="sync"
                       draggable={false}
-                      onError={() => setCompanyLogoUrl(null)}
+                      onError={() => {
+                        if (stableCompanyLogoFallbackUrl && companyLogoUrl !== stableCompanyLogoFallbackUrl) {
+                          setCompanyLogoUrl(stableCompanyLogoFallbackUrl);
+                        }
+                      }}
                     />
                   ) : (
                     <span className="text-white font-semibold text-sm">

@@ -50,9 +50,10 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, aspe
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging || !containerRef.current) return;
     const containerHeight = containerRef.current.clientHeight;
-    // Sensitivity: moving pointer down → image shifts up → higher % (shows lower part)
+    // Direct manipulation: dragging the image up should move the bitmap up in
+    // the final crop, which in CSS object-position means a higher percentage.
     const deltaY = e.clientY - startY.current;
-    const deltaPct = (deltaY / containerHeight) * 100;
+    const deltaPct = (-deltaY / containerHeight) * 100;
     onFocusChange(clamp(startPercent.current + deltaPct));
   }, [isDragging, onFocusChange]);
 
