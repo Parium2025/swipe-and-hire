@@ -51,6 +51,12 @@ export default function Messages() {
       }
     }
   }, [isLoading, showContentFade]);
+
+  // Cacha antalet så skeleton kan rendera exakt lika många rader nästa cold-load.
+  useEffect(() => {
+    if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.messages, conversations.length);
+  }, [isLoading, conversations.length]);
+
   const { deleteConversation, isDeleting } = useDeleteConversation();
   const { hasTeam } = useTeamMembers();
   const [searchParams, setSearchParams] = useSearchParams();
