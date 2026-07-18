@@ -113,7 +113,7 @@ export const JobViewHero = memo(function JobViewHero({
   }
 
   return (
-    <div className="relative w-full aspect-[2/1] overflow-hidden rounded-lg">
+    <div className="relative w-full overflow-hidden rounded-lg" style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }}>
       <ResilientImage
         src={imageUrl}
         alt={`${title} hos ${companyName}`}
