@@ -12,6 +12,7 @@ import { toObjectPosition } from '@/lib/jobImageFocus';
 interface JobViewHeroProps {
   title: string;
   imageUrl: string | null;
+  fallbackImageUrl?: string | null;
   companyName: string;
   location?: string;
   employmentType?: string;
@@ -73,6 +74,7 @@ function getSalaryText(salaryMin?: number | null, salaryMax?: number | null, sal
 export const JobViewHero = memo(function JobViewHero({
   title,
   imageUrl,
+  fallbackImageUrl,
   companyName,
   location,
   employmentType,
@@ -116,13 +118,14 @@ export const JobViewHero = memo(function JobViewHero({
     <div className="relative w-full overflow-hidden rounded-lg" style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }}>
       <ResilientImage
         src={imageUrl}
+        fallbackSrcs={[fallbackImageUrl]}
         alt={`${title} hos ${companyName}`}
         className="w-full h-full object-cover"
         style={{ objectPosition }}
         loading="eager"
         fetchPriority="high"
         decoding="sync"
-        fallbackClassName="w-full h-full"
+        fallbackClassName="w-full h-full flex flex-col items-center justify-center bg-white/5 text-white text-xs gap-1 p-2 text-center"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
       {overlayContent}
