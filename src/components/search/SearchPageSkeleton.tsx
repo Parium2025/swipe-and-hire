@@ -103,7 +103,7 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
                   {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
-                  <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: '2 / 1' }} />
+                  <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
                   {/* Kortkropp */}
                   <div className="p-4 space-y-3">
                     {/* Logo + företagsnamn — enhetlig ton (ingen ring) */}
