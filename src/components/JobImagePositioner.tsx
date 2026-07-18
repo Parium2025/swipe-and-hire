@@ -16,13 +16,22 @@ interface JobImagePositionerProps {
   imageUrl: string;
   focusPercent: number;
   onFocusChange: (percent: number) => void;
+  /**
+   * Optional CSS aspect-ratio (e.g. "3 / 1") to match the target surface.
+   * When set, overrides the default mobile-card height so the preview crops
+   * exactly like the destination (e.g. desktop JobView hero banner).
+   */
+  aspectRatio?: string;
+  /** Optional label shown under the positioner. */
+  hintLabel?: string;
 }
 
 /**
- * A card-shaped preview where the user can drag the image vertically
- * to set the exact crop position. Stores a 0-100 percentage value.
+ * A preview where the user can drag the image vertically to set the exact
+ * crop position. Stores a 0-100 percentage value. Aspect ratio can be
+ * overridden to match the destination surface (mobile card vs desktop hero).
  */
-export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: JobImagePositionerProps) {
+export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, aspectRatio, hintLabel }: JobImagePositionerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
@@ -61,8 +70,10 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
           isDragging ? 'border-white/60' : 'border-white/20'
         }`}
         style={{
-          /* Match job card media proportions from CSS variables */
-          height: 'var(--job-card-mobile-media-height, 13rem)',
+          /* Match target surface: desktop hero (aspectRatio) or mobile card height. */
+          ...(aspectRatio
+            ? { aspectRatio }
+            : { height: 'var(--job-card-mobile-media-height, 13rem)' }),
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none',
         }}
@@ -99,7 +110,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
         />
       </div>
       <p className="text-white text-[10px] text-center">
-        Så här kommer bilden att klippas i jobbkorten
+        {hintLabel ?? 'Så här kommer bilden att klippas i jobbkorten'}
       </p>
     </div>
   );
