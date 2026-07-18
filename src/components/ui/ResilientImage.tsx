@@ -55,6 +55,13 @@ export function ResilientImage({
     setFailed(false);
   }, []);
 
+  const handleRetryKeyDown = useCallback((e: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleManualRetry();
+    }
+  }, [handleManualRetry]);
+
   if (!src) {
     // Empty src — render nothing visible (parent controls placeholder)
     return null;
@@ -71,20 +78,23 @@ export function ResilientImage({
         aria-label={alt || "Bilden kunde inte laddas"}
       >
         <span className="leading-tight">Bilden kunde inte laddas</span>
-        <button
-          type="button"
+        <span
+          role="button"
+          tabIndex={0}
           onClick={handleManualRetry}
+          onKeyDown={handleRetryKeyDown}
           className="text-white/90 underline underline-offset-2 hover:text-white transition-colors"
         >
           Försök igen
-        </button>
+        </span>
       </div>
     );
   }
 
   // Cache-bust on retry attempts only (not initial load — keeps cache benefits)
+  // Never append query params to blob: URLs; reload the source through imageCache instead.
   const finalSrc =
-    attempt > 0
+    attempt > 0 && !src.startsWith('blob:')
       ? `${src}${src.includes("?") ? "&" : "?"}_r=${attempt}`
       : src;
 
