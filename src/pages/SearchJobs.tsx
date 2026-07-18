@@ -574,9 +574,7 @@ const SearchJobs = memo(() => {
       seedJobsFromSearch(jobs);
       // Cacha senaste resultatantal så JobListSkeleton kan rendera exakt
       // rätt antal kort vid nästa cold-load — inga fejkade 6 kort.
-      try {
-        sessionStorage.setItem('parium:searchJobs:lastCount', String(jobs.length));
-      } catch { /* noop */ }
+      writeCachedCount(SKELETON_COUNT_KEYS.searchJobs, jobs.length);
     }
   }, [jobs, seedJobsFromSearch]);
 
