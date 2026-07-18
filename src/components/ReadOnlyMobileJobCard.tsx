@@ -215,13 +215,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
               src={displayUrl}
               alt={`${job.title} hos ${companyName}`}
               className="w-full h-full object-cover"
-              style={{ objectPosition: `center ${(() => {
-                const v = job.image_focus_position;
-                if (!v || v === 'center') return '50%';
-                if (v === 'top') return '20%';
-                if (v === 'bottom') return '80%';
-                return `${v}%`;
-              })()}` }}
+              style={{ objectPosition: toObjectPosition(job.image_focus_position) }}
               loading={cardIndex < 6 ? 'eager' : 'lazy'}
               onError={handleImageError}
               fallbackClassName="w-full h-full"
