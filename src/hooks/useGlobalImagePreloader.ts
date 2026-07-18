@@ -120,7 +120,7 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
 
               const urls: string[] = [];
               for (const job of jobs) {
-                const v = (job as any).updated_at;
+                const v = (job as any).image_updated_at ?? (job as any).updated_at;
                 if (job.job_image_url && !job.job_image_url.startsWith('http')) {
                   const card = appendVersionToUrl(getPublicUrlSafe('job-images', job.job_image_url, JOB_CARD_TRANSFORM), v);
                   const hero = appendVersionToUrl(getPublicUrlSafe('job-images', job.job_image_url, JOB_VIEW_HERO_TRANSFORM), v);
