@@ -21,6 +21,8 @@ import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { TruncatedText } from '@/components/TruncatedText';
+import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
+import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 
 type SortOption = 'newest' | 'oldest';
