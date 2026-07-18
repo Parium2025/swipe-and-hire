@@ -780,6 +780,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               createdAt={job.created_at}
               expiresAt={job.expires_at}
               overlayTextColor={job.overlay_text_color}
+              imageFocusPosition={heroFocusPosition}
             />
 
             {/* Company profile + title - matchar arbetsgivar-preview */}
