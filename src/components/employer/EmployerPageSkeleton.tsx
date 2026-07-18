@@ -1,6 +1,7 @@
 import { memo, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 /**
  * Full-screen skeleton overlays for the employer side, mirroring
