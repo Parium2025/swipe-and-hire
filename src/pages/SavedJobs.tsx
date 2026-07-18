@@ -389,9 +389,7 @@ const SavedJobs = () => {
       {activeTab === 'skipped' && (
         <>
           {isLoadingSkipped ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 text-white animate-spin" />
-            </div>
+            <JobCardGridSkeleton count={readCachedCount(SKELETON_COUNT_KEYS.skippedJobs, 3)} />
           ) : filteredSkippedJobs.length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
