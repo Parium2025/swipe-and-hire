@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Users, Building2, MapPin, Timer, Gift, Briefcase, Banknote } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
+import { getImageObjectPosition } from '@/components/swipe/jobSlide/utils';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
