@@ -36,6 +36,33 @@ export function requireServiceRole(req: Request, corsHeaders: Record<string, str
   return unauthorized(403, 'Forbidden - service role required', corsHeaders)
 }
 
+async function isStoredCronSecret(token: string): Promise<boolean> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!supabaseUrl || !serviceKey || token.length < 32) return false
+
+  try {
+    const client = createClient(supabaseUrl, serviceKey)
+    const { data, error } = await client.rpc('verify_cron_secret', { _token: token })
+    return !error && data === true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Cron / internal only. Accepts the literal service-role key or the stored
+ * pg_cron secret used by database-scheduled jobs.
+ */
+export async function requireServiceRoleOrCronSecret(req: Request, corsHeaders: Record<string, string> = {}): Promise<Response | null> {
+  const token = extractBearer(req)
+  if (!token) return unauthorized(401, 'Unauthorized', corsHeaders)
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (serviceKey && token === serviceKey) return null
+  if (await isStoredCronSecret(token)) return null
+  return unauthorized(403, 'Forbidden - service role required', corsHeaders)
+}
+
 export interface VerifiedCaller {
   /** True when the request came in with the literal service-role key. */
   isServiceRole: boolean
@@ -56,6 +83,10 @@ export async function verifyCaller(req: Request, corsHeaders: Record<string, str
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (serviceKey && token === serviceKey) {
+    return { isServiceRole: true, userId: null, email: null }
+  }
+
+  if (await isStoredCronSecret(token)) {
     return { isServiceRole: true, userId: null, email: null }
   }
 

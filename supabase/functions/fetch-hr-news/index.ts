@@ -726,7 +726,6 @@ serve(async (req) => {
     const targetSlots = 4;
 
     // Check if we're in crisis mode (need to allow more per source)
-    const currentSourceCounts = countBySource(postCleanupRss);
     const availableNewWithLimit = filterBySourceLimit(newRssItems, postCleanupRss, MAX_PER_SOURCE_NORMAL);
     
     console.log(`Available new items with max 2/source limit: ${availableNewWithLimit.length}`);
@@ -740,7 +739,15 @@ serve(async (req) => {
     }
 
     const maxPerSource = needsCrisisMode ? MAX_PER_SOURCE_CRISIS : MAX_PER_SOURCE_NORMAL;
-    const eligibleNewItems = filterBySourceLimit(newRssItems, postCleanupRss, maxPerSource);
+    const staleRssIds = postCleanupRss
+      .filter(i => i.published_at && new Date(i.published_at) < new Date(Date.now() - 24 * 60 * 60 * 1000))
+      .map(i => i.id);
+
+    const eligibleNewItems = filterBySourceLimit(
+      newRssItems,
+      postCleanupRss.filter(i => !staleRssIds.includes(i.id)),
+      maxPerSource,
+    );
 
     console.log(`Eligible new items with max ${maxPerSource}/source: ${eligibleNewItems.length}`);
 
@@ -797,6 +804,15 @@ serve(async (req) => {
         
         const idsToDelete: string[] = [];
         let remaining = excess;
+
+        // STEG 0: Ta bort gamla RSS-artiklar först, så nya artiklar faktiskt syns
+        const staleToDelete = rssItems
+          .filter(i => staleRssIds.includes(i.id))
+          .slice(-Math.min(remaining, staleRssIds.length));
+        for (const item of staleToDelete) {
+          idsToDelete.push(item.id);
+          remaining--;
+        }
         
         // STEG 1: Ta bort AI-artiklar först (från äldst till nyast)
         const aiToDelete = aiItems.slice(-Math.min(remaining, aiItems.length));
@@ -807,7 +823,9 @@ serve(async (req) => {
         
         // STEG 2: Om det fortfarande behövs plats, ta bort äldsta RSS
         if (remaining > 0) {
-          const rssToDelete = rssItems.slice(-remaining);
+          const rssToDelete = rssItems
+            .filter(i => !idsToDelete.includes(i.id))
+            .slice(-remaining);
           for (const item of rssToDelete) {
             idsToDelete.push(item.id);
           }

@@ -21,6 +21,7 @@ export interface CareerTipItem {
 
 // LocalStorage cache for instant load - syncs based on cron schedule
 const CACHE_KEY = 'parium_career_tips_cache';
+const MAX_VISIBLE_TIP_AGE_MS = 12 * 60 * 60 * 1000;
 
 // Cron runs at 06, 11, 18, 23 UTC — calculate ms until next slot
 function msUntilNextCronSlot(): number {
@@ -73,6 +74,16 @@ function writeCache(items: CareerTipItem[]): void {
   }
 }
 
+function hasStaleVisibleTips(items: CareerTipItem[] | null | undefined): boolean {
+  if (!items?.length) return true;
+  const newest = items.reduce((latest, item) => {
+    if (!item.published_at) return latest;
+    const time = new Date(item.published_at).getTime();
+    return Number.isNaN(time) ? latest : Math.max(latest, time);
+  }, 0);
+  return newest === 0 || Date.now() - newest > MAX_VISIBLE_TIP_AGE_MS;
+}
+
 /**
  * BULLETPROOF CAREER TIPS FETCHER
  * 
@@ -91,16 +102,16 @@ const fetchRecentCareerTips = async (): Promise<CareerTipItem[]> => {
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(4);
 
-  // Happy path: we have tips (1-4 is fine, we show what's available)
-  if (!error && allTips && allTips.length > 0) {
+  // Happy path: we have fresh tips (1-4 is fine, we show what's available)
+  if (!error && allTips && allTips.length > 0 && !hasStaleVisibleTips(allTips)) {
     // Update cache with fresh data
     writeCache(allTips);
     return allTips;
   }
 
-  // Not enough tips - trigger backend to fetch more
+  // Not enough/fresh tips - trigger backend to fetch more
   const currentCount = allTips?.length || 0;
-  console.log(`[Career Tips] Only ${currentCount} tips, triggering backend refresh...`);
+  console.log(`[Career Tips] ${currentCount} stale/missing tips, triggering backend refresh...`);
 
   try {
     const { error: fnError } = await supabase.functions.invoke('fetch-career-tips', {

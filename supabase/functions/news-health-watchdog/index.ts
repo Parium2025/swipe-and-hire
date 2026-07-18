@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { requireServiceRole } from "../_shared/service-auth.ts";
+import { requireServiceRoleOrCronSecret } from "../_shared/service-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -138,7 +138,7 @@ async function getSourceHealth(supabase: any, sourceType: "hr_news" | "career_ti
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const authResp = requireServiceRole(req, corsHeaders);
+  const authResp = await requireServiceRoleOrCronSecret(req, corsHeaders);
   if (authResp) return authResp;
 
   try {
