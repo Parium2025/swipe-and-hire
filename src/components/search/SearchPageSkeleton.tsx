@@ -52,7 +52,27 @@ const SkeletonChrome = memo(function SkeletonChrome() {
   );
 });
 
+/**
+ * Läs cachead resultatlängd från senaste sökning så skeleton
+ * rendrar exakt rätt antal kort (t.ex. 2 om användaren hade 2 jobb).
+ * Fallback: 6 kort — vår gamla "har inte laddat än"-default.
+ * Clamp: 1–9 för att aldrig visa tomt eller överväldigande många.
+ */
+function readCachedJobCount(): number {
+  if (typeof window === 'undefined') return 6;
+  try {
+    const raw = sessionStorage.getItem('parium:searchJobs:lastCount');
+    if (!raw) return 6;
+    const n = parseInt(raw, 10);
+    if (!Number.isFinite(n) || n <= 0) return 6;
+    return Math.min(9, Math.max(1, n));
+  } catch {
+    return 6;
+  }
+}
+
 export const JobListSkeleton = memo(function JobListSkeleton() {
+  const cardCount = readCachedJobCount();
   return (
     <FullscreenSkeletonPortal>
       <motion.div
@@ -100,17 +120,18 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
 
           <div className="flex-1 overflow-hidden">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3, 4, 5, 6].map(i => (
+              {Array.from({ length: cardCount }).map((_, i) => (
                 <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
                   {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
                   <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
-                  {/* Kortkropp */}
-                  <div className="p-4 space-y-3">
-                    {/* Logo + företagsnamn — enhetlig ton (ingen ring) */}
-                    <div className="flex justify-center -mt-8 relative z-10">
-                      <div className={`h-12 w-12 rounded-full ${SKELETON_SHAPE}`} />
+                  {/* Kortkropp — matchar ReadOnlyMobileJobCard exakt:
+                      logo UNDER bilden (pt-1), aldrig -mt-8/överhäng. */}
+                  <div className="p-4 space-y-2.5">
+                    {/* Logo (w-14 h-14 som riktiga kortet) */}
+                    <div className="flex justify-center pt-1">
+                      <div className={`h-14 w-14 rounded-full ${SKELETON_SHAPE}`} />
                     </div>
-                    {/* Titel */}
+                    {/* Titel — 2 rader centrerad */}
                     <div className="space-y-2 pt-1">
                       <div className={`h-5 w-4/5 mx-auto rounded ${SKELETON_SHAPE}`} />
                       <div className={`h-5 w-3/5 mx-auto rounded ${SKELETON_SHAPE}`} />
@@ -123,10 +144,6 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
                     <div className="flex flex-wrap justify-center gap-2">
                       <div className={`h-6 w-28 rounded-full ${SKELETON_SHAPE}`} />
                       <div className={`h-6 w-24 rounded-full ${SKELETON_SHAPE}`} />
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      <div className={`h-6 w-20 rounded-full ${SKELETON_SHAPE}`} />
-                      <div className={`h-6 w-16 rounded-full ${SKELETON_SHAPE}`} />
                     </div>
                   </div>
                 </div>
