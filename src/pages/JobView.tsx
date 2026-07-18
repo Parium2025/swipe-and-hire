@@ -827,25 +827,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               </p>
             </div>
 
-            {/* Requirements */}
-            {job.requirements && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
-                <h2 className="text-section-title mb-3">Krav och kvalifikationer</h2>
-                <p className="text-body whitespace-pre-wrap break-words overflow-hidden">
-                  {job.requirements}
-                </p>
-              </div>
-            )}
-
-            {/* Application instructions */}
-            {job.application_instructions && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
-                <h2 className="text-section-title mb-3">Så ansöker du</h2>
-                <p className="text-body whitespace-pre-wrap break-words overflow-hidden">
-                  {job.application_instructions}
-                </p>
-              </div>
-            )}
 
             {/* Details */}
              <JobViewDetails
