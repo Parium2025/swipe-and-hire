@@ -113,6 +113,9 @@ const resolveCompanyLogoUrl = (raw: string | null | undefined) => {
   }
 };
 
+const isStableImageUrl = (url: unknown): url is string =>
+  typeof url === 'string' && url.trim().length > 0 && !url.startsWith('blob:');
+
 interface JobViewProps {
   /** When true, render as a fixed-position overlay on top of an existing route
    *  so the background page (e.g. SearchJobs) is preserved underneath. */
@@ -185,7 +188,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
-    if (typeof navigationImageState.initialHeroImageUrl === 'string' && navigationImageState.initialHeroImageUrl) {
+    if (isStableImageUrl(navigationImageState.initialHeroImageUrl)) {
       return navigationImageState.initialHeroImageUrl;
     }
     const isDesktopInit = typeof window !== 'undefined' && window.innerWidth >= 1024;
@@ -194,15 +197,15 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       : (initialJob?.job_image_url || initialJob?.job_image_desktop_url);
     const resolved = appendVersionToUrl(resolveJobImageUrl(rawImg), (initialJob as any)?.image_updated_at ?? (initialJob as any)?.updated_at);
     if (!resolved) return null;
-    return imageCache.getCachedUrl(resolved) || resolved;
+    return resolved;
   });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
-    if (typeof navigationImageState.initialCompanyLogoUrl === 'string' && navigationImageState.initialCompanyLogoUrl) {
+    if (isStableImageUrl(navigationImageState.initialCompanyLogoUrl)) {
       return navigationImageState.initialCompanyLogoUrl;
     }
     const rawLogo = initialJob?.company_logo_url || initialJob?.profiles?.company_logo_url;
     const resolvedLogo = resolveCompanyLogoUrl(rawLogo);
-    return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
+    return resolvedLogo;
   });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
   const [isDesktopViewport, setIsDesktopViewport] = useState<boolean>(() =>
@@ -228,9 +231,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     if (!rawImg) return;
     const resolved = appendVersionToUrl(resolveJobImageUrl(rawImg), (job as any)?.image_updated_at ?? (job as any)?.updated_at);
     if (!resolved) return;
-    const cachedBlob = imageCache.getCachedUrl(resolved);
-    setImageUrl(cachedBlob || resolved);
-    if (!cachedBlob) imageCache.loadImage(resolved).catch(() => {});
+    setImageUrl(resolved);
+    imageCache.loadImage(resolved).catch(() => {});
   }, [isDesktopViewport, job?.job_image_url, job?.job_image_desktop_url, (job as any)?.image_updated_at, (job as any)?.updated_at]);
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -339,14 +341,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       if (rawImageUrl) {
         const resolved = appendVersionToUrl(resolveJobImageUrl(rawImageUrl), (data as any)?.image_updated_at ?? (data as any)?.updated_at);
         if (resolved) {
-          const cachedBlob = imageCache.getCachedUrl(resolved);
           // Always sync to the latest persisted image version/focus source.
           // A stale URL from card navigation can otherwise survive reloads/edits.
-          setImageUrl(cachedBlob || resolved);
-          if (!cachedBlob) {
-            // Warm the cache in background — do NOT swap src after; let the browser keep its loaded bitmap
-            imageCache.loadImage(resolved).catch(() => {});
-          }
+          setImageUrl(resolved);
+          // Warm the cache in background — do NOT swap src after; let the browser keep its loaded bitmap
+          imageCache.loadImage(resolved).catch(() => {});
         } else if (rawImageUrl) {
           convertToSignedUrl(rawImageUrl, 'job-applications', 3600).then(signed => {
             if (signed) {
@@ -363,13 +362,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         : null;
       if (rawLogo) {
         const resolvedLogo = resolveCompanyLogoUrl(rawLogo) || rawLogo;
-        const cachedLogoBlob = imageCache.getCachedUrl(resolvedLogo);
-        // Only set src if not yet rendered — prevents the logo from flashing/re-fetching on revisit
-        setCompanyLogoUrl(prev => prev || cachedLogoBlob || resolvedLogo);
-        if (!cachedLogoBlob) {
-          // Warm cache silently; do NOT swap to blob URL afterwards (would trigger <img> reload)
-          imageCache.loadImage(resolvedLogo).catch(() => {});
-        }
+        // Use the stable storage URL in DOM; blob URLs can be revoked by the browser and disappear.
+        setCompanyLogoUrl(resolvedLogo);
+        // Warm cache silently; do NOT swap to blob URL afterwards (would trigger <img> reload)
+        imageCache.loadImage(resolvedLogo).catch(() => {});
       }
     } catch (error: any) {
       console.error('JobView fetch error:', error);

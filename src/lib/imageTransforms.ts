@@ -23,15 +23,12 @@ export const JOB_CARD_TRANSFORM: ImageTransform = {
   resize: 'cover',
 };
 
-// Hero/detaljsida — behåll en neutral 4:3-master med gott om vertikal bildyta,
-// så CSS object-position kan applicera arbetsgivarens fokuspunkt exakt i den
-// breda JobView-bannern. Den tidigare 1200×800-cropen kapade bort bildyta före
-// image_focus_position_desktop hann användas.
+// Hero/detaljsida — skala bara bredden, beskär aldrig server-side.
+// All beskärning måste ske i CSS med arbetsgivarens sparade fokuspunkt;
+// annars kan uppladdnings-preview, kort och JobView aldrig bli pixel-paritet.
 export const JOB_VIEW_HERO_TRANSFORM: ImageTransform = {
   width: 1600,
-  height: 1200,
   quality: 78,
-  resize: 'cover',
 };
 
 // Swipe-kortet — täcker viewporten (~400px bred på mobil), ~800px räcker för 2× retina.
