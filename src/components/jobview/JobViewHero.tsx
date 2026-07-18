@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Users, Building2, MapPin, Timer, Gift, Briefcase, Banknote } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -97,6 +97,10 @@ export const JobViewHero = memo(function JobViewHero({
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(overlayTextColor), [overlayTextColor]);
   const objectPosition = useMemo(() => getImageObjectPosition(imageFocusPosition ?? undefined), [imageFocusPosition]);
   const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [imageUrl]);
 
   // Ren bild/gradient utan overlay-titel — titeln flyttad till egen sektion
   // under hero för att matcha arbetsgivar-preview och undvika text ovanpå bild.
