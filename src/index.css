@@ -260,6 +260,9 @@ All colors MUST be HSL.
       --job-card-mobile-content-padding: clamp(0.95rem, 0.88rem + 0.35vw, 1.125rem);
       --job-card-desktop-min-height: clamp(8.5rem, 8.15rem + 0.9vw, 9.5rem);
       --job-card-grid-max-width: 100%;
+      /* Delat aspect-ratio-token för jobbmedia (kort, positionerare, hero).
+         Håll i sync med `JOB_MEDIA_ASPECT` i `src/lib/jobImageFocus.ts`. */
+      --job-media-aspect: 2 / 1;
 
     /* Pure colors tokens */
     --pure-white: 0 0% 100%;
