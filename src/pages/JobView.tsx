@@ -205,6 +205,20 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
   });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState<boolean>(() =>
+    typeof window !== 'undefined' && window.innerWidth >= 1024
+  );
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const onChange = () => setIsDesktopViewport(mq.matches);
+    mq.addEventListener?.('change', onChange);
+    return () => mq.removeEventListener?.('change', onChange);
+  }, []);
+  const heroFocusPosition = isDesktopViewport
+    ? (job?.image_focus_position_desktop || job?.image_focus_position || 'center')
+    : (job?.image_focus_position || job?.image_focus_position_desktop || 'center');
+
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close
   const [pullY, setPullY] = useState(0);
