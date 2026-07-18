@@ -28,7 +28,7 @@ export function ResilientImage({
   const [attempt, setAttempt] = useState(0);
   const [sourceIndex, setSourceIndex] = useState(0);
   const [failed, setFailed] = useState(false);
-  const fallbackSrcSignature = fallbackSrcs.filter(Boolean).join("|");
+  const fallbackSrcSignature = useMemo(() => fallbackSrcs.filter(Boolean).join("|"), [fallbackSrcs]);
   const sources = useMemo(
     () => [src, ...fallbackSrcs].filter((value, index, array): value is string => {
       return typeof value === "string" && value.trim().length > 0 && array.indexOf(value) === index;
