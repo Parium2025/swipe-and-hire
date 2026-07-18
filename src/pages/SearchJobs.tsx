@@ -79,6 +79,7 @@ interface Job {
   job_image_url?: string;
   job_image_desktop_url?: string;
   image_focus_position?: string;
+  image_focus_position_desktop?: string;
   employer_id?: string;
   employer_profile?: {
     first_name: string;
