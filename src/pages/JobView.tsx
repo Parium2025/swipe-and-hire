@@ -427,6 +427,21 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
       // Double-check role from database to prevent race conditions
       if (user?.id) {
+        const { data: existingApplication } = await supabase
+          .from('job_applications')
+          .select('id')
+          .eq('job_id', jobId!)
+          .eq('applicant_id', user.id)
+          .maybeSingle();
+
+        if (existingApplication) {
+          setHasAlreadyApplied(true);
+          setApplicationStatusChecked(true);
+          toast({ title: 'Redan sökt', description: 'Du har redan skickat en ansökan för den här tjänsten.' });
+          setApplying(false);
+          return;
+        }
+
         const { data: roleCheck } = await supabase
           .from('user_roles')
           .select('role')
@@ -504,6 +519,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         description: 'Din ansökan har skickats till arbetsgivaren',
       });
 
+      setHasAlreadyApplied(true);
+      setApplicationStatusChecked(true);
       try { localStorage.removeItem(`job-answers-draft-${jobId}`); } catch {}
       setTimeout(() => { navigate('/search-jobs'); }, 1500);
     } catch (error: any) {

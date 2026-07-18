@@ -319,6 +319,7 @@ const MyApplications = () => {
                     duration_amount: (job as any).duration_amount,
                     duration_unit: (job as any).duration_unit,
                   }}
+                  hasApplied
                   onDeleteClick={handleDeleteClick}
                   statusBadge={statusBadgeEl}
                 />
