@@ -104,7 +104,7 @@ export const JobViewHero = memo(function JobViewHero({
 
   if (!imageUrl) {
     return (
-      <div className="relative w-full aspect-[2/1] overflow-hidden rounded-lg">
+      <div className="relative w-full overflow-hidden rounded-lg" style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }}>
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         {overlayContent}
