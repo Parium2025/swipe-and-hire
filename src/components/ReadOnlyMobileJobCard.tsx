@@ -282,6 +282,19 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             </Badge>
           </div>
         )}
+        {/* Time-remaining badge — top-left when the slot is free (snabbare vy).
+            När "Redan sökt"/statusBadge tar top-left visas tiden i taggraden nedan istället. */}
+        {!statusBadge && !hasApplied && (
+          <div className="absolute top-2.5 left-2.5">
+            <Badge
+              variant="glass"
+              className={`text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : 'bg-black/60'}`}
+            >
+              <Timer className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="leading-snug">{isExpired ? 'Utgången' : `${timeText} kvar`}</span>
+            </Badge>
+          </div>
+        )}
       </div>
 
       {/* Content */}
