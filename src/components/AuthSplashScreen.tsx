@@ -179,15 +179,11 @@ export function AuthSplashScreen() {
             fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
           }}
         >
-          {(() => {
-            try {
-              return localStorage.getItem('parium-last-role') === 'employer'
-                ? 'Bygg ditt drömteam här'
-                : 'Din karriärresa börjar här';
-            } catch {
-              return 'Din karriärresa börjar här';
-            }
-          })()}
+          {lastRole === 'employer'
+            ? 'Bygg ditt drömteam här'
+            : lastRole === 'jobseeker'
+              ? 'Din karriärresa börjar här'
+              : 'Välkommen till Parium'}
         </p>
         
         {/* Pulserande prickar - exakt samma som index.html */}
