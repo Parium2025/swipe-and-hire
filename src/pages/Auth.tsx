@@ -342,7 +342,7 @@ const Auth = () => {
       if (!emailForReset) return;
       console.log('🔄 AUTH.TSX - SENDING RESET från Auth.tsx för:', emailForReset);
       const { error } = await supabase.functions.invoke('send-reset-password', {
-        body: { email: emailForReset }
+        body: { email: emailForReset, origin: window.location.origin }
       });
       console.log('📩 AUTH.TSX - RESET RESPONSE:', { error });
       if (error) throw error;
