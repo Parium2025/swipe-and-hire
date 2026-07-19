@@ -42,8 +42,12 @@ export function AuthSplashScreen() {
       } catch {}
     };
     read();
+    window.addEventListener('parium-auth-splash-role', read);
     const id = window.setInterval(read, 150);
-    return () => window.clearInterval(id);
+    return () => {
+      window.removeEventListener('parium-auth-splash-role', read);
+      window.clearInterval(id);
+    };
   }, [isVisible]);
   
   useEffect(() => {
@@ -118,6 +122,7 @@ export function AuthSplashScreen() {
   if (!isVisible) return null;
   
   // CSS clamp() handles all sizing fluidly — no JS breakpoint logic needed
+  const displayRole = lastRole === 'employer' ? 'employer' : 'job_seeker';
   
   return (
     <div
@@ -177,14 +182,12 @@ export function AuthSplashScreen() {
             marginBottom: '40px',
             textShadow: '0 2px 4px rgba(0,0,0,0.3)',
             fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-            visibility: lastRole ? 'visible' : 'hidden',
+            visibility: 'visible',
           }}
         >
-          {lastRole === 'employer'
+          {displayRole === 'employer'
             ? 'Bygg ditt drömteam här'
-            : lastRole === 'job_seeker'
-              ? 'Din karriärresa börjar här'
-              : '\u00A0'}
+            : 'Din karriärresa börjar här'}
         </p>
         
         {/* Pulserande prickar - exakt samma som index.html */}

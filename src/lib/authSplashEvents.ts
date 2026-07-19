@@ -6,9 +6,60 @@
  */
 
 type SplashListener = (visible: boolean) => void;
+type AuthSplashRole = 'job_seeker' | 'employer';
 
 const listeners = new Set<SplashListener>();
 let currentlyVisible = false;
+
+export const normalizeAuthSplashRole = (role?: string | null): AuthSplashRole | null => {
+  if (role === 'employer') return 'employer';
+  if (role === 'job_seeker') return 'job_seeker';
+  return null;
+};
+
+const normalizeEmail = (email?: string | null) => email?.trim().toLowerCase() || null;
+
+const hashEmailKey = (email: string) => {
+  let hash = 5381;
+  for (let i = 0; i < email.length; i += 1) {
+    hash = ((hash << 5) + hash) ^ email.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(36);
+};
+
+const roleByEmailKey = (email: string) => `parium-role-by-email:${hashEmailKey(email)}`;
+
+export const getCachedAuthRoleForEmail = (email?: string | null): AuthSplashRole | null => {
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail || typeof window === 'undefined') return null;
+  try {
+    return normalizeAuthSplashRole(window.localStorage.getItem(roleByEmailKey(normalizedEmail)));
+  } catch {
+    return null;
+  }
+};
+
+export const cacheAuthRoleForEmail = (email?: string | null, role?: string | null) => {
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedRole = normalizeAuthSplashRole(role);
+  if (!normalizedEmail || !normalizedRole || typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(roleByEmailKey(normalizedEmail), normalizedRole);
+  } catch {
+    /* ignore */
+  }
+};
+
+const persistSplashRole = (role?: string | null) => {
+  const normalized = normalizeAuthSplashRole(role);
+  if (!normalized || typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem('parium-last-role', normalized);
+    window.dispatchEvent(new CustomEvent('parium-auth-splash-role', { detail: normalized }));
+  } catch {
+    /* ignore */
+  }
+};
 
 export const authSplashEvents = {
   /**
@@ -24,7 +75,8 @@ export const authSplashEvents = {
   /**
    * Visa splash-skalet (anropas innan navigering till /auth)
    */
-  show() {
+  show(role?: string | null) {
+    persistSplashRole(role);
     if (currentlyVisible) return;
     currentlyVisible = true;
     listeners.forEach(l => l(true));
