@@ -1,4 +1,5 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useLocation } from 'react-router-dom';
 import { authSplashEvents } from '@/lib/authSplashEvents';
 
 import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
@@ -13,7 +14,7 @@ const MINIMUM_DISPLAY_MS = 2000;
  * så att fade-in/out blir pixel-perfekt oavsett entry-point.
  */
 export function AuthSplashScreen() {
-  
+  const location = useLocation();
   
   // Prenumerera på splash-events
   const isTriggered = useSyncExternalStore(
@@ -28,23 +29,45 @@ export function AuthSplashScreen() {
   const [dotsFading, setDotsFading] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [lockedRole, setLockedRole] = useState<string | null>(() => authSplashEvents.getRole());
+  const wasTriggeredRef = useRef(false);
+  const isVisibleRef = useRef(false);
+  const cycleStartedAtRef = useRef(0);
+  const cycleStartPathRef = useRef<string | null>(null);
+  const isAuthPath = (path?: string | null) => path === '/auth' || path === '/auth/';
+
+  useEffect(() => {
+    isVisibleRef.current = isVisible;
+  }, [isVisible]);
   
   useEffect(() => {
     if (!isTriggered) {
-      if (isVisible) {
-        // Fade CONTENT only (background stays opaque) so the app beneath
-        // never blinks through a semi-transparent overlay.
-        setIsFadingOut(true);
-        setIsFadingIn(false);
-        const timer = setTimeout(() => {
-          setIsVisible(false);
-          setIsFadingOut(false);
-        }, 260);
-        return () => clearTimeout(timer);
-      }
+      wasTriggeredRef.current = false;
+      if (!isVisibleRef.current) return;
+
+      // Fade CONTENT only (background stays opaque) so the app beneath
+      // never blinks through a semi-transparent overlay.
+      setIsFadingOut(true);
+      setIsFadingIn(false);
+      const timer = setTimeout(() => {
+        isVisibleRef.current = false;
+        setIsVisible(false);
+        setIsFadingOut(false);
+        setDotsFading(false);
+      }, 260);
+      return () => clearTimeout(timer);
+    }
+
+    // Kör init exakt en gång per splash-cykel. Tidigare kördes detta även när
+    // isVisible slog om till true, vilket kunde nollställa opacity/imageLoaded
+    // och skapa den korta blinkningen mitt i animationen.
+    if (wasTriggeredRef.current) {
       return;
     }
-    
+
+    wasTriggeredRef.current = true;
+    cycleStartedAtRef.current = Date.now();
+    cycleStartPathRef.current = typeof window !== 'undefined' ? window.location.pathname : location.pathname;
+
     // Lås taglinen för hela splash-cykeln. Rollen kan uppdateras i bakgrunden
     // under login, men texten får inte byta mitt i animationen och skapa blink.
     setLockedRole(authSplashEvents.getRole());
@@ -53,7 +76,7 @@ export function AuthSplashScreen() {
     setIsFadingIn(false);
     setDotsFading(false);
     setImageLoaded(false);
-  }, [isTriggered, isVisible]);
+  }, [isTriggered, location.pathname]);
   
   // Trigger content fade-in when image is loaded. The shell background itself is
   // opaque immediately so protected/outside pages never flash during logout.
@@ -75,15 +98,33 @@ export function AuthSplashScreen() {
     return () => clearTimeout(t);
   }, [isVisible, imageLoaded]);
   
-  // Auto-hide after minimum display time
+  // Dölj först när själva auth-övergången har landat på nästa route.
+  // Login: startar på /auth → vänta tills vi är utanför /auth.
+  // Logout: startar inuti appen → vänta tills vi är på /auth.
+  // Det gör att varken inloggningsformuläret eller appen bakom hinner blixtra till.
   useEffect(() => {
     if (!isTriggered || !isVisible) return;
-    
-    // Fade dots 0.4s before splash content fades
+
+    const startPath = cycleStartPathRef.current;
+    if (!startPath) return;
+
+    const startedOnAuth = isAuthPath(startPath);
+    const routeHasSettled = startedOnAuth
+      ? !isAuthPath(location.pathname)
+      : isAuthPath(location.pathname);
+
+    if (!routeHasSettled) return;
+
+    const elapsed = Date.now() - cycleStartedAtRef.current;
+    const remainingMinimum = Math.max(MINIMUM_DISPLAY_MS - elapsed, 0);
+    const routePaintBuffer = 140;
+    const dotsDelay = Math.max(remainingMinimum - 400, 0);
+    let finishTimer: ReturnType<typeof setTimeout> | undefined;
+
     const dotsTimer = setTimeout(() => {
       setDotsFading(true);
-    }, MINIMUM_DISPLAY_MS - 400);
-    
+    }, dotsDelay);
+
     const timer = setTimeout(() => {
       setIsFadingIn(false);
       setIsFadingOut(true);
@@ -91,19 +132,21 @@ export function AuthSplashScreen() {
       // Background stays OPAQUE the whole time. When the content is fully
       // invisible we remove the shell in a single frame — no fade of the
       // background layer, so the app beneath never bleeds through.
-      setTimeout(() => {
+      finishTimer = setTimeout(() => {
+        isVisibleRef.current = false;
         setIsVisible(false);
         setIsFadingOut(false);
         setDotsFading(false);
         authSplashEvents.hide();
       }, 300);
-    }, MINIMUM_DISPLAY_MS);
+    }, remainingMinimum + routePaintBuffer);
     
     return () => {
       clearTimeout(dotsTimer);
       clearTimeout(timer);
+      if (finishTimer) clearTimeout(finishTimer);
     };
-  }, [isTriggered, isVisible]);
+  }, [isTriggered, isVisible, location.pathname]);
   
   if (!isVisible) return null;
   
@@ -115,7 +158,7 @@ export function AuthSplashScreen() {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 99999,
+        zIndex: 2147483647,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
