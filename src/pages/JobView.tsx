@@ -265,7 +265,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         user
           ? supabase
               .from('job_applications')
-              .select('id, custom_answers')
+              .select('id, custom_answers, questions_snapshot')
               .eq('job_id', jobId!)
               .eq('applicant_id', user.id)
               .limit(1)
@@ -293,9 +293,19 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         return;
       }
 
-      const questions = (!questionsResult.error && questionsResult.data) ? questionsResult.data as JobQuestion[] : [];
+      const currentQuestions = (!questionsResult.error && questionsResult.data) ? questionsResult.data as JobQuestion[] : [];
       const appliedFromSharedState = navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
       const applied = appliedFromSharedState || !!applicationResult.data;
+
+      // 📸 Snapshot: om användaren redan har sökt visar vi de frusna frågorna
+      // som fanns när de skickade in — inte de aktuella (som kan ha ändrats).
+      const appRow = applicationResult.data as
+        | { id: string; custom_answers?: unknown; questions_snapshot?: unknown }
+        | null;
+      const snapshot = appRow?.questions_snapshot;
+      const questions = (applied && Array.isArray(snapshot) && snapshot.length > 0)
+        ? (snapshot as JobQuestion[])
+        : currentQuestions;
 
       if (jobId) {
         _jobCache.set(jobId, { job: data, questions, applied });
@@ -307,8 +317,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       setApplicationStatusChecked(!user || !applicationResult.error || appliedFromSharedState);
 
       // If already applied, load saved answers from the application
-      if (applied && applicationResult.data?.custom_answers) {
-        const savedAnswers = applicationResult.data.custom_answers as Record<string, any>;
+      if (applied && appRow?.custom_answers) {
+        const savedAnswers = appRow.custom_answers as Record<string, any>;
         if (savedAnswers && typeof savedAnswers === 'object') {
           setAnswers(savedAnswers);
         }
