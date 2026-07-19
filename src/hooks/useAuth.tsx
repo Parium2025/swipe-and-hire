@@ -1330,6 +1330,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Sätt loading state för smooth utloggning
       setLoading(true);
 
+      // 🧹 Rensa senaste rollen INNAN splash triggas så att taglinen
+      // inte flashar fel text när nästa användare loggar in.
+      try { localStorage.removeItem('parium-last-role'); } catch {}
+
       // 🎬 Trigga auth splash för premium känsla vid utloggning
       authSplashEvents.show();
 
