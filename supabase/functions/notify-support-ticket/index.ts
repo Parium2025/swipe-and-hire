@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
-import { requireAuthenticated } from "../_shared/service-auth.ts";
+import { verifyCaller } from "../_shared/service-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,13 +17,18 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-  const authResp = await requireAuthenticated(req, corsHeaders);
-  if (authResp) return authResp;
 
-
+  const caller = await verifyCaller(req, corsHeaders);
+  if (caller instanceof Response) return caller;
 
   try {
     const { ticketId }: NotificationRequest = await req.json();
+    if (!ticketId) {
+      return new Response(JSON.stringify({ error: "ticketId required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -37,6 +42,28 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (ticketError || !ticket) {
       throw new Error('Ticket not found');
+    }
+
+    // Only the ticket owner (or service role / admin) may trigger notifications
+    if (!caller.isServiceRole) {
+      const isOwner = caller.userId && ticket.user_id === caller.userId;
+      let isAdmin = false;
+      if (!isOwner && caller.userId) {
+        const { data: roleRow } = await supabase
+          .from('user_roles')
+          .select('id')
+          .eq('user_id', caller.userId)
+          .eq('role', 'admin')
+          .eq('is_active', true)
+          .maybeSingle();
+        isAdmin = !!roleRow;
+      }
+      if (!isOwner && !isAdmin) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
     }
 
     const fromName = [ticket.profiles?.first_name, ticket.profiles?.last_name]
