@@ -151,7 +151,6 @@ export function ScrollRestoration() {
     const isBackForwardDocument = documentNavigationType === 'back_forward';
     const isFreshDocumentEntry = location.key === 'default' && navigationType === 'POP' && !isBackForwardDocument;
     const isReturningFromJobOverlay = isJobOverlayPath(previousPathRef.current);
-    const shouldForceTopForDocumentEntry = isReload || isFreshDocumentEntry;
     const shouldForceTop = isReload || (isFreshDocumentEntry && !isReturningFromJobOverlay);
 
     if (shouldForceTop) {
@@ -179,7 +178,16 @@ export function ScrollRestoration() {
 
     isRestoringRef.current = true;
 
-    // For scroll-to-top (targetTop === 0) we can apply immediately
+    // For scroll-to-top (targetTop === 0) we can apply immediately.
+    // Undantag: när användaren går tillbaka från JobView-overlay utan sparad
+    // snapshot ska vi låta den underliggande KeepAlive-listan behålla sin
+    // nuvarande position — annars hamnar man högst upp i jobbsöklistan.
+    const shouldApplyTop = targetTop === 0 && (shouldForceTop || Boolean(storedPosition) || !isReturningFromJobOverlay);
+    if (targetTop === 0 && !shouldApplyTop) {
+      releaseRestoreLock();
+      return;
+    }
+
     if (targetTop === 0) {
       const startTime = performance.now();
       let topFrame = 0;
