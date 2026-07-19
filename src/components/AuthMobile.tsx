@@ -946,11 +946,11 @@ const AuthMobile = ({
                                     <Button
                                       ref={triggerRef}
                                       variant="outline"
-                                      className={`w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left min-h-[44px] ${industryMenuOpen ? 'border-white/50' : ''}`}
-                                    >
-                                       <span className="truncate text-left flex-1 px-1">
-                                         {employerData.industry || 'Välj bransch'}
-                                       </span>
+                                       className={`w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-11 min-h-0 px-3 font-normal ${industryMenuOpen ? 'border-white/50' : ''}`}
+                                     >
+                                        <span className="truncate text-left flex-1">
+                                          {employerData.industry || 'Välj bransch'}
+                                        </span>
                                       <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
                                     </Button>
                                   </DropdownMenuTrigger>
