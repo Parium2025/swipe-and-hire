@@ -1122,9 +1122,9 @@ const AuthMobile = ({
                                    value={employerData.companyDescription}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyDescription: e.target.value }))}
                                    placeholder="Beskriv vad ert företag gör..."
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white resize-none text-base"
-                                   style={{ fontSize: '16px' }}
-                                   rows={2}
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white resize-none text-sm"
+                                   style={{ fontSize: '14px' }}
+                                   rows={3}
                                  />
                               </div>
                            </div>
