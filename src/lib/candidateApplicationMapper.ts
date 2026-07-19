@@ -24,6 +24,7 @@ export function mapRawToApplicationData(
     work_schedule: string | null;
     availability: string | null;
     custom_answers: any;
+    questions_snapshot?: any;
     status: string | null;
     applied_at: string | null;
     updated_at: string;
