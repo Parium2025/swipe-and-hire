@@ -10,6 +10,7 @@ type AuthSplashRole = 'job_seeker' | 'employer';
 
 const listeners = new Set<SplashListener>();
 let currentlyVisible = false;
+let currentRole: AuthSplashRole | null = null;
 
 export const normalizeAuthSplashRole = (role?: string | null): AuthSplashRole | null => {
   if (role === 'employer') return 'employer';
@@ -28,6 +29,15 @@ const hashEmailKey = (email: string) => {
 };
 
 const roleByEmailKey = (email: string) => `parium-role-by-email:${hashEmailKey(email)}`;
+
+const getStoredSplashRole = (): AuthSplashRole | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return normalizeAuthSplashRole(window.localStorage.getItem('parium-last-role'));
+  } catch {
+    return null;
+  }
+};
 
 export const getCachedAuthRoleForEmail = (email?: string | null): AuthSplashRole | null => {
   const normalizedEmail = normalizeEmail(email);
@@ -52,7 +62,13 @@ export const cacheAuthRoleForEmail = (email?: string | null, role?: string | nul
 
 const persistSplashRole = (role?: string | null) => {
   const normalized = normalizeAuthSplashRole(role);
-  if (!normalized || typeof window === 'undefined') return;
+  if (!normalized) {
+    currentRole = currentRole ?? getStoredSplashRole();
+    return;
+  }
+
+  currentRole = normalized;
+  if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem('parium-last-role', normalized);
     window.dispatchEvent(new CustomEvent('parium-auth-splash-role', { detail: normalized }));
@@ -96,6 +112,14 @@ export const authSplashEvents = {
    */
   isVisible(): boolean {
     return currentlyVisible;
+  },
+
+  /**
+   * Stabil roll-snapshot för aktuell splash. Komponenten läser denna när
+   * splashen startar och ändrar inte texten mitt i animationen.
+   */
+  getRole(): AuthSplashRole | null {
+    return currentRole ?? getStoredSplashRole();
   }
 };
 

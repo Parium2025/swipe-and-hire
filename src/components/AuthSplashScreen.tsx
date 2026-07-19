@@ -27,28 +27,7 @@ export function AuthSplashScreen() {
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [dotsFading, setDotsFading] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [lastRole, setLastRole] = useState<string | null>(() => {
-    try { return localStorage.getItem('parium-last-role'); } catch { return null; }
-  });
-
-  // Poll localStorage medan splashen är synlig — så taglinen uppdateras
-  // så fort profilen laddas under inloggning (och nollställs vid utloggning).
-  useEffect(() => {
-    if (!isVisible) return;
-    const read = () => {
-      try {
-        const r = localStorage.getItem('parium-last-role');
-        setLastRole((prev) => (prev === r ? prev : r));
-      } catch {}
-    };
-    read();
-    window.addEventListener('parium-auth-splash-role', read);
-    const id = window.setInterval(read, 150);
-    return () => {
-      window.removeEventListener('parium-auth-splash-role', read);
-      window.clearInterval(id);
-    };
-  }, [isVisible]);
+  const [lockedRole, setLockedRole] = useState<string | null>(() => authSplashEvents.getRole());
   
   useEffect(() => {
     if (!isTriggered) {
@@ -66,6 +45,9 @@ export function AuthSplashScreen() {
       return;
     }
     
+    // Lås taglinen för hela splash-cykeln. Rollen kan uppdateras i bakgrunden
+    // under login, men texten får inte byta mitt i animationen och skapa blink.
+    setLockedRole(authSplashEvents.getRole());
     setIsVisible(true);
     setIsFadingOut(false);
     setIsFadingIn(false);
@@ -126,7 +108,7 @@ export function AuthSplashScreen() {
   if (!isVisible) return null;
   
   // CSS clamp() handles all sizing fluidly — no JS breakpoint logic needed
-  const displayRole = lastRole === 'employer' ? 'employer' : 'job_seeker';
+  const displayRole = lockedRole === 'employer' ? 'employer' : 'job_seeker';
   
   return (
     <div

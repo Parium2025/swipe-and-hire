@@ -258,7 +258,6 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
         {!isLightweightRoute && <PushNotificationProvider />}
         {!isLightweightRoute && <RealtimeKeepAlive />}
         {!isLightweightRoute && <OfflineQueueRunner />}
-        {location.pathname === '/auth' && <AuthSplashScreen />}
         <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
           {!isLightweightRoute && <CriticalAssetPreloads />}
           <div className="relative z-10">
@@ -269,6 +268,7 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
             </main>
           </div>
         </div>
+        <AuthSplashScreen />
       </UnsavedChangesProvider>
       <PremiumLimitListener />
       {isLightweightRoute && <CookieBanner />}
