@@ -91,6 +91,7 @@ const JobTemplatesOverview = () => {
       }
 
       setTemplates(data || []);
+      writeCachedCount(SKELETON_COUNT_KEYS.jobTemplates, (data || []).length);
     } catch (error) {
       toast({
         title: "Ett fel uppstod",
