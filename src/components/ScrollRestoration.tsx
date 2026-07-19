@@ -17,13 +17,15 @@ import {
 } from '@/lib/scrollRestoration';
 
 const FORCE_TOP_ON_RELOAD_MS = 1200;
+const isJobOverlayPath = (pathname: string) =>
+  pathname.startsWith('/job-view/') || pathname.startsWith('/job/');
 
 export function ScrollRestoration() {
   const location = useLocation();
   const navigationType = useNavigationType();
   const isRestoringRef = useRef(false);
   const pendingSaveFrameRef = useRef<number | null>(null);
-  const isJobViewOverlayPath = location.pathname.startsWith('/job-view/') || location.pathname.startsWith('/job/');
+  const isJobViewOverlayPath = isJobOverlayPath(location.pathname);
   const previousPathRef = useRef(location.pathname);
 
   useEffect(() => {
@@ -34,10 +36,8 @@ export function ScrollRestoration() {
       // sidas exakta scroll-position här också, som backup ifall kortets
       // pointerdown-hook missades (edge-swipe, snabb tap, inre child som
       // stoppar propagation osv.).
-      const nowOverlay =
-        location.pathname.startsWith('/job-view/') ||
-        location.pathname.startsWith('/job/');
-      const wasList = !previousPath.startsWith('/job-view/') && !previousPath.startsWith('/job/');
+      const nowOverlay = isJobOverlayPath(location.pathname);
+      const wasList = !isJobOverlayPath(previousPath);
       if (nowOverlay && wasList) {
         const container = getRestorableScrollContainer();
         if (container) {
@@ -150,15 +150,17 @@ export function ScrollRestoration() {
     const isReload = documentNavigationType === 'reload';
     const isBackForwardDocument = documentNavigationType === 'back_forward';
     const isFreshDocumentEntry = location.key === 'default' && navigationType === 'POP' && !isBackForwardDocument;
+    const isReturningFromJobOverlay = isJobOverlayPath(previousPathRef.current);
     const shouldForceTopForDocumentEntry = isReload || isFreshDocumentEntry;
+    const shouldForceTop = isReload || (isFreshDocumentEntry && !isReturningFromJobOverlay);
 
-    if (shouldForceTopForDocumentEntry) {
+    if (shouldForceTop) {
       clearScrollPosition(location.pathname);
       clearFooterNavigationForTarget(location.pathname);
     }
 
     const positions = readPositions();
-    const shouldRestore = !shouldForceTopForDocumentEntry && (navigationType === 'POP' || consumePendingFooterRestore(location.pathname));
+    const shouldRestore = !shouldForceTop && (navigationType === 'POP' || consumePendingFooterRestore(location.pathname));
     const storedPosition = shouldRestore ? positions[location.pathname] : undefined;
     const targetTop = storedPosition?.top ?? 0;
 
@@ -233,7 +235,7 @@ export function ScrollRestoration() {
         // Hard reloads can re-apply native scroll restoration to overflow
         // containers *after* React layout effects. Keep the top position locked
         // briefly so footer-origin reloads cannot land at the old footer/list.
-        if (shouldForceTopForDocumentEntry && performance.now() - startTime < FORCE_TOP_ON_RELOAD_MS) {
+        if (shouldForceTop && performance.now() - startTime < FORCE_TOP_ON_RELOAD_MS) {
           topFrame = requestAnimationFrame(enforceTop);
           return;
         }
