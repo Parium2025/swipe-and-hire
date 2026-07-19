@@ -4,8 +4,9 @@ import { authSplashEvents } from '@/lib/authSplashEvents';
 
 import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 
-// Minsta visningstid för att garantera att loggan hinner laddas och avkodas
-const MINIMUM_DISPLAY_MS = 2000;
+// Kort nog för att login/logout inte ska kännas segt, men tillräckligt för att
+// täcka route-bytet utan att auth- eller app-vyn blixtrar fram mellan frames.
+const MINIMUM_DISPLAY_MS = 320;
 
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
@@ -58,7 +59,7 @@ export function AuthSplashScreen() {
         setIsVisible(false);
         setIsFadingOut(false);
         setDotsFading(false);
-      }, 260);
+      }, 180);
       return () => clearTimeout(timer);
     }
 
@@ -122,8 +123,8 @@ export function AuthSplashScreen() {
 
     const elapsed = Date.now() - cycleStartedAtRef.current;
     const remainingMinimum = Math.max(MINIMUM_DISPLAY_MS - elapsed, 0);
-    const routePaintBuffer = 140;
-    const dotsDelay = Math.max(remainingMinimum - 400, 0);
+    const routePaintBuffer = 40;
+    const dotsDelay = Math.max(remainingMinimum - 140, 0);
     let finishTimer: ReturnType<typeof setTimeout> | undefined;
 
     const dotsTimer = setTimeout(() => {
@@ -143,7 +144,7 @@ export function AuthSplashScreen() {
         setIsFadingOut(false);
         setDotsFading(false);
         authSplashEvents.hide();
-      }, 300);
+      }, 180);
     }, remainingMinimum + routePaintBuffer);
     
     return () => {

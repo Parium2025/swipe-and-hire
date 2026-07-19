@@ -16,6 +16,10 @@ const TRANSITION_GATE_ID = 'parium-auth-transition-gate';
 const mountImmediateGate = () => {
   if (typeof document === 'undefined') return;
   try {
+    document.documentElement.dataset.authTransition = 'true';
+    document.body.dataset.authTransition = 'true';
+    document.documentElement.style.setProperty('background-color', 'hsl(215, 100%, 12%)', 'important');
+    document.body.style.setProperty('background-color', 'hsl(215, 100%, 12%)', 'important');
     if (document.getElementById(TRANSITION_GATE_ID)) return;
     const gate = document.createElement('div');
     gate.id = TRANSITION_GATE_ID;
@@ -38,6 +42,8 @@ const mountImmediateGate = () => {
 const removeImmediateGate = () => {
   if (typeof document === 'undefined') return;
   try {
+    delete document.documentElement.dataset.authTransition;
+    delete document.body.dataset.authTransition;
     document.getElementById(TRANSITION_GATE_ID)?.remove();
   } catch {
     /* ignore */
