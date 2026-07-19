@@ -26,6 +26,7 @@ export function mapToApplicationData(
     work_schedule: null,
     availability: app.availability,
     custom_answers: app.custom_answers,
+    questions_snapshot: (app as any).questions_snapshot,
     status: app.status,
     applied_at: app.applied_at,
     updated_at: app.applied_at,
