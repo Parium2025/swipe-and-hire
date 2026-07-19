@@ -1154,9 +1154,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         storage.clear();
       } catch {}
  
-      // Minsta visningstid för splash (matchar logout: ~1.1 sekund)
-      const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1100));
- 
       // Starta auth-anropet
       const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email,
@@ -1219,13 +1216,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authSplashEvents.show(metadataRole);
       }
  
-      // Lyckad inloggning – vänta på minsta visningstid OCH att profilen laddas
-      await minDelayPromise;
-      
       // 🔧 KRITISK FIX: Vänta på att fetchUserData faktiskt har laddat profilen
       // Nu använder vi profileLoadedRef för att veta när profilen är redo
       const profileCheckStart = Date.now();
-      const maxWaitMs = 3000;
+      const maxWaitMs = 1200;
       
       await new Promise<void>((resolve) => {
         const checkProfile = () => {
@@ -1346,9 +1340,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 🎬 Trigga auth splash för premium känsla vid utloggning
       authSplashEvents.show(currentSplashRole);
 
-      // Vänta för smooth känsla
-      await new Promise(resolve => setTimeout(resolve, 550));
-      
       // Remove session tracking before signing out
       await removeSession();
       
@@ -1380,8 +1371,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserRole(null);
       setOrganization(null);
       
-      // Vänta resterande tid för smooth övergång
-      await new Promise(resolve => setTimeout(resolve, 550));
     } catch (error: any) {
       console.error('Sign out error:', error);
       // Även vid oväntat fel: rensa lokalt så användaren inte fastnar
@@ -2394,7 +2383,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     // 🎬 Same premium fade animation as manual logout
     authSplashEvents.show();
-    await new Promise(resolve => setTimeout(resolve, 550));
     
     await supabase.auth.signOut({ scope: 'local' });
     
