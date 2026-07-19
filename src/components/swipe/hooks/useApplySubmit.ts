@@ -56,9 +56,20 @@ export function useApplySubmit({
     queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId] });
 
     try {
-      const { data: profileRows } = await supabase.rpc('get_my_profile');
+      // 📸 Snapshot: frys frågorna som visas för kandidaten precis nu.
+      // Arbetsgivaren kommer alltid se exakt dessa frågor + svar, även om
+      // frågorna senare ändras. Nya sökande får de nya frågorna.
+      const [profileRes, questionsRes] = await Promise.all([
+        supabase.rpc('get_my_profile'),
+        supabase
+          .from('job_questions')
+          .select('id, question_text, question_type, options, is_required, order_index')
+          .eq('job_id', jobId)
+          .order('order_index'),
+      ]);
+      const profileRows = profileRes.data;
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
-
+      const questionsSnapshot = questionsRes.data ?? [];
 
       let age: number | null = null;
       if (profile?.birth_date) {
@@ -82,6 +93,7 @@ export function useApplySubmit({
         profile_image_snapshot_url: profile?.profile_image_url || null,
         video_snapshot_url: profile?.video_url || null,
         custom_answers: answers,
+        questions_snapshot: questionsSnapshot,
         status: 'pending',
       });
 

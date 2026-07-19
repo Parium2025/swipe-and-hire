@@ -29,6 +29,7 @@ export interface JobApplication {
   applied_at: string;
   status: 'pending' | 'reviewing' | 'interview' | 'offered' | 'hired' | 'rejected';
   custom_answers: any;
+  questions_snapshot?: any;
   viewed_at: string | null;
   profile_image_url: string | null;
   video_url: string | null;

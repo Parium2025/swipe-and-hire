@@ -26,6 +26,7 @@ export interface ApplicationData {
   applied_at: string;
   updated_at: string;
   custom_answers: any;
+  questions_snapshot?: any;
   job_title?: string;
   job_occupation?: string | null;
   profile_image_url?: string | null;
@@ -229,6 +230,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
           work_schedule,
           availability,
           custom_answers,
+          questions_snapshot,
           status,
           applied_at,
           updated_at,

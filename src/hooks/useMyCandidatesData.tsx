@@ -37,6 +37,7 @@ export interface MyCandidateData {
   work_schedule: string | null;
   availability: string | null;
   custom_answers: any | null;
+  questions_snapshot?: any | null;
   status: string;
   job_title: string | null;
   profile_image_url: string | null;
@@ -189,7 +190,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           .from('job_applications')
           .select(`
             id, applicant_id, first_name, last_name, email, phone, location, bio,
-            cv_url, age, employment_status, work_schedule, availability, custom_answers,
+            cv_url, age, employment_status, work_schedule, availability, custom_answers, questions_snapshot,
             status, applied_at, viewed_at, job_postings!inner(title)
           `)
           .in('id', applicationIds);
@@ -262,6 +263,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
             work_schedule: app?.work_schedule || null,
             availability: app?.availability || null,
             custom_answers: app?.custom_answers || null,
+            questions_snapshot: app?.questions_snapshot || null,
             status: app?.status || 'pending',
             job_title: (app?.job_postings as any)?.title || null,
             profile_image_url: media.profile_image_url || null,
@@ -341,6 +343,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           work_schedule,
           availability,
           custom_answers,
+          questions_snapshot,
           status,
           applied_at,
           viewed_at,
@@ -433,6 +436,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           work_schedule: app?.work_schedule || null,
           availability: app?.availability || null,
           custom_answers: app?.custom_answers || null,
+          questions_snapshot: app?.questions_snapshot || null,
           status: app?.status || 'pending',
           job_title: (app?.job_postings as any)?.title || null,
           profile_image_url: media.profile_image_url,

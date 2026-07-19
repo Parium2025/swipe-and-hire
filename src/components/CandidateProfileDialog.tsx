@@ -194,6 +194,21 @@ export const CandidateProfileDialog = ({
 
   const fetchJobQuestions = useCallback(async () => {
     if (!activeApplication?.job_id) return;
+
+    // 📸 Snapshot först: om ansökan har en frusen version av frågorna
+    // (från tidpunkten då kandidaten sökte) — använd den. Det säkerställer
+    // att arbetsgivaren ser exakt de frågor kandidaten faktiskt besvarade,
+    // även om frågorna på jobbet senare har uppdaterats.
+    const snapshot = (activeApplication as any).questions_snapshot;
+    if (Array.isArray(snapshot) && snapshot.length > 0) {
+      const snapMap: Record<string, { text: string; order: number }> = {};
+      snapshot.forEach((q: any) => {
+        if (q?.id) snapMap[q.id] = { text: q.question_text, order: q.order_index ?? 0 };
+      });
+      setJobQuestions(snapMap);
+      return;
+    }
+
     const qCacheKey = activeApplication.job_id;
     const cachedQ = questionsCache.get(qCacheKey);
     if (cachedQ) { setJobQuestions(cachedQ); return; }
@@ -214,7 +229,7 @@ export const CandidateProfileDialog = ({
     } catch (error) {
       console.error('Error fetching job questions:', error);
     }
-  }, [activeApplication?.job_id]);
+  }, [activeApplication?.id, activeApplication?.job_id]);
 
   useEffect(() => {
     if (open && activeApplication && user) {
