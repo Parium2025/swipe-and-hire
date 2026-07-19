@@ -172,7 +172,7 @@ export function AuthSplashScreen() {
           flexDirection: 'column',
           alignItems: 'center',
           opacity: isFadingIn && !isFadingOut ? 1 : 0,
-          transition: 'opacity 0.14s ease-out',
+          transition: 'opacity 0.28s ease-out',
         }}
       >
 
