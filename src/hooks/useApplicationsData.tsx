@@ -229,6 +229,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
           work_schedule,
           availability,
           custom_answers,
+          questions_snapshot,
           status,
           applied_at,
           updated_at,
