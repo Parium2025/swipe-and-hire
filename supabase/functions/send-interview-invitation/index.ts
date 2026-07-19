@@ -24,7 +24,7 @@ const RequestSchema = z.object({
   message: z.string().max(5000).optional(),
   employerEmail: z.string().email().max(320).optional(),
   employerName: z.string().max(200).optional(),
-  interviewId: z.string().uuid().optional(),
+  interviewId: z.string().uuid(),
 });
 
 // ── Helpers ───────────────────────────────────────────────
