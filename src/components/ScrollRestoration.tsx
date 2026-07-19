@@ -182,7 +182,7 @@ export function ScrollRestoration() {
     // Undantag: när användaren går tillbaka från JobView-overlay utan sparad
     // snapshot ska vi låta den underliggande KeepAlive-listan behålla sin
     // nuvarande position — annars hamnar man högst upp i jobbsöklistan.
-    const shouldApplyTop = targetTop === 0 && (shouldForceTop || Boolean(storedPosition) || !isReturningFromJobOverlay);
+    const shouldApplyTop = targetTop === 0 && !isReturningFromJobOverlay;
     if (targetTop === 0 && !shouldApplyTop) {
       releaseRestoreLock();
       return;
