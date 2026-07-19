@@ -1375,7 +1375,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAllDrafts();
       clearAllAppCaches();
       clearSessionToken();
-      try { localStorage.removeItem('parium-last-role'); } catch {}
+      
       // 🔐 Rensa auth-tokens även vid oväntat fel
       try {
         const { authStorage: storage } = await import('@/lib/authStorage');
