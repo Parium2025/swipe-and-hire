@@ -141,11 +141,21 @@ export function useApplySubmit({
       clearMyApplicationsLocalCache();
       queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId] });
       queryClient.invalidateQueries({ queryKey: ['my-applications', userId] });
+
+      // 🔒 Server-side quota trigger — visa paywall istället för generiskt fel
+      const msg = String(err?.message ?? '');
+      if (msg.includes('application_quota_exceeded')) {
+        refreshQuota();
+        setShowLimitDialog(true);
+        return;
+      }
+
       toast({
         title: 'Kunde inte skicka ansökan',
         description: err.message || 'Försök igen',
         variant: 'destructive',
       });
+
     } finally {
       setSubmitting(false);
     }
