@@ -37,6 +37,11 @@ export function AuthSplashScreen() {
 
   useEffect(() => {
     isVisibleRef.current = isVisible;
+    if (isVisible) {
+      // React-overlayn är nu monterad och helt opak, så den synkrona gaten
+      // som lades in i click-framen kan tas bort utan att något bakom syns.
+      authSplashEvents.releaseGate();
+    }
   }, [isVisible]);
   
   useEffect(() => {
