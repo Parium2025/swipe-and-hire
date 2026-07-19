@@ -1087,6 +1087,7 @@ export type Database = {
           location: string | null
           phone: string | null
           profile_image_snapshot_url: string | null
+          questions_snapshot: Json | null
           search_vector: unknown
           status: string
           updated_at: string
@@ -1113,6 +1114,7 @@ export type Database = {
           location?: string | null
           phone?: string | null
           profile_image_snapshot_url?: string | null
+          questions_snapshot?: Json | null
           search_vector?: unknown
           status?: string
           updated_at?: string
@@ -1139,6 +1141,7 @@ export type Database = {
           location?: string | null
           phone?: string | null
           profile_image_snapshot_url?: string | null
+          questions_snapshot?: Json | null
           search_vector?: unknown
           status?: string
           updated_at?: string
