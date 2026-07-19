@@ -54,6 +54,7 @@ export function mapRawToApplicationData(
     work_schedule: raw.work_schedule,
     availability: raw.availability,
     custom_answers: raw.custom_answers,
+    questions_snapshot: raw.questions_snapshot,
     status: raw.status,
     applied_at: raw.applied_at || '',
     updated_at: raw.updated_at,
