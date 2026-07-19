@@ -189,7 +189,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           .from('job_applications')
           .select(`
             id, applicant_id, first_name, last_name, email, phone, location, bio,
-            cv_url, age, employment_status, work_schedule, availability, custom_answers,
+            cv_url, age, employment_status, work_schedule, availability, custom_answers, questions_snapshot,
             status, applied_at, viewed_at, job_postings!inner(title)
           `)
           .in('id', applicationIds);
