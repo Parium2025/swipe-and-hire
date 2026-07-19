@@ -24,7 +24,7 @@ const RequestSchema = z.object({
   message: z.string().max(5000).optional(),
   employerEmail: z.string().email().max(320).optional(),
   employerName: z.string().max(200).optional(),
-  interviewId: z.string().uuid().optional(),
+  interviewId: z.string().uuid(),
 });
 
 // ── Helpers ───────────────────────────────────────────────
@@ -138,8 +138,9 @@ const handler = async (req: Request): Promise<Response> => {
       employerEmail, employerName, interviewId,
     } = parsed.data;
 
-    // === AUTHORIZATION: if interviewId provided, caller must own it ===
-    if (interviewId) {
+    // === AUTHORIZATION: caller MUST own the interview (or its job/org) ===
+    // interviewId is required — no anonymous "send email to anyone" path.
+    {
       const { data: interview } = await supabaseAdmin
         .from('interviews')
         .select('employer_id, job_id')
@@ -177,6 +178,7 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
     }
+
 
 
 
