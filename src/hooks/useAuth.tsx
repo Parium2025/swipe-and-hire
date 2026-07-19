@@ -1352,10 +1352,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAllDrafts();
       clearAllAppCaches();
       clearSessionToken();
-
-      // 🧹 Nollställ senast kända roll så nästa login-splash inte visar
-      // fel tagline (t.ex. jobseeker-text när arbetsgivare loggar in)
-      try { localStorage.removeItem('parium-last-role'); } catch {}
       
       // 🔐 KRITISKT: Rensa auth-tokens från storage ALLTID
       // Om signOut misslyckades (nätverksfel etc.) ligger tokens kvar
@@ -1379,7 +1375,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAllDrafts();
       clearAllAppCaches();
       clearSessionToken();
-      try { localStorage.removeItem('parium-last-role'); } catch {}
+      
       // 🔐 Rensa auth-tokens även vid oväntat fel
       try {
         const { authStorage: storage } = await import('@/lib/authStorage');
