@@ -217,6 +217,15 @@ const Auth = () => {
       const hasError = !!(errorCode || errorDescription);
       const noAnyRecoveryTokens = !(accessToken || refreshToken || tokenParam || tokenHashParam);
 
+      // Om Supabase redan har etablerat sessionen via redirect (type=recovery i URL)
+      // men tokens inte ligger i URL/hash, betyder det att sessionen finns i storage.
+      // Visa då reset-formuläret istället för att anta att länken är förbrukad.
+      if (tokenType === 'recovery' && noAnyRecoveryTokens && user) {
+        if (AUTH_DEBUG) console.log('✅ Recovery session active in storage - showing reset form');
+        setIsPasswordReset(true);
+        return;
+      }
+
       if (hasError || (tokenType === 'recovery' && noAnyRecoveryTokens)) {
         const desc = (errorCode || errorDescription || '').toLowerCase();
         if (AUTH_DEBUG) console.log('🔍 AUTH ERROR DETECTED:', { errorCode, errorDescription, desc });
