@@ -22,6 +22,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
+import { ProfilePreviewSkeleton } from '@/components/profile/ProfilePreviewSkeleton';
 
 interface ProfileViewData {
   id: string;
@@ -508,14 +509,7 @@ export default function ProfilePreview() {
   };
 
   if (loading) {
-    return (
-      <div className="p-6 responsive-container-wide">
-        <div className="text-center text-white">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-          Laddar förhandsgranskning...
-        </div>
-      </div>
-    );
+    return <ProfilePreviewSkeleton />;
   }
 
   // Desktop view - stor profil som mobilvyn men desktop-layout
