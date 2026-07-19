@@ -190,7 +190,7 @@ export const BookInterviewDialog = ({
           .single();
 
         const candidateEmail = appData?.email;
-        if (candidateEmail) {
+        if (candidateEmail && interviewRow?.id) {
           await supabase.functions.invoke('send-interview-invitation', {
             body: {
               candidateEmail,
@@ -204,10 +204,11 @@ export const BookInterviewDialog = ({
               message: message || undefined,
               employerEmail: user?.email || undefined,
               employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
-              interviewId: interviewRow?.id || undefined,
+              interviewId: interviewRow.id,
             },
           });
         }
+
       } catch (emailErr) {
         console.error('Error sending interview email:', emailErr);
         // Non-blocking — interview is already created
