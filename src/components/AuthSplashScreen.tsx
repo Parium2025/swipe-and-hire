@@ -177,11 +177,14 @@ export function AuthSplashScreen() {
             marginBottom: '40px',
             textShadow: '0 2px 4px rgba(0,0,0,0.3)',
             fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+            visibility: lastRole ? 'visible' : 'hidden',
           }}
         >
           {lastRole === 'employer'
             ? 'Bygg ditt drömteam här'
-            : 'Din karriärresa börjar här'}
+            : lastRole === 'jobseeker'
+              ? 'Din karriärresa börjar här'
+              : 'Placeholder'}
         </p>
         
         {/* Pulserande prickar - exakt samma som index.html */}
