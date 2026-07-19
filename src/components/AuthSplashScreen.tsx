@@ -3,12 +3,12 @@ import { authSplashEvents } from '@/lib/authSplashEvents';
 
 import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 
-// Bara en kort frame-cover. Den får täcka blink, men aldrig vänta in auth/profile.
-// Premium app-feel: låt taglinen hinna andas. Login → app får längst tid
-// eftersom /home behöver ett par frames på sig att rendera efter navigate,
-// annars ser man en kort blink innan hemskärmen paintat.
+// Bara en kort frame-cover. Logout är fast (den fungerar redan perfekt).
+// Login är route-aware: splashen får inte släppa medan vi fortfarande är kvar
+// på /auth, eftersom det är exakt då den lilla millisekunds-blinken syns.
 const APP_TO_AUTH_COVER_MS = 620;
-const AUTH_TO_APP_COVER_MS = 950;
+const AUTH_TO_APP_MIN_COVER_MS = 920;
+const AUTH_TO_APP_MAX_COVER_MS = 2400;
 const CONTENT_FADE_OUT_MS = 220;
 
 /**
@@ -29,7 +29,10 @@ export function AuthSplashScreen() {
   const [isFadingIn, setIsFadingIn] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [dotsFading, setDotsFading] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  // Loggan är en inbäddad data-URI och för-dekodas i main.tsx. Vänta därför
+  // inte på img.onload för att visa text/logga — på iOS/Safari kan just den
+  // väntan skapa en kort blank blink i själva splashen.
+  const [imageLoaded, setImageLoaded] = useState(true);
   const [lockedRole, setLockedRole] = useState<string | null>(() => authSplashEvents.getRole());
   const wasTriggeredRef = useRef(false);
   const isVisibleRef = useRef(false);
@@ -80,7 +83,7 @@ export function AuthSplashScreen() {
     setIsFadingOut(false);
     setIsFadingIn(false);
     setDotsFading(false);
-    setImageLoaded(false);
+    setImageLoaded(true);
   }, [isTriggered]);
   
   // Trigger content fade-in when image is loaded. The shell background itself is
@@ -103,24 +106,32 @@ export function AuthSplashScreen() {
     return () => clearTimeout(t);
   }, [isVisible, imageLoaded]);
   
-  // Dölj efter en kort, fast cover. Vi väntar inte på route/profile/nätverk här,
-  // eftersom logout då känns seg. Detta maskerar bara browserns enstaka blink-frame.
+  // Dölj efter en kort cover. Logout är fast och snabb. Login väntar dessutom
+  // tills SPA-routen faktiskt har lämnat /auth + två frames, så vi aldrig
+  // exponerar auth-vyn mellan splash och hemskärm.
   useEffect(() => {
     if (!isTriggered || !isVisible) return;
 
     const startPath = cycleStartPathRef.current;
     if (!startPath) return;
 
-    const coverMs = isAuthPath(startPath) ? AUTH_TO_APP_COVER_MS : APP_TO_AUTH_COVER_MS;
+    const isLoginTransition = isAuthPath(startPath);
+    const coverMs = isLoginTransition ? AUTH_TO_APP_MIN_COVER_MS : APP_TO_AUTH_COVER_MS;
+    const startedAt = Date.now();
+    let exitStarted = false;
+    let dotsTimer: ReturnType<typeof setTimeout> | undefined;
+    let exitTimer: ReturnType<typeof setTimeout> | undefined;
     let finishTimer: ReturnType<typeof setTimeout> | undefined;
+    let routePollTimer: ReturnType<typeof setTimeout> | undefined;
+    let rafOne: number | undefined;
+    let rafTwo: number | undefined;
 
-    const dotsTimer = setTimeout(() => {
-      setDotsFading(true);
-    }, Math.max(coverMs - 80, 0));
-
-    const timer = setTimeout(() => {
+    const finish = () => {
+      if (exitStarted) return;
+      exitStarted = true;
       setIsFadingIn(false);
       setIsFadingOut(true);
+      setDotsFading(true);
       
       // Background stays OPAQUE the whole time. When the content is fully
       // invisible we remove the shell in a single frame — no fade of the
@@ -132,12 +143,49 @@ export function AuthSplashScreen() {
         setDotsFading(false);
         authSplashEvents.hide();
       }, CONTENT_FADE_OUT_MS);
-    }, coverMs);
+    };
+
+    const finishAfterPaint = () => {
+      rafOne = requestAnimationFrame(() => {
+        rafTwo = requestAnimationFrame(finish);
+      });
+    };
+
+    const waitForLoginRouteToPaint = () => {
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : startPath;
+      const routeHasLeftAuth = !isAuthPath(currentPath);
+      const hitSafetyCap = Date.now() - startedAt >= AUTH_TO_APP_MAX_COVER_MS;
+
+      if (routeHasLeftAuth) {
+        setDotsFading(true);
+        routePollTimer = setTimeout(finishAfterPaint, 80);
+        return;
+      }
+
+      if (hitSafetyCap) {
+        finish();
+        return;
+      }
+
+      routePollTimer = setTimeout(waitForLoginRouteToPaint, 40);
+    };
+
+    if (isLoginTransition) {
+      exitTimer = setTimeout(waitForLoginRouteToPaint, coverMs);
+    } else {
+      dotsTimer = setTimeout(() => {
+        setDotsFading(true);
+      }, Math.max(coverMs - 80, 0));
+      exitTimer = setTimeout(finish, coverMs);
+    }
     
     return () => {
       clearTimeout(dotsTimer);
-      clearTimeout(timer);
+      clearTimeout(exitTimer);
+      clearTimeout(routePollTimer);
       if (finishTimer) clearTimeout(finishTimer);
+      if (rafOne) cancelAnimationFrame(rafOne);
+      if (rafTwo) cancelAnimationFrame(rafTwo);
     };
   }, [isTriggered, isVisible]);
   
