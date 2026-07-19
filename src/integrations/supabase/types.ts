@@ -3256,6 +3256,7 @@ export type Database = {
         Returns: boolean
       }
       is_org_admin: { Args: { p_user_id: string }; Returns: boolean }
+      is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       is_session_valid: { Args: { p_session_token: string }; Returns: boolean }
       kick_session: { Args: { p_session_id: string }; Returns: boolean }
       log_profile_view: {
