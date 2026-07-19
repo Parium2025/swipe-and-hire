@@ -27,6 +27,24 @@ export function AuthSplashScreen() {
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [dotsFading, setDotsFading] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [lastRole, setLastRole] = useState<string | null>(() => {
+    try { return localStorage.getItem('parium-last-role'); } catch { return null; }
+  });
+
+  // Poll localStorage medan splashen är synlig — så taglinen uppdateras
+  // så fort profilen laddas under inloggning (och nollställs vid utloggning).
+  useEffect(() => {
+    if (!isVisible) return;
+    const read = () => {
+      try {
+        const r = localStorage.getItem('parium-last-role');
+        setLastRole((prev) => (prev === r ? prev : r));
+      } catch {}
+    };
+    read();
+    const id = window.setInterval(read, 150);
+    return () => window.clearInterval(id);
+  }, [isVisible]);
   
   useEffect(() => {
     if (!isTriggered) {
