@@ -74,6 +74,22 @@ const SkeletonChrome = memo(function SkeletonChrome() {
  *     the in-page loading block inside EmployerDashboard.tsx).
  */
 export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton() {
+  // Läs aktiv tab från URL så vi renderar rätt antal kort för den tab
+  // användaren faktiskt kommer landa på (matchar EmployerDashboard).
+  let tab: 'active' | 'expired' | 'draft' = 'active';
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get('tab');
+    if (t === 'expired' || t === 'draft') tab = t;
+  }
+  const countKey =
+    tab === 'expired' ? SKELETON_COUNT_KEYS.myJobsExpired
+    : tab === 'draft' ? SKELETON_COUNT_KEYS.myJobsDraft
+    : SKELETON_COUNT_KEYS.myJobsActive;
+  // Sidan paginerar med pageSize=20 — clampa så vi aldrig renderar fler placeholders
+  // än vad som faktiskt får plats i första view.
+  const cardCount = readCachedCount(countKey, 3, 6);
+
   return (
     <FullscreenSkeletonPortal>
       <motion.div
@@ -93,9 +109,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             <div className={`h-7 w-48 rounded ${SHAPE}`} />
           </div>
 
-          {/* StatsGrid — mobile shape mirrors the real dashboard exactly:
-              (1) full-width multi-col card with TWO cells (Aktiva | Utgångna)
-              (2) 3-col grid: Annonser / Visningar / Ansökningar */}
+          {/* StatsGrid — mobile shape mirrors the real dashboard exactly */}
           <div className="md:hidden space-y-2">
             <div className="rounded-lg overflow-hidden border border-white/20 bg-white/5">
               <div className="flex h-[62px]">
@@ -123,7 +137,6 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             </div>
           </div>
 
-
           {/* StatsGrid desktop shape — 5 columns */}
           <div className="hidden md:grid md:grid-cols-5 gap-2">
             <div className={`col-span-2 h-[76px] rounded-lg ${SHAPE}`} />
@@ -142,30 +155,90 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
           </div>
 
-          {/* Mobile: job cards (matches the in-page skeleton inside
-              EmployerDashboard: p-4 rounded-lg, logo left + text + pills) */}
-          <div className="md:hidden space-y-3 px-2">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                <div className="flex items-start gap-3">
-                  <div className={`h-10 w-10 rounded-lg ${SHAPE}`} />
-                  <div className="flex-1 space-y-2">
+          {/* Mobile: MobileJobCard-formade kort — hero-media (2:1), logo-cirkel
+              centrerad, titel, divider, list-rader, divider, action-rad.
+              Antalet styrs av senast kända tab-count via localStorage. */}
+          <div className="md:hidden flex flex-col items-center gap-4">
+            {Array.from({ length: cardCount }).map((_, i) => (
+              <div
+                key={i}
+                className="w-full max-w-[var(--job-card-mobile-max-width,24.5rem)] rounded-2xl overflow-hidden bg-white/5 border border-white/20"
+              >
+                {/* Hero media (2:1) med badge top-left + view counter top-right */}
+                <div
+                  className={`relative w-full ${SHAPE}`}
+                  style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }}
+                >
+                  <div className="absolute top-2.5 left-2.5 h-5 w-14 rounded-full bg-white/15" />
+                  <div className="absolute top-2.5 right-2.5 h-6 w-12 rounded-full bg-white/15" />
+                </div>
+                {/* Body */}
+                <div className="flex flex-col gap-2 py-2">
+                  {/* Logo-cirkel centrerad */}
+                  <div className="flex justify-center mt-1">
+                    <div className={`h-14 w-14 rounded-full ${SHAPE}`} />
+                  </div>
+                  {/* Titel — två rader centrerade */}
+                  <div className="flex flex-col items-center gap-1.5 px-4">
                     <div className={`h-4 w-3/4 rounded ${SHAPE}`} />
-                    <div className={`h-3 w-1/2 rounded ${SHAPE}`} />
-                    <div className="flex gap-2 mt-2">
-                      <div className={`h-5 w-16 rounded-full ${SHAPE}`} />
-                      <div className={`h-5 w-20 rounded-full ${SHAPE}`} />
-                    </div>
+                    <div className={`h-4 w-1/2 rounded ${SHAPE}`} />
+                  </div>
+                  <div className="h-px bg-white/10 mx-3 mt-1" />
+                  {/* List-rader — label + värde */}
+                  <div className="flex flex-col gap-2 px-4 py-1">
+                    {[0, 1, 2].map(row => (
+                      <div key={row} className="flex items-center justify-between">
+                        <div className={`h-3 w-20 rounded ${SHAPE}`} />
+                        <div className={`h-3 w-16 rounded ${SHAPE}`} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-px bg-white/10 mx-3" />
+                  {/* Action-rad — Edit + Delete */}
+                  <div className="flex gap-2 px-3 py-2">
+                    <div className={`flex-1 h-11 rounded-full ${SHAPE}`} />
+                    <div className={`flex-1 h-11 rounded-full ${SHAPE}`} />
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Desktop: card grid (1/2/3 cols) */}
+          {/* Desktop: card grid (1/2/3 cols) — samma card-form som mobil */}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className={`rounded-xl h-64 ${SHAPE}`} />
+            {Array.from({ length: Math.max(cardCount, 3) }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl overflow-hidden bg-white/5 border border-white/20"
+              >
+                <div
+                  className={`w-full ${SHAPE}`}
+                  style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }}
+                />
+                <div className="flex flex-col gap-2 py-2">
+                  <div className="flex justify-center mt-1">
+                    <div className={`h-14 w-14 rounded-full ${SHAPE}`} />
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 px-4">
+                    <div className={`h-4 w-3/4 rounded ${SHAPE}`} />
+                    <div className={`h-4 w-1/2 rounded ${SHAPE}`} />
+                  </div>
+                  <div className="h-px bg-white/10 mx-3 mt-1" />
+                  <div className="flex flex-col gap-2 px-4 py-1">
+                    {[0, 1, 2].map(row => (
+                      <div key={row} className="flex items-center justify-between">
+                        <div className={`h-3 w-20 rounded ${SHAPE}`} />
+                        <div className={`h-3 w-16 rounded ${SHAPE}`} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-px bg-white/10 mx-3" />
+                  <div className="flex gap-2 px-3 py-2">
+                    <div className={`flex-1 h-11 rounded-full ${SHAPE}`} />
+                    <div className={`flex-1 h-11 rounded-full ${SHAPE}`} />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
           </div>
