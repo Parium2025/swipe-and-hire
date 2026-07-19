@@ -40,7 +40,7 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
           userId
             ? supabase
                 .from('job_applications')
-                .select('id, custom_answers')
+                .select('id, custom_answers, questions_snapshot')
                 .eq('job_id', jobId)
                 .eq('applicant_id', userId)
                 .maybeSingle()
@@ -49,7 +49,15 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
 
         if (cancelled) return;
 
-        if (questionsRes.data) {
+        // 📸 Om användaren redan har sökt — visa de frusna frågorna
+        // från själva ansökan, inte de aktuella (som kan ha ändrats).
+        const appRow = applicationRes.data as
+          | { id: string; custom_answers?: unknown; questions_snapshot?: unknown }
+          | null;
+        const snapshot = appRow?.questions_snapshot;
+        if (appRow && Array.isArray(snapshot) && snapshot.length > 0) {
+          setQuestions(snapshot as (JobQuestion & { id: string })[]);
+        } else if (questionsRes.data) {
           setQuestions(questionsRes.data as (JobQuestion & { id: string })[]);
         }
         if (jobRes.data) {
@@ -59,9 +67,9 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
             work_end_time: jobRes.data.work_end_time,
           });
         }
-        if (applicationRes.data) {
+        if (appRow) {
           setHasAlreadyApplied(true);
-          const existing = (applicationRes.data as { custom_answers?: unknown }).custom_answers;
+          const existing = appRow.custom_answers;
           if (existing && typeof existing === 'object') {
             setAnswers(existing as Record<string, any>);
           }
