@@ -59,7 +59,7 @@ export function AuthSplashScreen() {
         setIsVisible(false);
         setIsFadingOut(false);
         setDotsFading(false);
-      }, 180);
+      }, CONTENT_FADE_OUT_MS);
       return () => clearTimeout(timer);
     }
 
