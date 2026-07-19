@@ -4,9 +4,12 @@ import { authSplashEvents } from '@/lib/authSplashEvents';
 import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 
 // Bara en kort frame-cover. Den får täcka blink, men aldrig vänta in auth/profile.
-const APP_TO_AUTH_COVER_MS = 220;
-const AUTH_TO_APP_COVER_MS = 260;
-const CONTENT_FADE_OUT_MS = 90;
+// Premium app-feel: låt taglinen hinna andas. Login → app får längst tid
+// eftersom /home behöver ett par frames på sig att rendera efter navigate,
+// annars ser man en kort blink innan hemskärmen paintat.
+const APP_TO_AUTH_COVER_MS = 620;
+const AUTH_TO_APP_COVER_MS = 950;
+const CONTENT_FADE_OUT_MS = 220;
 
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
