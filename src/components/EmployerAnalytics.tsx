@@ -643,15 +643,83 @@ const EmployerAnalytics = memo(() => {
 
   if (isLoading && !show) {
     return (
-      <div className="space-y-4 responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
-        <div className="h-10 w-48 bg-white/10 rounded-xl animate-pulse" />
-        <div className="grid grid-cols-2 gap-3">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="bg-white/5 rounded-2xl p-6 flex flex-col items-center">
-              <div className="h-20 w-20 bg-white/10 rounded-full animate-pulse mb-3" />
-              <div className="h-3 w-24 bg-white/10 rounded animate-pulse" />
+      <div className="space-y-5 responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)] animate-pulse">
+        {/* Header */}
+        <div className="flex items-center gap-3 justify-center">
+          <div className="h-10 w-10 rounded-xl bg-white/10 shrink-0" />
+          <div className="space-y-1.5">
+            <div className="h-5 w-40 bg-white/10 rounded" />
+            <div className="h-3 w-48 bg-white/10 rounded" />
+          </div>
+        </div>
+
+        {/* Time filter pills */}
+        <div className="flex gap-1.5 justify-center">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-7 w-12 rounded-full bg-white/10" />
+          ))}
+        </div>
+
+        {/* Trend pills (3-col) */}
+        <div className="grid grid-cols-3 gap-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-3 space-y-2">
+              <div className="flex items-center gap-1.5">
+                <div className="h-3 w-3 rounded bg-white/10" />
+                <div className="h-3 w-16 bg-white/10 rounded" />
+              </div>
+              <div className="h-6 w-20 bg-white/10 rounded" />
+              <div className="h-2.5 w-14 bg-white/10 rounded" />
+              <div className="h-3 w-10 bg-white/10 rounded" />
             </div>
           ))}
+        </div>
+
+        {/* Best day + TTFA summary (2-col) */}
+        <div className="grid grid-cols-2 gap-2">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="h-3 w-24 bg-white/10 rounded" />
+                <div className="h-3 w-3 rounded-full bg-white/10" />
+              </div>
+              <div className="h-7 w-20 bg-white/10 rounded" />
+              <div className="h-2.5 w-28 bg-white/10 rounded" />
+            </div>
+          ))}
+        </div>
+
+        {/* TTFA list card */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="h-4 w-44 bg-white/10 rounded" />
+            <div className="h-3 w-3 rounded-full bg-white/10" />
+          </div>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="h-3 flex-1 max-w-[140px] bg-white/10 rounded" />
+                  <div className="h-4 w-14 rounded-full bg-white/10" />
+                </div>
+                <div className="h-3 w-16 bg-white/10 rounded" />
+              </div>
+              {i < 4 && <div className="h-px w-full bg-white/5" />}
+            </div>
+          ))}
+        </div>
+
+        {/* Konverteringar card */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4">
+          <div className="h-4 w-32 bg-white/10 rounded" />
+          <div className="flex items-center justify-around">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex flex-col items-center gap-2">
+                <div className="h-16 w-16 rounded-full bg-white/10" />
+                <div className="h-3 w-14 bg-white/10 rounded" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
