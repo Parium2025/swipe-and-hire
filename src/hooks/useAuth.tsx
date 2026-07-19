@@ -13,7 +13,7 @@ import { isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage } from 
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
-import { authSplashEvents } from '@/lib/authSplashEvents';
+import { authSplashEvents, cacheAuthRoleForEmail, getCachedAuthRoleForEmail, normalizeAuthSplashRole } from '@/lib/authSplashEvents';
 import { forceConnectivityCheck, getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { useSessionManager, clearSessionToken } from '@/hooks/useSessionManager';
 import { useQueryClient } from '@tanstack/react-query';
@@ -140,7 +140,7 @@ interface AuthContextType {
     company_description?: string;
     employee_count?: string;
   }) => Promise<{ error?: any }>;
-  signIn: (email: string, password: string) => Promise<{ error?: any }>;
+  signIn: (email: string, password: string, roleHint?: UserRole) => Promise<{ error?: any }>;
   signInWithPhone: (phone: string) => Promise<{ error?: any }>;
   verifyOtp: (phone: string, otp: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
@@ -941,6 +941,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // eller utloggning — utan att behöva vänta på ett profil-fetch.
         try {
           localStorage.setItem('parium-last-role', profileRole);
+          cacheAuthRoleForEmail(session?.user?.email, profileRole);
         } catch { /* localStorage kan vara blockerad */ }
 
         if (membershipOrgId) {
@@ -1127,15 +1128,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, roleHint?: UserRole) => {
     try {
       setAuthAction('login');
       setLoading(true);
       isSigningInRef.current = true;
       
-      // 🎬 Trigga auth splash CENTRALT för premium känsla (exakt som logout)
+      const cachedRoleForEmail = getCachedAuthRoleForEmail(email);
+
+      // 🎬 Trigga auth splash CENTRALT för premium känsla (exakt som logout).
+      // Prioritet: tidigare känd roll för just e-posten → explicit roll från audience-länk.
+      // Vanlig login-form får inte gissa jobbsökare, eftersom arbetsgivare då kan få fel text.
       // OBS: Auth-komponenterna ska INTE trigga splash separat
-      authSplashEvents.show();
+      authSplashEvents.show(cachedRoleForEmail ?? roleHint);
       
       // 🗑️ KRITISKT: Rensa ALL app-cache DIREKT vid login
       // Detta förhindrar att gammal data (t.ex. snö-vädereffekt från tidigare session)
@@ -1206,6 +1211,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         setAuthAction(null);
         return { error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
+      }
+
+      const metadataRole = normalizeAuthSplashRole((signInData?.user?.user_metadata as any)?.role);
+      if (metadataRole) {
+        cacheAuthRoleForEmail(signInData.user.email ?? email, metadataRole);
+        authSplashEvents.show(metadataRole);
       }
  
       // Lyckad inloggning – vänta på minsta visningstid OCH att profilen laddas
@@ -1330,12 +1341,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Sätt loading state för smooth utloggning
       setLoading(true);
 
-      // 🧹 Rensa senaste rollen INNAN splash triggas så att taglinen
-      // inte flashar fel text när nästa användare loggar in.
-      try { localStorage.removeItem('parium-last-role'); } catch {}
+      const currentSplashRole = (profile as any)?.role || userRole?.role || null;
 
       // 🎬 Trigga auth splash för premium känsla vid utloggning
-      authSplashEvents.show();
+      authSplashEvents.show(currentSplashRole);
 
       // Vänta för smooth känsla
       await new Promise(resolve => setTimeout(resolve, 550));

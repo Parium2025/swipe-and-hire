@@ -261,7 +261,8 @@ const AuthDesktop = ({
       
        if (isLogin) {
           // 🎬 Splash triggas nu CENTRALT i signIn (useAuth.tsx) - ingen dubblering här
-          const result = await signIn(currentEmail, currentPassword);
+          const explicitRoleHint = initialRole === 'employer' || initialRole === 'job_seeker' ? role : undefined;
+          const result = await signIn(currentEmail, currentPassword, explicitRoleHint);
 
          if (result?.error) {
            if (result.error.code === 'email_not_confirmed') {
