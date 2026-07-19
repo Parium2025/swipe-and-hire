@@ -22,6 +22,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
+import { ProfilePreviewSkeleton } from '@/components/profile/ProfilePreviewSkeleton';
 
 interface ProfileViewData {
   id: string;
