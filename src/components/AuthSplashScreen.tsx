@@ -182,9 +182,9 @@ export function AuthSplashScreen() {
         >
           {lastRole === 'employer'
             ? 'Bygg ditt drömteam här'
-            : lastRole === 'jobseeker'
+            : lastRole === 'job_seeker'
               ? 'Din karriärresa börjar här'
-              : 'Placeholder'}
+              : '\u00A0'}
         </p>
         
         {/* Pulserande prickar - exakt samma som index.html */}
