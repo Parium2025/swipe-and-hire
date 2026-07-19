@@ -22,6 +22,7 @@ export const SKELETON_COUNT_KEYS = {
   myJobsActive: 'parium:myJobs:activeLastCount',
   myJobsExpired: 'parium:myJobs:expiredLastCount',
   myJobsDraft: 'parium:myJobs:draftLastCount',
+  jobTemplates: 'parium:jobTemplates:lastCount',
 } as const;
 
 export function readCachedCount(key: string, fallback = 6, max = 9): number {
