@@ -140,10 +140,11 @@ export function AuthSplashScreen() {
         justifyContent: 'flex-start',
         paddingTop: 'clamp(calc(env(safe-area-inset-top, 0px) + 24px), 5vw, 50px)',
         background: 'hsl(215, 100%, 12%)',
-        opacity: isFadingOut ? 0 : 1,
-        transition: 'opacity 0.5s ease-out',
+        // Background is ALWAYS fully opaque — we never fade the shell itself,
+        // only the inner content. This eliminates the "blink through" effect
+        // where the app beneath was visible during a semi-transparent fade.
+        opacity: 1,
         transform: 'translateZ(0)',
-        willChange: 'opacity',
         pointerEvents: isFadingOut ? 'none' : 'auto',
       }}
     >
@@ -153,9 +154,10 @@ export function AuthSplashScreen() {
           flexDirection: 'column',
           alignItems: 'center',
           opacity: isFadingIn && !isFadingOut ? 1 : 0,
-          transition: 'opacity 0.4s ease-out',
+          transition: 'opacity 0.3s ease-out',
         }}
       >
+
         {/* Parium Logo - inbäddad data-URI (offline-redo) */}
         <img
           src={authLogoDataUri}
