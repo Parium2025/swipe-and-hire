@@ -1348,6 +1348,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authStorage.clear();
       
       // 🔧 Tvinga user/session till null om onAuthStateChange inte hann fira
+      currentUserIdRef.current = null;
       setUser(null);
       setSession(null);
       setProfile(null);
@@ -1378,6 +1379,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearSessionToken();
       authStorage.clear();
       // 🔧 Tvinga state till null
+      currentUserIdRef.current = null;
       setUser(null);
       setSession(null);
       setProfile(null);
