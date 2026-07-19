@@ -11,7 +11,14 @@ const supabaseAdmin = createClient(
 
 interface ResetPasswordRequest {
   email: string;
+  origin?: string;
 }
+
+const ALLOWED_ORIGINS = [
+  "https://parium.se",
+  "https://www.parium.se",
+  "https://parium-ab.lovable.app",
+];
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -19,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email } = (await req.json()) as ResetPasswordRequest;
+    const { email, origin } = (await req.json()) as ResetPasswordRequest;
 
     if (!email) {
       return new Response(
@@ -31,7 +38,8 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Preparing password reset for: ${email}`);
 
     // 1) Generera Supabases recovery-länk. Rör inte auth-flödet i övrigt.
-    const redirectTo = "https://parium.se/auth?type=recovery";
+    // Använd kanonisk domän som standard, men tillåt kända domäner från klienten för test/preview.
+    const redirectTo = `${origin && ALLOWED_ORIGINS.includes(origin) ? origin : "https://parium.se"}/auth?reset=true`;
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: "recovery",
       email,

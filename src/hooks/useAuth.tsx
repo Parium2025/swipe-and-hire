@@ -1648,7 +1648,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Tillbaka till vår edge function - den kommer att fungera nu
       const { data, error } = await supabase.functions.invoke('send-reset-password', {
-        body: { email }
+        body: { email, origin: window.location.origin }
       });
 
       if (error) {
