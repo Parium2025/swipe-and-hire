@@ -86,7 +86,7 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
         userId
           ? supabase
               .from('job_applications')
-              .select('custom_answers')
+              .select('custom_answers, questions_snapshot')
               .eq('job_id', jobId)
               .eq('applicant_id', userId)
               .maybeSingle()
@@ -97,7 +97,14 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
         const [jobRes, questionsRes, answersRes] = await Promise.all(fetchPromises);
         if (cancelled) return;
         setDetail(jobRes.data ?? null);
-        setQuestions((questionsRes.data as (JobQuestion & { id: string })[]) ?? []);
+        // 📸 Snapshot först: har användaren redan sökt använder vi de frusna
+        // frågorna från ansökan så det som visas matchar det som besvarades.
+        const appSnap = (answersRes.data as any)?.questions_snapshot;
+        if (Array.isArray(appSnap) && appSnap.length > 0) {
+          setQuestions(appSnap as (JobQuestion & { id: string })[]);
+        } else {
+          setQuestions((questionsRes.data as (JobQuestion & { id: string })[]) ?? []);
+        }
         const answers = answersRes.data?.custom_answers;
         if (answers && typeof answers === 'object' && !Array.isArray(answers)) {
           setMyAnswers(answers as Record<string, any>);
