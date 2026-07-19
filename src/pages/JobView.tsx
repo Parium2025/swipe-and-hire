@@ -563,7 +563,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   };
 
   if (loading || (!job && !hasLoadedOnce.current)) {
-    return null;
+    return <JobViewSkeleton asOverlay={asOverlay} />;
   }
 
   const handleBack = () => {
