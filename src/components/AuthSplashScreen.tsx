@@ -53,12 +53,14 @@ export function AuthSplashScreen() {
   useEffect(() => {
     if (!isTriggered) {
       if (isVisible) {
+        // Fade CONTENT only (background stays opaque) so the app beneath
+        // never blinks through a semi-transparent overlay.
         setIsFadingOut(true);
+        setIsFadingIn(false);
         const timer = setTimeout(() => {
           setIsVisible(false);
           setIsFadingOut(false);
-          setIsFadingIn(false);
-        }, 400);
+        }, 260);
         return () => clearTimeout(timer);
       }
       return;
@@ -75,7 +77,6 @@ export function AuthSplashScreen() {
   // opaque immediately so protected/outside pages never flash during logout.
   useEffect(() => {
     if (isVisible && imageLoaded && !isFadingOut) {
-      // Use requestAnimationFrame for smooth fade-in like index.html
       requestAnimationFrame(() => {
         setIsFadingIn(true);
       });
@@ -96,21 +97,24 @@ export function AuthSplashScreen() {
   useEffect(() => {
     if (!isTriggered || !isVisible) return;
     
-    // Fade dots 0.5s before splash fades
+    // Fade dots 0.4s before splash content fades
     const dotsTimer = setTimeout(() => {
       setDotsFading(true);
-    }, MINIMUM_DISPLAY_MS - 500);
+    }, MINIMUM_DISPLAY_MS - 400);
     
     const timer = setTimeout(() => {
       setIsFadingIn(false);
       setIsFadingOut(true);
       
+      // Background stays OPAQUE the whole time. When the content is fully
+      // invisible we remove the shell in a single frame — no fade of the
+      // background layer, so the app beneath never bleeds through.
       setTimeout(() => {
         setIsVisible(false);
         setIsFadingOut(false);
         setDotsFading(false);
         authSplashEvents.hide();
-      }, 500);
+      }, 300);
     }, MINIMUM_DISPLAY_MS);
     
     return () => {
