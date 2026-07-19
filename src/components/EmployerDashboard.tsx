@@ -120,6 +120,30 @@ const EmployerDashboard = memo(() => {
       return () => clearTimeout(t);
     }
   }, [loading, initialLoadDone]);
+
+  // Cachea per-tab-antal så skeletonen nästa gång rendrar exakt rätt antal kort
+  // för den tab användaren är på. Skriver server-truth när tillgängligt, annars
+  // klient-buckets. Skrivs endast när data är klar för att undvika flimmer.
+  const cachedCountsRef = useRef({ active: -1, expired: -1, draft: -1 });
+  useEffect(() => {
+    if (loading) return;
+    const active = serverCounts?.active ?? jobs.filter(j => isEmployerJobActive(j)).length;
+    const expired = serverCounts?.expired ?? jobs.filter(j => isEmployerJobExpired(j)).length;
+    const draft = serverCounts?.draft ?? jobs.filter(j => isEmployerJobDraft(j)).length;
+    if (cachedCountsRef.current.active !== active) {
+      writeCachedCount(SKELETON_COUNT_KEYS.myJobsActive, active);
+      cachedCountsRef.current.active = active;
+    }
+    if (cachedCountsRef.current.expired !== expired) {
+      writeCachedCount(SKELETON_COUNT_KEYS.myJobsExpired, expired);
+      cachedCountsRef.current.expired = expired;
+    }
+    if (cachedCountsRef.current.draft !== draft) {
+      writeCachedCount(SKELETON_COUNT_KEYS.myJobsDraft, draft);
+      cachedCountsRef.current.draft = draft;
+    }
+  }, [loading, jobs, serverCounts]);
+
   
   const {
     searchInput,
