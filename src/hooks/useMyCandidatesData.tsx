@@ -37,6 +37,7 @@ export interface MyCandidateData {
   work_schedule: string | null;
   availability: string | null;
   custom_answers: any | null;
+  questions_snapshot?: any | null;
   status: string;
   job_title: string | null;
   profile_image_url: string | null;
