@@ -138,8 +138,9 @@ const handler = async (req: Request): Promise<Response> => {
       employerEmail, employerName, interviewId,
     } = parsed.data;
 
-    // === AUTHORIZATION: if interviewId provided, caller must own it ===
-    if (interviewId) {
+    // === AUTHORIZATION: caller MUST own the interview (or its job/org) ===
+    // interviewId is required — no anonymous "send email to anyone" path.
+    {
       const { data: interview } = await supabaseAdmin
         .from('interviews')
         .select('employer_id, job_id')
@@ -177,6 +178,7 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
     }
+
 
 
 
