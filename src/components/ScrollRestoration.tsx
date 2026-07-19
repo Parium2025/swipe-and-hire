@@ -29,11 +29,39 @@ export function ScrollRestoration() {
   useEffect(() => {
     const previousPath = previousPathRef.current;
     if (navigationType === 'PUSH' && previousPath !== location.pathname) {
+      // 🛟 Säkerhetsnät: om användaren just öppnade en JobView-overlay från
+      // en listvy (t.ex. /search-jobs → /job-view/:id) — snapshota föregående
+      // sidas exakta scroll-position här också, som backup ifall kortets
+      // pointerdown-hook missades (edge-swipe, snabb tap, inre child som
+      // stoppar propagation osv.).
+      const nowOverlay =
+        location.pathname.startsWith('/job-view/') ||
+        location.pathname.startsWith('/job/');
+      const wasList = !previousPath.startsWith('/job-view/') && !previousPath.startsWith('/job/');
+      if (nowOverlay && wasList) {
+        const container = getRestorableScrollContainer();
+        if (container) {
+          const positions = readPositions();
+          const existing = positions[previousPath];
+          // Skriv bara över om ny position skiljer sig — undvik att förstöra
+          // en färskare pointerdown-snapshot med samma värde.
+          const anchor = getAnchorSnapshot(container);
+          positions[previousPath] = {
+            top: container.scrollTop,
+            anchorId: anchor?.anchorId ?? existing?.anchorId,
+            anchorOffset: anchor?.anchorOffset ?? existing?.anchorOffset,
+            scrollHeight: container.scrollHeight,
+          };
+          writePositions(positions);
+        }
+      }
+
       clearFooterRestoreForTarget(previousPath);
       clearLatestFooterNavigationIfLeavingTarget(previousPath);
     }
     previousPathRef.current = location.pathname;
   }, [location.pathname, navigationType]);
+
 
   // -----------------------------------------------------------------------
   // Save scroll position on user scroll
