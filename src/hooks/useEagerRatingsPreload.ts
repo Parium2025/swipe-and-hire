@@ -130,10 +130,13 @@ export const clearAllAppCaches = () => {
   // weather effects flash on the next login before the deferred clear runs.
   try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
 
-  // On /auth route, defer the rest to avoid blocking touch responsiveness
+  // On /auth route OR while the auth transition-gate is active, defer the rest
+  // so logout click → /auth navigation is never blocked by localStorage sweeps.
   const isAuthRoute = typeof window !== 'undefined' && window.location.pathname === '/auth';
+  const isAuthTransition = typeof document !== 'undefined'
+    && (document.documentElement.dataset.authTransition === 'true' || document.body.dataset.authTransition === 'true');
 
-  if (isAuthRoute) {
+  if (isAuthRoute || isAuthTransition) {
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
       (window as any).requestIdleCallback(() => clearAllAppCachesSync(), { timeout: 3000 });
     } else {

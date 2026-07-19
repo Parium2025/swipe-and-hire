@@ -9,7 +9,7 @@ import { getMediaUrl } from '@/lib/mediaManager';
 import { clearMediaUrlCache, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
-import { isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage } from '@/lib/authStorage';
+import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
@@ -1340,36 +1340,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 🎬 Trigga auth splash för premium känsla vid utloggning
       authSplashEvents.show(currentSplashRole);
 
-      // Remove session tracking before signing out
-      await removeSession();
-      
-      // Logga ut BARA denna enhet (scope: 'local').
-      // 'global' invaliderar alla sessioner på alla enheter — det vill vi INTE.
-      // Varje enhet ska kunna logga ut oberoende av varandra.
-      try {
-        await supabase.auth.signOut({ scope: 'local' });
-      } catch (serverErr) {
-        console.warn('SignOut failed:', serverErr);
-      }
-      
-      // 🧹 Alltid rensa lokalt — oavsett om server-logout lyckades
+      // 🧹 Rensa lokalt direkt och navigera omedelbart. Server/session-cleanup
+      // får INTE blockera knappen — det var orsaken till seg logout.
       clearAllDrafts();
       clearAllAppCaches();
       clearSessionToken();
-      
-      // 🔐 KRITISKT: Rensa auth-tokens från storage ALLTID
-      // Om signOut misslyckades (nätverksfel etc.) ligger tokens kvar
-      try {
-        const { authStorage: storage } = await import('@/lib/authStorage');
-        storage.clear();
-      } catch {}
+      authStorage.clear();
       
       // 🔧 Tvinga user/session till null om onAuthStateChange inte hann fira
+      currentUserIdRef.current = null;
       setUser(null);
       setSession(null);
       setProfile(null);
       setUserRole(null);
       setOrganization(null);
+      setLoading(false);
+      setAuthAction(null);
+
+      // Remove session tracking + auth-server logout in the background.
+      void (async () => {
+        try {
+          await removeSession();
+          await supabase.auth.signOut({ scope: 'local' });
+        } catch (serverErr) {
+          console.warn('SignOut background cleanup failed:', serverErr);
+        } finally {
+          setTimeout(() => {
+            isManualSignOutRef.current = false;
+          }, 500);
+        }
+      })();
       
     } catch (error: any) {
       console.error('Sign out error:', error);
@@ -1377,22 +1377,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAllDrafts();
       clearAllAppCaches();
       clearSessionToken();
-      
-      // 🔐 Rensa auth-tokens även vid oväntat fel
-      try {
-        const { authStorage: storage } = await import('@/lib/authStorage');
-        storage.clear();
-      } catch {}
+      authStorage.clear();
       // 🔧 Tvinga state till null
+      currentUserIdRef.current = null;
       setUser(null);
       setSession(null);
       setProfile(null);
       setUserRole(null);
       setOrganization(null);
-    } finally {
       setLoading(false);
-      isManualSignOutRef.current = false;
       setAuthAction(null);
+      setTimeout(() => {
+        isManualSignOutRef.current = false;
+      }, 500);
     }
   };
 

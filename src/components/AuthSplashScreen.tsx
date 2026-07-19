@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { useLocation } from 'react-router-dom';
 import { authSplashEvents } from '@/lib/authSplashEvents';
 
 import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 
-// Kort nog för att login/logout inte ska kännas segt, men tillräckligt för att
-// täcka route-bytet utan att auth- eller app-vyn blixtrar fram mellan frames.
-const MINIMUM_DISPLAY_MS = 320;
+// Bara en kort frame-cover. Den får täcka blink, men aldrig vänta in auth/profile.
+const APP_TO_AUTH_COVER_MS = 220;
+const AUTH_TO_APP_COVER_MS = 260;
+const CONTENT_FADE_OUT_MS = 90;
 
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
@@ -15,8 +15,6 @@ const MINIMUM_DISPLAY_MS = 320;
  * så att fade-in/out blir pixel-perfekt oavsett entry-point.
  */
 export function AuthSplashScreen() {
-  const location = useLocation();
-  
   // Prenumerera på splash-events
   const isTriggered = useSyncExternalStore(
     authSplashEvents.subscribe,
@@ -32,7 +30,6 @@ export function AuthSplashScreen() {
   const [lockedRole, setLockedRole] = useState<string | null>(() => authSplashEvents.getRole());
   const wasTriggeredRef = useRef(false);
   const isVisibleRef = useRef(false);
-  const cycleStartedAtRef = useRef(0);
   const cycleStartPathRef = useRef<string | null>(null);
   const isAuthPath = (path?: string | null) => path === '/auth' || path === '/auth/';
 
@@ -71,8 +68,7 @@ export function AuthSplashScreen() {
     }
 
     wasTriggeredRef.current = true;
-    cycleStartedAtRef.current = Date.now();
-    cycleStartPathRef.current = typeof window !== 'undefined' ? window.location.pathname : location.pathname;
+    cycleStartPathRef.current = typeof window !== 'undefined' ? window.location.pathname : '/auth';
 
     // Lås taglinen för hela splash-cykeln. Rollen kan uppdateras i bakgrunden
     // under login, men texten får inte byta mitt i animationen och skapa blink.
@@ -82,7 +78,7 @@ export function AuthSplashScreen() {
     setIsFadingIn(false);
     setDotsFading(false);
     setImageLoaded(false);
-  }, [isTriggered, location.pathname]);
+  }, [isTriggered]);
   
   // Trigger content fade-in when image is loaded. The shell background itself is
   // opaque immediately so protected/outside pages never flash during logout.
@@ -104,32 +100,20 @@ export function AuthSplashScreen() {
     return () => clearTimeout(t);
   }, [isVisible, imageLoaded]);
   
-  // Dölj först när själva auth-övergången har landat på nästa route.
-  // Login: startar på /auth → vänta tills vi är utanför /auth.
-  // Logout: startar inuti appen → vänta tills vi är på /auth.
-  // Det gör att varken inloggningsformuläret eller appen bakom hinner blixtra till.
+  // Dölj efter en kort, fast cover. Vi väntar inte på route/profile/nätverk här,
+  // eftersom logout då känns seg. Detta maskerar bara browserns enstaka blink-frame.
   useEffect(() => {
     if (!isTriggered || !isVisible) return;
 
     const startPath = cycleStartPathRef.current;
     if (!startPath) return;
 
-    const startedOnAuth = isAuthPath(startPath);
-    const routeHasSettled = startedOnAuth
-      ? !isAuthPath(location.pathname)
-      : isAuthPath(location.pathname);
-
-    if (!routeHasSettled) return;
-
-    const elapsed = Date.now() - cycleStartedAtRef.current;
-    const remainingMinimum = Math.max(MINIMUM_DISPLAY_MS - elapsed, 0);
-    const routePaintBuffer = 40;
-    const dotsDelay = Math.max(remainingMinimum - 140, 0);
+    const coverMs = isAuthPath(startPath) ? AUTH_TO_APP_COVER_MS : APP_TO_AUTH_COVER_MS;
     let finishTimer: ReturnType<typeof setTimeout> | undefined;
 
     const dotsTimer = setTimeout(() => {
       setDotsFading(true);
-    }, dotsDelay);
+    }, Math.max(coverMs - 80, 0));
 
     const timer = setTimeout(() => {
       setIsFadingIn(false);
@@ -144,15 +128,15 @@ export function AuthSplashScreen() {
         setIsFadingOut(false);
         setDotsFading(false);
         authSplashEvents.hide();
-      }, 180);
-    }, remainingMinimum + routePaintBuffer);
+      }, CONTENT_FADE_OUT_MS);
+    }, coverMs);
     
     return () => {
       clearTimeout(dotsTimer);
       clearTimeout(timer);
       if (finishTimer) clearTimeout(finishTimer);
     };
-  }, [isTriggered, isVisible, location.pathname]);
+  }, [isTriggered, isVisible]);
   
   if (!isVisible) return null;
   
@@ -185,7 +169,7 @@ export function AuthSplashScreen() {
           flexDirection: 'column',
           alignItems: 'center',
           opacity: isFadingIn && !isFadingOut ? 1 : 0,
-          transition: 'opacity 0.3s ease-out',
+          transition: 'opacity 0.14s ease-out',
         }}
       >
 
@@ -234,7 +218,7 @@ export function AuthSplashScreen() {
             alignItems: 'center', 
             gap: '10px',
             opacity: dotsFading ? 0 : 1,
-            transition: 'opacity 0.4s ease-out',
+            transition: 'opacity 0.12s ease-out',
           }}
         >
         <span 

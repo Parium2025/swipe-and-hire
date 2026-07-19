@@ -1,8 +1,8 @@
 /**
  * Event-baserat system för att visa auth-splash vid navigering till /auth.
  * 
- * Skalet visas i minst 4 sekunder för att ge tid för loggan att laddas
- * och avkodas helt innan den tonas ut.
+ * Skalet visas bara under själva route-bytet. Det får täcka blink,
+ * men aldrig göra login/logout långsammare.
  */
 
 type SplashListener = (visible: boolean) => void;
@@ -12,6 +12,27 @@ const listeners = new Set<SplashListener>();
 let currentlyVisible = false;
 let currentRole: AuthSplashRole | null = null;
 const TRANSITION_GATE_ID = 'parium-auth-transition-gate';
+
+const removeGateElement = () => {
+  if (typeof document === 'undefined') return;
+  try {
+    document.getElementById(TRANSITION_GATE_ID)?.remove();
+  } catch {
+    /* ignore */
+  }
+};
+
+const clearTransitionChrome = () => {
+  if (typeof document === 'undefined') return;
+  try {
+    delete document.documentElement.dataset.authTransition;
+    delete document.body.dataset.authTransition;
+    document.documentElement.style.removeProperty('background-color');
+    document.body.style.removeProperty('background-color');
+  } catch {
+    /* ignore */
+  }
+};
 
 const mountImmediateGate = () => {
   if (typeof document === 'undefined') return;
@@ -42,9 +63,8 @@ const mountImmediateGate = () => {
 const removeImmediateGate = () => {
   if (typeof document === 'undefined') return;
   try {
-    delete document.documentElement.dataset.authTransition;
-    delete document.body.dataset.authTransition;
-    document.getElementById(TRANSITION_GATE_ID)?.remove();
+    removeGateElement();
+    clearTransitionChrome();
   } catch {
     /* ignore */
   }
@@ -154,7 +174,10 @@ export const authSplashEvents = {
    * fallback-gaten tas bort utan visuell skillnad.
    */
   releaseGate() {
-    removeImmediateGate();
+    // Ta bara bort DOM-gaten när React-overlayn ligger ovanpå. Behåll den
+    // mörka browser-bakgrunden tills hela auth-övergången är klar, annars kan
+    // Safari/Chrome hinna sampla vit/app-bakgrund mellan två frames.
+    removeGateElement();
   },
 
   /**
