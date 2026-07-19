@@ -11,6 +11,38 @@ type AuthSplashRole = 'job_seeker' | 'employer';
 const listeners = new Set<SplashListener>();
 let currentlyVisible = false;
 let currentRole: AuthSplashRole | null = null;
+const TRANSITION_GATE_ID = 'parium-auth-transition-gate';
+
+const mountImmediateGate = () => {
+  if (typeof document === 'undefined') return;
+  try {
+    if (document.getElementById(TRANSITION_GATE_ID)) return;
+    const gate = document.createElement('div');
+    gate.id = TRANSITION_GATE_ID;
+    gate.setAttribute('aria-hidden', 'true');
+    gate.style.cssText = [
+      'position:fixed',
+      'inset:0',
+      'z-index:2147483646',
+      'background:hsl(215, 100%, 12%)',
+      'pointer-events:auto',
+      'opacity:1',
+      'transform:translateZ(0)',
+    ].join(';');
+    document.body.appendChild(gate);
+  } catch {
+    /* ignore */
+  }
+};
+
+const removeImmediateGate = () => {
+  if (typeof document === 'undefined') return;
+  try {
+    document.getElementById(TRANSITION_GATE_ID)?.remove();
+  } catch {
+    /* ignore */
+  }
+};
 
 export const normalizeAuthSplashRole = (role?: string | null): AuthSplashRole | null => {
   if (role === 'employer') return 'employer';
@@ -94,6 +126,9 @@ export const authSplashEvents = {
   show(role?: string | null) {
     persistSplashRole(role);
     if (currentlyVisible) return;
+    // Täcker skärmen synkront i samma click-frame, innan React hinner committa
+    // splash-komponenten. Det eliminerar mini-blixten vid login/logout.
+    mountImmediateGate();
     currentlyVisible = true;
     listeners.forEach(l => l(true));
   },
@@ -105,6 +140,15 @@ export const authSplashEvents = {
     if (!currentlyVisible) return;
     currentlyVisible = false;
     listeners.forEach(l => l(false));
+    removeImmediateGate();
+  },
+
+  /**
+   * När React-splashen har committat sin opaka overlay kan den synkrona
+   * fallback-gaten tas bort utan visuell skillnad.
+   */
+  releaseGate() {
+    removeImmediateGate();
   },
 
   /**
