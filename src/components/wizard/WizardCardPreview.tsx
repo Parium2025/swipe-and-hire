@@ -45,6 +45,7 @@ export interface WizardPreviewData {
   occupation?: string | null;
   metaLine?: string;
   employmentTypeLabel?: string;
+  workingHours?: string | null;
   location?: string;
   salaryText?: string | null;
   benefitsCount?: number;
