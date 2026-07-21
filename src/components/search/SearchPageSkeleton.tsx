@@ -41,14 +41,34 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 
 const SkeletonChrome = memo(function SkeletonChrome() {
   return (
-    <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/10 bg-transparent px-3">
-      <div className={`h-9 w-28 rounded-md ${SKELETON_SHAPE}`} />
-      <div className={`absolute left-1/2 -translate-x-1/2 h-5 w-16 rounded ${SKELETON_SHAPE}`} />
-      <div className="flex items-center gap-2">
-        <div className={`h-9 w-9 rounded-full ${SKELETON_SHAPE}`} />
-        <div className={`h-8 w-8 rounded-full ${SKELETON_SHAPE}`} />
-      </div>
-    </header>
+    <>
+      {/* MOBILE chrome — mirrors JobSeekerLayout mobile header */}
+      <header className="md:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/10 bg-transparent px-3">
+        <div className={`h-9 w-28 rounded-md ${SKELETON_SHAPE}`} />
+        <div className={`absolute left-1/2 -translate-x-1/2 h-5 w-16 rounded ${SKELETON_SHAPE}`} />
+        <div className="flex items-center gap-2">
+          <div className={`h-9 w-9 rounded-full ${SKELETON_SHAPE}`} />
+          <div className={`h-9 w-9 rounded-full ${SKELETON_SHAPE}`} />
+          <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SKELETON_SHAPE}`} />
+        </div>
+      </header>
+      {/* DESKTOP chrome — mirrors JobSeekerTopNav exactly (h-14, left-aligned pills) */}
+      <header className="hidden md:flex shrink-0 h-14 items-center border-b border-white/20 bg-transparent">
+        <div className="w-full responsive-container-wide flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <div className={`h-10 w-10 rounded-lg ${SKELETON_SHAPE}`} />
+            <div className="flex items-center gap-1 ml-1">
+              <div className={`h-9 w-[92px] rounded-lg ${SKELETON_SHAPE}`} />
+              <div className={`h-9 w-[104px] rounded-lg ${SKELETON_SHAPE}`} />
+              <div className={`h-9 w-[112px] rounded-lg ${SKELETON_SHAPE}`} />
+              <div className={`h-9 w-[104px] rounded-lg ${SKELETON_SHAPE}`} />
+              <div className={`h-9 w-9 rounded-lg ${SKELETON_SHAPE}`} />
+              <div className={`h-9 w-[68px] rounded-lg ${SKELETON_SHAPE}`} />
+            </div>
+          </div>
+        </div>
+      </header>
+    </>
   );
 });
 
