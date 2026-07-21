@@ -1472,7 +1472,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer focus:border-white/40"
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
+                    <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white transition-transform duration-200 ${showQuestionTypeDropdown ? 'rotate-180' : 'rotate-0'}`} />
                     
                     {showQuestionTypeDropdown && (
                       <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
@@ -1662,7 +1662,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       placeholder="t.ex. Mjukvaru- och systemutvecklare"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 focus:border-white/40"
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
+                    <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white transition-transform duration-200 ${showOccupationDropdown ? 'rotate-180' : 'rotate-0'}`} />
                     
                     {showOccupationDropdown && (
                       <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
@@ -1722,7 +1722,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
                           : 'Välj förmåner'}
                       </span>
-                      <ChevronDown className="h-4 w-4 text-white" />
+                      <ChevronDown className={`h-4 w-4 text-white transition-transform duration-200 ${showBenefitsDropdown ? 'rotate-180' : 'rotate-0'}`} />
                     </div>
                     
                     {showBenefitsDropdown && (
@@ -1781,7 +1781,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         }
                       }}
                       placeholder="Lägg till egen förmån"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 text-sm focus:border-white/40 flex-1"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40 flex-1"
                     />
                     <button
                       type="button"
@@ -1809,7 +1809,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showEmploymentTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
+                    <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white transition-transform duration-200 ${showEmploymentTypeDropdown ? 'rotate-180' : 'rotate-0'}`} />
                     
                     {showEmploymentTypeDropdown && (
                        <div className="absolute top-full left-0 right-0 glass-dropdown">
@@ -1850,7 +1850,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showSalaryTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
+                    <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white transition-transform duration-200 ${showSalaryTypeDropdown ? 'rotate-180' : 'rotate-0'}`} />
                     
                     {showSalaryTypeDropdown && (
                       <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
@@ -1880,7 +1880,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showSalaryTransparencyDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
+                    <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white transition-transform duration-200 ${showSalaryTransparencyDropdown ? 'rotate-180' : 'rotate-0'}`} />
                     
                     {showSalaryTransparencyDropdown && (
                       <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
@@ -1960,7 +1960,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showWorkLocationDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
+                    <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white transition-transform duration-200 ${showWorkLocationDropdown ? 'rotate-180' : 'rotate-0'}`} />
                     
                     {showWorkLocationDropdown && (
                       <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
@@ -1990,7 +1990,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${showRemoteWorkDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
+                    <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white transition-transform duration-200 ${showRemoteWorkDropdown ? 'rotate-180' : 'rotate-0'}`} />
                     
                     {showRemoteWorkDropdown && (
                       <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
