@@ -47,6 +47,8 @@ export interface BaseFormData {
   duration_amount?: string;
   /** 'weeks' | 'months' */
   duration_unit?: string;
+  /** ISO date (YYYY-MM-DD) when the position starts. */
+  start_date?: string;
 }
 
 export interface JobFormData extends BaseFormData {
