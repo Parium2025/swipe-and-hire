@@ -833,6 +833,7 @@ const MobileJobWizard = ({
     image_focus_position: 'center',
     image_focus_position_desktop: 'center',
     overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
+    start_date: '',
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
