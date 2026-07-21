@@ -3315,7 +3315,7 @@ const MobileJobWizard = ({
                               {customQuestions.length}
                             </span>
                           ) : (
-                            <span className="text-white/50 text-xs font-normal">(valfritt)</span>
+                            <span className="text-white text-xs font-normal">(valfritt)</span>
                           )}
                         </div>
                         <Button
