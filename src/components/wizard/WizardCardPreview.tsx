@@ -447,6 +447,7 @@ export const WizardListPreview = memo(function WizardListPreview({
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
           <PreviewRow label="Plats" value={location || '–'} />
           <PreviewRow label="Arbetstider" value={workingHours || '–'} />
+          <PreviewRow label="Startdatum" value={startDateLabel || '–'} />
           <PreviewRow label="Lön" value={salaryText || '–'} />
           <PreviewRow
             label="Förmåner"
