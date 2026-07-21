@@ -55,6 +55,8 @@ export interface WizardPreviewData {
   overlayTextColor?: string | null;
   recruiterName?: string | null;
   publishedLabel?: string | null;
+  startDateLabel?: string | null;
+  questionsCount?: number;
   viewsCount?: number;
   isExpired?: boolean;
   isActive?: boolean;
