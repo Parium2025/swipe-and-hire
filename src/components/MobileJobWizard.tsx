@@ -325,6 +325,7 @@ const MobileJobWizard = ({
           duration_amount: existingJob.duration_amount != null ? String(existingJob.duration_amount) : '',
           duration_unit: existingJob.duration_unit || 'months',
           work_schedule: existingJob.work_schedule || '',
+          start_date: (existingJob as any).start_date || '',
           work_start_time: existingJob.work_start_time || '',
           work_end_time: existingJob.work_end_time || '',
           contact_email: existingJob.contact_email || '',
