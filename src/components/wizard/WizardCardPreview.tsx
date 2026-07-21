@@ -462,6 +462,19 @@ export const WizardListPreview = memo(function WizardListPreview({
               )
             }
           />
+          <PreviewRow
+            label="Frågor"
+            value={
+              questionsCount > 0 ? (
+                <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium">
+                  <FileQuestion className="h-3 w-3 flex-shrink-0" />
+                  {questionsCount} {questionsCount === 1 ? 'fråga' : 'st'}
+                </span>
+              ) : (
+                '–'
+              )
+            }
+          />
           <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
           {isExpired && (
             <PreviewRow
