@@ -263,6 +263,7 @@ export const createEmptyJobFormData = (): JobFormData => ({
   image_focus_position: 'center',
   image_focus_position_desktop: 'center',
   overlay_text_color: '#FFFFFF',
+  start_date: '',
 });
 
 export const createEmptyTemplateFormData = (): TemplateFormData => ({
