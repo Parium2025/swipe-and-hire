@@ -113,7 +113,8 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
     : SKELETON_COUNT_KEYS.myJobsActive;
   // Sidan paginerar med pageSize=20 — clampa så vi aldrig renderar fler placeholders
   // än vad som faktiskt får plats i första view.
-  const cardCount = readCachedCount(countKey, 3, 6);
+  const cardCount = useLiveEmployerJobCount(tab, countKey);
+
 
   return (
     <FullscreenSkeletonPortal>
