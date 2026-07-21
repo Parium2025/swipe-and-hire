@@ -369,6 +369,8 @@ export const WizardListPreview = memo(function WizardListPreview({
   overlayTextColor,
   recruiterName,
   publishedLabel,
+  startDateLabel,
+  questionsCount = 0,
   viewsCount = 0,
   isExpired,
   isActive,
