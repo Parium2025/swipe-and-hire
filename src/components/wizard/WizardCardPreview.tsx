@@ -529,6 +529,8 @@ interface BuildPreviewInput {
   overlayTextColor?: string | null;
   recruiterName?: string | null;
   createdAt?: string | null;
+  startDate?: string | null;
+  questionsCount?: number;
   viewsCount?: number;
   isActive?: boolean;
 }
