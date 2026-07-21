@@ -67,6 +67,10 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
     ? `${extra?.work_start_time ?? ''} – ${extra?.work_end_time ?? ''}`
     : null;
 
+  const startDateLabel = extra?.start_date
+    ? new Date(extra.start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+
   return (
     <div className="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
       <h3 className="text-white font-bold text-base">Snabb info</h3>
@@ -89,6 +93,7 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
         {job.occupation && <DetailRow label="Yrke" value={cap(job.occupation) ?? ''} />}
         {job.location && <DetailRow label="Ort" value={cap(job.location) ?? ''} />}
         {workTimeLabel && <DetailRow label="Arbetstid" value={workTimeLabel} />}
+        {startDateLabel && <DetailRow label="Startdatum" value={startDateLabel} />}
         {salaryLabel && <DetailRow label="Lön" value={salaryLabel} />}
         {job.positions_count && job.positions_count > 1 && <DetailRow label="Antal tjänster" value={`${job.positions_count} st`} />}
       </div>
