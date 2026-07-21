@@ -2145,10 +2145,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     {/* Anpassade frågor */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-white font-medium flex items-center gap-2">
+                        <h4 className="text-white font-medium">
                           Anpassade frågor (valfritt)
                           {customQuestions.length > 0 && (
-                            <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary/20 border border-primary/40 text-white text-xs font-semibold">
+                            <span className="ml-2 inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary/20 border border-primary/40 text-white text-xs font-semibold align-middle">
                               {customQuestions.length}
                             </span>
                           )}
