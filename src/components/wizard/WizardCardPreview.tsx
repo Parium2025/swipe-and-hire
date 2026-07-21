@@ -95,10 +95,11 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   occupation,
   metaLine,
   workingHours,
+  employmentTypeLabel,
   salaryText,
   benefitsCount = 0,
   applicationsCount = 0,
-  daysLeftLabel,
+  publishedLabel,
   overlayTextColor,
   onOpenForm,
   onOpenCompany,
@@ -225,13 +226,13 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
               />
             )}
             {salaryText && <PreviewPill text={salaryText} />}
-            {daysLeftLabel && <PreviewPill text={daysLeftLabel} />}
             {benefitsCount > 0 && (
               <PreviewPill
                 icon={<Gift className="h-2 w-2 text-white" />}
                 text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
               />
             )}
+            {publishedLabel && <PreviewPill text={`Publicerad ${publishedLabel}`} />}
           </div>
         </div>
       </div>
@@ -424,7 +425,7 @@ export const WizardListPreview = memo(function WizardListPreview({
       <div className="w-full bg-[hsl(215,85%,10%)]/95 backdrop-blur-sm border-t border-white/10 px-3 py-2">
         <div className="space-y-1.5">
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
-          {workingHours && <PreviewRow label="Arbetstider" value={workingHours} />}
+          <PreviewRow label="Arbetstider" value={workingHours || '–'} />
           <PreviewRow label="Plats" value={location || '–'} />
           <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
           <PreviewRow label="Lön" value={salaryText || '–'} />
