@@ -3100,6 +3100,17 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Startdatum</Label>
+                  <Input
+                    type="date"
+                    value={formData.start_date || ''}
+                    onChange={(e) => handleInputChange('start_date', e.target.value)}
+                    className="bg-white/10 border-white/20 text-white h-11 !min-h-0 text-sm focus:border-white/40"
+                  />
+                </div>
+
+
+                <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
                   <div className="flex gap-3 items-center">
                     <div className="flex-1">
