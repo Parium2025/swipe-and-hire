@@ -532,11 +532,7 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     daysLeftLabel = '30 dagar kvar';
   }
 
-  const employmentLabelWithDetail = [input.employmentTypeLabel, input.employmentTypeDetail]
-    .filter(Boolean)
-    .join(' · ');
-
-  const metaParts = [employmentLabelWithDetail, input.location].filter(Boolean);
+  const metaParts = [input.employmentTypeLabel, input.location].filter(Boolean);
 
   const publishedLabel = input.createdAt
     ? formatDateShortSv(input.createdAt)
@@ -550,7 +546,8 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     imageFocusPosition: input.imageFocusPosition,
     occupation: input.occupation || null,
     metaLine: metaParts.join(' • '),
-    employmentTypeLabel: employmentLabelWithDetail || undefined,
+    employmentTypeLabel: input.employmentTypeLabel || undefined,
+    workingHours: input.employmentTypeDetail || null,
     location: input.location,
     salaryText,
     benefitsCount: input.benefits?.length ?? 0,
