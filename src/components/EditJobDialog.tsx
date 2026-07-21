@@ -1740,7 +1740,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0 &&
              formData.work_start_time &&
-             formData.work_end_time;
+             formData.work_end_time &&
+             !!(formData.start_date && formData.start_date.trim());
     }
     
     if (currentStep === 1) {
@@ -2279,7 +2280,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Startdatum</Label>
+                        <Label className="text-white font-medium text-sm">Startdatum *</Label>
                         <StartDatePicker
                           value={formData.start_date || ''}
                           onChange={(v) => handleInputChange('start_date', v)}
