@@ -3315,7 +3315,7 @@ const MobileJobWizard = ({
                               {customQuestions.length}
                             </span>
                           ) : (
-                            <span className="text-white/50 text-xs font-normal">(valfritt)</span>
+                            <span className="text-white text-xs font-normal">(valfritt)</span>
                           )}
                         </div>
                         <Button
@@ -3532,7 +3532,7 @@ const MobileJobWizard = ({
                         <AlertDialogFooter className="flex-row justify-center gap-2 mt-4">
                           <AlertDialogCancel
                             onClick={() => setDeleteTemplateId(null)}
-                            className="btn-dialog-action mt-0 rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
+                            className="btn-dialog-action mt-0 rounded-full border-white/30 text-white !bg-white/10 md:hover:!bg-white/20 md:hover:!text-white"
                           >
                             Avbryt
                           </AlertDialogCancel>

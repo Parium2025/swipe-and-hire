@@ -2706,7 +2706,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               <AlertDialogFooter className="mt-4 flex-row justify-center gap-2">
                                 <AlertDialogCancel
                                   onClick={() => setDeleteTemplateId(null)}
-                                  className="btn-dialog-action mt-0 rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
+                                  className="btn-dialog-action mt-0 rounded-full border-white/30 !bg-white/10 text-white md:hover:!bg-white/20 md:hover:!text-white"
                                 >
                                   Avbryt
                                 </AlertDialogCancel>
