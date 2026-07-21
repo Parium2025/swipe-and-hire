@@ -1541,8 +1541,10 @@ export type Database = {
           salary_type: string | null
           title: string
           updated_at: string
+          work_end_time: string | null
           work_location_type: string | null
           work_schedule: string | null
+          work_start_time: string | null
           workplace_address: string | null
           workplace_city: string | null
           workplace_county: string | null
@@ -1578,8 +1580,10 @@ export type Database = {
           salary_type?: string | null
           title: string
           updated_at?: string
+          work_end_time?: string | null
           work_location_type?: string | null
           work_schedule?: string | null
+          work_start_time?: string | null
           workplace_address?: string | null
           workplace_city?: string | null
           workplace_county?: string | null
@@ -1615,8 +1619,10 @@ export type Database = {
           salary_type?: string | null
           title?: string
           updated_at?: string
+          work_end_time?: string | null
           work_location_type?: string | null
           work_schedule?: string | null
+          work_start_time?: string | null
           workplace_address?: string | null
           workplace_city?: string | null
           workplace_county?: string | null
