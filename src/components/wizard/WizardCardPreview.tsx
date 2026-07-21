@@ -335,7 +335,9 @@ export const WizardListPreview = memo(function WizardListPreview({
   employmentTypeLabel,
   location,
   salaryText,
+  benefitsCount = 0,
   applicationsCount = 0,
+
   daysLeftLabel,
   overlayTextColor,
   recruiterName,
