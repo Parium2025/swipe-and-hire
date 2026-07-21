@@ -217,6 +217,12 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
 
           {/* Badge-rad — i samma ordning som swipe mode, staplade vertikalt */}
           <div className="flex flex-col items-center justify-center gap-2 mt-3">
+            {workingHours && (
+              <PreviewPill
+                icon={<Clock className="h-2 w-2 text-white" />}
+                text={workingHours}
+              />
+            )}
             {salaryText && <PreviewPill text={salaryText} />}
             {daysLeftLabel && <PreviewPill text={daysLeftLabel} />}
             {benefitsCount > 0 && (
