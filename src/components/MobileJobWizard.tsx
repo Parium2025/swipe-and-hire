@@ -427,6 +427,7 @@ const MobileJobWizard = ({
           overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
           work_start_time: (selectedTemplate as any).work_start_time || '',
           work_end_time: (selectedTemplate as any).work_end_time || '',
+          start_date: '',
         };
         setFormData(templateFormData);
         
