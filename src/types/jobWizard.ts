@@ -75,6 +75,8 @@ export interface JobTemplate {
   occupation?: string;
   employment_type?: string;
   work_schedule?: string;
+  work_start_time?: string | null;
+  work_end_time?: string | null;
   salary_min?: number;
   salary_max?: number;
   salary_type?: string;
