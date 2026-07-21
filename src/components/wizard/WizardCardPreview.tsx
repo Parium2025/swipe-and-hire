@@ -479,6 +479,9 @@ interface BuildPreviewInput {
   imageFocusPosition?: string;
   employmentTypeLabel?: string;
   employmentTypeDetail?: string;
+  workStartTime?: string | null;
+  workEndTime?: string | null;
+  workSchedule?: string | null;
   location?: string;
   salaryMin?: string | number | null;
   salaryMax?: string | number | null;
@@ -517,7 +520,7 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     }
   }
 
-  // Days-left: från expires_at om satt, annars 30 dagar (standardpublicering).
+  // Days-left används bara för faktisk utgången status — aldrig som standardpill.
   let daysLeftLabel: string | undefined;
   let isExpired = false;
   if (input.expiresAt) {
@@ -529,11 +532,16 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
       const diff = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       daysLeftLabel = diff === 0 ? 'Sista dagen' : `${diff} dagar kvar`;
     }
-  } else {
-    daysLeftLabel = '30 dagar kvar';
   }
 
   const metaParts = [input.employmentTypeLabel, input.location].filter(Boolean);
+
+  const startTime = input.workStartTime?.trim();
+  const endTime = input.workEndTime?.trim();
+  const workingHours =
+    startTime && endTime
+      ? `${startTime} – ${endTime}`
+      : startTime || endTime || input.workSchedule?.trim() || null;
 
   const publishedLabel = input.createdAt
     ? formatDateShortSv(input.createdAt)
@@ -548,7 +556,7 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     occupation: input.occupation || null,
     metaLine: metaParts.join(' • '),
     employmentTypeLabel: input.employmentTypeLabel || undefined,
-    workingHours: input.employmentTypeDetail || null,
+    workingHours,
     location: input.location,
     salaryText,
     benefitsCount: input.benefits?.length ?? 0,

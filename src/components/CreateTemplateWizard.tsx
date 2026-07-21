@@ -922,6 +922,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
              (!TYPES_WITH_DURATION.has(formData.employment_type) || (formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) &&
              formData.salary_type &&
              formData.salary_transparency &&
+             formData.work_start_time.trim() &&
+             formData.work_end_time.trim() &&
              parseInt(formData.positions_count) > 0;
     }
     if (currentStep === 2) {
@@ -1057,6 +1059,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         duration_amount: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
         duration_unit: TYPES_WITH_DURATION.has(formData.employment_type) && formData.duration_amount ? (formData.duration_unit || 'months') : null,
         work_schedule: formData.work_schedule || null,
+        work_start_time: formData.work_start_time || null,
+        work_end_time: formData.work_end_time || null,
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         salary_type: formData.salary_type || null,
@@ -1943,6 +1947,65 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   </div>
                 </div>
 
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
+                  <div className="flex gap-3 items-center">
+                    <div className="flex-1">
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.work_start_time}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+                          handleInputChange('work_start_time', formatted);
+                          if (formatted.length === 5) {
+                            workEndTimeRef.current?.focus();
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !value.includes(':')) {
+                            handleInputChange('work_start_time', value.padStart(2, '0') + ':00');
+                          } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
+                            const [hours, mins] = value.split(':');
+                            handleInputChange('work_start_time', `${hours}:${mins.padEnd(2, '0')}`);
+                          }
+                        }}
+                        placeholder="--:--"
+                        maxLength={5}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-11 !min-h-0 text-sm focus:border-white/40"
+                      />
+                    </div>
+                    <span className="text-white text-sm">–</span>
+                    <div className="flex-1">
+                      <Input
+                        ref={workEndTimeRef}
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.work_end_time}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+                          handleInputChange('work_end_time', formatted);
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !value.includes(':')) {
+                            handleInputChange('work_end_time', value.padStart(2, '0') + ':00');
+                          } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
+                            const [hours, mins] = value.split(':');
+                            handleInputChange('work_end_time', `${hours}:${mins.padEnd(2, '0')}`);
+                          }
+                        }}
+                        placeholder="--:--"
+                        maxLength={5}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-11 !min-h-0 text-sm focus:border-white/40"
+                      />
+                    </div>
+                  </div>
+                </div>
+
               </div>
             )}
 
@@ -2287,6 +2350,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <div>
                     <p className="text-white text-sm mb-1">Anställningstyp</p>
                     <p className="text-white">{EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '-'}</p>
+                  </div>
+                  <div className="border-t border-white/30" />
+
+                  <div>
+                    <p className="text-white text-sm mb-1">Arbetstider</p>
+                    <p className="text-white">
+                      {formData.work_start_time && formData.work_end_time
+                        ? `${formData.work_start_time} – ${formData.work_end_time}`
+                        : formData.work_start_time || formData.work_end_time || '-'}
+                    </p>
                   </div>
                   <div className="border-t border-white/30" />
                   

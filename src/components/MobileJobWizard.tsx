@@ -424,8 +424,8 @@ const MobileJobWizard = ({
           image_focus_position: 'center',
           image_focus_position_desktop: 'center',
           overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
-          work_start_time: '',
-          work_end_time: '',
+          work_start_time: (selectedTemplate as any).work_start_time || '',
+          work_end_time: (selectedTemplate as any).work_end_time || '',
         };
         setFormData(templateFormData);
         
@@ -4350,6 +4350,9 @@ const MobileJobWizard = ({
                                 duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                 duration_unit: formData.duration_unit,
                               }),
+                              workStartTime: formData.work_start_time,
+                              workEndTime: formData.work_end_time,
+                              workSchedule: formData.work_schedule,
                               location: formData.workplace_city || formData.location || '',
                               salaryMin: formData.salary_min,
                               salaryMax: formData.salary_max,
@@ -4894,6 +4897,9 @@ const MobileJobWizard = ({
                                     duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
                                     duration_unit: formData.duration_unit,
                                   }),
+                                  workStartTime: formData.work_start_time,
+                                  workEndTime: formData.work_end_time,
+                                  workSchedule: formData.work_schedule,
                                   location: formData.workplace_city || formData.location || '',
                                   salaryMin: formData.salary_min,
                                   salaryMax: formData.salary_max,
