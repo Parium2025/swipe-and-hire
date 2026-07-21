@@ -1951,11 +1951,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Startdatum</Label>
-                  <Input
-                    type="date"
+                  <StartDatePicker
                     value={formData.start_date || ''}
-                    onChange={(e) => handleInputChange('start_date', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white h-11 !min-h-0 text-sm focus:border-white/40"
+                    onChange={(v) => handleInputChange('start_date', v)}
                   />
                 </div>
 
@@ -2146,7 +2144,14 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     {/* Anpassade frågor */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
+                        <h4 className="text-white font-medium flex items-center gap-2">
+                          Anpassade frågor (valfritt)
+                          {customQuestions.length > 0 && (
+                            <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary/20 border border-primary/40 text-white text-xs font-semibold">
+                              {customQuestions.length}
+                            </span>
+                          )}
+                        </h4>
                         <Button
                           onClick={addCustomQuestion}
                           onMouseDown={(e) => e.currentTarget.blur()}

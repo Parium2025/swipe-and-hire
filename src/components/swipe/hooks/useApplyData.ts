@@ -5,6 +5,7 @@ import type { JobQuestion } from '@/types/jobWizard';
 export interface ExtraJobDetails {
   work_start_time?: string | null;
   work_end_time?: string | null;
+  start_date?: string | null;
 }
 
 /**
@@ -34,7 +35,7 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
           supabase.from('job_questions').select('*').eq('job_id', jobId).order('order_index'),
           supabase
             .from('job_postings')
-            .select('contact_email, work_start_time, work_end_time')
+            .select('contact_email, work_start_time, work_end_time, start_date')
             .eq('id', jobId)
             .single(),
           userId
@@ -64,7 +65,8 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
           if (jobRes.data.contact_email) setContactEmail(jobRes.data.contact_email);
           setExtraDetails({
             work_start_time: jobRes.data.work_start_time,
-            work_end_time: jobRes.data.work_end_time,
+            work_end_time: (jobRes.data as any).work_end_time,
+            start_date: (jobRes.data as any).start_date ?? null,
           });
         }
         if (appRow) {
