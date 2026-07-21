@@ -244,12 +244,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
                 text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
               />
             )}
-            {questionsCount > 0 && (
-              <PreviewPill
-                icon={<FileQuestion className="h-2 w-2 text-white" />}
-                text={`${questionsCount} ${questionsCount === 1 ? 'fråga' : 'frågor'}`}
-              />
-            )}
+            {/* Frågor visas inte i swipe-preview — de dyker upp när kandidaten öppnar annonsen */}
             {publishedLabel && <PreviewPill text={`Publicerad ${publishedLabel}`} />}
           </div>
         </div>
@@ -462,19 +457,7 @@ export const WizardListPreview = memo(function WizardListPreview({
               )
             }
           />
-          <PreviewRow
-            label="Frågor"
-            value={
-              questionsCount > 0 ? (
-                <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium">
-                  <FileQuestion className="h-3 w-3 flex-shrink-0" />
-                  {questionsCount} {questionsCount === 1 ? 'fråga' : 'st'}
-                </span>
-              ) : (
-                '–'
-              )
-            }
-          />
+          {/* Frågor visas inte i förhandsvisningen — kandidaten ser dem först när annonsen öppnas */}
           <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
           {isExpired && (
             <PreviewRow
