@@ -1212,6 +1212,7 @@ export type Database = {
           category: string | null
           company_logo_url: string | null
           contact_email: string | null
+          content_fingerprint: string | null
           created_at: string
           deleted_at: string | null
           description: string | null
@@ -1266,6 +1267,7 @@ export type Database = {
           category?: string | null
           company_logo_url?: string | null
           contact_email?: string | null
+          content_fingerprint?: string | null
           created_at?: string
           deleted_at?: string | null
           description?: string | null
@@ -1320,6 +1322,7 @@ export type Database = {
           category?: string | null
           company_logo_url?: string | null
           contact_email?: string | null
+          content_fingerprint?: string | null
           created_at?: string
           deleted_at?: string | null
           description?: string | null
@@ -2950,6 +2953,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      compute_job_fingerprint: {
+        Args: { j: Database["public"]["Tables"]["job_postings"]["Row"] }
+        Returns: string
+      }
       count_distinct_candidates: {
         Args: { p_job_ids: string[] }
         Returns: number
@@ -3287,6 +3294,7 @@ export type Database = {
         }
         Returns: number
       }
+      normalize_job_text: { Args: { t: string }; Returns: string }
       queue_cv_analysis: {
         Args: {
           p_applicant_id: string

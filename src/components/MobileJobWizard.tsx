@@ -2607,11 +2607,17 @@ const MobileJobWizard = ({
       }
 
       if (error) {
-        toast({
-          title: "Fel vid skapande av annons",
-          description: error.message,
-          variant: "destructive"
-        });
+        const msg = error.message || '';
+        let title = "Fel vid skapande av annons";
+        let description = error.message;
+        if (msg.includes('PARIUM_DUPLICATE_JOB')) {
+          title = "Identisk annons finns redan";
+          description = "Du har redan en aktiv annons med exakt samma innehåll. Ändra något (t.ex. tid, dag, lön eller några ord i beskrivningen) innan du publicerar igen.";
+        } else if (msg.includes('PARIUM_PUBLISH_COOLDOWN')) {
+          title = "Vänta några sekunder";
+          description = "Du behöver vänta ~20 sekunder mellan publiceringar. Försök igen om en stund.";
+        }
+        toast({ title, description, variant: "destructive" });
         return;
       }
 
