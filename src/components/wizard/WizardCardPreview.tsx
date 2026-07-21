@@ -332,6 +332,7 @@ export const WizardListPreview = memo(function WizardListPreview({
   imageUrl,
   imageFocusPosition,
   employmentTypeLabel,
+  workingHours,
   location,
   salaryText,
   benefitsCount = 0,
