@@ -536,7 +536,12 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     }
   }
 
-  const metaParts = [input.employmentTypeLabel, input.location].filter(Boolean);
+  const employmentTypeCombined = [input.employmentTypeLabel, input.employmentTypeDetail]
+    .map((s) => s?.trim())
+    .filter(Boolean)
+    .join(' · ') || undefined;
+
+  const metaParts = [employmentTypeCombined, input.location].filter(Boolean);
 
   const startTime = input.workStartTime?.trim();
   const endTime = input.workEndTime?.trim();
@@ -557,7 +562,7 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     imageFocusPosition: input.imageFocusPosition,
     occupation: input.occupation || null,
     metaLine: metaParts.join(' • '),
-    employmentTypeLabel: input.employmentTypeLabel || undefined,
+    employmentTypeLabel: employmentTypeCombined,
     workingHours,
     location: input.location,
     salaryText,
