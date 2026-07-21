@@ -1,7 +1,32 @@
 import { memo, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
 import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { isEmployerJobActive, isEmployerJobExpired, isEmployerJobDraft } from '@/lib/jobStatus';
+
+/**
+ * Hybrid skeleton count: read live from React Query cache first (accurate
+ * even after data changed since last visit), then fall back to
+ * localStorage last-known-count, then to the numeric fallback.
+ */
+function useLiveEmployerJobCount(tab: 'active' | 'expired' | 'draft', fallbackKey: string): number {
+  const qc = useQueryClient();
+  // Look for any cached ['jobs', ...] entry with data
+  const entries = qc.getQueriesData<any[]>({ queryKey: ['jobs'] });
+  for (const [, data] of entries) {
+    if (Array.isArray(data) && data.length >= 0) {
+      const filtered = data.filter(j =>
+        tab === 'active' ? isEmployerJobActive(j) :
+        tab === 'expired' ? isEmployerJobExpired(j) :
+        isEmployerJobDraft(j)
+      );
+      // Clamp to visible range like readCachedCount does
+      return Math.min(6, Math.max(1, filtered.length || 1));
+    }
+  }
+  return readCachedCount(fallbackKey, 3, 6);
+}
 
 /**
  * Full-screen skeleton overlays for the employer side, mirroring
@@ -88,7 +113,8 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
     : SKELETON_COUNT_KEYS.myJobsActive;
   // Sidan paginerar med pageSize=20 — clampa så vi aldrig renderar fler placeholders
   // än vad som faktiskt får plats i första view.
-  const cardCount = readCachedCount(countKey, 3, 6);
+  const cardCount = useLiveEmployerJobCount(tab, countKey);
+
 
   return (
     <FullscreenSkeletonPortal>
