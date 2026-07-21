@@ -1243,6 +1243,7 @@ export type Database = {
           salary_transparency: string | null
           salary_type: string | null
           search_vector: unknown
+          start_date: string | null
           title: string
           updated_at: string
           views_count: number | null
@@ -1296,6 +1297,7 @@ export type Database = {
           salary_transparency?: string | null
           salary_type?: string | null
           search_vector?: unknown
+          start_date?: string | null
           title: string
           updated_at?: string
           views_count?: number | null
@@ -1349,6 +1351,7 @@ export type Database = {
           salary_transparency?: string | null
           salary_type?: string | null
           search_vector?: unknown
+          start_date?: string | null
           title?: string
           updated_at?: string
           views_count?: number | null
@@ -1539,6 +1542,7 @@ export type Database = {
           salary_min: number | null
           salary_transparency: string | null
           salary_type: string | null
+          start_date: string | null
           title: string
           updated_at: string
           work_end_time: string | null
@@ -1578,6 +1582,7 @@ export type Database = {
           salary_min?: number | null
           salary_transparency?: string | null
           salary_type?: string | null
+          start_date?: string | null
           title: string
           updated_at?: string
           work_end_time?: string | null
@@ -1617,6 +1622,7 @@ export type Database = {
           salary_min?: number | null
           salary_transparency?: string | null
           salary_type?: string | null
+          start_date?: string | null
           title?: string
           updated_at?: string
           work_end_time?: string | null
