@@ -3089,7 +3089,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Startdatum</Label>
+                  <Label className="text-white font-medium text-sm">Startdatum *</Label>
                   <StartDatePicker
                     value={formData.start_date || ''}
                     onChange={(v) => handleInputChange('start_date', v)}
@@ -3307,15 +3307,17 @@ const MobileJobWizard = ({
 
                     {/* Anpassade frågor */}
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-white font-medium">
-                          Anpassade frågor (valfritt)
-                          {customQuestions.length > 0 && (
-                            <span className="ml-2 inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary/20 border border-primary/40 text-white text-xs font-semibold align-middle">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <h4 className="text-white font-medium whitespace-nowrap">Anpassade frågor</h4>
+                          {customQuestions.length > 0 ? (
+                            <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary/20 border border-primary/40 text-white text-xs font-semibold">
                               {customQuestions.length}
                             </span>
+                          ) : (
+                            <span className="text-white/50 text-xs font-normal">(valfritt)</span>
                           )}
-                        </h4>
+                        </div>
                         <Button
                           onMouseDown={(e) => {
                             e.currentTarget.blur();
@@ -3325,10 +3327,10 @@ const MobileJobWizard = ({
                           onMouseUp={(e) => e.currentTarget.blur()}
                           onClick={addCustomQuestion}
                           size="sm"
-                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-4 font-medium rounded-full transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 whitespace-nowrap"
                         >
-                          Lägg till fråga
-                          <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                          <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
+                          Lägg till
                         </Button>
                       </div>
                       
