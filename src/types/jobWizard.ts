@@ -294,6 +294,7 @@ export const createEmptyTemplateFormData = (): TemplateFormData => ({
   application_instructions: '',
   pitch: '',
   benefits: [],
+  start_date: '',
 });
 
 export const createEmptyQuestion = (): JobQuestion => ({
