@@ -4911,6 +4911,8 @@ const MobileJobWizard = ({
                                   benefits: formData.benefits,
                                   overlayTextColor: formData.overlay_text_color,
                                   recruiterName: profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : null,
+                                  startDate: formData.start_date,
+                                  questionsCount: customQuestions.length,
                                 })}
                                 onOpenForm={() => setShowDesktopApplicationForm(true)}
                               />
