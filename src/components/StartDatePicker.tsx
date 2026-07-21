@@ -91,8 +91,11 @@ export function StartDatePicker({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
+          onMouseDown={(e) => e.currentTarget.blur()}
+          onMouseUp={(e) => e.currentTarget.blur()}
           className={cn(
             "w-full h-11 !min-h-0 pl-3 pr-3 text-left text-sm font-normal bg-white/10 backdrop-blur-sm border-white/20 !text-white hover:bg-white/15 hover:!text-white hover:border-white/40 md:hover:bg-white/15 md:hover:!text-white md:hover:border-white/40 justify-start",
+            "outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 focus:border-white/20 focus-visible:border-white/20 active:border-white/20 transition-none",
             className
           )}
         >
@@ -100,9 +103,9 @@ export function StartDatePicker({
             <CalendarIcon className="h-4 w-4 text-white" />
           </span>
           {selectedDate ? (
-            format(selectedDate, "d MMMM yyyy", { locale: sv })
+            <span className="text-white">{format(selectedDate, "d MMMM yyyy", { locale: sv })}</span>
           ) : (
-            <span className="text-white/60">{placeholder}</span>
+            <span className="text-white">{placeholder}</span>
           )}
         </Button>
       </PopoverTrigger>
