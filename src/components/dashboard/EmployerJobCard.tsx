@@ -166,8 +166,8 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             <span className="text-sm leading-snug text-white">Rekryterare:</span>
             <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{recruiterName || '–'}</span>
           </div>
-          <div className="flex items-start justify-between gap-3">
-            <span className="text-sm leading-snug text-white">Anställningsform:</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
             {(() => {
               const details = formatEmploymentDetails({
                 employment_type: job.employment_type,
@@ -179,7 +179,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
               const label = job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–';
               const combined = [label, details].filter(Boolean).join(' · ');
               return (
-                <span className="text-sm leading-snug text-white font-medium text-right max-w-[65%] break-words">
+                <span className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]">
                   {combined}
                 </span>
               );
@@ -208,14 +208,15 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
               salary_transparency: job.salary_transparency,
             });
             return (
-              <div className="flex items-start justify-between gap-3">
-                <span className="text-sm leading-snug text-white">Lön:</span>
-                <span className="text-sm leading-snug text-white font-medium text-right max-w-[65%] break-words">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm leading-snug text-white flex-shrink-0">Lön:</span>
+                <span className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]">
                   {salaryText || '–'}
                 </span>
               </div>
             );
           })()}
+
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
