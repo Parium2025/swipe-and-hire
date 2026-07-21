@@ -840,20 +840,8 @@ const MobileJobWizard = ({
   const persistCreateDraftSnapshot = useCallback(() => {
     if (!open || existingJob || !hasCompletedRestoreRef.current) return;
 
-    // Always save if user has progressed past step 0, even without content changes
-    const hasProgressedPastStart = currentStep > 0;
-
-    const hasContent = hasProgressedPastStart || Object.entries(formData).some(([key, value]) => {
-      if (key === 'title' && value === jobTitle) return false; // Ignore default title
-      if (key === 'positions_count' && value === '1') return false; // Ignore default
-      if (key === 'work_location_type' && value === 'på-plats') return false; // Ignore default
-      if (key === 'remote_work_possible' && value === 'nej') return false; // Ignore default
-      if (typeof value === 'string') return value.trim() !== '';
-      if (Array.isArray(value)) return value.length > 0;
-      return false;
-    });
-
-    if (!hasContent) return;
+    // Persist as soon as the wizard is open — even on step 0 with only a title.
+    // This guarantees we can restore the card on preview reload / crash.
 
     try {
       const draftData = JSON.stringify({
