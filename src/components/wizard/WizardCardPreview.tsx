@@ -2,9 +2,11 @@ import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } fr
 import {
   Bookmark,
   Building2,
+  CalendarDays,
   ChevronDown,
   Clock,
   Eye,
+  FileQuestion,
   Gift,
   Heart,
   Users,
