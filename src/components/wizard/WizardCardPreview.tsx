@@ -180,16 +180,14 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             </Tooltip>
           </div>
 
-          {/* Titel */}
+          {/* Titel — luft ovanför så företagspillen får andas, tillåter 2 rader */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="cursor-default">
-                <AutoFitTitle
+              <div className="cursor-default mt-2">
+                <TruncatedText
                   text={title || 'Jobbtitel'}
-                  className="mt-0.5 w-full font-extrabold leading-[1.05] tracking-tight"
+                  className="w-full text-[12px] font-extrabold leading-[1.15] tracking-tight line-clamp-2 break-words"
                   style={overlayStyle}
-                  minFontPx={11}
-                  maxFontPx={14}
                 />
               </div>
             </TooltipTrigger>
@@ -203,7 +201,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             <Tooltip>
               <TooltipTrigger asChild>
                 <p
-                  className="mt-0.5 text-[8px] font-semibold truncate cursor-default"
+                  className="mt-1.5 text-[8px] font-semibold truncate cursor-default"
                   style={overlayStyle}
                 >
                   {metaLine}
