@@ -380,7 +380,7 @@ export const WizardListPreview = memo(function WizardListPreview({
             </div>
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-indigo-900/50 to-slate-900/70 flex flex-col items-center justify-center gap-1.5 px-3 py-3">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-indigo-900/50 to-slate-900/70 flex flex-col items-center justify-center gap-2 px-3 py-4">
             {companyLogoUrl ? (
               <div className="w-9 h-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img src={companyLogoUrl} alt="" className="w-full h-full object-cover" draggable={false} />
@@ -396,7 +396,7 @@ export const WizardListPreview = memo(function WizardListPreview({
             </div>
             <TruncatedText
               text={title || 'Jobbtitel'}
-              className="w-full text-center text-[13px] font-extrabold leading-[1.15] line-clamp-2 px-2 [text-shadow:0_2px_6px_rgba(0,0,0,0.55)]"
+              className="mt-1 w-full text-center text-[13px] font-extrabold leading-[1.2] line-clamp-2 px-2 break-words [text-shadow:0_2px_6px_rgba(0,0,0,0.55)]"
               style={overlayStyle}
             />
           </div>
