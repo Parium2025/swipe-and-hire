@@ -10,7 +10,7 @@ import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { ABOUT_BANNER_URL, preloadAboutPageAssets } from '@/lib/aboutPagePreload';
 
-const CANONICAL = 'https://parium.se/om-oss';
+const CANONICAL = 'https://www.parium.se/om-oss';
 const TITLE = 'Om Parium – Jobbappen som samlar allt på ett ställe';
 const DESCRIPTION =
   'Parium bygger jobbsökandet från grunden — för både arbetsgivare och kandidater. Ett enda flöde. Läs om vår vision och hur vi jobbar.';

@@ -31,7 +31,7 @@ const POPULAR_OCCUPATIONS = [
   'Truckförare',
 ];
 
-const BASE = 'https://parium.se';
+const BASE = 'https://www.parium.se';
 
 const normalize = (s: string) =>
   s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');

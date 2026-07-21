@@ -9,7 +9,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Clock } from 'lucide-react';
 import { GUIDES } from '@/data/guides';
 
-const BASE = 'https://parium.se';
+const BASE = 'https://www.parium.se';
 
 const GuiderHub = () => {
   const navigate = useNavigate();

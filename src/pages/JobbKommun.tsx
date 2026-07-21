@@ -23,7 +23,7 @@ type PublicJobRow = {
   employment_type: string | null;
 };
 
-const BASE = 'https://parium.se';
+const BASE = 'https://www.parium.se';
 
 const JobbKommun = () => {
   const { kommunSlug } = useParams<{ kommunSlug: string }>();

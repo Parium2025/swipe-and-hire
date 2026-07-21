@@ -7,7 +7,7 @@ import SiteFooter from '@/components/landing/SiteFooter';
 import { openCookieSettings } from '@/components/CookieBanner';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
-const CANONICAL = 'https://parium.se/integritetspolicy';
+const CANONICAL = 'https://www.parium.se/integritetspolicy';
 const TITLE = 'Integritetspolicy – Parium';
 const DESCRIPTION =
   'Så hanterar Parium dina personuppgifter enligt GDPR. Läs om vilka uppgifter vi samlar in, varför, hur länge de lagras och vilka rättigheter du har.';

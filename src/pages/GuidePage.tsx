@@ -11,7 +11,7 @@ import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
 import { GUIDE_BY_SLUG, GUIDES } from '@/data/guides';
 
-const BASE = 'https://parium.se';
+const BASE = 'https://www.parium.se';
 const ease = [0.16, 1, 0.3, 1] as const;
 
 function FaqItem({ q, a }: { q: string; a: string }) {
