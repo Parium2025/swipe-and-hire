@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { StartDatePicker } from '@/components/StartDatePicker';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
