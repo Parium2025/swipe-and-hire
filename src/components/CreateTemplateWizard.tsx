@@ -2158,8 +2158,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           size="sm"
                           className="bg-primary hover:bg-primary/90 text-white touch-border-white px-4 font-medium rounded-full focus:outline-none focus:ring-0 whitespace-nowrap"
                         >
-                          <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
                           Lägg till
+                          <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
                         </Button>
                       </div>
                       
