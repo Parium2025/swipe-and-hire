@@ -47,6 +47,8 @@ export interface BaseFormData {
   duration_amount?: string;
   /** 'weeks' | 'months' */
   duration_unit?: string;
+  /** ISO date (YYYY-MM-DD) when the position starts. */
+  start_date?: string;
 }
 
 export interface JobFormData extends BaseFormData {
@@ -261,6 +263,7 @@ export const createEmptyJobFormData = (): JobFormData => ({
   image_focus_position: 'center',
   image_focus_position_desktop: 'center',
   overlay_text_color: '#FFFFFF',
+  start_date: '',
 });
 
 export const createEmptyTemplateFormData = (): TemplateFormData => ({
@@ -291,6 +294,7 @@ export const createEmptyTemplateFormData = (): TemplateFormData => ({
   application_instructions: '',
   pitch: '',
   benefits: [],
+  start_date: '',
 });
 
 export const createEmptyQuestion = (): JobQuestion => ({

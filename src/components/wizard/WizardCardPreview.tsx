@@ -2,9 +2,11 @@ import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } fr
 import {
   Bookmark,
   Building2,
+  CalendarDays,
   ChevronDown,
   Clock,
   Eye,
+  FileQuestion,
   Gift,
   Heart,
   Users,
@@ -55,6 +57,8 @@ export interface WizardPreviewData {
   overlayTextColor?: string | null;
   recruiterName?: string | null;
   publishedLabel?: string | null;
+  startDateLabel?: string | null;
+  questionsCount?: number;
   viewsCount?: number;
   isExpired?: boolean;
   isActive?: boolean;
@@ -100,6 +104,8 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   benefitsCount = 0,
   applicationsCount = 0,
   publishedLabel,
+  startDateLabel,
+  questionsCount = 0,
   overlayTextColor,
   onOpenForm,
   onOpenCompany,
@@ -225,11 +231,23 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
                 text={workingHours}
               />
             )}
+            {startDateLabel && (
+              <PreviewPill
+                icon={<CalendarDays className="h-2 w-2 text-white" />}
+                text={`Start ${startDateLabel}`}
+              />
+            )}
             {salaryText && <PreviewPill text={salaryText} />}
             {benefitsCount > 0 && (
               <PreviewPill
                 icon={<Gift className="h-2 w-2 text-white" />}
                 text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
+              />
+            )}
+            {questionsCount > 0 && (
+              <PreviewPill
+                icon={<FileQuestion className="h-2 w-2 text-white" />}
+                text={`${questionsCount} ${questionsCount === 1 ? 'fråga' : 'frågor'}`}
               />
             )}
             {publishedLabel && <PreviewPill text={`Publicerad ${publishedLabel}`} />}
@@ -351,6 +369,8 @@ export const WizardListPreview = memo(function WizardListPreview({
   overlayTextColor,
   recruiterName,
   publishedLabel,
+  startDateLabel,
+  questionsCount = 0,
   viewsCount = 0,
   isExpired,
   isActive,
@@ -427,6 +447,7 @@ export const WizardListPreview = memo(function WizardListPreview({
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
           <PreviewRow label="Plats" value={location || '–'} />
           <PreviewRow label="Arbetstider" value={workingHours || '–'} />
+          <PreviewRow label="Startdatum" value={startDateLabel || '–'} />
           <PreviewRow label="Lön" value={salaryText || '–'} />
           <PreviewRow
             label="Förmåner"
@@ -435,6 +456,19 @@ export const WizardListPreview = memo(function WizardListPreview({
                 <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium">
                   <Gift className="h-3 w-3 flex-shrink-0" />
                   {benefitsCount} st
+                </span>
+              ) : (
+                '–'
+              )
+            }
+          />
+          <PreviewRow
+            label="Frågor"
+            value={
+              questionsCount > 0 ? (
+                <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium">
+                  <FileQuestion className="h-3 w-3 flex-shrink-0" />
+                  {questionsCount} {questionsCount === 1 ? 'fråga' : 'st'}
                 </span>
               ) : (
                 '–'
@@ -495,6 +529,8 @@ interface BuildPreviewInput {
   overlayTextColor?: string | null;
   recruiterName?: string | null;
   createdAt?: string | null;
+  startDate?: string | null;
+  questionsCount?: number;
   viewsCount?: number;
   isActive?: boolean;
 }
@@ -572,6 +608,8 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     overlayTextColor: normalizeJobOverlayTextColor(input.overlayTextColor ?? DEFAULT_JOB_OVERLAY_TEXT_COLOR),
     recruiterName: input.recruiterName ?? null,
     publishedLabel,
+    startDateLabel: input.startDate ? formatDateShortSv(input.startDate) : null,
+    questionsCount: input.questionsCount ?? 0,
     viewsCount: input.viewsCount ?? 0,
     isExpired,
     isActive: input.isActive,

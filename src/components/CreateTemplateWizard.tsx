@@ -335,6 +335,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         requirements: templateToEdit.requirements || '',
         work_start_time: templateToEdit.work_start_time || '',
         work_end_time: templateToEdit.work_end_time || '',
+        start_date: (templateToEdit as any).start_date || '',
         contact_email: templateToEdit.contact_email || '',
         application_instructions: templateToEdit.application_instructions || '',
         location: '',
@@ -1075,6 +1076,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         workplace_county: workplaceCounty,
         workplace_municipality: workplaceMunicipality,
         positions_count: formData.positions_count || null,
+        start_date: formData.start_date || null,
         pitch: formData.pitch || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
@@ -1946,6 +1948,17 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     </button>
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Startdatum</Label>
+                  <Input
+                    type="date"
+                    value={formData.start_date || ''}
+                    onChange={(e) => handleInputChange('start_date', e.target.value)}
+                    className="bg-white/10 border-white/20 text-white h-11 !min-h-0 text-sm focus:border-white/40"
+                  />
+                </div>
+
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>

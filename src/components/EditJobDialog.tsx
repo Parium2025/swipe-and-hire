@@ -126,6 +126,7 @@ interface JobFormData {
   positions_count: string;
   work_start_time: string;
   work_end_time: string;
+  start_date?: string;
   work_location_type: string;
   remote_work_possible: string;
   workplace_name: string;
@@ -236,6 +237,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     positions_count: '1',
     work_start_time: '',
     work_end_time: '',
+    start_date: '',
     work_location_type: '',
     remote_work_possible: '',
     workplace_name: '',
@@ -961,6 +963,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         positions_count: (job.positions_count ?? 1).toString(),
         work_start_time: job.work_start_time || '',
         work_end_time: job.work_end_time || '',
+        start_date: (job as any).start_date || '',
         work_location_type: job.work_location_type || '',
         remote_work_possible: job.remote_work_possible || '',
         workplace_name: job.workplace_name || '',
@@ -1078,6 +1081,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         work_schedule: formData.work_schedule || null,
         work_start_time: formData.work_start_time || null,
         work_end_time: formData.work_end_time || null,
+        start_date: formData.start_date || null,
         benefits: formData.benefits && formData.benefits.length > 0 ? formData.benefits : null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
@@ -1811,6 +1815,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         work_schedule: formData.work_schedule || null,
         work_start_time: formData.work_start_time || null,
         work_end_time: formData.work_end_time || null,
+        start_date: formData.start_date || null,
         benefits: formData.benefits && formData.benefits.length > 0 ? formData.benefits : null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
@@ -2271,6 +2276,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         </button>
                         </div>
                       </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium text-sm">Startdatum</Label>
+                        <Input
+                          type="date"
+                          value={formData.start_date || ''}
+                          onChange={(e) => handleInputChange('start_date', e.target.value)}
+                          className="bg-white/10 border-white/20 text-white h-11 !min-h-0 text-sm focus:border-white/40"
+                        />
+                      </div>
+
 
                       <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
@@ -3489,6 +3505,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       expiresAt: (formData as any).expires_at ?? (job as any)?.expires_at ?? null,
                                       applicationsCount: (job as any)?.applications_count,
                                       overlayTextColor: formData.overlay_text_color,
+                                      startDate: formData.start_date,
+                                      questionsCount: customQuestions.length,
                                     })}
                                     onOpenForm={() => setShowApplicationForm(true)}
                                     onOpenCompany={() => setShowCompanyProfile(true)}
@@ -4011,6 +4029,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          expiresAt: (formData as any).expires_at ?? (job as any)?.expires_at ?? null,
                                          applicationsCount: (job as any)?.applications_count,
                                          overlayTextColor: formData.overlay_text_color,
+                                         startDate: formData.start_date,
+                                         questionsCount: customQuestions.length,
                                          recruiterName: profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : null,
                                          createdAt: (job as any)?.created_at ?? null,
                                          viewsCount: (job as any)?.views_count ?? 0,

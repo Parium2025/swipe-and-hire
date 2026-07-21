@@ -325,6 +325,7 @@ const MobileJobWizard = ({
           duration_amount: existingJob.duration_amount != null ? String(existingJob.duration_amount) : '',
           duration_unit: existingJob.duration_unit || 'months',
           work_schedule: existingJob.work_schedule || '',
+          start_date: (existingJob as any).start_date || '',
           work_start_time: existingJob.work_start_time || '',
           work_end_time: existingJob.work_end_time || '',
           contact_email: existingJob.contact_email || '',
@@ -426,6 +427,7 @@ const MobileJobWizard = ({
           overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
           work_start_time: (selectedTemplate as any).work_start_time || '',
           work_end_time: (selectedTemplate as any).work_end_time || '',
+          start_date: '',
         };
         setFormData(templateFormData);
         
@@ -487,6 +489,7 @@ const MobileJobWizard = ({
           overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
           work_start_time: '',
           work_end_time: '',
+          start_date: '',
         };
         setFormData(emptyFormData);
         setCustomQuestions([]);
@@ -830,6 +833,7 @@ const MobileJobWizard = ({
     image_focus_position: 'center',
     image_focus_position_desktop: 'center',
     overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
+    start_date: '',
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
@@ -2233,6 +2237,7 @@ const MobileJobWizard = ({
       image_focus_position: 'center',
       image_focus_position_desktop: 'center',
       overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
+      start_date: '',
     });
     setCustomQuestions([]);
     setInitialCustomQuestions([]);
@@ -2355,6 +2360,7 @@ const MobileJobWizard = ({
         work_schedule: formData.work_schedule || null,
         work_start_time: formData.work_start_time || null,
         work_end_time: formData.work_end_time || null,
+        start_date: formData.start_date || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
@@ -2554,6 +2560,7 @@ const MobileJobWizard = ({
         work_schedule: formData.work_schedule || null,
         work_start_time: formData.work_start_time || null,
         work_end_time: formData.work_end_time || null,
+        start_date: formData.start_date || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
@@ -3091,6 +3098,17 @@ const MobileJobWizard = ({
                     </button>
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Startdatum</Label>
+                  <Input
+                    type="date"
+                    value={formData.start_date || ''}
+                    onChange={(e) => handleInputChange('start_date', e.target.value)}
+                    className="bg-white/10 border-white/20 text-white h-11 !min-h-0 text-sm focus:border-white/40"
+                  />
+                </div>
+
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
@@ -4360,6 +4378,8 @@ const MobileJobWizard = ({
                               salaryTransparency: formData.salary_transparency,
                               benefits: formData.benefits,
                               overlayTextColor: formData.overlay_text_color,
+                              startDate: formData.start_date,
+                              questionsCount: customQuestions.length,
                             })}
                             onOpenForm={() => setShowApplicationForm(true)}
                             onOpenCompany={() => setShowCompanyProfile(true)}
@@ -4908,6 +4928,8 @@ const MobileJobWizard = ({
                                   benefits: formData.benefits,
                                   overlayTextColor: formData.overlay_text_color,
                                   recruiterName: profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : null,
+                                  startDate: formData.start_date,
+                                  questionsCount: customQuestions.length,
                                 })}
                                 onOpenForm={() => setShowDesktopApplicationForm(true)}
                               />
