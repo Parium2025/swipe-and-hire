@@ -70,20 +70,37 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 
 const SkeletonChrome = memo(function SkeletonChrome() {
   return (
-    <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-      {/* Left: logo shape sized to the *visible* Parium graphic (not the full
-          h-10 w-40 background container) so it never overlaps the centered
-          wordmark placeholder on narrow mobile widths. */}
-      <div className={`h-7 w-24 rounded-md ${SHAPE}`} />
-      {/* Center: "Parium" wordmark (text-base, ~w-16) */}
-      <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SHAPE}`} />
-      {/* Right: Plus + Notifications + Avatar */}
-      <div className="flex items-center gap-2">
-        <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
-        <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
-        <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
-      </div>
-    </header>
+    <>
+      {/* MOBILE chrome — mirrors EmployerMobileHeader */}
+      <header className="md:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
+        <div className={`h-7 w-24 rounded-md ${SHAPE}`} />
+        <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SHAPE}`} />
+        <div className="flex items-center gap-2">
+          <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
+          <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
+          <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
+        </div>
+      </header>
+      {/* DESKTOP chrome — mirrors EmployerTopNav (logo + nav pills + right actions) */}
+      <header className="hidden md:flex shrink-0 h-16 items-center justify-between border-b border-white/20 bg-transparent px-4 gap-4">
+        {/* Left: logo */}
+        <div className={`h-8 w-28 rounded-md ${SHAPE}`} />
+        {/* Center: nav pills (Annonser, Kandidater, Chattar, Företag) */}
+        <div className="flex-1 flex items-center justify-center gap-2">
+          <div className={`h-8 w-28 rounded-md ${SHAPE}`} />
+          <div className={`h-8 w-28 rounded-md ${SHAPE}`} />
+          <div className={`h-8 w-24 rounded-md ${SHAPE}`} />
+          <div className={`h-8 w-24 rounded-md ${SHAPE}`} />
+        </div>
+        {/* Right: notifications + avatar + extraRight (dev pill + create button) */}
+        <div className="flex items-center gap-3">
+          <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
+          <div className={`h-9 w-9 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
+          <div className={`h-9 w-28 rounded-lg ${SHAPE}`} />
+          <div className={`h-9 w-40 rounded-lg ${SHAPE}`} />
+        </div>
+      </header>
+    </>
   );
 });
 
