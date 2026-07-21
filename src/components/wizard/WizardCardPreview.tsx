@@ -3,6 +3,7 @@ import {
   Bookmark,
   Building2,
   ChevronDown,
+  Clock,
   Eye,
   Gift,
   Heart,
@@ -45,6 +46,7 @@ export interface WizardPreviewData {
   occupation?: string | null;
   metaLine?: string;
   employmentTypeLabel?: string;
+  workingHours?: string | null;
   location?: string;
   salaryText?: string | null;
   benefitsCount?: number;
@@ -92,6 +94,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   imageFocusPosition,
   occupation,
   metaLine,
+  workingHours,
   salaryText,
   benefitsCount = 0,
   applicationsCount = 0,
@@ -215,6 +218,12 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
 
           {/* Badge-rad — i samma ordning som swipe mode, staplade vertikalt */}
           <div className="flex flex-col items-center justify-center gap-2 mt-3">
+            {workingHours && (
+              <PreviewPill
+                icon={<Clock className="h-2 w-2 text-white" />}
+                text={workingHours}
+              />
+            )}
             {salaryText && <PreviewPill text={salaryText} />}
             {daysLeftLabel && <PreviewPill text={daysLeftLabel} />}
             {benefitsCount > 0 && (
@@ -331,6 +340,7 @@ export const WizardListPreview = memo(function WizardListPreview({
   imageUrl,
   imageFocusPosition,
   employmentTypeLabel,
+  workingHours,
   location,
   salaryText,
   benefitsCount = 0,
@@ -414,15 +424,7 @@ export const WizardListPreview = memo(function WizardListPreview({
       <div className="w-full bg-[hsl(215,85%,10%)]/95 backdrop-blur-sm border-t border-white/10 px-3 py-2">
         <div className="space-y-1.5">
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
-          <PreviewRow
-            label="Ansökningar"
-            value={
-              <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium">
-                <Users className="h-3 w-3 flex-shrink-0" />
-                {applicationsCount || 0}
-              </span>
-            }
-          />
+          {workingHours && <PreviewRow label="Arbetstider" value={workingHours} />}
           <PreviewRow label="Plats" value={location || '–'} />
           <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
           <PreviewRow label="Lön" value={salaryText || '–'} />
@@ -437,14 +439,12 @@ export const WizardListPreview = memo(function WizardListPreview({
               }
             />
           )}
-          <PreviewRow
-            label="Status"
-            value={
-              <span className={isExpired ? 'text-red-300 font-medium' : 'font-medium'}>
-                {isExpired ? 'Utgången' : `${daysLeftLabel || '30 dagar kvar'}`}
-              </span>
-            }
-          />
+          {isExpired && (
+            <PreviewRow
+              label="Status"
+              value={<span className="text-red-300 font-medium">Utgången</span>}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -532,11 +532,7 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     daysLeftLabel = '30 dagar kvar';
   }
 
-  const employmentLabelWithDetail = [input.employmentTypeLabel, input.employmentTypeDetail]
-    .filter(Boolean)
-    .join(' · ');
-
-  const metaParts = [employmentLabelWithDetail, input.location].filter(Boolean);
+  const metaParts = [input.employmentTypeLabel, input.location].filter(Boolean);
 
   const publishedLabel = input.createdAt
     ? formatDateShortSv(input.createdAt)
@@ -550,7 +546,8 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     imageFocusPosition: input.imageFocusPosition,
     occupation: input.occupation || null,
     metaLine: metaParts.join(' • '),
-    employmentTypeLabel: employmentLabelWithDetail || undefined,
+    employmentTypeLabel: input.employmentTypeLabel || undefined,
+    workingHours: input.employmentTypeDetail || null,
     location: input.location,
     salaryText,
     benefitsCount: input.benefits?.length ?? 0,
