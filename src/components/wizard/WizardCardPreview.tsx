@@ -608,6 +608,8 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     overlayTextColor: normalizeJobOverlayTextColor(input.overlayTextColor ?? DEFAULT_JOB_OVERLAY_TEXT_COLOR),
     recruiterName: input.recruiterName ?? null,
     publishedLabel,
+    startDateLabel: input.startDate ? formatDateShortSv(input.startDate) : null,
+    questionsCount: input.questionsCount ?? 0,
     viewsCount: input.viewsCount ?? 0,
     isExpired,
     isActive: input.isActive,
