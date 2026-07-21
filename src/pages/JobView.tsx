@@ -908,6 +908,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               remoteWorkPossible={job.remote_work_possible}
               workStartTime={job.work_start_time}
               workEndTime={job.work_end_time}
+              startDate={(job as any).start_date}
               positionsCount={job.positions_count}
               occupation={job.occupation}
               salaryMin={job.salary_min}
