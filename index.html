@@ -6,12 +6,18 @@
       // Konsolidera SEO till www.parium.se: redirecta alla besök på lovable.app-domänen
       // till motsvarande URL på parium.se. Säkerställer att Google bara indexerar
       // den officiella domänen och att lovable-titel/favicon försvinner från sökresultaten.
+      // UNDANTAG: staging-domänens startsida (/ och /index.html) redirectas INTE under
+      // Search Console-verifiering, så Google kan läsa google-site-verification-taggen.
       (function() {
         try {
           var h = window.location.hostname;
+          var p = window.location.pathname;
           if (h.endsWith('.lovable.app') && h.indexOf('id-preview') === -1) {
-            var target = 'https://www.parium.se' + window.location.pathname + window.location.search + window.location.hash;
-            window.location.replace(target);
+            var isStagingRoot = h === 'parium-ab.lovable.app' && (p === '/' || p === '/index.html');
+            if (!isStagingRoot) {
+              var target = 'https://www.parium.se' + p + window.location.search + window.location.hash;
+              window.location.replace(target);
+            }
           }
         } catch (e) {}
       })();
