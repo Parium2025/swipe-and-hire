@@ -1740,7 +1740,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0 &&
              formData.work_start_time &&
-             formData.work_end_time;
+             formData.work_end_time &&
+             !!(formData.start_date && formData.start_date.trim());
     }
     
     if (currentStep === 1) {
