@@ -4361,6 +4361,8 @@ const MobileJobWizard = ({
                               salaryTransparency: formData.salary_transparency,
                               benefits: formData.benefits,
                               overlayTextColor: formData.overlay_text_color,
+                              startDate: formData.start_date,
+                              questionsCount: customQuestions.length,
                             })}
                             onOpenForm={() => setShowApplicationForm(true)}
                             onOpenCompany={() => setShowCompanyProfile(true)}
