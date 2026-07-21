@@ -9,7 +9,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
+
 import { TruncatedText } from '@/components/TruncatedText';
 import {
   Tooltip,
