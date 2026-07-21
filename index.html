@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <script>
-      // Konsolidera SEO till parium.se: redirecta alla besök på lovable.app-domänen
+      // Konsolidera SEO till www.parium.se: redirecta alla besök på lovable.app-domänen
       // till motsvarande URL på parium.se. Säkerställer att Google bara indexerar
       // den officiella domänen och att lovable-titel/favicon försvinner från sökresultaten.
       (function() {
         try {
           var h = window.location.hostname;
           if (h.endsWith('.lovable.app') && h.indexOf('id-preview') === -1) {
-            var target = 'https://parium.se' + window.location.pathname + window.location.search + window.location.hash;
+            var target = 'https://www.parium.se' + window.location.pathname + window.location.search + window.location.hash;
             window.location.replace(target);
           }
         } catch (e) {}
@@ -90,23 +90,23 @@
       "@graph": [
         {
           "@type": "Organization",
-          "@id": "https://parium.se/#organization",
+          "@id": "https://www.parium.se/#organization",
           "name": "Parium",
           "legalName": "Parium AB",
-          "url": "https://parium.se",
-          "logo": "https://parium.se/parium-icon-v3-512.png",
+          "url": "https://www.parium.se",
+          "logo": "https://www.parium.se/parium-icon-v3-512.png",
           "description": "Parium är jobbappen som matchar jobbsökare med arbetsgivare i hela Sverige. Skapa profil gratis, matcha och chatta direkt."
         },
         {
           "@type": "WebSite",
-          "@id": "https://parium.se/#website",
-          "url": "https://parium.se",
+          "@id": "https://www.parium.se/#website",
+          "url": "https://www.parium.se",
           "name": "Parium",
           "inLanguage": "sv-SE",
-          "publisher": { "@id": "https://parium.se/#organization" },
+          "publisher": { "@id": "https://www.parium.se/#organization" },
           "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://parium.se/jobb/{search_term_string}",
+            "target": "https://www.parium.se/jobb/{search_term_string}",
             "query-input": "required name=search_term_string"
           }
         }
@@ -128,7 +128,7 @@
       // Ingen dubblering här — det orsakade kapplöpningar mot Safari.)
 
       // 🚨 CANONICAL DOMAIN REDIRECT + NOINDEX på staging
-      // 1) Skriver noindex + canonical till parium.se INNAN React mountar,
+      // 1) Skriver noindex + canonical till www.parium.se INNAN React mountar,
       //    så Googlebot (som inte alltid följer JS-redirects) ändå konsoliderar
       //    alla signaler till parium.se och slutar visa lovable.app i SERP.
       // 2) Tvingar samtidigt full redirect för riktiga användare.
@@ -137,7 +137,7 @@
           var h = window.location.hostname;
           var isLovableHost = h === 'parium-ab.lovable.app' || (h.endsWith('.lovable.app') && h.indexOf('parium-ab') === 0);
           if (!isLovableHost) return;
-          var pariumUrl = 'https://parium.se' + window.location.pathname + window.location.search + window.location.hash;
+          var pariumUrl = 'https://www.parium.se' + window.location.pathname + window.location.search + window.location.hash;
           // Injicera noindex + canonical INNAN body parsas — Googlebot ser detta även utan JS-exec.
           document.write('<meta name="robots" content="noindex,nofollow">');
           document.write('<link rel="canonical" href="' + pariumUrl.split('#')[0] + '">');
@@ -335,14 +335,14 @@
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="sv_SE" />
     <meta property="og:site_name" content="Parium" />
-    <meta property="og:url" content="https://parium.se/" />
-    <meta property="og:image" content="https://parium.se/og-image.jpg" />
+    <meta property="og:url" content="https://www.parium.se/" />
+    <meta property="og:image" content="https://www.parium.se/og-image.jpg" />
     <meta property="og:image:width" content="1216" />
     <meta property="og:image:height" content="640" />
     <meta property="og:image:alt" content="Parium – jobbappen som matchar jobbsökare med arbetsgivare i hela Sverige" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://parium.se/og-image.jpg" />
+    <meta name="twitter:image" content="https://www.parium.se/og-image.jpg" />
     <meta name="twitter:site" content="@parium_se" />
 
     <meta property="og:title" content="Parium – Hitta jobb och rekrytera smartare">
@@ -356,31 +356,31 @@
       "@graph": [
         {
           "@type": "Organization",
-          "@id": "https://parium.se/#organization",
+          "@id": "https://www.parium.se/#organization",
           "name": "Parium",
-          "url": "https://parium.se/",
-          "logo": "https://parium.se/parium-icon-v3-512.png",
+          "url": "https://www.parium.se/",
+          "logo": "https://www.parium.se/parium-icon-v3-512.png",
           "description": "Parium kopplar samman jobbsökare och arbetsgivare via smart matchning — rekrytering och jobbsökande på 60 sekunder."
         },
         {
           "@type": "WebSite",
-          "@id": "https://parium.se/#website",
-          "url": "https://parium.se/",
+          "@id": "https://www.parium.se/#website",
+          "url": "https://www.parium.se/",
           "name": "Parium",
           "inLanguage": "sv-SE",
-          "publisher": { "@id": "https://parium.se/#organization" }
+          "publisher": { "@id": "https://www.parium.se/#organization" }
         }
       ]
     }
     </script>
-  <link rel="manifest" href="/manifest.json?v=20260427-3">
-  <link rel="shortcut icon" href="/parium-favicon-v3.ico" sizes="any">
-  <link rel="icon" href="/parium-favicon-v3.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="32x32" href="/parium-favicon-v3-32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="/parium-favicon-v3-48.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/parium-icon-v3-512.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/parium-touch-icon-v3.png">
-  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/parium-touch-icon-v3.png">
+  <link rel="manifest" href="/manifest.json?v=20260721-1">
+  <link rel="shortcut icon" href="/parium-favicon-v3.ico?v=20260721-1" sizes="any">
+  <link rel="icon" href="/parium-favicon-v3.ico?v=20260721-1" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/parium-favicon-v3-32.png?v=20260721-1">
+  <link rel="icon" type="image/png" sizes="48x48" href="/parium-favicon-v3-48.png?v=20260721-1">
+  <link rel="icon" type="image/png" sizes="512x512" href="/parium-icon-v3-512.png?v=20260721-1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/parium-touch-icon-v3.png?v=20260721-1">
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/parium-touch-icon-v3.png?v=20260721-1">
   <style>
     /* Body-färgen sätts INLINE av syncBrowserChrome() vid varje route-byte:
        - På "/" → #2a2a2a (matchar landningssidans video + topp-URL-bar)
