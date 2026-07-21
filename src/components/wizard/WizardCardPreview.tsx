@@ -104,6 +104,8 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   benefitsCount = 0,
   applicationsCount = 0,
   publishedLabel,
+  startDateLabel,
+  questionsCount = 0,
   overlayTextColor,
   onOpenForm,
   onOpenCompany,
