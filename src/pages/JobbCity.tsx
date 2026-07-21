@@ -31,7 +31,7 @@ type PublicJobRow = {
 // (Inga mock-/sample-jobs – vi visar bara riktiga aktiva annonser.)
 
 
-const BASE = 'https://parium.se';
+const BASE = 'https://www.parium.se';
 
 const JobbCity = () => {
   const { citySlug } = useParams<{ citySlug: string }>();

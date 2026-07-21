@@ -34,7 +34,7 @@ const env = (name: string, fallback = '') => process.env[name] || envFile[name] 
 
 const SUPABASE_URL = env('VITE_SUPABASE_URL') || env('SUPABASE_URL');
 const SUPABASE_ANON_KEY = env('VITE_SUPABASE_PUBLISHABLE_KEY') || env('VITE_SUPABASE_ANON_KEY') || env('SUPABASE_ANON_KEY');
-const TARGET_URL = env('PARIUM_LOAD_TEST_TARGET', 'https://parium.se');
+const TARGET_URL = env('PARIUM_LOAD_TEST_TARGET', 'https://www.parium.se');
 const ALLOW_PRODUCTION = env('PARIUM_LOAD_TEST_ALLOW_PRODUCTION') === 'true';
 const ENABLE_WRITES = env('PARIUM_LOAD_TEST_ENABLE_WRITES') === 'true';
 const VIRTUAL_USERS = toInt(env('PARIUM_LOAD_TEST_USERS_COUNT', '100'), 100);

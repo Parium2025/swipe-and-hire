@@ -1430,7 +1430,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     const description = isSeeker
       ? 'Slipp långa formulär. Bygg en profil som visar mer än ett CV och få relevanta jobb först. Gratis för jobbsökare i Sverige.'
       : 'Hitta rätt kandidater på sekunder. Publicera jobb, matcha smart och anställ snabbare med Parium – rekrytering i en ny generation.';
-    const url = isSeeker ? 'https://parium.se/jobbsokare' : 'https://parium.se/arbetsgivare';
+    const url = isSeeker ? 'https://www.parium.se/jobbsokare' : 'https://www.parium.se/arbetsgivare';
 
     document.title = title;
 

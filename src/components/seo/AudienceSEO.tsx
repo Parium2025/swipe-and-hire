@@ -13,13 +13,13 @@ const SEO: Record<AudienceRole, SEOConfig> = {
     title: 'Hitta jobb som passar dig – jobbapp & lediga jobb | Parium',
     description:
       'Hitta lediga jobb som faktiskt passar dig. Skapa profil gratis och sök jobb i jobbappen Parium.',
-    canonical: 'https://parium.se/jobbsokare',
+    canonical: 'https://www.parium.se/jobbsokare',
   },
   employer: {
     title: 'Rekrytera rätt kandidater snabbt & enkelt | Parium',
     description:
       'Snabbare rekrytering med smart matchning. Få kvalificerade kandidater i flödet, granska mobilt och boka samtal direkt. Testa Parium gratis.',
-    canonical: 'https://parium.se/arbetsgivare',
+    canonical: 'https://www.parium.se/arbetsgivare',
   },
 };
 

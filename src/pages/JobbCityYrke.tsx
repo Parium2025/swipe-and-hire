@@ -18,7 +18,7 @@ import { CITY_BY_SLUG, CITIES } from '@/data/jobCities';
 import { OCCUPATION_BY_SLUG, OCCUPATIONS } from '@/data/jobOccupations';
 import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
 
-const BASE = 'https://parium.se';
+const BASE = 'https://www.parium.se';
 
 const JobbCityYrke = () => {
   const { citySlug, occupationSlug } = useParams<{ citySlug: string; occupationSlug: string }>();

@@ -16,7 +16,7 @@ import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchInte
 import { buildGenericOccupation } from '@/lib/genericOccupation';
 
 
-const BASE = 'https://parium.se';
+const BASE = 'https://www.parium.se';
 
 const YrkePage = () => {
   const { occupationSlug } = useParams<{ occupationSlug: string }>();

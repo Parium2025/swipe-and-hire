@@ -18,7 +18,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
  import { TruncatedText } from '@/components/TruncatedText';
  
 
-const BASE = 'https://parium.se';
+const BASE = 'https://www.parium.se';
 
 type Job = {
   id: string;

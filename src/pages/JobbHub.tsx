@@ -40,7 +40,7 @@ const POPULAR_OCCUPATIONS = [
   'Kock',
 ];
 
-const CANONICAL = 'https://parium.se/jobb';
+const CANONICAL = 'https://www.parium.se/jobb';
 const TITLE = 'Lediga jobb i hela Sverige – jobbapp & matchning | Parium';
 const DESCRIPTION = 'Hitta lediga jobb i hela Sverige. Stockholm, Göteborg, Malmö, Uppsala och fler – sök jobb i jobbappen Parium.';
 
@@ -104,7 +104,7 @@ const JobbHub = () => {
       '@type': 'ListItem',
       position: i + 1,
       name: `Lediga jobb ${c.inForm}`,
-      url: `https://parium.se/jobb/${c.slug}`,
+      url: `https://www.parium.se/jobb/${c.slug}`,
     })),
   };
 
@@ -112,7 +112,7 @@ const JobbHub = () => {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Parium', item: 'https://parium.se/' },
+      { '@type': 'ListItem', position: 1, name: 'Parium', item: 'https://www.parium.se/' },
       { '@type': 'ListItem', position: 2, name: 'Jobb', item: CANONICAL },
     ],
   };

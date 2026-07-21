@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Smartphone, AlertTriangle, Copy, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const PUBLIC_APP_URL = 'https://parium.se';
+const PUBLIC_APP_URL = 'https://www.parium.se';
 
 const EmailRedirect = () => {
   const [isInAppBrowser, setIsInAppBrowser] = useState(false);

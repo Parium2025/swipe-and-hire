@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import * as QRCodeStylingModule from 'qr-code-styling';
 // CJS/ESM interop: handle both default and namespace exports
 const QRCodeStyling = (QRCodeStylingModule as any).default || QRCodeStylingModule;
-const PUBLIC_APP_URL = 'https://parium.se';
+const PUBLIC_APP_URL = 'https://www.parium.se';
 
 const EmailVerification = () => {
   const [verificationMethod, setVerificationMethod] = useState<'email' | 'pin' | 'qr'>('email');

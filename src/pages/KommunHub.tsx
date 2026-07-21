@@ -9,7 +9,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import { MapPin, Search } from 'lucide-react';
 import { KOMMUNER } from '@/data/jobMunicipalities';
 
-const CANONICAL = 'https://parium.se/kommuner';
+const CANONICAL = 'https://www.parium.se/kommuner';
 const TITLE = 'Lediga jobb i Sveriges kommuner – sök på din kommun | Parium';
 const DESCRIPTION = 'Hitta lediga jobb i alla 290 svenska kommuner. Från Stockholm och Göteborg till Kiruna och Trelleborg – sök jobb i jobbappen Parium.';
 
@@ -60,7 +60,7 @@ const KommunHub = () => {
       '@type': 'ListItem',
       position: i + 1,
       name: `Lediga jobb i ${k.name} kommun`,
-      url: `https://parium.se/kommun/${k.slug}`,
+      url: `https://www.parium.se/kommun/${k.slug}`,
     })),
   };
 
@@ -68,7 +68,7 @@ const KommunHub = () => {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Parium', item: 'https://parium.se/' },
+      { '@type': 'ListItem', position: 1, name: 'Parium', item: 'https://www.parium.se/' },
       { '@type': 'ListItem', position: 2, name: 'Kommuner', item: CANONICAL },
     ],
   };
