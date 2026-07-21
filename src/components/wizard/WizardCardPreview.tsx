@@ -425,7 +425,7 @@ export const WizardListPreview = memo(function WizardListPreview({
       <div className="w-full bg-[hsl(215,85%,10%)]/95 backdrop-blur-sm border-t border-white/10 px-3 py-2">
         <div className="space-y-1.5">
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
-          {workingHours && <PreviewRow label="Arbetstider" value={workingHours} />}
+          <PreviewRow label="Arbetstider" value={workingHours || '–'} />
           <PreviewRow label="Plats" value={location || '–'} />
           <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
           <PreviewRow label="Lön" value={salaryText || '–'} />
