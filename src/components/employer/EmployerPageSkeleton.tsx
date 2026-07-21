@@ -81,23 +81,26 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
         </div>
       </header>
-      {/* DESKTOP chrome — mirrors EmployerTopNav (logo + nav pills + right actions) */}
-      <header className="hidden md:flex shrink-0 h-16 items-center justify-between border-b border-white/20 bg-transparent px-4 gap-4">
-        {/* Left: logo */}
-        <div className={`h-8 w-28 rounded-md ${SHAPE}`} />
-        {/* Center: nav pills (Annonser, Kandidater, Chattar, Företag) */}
-        <div className="flex-1 flex items-center justify-center gap-2">
-          <div className={`h-8 w-28 rounded-md ${SHAPE}`} />
-          <div className={`h-8 w-28 rounded-md ${SHAPE}`} />
-          <div className={`h-8 w-24 rounded-md ${SHAPE}`} />
-          <div className={`h-8 w-24 rounded-md ${SHAPE}`} />
-        </div>
-        {/* Right: notifications + avatar + extraRight (dev pill + create button) */}
-        <div className="flex items-center gap-3">
-          <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
-          <div className={`h-9 w-9 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
-          <div className={`h-9 w-28 rounded-lg ${SHAPE}`} />
-          <div className={`h-9 w-40 rounded-lg ${SHAPE}`} />
+      {/* DESKTOP chrome — mirrors EmployerTopNav layout exactly */}
+      <header className="hidden md:flex shrink-0 h-16 items-center border-b border-white/20 bg-transparent">
+        <div className="w-full responsive-container-wide flex items-center justify-between">
+          {/* Left: logo + nav pills (left-aligned, gap-1) */}
+          <div className="flex items-center gap-1">
+            <div className={`h-10 w-10 rounded-lg ${SHAPE}`} />
+            <div className="flex items-center gap-1 ml-1">
+              <div className={`h-10 w-[140px] rounded-lg ${SHAPE}`} />
+              <div className={`h-10 w-[132px] rounded-lg ${SHAPE}`} />
+              <div className={`h-10 w-[92px] rounded-lg ${SHAPE}`} />
+              <div className={`h-10 w-[104px] rounded-lg ${SHAPE}`} />
+            </div>
+          </div>
+          {/* Right: notifications + avatar + dev pill + create button */}
+          <div className="flex items-center gap-3">
+            <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
+            <div className={`h-9 w-9 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
+            <div className={`h-10 w-[132px] rounded-lg ${SHAPE}`} />
+            <div className={`h-10 w-[164px] rounded-lg ${SHAPE}`} />
+          </div>
         </div>
       </header>
     </>
