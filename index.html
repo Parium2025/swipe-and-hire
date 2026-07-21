@@ -139,15 +139,20 @@
       //    så Googlebot (som inte alltid följer JS-redirects) ändå konsoliderar
       //    alla signaler till parium.se och slutar visa lovable.app i SERP.
       // 2) Tvingar samtidigt full redirect för riktiga användare.
+      // UNDANTAG: staging-domänens startsida (/ och /index.html) redirectas INTE
+      // under Search Console-verifiering, så Google kan läsa meta-taggen.
       (function() {
         try {
           var h = window.location.hostname;
+          var p = window.location.pathname;
           var isLovableHost = h === 'parium-ab.lovable.app' || (h.endsWith('.lovable.app') && h.indexOf('parium-ab') === 0);
           if (!isLovableHost) return;
-          var pariumUrl = 'https://www.parium.se' + window.location.pathname + window.location.search + window.location.hash;
+          var pariumUrl = 'https://www.parium.se' + p + window.location.search + window.location.hash;
           // Injicera noindex + canonical INNAN body parsas — Googlebot ser detta även utan JS-exec.
           document.write('<meta name="robots" content="noindex,nofollow">');
           document.write('<link rel="canonical" href="' + pariumUrl.split('#')[0] + '">');
+          var isStagingRootForVerification = h === 'parium-ab.lovable.app' && (p === '/' || p === '/index.html');
+          if (isStagingRootForVerification) return;
           // Hard redirect för riktiga besökare.
           window.location.replace(pariumUrl);
         } catch (e) { /* noop */ }
