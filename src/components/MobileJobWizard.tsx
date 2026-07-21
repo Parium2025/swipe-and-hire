@@ -2115,6 +2115,7 @@ const MobileJobWizard = ({
       if (!(parseInt(formData.positions_count) > 0)) missing.push('Antal personer att rekrytera');
       if (!formData.work_start_time.trim()) missing.push('Arbetstid (starttid)');
       if (!formData.work_end_time.trim()) missing.push('Arbetstid (sluttid)');
+      if (!(formData.start_date && formData.start_date.trim())) missing.push('Startdatum');
     }
     
     if (currentStep === 1) {
