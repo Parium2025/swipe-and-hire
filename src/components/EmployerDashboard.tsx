@@ -59,6 +59,8 @@ const EmployerDashboard = memo(() => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<JobPosting | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [republishJob, setRepublishJob] = useState<JobPosting | null>(null);
+  const [republishDialogOpen, setRepublishDialogOpen] = useState(false);
   const [pendingEditJobId, setPendingEditJobId] = useState<string | null>(null);
   const { user, profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const { toast } = useToast();
