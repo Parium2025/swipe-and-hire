@@ -71,9 +71,11 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 const SkeletonChrome = memo(function SkeletonChrome() {
   return (
     <>
-      {/* MOBILE chrome — mirrors EmployerMobileHeader */}
+      {/* MOBILE chrome — mirrors EmployerMobileShell header exactly:
+          logo (h-10 w-40 bg image) | absolute-centered "Parium" text |
+          [Plus 9x9] [Notification 9x9] [Avatar 8x8 ring-2 rounded-full] */}
       <header className="md:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-        <div className={`h-7 w-24 rounded-md ${SHAPE}`} />
+        <div className={`h-10 w-40 rounded-md ${SHAPE}`} />
         <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SHAPE}`} />
         <div className="flex items-center gap-2">
           <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
