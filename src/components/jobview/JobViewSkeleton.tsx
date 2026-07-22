@@ -58,6 +58,19 @@ export const JobViewSkeleton = ({ asOverlay = false }: JobViewSkeletonProps) => 
           ))}
         </div>
 
+        {/* Benefits block — 6 pill-badges (matchar JobViewBenefits grid) */}
+        <div className="mt-6 space-y-3">
+          <div className={`h-5 w-32 rounded ${SHAPE}`} />
+          <div className="flex flex-wrap gap-2">
+            <div className={`h-8 w-24 rounded-full ${SHAPE}`} />
+            <div className={`h-8 w-28 rounded-full ${SHAPE}`} />
+            <div className={`h-8 w-20 rounded-full ${SHAPE}`} />
+            <div className={`h-8 w-32 rounded-full ${SHAPE}`} />
+            <div className={`h-8 w-24 rounded-full ${SHAPE}`} />
+            <div className={`h-8 w-28 rounded-full ${SHAPE}`} />
+          </div>
+        </div>
+
         {/* Description block */}
         <div className="mt-6 space-y-2">
           <div className={`h-4 w-full rounded ${SHAPE}`} />
@@ -66,8 +79,14 @@ export const JobViewSkeleton = ({ asOverlay = false }: JobViewSkeletonProps) => 
           <div className={`h-4 w-9/12 rounded ${SHAPE}`} />
         </div>
 
+        {/* Footer meta (createdAt / expiresAt) */}
+        <div className="mt-6 flex items-center justify-between">
+          <div className={`h-3 w-32 rounded ${SHAPE}`} />
+          <div className={`h-3 w-28 rounded ${SHAPE}`} />
+        </div>
+
         {/* Apply button */}
-        <div className={`h-12 w-full rounded-xl mt-8 ${SHAPE}`} />
+        <div className={`h-12 w-full rounded-xl mt-6 ${SHAPE}`} />
       </div>
     </div>
   );

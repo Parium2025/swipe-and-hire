@@ -42,10 +42,12 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 const SkeletonChrome = memo(function SkeletonChrome() {
   return (
     <>
-      {/* MOBILE chrome — mirrors JobSeekerLayout mobile header */}
-      <header className="md:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/10 bg-transparent px-3">
-        <div className={`h-9 w-28 rounded-md ${SKELETON_SHAPE}`} />
-        <div className={`absolute left-1/2 -translate-x-1/2 h-5 w-16 rounded ${SKELETON_SHAPE}`} />
+      {/* MOBILE chrome — mirrors JobSeekerLayout header exactly:
+          rings-logo (h-10 w-12) | absolute-centered "Parium" text |
+          [Search 9x9] [Notification 9x9] [Avatar 8x8 ring-2] */}
+      <header className="md:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
+        <div className={`h-10 w-12 rounded-md ${SKELETON_SHAPE}`} />
+        <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SKELETON_SHAPE}`} />
         <div className="flex items-center gap-2">
           <div className={`h-9 w-9 rounded-full ${SKELETON_SHAPE}`} />
           <div className={`h-9 w-9 rounded-full ${SKELETON_SHAPE}`} />
