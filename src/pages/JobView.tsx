@@ -123,6 +123,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const isPreviewMode = new URLSearchParams(location.search).get('preview') === '1';
   const { user, isCompanyUser, userRole, loading: authLoading } = useAuth();
   const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || userRole?.role === 'employer');
   const { getPrefetchedJob } = useJobPrefetchCache();
