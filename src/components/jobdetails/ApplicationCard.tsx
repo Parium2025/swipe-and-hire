@@ -177,8 +177,9 @@ export const ApplicationCardContent = memo(({
         </div>
       </div>
 
-      {hasResults && (
-        <div className="flex flex-wrap gap-1 mt-1.5 pt-1.5 border-t border-white/10">
+      {hasCriteria && hasResults && (
+        <div className="flex flex-wrap items-center gap-1 mt-1.5 pt-1.5 border-t border-white/10">
+          <CriteriaSummaryPill results={criterionResults} totalCriteria={criteriaCount} />
           {criterionResults.map((cr) => (
             <CriterionIconBadge
               key={cr.criterion_id}
