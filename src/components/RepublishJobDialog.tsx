@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { TruncatedText } from '@/components/TruncatedText';
 
-const DAY_OPTIONS = [14, 30, 60, 90] as const;
+const REPUBLISH_DAYS = 14;
 
 interface RepublishJobDialogProps {
   jobId: string | null;
@@ -32,7 +32,6 @@ export function RepublishJobDialog({
   onRepublished,
 }: RepublishJobDialogProps) {
   const { toast } = useToast();
-  const [days, setDays] = useState<number>(30);
   const [submitting, setSubmitting] = useState(false);
 
   const handleConfirm = async () => {
@@ -41,7 +40,7 @@ export function RepublishJobDialog({
     try {
       const { data, error } = await supabase.rpc('republish_job', {
         _job_id: jobId,
-        _days: days,
+        _days: REPUBLISH_DAYS,
       });
 
       if (error) {
@@ -70,7 +69,7 @@ export function RepublishJobDialog({
 
       toast({
         title: 'Annons återpublicerad',
-        description: `Din annons är aktiv i ${days} dagar.`,
+        description: `Din annons är aktiv i ${REPUBLISH_DAYS} dagar.`,
       });
       onOpenChange(false);
       if (typeof data === 'string') onRepublished?.(data);
@@ -93,7 +92,7 @@ export function RepublishJobDialog({
           </div>
         </AlertDialogHeader>
 
-        <div className="overflow-y-auto flex-1 my-4 space-y-4">
+        <div className="overflow-y-auto flex-1 my-4">
           <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
             {jobTitle ? (
               <>
@@ -102,37 +101,12 @@ export function RepublishJobDialog({
                   text={`"${jobTitle}"`}
                   className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom"
                 />{' '}
-                skapas med nytt utgångsdatum.
+                skapas och är aktiv i {REPUBLISH_DAYS} dagar.
               </>
             ) : (
-              'En ny aktiv kopia av annonsen skapas med nytt utgångsdatum.'
+              `En ny aktiv kopia av annonsen skapas och är aktiv i ${REPUBLISH_DAYS} dagar.`
             )}
           </AlertDialogDescription>
-
-          <div>
-            <p className="text-xs uppercase tracking-wide text-white/70 mb-2 text-center">
-              Välj längd
-            </p>
-            <div className="grid grid-cols-4 gap-2">
-              {DAY_OPTIONS.map((d) => {
-                const active = d === days;
-                return (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => setDays(d)}
-                    className={`h-11 rounded-full border text-sm font-medium transition-colors ${
-                      active
-                        ? 'bg-green-500/90 border-green-400 text-white'
-                        : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
-                    }`}
-                  >
-                    {d} dagar
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         </div>
 
         <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
