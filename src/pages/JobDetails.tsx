@@ -38,6 +38,7 @@ import {
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
+import { readJobDetailsSkeletonHint } from '@/lib/jobDetailsSkeletonHint';
 
 // Extracted sub-components
 import {
@@ -110,6 +111,7 @@ const JobDetails = () => {
   const criteriaCount = jobCriteria?.length || 0;
   
   const employerProfileImageUrl = useMediaUrl(job?.employer_profile?.profile_image_url, 'profile-image');
+  const skeletonHint = useMemo(() => readJobDetailsSkeletonHint(jobId), [jobId]);
 
   // Load my_candidates map for rating updates — only re-fetch when applicant IDs actually change
   useEffect(() => {
@@ -471,7 +473,7 @@ const JobDetails = () => {
   const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 
   if (dataLoading || stagesLoading) {
-    return <JobDetailsSkeleton />;
+    return <JobDetailsSkeleton hint={skeletonHint} />;
   }
 
   if (!job) {

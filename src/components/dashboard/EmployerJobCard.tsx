@@ -13,6 +13,7 @@ import { useCardImage } from '@/hooks/useCardImage';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { storeJobDetailsSkeletonHint } from '@/lib/jobDetailsSkeletonHint';
 
 interface EmployerJobCardProps {
   job: {
@@ -93,7 +94,10 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
   return (
     <Card
       className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] hover:bg-white/10 hover:border-white/30"
-      onClick={() => onClick(job.id)}
+      onClick={() => {
+        storeJobDetailsSkeletonHint(job);
+        onClick(job.id);
+      }}
     >
       {/* Image header */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">

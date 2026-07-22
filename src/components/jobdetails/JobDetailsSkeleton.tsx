@@ -3,18 +3,9 @@
  * It uses route/card hints when available so the title wraps like the actual ad.
  */
 import { CheckSquare, Eye, MapPin, Plus, QrCode, Users, X } from 'lucide-react';
+import type { JobDetailsSkeletonHint } from '@/lib/jobDetailsSkeletonHint';
 
 const SHAPE = 'bg-white/10 animate-pulse';
-
-export interface JobDetailsSkeletonHint {
-  title?: string | null;
-  location?: string | null;
-  expiresAt?: string | null;
-  viewsCount?: number | null;
-  applicationsCount?: number | null;
-  recruiterName?: string | null;
-  isActive?: boolean | null;
-}
 
 const DEFAULT_STAGES = [
   { label: 'Inkorg', color: '#EAB308', iconWidth: 'w-3.5' },
