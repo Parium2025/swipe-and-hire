@@ -2075,8 +2075,7 @@ const MobileJobWizard = ({
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0 &&
              formData.work_start_time.trim() &&
-             formData.work_end_time.trim() &&
-             !!(formData.start_date && formData.start_date.trim());
+             formData.work_end_time.trim();
     }
     
     if (currentStep === 1) {
