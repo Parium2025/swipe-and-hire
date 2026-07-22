@@ -260,30 +260,80 @@ serve(async (req) => {
     const jobContext = buildJobContext(job, criteria, questions);
     const feedbackContext = buildFeedbackContext(feedback, criteria);
 
-    // Call AI with tool calling
-    const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteria, feedbackContext);
+    // ─── HASH-BASED CACHE: skip criteria whose prompt AND context haven't changed ───
+    const contextHash = await sha256(candidateContext + '||' + feedbackContext);
+    const criteriaWithHashes = await Promise.all(
+      criteria.map(async (c: any) => ({
+        ...c,
+        _criterion_hash: await sha256(`${c.title}||${c.prompt}`),
+      }))
+    );
 
-    if (!aiResponse) {
-      await supabase
-        .from('candidate_evaluations')
-        .update({ status: 'failed', error_message: 'AI evaluation failed after retries', updated_at: new Date().toISOString() })
-        .eq('id', evaluation.id);
+    // Fetch existing cached results for these criteria (by hash) — reuse them.
+    const criterionIds = criteriaWithHashes.map(c => c.id);
+    const { data: cachedRows } = await supabase
+      .from('criterion_results')
+      .select('criterion_id, result, confidence, reasoning, source, criterion_hash, context_hash')
+      .in('criterion_id', criterionIds)
+      .eq('context_hash', contextHash);
 
-      return new Response(
-        JSON.stringify({ error: 'AI evaluation failed' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const cachedByCriterion = new Map<string, any>();
+    (cachedRows || []).forEach((row: any) => {
+      cachedByCriterion.set(`${row.criterion_id}||${row.criterion_hash}`, row);
+    });
+
+    const cachedResults: any[] = [];
+    const criteriaToEvaluate: any[] = [];
+    for (const c of criteriaWithHashes) {
+      const hit = cachedByCriterion.get(`${c.id}||${c._criterion_hash}`);
+      if (hit) {
+        cachedResults.push({
+          criterion_id: c.id,
+          title: c.title,
+          result: hit.result,
+          confidence: hit.confidence,
+          reasoning: hit.reasoning,
+          source: hit.source,
+          _from_cache: true,
+        });
+      } else {
+        criteriaToEvaluate.push(c);
+      }
     }
 
-    // Batch upsert criterion results
-    if (aiResponse.criteria_results.length > 0) {
-      const resultsToUpsert = aiResponse.criteria_results.map(result => ({
+    console.log(`Cache: ${cachedResults.length} hit / ${criteriaToEvaluate.length} miss (of ${criteria.length} criteria)`);
+
+    // Call AI only for criteria that need fresh evaluation
+    let freshResults: CriterionResult[] = [];
+    if (criteriaToEvaluate.length > 0) {
+      const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteriaToEvaluate, feedbackContext);
+
+      if (!aiResponse) {
+        await supabase
+          .from('candidate_evaluations')
+          .update({ status: 'failed', error_message: 'AI evaluation failed after retries', updated_at: new Date().toISOString() })
+          .eq('id', evaluation.id);
+
+        return new Response(
+          JSON.stringify({ error: 'AI evaluation failed' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      freshResults = aiResponse.criteria_results;
+    }
+
+    // Persist ONLY fresh results (cached rows already exist in DB)
+    if (freshResults.length > 0) {
+      const hashByCriterionId = new Map(criteriaWithHashes.map(c => [c.id, c._criterion_hash]));
+      const resultsToUpsert = freshResults.map(result => ({
         evaluation_id: evaluation.id,
         criterion_id: result.criterion_id,
         result: result.result,
         confidence: result.confidence,
         reasoning: result.reasoning,
         source: result.source,
+        criterion_hash: hashByCriterionId.get(result.criterion_id) || null,
+        context_hash: contextHash,
       }));
 
       const { error: upsertError } = await supabase
@@ -293,15 +343,35 @@ serve(async (req) => {
       if (upsertError) console.error('Error batch upserting results:', upsertError);
     }
 
+    // Ensure cached results are also linked to THIS evaluation (rebind to current evaluation_id)
+    if (cachedResults.length > 0) {
+      const hashByCriterionId = new Map(criteriaWithHashes.map(c => [c.id, c._criterion_hash]));
+      const cachedToUpsert = cachedResults.map(r => ({
+        evaluation_id: evaluation.id,
+        criterion_id: r.criterion_id,
+        result: r.result,
+        confidence: r.confidence,
+        reasoning: r.reasoning,
+        source: r.source,
+        criterion_hash: hashByCriterionId.get(r.criterion_id) || null,
+        context_hash: contextHash,
+      }));
+      await supabase
+        .from('criterion_results')
+        .upsert(cachedToUpsert, { onConflict: 'evaluation_id,criterion_id' });
+    }
+
+    const allResults = [...cachedResults, ...freshResults];
+
     await supabase
       .from('candidate_evaluations')
       .update({ status: 'completed', evaluated_at: new Date().toISOString(), updated_at: new Date().toISOString() })
       .eq('id', evaluation.id);
 
-    console.log(`Evaluation completed for candidate ${applicant_id} — ${aiResponse.criteria_results.length} criteria evaluated`);
+    console.log(`Evaluation completed for candidate ${applicant_id} — ${allResults.length} results (${cachedResults.length} cached, ${freshResults.length} fresh)`);
 
     return new Response(
-      JSON.stringify({ success: true, evaluation_id: evaluation.id, criteria_results: aiResponse.criteria_results }),
+      JSON.stringify({ success: true, evaluation_id: evaluation.id, criteria_results: allResults, cache_hits: cachedResults.length, ai_calls: freshResults.length }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
@@ -313,6 +383,15 @@ serve(async (req) => {
     );
   }
 });
+
+// ─── SHA-256 helper (Web Crypto, works in Deno edge) ────────────
+async function sha256(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 // ─── Video CV Analysis ──────────────────────────────────────────
 
@@ -635,28 +714,88 @@ async function callLovableAI(
   feedbackContext: string
 ): Promise<EvaluationResponse | null> {
   try {
-    const systemPrompt = `Du är en professionell rekryteringsassistent som utvärderar kandidater mot specifika urvalskriterier.
+    const systemPrompt = `Du är en professionell svensk rekryteringsassistent som utvärderar kandidater mot urvalskriterier.
 
-DIN UPPGIFT: Utvärdera VARJE kriterium baserat på ALL tillgänglig information:
-- Profilinformation (yrke, plats, tillgänglighet)
-- Ansökningsdata (personligt brev, anställningsstatus)
-- Svar på jobbfrågor (t.ex. körkort, erfarenhet)
-- CV-fulltext (om tillgänglig — läs noggrant)
-- Video-CV transkription (om tillgänglig)
-- Rekryterarens tidigare korrigeringar (om tillgängliga — lär av dem!)
+═══════════════════════════════════════════════════
+🧠 SEMANTISK FÖRSTÅELSE — DETTA ÄR AVGÖRANDE
+═══════════════════════════════════════════════════
+Du MÅSTE förstå att olika ord kan betyda EXAKT SAMMA sak. Rekryteraren skriver kriterier på vardagligt svenska — kandidater skriver på sitt eget sätt. Din uppgift är att koppla ihop dem intelligent.
 
-BEDÖMNINGSREGLER:
-- "match" = Konkret bevis hittades
-- "no_match" = Bevis saknas eller motsägs
-- Confidence 0.0–1.0
+Exempel på vad du MÅSTE förstå som EKVIVALENT:
+
+📄 KÖRKORT
+- "B-kort" = "B-körkort" = "körkort B" = "har körkort" (i Sverige = B som standard) = "personbilskörkort"
+- "C-kort" = "lastbilskörkort" = "tungt körkort"
+- "CE" = "släpvagnskörkort tung" = "truck+släp"
+- "YKB" = "yrkeskompetensbevis"
+- "ADR" = "farligt gods-behörighet"
+
+💻 IT / TEKNIK
+- "React" ≈ "React.js" ≈ "ReactJS"
+- "JS" = "JavaScript" ; "TS" = "TypeScript"
+- "SEO" = "sökmotoroptimering"
+- "UX" = "användarupplevelse" ; "UI" = "gränssnittsdesign"
+- "DevOps" ≈ "CI/CD" ≈ "infrastruktur"
+- "backend" ≈ "server-side" ; "frontend" ≈ "klient" ≈ "webbutveckling"
+- "Kubernetes" = "k8s"
+
+🩺 VÅRD
+- "USK" = "undersköterska"
+- "SSK" = "sjuksköterska"
+- "leg." = "legitimerad"
+- "HLR" = "hjärt-lungräddning"
+- "delegering" = "delegerad sjukvård"
+
+🏗️ BYGG / INDUSTRI
+- "heta arbeten" = "certifikat heta arbeten"
+- "ställningsbygg" = "ställningsbyggnadskurs"
+- "liftkort" = "mobil arbetsplattform"
+- "truckkort" = "truckförarintyg" (A, B, C = olika klasser)
+
+🎓 UTBILDNING
+- "gymnasium" = "gymnasieutbildning" = "gymnasieexamen"
+- "högskola" ≈ "universitet"
+- "YH" = "yrkeshögskola"
+- "civilingenjör" ≈ "MSc" ; "kandidat" ≈ "BSc"
+
+🗣️ SPRÅK
+- "flytande svenska" = "modersmål svenska" = "obehindrad svenska"
+- "engelska i tal och skrift" = "professionell engelska"
+- "nybörjare" ≠ "flytande" — bedöm NIVÅ, inte bara närvaro
+
+⏰ TILLGÄNGLIGHET
+- "kan jobba helger" = "flexibel arbetstid" = "OB-villig"
+- "skiftarbete" = "roterande arbetstider" = "3-skift"
+- "heltid" = "100%" ; "deltid" = "<100%"
+
+📅 ERFARENHET (viktigt — räkna år konkret!)
+- "2+ års erfarenhet" → räkna faktiska år från CV:s tjänstgöringsperioder
+- "junior" ≈ 0-2 år ; "senior" ≈ 5+ år
+- Om CV visar 2019-2024 = ~5 år
+
+═══════════════════════════════════════════════════
+📋 BEDÖMNINGSREGLER
+═══════════════════════════════════════════════════
+- "match" = Konkret bevis finns (i CV, svar, profil eller video)
+- "no_match" = Bevis saknas ELLER motsägs
+- Confidence 0.0–1.0 (hur säker är du?)
 - Source: "cv", "application", "profile", "answer", "video", "multiple"
-- Reasoning: Max 1 mening på svenska
+- Reasoning: EN kort mening på svenska som förklarar KONKRET vad du hittade (t.ex. "Kandidaten skrev 'har körkort' i svaret — motsvarar B-körkort")
+
+═══════════════════════════════════════════════════
+⚖️ TÄNK SÅHÄR
+═══════════════════════════════════════════════════
+1. Läs kriteriet — VAD frågar rekryteraren egentligen efter?
+2. Sök i ALL kandidatdata (CV, svar, profil, video) — men förstå synonymer!
+3. Om kandidaten skrev "har körkort" och kriteriet är "B-körkort" → MATCH (i Sverige är B standard)
+4. Om osäker: hellre no_match med låg confidence än en falsk match
+5. Rekryterarens tidigare korrigeringar är GOLDEN — följ deras mönster
 
 VIKTIGT:
-- Om CV-fulltext finns, läs den noggrant för detaljer (år, arbetsgivare, certifikat)
-- Om rekryteraren tidigare har korrigerat ditt resultat för ett kriterium, luta åt rekryterarens bedömning
-- Saknad information = no_match med låg confidence
-- Var strikt men rättvis`;
+- Läs CV-fulltext noggrant för år, arbetsgivare, certifikat
+- Räkna faktiska år vid erfarenhetskrav
+- Saknad information ≠ negativ information — men båda ger no_match
+- Var STRIKT vid diskvalificerande krav (t.ex. certifikat), MJUKARE vid nice-to-haves`;
 
     const userPrompt = `${jobContext}\n\n${candidateContext}${feedbackContext}\n\nUtvärdera kandidaten mot varje urvalskriterium.`;
 
