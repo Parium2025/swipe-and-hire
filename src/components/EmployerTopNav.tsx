@@ -150,10 +150,12 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
 
   const isDropdownActive = (items: typeof businessItems) => {
     if (items.some(item => location.pathname === item.url)) return true;
-    // Keep Annonser dropdown highlighted while previewing a job from dashboard/my-jobs
-    if (location.pathname.startsWith('/job/')) {
-      const source = sessionStorage.getItem('jobPreviewSource');
-      if (items.some(item => item.url === source)) return true;
+    // Keep Annonser dropdown highlighted while inside any job context
+    // (job-details/kanban eller preview via öga) — man är alltid på väg
+    // tillbaka till Annonser oavsett källa.
+    const isAnnonser = items.some(i => i.url === '/dashboard' || i.url === '/my-jobs');
+    if (isAnnonser && (location.pathname.startsWith('/job/') || location.pathname.startsWith('/job-details/'))) {
+      return true;
     }
     return false;
   };

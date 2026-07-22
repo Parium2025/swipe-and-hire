@@ -1,55 +1,71 @@
 /**
  * Skeleton loader for JobDetails page.
- * Unified color standard: every placeholder shape uses `bg-white/10`
- * (same tone as the logo-circle skeleton) — no mixed opacities, no borders.
+ * Mirrors the real layout: header card (title/location/stat-pills) + kanban columns.
+ * Unified shape tone: `bg-white/10` — inga blandade opaciteter.
  */
 
-const SHAPE = 'bg-white/10 animate-pulse';
+const SHAPE = 'bg-white/10 animate-pulse rounded';
 
 export const JobDetailsSkeleton = () => (
-  <div className="space-y-4 responsive-container-wide py-4 pb-safe min-h-screen animate-fade-in">
-    <div className="rounded-lg p-3 md:p-6">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1 min-w-0 pr-4 space-y-2">
-          <div className={`h-6 w-3/4 rounded ${SHAPE}`} />
-          <div className="flex items-center gap-4">
-            <div className={`h-4 w-24 rounded ${SHAPE}`} />
-            <div className={`h-5 w-16 rounded-full ${SHAPE}`} />
-          </div>
+  <div className="responsive-container-wide py-4 pb-safe min-h-screen animate-fade-in space-y-4">
+    {/* Header card — matches JobDetailsHeader */}
+    <div className="rounded-lg border border-white/20 bg-white/5 p-3 md:p-4">
+      <div className="flex items-start justify-between gap-2">
+        <div className={`h-6 w-3/4 ${SHAPE}`} />
+        <div className={`h-7 w-7 rounded-full ${SHAPE}`} />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 mt-2">
+        <div className={`h-4 w-32 ${SHAPE}`} />
+        <div className={`h-5 w-16 rounded-full ${SHAPE}`} />
+        <div className={`h-3 w-28 ${SHAPE}`} />
+      </div>
+
+      <div className="mt-3 space-y-1.5 md:space-y-0">
+        {/* Desktop: 6 pills */}
+        <div className="hidden md:grid grid-cols-6 gap-1.5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className={`h-8 ${SHAPE} border border-white/10`} />
+          ))}
         </div>
-        <div className={`h-8 w-8 rounded ${SHAPE}`} />
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-        {[1, 2].map(i => (
-          <div key={i} className="rounded-lg p-2 md:p-3 space-y-2">
-            <div className={`h-4 w-20 rounded ${SHAPE}`} />
-            <div className={`h-6 w-8 rounded ${SHAPE}`} />
-          </div>
-        ))}
-      </div>
-    </div>
-    <div className="rounded-lg p-3">
-      <div className="flex items-center justify-between">
-        <div className={`h-4 w-32 rounded ${SHAPE}`} />
-        <div className={`h-6 w-20 rounded ${SHAPE}`} />
+        {/* Mobile: 3 stat pills + 3 action pills */}
+        <div className="md:hidden grid grid-cols-3 gap-1.5">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className={`h-8 ${SHAPE} border border-white/10`} />
+          ))}
+        </div>
+        <div className="md:hidden grid grid-cols-3 gap-1.5">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className={`h-11 ${SHAPE} border border-white/10`} />
+          ))}
+        </div>
       </div>
     </div>
-    <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
-      {[1, 2, 3, 4, 5].map(i => (
-        <div key={i} className="flex-1 min-w-[160px] max-w-[240px] flex flex-col">
-          <div className={`rounded-md px-2 py-1.5 mb-2 ${SHAPE}`}>
-            <div className="h-4 w-24 rounded bg-white/10" />
+
+    {/* Kanban board */}
+    <div className="flex gap-3 overflow-x-auto pb-4 px-1">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex-1 min-w-[260px] max-w-[320px] flex flex-col">
+          {/* Column header */}
+          <div className="rounded-md bg-white/5 border border-white/10 px-3 py-2 mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`h-4 w-4 rounded-full ${SHAPE}`} />
+              <div className={`h-4 w-24 ${SHAPE}`} />
+            </div>
+            <div className={`h-4 w-6 ${SHAPE}`} />
           </div>
-          <div className="flex-1 space-y-2 p-1">
-            {i <= 2 && (
-              <div className={`rounded-md p-2 space-y-2 ${SHAPE}`}>
+          {/* Cards */}
+          <div className="space-y-2">
+            {i === 0 && (
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-white/10" />
-                  <div className="flex-1 space-y-1">
-                    <div className="h-3 w-20 rounded bg-white/10" />
-                    <div className="h-2 w-12 rounded bg-white/10" />
+                  <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
+                  <div className="flex-1 space-y-1.5">
+                    <div className={`h-3.5 w-28 ${SHAPE}`} />
+                    <div className={`h-2.5 w-20 ${SHAPE}`} />
                   </div>
                 </div>
+                <div className={`h-2.5 w-16 ${SHAPE}`} />
               </div>
             )}
           </div>
