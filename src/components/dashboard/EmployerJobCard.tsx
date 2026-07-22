@@ -191,6 +191,14 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
               );
             })()}
           </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Startdatum:</span>
+            <span className="text-sm leading-snug text-white font-medium text-right">
+              {(job as any).start_date
+                ? new Date((job as any).start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+                : 'Omgående'}
+            </span>
+          </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Ansökningar:</span>
             <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
