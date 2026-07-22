@@ -260,30 +260,80 @@ serve(async (req) => {
     const jobContext = buildJobContext(job, criteria, questions);
     const feedbackContext = buildFeedbackContext(feedback, criteria);
 
-    // Call AI with tool calling
-    const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteria, feedbackContext);
+    // ─── HASH-BASED CACHE: skip criteria whose prompt AND context haven't changed ───
+    const contextHash = await sha256(candidateContext + '||' + feedbackContext);
+    const criteriaWithHashes = await Promise.all(
+      criteria.map(async (c: any) => ({
+        ...c,
+        _criterion_hash: await sha256(`${c.title}||${c.prompt}`),
+      }))
+    );
 
-    if (!aiResponse) {
-      await supabase
-        .from('candidate_evaluations')
-        .update({ status: 'failed', error_message: 'AI evaluation failed after retries', updated_at: new Date().toISOString() })
-        .eq('id', evaluation.id);
+    // Fetch existing cached results for these criteria (by hash) — reuse them.
+    const criterionIds = criteriaWithHashes.map(c => c.id);
+    const { data: cachedRows } = await supabase
+      .from('criterion_results')
+      .select('criterion_id, result, confidence, reasoning, source, criterion_hash, context_hash')
+      .in('criterion_id', criterionIds)
+      .eq('context_hash', contextHash);
 
-      return new Response(
-        JSON.stringify({ error: 'AI evaluation failed' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const cachedByCriterion = new Map<string, any>();
+    (cachedRows || []).forEach((row: any) => {
+      cachedByCriterion.set(`${row.criterion_id}||${row.criterion_hash}`, row);
+    });
+
+    const cachedResults: any[] = [];
+    const criteriaToEvaluate: any[] = [];
+    for (const c of criteriaWithHashes) {
+      const hit = cachedByCriterion.get(`${c.id}||${c._criterion_hash}`);
+      if (hit) {
+        cachedResults.push({
+          criterion_id: c.id,
+          title: c.title,
+          result: hit.result,
+          confidence: hit.confidence,
+          reasoning: hit.reasoning,
+          source: hit.source,
+          _from_cache: true,
+        });
+      } else {
+        criteriaToEvaluate.push(c);
+      }
     }
 
-    // Batch upsert criterion results
-    if (aiResponse.criteria_results.length > 0) {
-      const resultsToUpsert = aiResponse.criteria_results.map(result => ({
+    console.log(`Cache: ${cachedResults.length} hit / ${criteriaToEvaluate.length} miss (of ${criteria.length} criteria)`);
+
+    // Call AI only for criteria that need fresh evaluation
+    let freshResults: CriterionResult[] = [];
+    if (criteriaToEvaluate.length > 0) {
+      const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteriaToEvaluate, feedbackContext);
+
+      if (!aiResponse) {
+        await supabase
+          .from('candidate_evaluations')
+          .update({ status: 'failed', error_message: 'AI evaluation failed after retries', updated_at: new Date().toISOString() })
+          .eq('id', evaluation.id);
+
+        return new Response(
+          JSON.stringify({ error: 'AI evaluation failed' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      freshResults = aiResponse.criteria_results;
+    }
+
+    // Persist ONLY fresh results (cached rows already exist in DB)
+    if (freshResults.length > 0) {
+      const hashByCriterionId = new Map(criteriaWithHashes.map(c => [c.id, c._criterion_hash]));
+      const resultsToUpsert = freshResults.map(result => ({
         evaluation_id: evaluation.id,
         criterion_id: result.criterion_id,
         result: result.result,
         confidence: result.confidence,
         reasoning: result.reasoning,
         source: result.source,
+        criterion_hash: hashByCriterionId.get(result.criterion_id) || null,
+        context_hash: contextHash,
       }));
 
       const { error: upsertError } = await supabase
@@ -293,12 +343,32 @@ serve(async (req) => {
       if (upsertError) console.error('Error batch upserting results:', upsertError);
     }
 
+    // Ensure cached results are also linked to THIS evaluation (rebind to current evaluation_id)
+    if (cachedResults.length > 0) {
+      const hashByCriterionId = new Map(criteriaWithHashes.map(c => [c.id, c._criterion_hash]));
+      const cachedToUpsert = cachedResults.map(r => ({
+        evaluation_id: evaluation.id,
+        criterion_id: r.criterion_id,
+        result: r.result,
+        confidence: r.confidence,
+        reasoning: r.reasoning,
+        source: r.source,
+        criterion_hash: hashByCriterionId.get(r.criterion_id) || null,
+        context_hash: contextHash,
+      }));
+      await supabase
+        .from('criterion_results')
+        .upsert(cachedToUpsert, { onConflict: 'evaluation_id,criterion_id' });
+    }
+
+    const allResults = [...cachedResults, ...freshResults];
+
     await supabase
       .from('candidate_evaluations')
       .update({ status: 'completed', evaluated_at: new Date().toISOString(), updated_at: new Date().toISOString() })
       .eq('id', evaluation.id);
 
-    console.log(`Evaluation completed for candidate ${applicant_id} — ${aiResponse.criteria_results.length} criteria evaluated`);
+    console.log(`Evaluation completed for candidate ${applicant_id} — ${allResults.length} results (${cachedResults.length} cached, ${freshResults.length} fresh)`);
 
     return new Response(
       JSON.stringify({ success: true, evaluation_id: evaluation.id, criteria_results: aiResponse.criteria_results }),
