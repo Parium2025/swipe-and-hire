@@ -204,7 +204,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           <>
             <div className="h-px bg-white/10 mx-2" />
 
-            <div className={`flex gap-2 px-2 py-1.5 ${isExpired ? 'justify-center' : ''}`}>
+            <div className={`flex gap-2 px-2 py-1.5 ${isExpired ? '' : ''}`}>
               {!isExpired && (
                 <Button
                   variant="glass"
@@ -223,6 +223,20 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   Redigera
                 </Button>
               )}
+              {isExpired && onRepublish && (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRepublish(job);
+                  }}
+                  className="flex-1 h-11 rounded-full border-0 bg-green-500 text-white transition-[background-color,transform] duration-150 hover:bg-green-500/90 active:scale-[0.97]"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Återpublicera
+                </Button>
+              )}
               <Button
                 variant="glass"
                 size="sm"
@@ -230,7 +244,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   e.stopPropagation();
                   onDelete(job);
                 }}
-                className={`${isExpired ? 'px-8' : 'flex-1'} h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
+                className={`flex-1 h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Ta bort
