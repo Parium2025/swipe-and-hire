@@ -45,6 +45,7 @@ interface EmployerJobCardProps {
   };
   activeTab: 'active' | 'expired';
   onClick: (jobId: string) => void;
+  onRepublish?: (job: EmployerJobCardProps['job']) => void;
 }
 
 const GRADIENTS = [
