@@ -371,7 +371,7 @@ serve(async (req) => {
     console.log(`Evaluation completed for candidate ${applicant_id} — ${allResults.length} results (${cachedResults.length} cached, ${freshResults.length} fresh)`);
 
     return new Response(
-      JSON.stringify({ success: true, evaluation_id: evaluation.id, criteria_results: aiResponse.criteria_results }),
+      JSON.stringify({ success: true, evaluation_id: evaluation.id, criteria_results: allResults, cache_hits: cachedResults.length, ai_calls: freshResults.length }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
@@ -383,6 +383,15 @@ serve(async (req) => {
     );
   }
 });
+
+// ─── SHA-256 helper (Web Crypto, works in Deno edge) ────────────
+async function sha256(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 // ─── Video CV Analysis ──────────────────────────────────────────
 
