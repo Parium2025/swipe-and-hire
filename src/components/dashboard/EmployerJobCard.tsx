@@ -249,13 +249,12 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
             <div className="h-px bg-white/10 mx-2" />
             <div className="flex gap-2 px-2 py-1.5">
               <Button
-                variant="glass"
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRepublish(job);
                 }}
-                className="flex-1 h-11 rounded-full border-0 bg-green-500 text-white transition-[background-color,transform] duration-150 hover:bg-green-500/90 active:scale-[0.97]"
+                className="flex-1 h-11 rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Återpublicera
