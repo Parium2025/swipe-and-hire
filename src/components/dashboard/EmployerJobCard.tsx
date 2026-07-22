@@ -67,7 +67,7 @@ function getGradientForId(id: string) {
 }
 
 
-export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCardProps) => {
+export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: EmployerJobCardProps) => {
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
   const companyName = job.workplace_name?.trim() || 'Okänt företag';
