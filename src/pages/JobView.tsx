@@ -808,26 +808,29 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-3 space-y-3">
             
-            {/* Hero section */}
-            <JobViewHero
-              title={job.title}
-              imageUrl={imageUrl}
-        fallbackImageUrl={canonicalImageUrl}
-              companyName={getDisplayCompanyName(job)}
-              location={job.location}
-              employmentType={job.employment_type}
-              positionsCount={job.positions_count}
-              companyLogoUrl={companyLogoUrl}
-              salaryMin={job.salary_min}
-              salaryMax={job.salary_max}
-              salaryType={job.salary_type}
-              salaryTransparency={job.salary_transparency}
-              benefits={job.benefits}
-              createdAt={job.created_at}
-              expiresAt={job.expires_at}
-              overlayTextColor={job.overlay_text_color}
-              imageFocusPosition={(job as any).image_focus_position}
-            />
+            {/* Hero section — visas endast när det finns en riktig bild.
+                Ingen fallback-gradient/placeholder om annonsen saknar bild. */}
+            {imageUrl && (
+              <JobViewHero
+                title={job.title}
+                imageUrl={imageUrl}
+                fallbackImageUrl={canonicalImageUrl}
+                companyName={getDisplayCompanyName(job)}
+                location={job.location}
+                employmentType={job.employment_type}
+                positionsCount={job.positions_count}
+                companyLogoUrl={companyLogoUrl}
+                salaryMin={job.salary_min}
+                salaryMax={job.salary_max}
+                salaryType={job.salary_type}
+                salaryTransparency={job.salary_transparency}
+                benefits={job.benefits}
+                createdAt={job.created_at}
+                expiresAt={job.expires_at}
+                overlayTextColor={job.overlay_text_color}
+                imageFocusPosition={(job as any).image_focus_position}
+              />
+            )}
 
             {/* Company profile + title - matchar arbetsgivar-preview */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden space-y-3">
