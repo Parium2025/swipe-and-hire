@@ -502,25 +502,25 @@ export function SelectionCriteriaDialog({
                 </div>
               ))}
 
-              {/* Add button */}
+              {/* Add button — oval Parium pill */}
               {canAddMore && (
                 <button
                   onClick={addNewCriterion}
                   onMouseDown={(e) => e.preventDefault()}
-                  className="w-auto mx-auto py-2 px-6 rounded-lg border border-solid border-white/[0.15] md:hover:border-white/[0.30] 
-                    text-white md:hover:text-white flex items-center justify-center gap-1.5 transition-all text-xs
+                  className="w-auto mx-auto mt-1 py-2 px-5 rounded-full border border-white/20 md:hover:border-white/40
+                    text-white md:hover:text-white flex items-center justify-center gap-1.5 transition-all
                     active:scale-[0.97] active:duration-75 focus:outline-none focus-visible:outline-none
                     [-webkit-tap-highlight-color:transparent]"
                 >
                   <Plus className="h-4 w-4 text-white" />
-                  <span className="text-sm">Lägg till kriterium</span>
+                  <span className="text-sm font-medium">Lägg till kriterium</span>
                 </button>
               )}
 
 
               {/* Tips box */}
               {criteria.length > 0 && (
-                <div className="rounded-lg bg-white/[0.03] px-3.5 py-2.5">
+                <div className="rounded-xl bg-white/[0.03] px-3.5 py-2.5">
                   <p className="text-xs text-white mb-1.5 font-medium">Exempel på kriterier:</p>
                   <div className="grid grid-cols-2 gap-1.5">
                     {[
@@ -546,28 +546,29 @@ export function SelectionCriteriaDialog({
           )}
         </div>
 
-        {/* Footer — only show when there are criteria */}
+        {/* Footer — Parium solid green pill (matches Skicka ansökan) */}
         {criteria.length > 0 && (
           <div className="flex-shrink-0 px-5 py-3 border-t border-white/[0.05] flex items-center justify-center">
             <button
               onClick={handleSaveAndActivate}
               disabled={isSaving || !hasValidCriteria || Object.keys(validationErrors).length > 0}
-              className="py-2.5 px-6 rounded-lg border border-solid border-white/[0.15] hover:border-white/[0.30] text-sm text-white hover:text-white flex items-center gap-2 transition-all disabled:opacity-30 font-medium"
+              className="py-2.5 px-8 rounded-full bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-600 transition-all active:scale-[0.97] text-sm font-semibold flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]"
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   Sparar...
                 </>
               ) : (
                 <>
-                  <Zap className="h-3.5 w-3.5" />
+                  <Zap className="h-4 w-4" />
                   Spara & aktivera
                 </>
               )}
             </button>
           </div>
         )}
+
     </div>
   );
 
