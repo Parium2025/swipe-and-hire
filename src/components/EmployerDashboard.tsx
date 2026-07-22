@@ -656,6 +656,20 @@ const EmployerDashboard = memo(() => {
         onOpenChange={setEditDialogOpen}
         onJobUpdated={invalidateJobs}
       />
+
+      <RepublishJobDialog
+        jobId={republishJob?.id ?? null}
+        jobTitle={republishJob?.title}
+        open={republishDialogOpen}
+        onOpenChange={(open) => {
+          setRepublishDialogOpen(open);
+          if (!open) setRepublishJob(null);
+        }}
+        onRepublished={() => {
+          invalidateJobs();
+          setRepublishJob(null);
+        }}
+      />
     </div>
   );
 });
