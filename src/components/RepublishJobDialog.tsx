@@ -32,7 +32,6 @@ export function RepublishJobDialog({
   onRepublished,
 }: RepublishJobDialogProps) {
   const { toast } = useToast();
-  const [days, setDays] = useState<number>(30);
   const [submitting, setSubmitting] = useState(false);
 
   const handleConfirm = async () => {
