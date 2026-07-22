@@ -45,7 +45,7 @@ function getGradientForId(id: string) {
 }
 
 
-export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, cardIndex = 0, hideActions = false }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false }: MobileJobCardProps) => {
   const navigate = useNavigate();
   const isDraft = isEmployerJobDraft(job);
   const isExpired = isEmployerJobExpired(job);
