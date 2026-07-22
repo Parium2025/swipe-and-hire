@@ -5,8 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMyApplicationsCache } from '@/hooks/useMyApplicationsCache';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
-import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { MyApplicationsSkeleton } from '@/components/search/SearchPageSkeleton';
+import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   AlertDialog,
