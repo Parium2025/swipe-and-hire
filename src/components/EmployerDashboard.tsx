@@ -594,6 +594,7 @@ const EmployerDashboard = memo(() => {
                     onDelete={handleDeleteClick}
                     onEditDraft={handleEditDraft}
                     onPrefetch={prefetchJob}
+                    onRepublish={handleRepublishClick}
                     cardIndex={idx}
                   />
                 </CardErrorBoundary>
