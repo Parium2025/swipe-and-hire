@@ -457,7 +457,7 @@ export function SelectionCriteriaDialog({
               {criteria.map((criterion, index) => (
                 <div 
                   key={criterion.id}
-                  className="rounded-lg bg-white/[0.04] px-3.5 py-3 space-y-2.5"
+                  className="rounded-2xl bg-white/[0.04] px-3.5 py-3 space-y-2.5 ring-1 ring-inset ring-white/[0.05]"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-white uppercase tracking-widest font-medium">
@@ -465,8 +465,8 @@ export function SelectionCriteriaDialog({
                     </span>
                     <button
                       onClick={() => deleteCriterion(criterion.id)}
-                      className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
-                      aria-label="Ta bort"
+                      className="rounded-full border border-red-500/40 bg-red-500/15 p-1.5 text-red-300 transition-colors md:hover:!border-red-500/60 md:hover:!bg-red-500/25 md:hover:!text-red-200 active:scale-[0.95] focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]"
+                      aria-label="Ta bort kriterium"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -478,7 +478,7 @@ export function SelectionCriteriaDialog({
                       placeholder="T.ex. Har B-körkort"
                       value={drafts[criterion.id]?.title || ''}
                       onChange={(e) => handleDraftChange(criterion.id, 'title', e.target.value)}
-                      className="h-11 !min-h-0 bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/50 text-sm focus:border-white/15 focus:ring-0 rounded-md"
+                      className="h-11 !min-h-0 bg-white/[0.05] border-white/[0.08] text-white placeholder:text-white/50 text-base md:text-sm focus:border-white/25 focus:ring-0 rounded-xl"
                     />
                   </div>
 
@@ -489,9 +489,10 @@ export function SelectionCriteriaDialog({
                       value={drafts[criterion.id]?.prompt || ''}
                       onChange={(e) => handleDraftChange(criterion.id, 'prompt', e.target.value)}
                       rows={2}
-                      className="resize-none bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/50 text-sm focus:border-white/15 focus:ring-0 rounded-md min-h-[56px]"
+                      className="resize-none bg-white/[0.05] border-white/[0.08] text-white placeholder:text-white/50 text-base md:text-sm focus:border-white/25 focus:ring-0 rounded-xl min-h-[56px]"
                     />
                   </div>
+
 
                   {validationErrors[criterion.id] && (
                     <div className="flex items-start gap-1.5 px-2.5 py-1.5 rounded-md bg-amber-500/10">
@@ -502,25 +503,25 @@ export function SelectionCriteriaDialog({
                 </div>
               ))}
 
-              {/* Add button */}
+              {/* Add button — oval Parium pill */}
               {canAddMore && (
                 <button
                   onClick={addNewCriterion}
                   onMouseDown={(e) => e.preventDefault()}
-                  className="w-auto mx-auto py-2 px-6 rounded-lg border border-solid border-white/[0.15] md:hover:border-white/[0.30] 
-                    text-white md:hover:text-white flex items-center justify-center gap-1.5 transition-all text-xs
+                  className="w-auto mx-auto mt-1 py-2 px-5 rounded-full border border-white/20 md:hover:border-white/40
+                    text-white md:hover:text-white flex items-center justify-center gap-1.5 transition-all
                     active:scale-[0.97] active:duration-75 focus:outline-none focus-visible:outline-none
                     [-webkit-tap-highlight-color:transparent]"
                 >
                   <Plus className="h-4 w-4 text-white" />
-                  <span className="text-sm">Lägg till kriterium</span>
+                  <span className="text-sm font-medium">Lägg till kriterium</span>
                 </button>
               )}
 
 
               {/* Tips box */}
               {criteria.length > 0 && (
-                <div className="rounded-lg bg-white/[0.03] px-3.5 py-2.5">
+                <div className="rounded-xl bg-white/[0.03] px-3.5 py-2.5">
                   <p className="text-xs text-white mb-1.5 font-medium">Exempel på kriterier:</p>
                   <div className="grid grid-cols-2 gap-1.5">
                     {[
@@ -546,28 +547,29 @@ export function SelectionCriteriaDialog({
           )}
         </div>
 
-        {/* Footer — only show when there are criteria */}
+        {/* Footer — Parium solid green pill (matches Skicka ansökan) */}
         {criteria.length > 0 && (
           <div className="flex-shrink-0 px-5 py-3 border-t border-white/[0.05] flex items-center justify-center">
             <button
               onClick={handleSaveAndActivate}
               disabled={isSaving || !hasValidCriteria || Object.keys(validationErrors).length > 0}
-              className="py-2.5 px-6 rounded-lg border border-solid border-white/[0.15] hover:border-white/[0.30] text-sm text-white hover:text-white flex items-center gap-2 transition-all disabled:opacity-30 font-medium"
+              className="py-2.5 px-8 rounded-full bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-600 transition-all active:scale-[0.97] text-sm font-semibold flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]"
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   Sparar...
                 </>
               ) : (
                 <>
-                  <Zap className="h-3.5 w-3.5" />
+                  <Zap className="h-4 w-4" />
                   Spara & aktivera
                 </>
               )}
             </button>
           </div>
         )}
+
     </div>
   );
 
