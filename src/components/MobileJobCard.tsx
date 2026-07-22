@@ -79,6 +79,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
 
   const handlePreviewClick = (e: MouseEvent) => {
     e.stopPropagation();
+    try { sessionStorage.setItem('jobPreviewSource', window.location.pathname); } catch {}
     navigate(`/job/${job.id}?preview=1`);
   };
 
