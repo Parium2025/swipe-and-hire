@@ -38,6 +38,7 @@ import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmp
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { RepublishJobDialog } from '@/components/RepublishJobDialog';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
