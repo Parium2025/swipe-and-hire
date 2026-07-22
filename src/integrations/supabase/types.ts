@@ -572,7 +572,9 @@ export type Database = {
       criterion_results: {
         Row: {
           confidence: number | null
+          context_hash: string | null
           created_at: string
+          criterion_hash: string | null
           criterion_id: string
           evaluation_id: string
           id: string
@@ -582,7 +584,9 @@ export type Database = {
         }
         Insert: {
           confidence?: number | null
+          context_hash?: string | null
           created_at?: string
+          criterion_hash?: string | null
           criterion_id: string
           evaluation_id: string
           id?: string
@@ -592,7 +596,9 @@ export type Database = {
         }
         Update: {
           confidence?: number | null
+          context_hash?: string | null
           created_at?: string
+          criterion_hash?: string | null
           criterion_id?: string
           evaluation_id?: string
           id?: string
