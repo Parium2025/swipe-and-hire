@@ -312,6 +312,11 @@ const EmployerDashboard = memo(() => {
     setDeleteDialogOpen(true);
   };
 
+  const handleRepublishClick = (job: JobPosting) => {
+    setRepublishJob(job);
+    setRepublishDialogOpen(true);
+  };
+
   const confirmDeleteJob = async () => {
     if (!jobToDelete) return;
     
