@@ -72,6 +72,14 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
     return () => document.removeEventListener('pointerdown', handler, true);
   }, [recruiterTooltipOpen]);
 
+  const openPublicPreview = () => {
+    navigate(`/job/${jobId}?preview=1`, {
+      state: {
+        fromRoute: location.pathname,
+      },
+    });
+  };
+
   return (
     <div className="relative z-30 rounded-lg border border-white/20 bg-white/5 p-3 md:p-4">
       <div className="flex items-start justify-between gap-2">
@@ -122,7 +130,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
       </div>
 
       <div className="mt-3 space-y-1.5 md:space-y-0">
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-1.5 min-w-0">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-1.5 min-w-0">
           <div className="flex min-w-0 items-center justify-center gap-1 overflow-hidden rounded-lg border border-white/20 bg-white/5 px-2 py-1.5">
             <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
             <span className="text-white text-xs font-medium truncate">{job.views_count}</span>
@@ -179,12 +187,22 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
             <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
             <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
           </button>
+          <button
+            onClick={openPublicPreview}
+            onMouseDown={(e) => e.preventDefault()}
+            className="hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden border border-white/20 bg-white/5 hover:bg-white/10"
+            aria-label="Förhandsgranska annons"
+            title="Förhandsgranska annons"
+          >
+            <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
+            <span className="text-white text-xs font-medium">Visa</span>
+          </button>
           <div className="hidden md:flex min-w-0">
             <JobQrCodeButton jobId={jobId} jobTitle={job.title} />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5 min-w-0 md:hidden">
+        <div className="grid grid-cols-3 gap-1.5 min-w-0 md:hidden">
           <button
             onClick={() => applicationsCount > 0 ? (isSelectionMode ? onExitSelectionMode() : onToggleSelectionMode()) : undefined}
             onMouseDown={(e) => e.preventDefault()}
@@ -198,6 +216,17 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
           >
             <CheckSquare className="h-4 w-4 text-white flex-shrink-0" />
             <span className="text-white text-sm font-medium">Välj</span>
+          </button>
+
+          <button
+            onClick={openPublicPreview}
+            onMouseDown={(e) => e.preventDefault()}
+            className="rounded-lg px-3 py-2.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation bg-white/[0.045] ring-white/30"
+            aria-label="Förhandsgranska annons"
+            title="Förhandsgranska annons"
+          >
+            <Eye className="h-4 w-4 text-white flex-shrink-0" />
+            <span className="text-white text-sm font-medium">Visa</span>
           </button>
 
           <JobQrCodeButton jobId={jobId} jobTitle={job.title} />
