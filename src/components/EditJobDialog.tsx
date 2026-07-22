@@ -2279,11 +2279,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Startdatum *</Label>
+                        <Label className="text-white font-medium text-sm">Startdatum</Label>
                         <StartDatePicker
                           value={formData.start_date || ''}
                           onChange={(v) => handleInputChange('start_date', v)}
                         />
+                        <p className="text-xs text-white/70 leading-relaxed">
+                          Om du inte väljer ett datum visas <span className="font-medium text-white">"Omgående"</span> i annonsen.
+                        </p>
                       </div>
 
 
