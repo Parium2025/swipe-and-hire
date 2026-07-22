@@ -5,8 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMyApplicationsCache } from '@/hooks/useMyApplicationsCache';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
-import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { MyApplicationsSkeleton } from '@/components/search/SearchPageSkeleton';
+import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   AlertDialog,
@@ -182,19 +182,7 @@ const MyApplications = () => {
   };
 
   if (!showContent || isLoading) {
-    const skeletonKey = activeTab === 'expired'
-      ? SKELETON_COUNT_KEYS.myApplicationsExpired
-      : SKELETON_COUNT_KEYS.myApplicationsActive;
-    const skeletonCount = readCachedCount(skeletonKey, 3);
-    return (
-      <div className="responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
-        <div className="text-center mb-5">
-          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
-          <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
-        </div>
-        <JobCardGridSkeleton count={skeletonCount} />
-      </div>
-    );
+    return <MyApplicationsSkeleton activeTab={activeTab} />;
   }
 
 
