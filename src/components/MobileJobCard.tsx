@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Users, Edit, Trash2 } from 'lucide-react';
+import { Eye, Users, Edit, Trash2, RotateCcw } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
@@ -19,6 +19,7 @@ interface MobileJobCardProps {
   onDelete: (job: JobPosting) => void;
   onEditDraft?: (job: JobPosting) => void;
   onPrefetch?: (jobId: string) => void;
+  onRepublish?: (job: JobPosting) => void;
   /** Card index in list — first 6 load eagerly, rest lazy */
   cardIndex?: number;
   /** Hide Redigera/Ta bort action buttons (used on read-only dashboard view) */
