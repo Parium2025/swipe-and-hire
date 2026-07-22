@@ -524,9 +524,20 @@ const Index = () => {
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
   // Behåll senaste sidebar-path så JobView-overlay vet vilken vy som
   // ska visas underst (utan att KeepAlive byter activeKey och fadar).
-  if (isSidebarRoute) {
-    if (role === 'employer') lastEmployerPathRef.current = location.pathname;
-    else lastJobSeekerPathRef.current = location.pathname;
+  // Inkludera även employer-keep-routes (t.ex. /my-jobs, /dashboard, /candidates)
+  // så tillbaka från preview-overlay återgår smooth till exakt samma vy.
+  const isEmployerKeepRoute = EMPLOYER_KEEP_KEYS.some(
+    (r) => location.pathname === r || location.pathname.startsWith(r + '/')
+  );
+  const isJobSeekerKeepRoute = JOB_SEEKER_KEEP_KEYS.some(
+    (r) => location.pathname === r || location.pathname.startsWith(r + '/')
+  );
+  if (isSidebarRoute || isEmployerKeepRoute || isJobSeekerKeepRoute) {
+    if (role === 'employer' && (isSidebarRoute || isEmployerKeepRoute)) {
+      lastEmployerPathRef.current = location.pathname;
+    } else if (role !== 'employer' && (isSidebarRoute || isJobSeekerKeepRoute)) {
+      lastJobSeekerPathRef.current = location.pathname;
+    }
   }
   // Behandla /job-view/:id som "fortsatt på senaste sidebar-vy + overlay".
   const treatAsSidebar = isSidebarRoute || isJobViewOverlay;
