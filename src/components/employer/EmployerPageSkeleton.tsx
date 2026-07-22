@@ -81,23 +81,33 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
         </div>
       </header>
-      {/* DESKTOP chrome — mirrors EmployerTopNav layout exactly */}
+      {/* DESKTOP chrome — mirrors EmployerTopNav layout exactly.
+          Real order (left→right):
+            LEFT: logo | Annonser | Kandidater | Chattar | Företag | Notif | Profil-avatar
+            RIGHT (extraRight): Utvecklarvy pill | Skapa ny annons */}
       <header className="hidden md:flex shrink-0 h-16 items-center border-b border-white/20 bg-transparent">
         <div className="w-full responsive-container-wide flex items-center justify-between">
-          {/* Left: logo + nav pills (left-aligned, gap-1) */}
+          {/* Left group — allt sitter i samma gap-1 block som i EmployerTopNav */}
           <div className="flex items-center gap-1">
+            {/* Parium-logo (PariumLogoButton är 40x40) */}
             <div className={`h-10 w-10 rounded-lg ${SHAPE}`} />
             <div className="flex items-center gap-1 ml-1">
+              {/* Annonser (LayoutDashboard + text + count + chevron) */}
               <div className={`h-10 w-[140px] rounded-lg ${SHAPE}`} />
-              <div className={`h-10 w-[132px] rounded-lg ${SHAPE}`} />
-              <div className={`h-10 w-[92px] rounded-lg ${SHAPE}`} />
-              <div className={`h-10 w-[104px] rounded-lg ${SHAPE}`} />
+              {/* Kandidater */}
+              <div className={`h-10 w-[135px] rounded-lg ${SHAPE}`} />
+              {/* Chattar (utan count-pil, smalare) */}
+              <div className={`h-10 w-[110px] rounded-lg ${SHAPE}`} />
+              {/* Företag (avatar-cirkel + text + chevron) */}
+              <div className={`h-10 w-[128px] rounded-lg ${SHAPE}`} />
+              {/* NotificationCenter (rect variant, klocka) */}
+              <div className={`h-10 w-10 rounded-lg ${SHAPE}`} />
+              {/* Profil-dropdown (avatar + chevron) */}
+              <div className={`h-10 w-[64px] rounded-lg ${SHAPE}`} />
             </div>
           </div>
-          {/* Right: notifications + avatar + dev pill + create button */}
+          {/* Right group — extraRight: Utvecklarvy pill + Skapa ny annons */}
           <div className="flex items-center gap-3">
-            <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
-            <div className={`h-9 w-9 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
             <div className={`h-10 w-[132px] rounded-lg ${SHAPE}`} />
             <div className={`h-10 w-[164px] rounded-lg ${SHAPE}`} />
           </div>
