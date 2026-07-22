@@ -18,7 +18,7 @@ export const JobStatusBadge = memo(({ jobId, isActive, expiresAt, onOptimisticUp
   const isExpired = !!expiresAt && new Date(expiresAt) < new Date();
   const statusLabel = isExpired ? 'Utgången' : (isActive ? 'Aktiv' : 'Inaktiv');
   const statusColor = isExpired
-    ? 'bg-red-500/20 text-white border-red-500/30'
+    ? 'bg-red-500/80 text-white border-0'
     : isActive
       ? 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30'
       : 'bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30';
