@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { TruncatedText } from '@/components/TruncatedText';
 
-const DAY_OPTIONS = [14, 30, 60, 90] as const;
+const REPUBLISH_DAYS = 14;
 
 interface RepublishJobDialogProps {
   jobId: string | null;
