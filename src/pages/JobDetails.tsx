@@ -470,8 +470,25 @@ const JobDetails = () => {
 
   const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 
+  // Cache per-stage counts + stage order per job so the skeleton kan matcha
+  // exakt hur många kort som faktiskt ligger i varje kolumn nästa gång sidan
+  // öppnas — inga "spökkort" från en annan annons.
+  useEffect(() => {
+    if (dataLoading || stagesLoading || !jobId) return;
+    try {
+      const counts: Record<string, number> = {};
+      activeStages.forEach(s => { counts[s] = (applicationsByStatus[s] || []).length; });
+      const payload = {
+        stages: activeStages,
+        labels: Object.fromEntries(activeStages.map(s => [s, stageSettings[s]?.label || s])),
+        counts,
+      };
+      localStorage.setItem(`parium:jobDetails:${jobId}:layout`, JSON.stringify(payload));
+    } catch { /* noop */ }
+  }, [jobId, dataLoading, stagesLoading, activeStages, applicationsByStatus, stageSettings]);
+
   if (dataLoading || stagesLoading) {
-    return <JobDetailsSkeleton />;
+    return <JobDetailsSkeleton jobId={jobId} />;
   }
 
   if (!job) {
