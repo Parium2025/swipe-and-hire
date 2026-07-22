@@ -40,7 +40,7 @@ export function RepublishJobDialog({
     try {
       const { data, error } = await supabase.rpc('republish_job', {
         _job_id: jobId,
-        _days: days,
+        _days: REPUBLISH_DAYS,
       });
 
       if (error) {
