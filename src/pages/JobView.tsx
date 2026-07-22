@@ -245,6 +245,34 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     fetchJob();
   }, [jobId, authLoading, user?.id]);
 
+  // 🔴 LIVE: Prenumerera på ändringar i annonsen och dess frågor så att
+  // förhandsgranskningen (och vanliga vyn) alltid speglar senaste versionen —
+  // t.ex. när en kollega redigerar samma jobb i en annan flik.
+  useEffect(() => {
+    if (!jobId) return;
+    // Invalidera cache och hämta om vid förändring
+    const refetch = () => {
+      if (jobId) _jobCache.delete(jobId);
+      fetchJob();
+    };
+    const channel = supabase
+      .channel(`job-view-live-${jobId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_postings', filter: `id=eq.${jobId}` },
+        refetch,
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_questions', filter: `job_id=eq.${jobId}` },
+        refetch,
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [jobId]);
+
   const fetchJob = async (retryCount = 0) => {
     try {
       // 🚇 SINGLE TUNNEL: workplace_name + company_logo_url come straight from job_postings
