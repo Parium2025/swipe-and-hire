@@ -142,8 +142,18 @@ export function ScrollRestoration() {
   // -----------------------------------------------------------------------
   // Restore scroll position on navigation
   // -----------------------------------------------------------------------
+  const lastRestoredPathRef = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (isJobViewOverlayPath) return;
+
+    // 🛟 Ignorera rena query-string-ändringar (t.ex. tab-byten via
+    // setSearchParams). Pathname är oförändrad → användaren är kvar på
+    // samma sida och scrollpositionen ska INTE nollställas.
+    if (lastRestoredPathRef.current === location.pathname && navigationType !== 'POP') {
+      return;
+    }
+    lastRestoredPathRef.current = location.pathname;
+
 
     const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
     const documentNavigationType = navEntries[0]?.type;
