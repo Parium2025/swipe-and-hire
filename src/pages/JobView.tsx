@@ -987,11 +987,59 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               </>
             )}
 
+            {/* Preview mode for employers: show questions read-only */}
+            {user && isEmployer && isPreviewMode && jobQuestions.length > 0 && (
+              <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-sm font-semibold text-white">
+                    {jobQuestions.length === 1 ? 'Ansökningsfråga' : 'Ansökningsfrågor'} ({jobQuestions.length} st)
+                  </h2>
+                  <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-white/10 text-white/80 border border-white/15">
+                    Förhandsgranskning
+                  </span>
+                </div>
+                <ol className="space-y-2 list-decimal list-inside">
+                  {jobQuestions.map((q, i) => (
+                    <li key={q.id ?? i} className="text-sm text-white leading-relaxed">
+                      <span className="font-medium">{q.question_text}</span>
+                      {q.is_required && <span className="text-red-300 ml-1">*</span>}
+                      <span className="ml-2 text-xs text-white/60">
+                        ({q.question_type === 'yes_no' ? 'Ja/Nej'
+                          : q.question_type === 'multiple_choice' ? 'Flerval'
+                          : q.question_type === 'number' ? 'Nummer'
+                          : q.question_type === 'date' ? 'Datum'
+                          : q.question_type === 'file' ? 'Filuppladdning'
+                          : q.question_type === 'range' ? 'Skala'
+                          : q.question_type === 'video' ? 'Video'
+                          : 'Text'})
+                      </span>
+                      {q.options && q.options.length > 0 && (
+                        <ul className="mt-1 ml-6 list-disc space-y-0.5">
+                          {q.options.map((opt, oi) => (
+                            <li key={oi} className="text-xs text-white/80">{opt}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
             {/* Info for employer users - cannot apply */}
-            {user && isEmployer && !isJobExpired && (
+            {user && isEmployer && !isJobExpired && !isPreviewMode && (
               <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] text-center space-y-1.5">
                 <p className="text-sm text-[#FFFFFF]">
                   Du är inloggad som arbetsgivare och kan inte söka jobb. Byt till jobbsökarkontot för att ansöka.
+                </p>
+              </div>
+            )}
+
+            {/* Preview mode banner instead of "cannot apply" message */}
+            {user && isEmployer && !isJobExpired && isPreviewMode && (
+              <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] text-center space-y-1.5">
+                <p className="text-sm text-white">
+                  Detta är en förhandsgranskning av annonsen så som jobbsökare ser den.
                 </p>
               </div>
             )}
