@@ -164,9 +164,12 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
 
         {/* Info rows */}
         <div className="flex flex-col px-3 pb-1 [&>div]:py-2.5 [&>div]:border-b [&>div]:border-white/10 [&>div:last-child]:border-b-0">
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Rekryterare:</span>
-            <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{recruiterName || '–'}</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
+            <TruncatedText
+              text={recruiterName || '–'}
+              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+            />
           </div>
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
@@ -181,9 +184,10 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
               const label = job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–';
               const combined = [label, details].filter(Boolean).join(' · ');
               return (
-                <span className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]">
-                  {combined}
-                </span>
+                <TruncatedText
+                  text={combined || '–'}
+                  className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]"
+                />
               );
             })()}
           </div>
@@ -194,9 +198,12 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
               {job.applications_count || 0}
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Plats:</span>
-            <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{job.location || '–'}</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
+            <TruncatedText
+              text={job.location || '–'}
+              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+            />
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Publicerad:</span>
@@ -212,9 +219,10 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
             return (
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm leading-snug text-white flex-shrink-0">Lön:</span>
-                <span className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]">
-                  {salaryText || '–'}
-                </span>
+                <TruncatedText
+                  text={salaryText || '–'}
+                  className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]"
+                />
               </div>
             );
           })()}
@@ -236,6 +244,25 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
           </TooltipProvider>
         </div>
 
+        {isExpired && onRepublish && (
+          <>
+            <div className="h-px bg-white/10 mx-2" />
+            <div className="flex gap-2 px-2 py-1.5">
+              <Button
+                variant="glass"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRepublish(job);
+                }}
+                className="flex-1 h-11 rounded-full border-0 bg-green-500 text-white transition-[background-color,transform] duration-150 hover:bg-green-500/90 active:scale-[0.97]"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Återpublicera
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </Card>
   );
