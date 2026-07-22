@@ -122,7 +122,7 @@ export function RepublishJobDialog({
               e.preventDefault();
               handleConfirm();
             }}
-            className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full bg-green-500 hover:bg-green-500/90 border-0 text-white"
+            className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full !bg-green-500 md:hover:!bg-green-600 border-0 text-white"
           >
             <RotateCcw className="h-4 w-4 mr-1.5" />
             {submitting ? 'Publicerar…' : 'Återpublicera'}
