@@ -160,13 +160,19 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         <div className="h-px bg-white/10 mx-2" />
 
         <div className="flex flex-col px-3 pb-1 [&>div]:py-2.5 [&>div]:border-b [&>div]:border-white/10 [&>div:last-child]:border-b-0">
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Rekryterare:</span>
-            <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{recruiterName || '–'}</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
+            <TruncatedText
+              text={recruiterName || '–'}
+              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+            />
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Anställningsform:</span>
-            <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
+            <TruncatedText
+              text={job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}
+              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+            />
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Ansökningar:</span>
@@ -175,9 +181,12 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
               {job.applications_count || 0}
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Plats:</span>
-            <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{job.location || '–'}</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
+            <TruncatedText
+              text={job.location || '–'}
+              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+            />
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Publicerad:</span>
