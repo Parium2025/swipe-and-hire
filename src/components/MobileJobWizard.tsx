@@ -2075,8 +2075,7 @@ const MobileJobWizard = ({
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0 &&
              formData.work_start_time.trim() &&
-             formData.work_end_time.trim() &&
-             !!(formData.start_date && formData.start_date.trim());
+             formData.work_end_time.trim();
     }
     
     if (currentStep === 1) {
@@ -2115,7 +2114,6 @@ const MobileJobWizard = ({
       if (!(parseInt(formData.positions_count) > 0)) missing.push('Antal personer att rekrytera');
       if (!formData.work_start_time.trim()) missing.push('Arbetstid (starttid)');
       if (!formData.work_end_time.trim()) missing.push('Arbetstid (sluttid)');
-      if (!(formData.start_date && formData.start_date.trim())) missing.push('Startdatum');
     }
     
     if (currentStep === 1) {
@@ -3097,11 +3095,14 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Startdatum *</Label>
+                  <Label className="text-white font-medium text-sm">Startdatum</Label>
                   <StartDatePicker
                     value={formData.start_date || ''}
                     onChange={(v) => handleInputChange('start_date', v)}
                   />
+                  <p className="text-xs text-white/70 leading-relaxed">
+                    Om du inte väljer ett datum visas <span className="font-medium text-white">"Omgående"</span> i annonsen.
+                  </p>
                 </div>
 
 

@@ -244,6 +244,21 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   Återpublicera
                 </Button>
               )}
+              {!isDraft && (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  aria-label="Förhandsgranska annons"
+                  title="Förhandsgranska annons"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/job-details/${job.id}?preview=1`);
+                  }}
+                  className="h-11 w-11 flex-shrink-0 px-0 transition-[background-color,border-color] duration-150 hover:bg-white/20"
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="glass"
                 size="sm"
