@@ -69,7 +69,7 @@ export function RepublishJobDialog({
 
       toast({
         title: 'Annons återpublicerad',
-        description: `Din annons är aktiv i ${days} dagar.`,
+        description: `Din annons är aktiv i ${REPUBLISH_DAYS} dagar.`,
       });
       onOpenChange(false);
       if (typeof data === 'string') onRepublished?.(data);
