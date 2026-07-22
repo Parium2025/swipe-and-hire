@@ -457,7 +457,7 @@ export function SelectionCriteriaDialog({
               {criteria.map((criterion, index) => (
                 <div 
                   key={criterion.id}
-                  className="rounded-lg bg-white/[0.04] px-3.5 py-3 space-y-2.5"
+                  className="rounded-2xl bg-white/[0.04] px-3.5 py-3 space-y-2.5 ring-1 ring-inset ring-white/[0.05]"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-white uppercase tracking-widest font-medium">
@@ -465,8 +465,8 @@ export function SelectionCriteriaDialog({
                     </span>
                     <button
                       onClick={() => deleteCriterion(criterion.id)}
-                      className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
-                      aria-label="Ta bort"
+                      className="rounded-full border border-red-500/40 bg-red-500/15 p-1.5 text-red-300 transition-colors md:hover:!border-red-500/60 md:hover:!bg-red-500/25 md:hover:!text-red-200 active:scale-[0.95] focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]"
+                      aria-label="Ta bort kriterium"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -478,7 +478,7 @@ export function SelectionCriteriaDialog({
                       placeholder="T.ex. Har B-körkort"
                       value={drafts[criterion.id]?.title || ''}
                       onChange={(e) => handleDraftChange(criterion.id, 'title', e.target.value)}
-                      className="h-11 !min-h-0 bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/50 text-sm focus:border-white/15 focus:ring-0 rounded-md"
+                      className="h-11 !min-h-0 bg-white/[0.05] border-white/[0.08] text-white placeholder:text-white/50 text-base md:text-sm focus:border-white/25 focus:ring-0 rounded-xl"
                     />
                   </div>
 
@@ -489,9 +489,10 @@ export function SelectionCriteriaDialog({
                       value={drafts[criterion.id]?.prompt || ''}
                       onChange={(e) => handleDraftChange(criterion.id, 'prompt', e.target.value)}
                       rows={2}
-                      className="resize-none bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/50 text-sm focus:border-white/15 focus:ring-0 rounded-md min-h-[56px]"
+                      className="resize-none bg-white/[0.05] border-white/[0.08] text-white placeholder:text-white/50 text-base md:text-sm focus:border-white/25 focus:ring-0 rounded-xl min-h-[56px]"
                     />
                   </div>
+
 
                   {validationErrors[criterion.id] && (
                     <div className="flex items-start gap-1.5 px-2.5 py-1.5 rounded-md bg-amber-500/10">
