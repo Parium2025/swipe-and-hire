@@ -73,6 +73,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
   }, [recruiterTooltipOpen]);
 
   const openPublicPreview = () => {
+    try { sessionStorage.setItem('jobPreviewSource', location.pathname); } catch {}
     navigate(`/job/${jobId}?preview=1`, {
       state: {
         fromRoute: location.pathname,
