@@ -38,6 +38,7 @@ import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmp
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { RepublishJobDialog } from '@/components/RepublishJobDialog';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -58,6 +59,8 @@ const EmployerDashboard = memo(() => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<JobPosting | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [republishJob, setRepublishJob] = useState<JobPosting | null>(null);
+  const [republishDialogOpen, setRepublishDialogOpen] = useState(false);
   const [pendingEditJobId, setPendingEditJobId] = useState<string | null>(null);
   const { user, profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const { toast } = useToast();
@@ -309,6 +312,11 @@ const EmployerDashboard = memo(() => {
     setDeleteDialogOpen(true);
   };
 
+  const handleRepublishClick = (job: JobPosting) => {
+    setRepublishJob(job);
+    setRepublishDialogOpen(true);
+  };
+
   const confirmDeleteJob = async () => {
     if (!jobToDelete) return;
     
@@ -525,6 +533,7 @@ const EmployerDashboard = memo(() => {
                     onDelete={handleDeleteClick}
                     onEditDraft={handleEditDraft}
                     onPrefetch={prefetchJob}
+                    onRepublish={handleRepublishClick}
                     cardIndex={idx}
                   />
                 </CardErrorBoundary>
@@ -585,6 +594,7 @@ const EmployerDashboard = memo(() => {
                     onDelete={handleDeleteClick}
                     onEditDraft={handleEditDraft}
                     onPrefetch={prefetchJob}
+                    onRepublish={handleRepublishClick}
                     cardIndex={idx}
                   />
                 </CardErrorBoundary>
@@ -645,6 +655,20 @@ const EmployerDashboard = memo(() => {
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         onJobUpdated={invalidateJobs}
+      />
+
+      <RepublishJobDialog
+        jobId={republishJob?.id ?? null}
+        jobTitle={republishJob?.title}
+        open={republishDialogOpen}
+        onOpenChange={(open) => {
+          setRepublishDialogOpen(open);
+          if (!open) setRepublishJob(null);
+        }}
+        onRepublished={() => {
+          invalidateJobs();
+          setRepublishJob(null);
+        }}
       />
     </div>
   );

@@ -3366,6 +3366,10 @@ export type Database = {
         Args: { p_job_id: string; p_stage_keys: string[] }
         Returns: undefined
       }
+      republish_job: {
+        Args: { _days?: number; _job_id: string }
+        Returns: string
+      }
       reregister_session: {
         Args: {
           p_device_label: string

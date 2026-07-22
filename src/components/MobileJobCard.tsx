@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Users, Edit, Trash2 } from 'lucide-react';
+import { Eye, Users, Edit, Trash2, RotateCcw } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
@@ -19,6 +19,7 @@ interface MobileJobCardProps {
   onDelete: (job: JobPosting) => void;
   onEditDraft?: (job: JobPosting) => void;
   onPrefetch?: (jobId: string) => void;
+  onRepublish?: (job: JobPosting) => void;
   /** Card index in list — first 6 load eagerly, rest lazy */
   cardIndex?: number;
   /** Hide Redigera/Ta bort action buttons (used on read-only dashboard view) */
@@ -44,7 +45,7 @@ function getGradientForId(id: string) {
 }
 
 
-export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, cardIndex = 0, hideActions = false }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false }: MobileJobCardProps) => {
   const navigate = useNavigate();
   const isDraft = isEmployerJobDraft(job);
   const isExpired = isEmployerJobExpired(job);
@@ -159,13 +160,19 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         <div className="h-px bg-white/10 mx-2" />
 
         <div className="flex flex-col px-3 pb-1 [&>div]:py-2.5 [&>div]:border-b [&>div]:border-white/10 [&>div:last-child]:border-b-0">
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Rekryterare:</span>
-            <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{recruiterName || '–'}</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
+            <TruncatedText
+              text={recruiterName || '–'}
+              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+            />
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Anställningsform:</span>
-            <span className="text-sm leading-snug text-white font-medium text-right">{job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
+            <TruncatedText
+              text={job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}
+              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+            />
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Ansökningar:</span>
@@ -174,9 +181,12 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
               {job.applications_count || 0}
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Plats:</span>
-            <span className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium">{job.location || '–'}</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
+            <TruncatedText
+              text={job.location || '–'}
+              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+            />
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-snug text-white">Publicerad:</span>
@@ -194,7 +204,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           <>
             <div className="h-px bg-white/10 mx-2" />
 
-            <div className={`flex gap-2 px-2 py-1.5 ${isExpired ? 'justify-center' : ''}`}>
+            <div className={`flex gap-2 px-2 py-1.5 ${isExpired ? '' : ''}`}>
               {!isExpired && (
                 <Button
                   variant="glass"
@@ -213,6 +223,20 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   Redigera
                 </Button>
               )}
+              {isExpired && onRepublish && (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRepublish(job);
+                  }}
+                  className="flex-1 h-11 rounded-full border-0 bg-green-500 text-white transition-[background-color,transform] duration-150 hover:bg-green-500/90 active:scale-[0.97]"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Återpublicera
+                </Button>
+              )}
               <Button
                 variant="glass"
                 size="sm"
@@ -220,7 +244,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   e.stopPropagation();
                   onDelete(job);
                 }}
-                className={`${isExpired ? 'px-8' : 'flex-1'} h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
+                className={`flex-1 h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Ta bort

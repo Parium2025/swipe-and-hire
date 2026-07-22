@@ -1,0 +1,160 @@
+import { useState } from 'react';
+import { RotateCcw } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { TruncatedText } from '@/components/TruncatedText';
+
+const DAY_OPTIONS = [14, 30, 60, 90] as const;
+
+interface RepublishJobDialogProps {
+  jobId: string | null;
+  jobTitle?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onRepublished?: (newJobId: string) => void;
+}
+
+export function RepublishJobDialog({
+  jobId,
+  jobTitle,
+  open,
+  onOpenChange,
+  onRepublished,
+}: RepublishJobDialogProps) {
+  const { toast } = useToast();
+  const [days, setDays] = useState<number>(30);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!jobId || submitting) return;
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.rpc('republish_job', {
+        _job_id: jobId,
+        _days: days,
+      });
+
+      if (error) {
+        const msg = error.message || '';
+        if (/cooldown|för snabbt|too fast|rate/i.test(msg)) {
+          toast({
+            title: 'Vänta en stund',
+            description: 'Du publicerade nyss en annons. Försök igen om några sekunder.',
+            variant: 'destructive',
+          });
+        } else if (/fingerprint|duplicate|identisk/i.test(msg)) {
+          toast({
+            title: 'Identisk annons finns redan',
+            description: 'Det finns redan en aktiv annons med samma innehåll.',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Kunde inte återpublicera',
+            description: msg || 'Något gick fel. Försök igen.',
+            variant: 'destructive',
+          });
+        }
+        return;
+      }
+
+      toast({
+        title: 'Annons återpublicerad',
+        description: `Din annons är aktiv i ${days} dagar.`,
+      });
+      onOpenChange(false);
+      if (typeof data === 'string') onRepublished?.(data);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col">
+        <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
+          <div className="flex items-center justify-center gap-2.5">
+            <div className="bg-green-500/20 p-2 rounded-full">
+              <RotateCcw className="h-4 w-4 text-white" />
+            </div>
+            <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+              Återpublicera annons
+            </AlertDialogTitle>
+          </div>
+        </AlertDialogHeader>
+
+        <div className="overflow-y-auto flex-1 my-4 space-y-4">
+          <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
+            {jobTitle ? (
+              <>
+                En ny aktiv kopia av{' '}
+                <TruncatedText
+                  text={`"${jobTitle}"`}
+                  className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom"
+                />{' '}
+                skapas med nytt utgångsdatum.
+              </>
+            ) : (
+              'En ny aktiv kopia av annonsen skapas med nytt utgångsdatum.'
+            )}
+          </AlertDialogDescription>
+
+          <div>
+            <p className="text-xs uppercase tracking-wide text-white/70 mb-2 text-center">
+              Välj längd
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+              {DAY_OPTIONS.map((d) => {
+                const active = d === days;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setDays(d)}
+                    className={`h-11 rounded-full border text-sm font-medium transition-colors ${
+                      active
+                        ? 'bg-green-500/90 border-green-400 text-white'
+                        : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {d} dagar
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
+          <AlertDialogCancel
+            disabled={submitting}
+            className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+          >
+            Avbryt
+          </AlertDialogCancel>
+          <AlertDialogAction
+            disabled={submitting || !jobId}
+            onClick={(e) => {
+              e.preventDefault();
+              handleConfirm();
+            }}
+            className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full bg-green-500 hover:bg-green-500/90 border-0 text-white"
+          >
+            <RotateCcw className="h-4 w-4 mr-1.5" />
+            {submitting ? 'Publicerar…' : 'Återpublicera'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContentNoFocus>
+    </AlertDialog>
+  );
+}
