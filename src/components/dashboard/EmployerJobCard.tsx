@@ -86,6 +86,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
 
   const handlePreviewClick = (e: MouseEvent) => {
     e.stopPropagation();
+    try { sessionStorage.setItem('jobPreviewSource', window.location.pathname); } catch {}
     navigate(`/job/${job.id}?preview=1`);
   };
 

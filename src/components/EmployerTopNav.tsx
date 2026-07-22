@@ -137,12 +137,25 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
       if (url === '/my-jobs' && source === '/my-jobs') return true;
       if (url === '/dashboard' && source === '/dashboard') return true;
     }
+
+    // When on /job/:id (preview via eye icon), highlight source
+    if (currentPath.startsWith('/job/')) {
+      const source = sessionStorage.getItem('jobPreviewSource');
+      if (url === '/my-jobs' && source === '/my-jobs') return true;
+      if (url === '/dashboard' && source === '/dashboard') return true;
+    }
     
     return false;
   };
 
   const isDropdownActive = (items: typeof businessItems) => {
-    return items.some(item => location.pathname === item.url);
+    if (items.some(item => location.pathname === item.url)) return true;
+    // Keep Annonser dropdown highlighted while previewing a job from dashboard/my-jobs
+    if (location.pathname.startsWith('/job/')) {
+      const source = sessionStorage.getItem('jobPreviewSource');
+      if (items.some(item => item.url === source)) return true;
+    }
+    return false;
   };
 
   // prefetchApplications is now provided by usePrefetchApplications hook
