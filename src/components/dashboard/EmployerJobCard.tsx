@@ -1,4 +1,5 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, type MouseEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,7 @@ function getGradientForId(id: string) {
 
 
 export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: EmployerJobCardProps) => {
+  const navigate = useNavigate();
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
   const companyName = job.workplace_name?.trim() || 'Okänt företag';
@@ -81,6 +83,11 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', undefined, { width: 64, height: 64, quality: 80, resize: 'contain' });
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
+
+  const handlePreviewClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/job/${job.id}?preview=1`);
+  };
 
   return (
     <Card
@@ -252,10 +259,21 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
           </TooltipProvider>
         </div>
 
-        {isExpired && onRepublish && (
-          <>
-            <div className="h-px bg-white/10 mx-2" />
-            <div className="flex gap-2 px-2 py-1.5">
+        <>
+          <div className="h-px bg-white/10 mx-2" />
+          <div className="flex gap-2 px-2 py-1.5">
+            <Button
+              variant="glass"
+              size="sm"
+              aria-label="Förhandsgranska annons"
+              title="Förhandsgranska annons"
+              onClick={handlePreviewClick}
+              className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Visa annons
+            </Button>
+            {isExpired && onRepublish && (
               <Button
                 size="sm"
                 onClick={(e) => {
@@ -267,9 +285,9 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Återpublicera
               </Button>
-            </div>
-          </>
-        )}
+            )}
+          </div>
+        </>
       </div>
     </Card>
   );

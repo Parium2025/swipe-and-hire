@@ -125,7 +125,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const location = useLocation();
   const isPreviewMode = new URLSearchParams(location.search).get('preview') === '1';
   const { user, isCompanyUser, userRole, loading: authLoading } = useAuth();
-  const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || userRole?.role === 'employer');
+  const isEmployerRole = (role?: string | null) => role === 'employer' || role === 'company_admin' || role === 'recruiter';
+  const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || isEmployerRole(userRole?.role));
   const { getPrefetchedJob } = useJobPrefetchCache();
   const navigationImageState = (location.state ?? {}) as {
     initialHeroImageUrl?: string;
@@ -140,7 +141,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       return;
     }
     // Immediate check from auth context
-    if (isCompanyUser() || userRole?.role === 'employer') {
+    if (isCompanyUser() || isEmployerRole(userRole?.role)) {
       setIsEmployer(true);
       return;
     }
@@ -151,7 +152,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         .select('role')
         .eq('user_id', user.id)
         .maybeSingle();
-      if (data?.role === 'employer') {
+      if (isEmployerRole(data?.role)) {
         setIsEmployer(true);
       }
     };
@@ -229,7 +230,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   // Track job view when user reads content (lowered thresholds for accuracy)
   useJobViewTracker({
     jobId,
-    userId: user?.id,
+    userId: isPreviewMode ? undefined : user?.id,
     contentRef,
     scrollThreshold: 0.5,
     minTimeOnPage: 2000,

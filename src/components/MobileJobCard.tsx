@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -75,6 +75,11 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
     if (!isDraft && !isExpired && onPrefetch) {
       onPrefetch(job.id);
     }
+  };
+
+  const handlePreviewClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/job/${job.id}?preview=1`);
   };
 
   const hoverClass = isExpired
@@ -208,12 +213,12 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           </div>
         </div>
 
-        {!hideActions && (
+        {(!hideActions || !isDraft) && (
           <>
             <div className="h-px bg-white/10 mx-2" />
 
             <div className={`flex gap-2 px-2 py-1.5 ${isExpired ? '' : ''}`}>
-              {!isExpired && (
+              {!hideActions && !isExpired && (
                 <Button
                   variant="glass"
                   size="sm"
@@ -231,7 +236,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   Redigera
                 </Button>
               )}
-              {isExpired && onRepublish && (
+              {!hideActions && isExpired && onRepublish && (
                 <Button
                   size="sm"
                   onClick={(e) => {
@@ -250,27 +255,27 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   size="sm"
                   aria-label="Förhandsgranska annons"
                   title="Förhandsgranska annons"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/job-details/${job.id}?preview=1`);
-                  }}
-                  className="h-11 w-11 flex-shrink-0 px-0 transition-[background-color,border-color] duration-150 hover:bg-white/20"
+                  onClick={handlePreviewClick}
+                  className={`${hideActions ? 'flex-1 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
                 >
                   <Eye className="h-4 w-4" />
+                  {hideActions && <span className="text-sm">Visa annons</span>}
                 </Button>
               )}
-              <Button
-                variant="glass"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(job);
-                }}
-                className={`flex-1 h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Ta bort
-              </Button>
+              {!hideActions && (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(job);
+                  }}
+                  className={`flex-1 h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Ta bort
+                </Button>
+              )}
             </div>
           </>
         )}
