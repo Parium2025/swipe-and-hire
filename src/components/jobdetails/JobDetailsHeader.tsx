@@ -110,16 +110,16 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mt-1.5 text-sm">
+        <div className="flex items-center gap-1 text-white">
+          <MapPin className="h-3.5 w-3.5" />
+          {job.location}
+        </div>
         <JobStatusBadge
           jobId={jobId}
           isActive={!!job.is_active}
           expiresAt={job.expires_at}
           onOptimisticUpdate={onUpdateJobLocally}
         />
-        <div className="flex items-center gap-1 text-white">
-          <MapPin className="h-3.5 w-3.5" />
-          {job.location}
-        </div>
         {job.expires_at && (
           <span className="text-white text-xs">
             {new Date(job.expires_at) < new Date() 

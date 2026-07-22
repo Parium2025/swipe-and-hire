@@ -12,7 +12,6 @@ import { useCardImage } from '@/hooks/useCardImage';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getCompanyInitials } from '@/lib/companyInitials';
-import { storeJobDetailsSkeletonHint } from '@/lib/jobDetailsSkeletonHint';
 
 interface MobileJobCardProps {
   job: JobPosting;
@@ -69,7 +68,6 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
       onEditDraft(job);
       return;
     }
-    storeJobDetailsSkeletonHint(job);
     navigate(`/job-details/${job.id}`);
   };
 

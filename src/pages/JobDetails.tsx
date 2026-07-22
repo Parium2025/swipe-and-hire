@@ -38,7 +38,6 @@ import {
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
-import { readJobDetailsSkeletonHint } from '@/lib/jobDetailsSkeletonHint';
 
 // Extracted sub-components
 import {
@@ -111,7 +110,6 @@ const JobDetails = () => {
   const criteriaCount = jobCriteria?.length || 0;
   
   const employerProfileImageUrl = useMediaUrl(job?.employer_profile?.profile_image_url, 'profile-image');
-  const skeletonHint = useMemo(() => readJobDetailsSkeletonHint(jobId), [jobId]);
 
   // Load my_candidates map for rating updates — only re-fetch when applicant IDs actually change
   useEffect(() => {
@@ -473,7 +471,7 @@ const JobDetails = () => {
   const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 
   if (dataLoading || stagesLoading) {
-    return <JobDetailsSkeleton hint={skeletonHint} />;
+    return <JobDetailsSkeleton />;
   }
 
   if (!job) {
@@ -486,12 +484,10 @@ const JobDetails = () => {
 
   return (
      <div
-       key={jobId}
        ref={pageRef}
        {...pullHandlers}
        style={pullStyle}
-       className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
-
+       className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
 
         <JobDetailsHeader
           jobId={jobId!}
