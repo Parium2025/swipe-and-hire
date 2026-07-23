@@ -29,6 +29,8 @@ interface MobileJobCardProps {
   collapsible?: boolean;
   /** Optional initial expanded state when collapsible */
   defaultExpanded?: boolean;
+  /** Controlled expanded state — when set, syncs local state (used for global "Visa detaljer") */
+  expanded?: boolean;
 }
 
 const GRADIENTS = [
