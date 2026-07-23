@@ -11,23 +11,24 @@ const corsHeaders = {
 const PROMPT_VERSION = 'v2026-07-23';
 
 // ─── Per-user rate limiting (in-memory token bucket, per edge instance) ──
-// Prevents runaway loops or bugs from burning credits. Instance-local, so
-// a distributed cap is best-effort — good enough as a safety net.
-const RATE_LIMIT_MAX = 60;        // max evaluations
+// Only counts FRESH AI calls (cache hits are free and never rate-limited).
+// Cap is generous so an employer can bulk-evaluate a full ad (500–1000
+// ansökningar) without hitting the ceiling; it's a runaway-loop safety net,
+// not a throttle for normal use. Instance-local — best-effort distributed cap.
+const RATE_LIMIT_MAX = 600;          // fresh AI calls per user
 const RATE_LIMIT_WINDOW_MS = 60_000; // per minute
 const rateLimitBuckets = new Map<string, number[]>();
 
-function checkRateLimit(userId: string): { allowed: boolean; retryAfterSec: number } {
+function checkRateLimit(userId: string, cost = 1): { allowed: boolean; retryAfterSec: number } {
   const now = Date.now();
   const cutoff = now - RATE_LIMIT_WINDOW_MS;
   const bucket = (rateLimitBuckets.get(userId) || []).filter(t => t > cutoff);
-  if (bucket.length >= RATE_LIMIT_MAX) {
-    const oldest = bucket[0];
+  if (bucket.length + cost > RATE_LIMIT_MAX) {
+    const oldest = bucket[0] ?? now;
     return { allowed: false, retryAfterSec: Math.ceil((oldest + RATE_LIMIT_WINDOW_MS - now) / 1000) };
   }
-  bucket.push(now);
+  for (let i = 0; i < cost; i++) bucket.push(now);
   rateLimitBuckets.set(userId, bucket);
-  // Opportunistic cleanup so map doesn't grow unbounded
   if (rateLimitBuckets.size > 500) {
     for (const [k, v] of rateLimitBuckets) {
       const kept = v.filter(t => t > cutoff);
@@ -136,20 +137,9 @@ serve(async (req) => {
       }
     }
 
-    // Rate-limit real users (service-role internal calls bypass)
-    if (callerId) {
-      const rl = checkRateLimit(callerId);
-      if (!rl.allowed) {
-        console.warn(`Rate limit exceeded for user ${callerId}`);
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Vänta en stund innan du kör fler utvärderingar.', retry_after_seconds: rl.retryAfterSec }),
-          {
-            status: 429,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': String(rl.retryAfterSec) },
-          }
-        );
-      }
-    }
+    // Rate-limit is now enforced AFTER cache resolution — cache hits are free.
+    // See checkRateLimit call further down (only fresh AI calls count).
+
 
 
     // Action: validate_criterion — AI-powered discrimination check
@@ -354,6 +344,17 @@ serve(async (req) => {
     // Call AI only for criteria that need fresh evaluation
     let freshResults: CriterionResult[] = [];
     if (criteriaToEvaluate.length > 0) {
+      // Rate-limit ONLY fresh AI calls (cache hits are always free)
+      if (callerId) {
+        const rl = checkRateLimit(callerId, criteriaToEvaluate.length);
+        if (!rl.allowed) {
+          console.warn(`Rate limit exceeded for user ${callerId}`);
+          return new Response(
+            JSON.stringify({ error: 'För många utvärderingar just nu. Vänta en stund.', retry_after_seconds: rl.retryAfterSec }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': String(rl.retryAfterSec) } }
+          );
+        }
+      }
       const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteriaToEvaluate, feedbackContext);
 
       if (!aiResponse) {
