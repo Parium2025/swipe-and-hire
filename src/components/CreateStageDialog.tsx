@@ -86,8 +86,8 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
           </Button>
         )}
       </DialogTrigger>
-      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[calc(100dvh-32px)] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0" hideClose>
-        <DialogHeader className="flex flex-row items-center justify-between px-6 pt-8 pb-3 text-left !space-y-0">
+      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[calc(100dvh-40px)] grid-rows-[auto_minmax(0,1fr)_auto] !gap-0 overflow-hidden !p-0" hideClose>
+        <DialogHeader className="flex flex-row items-center justify-between px-6 pt-10 pb-4 text-left !space-y-0">
           <DialogTitle className="text-white">Skapa nytt steg</DialogTitle>
           <DialogClose className={cn(dialogCloseButtonClassName, "static right-auto top-auto")}>
             <X className={dialogCloseIconClassName} />
@@ -170,7 +170,7 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
             </TooltipProvider>
           </div>
         </div>
-        <DialogFooter className="flex gap-2 px-6 pt-4 pb-8">
+        <DialogFooter className="flex gap-2 px-6 pt-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
           <Button
             variant="glass"
             onClick={() => setOpen(false)}
