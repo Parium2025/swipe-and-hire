@@ -975,7 +975,8 @@ async function callLovableAI(
   jobContext: string,
   candidateContext: string,
   criteria: any[],
-  feedbackContext: string
+  feedbackContext: string,
+  includeSummary: boolean = false,
 ): Promise<EvaluationResponse | null> {
   try {
     const systemPrompt = `Du är en professionell svensk rekryteringsassistent som utvärderar kandidater mot urvalskriterier.
