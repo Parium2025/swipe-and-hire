@@ -239,7 +239,7 @@ const Dashboard = memo(() => {
   }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
   if (!initialLoadDone) {
-    return <EmployerDashboardSkeleton />;
+    return <EmployerDashboardSkeleton showDrafts={false} titleWidthClass="w-28" />;
   }
   if (isLoading || !showContent) {
     return (

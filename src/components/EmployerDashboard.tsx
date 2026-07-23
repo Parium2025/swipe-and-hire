@@ -444,7 +444,7 @@ const EmployerDashboard = memo(() => {
   // Full-screen skeleton vid kall mount i tab-sessionen — visas tills första data
   // landar oavsett om localStorage-cachen var varm (mirror av seeker SearchJobs).
   if (!initialLoadDone) {
-    return <EmployerDashboardSkeleton />;
+    return <EmployerDashboardSkeleton showDrafts titleWidthClass="w-48" />;
   }
   // Sidebar-navigering (varm cache) → osynlig placeholder under fade-in delay.
   if (loading || !showContent) {
