@@ -6,6 +6,38 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// Bump this when the AI system prompt / evaluation logic changes materially.
+// Included in criterion_hash → forces a global cache invalidation for all criteria.
+const PROMPT_VERSION = 'v2026-07-23';
+
+// ─── Per-user rate limiting (in-memory token bucket, per edge instance) ──
+// Prevents runaway loops or bugs from burning credits. Instance-local, so
+// a distributed cap is best-effort — good enough as a safety net.
+const RATE_LIMIT_MAX = 60;        // max evaluations
+const RATE_LIMIT_WINDOW_MS = 60_000; // per minute
+const rateLimitBuckets = new Map<string, number[]>();
+
+function checkRateLimit(userId: string): { allowed: boolean; retryAfterSec: number } {
+  const now = Date.now();
+  const cutoff = now - RATE_LIMIT_WINDOW_MS;
+  const bucket = (rateLimitBuckets.get(userId) || []).filter(t => t > cutoff);
+  if (bucket.length >= RATE_LIMIT_MAX) {
+    const oldest = bucket[0];
+    return { allowed: false, retryAfterSec: Math.ceil((oldest + RATE_LIMIT_WINDOW_MS - now) / 1000) };
+  }
+  bucket.push(now);
+  rateLimitBuckets.set(userId, bucket);
+  // Opportunistic cleanup so map doesn't grow unbounded
+  if (rateLimitBuckets.size > 500) {
+    for (const [k, v] of rateLimitBuckets) {
+      const kept = v.filter(t => t > cutoff);
+      if (kept.length === 0) rateLimitBuckets.delete(k);
+      else rateLimitBuckets.set(k, kept);
+    }
+  }
+  return { allowed: true, retryAfterSec: 0 };
+}
+
 interface CriterionResult {
   criterion_id: string;
   title: string;
