@@ -257,72 +257,92 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         </AnimatePresence>
 
 
-        {(!hideActions || !isDraft) && (
-          <>
-            <div className="h-px bg-white/10 mx-2" />
+        <AnimatePresence initial={false}>
+          {(!collapsible || expanded) && (!hideActions || !isDraft) && (
+            <motion.div
+              key="actions"
+              initial={collapsible ? { height: 0, opacity: 0 } : false}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="h-px bg-white/10 mx-2" />
+              <div className="flex gap-2 px-2 py-1.5">
+                {collapsible && !isDraft && (
+                  <Button
+                    variant="glass"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); openJob(); }}
+                    className="flex-1 h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-white/20"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Öppna
+                  </Button>
+                )}
+                {!hideActions && !isExpired && (
+                  <Button
+                    variant="glass"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isDraft && onEditDraft) {
+                        onEditDraft(job);
+                      } else {
+                        onEdit(job);
+                      }
+                    }}
+                    className="flex-1 h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Redigera
+                  </Button>
+                )}
+                {!hideActions && isExpired && onRepublish && (
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRepublish(job);
+                    }}
+                    className="flex-1 h-11 rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Återpublicera
+                  </Button>
+                )}
+                {!isDraft && !collapsible && (
+                  <Button
+                    variant="glass"
+                    size="sm"
+                    aria-label="Förhandsgranska annons"
+                    title="Förhandsgranska annons"
+                    onClick={handlePreviewClick}
+                    className={`${hideActions ? 'flex-1 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
+                  >
+                    <Eye className="h-4 w-4" />
+                    {hideActions && <span className="text-sm">Visa annons</span>}
+                  </Button>
+                )}
+                {!hideActions && (
+                  <Button
+                    variant="glass"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(job);
+                    }}
+                    className={`flex-1 h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Ta bort
+                  </Button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            <div className={`flex gap-2 px-2 py-1.5 ${isExpired ? '' : ''}`}>
-              {!hideActions && !isExpired && (
-                <Button
-                  variant="glass"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (isDraft && onEditDraft) {
-                      onEditDraft(job);
-                    } else {
-                      onEdit(job);
-                    }
-                  }}
-                  className="flex-1 h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Redigera
-                </Button>
-              )}
-              {!hideActions && isExpired && onRepublish && (
-                <Button
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRepublish(job);
-                  }}
-                  className="flex-1 h-11 rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]"
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Återpublicera
-                </Button>
-              )}
-              {!isDraft && (
-                <Button
-                  variant="glass"
-                  size="sm"
-                  aria-label="Förhandsgranska annons"
-                  title="Förhandsgranska annons"
-                  onClick={handlePreviewClick}
-                  className={`${hideActions ? 'flex-1 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
-                >
-                  <Eye className="h-4 w-4" />
-                  {hideActions && <span className="text-sm">Visa annons</span>}
-                </Button>
-              )}
-              {!hideActions && (
-                <Button
-                  variant="glass"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(job);
-                  }}
-                  className={`flex-1 h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Ta bort
-                </Button>
-              )}
-            </div>
-          </>
-        )}
       </div>
     </Card>
   );
