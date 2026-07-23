@@ -318,7 +318,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                     Återpublicera
                   </Button>
                 )}
-                {!isDraft && !collapsible && (
+                {!isDraft && (
                   <Button
                     variant="glass"
                     size="sm"
