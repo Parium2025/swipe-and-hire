@@ -32,6 +32,7 @@ import Support from '@/pages/Support';
 import SavedJobs from '@/pages/SavedJobs';
 import MyApplications from '@/pages/MyApplications';
 import SupportAdmin from '@/pages/SupportAdmin';
+import AiUsage from '@/pages/AiUsage';
 import EmployerProfile from '@/pages/employer/EmployerProfile';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
