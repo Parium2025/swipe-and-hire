@@ -181,128 +181,167 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
           />
         </div>
 
-        {/* Divider */}
-        <div className="h-px bg-white/10 mx-2" />
+        {collapsible && (
+          <div className="flex justify-center pb-1">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
+              aria-label={expanded ? 'Dölj detaljer' : 'Visa detaljer'}
+              aria-expanded={expanded}
+              className="flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-3 py-1 text-xs font-medium text-white transition-colors"
+            >
+              <span>{expanded ? 'Dölj detaljer' : 'Visa detaljer'}</span>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+        )}
 
-        {/* Info rows */}
-        <div className="flex flex-col px-3 pb-1 [&>div]:py-2.5 [&>div]:border-b [&>div]:border-white/10 [&>div:last-child]:border-b-0">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
-            <TruncatedText
-              text={recruiterName || '–'}
-              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
-            />
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
-            {(() => {
-              const details = formatEmploymentDetails({
-                employment_type: job.employment_type,
-                part_time_days: job.part_time_days,
-                part_time_shifts: job.part_time_shifts,
-                duration_amount: job.duration_amount,
-                duration_unit: job.duration_unit,
-              });
-              const label = job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–';
-              const combined = [label, details].filter(Boolean).join(' · ');
-              return (
-                <TruncatedText
-                  text={combined || '–'}
-                  className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]"
-                />
-              );
-            })()}
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm leading-snug text-white flex-shrink-0">Startdatum:</span>
-            <span className="text-sm leading-snug text-white font-medium text-right">
-              {(job as any).start_date
-                ? new Date((job as any).start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
-                : 'Omgående'}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Ansökningar:</span>
-            <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
-              <Users className="h-3.5 w-3.5 flex-shrink-0" />
-              {job.applications_count || 0}
-            </span>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
-            <TruncatedText
-              text={job.location || '–'}
-              className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm leading-snug text-white">Publicerad:</span>
-            <span className="text-sm leading-snug text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
-          </div>
-          {(() => {
-            const salaryText = getJobBadgeSalary({
-              salary_min: job.salary_min,
-              salary_max: job.salary_max,
-              salary_type: job.salary_type,
-              salary_transparency: job.salary_transparency,
-            });
-            return (
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm leading-snug text-white flex-shrink-0">Lön:</span>
-                <TruncatedText
-                  text={salaryText || '–'}
-                  className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]"
-                />
-              </div>
-            );
-          })()}
+        <AnimatePresence initial={false}>
+          {(!collapsible || expanded) && (
+            <motion.div
+              key="details"
+              initial={collapsible ? { height: 0, opacity: 0 } : false}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+              className="overflow-hidden"
+            >
+              {/* Divider */}
+              <div className="h-px bg-white/10 mx-2" />
 
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer">
-                  <span className="text-sm leading-snug text-white">Status:</span>
-                  <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-400' : 'text-white'}`}>
-                    {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
+              {/* Info rows */}
+              <div className="flex flex-col px-3 pb-1 [&>div]:py-2.5 [&>div]:border-b [&>div]:border-white/10 [&>div:last-child]:border-b-0">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
+                  <TruncatedText
+                    text={recruiterName || '–'}
+                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
+                  {(() => {
+                    const details = formatEmploymentDetails({
+                      employment_type: job.employment_type,
+                      part_time_days: job.part_time_days,
+                      part_time_shifts: job.part_time_shifts,
+                      duration_amount: job.duration_amount,
+                      duration_unit: job.duration_unit,
+                    });
+                    const label = job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–';
+                    const combined = [label, details].filter(Boolean).join(' · ');
+                    return (
+                      <TruncatedText
+                        text={combined || '–'}
+                        className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]"
+                      />
+                    );
+                  })()}
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Startdatum:</span>
+                  <span className="text-sm leading-snug text-white font-medium text-right">
+                    {(job as any).start_date
+                      ? new Date((job as any).start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+                      : 'Omgående'}
                   </span>
                 </div>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
-                <p className="text-xs">{formatExpirationDateTime(job.created_at, job.expires_at)}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm leading-snug text-white">Ansökningar:</span>
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
+                    <Users className="h-3.5 w-3.5 flex-shrink-0" />
+                    {job.applications_count || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
+                  <TruncatedText
+                    text={job.location || '–'}
+                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm leading-snug text-white">Publicerad:</span>
+                  <span className="text-sm leading-snug text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
+                </div>
+                {(() => {
+                  const salaryText = getJobBadgeSalary({
+                    salary_min: job.salary_min,
+                    salary_max: job.salary_max,
+                    salary_type: job.salary_type,
+                    salary_transparency: job.salary_transparency,
+                  });
+                  return (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm leading-snug text-white flex-shrink-0">Lön:</span>
+                      <TruncatedText
+                        text={salaryText || '–'}
+                        className="text-sm leading-snug text-white font-medium text-right truncate max-w-[65%]"
+                      />
+                    </div>
+                  );
+                })()}
 
-        <>
-          <div className="h-px bg-white/10 mx-2" />
-          <div className="flex gap-2 px-2 py-1.5">
-            <Button
-              variant="glass"
-              size="sm"
-              aria-label="Förhandsgranska annons"
-              title="Förhandsgranska annons"
-              onClick={handlePreviewClick}
-              className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Visa annons
-            </Button>
-            {isExpired && onRepublish && (
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRepublish(job);
-                }}
-                className="flex-1 h-11 rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Återpublicera
-              </Button>
-            )}
-          </div>
-        </>
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-between cursor-pointer">
+                        <span className="text-sm leading-snug text-white">Status:</span>
+                        <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-400' : 'text-white'}`}>
+                          {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
+                      <p className="text-xs">{formatExpirationDateTime(job.created_at, job.expires_at)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+
+              <div className="h-px bg-white/10 mx-2" />
+              <div className="flex gap-2 px-2 py-1.5">
+                {collapsible && (
+                  <Button
+                    variant="glass"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); onClick(job.id); }}
+                    className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
+                  >
+                    Öppna
+                  </Button>
+                )}
+                {!collapsible && (
+                  <Button
+                    variant="glass"
+                    size="sm"
+                    aria-label="Förhandsgranska annons"
+                    title="Förhandsgranska annons"
+                    onClick={handlePreviewClick}
+                    className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Visa annons
+                  </Button>
+                )}
+                {isExpired && onRepublish && (
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRepublish(job);
+                    }}
+                    className="flex-1 h-11 rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Återpublicera
+                  </Button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </div>
     </Card>
   );
