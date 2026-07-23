@@ -388,8 +388,10 @@ const Dashboard = memo(() => {
                   onEdit={() => navigate(`/job-details/${(job as any).id}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                   onDelete={() => {}}
                   collapsible
+                  expanded={expandAll}
                   hideActions
                 />
+
 
               )}
             />
