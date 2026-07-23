@@ -350,11 +350,12 @@ export function StageSettingsMenu({
               onClick={() => setColorDialogOpen(false)}
               onMouseDown={(e) => e.currentTarget.blur()}
               onMouseUp={(e) => e.currentTarget.blur()}
-              className="min-h-[40px] h-10 rounded-full text-sm flex-1"
+              className="min-h-[44px] rounded-full text-sm flex-1"
             >
               Klar
             </Button>
           </DialogFooter>
+
         </DialogContentNoFocus>
       </Dialog>
 
