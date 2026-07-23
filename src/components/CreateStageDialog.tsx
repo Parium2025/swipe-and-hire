@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
   Dialog,
@@ -7,6 +7,9 @@ import {
   DialogTitle,
   DialogFooter,
   DialogTrigger,
+  DialogClose,
+  dialogCloseButtonClassName,
+  dialogCloseIconClassName,
 } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
@@ -20,6 +23,7 @@ import {
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
 import { MAX_KANBAN_STAGES } from '@/hooks/useKanbanLayout';
+import { cn } from '@/lib/utils';
 
 interface CreateStageDialogProps {
   trigger?: React.ReactNode;
