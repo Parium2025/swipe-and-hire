@@ -521,7 +521,7 @@ const Index = () => {
   }
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/status', '/consent', '/templates'];
+  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/status', '/ai-usage', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
   // Behåll senaste sidebar-path så JobView-overlay vet vilken vy som
   // ska visas underst (utan att KeepAlive byter activeKey och fadar).
