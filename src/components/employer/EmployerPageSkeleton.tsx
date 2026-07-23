@@ -441,9 +441,16 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton()
         <SkeletonChrome />
         <div className="flex-1 min-h-0 overflow-hidden p-3">
           <div className="responsive-container-wide space-y-4 h-full flex flex-col">
-            {/* Page title */}
-            <div className="flex justify-center items-center">
-              <div className={`h-7 w-40 rounded ${SHAPE}`} />
+            {/* Header — mirrors Messages page icon/title group + optional new conversation action */}
+            <div className="flex items-center justify-center flex-shrink-0 relative">
+              <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 rounded-full ${SHAPE}`} />
+                <div className="space-y-2">
+                  <div className={`h-7 w-24 rounded ${SHAPE}`} />
+                  <div className={`h-4 w-32 rounded ${SHAPE}`} />
+                </div>
+              </div>
+              <div className={`absolute right-0 h-10 w-12 sm:w-40 rounded-lg ${SHAPE}`} />
             </div>
             <div className="flex-1 min-h-0 flex gap-4 overflow-hidden">
               <div className="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col min-h-0">

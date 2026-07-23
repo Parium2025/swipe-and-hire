@@ -153,6 +153,12 @@ const MyApplications = () => {
     }
   }, [isLoading, activeApplications.length, expiredApplications.length]);
 
+  useEffect(() => {
+    if (!interviewsLoading) {
+      writeCachedCount(SKELETON_COUNT_KEYS.myApplicationsInterviews, interviews?.length ?? 0);
+    }
+  }, [interviewsLoading, interviews?.length]);
+
 
   const visibleApplications = activeTab === 'active' ? activeApplications : expiredApplications;
 
