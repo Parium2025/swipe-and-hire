@@ -77,7 +77,7 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
           </Button>
         </DialogTrigger>
       )}
-      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg pt-8 pb-8" hideClose>
+      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg pt-10 pb-10" hideClose>
         <DialogHeader className="flex flex-row items-center justify-between text-left !space-y-0">
           <DialogTitle className="text-white">Skapa nytt steg</DialogTitle>
           <DialogClose className={cn(dialogCloseButtonClassName, "static right-auto top-auto")}>
