@@ -360,8 +360,10 @@ const Dashboard = memo(() => {
                   job={job as any}
                   onEdit={() => navigate(`/job-details/${(job as any).id}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                   onDelete={() => {}}
+                  collapsible
                   hideActions
                 />
+
               )}
             />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
