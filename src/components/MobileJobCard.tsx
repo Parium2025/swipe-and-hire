@@ -50,8 +50,9 @@ function getGradientForId(id: string) {
 }
 
 
-export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false }: MobileJobCardProps) => {
   const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const isDraft = isEmployerJobDraft(job);
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
@@ -68,12 +69,20 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
 
-  const handleCardClick = () => {
+  const openJob = useCallback(() => {
     if (isDraft && onEditDraft) {
       onEditDraft(job);
       return;
     }
     navigate(`/job-details/${job.id}`);
+  }, [isDraft, onEditDraft, job, navigate]);
+
+  const handleCardClick = () => {
+    if (collapsible) {
+      setExpanded((v) => !v);
+      return;
+    }
+    openJob();
   };
 
   const handleTouchStart = () => {
