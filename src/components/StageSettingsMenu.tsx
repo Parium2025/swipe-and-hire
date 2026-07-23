@@ -344,17 +344,18 @@ export function StageSettingsMenu({
               </div>
             </div>
           </div>
-          <DialogFooter className="flex gap-2 pt-2">
+          <DialogFooter className="flex gap-2 pt-2 sm:justify-center">
             <Button
               variant="glass"
               onClick={() => setColorDialogOpen(false)}
               onMouseDown={(e) => e.currentTarget.blur()}
               onMouseUp={(e) => e.currentTarget.blur()}
-              className="min-h-[44px] rounded-full text-sm flex-1"
+              className="min-h-[44px] rounded-full text-sm px-10"
             >
               Klar
             </Button>
           </DialogFooter>
+
 
         </DialogContentNoFocus>
       </Dialog>
