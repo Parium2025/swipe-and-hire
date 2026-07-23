@@ -96,15 +96,14 @@ export function RepublishJobDialog({
           <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
             {jobTitle ? (
               <>
-                En ny aktiv kopia av{' '}
                 <TruncatedText
                   text={`"${jobTitle}"`}
                   className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom"
                 />{' '}
-                skapas och är aktiv i {REPUBLISH_DAYS} dagar.
+                återaktiveras i {REPUBLISH_DAYS} dagar. Alla tidigare kandidater, meddelanden och urval följer med.
               </>
             ) : (
-              `En ny aktiv kopia av annonsen skapas och är aktiv i ${REPUBLISH_DAYS} dagar.`
+              `Annonsen återaktiveras i ${REPUBLISH_DAYS} dagar. Alla tidigare kandidater, meddelanden och urval följer med.`
             )}
           </AlertDialogDescription>
         </div>

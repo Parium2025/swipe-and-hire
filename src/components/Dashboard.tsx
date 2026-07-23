@@ -312,8 +312,10 @@ const Dashboard = memo(() => {
                 <EmployerJobCard
                   job={job as any}
                   activeTab={activeTab as 'active' | 'expired'}
+                  collapsible
                   onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                 />
+
               )}
             />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
@@ -358,8 +360,10 @@ const Dashboard = memo(() => {
                   job={job as any}
                   onEdit={() => navigate(`/job-details/${(job as any).id}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                   onDelete={() => {}}
+                  collapsible
                   hideActions
                 />
+
               )}
             />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
