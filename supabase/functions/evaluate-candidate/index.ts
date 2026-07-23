@@ -449,6 +449,25 @@ serve(async (req) => {
 
     console.log(`Evaluation completed for candidate ${applicant_id} — ${allResults.length} results (${cachedResults.length} cached, ${freshResults.length} fresh)`);
 
+    // ─── OBSERVABILITY: log usage (best-effort, non-blocking) ───────
+    try {
+      await supabase.from('ai_usage_log').insert({
+        function_name: 'evaluate-candidate',
+        user_id: callerId,
+        employer_id: job.employer_id ?? null,
+        organization_id: job.organization_id ?? null,
+        job_id,
+        applicant_id,
+        criteria_count: criteria.length,
+        cache_hits: cachedResults.length,
+        fresh_calls: freshResults.length,
+        duration_ms: Date.now() - evalStartMs,
+        model: freshResults.length > 0 ? 'google/gemini-2.5-flash' : null,
+      });
+    } catch (logErr) {
+      console.warn('ai_usage_log insert failed (non-blocking):', logErr);
+    }
+
     return new Response(
       JSON.stringify({ success: true, evaluation_id: evaluation.id, criteria_results: allResults, cache_hits: cachedResults.length, ai_calls: freshResults.length }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
