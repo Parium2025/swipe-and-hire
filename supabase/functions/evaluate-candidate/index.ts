@@ -297,33 +297,48 @@ serve(async (req) => {
     const candidateContext = buildCandidateContext(application, profile, questions, cvSummary, profileCv, videoAnalysis);
     const jobContext = buildJobContext(job, criteria, questions);
     const feedbackContext = buildFeedbackContext(feedback, criteria);
+    const feedbackByCriterion = buildFeedbackByCriterion(feedback, criteria);
 
-    // ─── HASH-BASED CACHE: skip criteria whose prompt AND context haven't changed ───
-    const contextHash = await sha256(candidateContext + '||' + feedbackContext);
+    // ─── GLOBAL HASH-BASED CACHE ─────────────────────────────────────
+    // context_hash = candidate data ONLY (feedback is per-criterion below).
+    // criterion_hash includes per-criterion feedback → a correction on
+    // criterion A doesn't invalidate criteria B, C, D for the same candidate.
+    // Cache lookup keys on (criterion_hash, context_hash) — NOT criterion_id —
+    // so the same prompt against the same candidate data is reused across
+    // every job and every organization. Same criterion + same candidate = free.
+    const contextHash = await sha256(candidateContext);
     const criteriaWithHashes = await Promise.all(
-      criteria.map(async (c: any) => ({
-        ...c,
-        _criterion_hash: await sha256(`${PROMPT_VERSION}||${c.title}||${c.prompt}`),
-      }))
+      criteria.map(async (c: any) => {
+        const perCriterionFeedback = feedbackByCriterion.get(c.id) || '';
+        return {
+          ...c,
+          _criterion_hash: await sha256(
+            `${PROMPT_VERSION}||${c.title}||${c.prompt}||${perCriterionFeedback}`
+          ),
+        };
+      })
     );
 
-    // Fetch existing cached results for these criteria (by hash) — reuse them.
-    const criterionIds = criteriaWithHashes.map(c => c.id);
+    const criterionHashes = Array.from(new Set(criteriaWithHashes.map(c => c._criterion_hash)));
     const { data: cachedRows } = await supabase
       .from('criterion_results')
-      .select('criterion_id, result, confidence, reasoning, source, criterion_hash, context_hash')
-      .in('criterion_id', criterionIds)
-      .eq('context_hash', contextHash);
+      .select('result, confidence, reasoning, source, criterion_hash')
+      .in('criterion_hash', criterionHashes)
+      .eq('context_hash', contextHash)
+      .limit(criterionHashes.length * 5);
 
-    const cachedByCriterion = new Map<string, any>();
+    // Pick first row per criterion_hash (all rows with same hash are semantically identical).
+    const cachedByHash = new Map<string, any>();
     (cachedRows || []).forEach((row: any) => {
-      cachedByCriterion.set(`${row.criterion_id}||${row.criterion_hash}`, row);
+      if (row.criterion_hash && !cachedByHash.has(row.criterion_hash)) {
+        cachedByHash.set(row.criterion_hash, row);
+      }
     });
 
     const cachedResults: any[] = [];
     const criteriaToEvaluate: any[] = [];
     for (const c of criteriaWithHashes) {
-      const hit = cachedByCriterion.get(`${c.id}||${c._criterion_hash}`);
+      const hit = cachedByHash.get(c._criterion_hash);
       if (hit) {
         cachedResults.push({
           criterion_id: c.id,
@@ -339,7 +354,7 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Cache: ${cachedResults.length} hit / ${criteriaToEvaluate.length} miss (of ${criteria.length} criteria)`);
+    console.log(`Cache (global): ${cachedResults.length} hit / ${criteriaToEvaluate.length} miss (of ${criteria.length} criteria)`);
 
     // Call AI only for criteria that need fresh evaluation
     let freshResults: CriterionResult[] = [];
@@ -751,6 +766,32 @@ function buildFeedbackContext(feedback: any[], criteria: any[]): string {
   }
 
   return context;
+}
+
+// Per-criterion feedback digest — used inside criterion_hash so a correction
+// on ONE criterion only invalidates that criterion's cache, not the whole
+// candidate. Deterministic (sorted) so identical feedback → identical hash.
+function buildFeedbackByCriterion(feedback: any[], criteria: any[]): Map<string, string> {
+  const map = new Map<string, string>();
+  if (!feedback || feedback.length === 0) return map;
+
+  const byCriterion: Record<string, any[]> = {};
+  for (const f of feedback) {
+    if (!f.criterion_id) continue;
+    (byCriterion[f.criterion_id] ||= []).push(f);
+  }
+
+  for (const c of criteria) {
+    const rows = byCriterion[c.id];
+    if (!rows || rows.length === 0) continue;
+    const sorted = [...rows].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const digest = sorted
+      .slice(0, 5)
+      .map(r => `${r.ai_result}>${r.corrected_result}|${(r.recruiter_note || '').trim()}`)
+      .join(';;');
+    map.set(c.id, digest);
+  }
+  return map;
 }
 
 // ─── AI evaluation with tool calling ─────────────────────────────
