@@ -297,7 +297,7 @@ serve(async (req) => {
     const criteriaWithHashes = await Promise.all(
       criteria.map(async (c: any) => ({
         ...c,
-        _criterion_hash: await sha256(`${c.title}||${c.prompt}`),
+        _criterion_hash: await sha256(`${PROMPT_VERSION}||${c.title}||${c.prompt}`),
       }))
     );
 
