@@ -10,6 +10,18 @@ const corsHeaders = {
 // Included in criterion_hash → forces a global cache invalidation for all criteria.
 const PROMPT_VERSION = 'v2026-07-23';
 
+// Normalize prompt text before hashing so tiny cosmetic edits don't invalidate
+// the cache. Lowercases, trims, collapses whitespace, strips trailing punctuation.
+// "Har B-körkort" → "har b-körkort"  |  "Har  B-körkort." → same hash.
+function normalizeForHash(text: string): string {
+  return (text || '')
+    .toLowerCase()
+    .normalize('NFKC')
+    .replace(/[\s\u00A0]+/g, ' ')
+    .replace(/[.,;:!?"'`´]+$/g, '')
+    .trim();
+}
+
 // ─── Per-user rate limiting (in-memory token bucket, per edge instance) ──
 // Only counts FRESH AI calls (cache hits are free and never rate-limited).
 // Cap is generous so an employer can bulk-evaluate a full ad (500–1000
@@ -213,6 +225,7 @@ serve(async (req) => {
       }
     }
 
+    const evalStartMs = Date.now();
     console.log(`Evaluating candidate ${applicant_id} for job ${job_id}`);
 
 
@@ -310,10 +323,12 @@ serve(async (req) => {
     const criteriaWithHashes = await Promise.all(
       criteria.map(async (c: any) => {
         const perCriterionFeedback = feedbackByCriterion.get(c.id) || '';
+        const normTitle = normalizeForHash(c.title);
+        const normPrompt = normalizeForHash(c.prompt);
         return {
           ...c,
           _criterion_hash: await sha256(
-            `${PROMPT_VERSION}||${c.title}||${c.prompt}||${perCriterionFeedback}`
+            `${PROMPT_VERSION}||${normTitle}||${normPrompt}||${perCriterionFeedback}`
           ),
         };
       })
@@ -433,6 +448,25 @@ serve(async (req) => {
       .eq('id', evaluation.id);
 
     console.log(`Evaluation completed for candidate ${applicant_id} — ${allResults.length} results (${cachedResults.length} cached, ${freshResults.length} fresh)`);
+
+    // ─── OBSERVABILITY: log usage (best-effort, non-blocking) ───────
+    try {
+      await supabase.from('ai_usage_log').insert({
+        function_name: 'evaluate-candidate',
+        user_id: callerId,
+        employer_id: job.employer_id ?? null,
+        organization_id: job.organization_id ?? null,
+        job_id,
+        applicant_id,
+        criteria_count: criteria.length,
+        cache_hits: cachedResults.length,
+        fresh_calls: freshResults.length,
+        duration_ms: Date.now() - evalStartMs,
+        model: freshResults.length > 0 ? 'google/gemini-2.5-flash' : null,
+      });
+    } catch (logErr) {
+      console.warn('ai_usage_log insert failed (non-blocking):', logErr);
+    }
 
     return new Response(
       JSON.stringify({ success: true, evaluation_id: evaluation.id, criteria_results: allResults, cache_hits: cachedResults.length, ai_calls: freshResults.length }),

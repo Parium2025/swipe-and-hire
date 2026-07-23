@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage_log: {
+        Row: {
+          applicant_id: string | null
+          cache_hits: number
+          created_at: string
+          criteria_count: number
+          duration_ms: number | null
+          employer_id: string | null
+          fresh_calls: number
+          function_name: string
+          id: string
+          job_id: string | null
+          metadata: Json | null
+          model: string | null
+          organization_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          applicant_id?: string | null
+          cache_hits?: number
+          created_at?: string
+          criteria_count?: number
+          duration_ms?: number | null
+          employer_id?: string | null
+          fresh_calls?: number
+          function_name: string
+          id?: string
+          job_id?: string | null
+          metadata?: Json | null
+          model?: string | null
+          organization_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          applicant_id?: string | null
+          cache_hits?: number
+          created_at?: string
+          criteria_count?: number
+          duration_ms?: number | null
+          employer_id?: string | null
+          fresh_calls?: number
+          function_name?: string
+          id?: string
+          job_id?: string | null
+          metadata?: Json | null
+          model?: string | null
+          organization_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       app_exceptions: {
         Row: {
           created_at: string
