@@ -1062,7 +1062,10 @@ VIKTIGT:
 - Saknad information ≠ negativ information — men båda ger no_match
 - Var STRIKT vid diskvalificerande krav (t.ex. certifikat), MJUKARE vid nice-to-haves`;
 
-    const userPrompt = `${jobContext}\n\n${candidateContext}${feedbackContext}\n\nUtvärdera kandidaten mot varje urvalskriterium.`;
+    const summaryInstruction = includeSummary
+      ? `\n\nBonus: Skriv även en kort professionell sammanfattning (2–4 meningar på svenska) av kandidatens profil samt 3–6 nyckelpunkter (kort text + typ: strength|experience|skill|note).`
+      : '';
+    const userPrompt = `${jobContext}\n\n${candidateContext}${feedbackContext}\n\nUtvärdera kandidaten mot varje urvalskriterium.${summaryInstruction}`;
 
     const response = await fetchWithRetry(
       'https://ai.gateway.lovable.dev/v1/chat/completions',
