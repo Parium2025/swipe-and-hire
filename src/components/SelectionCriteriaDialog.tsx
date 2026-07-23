@@ -286,16 +286,7 @@ export function SelectionCriteriaDialog({
   };
 
   const handleSaveAndActivate = async () => {
-    // Cost guardrail: confirm before evaluating large candidate pools.
-    // Cache hits are free, but first-time criteria on 200+ candidates is a real cost.
-    if (candidates.length >= 100) {
-      const ok = window.confirm(
-        `Du är på väg att köra urvalskriterierna mot ${candidates.length} kandidater.\n\n` +
-        `Kandidater som redan bedömts med samma kriterier är gratis (cache). ` +
-        `Nya kombinationer använder AI-anrop.\n\nVill du fortsätta?`
-      );
-      if (!ok) return;
-    }
+
 
     
     let hasErrors = false;
