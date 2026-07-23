@@ -171,7 +171,10 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         </div>
       </div>
 
-      <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
+      <div
+        className={`job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5 ${collapsible ? 'cursor-pointer' : 'cursor-pointer'}`}
+        onClick={handleBodyClick}
+      >
         <div className="flex justify-center mt-1 mb-1">
           {logoUrl ? (
             <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg">
