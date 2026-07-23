@@ -466,6 +466,27 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               >
                 {count}
               </span>
+              {/* Urvalskriterier (Sparkles) — only on first stage (Inkorg), matches desktop column header */}
+              {stageIdx === 0 && onOpenCriteriaDialog && (
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenCriteriaDialog();
+                  }}
+                  className="relative p-1 rounded hover:bg-white/20 transition-colors text-white/90 hover:text-white flex-shrink-0"
+                  aria-label="Urvalskriterier"
+                  title="Urvalskriterier"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {criteriaCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-1 rounded-full bg-white text-[9px] font-semibold text-black flex items-center justify-center leading-none">
+                      {criteriaCount}
+                    </span>
+                  )}
+                </button>
+              )}
               {/* Stage settings menu (3-dot) — visual-only on touch, functional on mouse */}
               <span
                 onPointerDown={(e) => e.stopPropagation()}
@@ -508,22 +529,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           />
         )}
       </div>
-
-      {/* AI Urvalskriterier button — visible when on first tab */}
-      {activeTab === stages[0] && onOpenCriteriaDialog && (
-        <button
-          onClick={onOpenCriteriaDialog}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-white/5 ring-1 ring-inset ring-white/10 active:scale-[0.97] transition-all backdrop-blur-sm w-full justify-center min-h-touch"
-        >
-          <Sparkles className="h-4 w-4 text-white" />
-          Urvalskriterier
-          {criteriaCount > 0 && (
-            <span className="text-[10px] bg-white/10 text-white px-1.5 py-0.5 rounded-full">
-              {criteriaCount} aktiva
-            </span>
-          )}
-        </button>
-      )}
 
       {/* Inline action bar for selection mode — placed above candidate list */}
       {renderActionBar}
