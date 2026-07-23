@@ -92,6 +92,8 @@ interface CriterionResult {
 
 interface EvaluationResponse {
   criteria_results: CriterionResult[];
+  summary_text?: string;
+  key_points?: Array<{ text: string; type?: string }>;
 }
 
 // Retry with exponential backoff
