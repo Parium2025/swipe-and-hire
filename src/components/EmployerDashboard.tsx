@@ -172,6 +172,19 @@ const EmployerDashboard = memo(() => {
   // Den orsakade dubbelblink (mellan-render med gamla tabben fortfarande aktiv).
   const listActiveTab = activeTab;
 
+  // Global "Visa detaljer / Dölj detaljer" — kollapsibel-toggle för alla kort.
+  const [expandAll, setExpandAll] = useState<boolean>(() => {
+    try { return sessionStorage.getItem('employer_dashboard_expand_all') === '1'; } catch { return false; }
+  });
+  const toggleExpandAll = useCallback(() => {
+    setExpandAll(v => {
+      const next = !v;
+      try { sessionStorage.setItem('employer_dashboard_expand_all', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  }, []);
+
+
   const setActiveTab = useCallback((tab: JobStatusTab) => {
     setOptimisticTab(tab); // 0ms visuell respons för indikatorn
     startTransition(() => {
