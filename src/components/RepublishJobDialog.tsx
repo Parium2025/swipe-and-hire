@@ -122,10 +122,10 @@ export function RepublishJobDialog({
               e.preventDefault();
               handleConfirm();
             }}
-            className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full !bg-green-500 md:hover:!bg-green-600 border-0 text-white"
+            className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full !bg-green-500 md:hover:!bg-green-600 active:!bg-green-500 focus:!bg-green-500 focus-visible:!bg-green-500 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 ring-0 border-0 text-white disabled:!bg-green-500 disabled:opacity-100 transition-none"
           >
             <RotateCcw className="h-4 w-4 mr-1.5" />
-            {submitting ? 'Publicerar…' : 'Återpublicera'}
+            <span>{submitting ? 'Publicerar…' : 'Återpublicera'}</span>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContentNoFocus>
