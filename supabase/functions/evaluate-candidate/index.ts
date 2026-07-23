@@ -399,7 +399,61 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Cache (global): ${cachedResults.length} hit / ${criteriaToEvaluate.length} miss (of ${criteria.length} criteria)`);
+    console.log(`Cache (global hash): ${cachedResults.length} hit / ${criteriaToEvaluate.length} miss (of ${criteria.length} criteria)`);
+
+    // ─── SEMANTIC CACHE (embeddings, punkt D) ───────────────────────
+    // For each hash-miss, embed the normalized prompt and look for a
+    // semantically equivalent prompt (cosine similarity ≥ 0.95) that we've
+    // already evaluated against the SAME candidate context. If found, reuse
+    // the result — no full AI eval needed.
+    let semanticHits = 0;
+    const stillMissing: any[] = [];
+    if (criteriaToEvaluate.length > 0) {
+      const semanticResults: Array<{ criterion: any; embedding: number[]; hit: any | null }> = [];
+      // Embed all missing prompts in parallel (bounded — usually 1–10).
+      await Promise.all(criteriaToEvaluate.map(async (c) => {
+        const normText = `${normalizeForHash(c.title)} ${normalizeForHash(c.prompt)}`.trim();
+        const embedding = await embedText(LOVABLE_API_KEY, normText);
+        if (!embedding) {
+          semanticResults.push({ criterion: c, embedding: [], hit: null });
+          return;
+        }
+        // Look up nearest neighbour with same candidate context.
+        const { data: matches, error } = await supabase.rpc('match_criterion_prompt', {
+          query_embedding: embedding as any,
+          match_context_hash: contextHash,
+          similarity_threshold: EMBEDDING_SIMILARITY_THRESHOLD,
+          match_count: 1,
+        });
+        const hit = !error && Array.isArray(matches) && matches.length > 0 ? matches[0] : null;
+        semanticResults.push({ criterion: c, embedding, hit });
+      }));
+
+      for (const { criterion, embedding, hit } of semanticResults) {
+        if (hit) {
+          semanticHits++;
+          cachedResults.push({
+            criterion_id: criterion.id,
+            title: criterion.title,
+            result: hit.result,
+            confidence: hit.confidence,
+            reasoning: hit.reasoning,
+            source: hit.source,
+            _from_cache: true,
+            _from_semantic_cache: true,
+          });
+        } else {
+          // Keep embedding attached — we'll save it after fresh eval succeeds.
+          criterion._embedding = embedding;
+          stillMissing.push(criterion);
+        }
+      }
+      criteriaToEvaluate.length = 0;
+      criteriaToEvaluate.push(...stillMissing);
+      if (semanticHits > 0) {
+        console.log(`Cache (semantic): ${semanticHits} extra hit(s) reused; ${criteriaToEvaluate.length} still need AI`);
+      }
+    }
 
     // Call AI only for criteria that need fresh evaluation
     let freshResults: CriterionResult[] = [];
@@ -415,7 +469,23 @@ serve(async (req) => {
           );
         }
       }
-      const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteriaToEvaluate, feedbackContext);
+
+      // ─── COMBINED PIPE ────────────────────────────────────────────
+      // If there's no candidate_summaries row yet BUT we have raw CV text,
+      // ask the AI to generate the CV summary in the SAME call. Saves a
+      // second generate-cv-summary invocation at first application.
+      const rawText = cvSummary?.raw_text || profileCv?.raw_text;
+      const alreadyHasSummary = !!(cvSummary?.summary_text);
+      const shouldGenerateSummary = !alreadyHasSummary && !!rawText;
+
+      const aiResponse = await callLovableAI(
+        LOVABLE_API_KEY,
+        jobContext,
+        candidateContext,
+        criteriaToEvaluate,
+        feedbackContext,
+        shouldGenerateSummary,
+      );
 
       if (!aiResponse) {
         await supabase
@@ -429,6 +499,44 @@ serve(async (req) => {
         );
       }
       freshResults = aiResponse.criteria_results;
+
+      // Persist combined-pipe summary (if AI produced one).
+      if (shouldGenerateSummary && aiResponse.summary_text) {
+        try {
+          await supabase.from('candidate_summaries').upsert({
+            job_id,
+            applicant_id,
+            application_id: application?.id ?? null,
+            summary_text: aiResponse.summary_text,
+            key_points: aiResponse.key_points ?? [],
+            raw_text: rawText,
+            generated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'job_id,applicant_id' });
+          console.log('Combined pipe: candidate_summaries filled from same AI call');
+        } catch (err) {
+          console.warn('Combined pipe summary upsert failed (non-blocking):', err);
+        }
+      }
+
+      // Save embeddings for fresh criteria (best-effort, non-blocking).
+      const hashByCriterionId = new Map(criteriaWithHashes.map(c => [c.id, c._criterion_hash]));
+      const embeddingsToInsert = criteriaToEvaluate
+        .filter((c: any) => Array.isArray(c._embedding) && c._embedding.length > 0)
+        .map((c: any) => ({
+          criterion_hash: hashByCriterionId.get(c.id),
+          normalized_prompt: `${normalizeForHash(c.title)} ${normalizeForHash(c.prompt)}`.trim(),
+          embedding: c._embedding as any,
+        }))
+        .filter((r: any) => !!r.criterion_hash);
+      if (embeddingsToInsert.length > 0) {
+        supabase
+          .from('criterion_prompt_embeddings')
+          .upsert(embeddingsToInsert, { onConflict: 'criterion_hash' })
+          .then(({ error }) => {
+            if (error) console.warn('Embedding upsert failed (non-blocking):', error.message);
+          });
+      }
     }
 
     // Persist ONLY fresh results (cached rows already exist in DB)
