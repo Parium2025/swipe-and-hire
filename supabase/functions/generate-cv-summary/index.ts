@@ -167,6 +167,53 @@ serve(async (req) => {
     // Get CV URL - prioritize override, then application, then profile
     const finalCvUrl = application?.cv_url || profile?.cv_url;
 
+    // ─── SHARED CACHE: reuse profile summary for job-specific analysis ───
+    // If we already have a proactive profile summary for this exact CV, copy it
+    // into candidate_summaries without any AI call. Saves ~100% of repeated cost
+    // when the same candidate applies to multiple jobs with the same CV.
+    if (!isProactiveAnalysis && finalCvUrl) {
+      const { data: profileSummary } = await supabase
+        .from('profile_cv_summaries')
+        .select('summary_text, key_points, raw_text, is_valid_cv, document_type, cv_url')
+        .eq('user_id', applicant_id)
+        .maybeSingle();
+
+      if (profileSummary && profileSummary.cv_url === finalCvUrl && profileSummary.summary_text) {
+        console.log('Reusing profile CV summary (0 AI calls)');
+        const saveJobId = job_id || application?.job_id;
+        if (saveJobId) {
+          await supabase
+            .from('candidate_summaries')
+            .upsert({
+              job_id: saveJobId,
+              applicant_id,
+              application_id: application?.id || application_id,
+              summary_text: profileSummary.summary_text,
+              key_points: profileSummary.key_points,
+              raw_text: profileSummary.raw_text,
+              generated_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'job_id,applicant_id' });
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            reused: true,
+            is_valid_cv: profileSummary.is_valid_cv !== false,
+            document_type: profileSummary.document_type,
+            summary: {
+              summary_text: profileSummary.summary_text,
+              key_points: profileSummary.key_points,
+            },
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+
+
 let contentType = '';
     let userContent: string | any[] | null = null;
     let rawExtractedText: string | null = null; // Store raw text for evaluate-candidate
