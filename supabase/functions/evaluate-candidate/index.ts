@@ -51,6 +51,36 @@ function checkRateLimit(userId: string, cost = 1): { allowed: boolean; retryAfte
   return { allowed: true, retryAfterSec: 0 };
 }
 
+// ─── Embeddings cache (semantic near-duplicate detection) ────────────
+// Turns prompts into a 1536-dim vector via Lovable AI's embeddings endpoint.
+// Two prompts that mean the same thing but use different words end up ~1.0
+// cosine-similar → we can reuse a previous AI evaluation without re-running.
+// Cost: ~$0.00001 per embedding vs ~$0.001–0.01 per full evaluation.
+const EMBEDDING_MODEL = 'openai/text-embedding-3-small';
+const EMBEDDING_SIMILARITY_THRESHOLD = 0.95;
+
+async function embedText(apiKey: string, text: string): Promise<number[] | null> {
+  try {
+    const resp = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ model: EMBEDDING_MODEL, input: text }),
+    });
+    if (!resp.ok) {
+      console.warn('Embedding call failed:', resp.status);
+      return null;
+    }
+    const data = await resp.json();
+    return data?.data?.[0]?.embedding ?? null;
+  } catch (err) {
+    console.warn('Embedding error (non-blocking):', err);
+    return null;
+  }
+}
+
 interface CriterionResult {
   criterion_id: string;
   title: string;
