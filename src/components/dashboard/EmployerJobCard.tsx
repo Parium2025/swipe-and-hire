@@ -74,9 +74,12 @@ function getGradientForId(id: string) {
 }
 
 
-export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, collapsible = false, defaultExpanded = false }: EmployerJobCardProps) => {
+export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, collapsible = false, defaultExpanded = false, expanded: expandedProp }: EmployerJobCardProps) => {
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [expanded, setExpanded] = useState(expandedProp ?? defaultExpanded);
+  useEffect(() => {
+    if (expandedProp !== undefined) setExpanded(expandedProp);
+  }, [expandedProp]);
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
   const companyName = job.workplace_name?.trim() || 'Okänt företag';
@@ -97,19 +100,24 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
     navigate(`/job/${job.id}?preview=1`);
   };
 
-  const handleCardClick = () => {
+  const handleMediaClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    onClick(job.id);
+  };
+
+  const handleBodyClick = () => {
     if (collapsible) {
       setExpanded((v) => !v);
-      return;
+    } else {
+      onClick(job.id);
     }
-    onClick(job.id);
   };
 
   return (
     <Card
-      className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] hover:bg-white/10 hover:border-white/30"
-      onClick={handleCardClick}
+      className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden transition-[background-color,border-color,transform] duration-150 hover:bg-white/10 hover:border-white/30"
     >
+
       {/* Image header */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
 
