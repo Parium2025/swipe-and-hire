@@ -85,6 +85,20 @@ const Dashboard = memo(() => {
   // vilket orsakade dubbelblink (båda paneler animerade synlighet samtidigt).
   const listActiveTab = activeTab;
 
+  // Global "Visa detaljer / Dölj detaljer" — kollapsibel-toggle för alla kort.
+  // undefined = varje kort styr själv (default = kollapsat). true/false = tvinga.
+  const [expandAll, setExpandAll] = useState<boolean>(() => {
+    try { return sessionStorage.getItem('dashboard_expand_all') === '1'; } catch { return false; }
+  });
+  const toggleExpandAll = useCallback(() => {
+    setExpandAll(v => {
+      const next = !v;
+      try { sessionStorage.setItem('dashboard_expand_all', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  }, []);
+
+
   const setActiveTab = useCallback((tab: JobStatusTab) => {
     setOptimisticTab(tab); // 0ms visuell respons
     startTransition(() => {
