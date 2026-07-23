@@ -119,7 +119,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
     >
 
       {/* Image header */}
-      <div className="job-card-mobile-media relative w-full overflow-hidden">
+      <div className="job-card-mobile-media relative w-full overflow-hidden cursor-pointer" onClick={handleMediaClick}>
 
         {displayUrl ? (
           <>
