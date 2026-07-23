@@ -10,6 +10,18 @@ const corsHeaders = {
 // Included in criterion_hash → forces a global cache invalidation for all criteria.
 const PROMPT_VERSION = 'v2026-07-23';
 
+// Normalize prompt text before hashing so tiny cosmetic edits don't invalidate
+// the cache. Lowercases, trims, collapses whitespace, strips trailing punctuation.
+// "Har B-körkort" → "har b-körkort"  |  "Har  B-körkort." → same hash.
+function normalizeForHash(text: string): string {
+  return (text || '')
+    .toLowerCase()
+    .normalize('NFKC')
+    .replace(/[\s\u00A0]+/g, ' ')
+    .replace(/[.,;:!?"'`´]+$/g, '')
+    .trim();
+}
+
 // ─── Per-user rate limiting (in-memory token bucket, per edge instance) ──
 // Only counts FRESH AI calls (cache hits are free and never rate-limited).
 // Cap is generous so an employer can bulk-evaluate a full ad (500–1000
