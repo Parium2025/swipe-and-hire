@@ -45,7 +45,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
       {/* MOBILE chrome — mirrors JobSeekerLayout header exactly:
           rings-logo (h-10 w-12) | absolute-centered "Parium" text |
           [Search 9x9] [Notification 9x9] [Avatar 8x8 ring-2] */}
-      <header className="md:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
+      <header className="lg:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
         <div className={`h-10 w-12 rounded-md ${SKELETON_SHAPE}`} />
         <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SKELETON_SHAPE}`} />
         <div className="flex items-center gap-2">
@@ -55,7 +55,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
         </div>
       </header>
       {/* DESKTOP chrome — mirrors JobSeekerTopNav exactly (h-14, left-aligned pills) */}
-      <header className="hidden md:flex shrink-0 h-14 items-center border-b border-white/20 bg-transparent">
+      <header className="hidden lg:flex shrink-0 h-14 items-center border-b border-white/20 bg-transparent">
         <div className="w-full responsive-container-wide flex items-center justify-between">
           <div className="flex items-center gap-1">
             <div className={`h-10 w-10 rounded-lg ${SKELETON_SHAPE}`} />
@@ -124,7 +124,7 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
           </div>
 
           <div className="flex-1 overflow-hidden">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${cardCount === 1 ? ' job-card-grid-single' : cardCount === 2 ? ' job-card-grid-double' : ''}`}>
               {Array.from({ length: cardCount }).map((_, i) => (
                 <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
                   {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
@@ -299,7 +299,7 @@ export const MyApplicationsSkeleton = memo(function MyApplicationsSkeleton({
 
           {/* Card grid — samma struktur som JobListSkeleton */}
           <div className="flex-1 overflow-hidden">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${cardCount === 1 ? ' job-card-grid-single' : cardCount === 2 ? ' job-card-grid-double' : ''}`}>
               {Array.from({ length: cardCount }).map((_, i) => (
                 <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
                   <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
