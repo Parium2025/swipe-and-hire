@@ -1,6 +1,7 @@
 import { memo, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 /**
  * Full-screen skeleton overlay for SearchJobs.
@@ -73,8 +74,6 @@ const SkeletonChrome = memo(function SkeletonChrome() {
     </>
   );
 });
-
-import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 export const JobListSkeleton = memo(function JobListSkeleton() {
   const cardCount = readCachedCount(SKELETON_COUNT_KEYS.searchJobs);
