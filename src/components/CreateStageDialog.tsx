@@ -86,9 +86,13 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
           </Button>
         )}
       </DialogTrigger>
-      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain">
-        <DialogHeader>
+      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain pt-8 pb-8" hideClose>
+        <DialogHeader className="flex flex-row items-center justify-between text-left !space-y-0">
           <DialogTitle className="text-white">Skapa nytt steg</DialogTitle>
+          <DialogClose className={cn(dialogCloseButtonClassName, "static right-auto top-auto")}>
+            <X className={dialogCloseIconClassName} />
+            <span className="sr-only">Stäng</span>
+          </DialogClose>
         </DialogHeader>
         <div className="space-y-5 py-2">
           {/* Name */}
