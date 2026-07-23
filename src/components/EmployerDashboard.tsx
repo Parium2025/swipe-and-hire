@@ -599,7 +599,9 @@ const EmployerDashboard = memo(() => {
                     onPrefetch={prefetchJob}
                     onRepublish={handleRepublishClick}
                     cardIndex={idx}
+                    collapsible
                   />
+
                 </CardErrorBoundary>
               )}
             />
