@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Dialog, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { X } from 'lucide-react';
+import { Dialog, DialogHeader, DialogTitle, DialogTrigger, DialogClose, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS } from '@/hooks/useJobStageSettings';
+import { cn } from '@/lib/utils';
 
 const MAX_STAGES = 8;
 
