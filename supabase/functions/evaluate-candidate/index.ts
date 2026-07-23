@@ -530,7 +530,7 @@ serve(async (req) => {
         .map((c: any) => ({
           criterion_hash: hashByCriterionId.get(c.id),
           normalized_prompt: `${normalizeForHash(c.title)} ${normalizeForHash(c.prompt)}`.trim(),
-          embedding: c._embedding as any,
+          embedding: `[${(c._embedding as number[]).join(',')}]` as any,
         }))
         .filter((r: any) => !!r.criterion_hash);
       if (embeddingsToInsert.length > 0) {
