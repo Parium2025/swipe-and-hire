@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState, type MouseEvent } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -29,6 +29,8 @@ interface MobileJobCardProps {
   collapsible?: boolean;
   /** Optional initial expanded state when collapsible */
   defaultExpanded?: boolean;
+  /** Controlled expanded state — when set, syncs local state (used for global "Visa detaljer") */
+  expanded?: boolean;
 }
 
 const GRADIENTS = [
@@ -50,9 +52,13 @@ function getGradientForId(id: string) {
 }
 
 
-export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp }: MobileJobCardProps) => {
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [expanded, setExpanded] = useState(expandedProp ?? defaultExpanded);
+  // Sync with controlled prop (used for global "Visa detaljer alla")
+  useEffect(() => {
+    if (expandedProp !== undefined) setExpanded(expandedProp);
+  }, [expandedProp]);
   const isDraft = isEmployerJobDraft(job);
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
@@ -77,12 +83,17 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
     navigate(`/job-details/${job.id}`);
   }, [isDraft, onEditDraft, job, navigate]);
 
-  const handleCardClick = () => {
+  const handleMediaClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    openJob();
+  };
+
+  const handleBodyClick = () => {
     if (collapsible) {
       setExpanded((v) => !v);
-      return;
+    } else {
+      openJob();
     }
-    openJob();
   };
 
   const handleTouchStart = () => {
@@ -105,12 +116,15 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
 
   return (
     <Card
-      className={`job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color] duration-150 ${hoverClass}`}
+      className={`job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden transition-[background-color,border-color] duration-150 ${hoverClass}`}
       style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 420px' } as React.CSSProperties}
-      onClick={handleCardClick}
       onTouchStart={handleTouchStart}
     >
-      <div className="job-card-mobile-media relative w-full overflow-hidden">
+      <div
+        className="job-card-mobile-media relative w-full overflow-hidden cursor-pointer"
+        onClick={handleMediaClick}
+      >
+
         {displayUrl ? (
           <>
             <img
@@ -157,7 +171,10 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         </div>
       </div>
 
-      <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
+      <div
+        className={`job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5 ${collapsible ? 'cursor-pointer' : 'cursor-pointer'}`}
+        onClick={handleBodyClick}
+      >
         <div className="flex justify-center mt-1 mb-1">
           {logoUrl ? (
             <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg">
@@ -269,18 +286,8 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
             >
               <div className="h-px bg-white/10 mx-2" />
               <div className="flex gap-2 px-2 py-1.5">
-                {collapsible && !isDraft && (
-                  <Button
-                    variant="glass"
-                    size="sm"
-                    onClick={(e) => { e.stopPropagation(); openJob(); }}
-                    className="flex-1 h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-white/20"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Öppna
-                  </Button>
-                )}
                 {!hideActions && !isExpired && (
+
                   <Button
                     variant="glass"
                     size="sm"
@@ -311,7 +318,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                     Återpublicera
                   </Button>
                 )}
-                {!isDraft && !collapsible && (
+                {!isDraft && (
                   <Button
                     variant="glass"
                     size="sm"

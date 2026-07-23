@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, type MouseEvent } from 'react';
+import { memo, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -51,6 +51,8 @@ interface EmployerJobCardProps {
   /** Enable expand/collapse — starts collapsed showing only image + title */
   collapsible?: boolean;
   defaultExpanded?: boolean;
+  /** Controlled expanded state (global "Visa detaljer") */
+  expanded?: boolean;
 }
 
 const GRADIENTS = [
@@ -72,9 +74,12 @@ function getGradientForId(id: string) {
 }
 
 
-export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, collapsible = false, defaultExpanded = false }: EmployerJobCardProps) => {
+export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, collapsible = false, defaultExpanded = false, expanded: expandedProp }: EmployerJobCardProps) => {
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [expanded, setExpanded] = useState(expandedProp ?? defaultExpanded);
+  useEffect(() => {
+    if (expandedProp !== undefined) setExpanded(expandedProp);
+  }, [expandedProp]);
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
   const companyName = job.workplace_name?.trim() || 'Okänt företag';
@@ -95,21 +100,26 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
     navigate(`/job/${job.id}?preview=1`);
   };
 
-  const handleCardClick = () => {
+  const handleMediaClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    onClick(job.id);
+  };
+
+  const handleBodyClick = () => {
     if (collapsible) {
       setExpanded((v) => !v);
-      return;
+    } else {
+      onClick(job.id);
     }
-    onClick(job.id);
   };
 
   return (
     <Card
-      className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] hover:bg-white/10 hover:border-white/30"
-      onClick={handleCardClick}
+      className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden transition-[background-color,border-color,transform] duration-150 hover:bg-white/10 hover:border-white/30"
     >
+
       {/* Image header */}
-      <div className="job-card-mobile-media relative w-full overflow-hidden">
+      <div className="job-card-mobile-media relative w-full overflow-hidden cursor-pointer" onClick={handleMediaClick}>
 
         {displayUrl ? (
           <>
@@ -162,7 +172,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
       </div>
 
       {/* Content body */}
-      <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
+      <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5 cursor-pointer" onClick={handleBodyClick}>
         {/* Logo + Title */}
         <div className="flex flex-col items-center justify-start gap-1.5 px-2 pt-2">
           {logoUrl ? (
@@ -301,29 +311,18 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
 
               <div className="h-px bg-white/10 mx-2" />
               <div className="flex gap-2 px-2 py-1.5">
-                {collapsible && (
-                  <Button
-                    variant="glass"
-                    size="sm"
-                    onClick={(e) => { e.stopPropagation(); onClick(job.id); }}
-                    className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
-                  >
-                    Öppna
-                  </Button>
-                )}
-                {!collapsible && (
-                  <Button
-                    variant="glass"
-                    size="sm"
-                    aria-label="Förhandsgranska annons"
-                    title="Förhandsgranska annons"
-                    onClick={handlePreviewClick}
-                    className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Visa annons
-                  </Button>
-                )}
+                <Button
+                  variant="glass"
+                  size="sm"
+                  aria-label="Förhandsgranska annons"
+                  title="Förhandsgranska annons"
+                  onClick={handlePreviewClick}
+                  className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Visa annons
+                </Button>
+
                 {isExpired && onRepublish && (
                   <Button
                     size="sm"

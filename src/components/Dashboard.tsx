@@ -1,6 +1,6 @@
 import { memo, useMemo, useState, useRef, useEffect, useCallback, startTransition } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Briefcase, Users, Eye, TrendingUp } from 'lucide-react';
+import { Briefcase, Users, Eye, TrendingUp, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -84,6 +84,20 @@ const Dashboard = memo(() => {
   // useDeferredValue introducerade en mellan-render där "gamla tabben" fortfarande var aktiv,
   // vilket orsakade dubbelblink (båda paneler animerade synlighet samtidigt).
   const listActiveTab = activeTab;
+
+  // Global "Visa detaljer / Dölj detaljer" — kollapsibel-toggle för alla kort.
+  // undefined = varje kort styr själv (default = kollapsat). true/false = tvinga.
+  const [expandAll, setExpandAll] = useState<boolean>(() => {
+    try { return sessionStorage.getItem('dashboard_expand_all') === '1'; } catch { return false; }
+  });
+  const toggleExpandAll = useCallback(() => {
+    setExpandAll(v => {
+      const next = !v;
+      try { sessionStorage.setItem('dashboard_expand_all', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  }, []);
+
 
   const setActiveTab = useCallback((tab: JobStatusTab) => {
     setOptimisticTab(tab); // 0ms visuell respons
@@ -286,12 +300,23 @@ const Dashboard = memo(() => {
           activeCount={serverCounts?.active ?? activeJobs.length}
           expiredCount={serverCounts?.expired ?? expiredJobs.length}
         />
+        <button
+          type="button"
+          onClick={toggleExpandAll}
+          aria-label={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
+          title={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
+          className="absolute right-0 inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+        >
+          {expandAll ? <ChevronsDownUp className="h-3.5 w-3.5" /> : <ChevronsUpDown className="h-3.5 w-3.5" />}
+          <span className="hidden sm:inline">{expandAll ? 'Dölj detaljer' : 'Visa detaljer'}</span>
+        </button>
         {totalPages > 1 && (
-          <span className="hidden md:inline absolute right-0 text-sm text-white">
+          <span className="hidden xl:inline absolute right-40 text-sm text-white">
             Sida {page} av {totalPages}
           </span>
         )}
       </div>
+
 
       {/* Desktop: Card grid */}
       <div className="hidden md:block">
@@ -313,8 +338,10 @@ const Dashboard = memo(() => {
                   job={job as any}
                   activeTab={activeTab as 'active' | 'expired'}
                   collapsible
+                  expanded={expandAll}
                   onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                 />
+
 
               )}
             />
@@ -361,8 +388,10 @@ const Dashboard = memo(() => {
                   onEdit={() => navigate(`/job-details/${(job as any).id}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                   onDelete={() => {}}
                   collapsible
+                  expanded={expandAll}
                   hideActions
                 />
+
 
               )}
             />
