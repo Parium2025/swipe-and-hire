@@ -53,6 +53,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
   applicationsCount,
   activeStagesLength,
   isSelectionMode,
+  canToggleStatus,
   onToggleSelectionMode,
   onExitSelectionMode,
   onUpdateJobLocally,
