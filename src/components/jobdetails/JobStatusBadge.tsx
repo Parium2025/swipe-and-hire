@@ -78,20 +78,26 @@ export const JobStatusBadge = memo(({ jobId, isActive, expiresAt, canToggle, onO
         {statusLabel}
       </Badge>
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
+        <AlertDialogContent className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg mx-0">
+          <AlertDialogHeader className="space-y-3 text-center">
+            <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
               {goingInactive ? 'Inaktivera annons?' : 'Aktivera annons?'}
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {goingInactive
                 ? 'Annonsen döljs från jobbsökare. Kandidater som redan är inne får söka klart, sparade annonser förblir sparade.'
                 : 'Annonsen blir synlig för jobbsökare igen.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Avbryt</AlertDialogCancel>
-            <AlertDialogAction onClick={performToggle}>
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50">
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={performToggle}
+              variant={goingInactive ? 'destructiveSoft' : 'glassGreen'}
+              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
+            >
               {goingInactive ? 'Inaktivera' : 'Aktivera'}
             </AlertDialogAction>
           </AlertDialogFooter>
