@@ -1,9 +1,10 @@
-import { memo, useMemo, type MouseEvent } from 'react';
+import { memo, useCallback, useMemo, useState, type MouseEvent } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Users, Edit, Trash2, RotateCcw } from 'lucide-react';
+import { ChevronDown, Eye, Users, Edit, Trash2, RotateCcw } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
@@ -24,6 +25,10 @@ interface MobileJobCardProps {
   cardIndex?: number;
   /** Hide Redigera/Ta bort action buttons (used on read-only dashboard view) */
   hideActions?: boolean;
+  /** Enable expand/collapse — starts collapsed showing only image + title */
+  collapsible?: boolean;
+  /** Optional initial expanded state when collapsible */
+  defaultExpanded?: boolean;
 }
 
 const GRADIENTS = [
