@@ -78,32 +78,34 @@ export function SelectionCriteriaDialog({
     setHasFetched(false);
   }, [jobId]);
 
-  // When dialog closes, remove unsaved (empty) criteria from local state
+  // When dialog closes, flush pending auto-saves and remove unsaved (empty) criteria
   useEffect(() => {
-    if (!open && criteria.length > 0) {
-      const unsavedEmptyIds = criteria
-        .filter(c => {
-          const d = drafts[c.id];
-          return !c.is_active && (!d?.title.trim() || !d?.prompt.trim());
-        })
-        .map(c => c.id);
+    if (open || criteria.length === 0) return;
 
-      if (unsavedEmptyIds.length > 0) {
-        // Delete empty unsaved rows from DB silently
-        supabase.from('job_criteria').delete().in('id', unsavedEmptyIds).then(() => {
-          queryClient.invalidateQueries({ queryKey: ['job-criteria', jobId] });
-          queryClient.invalidateQueries({ queryKey: ['job-applications', jobId] });
-        });
-        // Clean local state
-        setCriteria(prev => prev.filter(c => !unsavedEmptyIds.includes(c.id)));
-        setDrafts(prev => {
-          const next = { ...prev };
-          unsavedEmptyIds.forEach(id => delete next[id]);
-          return next;
-        });
-      }
-    }
-  }, [open]);
+    // Flush pending auto-save timers so nothing races the delete below
+    Object.values(autoSaveTimers.current).forEach(clearTimeout);
+    autoSaveTimers.current = {};
+
+    const unsavedEmptyIds = criteria
+      .filter(c => {
+        const d = drafts[c.id];
+        return !c.is_active && (!d?.title.trim() || !d?.prompt.trim());
+      })
+      .map(c => c.id);
+
+    if (unsavedEmptyIds.length === 0) return;
+
+    supabase.from('job_criteria').delete().in('id', unsavedEmptyIds).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['job-criteria', jobId] });
+      queryClient.invalidateQueries({ queryKey: ['job-applications', jobId] });
+    });
+    setCriteria(prev => prev.filter(c => !unsavedEmptyIds.includes(c.id)));
+    setDrafts(prev => {
+      const next = { ...prev };
+      unsavedEmptyIds.forEach(id => delete next[id]);
+      return next;
+    });
+  }, [open, criteria, drafts, jobId, queryClient]);
 
   useEffect(() => {
     if (!jobId) return;
