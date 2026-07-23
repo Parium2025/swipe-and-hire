@@ -48,6 +48,9 @@ interface EmployerJobCardProps {
   activeTab: 'active' | 'expired';
   onClick: (jobId: string) => void;
   onRepublish?: (job: EmployerJobCardProps['job']) => void;
+  /** Enable expand/collapse — starts collapsed showing only image + title */
+  collapsible?: boolean;
+  defaultExpanded?: boolean;
 }
 
 const GRADIENTS = [
