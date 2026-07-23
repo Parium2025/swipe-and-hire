@@ -29,6 +29,7 @@ interface JobDetailsHeaderProps {
     expires_at: string | null;
     views_count: number | null;
     applications_count: number | null;
+    employer_id?: string;
     employer_profile?: {
       first_name: string | null;
       last_name: string | null;
@@ -39,6 +40,7 @@ interface JobDetailsHeaderProps {
   applicationsCount: number;
   activeStagesLength: number;
   isSelectionMode: boolean;
+  canToggleStatus: boolean;
   onToggleSelectionMode: () => void;
   onExitSelectionMode: () => void;
   onUpdateJobLocally: (updates: Record<string, unknown>) => void;
