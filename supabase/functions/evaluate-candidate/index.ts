@@ -602,7 +602,11 @@ serve(async (req) => {
         cache_hits: cachedResults.length,
         fresh_calls: freshResults.length,
         duration_ms: Date.now() - evalStartMs,
-        model: freshResults.length > 0 ? 'google/gemini-2.5-flash' : null,
+        model: freshResults.length > 0 ? 'google/gemini-3.6-flash' : null,
+        metadata: {
+          semantic_cache_hits: semanticHits,
+          prompt_version: PROMPT_VERSION,
+        },
       });
     } catch (logErr) {
       console.warn('ai_usage_log insert failed (non-blocking):', logErr);
