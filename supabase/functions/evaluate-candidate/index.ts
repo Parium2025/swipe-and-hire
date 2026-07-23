@@ -225,6 +225,7 @@ serve(async (req) => {
       }
     }
 
+    const evalStartMs = Date.now();
     console.log(`Evaluating candidate ${applicant_id} for job ${job_id}`);
 
 
