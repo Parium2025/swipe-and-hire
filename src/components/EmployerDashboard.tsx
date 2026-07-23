@@ -498,12 +498,23 @@ const EmployerDashboard = memo(() => {
           draftCount={serverCounts?.draft ?? draftJobsCount}
           showDrafts
         />
+        <button
+          type="button"
+          onClick={toggleExpandAll}
+          aria-label={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
+          title={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
+          className="absolute right-0 inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+        >
+          {expandAll ? <ChevronsDownUp className="h-3.5 w-3.5" /> : <ChevronsUpDown className="h-3.5 w-3.5" />}
+          <span className="hidden sm:inline">{expandAll ? 'Dölj detaljer' : 'Visa detaljer'}</span>
+        </button>
         {totalPages > 1 && (
-          <span className="hidden md:inline absolute right-0 text-sm text-white">
+          <span className="hidden xl:inline absolute right-40 text-sm text-white">
             Sida {page} av {totalPages}
           </span>
         )}
       </div>
+
 
       {/* Result indicator */}
       {searchTerm && (
