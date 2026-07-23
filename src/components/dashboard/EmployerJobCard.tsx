@@ -51,6 +51,8 @@ interface EmployerJobCardProps {
   /** Enable expand/collapse — starts collapsed showing only image + title */
   collapsible?: boolean;
   defaultExpanded?: boolean;
+  /** Controlled expanded state (global "Visa detaljer") */
+  expanded?: boolean;
 }
 
 const GRADIENTS = [
