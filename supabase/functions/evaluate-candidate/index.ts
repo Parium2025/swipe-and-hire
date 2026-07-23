@@ -1174,7 +1174,11 @@ VIKTIGT:
           }
         }
 
-        return { criteria_results: validResults };
+        return {
+          criteria_results: validResults,
+          summary_text: typeof parsed.summary_text === 'string' ? parsed.summary_text : undefined,
+          key_points: Array.isArray(parsed.key_points) ? parsed.key_points : undefined,
+        };
       } catch (parseError) {
         console.error('Failed to parse tool call:', parseError);
       }
