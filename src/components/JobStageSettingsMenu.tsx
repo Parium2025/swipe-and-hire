@@ -433,14 +433,18 @@ export function JobStageSettingsMenu({
               style={{ width: '100%', maxWidth: '260px' }}
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex gap-2 pt-2 sm:justify-center">
             <Button
+              variant="glass"
               onClick={() => setColorDialogOpen(false)}
-              className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 w-full touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              onMouseDown={(e) => e.currentTarget.blur()}
+              onMouseUp={(e) => e.currentTarget.blur()}
+              className="min-h-[44px] rounded-full text-sm px-10"
             >
               Klar
             </Button>
           </DialogFooter>
+
         </DialogContentNoFocus>
       </Dialog>
 
