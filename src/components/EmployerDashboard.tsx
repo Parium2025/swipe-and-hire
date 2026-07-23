@@ -625,6 +625,7 @@ const EmployerDashboard = memo(() => {
                     onRepublish={handleRepublishClick}
                     cardIndex={idx}
                     collapsible
+                    expanded={expandAll}
                   />
 
                 </CardErrorBoundary>
