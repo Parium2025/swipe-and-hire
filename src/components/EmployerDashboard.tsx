@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { MobileJobCard } from '@/components/MobileJobCard';
