@@ -29,6 +29,7 @@ interface JobDetailsHeaderProps {
     expires_at: string | null;
     views_count: number | null;
     applications_count: number | null;
+    employer_id?: string;
     employer_profile?: {
       first_name: string | null;
       last_name: string | null;
@@ -39,6 +40,7 @@ interface JobDetailsHeaderProps {
   applicationsCount: number;
   activeStagesLength: number;
   isSelectionMode: boolean;
+  canToggleStatus: boolean;
   onToggleSelectionMode: () => void;
   onExitSelectionMode: () => void;
   onUpdateJobLocally: (updates: Record<string, unknown>) => void;
@@ -51,6 +53,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
   applicationsCount,
   activeStagesLength,
   isSelectionMode,
+  canToggleStatus,
   onToggleSelectionMode,
   onExitSelectionMode,
   onUpdateJobLocally,
@@ -114,6 +117,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
           jobId={jobId}
           isActive={!!job.is_active}
           expiresAt={job.expires_at}
+          canToggle={canToggleStatus}
           onOptimisticUpdate={onUpdateJobLocally}
         />
         <div className="flex items-center gap-1 text-white">

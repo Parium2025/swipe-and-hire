@@ -513,6 +513,7 @@ const JobDetails = () => {
           applicationsCount={applications.length}
           activeStagesLength={activeStages.length}
           isSelectionMode={isSelectionMode}
+          canToggleStatus={!!user?.id && job.employer_id === user.id}
           onToggleSelectionMode={() => setIsSelectionMode(true)}
           onExitSelectionMode={exitSelectionMode}
           onUpdateJobLocally={updateJobLocally}
