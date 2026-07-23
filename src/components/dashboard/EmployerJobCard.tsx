@@ -72,8 +72,9 @@ function getGradientForId(id: string) {
 }
 
 
-export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: EmployerJobCardProps) => {
+export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, collapsible = false, defaultExpanded = false }: EmployerJobCardProps) => {
   const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
   const companyName = job.workplace_name?.trim() || 'Okänt företag';
@@ -94,13 +95,22 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish }: E
     navigate(`/job/${job.id}?preview=1`);
   };
 
+  const handleCardClick = () => {
+    if (collapsible) {
+      setExpanded((v) => !v);
+      return;
+    }
+    onClick(job.id);
+  };
+
   return (
     <Card
       className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] hover:bg-white/10 hover:border-white/30"
-      onClick={() => onClick(job.id)}
+      onClick={handleCardClick}
     >
       {/* Image header */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
+
         {displayUrl ? (
           <>
             <ResilientImage
