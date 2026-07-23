@@ -117,6 +117,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
           jobId={jobId}
           isActive={!!job.is_active}
           expiresAt={job.expires_at}
+          canToggle={canToggleStatus}
           onOptimisticUpdate={onUpdateJobLocally}
         />
         <div className="flex items-center gap-1 text-white">
