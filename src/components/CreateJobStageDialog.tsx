@@ -77,8 +77,8 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
           </Button>
         </DialogTrigger>
       )}
-      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg pt-10 pb-10" hideClose>
-        <DialogHeader className="flex flex-row items-center justify-between text-left !space-y-0">
+      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[calc(100dvh-32px)] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0" hideClose>
+        <DialogHeader className="flex flex-row items-center justify-between px-6 pt-8 pb-3 text-left !space-y-0">
           <DialogTitle className="text-white">Skapa nytt steg</DialogTitle>
           <DialogClose className={cn(dialogCloseButtonClassName, "static right-auto top-auto")}>
             <X className={dialogCloseIconClassName} />
@@ -86,7 +86,7 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
           </DialogClose>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
+        <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain px-6 py-3">
           <div className="space-y-2">
             <Label className="text-white">Namn</Label>
             <Input
@@ -129,7 +129,7 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
           </div>
         </div>
         
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2 px-6 pt-4 pb-8">
           <Button
             onMouseDown={(e) => e.currentTarget.blur()}
             onMouseUp={(e) => e.currentTarget.blur()}
