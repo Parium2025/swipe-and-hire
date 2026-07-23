@@ -1107,8 +1107,20 @@ VIKTIGT:
                         additionalProperties: false,
                       },
                     },
+                    summary_text: includeSummary ? { type: 'string', description: 'Kort sammanfattning på svenska (2-4 meningar)' } : undefined,
+                    key_points: includeSummary ? {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          text: { type: 'string' },
+                          type: { type: 'string', enum: ['strength', 'experience', 'skill', 'note'] },
+                        },
+                        required: ['text'],
+                      },
+                    } : undefined,
                   },
-                  required: ['criteria_results'],
+                  required: includeSummary ? ['criteria_results', 'summary_text', 'key_points'] : ['criteria_results'],
                   additionalProperties: false,
                 },
               },
