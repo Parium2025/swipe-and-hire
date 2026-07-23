@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
+import { useIsPlatformAdmin } from '@/hooks/useIsPlatformAdmin';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -43,7 +43,7 @@ function pct(n: number, d: number): string {
 }
 
 export default function AiUsage() {
-  const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
+  const { isPlatformAdmin: isAdmin, loading: adminLoading } = useIsPlatformAdmin();
   const [range, setRange] = useState<Range>('7d');
   const [rows, setRows] = useState<Row[] | null>(null);
   const [loading, setLoading] = useState(true);

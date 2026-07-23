@@ -421,8 +421,10 @@ serve(async (req) => {
           return;
         }
         // Look up nearest neighbour with same candidate context.
+        // pgvector via PostgREST expects the vector as a bracketed string, e.g. "[0.1,0.2,...]".
+        const embeddingLiteral = `[${embedding.join(',')}]`;
         const { data: matches, error } = await supabase.rpc('match_criterion_prompt', {
-          query_embedding: embedding as any,
+          query_embedding: embeddingLiteral as any,
           match_context_hash: contextHash,
           similarity_threshold: EMBEDDING_SIMILARITY_THRESHOLD,
           match_count: 1,
@@ -528,7 +530,7 @@ serve(async (req) => {
         .map((c: any) => ({
           criterion_hash: hashByCriterionId.get(c.id),
           normalized_prompt: `${normalizeForHash(c.title)} ${normalizeForHash(c.prompt)}`.trim(),
-          embedding: c._embedding as any,
+          embedding: `[${(c._embedding as number[]).join(',')}]` as any,
         }))
         .filter((r: any) => !!r.criterion_hash);
       if (embeddingsToInsert.length > 0) {
