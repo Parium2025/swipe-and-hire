@@ -137,20 +137,9 @@ serve(async (req) => {
       }
     }
 
-    // Rate-limit real users (service-role internal calls bypass)
-    if (callerId) {
-      const rl = checkRateLimit(callerId);
-      if (!rl.allowed) {
-        console.warn(`Rate limit exceeded for user ${callerId}`);
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Vänta en stund innan du kör fler utvärderingar.', retry_after_seconds: rl.retryAfterSec }),
-          {
-            status: 429,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': String(rl.retryAfterSec) },
-          }
-        );
-      }
-    }
+    // Rate-limit is now enforced AFTER cache resolution — cache hits are free.
+    // See checkRateLimit call further down (only fresh AI calls count).
+
 
 
     // Action: validate_criterion — AI-powered discrimination check
