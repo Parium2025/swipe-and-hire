@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
   Dialog,
@@ -7,6 +7,9 @@ import {
   DialogTitle,
   DialogFooter,
   DialogTrigger,
+  DialogClose,
+  dialogCloseButtonClassName,
+  dialogCloseIconClassName,
 } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
@@ -20,6 +23,7 @@ import {
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
 import { MAX_KANBAN_STAGES } from '@/hooks/useKanbanLayout';
+import { cn } from '@/lib/utils';
 
 interface CreateStageDialogProps {
   trigger?: React.ReactNode;
@@ -82,9 +86,13 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
           </Button>
         )}
       </DialogTrigger>
-      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain">
-        <DialogHeader>
+      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain pt-8 pb-8" hideClose>
+        <DialogHeader className="flex flex-row items-center justify-between text-left !space-y-0">
           <DialogTitle className="text-white">Skapa nytt steg</DialogTitle>
+          <DialogClose className={cn(dialogCloseButtonClassName, "static right-auto top-auto")}>
+            <X className={dialogCloseIconClassName} />
+            <span className="sr-only">Stäng</span>
+          </DialogClose>
         </DialogHeader>
         <div className="space-y-5 py-2">
           {/* Name */}
