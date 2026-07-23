@@ -311,29 +311,18 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
 
               <div className="h-px bg-white/10 mx-2" />
               <div className="flex gap-2 px-2 py-1.5">
-                {collapsible && (
-                  <Button
-                    variant="glass"
-                    size="sm"
-                    onClick={(e) => { e.stopPropagation(); onClick(job.id); }}
-                    className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
-                  >
-                    Öppna
-                  </Button>
-                )}
-                {!collapsible && (
-                  <Button
-                    variant="glass"
-                    size="sm"
-                    aria-label="Förhandsgranska annons"
-                    title="Förhandsgranska annons"
-                    onClick={handlePreviewClick}
-                    className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Visa annons
-                  </Button>
-                )}
+                <Button
+                  variant="glass"
+                  size="sm"
+                  aria-label="Förhandsgranska annons"
+                  title="Förhandsgranska annons"
+                  onClick={handlePreviewClick}
+                  className="flex-1 h-11 transition-[background-color,border-color] duration-150 hover:bg-white/20"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Visa annons
+                </Button>
+
                 {isExpired && onRepublish && (
                   <Button
                     size="sm"
