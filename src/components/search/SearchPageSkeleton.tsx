@@ -1,6 +1,7 @@
 import { memo, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 /**
  * Full-screen skeleton overlay for SearchJobs.
@@ -45,7 +46,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
       {/* MOBILE chrome — mirrors JobSeekerLayout header exactly:
           rings-logo (h-10 w-12) | absolute-centered "Parium" text |
           [Search 9x9] [Notification 9x9] [Avatar 8x8 ring-2] */}
-      <header className="md:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
+      <header className="lg:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
         <div className={`h-10 w-12 rounded-md ${SKELETON_SHAPE}`} />
         <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SKELETON_SHAPE}`} />
         <div className="flex items-center gap-2">
@@ -55,7 +56,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
         </div>
       </header>
       {/* DESKTOP chrome — mirrors JobSeekerTopNav exactly (h-14, left-aligned pills) */}
-      <header className="hidden md:flex shrink-0 h-14 items-center border-b border-white/20 bg-transparent">
+      <header className="hidden lg:flex shrink-0 h-14 items-center border-b border-white/20 bg-transparent">
         <div className="w-full responsive-container-wide flex items-center justify-between">
           <div className="flex items-center gap-1">
             <div className={`h-10 w-10 rounded-lg ${SKELETON_SHAPE}`} />
@@ -73,8 +74,6 @@ const SkeletonChrome = memo(function SkeletonChrome() {
     </>
   );
 });
-
-import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 export const JobListSkeleton = memo(function JobListSkeleton() {
   const cardCount = readCachedCount(SKELETON_COUNT_KEYS.searchJobs);
@@ -124,7 +123,7 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
           </div>
 
           <div className="flex-1 overflow-hidden">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${cardCount === 1 ? ' job-card-grid-single' : cardCount === 2 ? ' job-card-grid-double' : ''}`}>
               {Array.from({ length: cardCount }).map((_, i) => (
                 <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
                   {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
@@ -273,6 +272,7 @@ export const MyApplicationsSkeleton = memo(function MyApplicationsSkeleton({
       ? SKELETON_COUNT_KEYS.myApplicationsExpired
       : SKELETON_COUNT_KEYS.myApplicationsActive;
   const cardCount = readCachedCount(key, 3);
+  const interviewCount = readCachedCount(SKELETON_COUNT_KEYS.myApplicationsInterviews, 0, 3);
   return (
     <FullscreenSkeletonPortal>
       <motion.div
@@ -284,45 +284,84 @@ export const MyApplicationsSkeleton = memo(function MyApplicationsSkeleton({
       >
         <SkeletonChrome />
 
-        <div className="flex-1 min-h-0 overflow-hidden p-3 space-y-5">
-          {/* Title + subtitle */}
-          <div className="flex flex-col items-center gap-2">
-            <div className={`h-6 w-48 rounded ${SKELETON_SHAPE}`} />
-            <div className={`h-4 w-56 rounded ${SKELETON_SHAPE}`} />
-          </div>
+        <div className="flex-1 min-h-0 overflow-hidden p-3">
+          <div className="responsive-container-wide space-y-8">
+          {interviewCount > 0 && (
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`h-9 w-9 rounded-lg ${SKELETON_SHAPE}`} />
+                <div className="space-y-2">
+                  <div className={`h-5 w-44 rounded ${SKELETON_SHAPE}`} />
+                  <div className={`h-4 w-36 rounded ${SKELETON_SHAPE}`} />
+                </div>
+              </div>
+              <div className="space-y-4">
+                {Array.from({ length: interviewCount }).map((_, i) => (
+                  <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-11 w-11 rounded-full ${SKELETON_SHAPE}`} />
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className={`h-4 w-3/5 rounded ${SKELETON_SHAPE}`} />
+                        <div className={`h-3 w-2/5 rounded ${SKELETON_SHAPE}`} />
+                      </div>
+                      <div className={`h-8 w-24 rounded-full ${SKELETON_SHAPE}`} />
+                    </div>
+                    <div className={`h-10 w-full rounded-lg ${SKELETON_SHAPE}`} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section>
+            {/* Title + subtitle */}
+            <div className="flex flex-col items-center gap-2 mb-5">
+              <div className={`h-6 w-48 rounded ${SKELETON_SHAPE}`} />
+              <div className={`h-4 w-56 rounded ${SKELETON_SHAPE}`} />
+            </div>
 
           {/* Tab pills — "Under granskning (n)" | "Utgångna (n)" */}
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 mb-5">
             <div className={`h-9 w-44 rounded-full ${SKELETON_SHAPE}`} />
             <div className={`h-9 w-32 rounded-full ${SKELETON_SHAPE}`} />
           </div>
 
           {/* Card grid — samma struktur som JobListSkeleton */}
           <div className="flex-1 overflow-hidden">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: cardCount }).map((_, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
-                  <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
-                  <div className="p-4 space-y-2.5">
-                    <div className="flex justify-center pt-1">
-                      <div className={`h-14 w-14 rounded-full ${SKELETON_SHAPE}`} />
-                    </div>
-                    <div className="space-y-2 pt-1">
-                      <div className={`h-5 w-4/5 mx-auto rounded ${SKELETON_SHAPE}`} />
-                      <div className={`h-5 w-3/5 mx-auto rounded ${SKELETON_SHAPE}`} />
-                    </div>
-                    {/* Status-badge rad (unikt för MyApplications) */}
-                    <div className="flex justify-center pt-1">
-                      <div className={`h-6 w-28 rounded-full ${SKELETON_SHAPE}`} />
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      <div className={`h-6 w-20 rounded-full ${SKELETON_SHAPE}`} />
-                      <div className={`h-6 w-24 rounded-full ${SKELETON_SHAPE}`} />
+            {cardCount === 0 ? (
+              <div className="rounded-lg border border-white/10 bg-white/5 p-8 text-center space-y-4">
+                <div className={`h-12 w-12 rounded-full mx-auto ${SKELETON_SHAPE}`} />
+                <div className={`h-5 w-44 rounded mx-auto ${SKELETON_SHAPE}`} />
+                <div className={`h-4 w-64 max-w-full rounded mx-auto ${SKELETON_SHAPE}`} />
+              </div>
+            ) : (
+              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${cardCount === 1 ? ' job-card-grid-single' : cardCount === 2 ? ' job-card-grid-double' : ''}`}>
+                {Array.from({ length: cardCount }).map((_, i) => (
+                  <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
+                    <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
+                    <div className="p-4 space-y-2.5">
+                      <div className="flex justify-center pt-1">
+                        <div className={`h-14 w-14 rounded-full ${SKELETON_SHAPE}`} />
+                      </div>
+                      <div className="space-y-2 pt-1">
+                        <div className={`h-5 w-4/5 mx-auto rounded ${SKELETON_SHAPE}`} />
+                        <div className={`h-5 w-3/5 mx-auto rounded ${SKELETON_SHAPE}`} />
+                      </div>
+                      {/* Status-badge rad (unikt för MyApplications) */}
+                      <div className="flex justify-center pt-1">
+                        <div className={`h-6 w-28 rounded-full ${SKELETON_SHAPE}`} />
+                      </div>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        <div className={`h-6 w-20 rounded-full ${SKELETON_SHAPE}`} />
+                        <div className={`h-6 w-24 rounded-full ${SKELETON_SHAPE}`} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+          </div>
+          </section>
           </div>
         </div>
       </motion.div>

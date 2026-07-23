@@ -74,7 +74,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
       {/* MOBILE chrome — mirrors EmployerMobileShell header exactly:
           logo (h-10 w-40 bg image) | absolute-centered "Parium" text |
           [Plus 9x9] [Notification 9x9] [Avatar 8x8 ring-2 rounded-full] */}
-      <header className="md:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
+      <header className="lg:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
         <div className={`h-10 w-40 rounded-md ${SHAPE}`} />
         <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SHAPE}`} />
         <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           Real order (left→right):
             LEFT: logo | Annonser | Kandidater | Chattar | Företag | Notif | Profil-avatar
             RIGHT (extraRight): Utvecklarvy pill | Skapa ny annons */}
-      <header className="hidden md:flex shrink-0 h-16 items-center border-b border-white/20 bg-transparent">
+      <header className="hidden lg:flex shrink-0 h-16 items-center border-b border-white/20 bg-transparent">
         <div className="w-full responsive-container-wide flex items-center justify-between">
           {/* Left group — allt sitter i samma gap-1 block som i EmployerTopNav */}
           <div className="flex items-center gap-1">
@@ -130,7 +130,16 @@ const SkeletonChrome = memo(function SkeletonChrome() {
  *   - Mobile job cards: p-4 rounded-lg with logo + text + pills (matches
  *     the in-page loading block inside EmployerDashboard.tsx).
  */
-export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton() {
+interface EmployerDashboardSkeletonProps {
+  showDrafts?: boolean;
+  titleWidthClass?: string;
+}
+
+export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton({
+  showDrafts,
+  titleWidthClass = 'w-48',
+}: EmployerDashboardSkeletonProps = {}) {
+  const resolvedShowDrafts = showDrafts ?? (typeof window !== 'undefined' ? window.location.pathname !== '/dashboard' : true);
   // Läs aktiv tab från URL så vi renderar rätt antal kort för den tab
   // användaren faktiskt kommer landa på (matchar EmployerDashboard).
   let tab: 'active' | 'expired' | 'draft' = 'active';
@@ -162,19 +171,19 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
         {/* Mirror EmployerMobileShell <main class="p-3"> + inner responsive-container-wide */}
         <div className="flex-1 min-h-0 overflow-hidden p-3">
           <div className="responsive-container-wide space-y-4">
-          {/* Page title — "Mina jobbannonser" (text-xl mobile / md:text-2xl) */}
+          {/* Page title — matches Dashboard / Mina jobbannonser */}
           <div className="flex justify-center items-center mb-6">
-            <div className={`h-7 w-48 rounded ${SHAPE}`} />
+            <div className={`h-7 ${titleWidthClass} rounded ${SHAPE}`} />
           </div>
 
           {/* StatsGrid — mobile shape mirrors the real dashboard exactly */}
           <div className="md:hidden space-y-2">
             <div className="rounded-lg overflow-hidden border border-white/20 bg-white/5">
               <div className="flex h-[62px]">
-                {[1, 2].map(i => (
+                {Array.from({ length: resolvedShowDrafts ? 3 : 2 }).map((_, index) => (
                   <div
-                    key={i}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1.5 ${i > 1 ? 'border-l border-white/20' : ''}`}
+                    key={index}
+                    className={`flex-1 flex flex-col items-center justify-center gap-1.5 ${index > 0 ? 'border-l border-white/20' : ''}`}
                   >
                     <div className={`h-3 w-14 rounded ${SHAPE}`} />
                     <div className={`h-4 w-6 rounded ${SHAPE}`} />
@@ -195,7 +204,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             </div>
           </div>
 
-          {/* StatsGrid desktop shape — 5 columns */}
+          {/* StatsGrid desktop shape — one multi-column card spanning 2 cols + 3 regular cards */}
           <div className="hidden md:grid md:grid-cols-5 gap-2">
             <div className={`col-span-2 h-[76px] rounded-lg ${SHAPE}`} />
             {[1, 2, 3].map(i => (
@@ -203,14 +212,18 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             ))}
           </div>
 
-          {/* JobSearchBar row */}
-          <div className={`h-11 w-full rounded-xl ${SHAPE}`} />
+          {/* JobSearchBar row — mobile has one inline search/sort control, desktop has search + sort button */}
+          <div className={`md:hidden h-[3.05rem] w-full rounded-xl ${SHAPE}`} />
+          <div className="hidden md:flex gap-2">
+            <div className={`h-11 flex-1 rounded-xl ${SHAPE}`} />
+            <div className={`h-11 w-44 rounded-xl ${SHAPE}`} />
+          </div>
 
-          {/* JobStatusTabs — 3 pills centered */}
+          {/* JobStatusTabs — Dashboard has 2, Mina jobbannonser has 3 */}
           <div className="flex justify-center items-center gap-2">
             <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
             <div className={`h-9 w-28 rounded-full ${SHAPE}`} />
-            <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
+            {resolvedShowDrafts && <div className={`h-9 w-24 rounded-full ${SHAPE}`} />}
           </div>
 
           {/* Mobile: MobileJobCard-formade kort — hero-media (2:1), logo-cirkel
@@ -263,8 +276,8 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
           </div>
 
           {/* Desktop: card grid (1/2/3 cols) — samma card-form som mobil */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: Math.max(cardCount, 3) }).map((_, i) => (
+          <div className={`hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4${cardCount === 1 ? ' job-card-grid-single' : cardCount === 2 ? ' job-card-grid-double' : ''}`}>
+            {Array.from({ length: cardCount }).map((_, i) => (
               <div
                 key={i}
                 className="rounded-2xl overflow-hidden bg-white/5 border border-white/20"
@@ -428,30 +441,48 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton()
         <SkeletonChrome />
         <div className="flex-1 min-h-0 overflow-hidden p-3">
           <div className="responsive-container-wide space-y-4 h-full flex flex-col">
-            {/* Page title */}
-            <div className="flex justify-center items-center">
-              <div className={`h-7 w-40 rounded ${SHAPE}`} />
-            </div>
-            {/* Tabs */}
-            <div className="flex justify-center gap-2">
-              <div className={`h-9 w-20 rounded-full ${SHAPE}`} />
-              <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
-              <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
-            </div>
-            {/* Search */}
-            <div className={`h-11 w-full rounded-xl ${SHAPE}`} />
-            {/* Conversation rows */}
-            <div className="flex-1 space-y-2 rounded-xl border border-white/20 bg-white/5 p-2">
-              {Array.from({ length: messageCount }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03]">
-                  <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
-                  <div className="flex-1 space-y-2 min-w-0">
-                    <div className={`h-4 w-1/2 rounded ${SHAPE}`} />
-                    <div className={`h-3 w-3/4 rounded ${SHAPE}`} />
-                  </div>
-                  <div className={`h-3 w-10 rounded ${SHAPE}`} />
+            {/* Header — mirrors Messages page icon/title group + optional new conversation action */}
+            <div className="flex items-center justify-center flex-shrink-0 relative">
+              <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 rounded-full ${SHAPE}`} />
+                <div className="space-y-2">
+                  <div className={`h-7 w-24 rounded ${SHAPE}`} />
+                  <div className={`h-4 w-32 rounded ${SHAPE}`} />
                 </div>
-              ))}
+              </div>
+              <div className={`absolute right-0 h-10 w-12 sm:w-40 rounded-lg ${SHAPE}`} />
+            </div>
+            <div className="flex-1 min-h-0 flex gap-4 overflow-hidden">
+              <div className="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col min-h-0">
+                {/* Tabs */}
+                <div className="flex justify-center gap-2 mb-3">
+                  <div className={`h-9 w-20 rounded-full ${SHAPE}`} />
+                  <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
+                  <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
+                </div>
+                {/* Search */}
+                <div className={`h-11 w-full rounded-xl mb-3 ${SHAPE}`} />
+                {/* Conversation rows */}
+                <div className="flex-1 space-y-2 rounded-xl border border-white/20 bg-white/5 p-2 overflow-hidden">
+                  {Array.from({ length: messageCount }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03]">
+                      <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
+                      <div className="flex-1 space-y-2 min-w-0">
+                        <div className={`h-4 w-1/2 rounded ${SHAPE}`} />
+                        <div className={`h-3 w-3/4 rounded ${SHAPE}`} />
+                      </div>
+                      <div className={`h-3 w-10 rounded ${SHAPE}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="hidden md:flex flex-1 min-w-0 rounded-xl border border-white/20 bg-white/5 items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className={`h-14 w-14 rounded-full ${SHAPE}`} />
+                  <div className={`h-5 w-48 rounded ${SHAPE}`} />
+                  <div className={`h-4 w-64 rounded ${SHAPE}`} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

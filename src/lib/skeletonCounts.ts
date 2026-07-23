@@ -15,6 +15,7 @@ export const SKELETON_COUNT_KEYS = {
   searchJobs: 'parium:searchJobs:lastCount',
   myApplicationsActive: 'parium:myApplications:activeLastCount',
   myApplicationsExpired: 'parium:myApplications:expiredLastCount',
+  myApplicationsInterviews: 'parium:myApplications:interviewsLastCount',
   savedJobs: 'parium:savedJobs:lastCount',
   skippedJobs: 'parium:skippedJobs:lastCount',
   myCandidates: 'parium:myCandidates:lastCount',
@@ -33,7 +34,8 @@ export function readCachedCount(key: string, fallback = 6, max = 9): number {
     const raw = localStorage.getItem(key) ?? sessionStorage.getItem(key);
     if (!raw) return fallback;
     const n = parseInt(raw, 10);
-    if (!Number.isFinite(n) || n <= 0) return fallback;
+    if (!Number.isFinite(n) || n < 0) return fallback;
+    if (n === 0) return 0;
     return Math.min(max, Math.max(1, n));
   } catch {
     return fallback;
