@@ -679,6 +679,13 @@ const Index = () => {
             navigate('/support');
             return <Support />;
           }
+        case '/ai-usage':
+          if (isAdmin) {
+            return <AiUsage />;
+          } else {
+            navigate('/support');
+            return <Support />;
+          }
         default:
           return <EmployerHome />;
       }
