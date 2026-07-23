@@ -338,8 +338,10 @@ const Dashboard = memo(() => {
                   job={job as any}
                   activeTab={activeTab as 'active' | 'expired'}
                   collapsible
+                  expanded={expandAll}
                   onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                 />
+
 
               )}
             />
