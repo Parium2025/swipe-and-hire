@@ -768,6 +768,32 @@ function buildFeedbackContext(feedback: any[], criteria: any[]): string {
   return context;
 }
 
+// Per-criterion feedback digest — used inside criterion_hash so a correction
+// on ONE criterion only invalidates that criterion's cache, not the whole
+// candidate. Deterministic (sorted) so identical feedback → identical hash.
+function buildFeedbackByCriterion(feedback: any[], criteria: any[]): Map<string, string> {
+  const map = new Map<string, string>();
+  if (!feedback || feedback.length === 0) return map;
+
+  const byCriterion: Record<string, any[]> = {};
+  for (const f of feedback) {
+    if (!f.criterion_id) continue;
+    (byCriterion[f.criterion_id] ||= []).push(f);
+  }
+
+  for (const c of criteria) {
+    const rows = byCriterion[c.id];
+    if (!rows || rows.length === 0) continue;
+    const sorted = [...rows].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const digest = sorted
+      .slice(0, 5)
+      .map(r => `${r.ai_result}>${r.corrected_result}|${(r.recruiter_note || '').trim()}`)
+      .join(';;');
+    map.set(c.id, digest);
+  }
+  return map;
+}
+
 // ─── AI evaluation with tool calling ─────────────────────────────
 
 async function callLovableAI(
