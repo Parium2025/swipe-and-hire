@@ -279,7 +279,23 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   onToggleSelect,
   renderActionBar,
 }: MobileCandidateViewProps) {
-  const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined' && jobId) {
+      try {
+        const cached = localStorage.getItem(`parium:jobDetails:${jobId}:activeStage`);
+        if (cached && stages.includes(cached)) return cached;
+      } catch { /* noop */ }
+    }
+    return stages[0] || 'pending';
+  });
+
+  // Persist active tab per job so skeleton can render the correct column on reload
+  useEffect(() => {
+    if (!jobId || typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(`parium:jobDetails:${jobId}:activeStage`, activeTab);
+    } catch { /* noop */ }
+  }, [jobId, activeTab]);
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
   const [previewStage, setPreviewStage] = useState<string | null>(null);
   const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();

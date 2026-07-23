@@ -32,12 +32,38 @@ function readLayout(jobId?: string): CachedLayout | null {
   }
 }
 
+function readActiveStage(jobId?: string): string | null {
+  if (!jobId || typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(`parium:jobDetails:${jobId}:activeStage`);
+  } catch {
+    return null;
+  }
+}
+
 export const JobDetailsSkeleton = ({ jobId }: JobDetailsSkeletonProps = {}) => {
   const layout = readLayout(jobId);
   const stages = layout?.stages ?? ['s1', 's2', 's3', 's4', 's5'];
   const counts = layout?.counts ?? {};
   // Clamp per kolumn så vi aldrig ritar tusen kort — men speglar verklig data.
   const cardsFor = (stage: string) => Math.min(20, Math.max(0, counts[stage] ?? 0));
+
+  // Mobile: single big column-box representing the currently active tab.
+  const activeStage = readActiveStage(jobId) ?? stages[0];
+  const mobileCount = cardsFor(activeStage);
+
+  const CandidateRowSkeleton = () => (
+    <div className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
+      <div className="flex items-center gap-2">
+        <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
+        <div className="flex-1 space-y-1.5 min-w-0">
+          <div className={`h-3.5 w-28 ${SHAPE}`} />
+          <div className={`h-2.5 w-20 ${SHAPE}`} />
+        </div>
+      </div>
+      <div className={`h-2.5 w-16 ${SHAPE}`} />
+    </div>
+  );
 
   return (
     <div className="responsive-container-wide py-4 pb-safe min-h-screen animate-fade-in space-y-4">
@@ -73,8 +99,36 @@ export const JobDetailsSkeleton = ({ jobId }: JobDetailsSkeletonProps = {}) => {
         </div>
       </div>
 
-      {/* Kanban board — per-stage kortantal från cache */}
-      <div className="flex gap-3 overflow-x-auto pb-4 px-1">
+      {/* Mobile / tablet (<lg): tab-strip + one big column-box for active stage */}
+      <div className="lg:hidden flex flex-col gap-3">
+        {/* Horizontal stage tabs */}
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
+          {stages.map((stage, i) => (
+            <div
+              key={stage + i}
+              className={`h-7 shrink-0 rounded-md ${SHAPE}`}
+              style={{ width: i === 0 ? 120 : 96 }}
+            />
+          ))}
+        </div>
+        {/* Single column-box — mirrors MobileCandidateView list container */}
+        <div className="rounded-lg border border-white/20 bg-white/5 p-2 min-h-[50vh]">
+          {mobileCount === 0 ? (
+            <div className="h-full min-h-[40vh] flex items-center justify-center">
+              <div className={`h-3 w-40 ${SHAPE}`} />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {Array.from({ length: mobileCount }).map((_, k) => (
+                <CandidateRowSkeleton key={k} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop (lg+): kanban board — per-stage kortantal från cache */}
+      <div className="hidden lg:flex gap-3 overflow-x-auto pb-4 px-1">
         {stages.map((stage, i) => {
           const count = cardsFor(stage);
           return (
@@ -95,16 +149,7 @@ export const JobDetailsSkeleton = ({ jobId }: JobDetailsSkeletonProps = {}) => {
                   </div>
                 ) : (
                   Array.from({ length: count }).map((_, k) => (
-                    <div key={k} className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
-                        <div className="flex-1 space-y-1.5 min-w-0">
-                          <div className={`h-3.5 w-28 ${SHAPE}`} />
-                          <div className={`h-2.5 w-20 ${SHAPE}`} />
-                        </div>
-                      </div>
-                      <div className={`h-2.5 w-16 ${SHAPE}`} />
-                    </div>
+                    <CandidateRowSkeleton key={k} />
                   ))
                 )}
               </div>
