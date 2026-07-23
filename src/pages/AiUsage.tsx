@@ -43,7 +43,7 @@ function pct(n: number, d: number): string {
 }
 
 export default function AiUsage() {
-  const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
+  const { isPlatformAdmin: isAdmin, loading: adminLoading } = useIsPlatformAdmin();
   const [range, setRange] = useState<Range>('7d');
   const [rows, setRows] = useState<Row[] | null>(null);
   const [loading, setLoading] = useState(true);
