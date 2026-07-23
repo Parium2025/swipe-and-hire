@@ -322,10 +322,12 @@ serve(async (req) => {
     const criteriaWithHashes = await Promise.all(
       criteria.map(async (c: any) => {
         const perCriterionFeedback = feedbackByCriterion.get(c.id) || '';
+        const normTitle = normalizeForHash(c.title);
+        const normPrompt = normalizeForHash(c.prompt);
         return {
           ...c,
           _criterion_hash: await sha256(
-            `${PROMPT_VERSION}||${c.title}||${c.prompt}||${perCriterionFeedback}`
+            `${PROMPT_VERSION}||${normTitle}||${normPrompt}||${perCriterionFeedback}`
           ),
         };
       })
