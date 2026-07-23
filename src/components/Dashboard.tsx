@@ -312,8 +312,10 @@ const Dashboard = memo(() => {
                 <EmployerJobCard
                   job={job as any}
                   activeTab={activeTab as 'active' | 'expired'}
+                  collapsible
                   onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                 />
+
               )}
             />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
