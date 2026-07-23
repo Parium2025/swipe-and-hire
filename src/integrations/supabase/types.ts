@@ -620,6 +620,30 @@ export type Database = {
           },
         ]
       }
+      criterion_prompt_embeddings: {
+        Row: {
+          created_at: string
+          criterion_hash: string
+          embedding: string
+          id: string
+          normalized_prompt: string
+        }
+        Insert: {
+          created_at?: string
+          criterion_hash: string
+          embedding: string
+          id?: string
+          normalized_prompt: string
+        }
+        Update: {
+          created_at?: string
+          criterion_hash?: string
+          embedding?: string
+          id?: string
+          normalized_prompt?: string
+        }
+        Relationships: []
+      }
       criterion_results: {
         Row: {
           confidence: number | null
@@ -3341,6 +3365,22 @@ export type Database = {
       log_profile_view: {
         Args: { p_application_id: string }
         Returns: undefined
+      }
+      match_criterion_prompt: {
+        Args: {
+          match_context_hash: string
+          match_count?: number
+          query_embedding: string
+          similarity_threshold?: number
+        }
+        Returns: {
+          confidence: number
+          criterion_hash: string
+          reasoning: string
+          result: string
+          similarity: number
+          source: string
+        }[]
       }
       move_to_dlq: {
         Args: {

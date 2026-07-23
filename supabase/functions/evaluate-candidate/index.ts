@@ -51,6 +51,36 @@ function checkRateLimit(userId: string, cost = 1): { allowed: boolean; retryAfte
   return { allowed: true, retryAfterSec: 0 };
 }
 
+// ─── Embeddings cache (semantic near-duplicate detection) ────────────
+// Turns prompts into a 1536-dim vector via Lovable AI's embeddings endpoint.
+// Two prompts that mean the same thing but use different words end up ~1.0
+// cosine-similar → we can reuse a previous AI evaluation without re-running.
+// Cost: ~$0.00001 per embedding vs ~$0.001–0.01 per full evaluation.
+const EMBEDDING_MODEL = 'openai/text-embedding-3-small';
+const EMBEDDING_SIMILARITY_THRESHOLD = 0.95;
+
+async function embedText(apiKey: string, text: string): Promise<number[] | null> {
+  try {
+    const resp = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ model: EMBEDDING_MODEL, input: text }),
+    });
+    if (!resp.ok) {
+      console.warn('Embedding call failed:', resp.status);
+      return null;
+    }
+    const data = await resp.json();
+    return data?.data?.[0]?.embedding ?? null;
+  } catch (err) {
+    console.warn('Embedding error (non-blocking):', err);
+    return null;
+  }
+}
+
 interface CriterionResult {
   criterion_id: string;
   title: string;
@@ -62,6 +92,8 @@ interface CriterionResult {
 
 interface EvaluationResponse {
   criteria_results: CriterionResult[];
+  summary_text?: string;
+  key_points?: Array<{ text: string; type?: string }>;
 }
 
 // Retry with exponential backoff
@@ -369,7 +401,61 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Cache (global): ${cachedResults.length} hit / ${criteriaToEvaluate.length} miss (of ${criteria.length} criteria)`);
+    console.log(`Cache (global hash): ${cachedResults.length} hit / ${criteriaToEvaluate.length} miss (of ${criteria.length} criteria)`);
+
+    // ─── SEMANTIC CACHE (embeddings, punkt D) ───────────────────────
+    // For each hash-miss, embed the normalized prompt and look for a
+    // semantically equivalent prompt (cosine similarity ≥ 0.95) that we've
+    // already evaluated against the SAME candidate context. If found, reuse
+    // the result — no full AI eval needed.
+    let semanticHits = 0;
+    const stillMissing: any[] = [];
+    if (criteriaToEvaluate.length > 0) {
+      const semanticResults: Array<{ criterion: any; embedding: number[]; hit: any | null }> = [];
+      // Embed all missing prompts in parallel (bounded — usually 1–10).
+      await Promise.all(criteriaToEvaluate.map(async (c) => {
+        const normText = `${normalizeForHash(c.title)} ${normalizeForHash(c.prompt)}`.trim();
+        const embedding = await embedText(LOVABLE_API_KEY, normText);
+        if (!embedding) {
+          semanticResults.push({ criterion: c, embedding: [], hit: null });
+          return;
+        }
+        // Look up nearest neighbour with same candidate context.
+        const { data: matches, error } = await supabase.rpc('match_criterion_prompt', {
+          query_embedding: embedding as any,
+          match_context_hash: contextHash,
+          similarity_threshold: EMBEDDING_SIMILARITY_THRESHOLD,
+          match_count: 1,
+        });
+        const hit = !error && Array.isArray(matches) && matches.length > 0 ? matches[0] : null;
+        semanticResults.push({ criterion: c, embedding, hit });
+      }));
+
+      for (const { criterion, embedding, hit } of semanticResults) {
+        if (hit) {
+          semanticHits++;
+          cachedResults.push({
+            criterion_id: criterion.id,
+            title: criterion.title,
+            result: hit.result,
+            confidence: hit.confidence,
+            reasoning: hit.reasoning,
+            source: hit.source,
+            _from_cache: true,
+            _from_semantic_cache: true,
+          });
+        } else {
+          // Keep embedding attached — we'll save it after fresh eval succeeds.
+          criterion._embedding = embedding;
+          stillMissing.push(criterion);
+        }
+      }
+      criteriaToEvaluate.length = 0;
+      criteriaToEvaluate.push(...stillMissing);
+      if (semanticHits > 0) {
+        console.log(`Cache (semantic): ${semanticHits} extra hit(s) reused; ${criteriaToEvaluate.length} still need AI`);
+      }
+    }
 
     // Call AI only for criteria that need fresh evaluation
     let freshResults: CriterionResult[] = [];
@@ -385,7 +471,23 @@ serve(async (req) => {
           );
         }
       }
-      const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteriaToEvaluate, feedbackContext);
+
+      // ─── COMBINED PIPE ────────────────────────────────────────────
+      // If there's no candidate_summaries row yet BUT we have raw CV text,
+      // ask the AI to generate the CV summary in the SAME call. Saves a
+      // second generate-cv-summary invocation at first application.
+      const rawText = cvSummary?.raw_text || profileCv?.raw_text;
+      const alreadyHasSummary = !!(cvSummary?.summary_text);
+      const shouldGenerateSummary = !alreadyHasSummary && !!rawText;
+
+      const aiResponse = await callLovableAI(
+        LOVABLE_API_KEY,
+        jobContext,
+        candidateContext,
+        criteriaToEvaluate,
+        feedbackContext,
+        shouldGenerateSummary,
+      );
 
       if (!aiResponse) {
         await supabase
@@ -399,6 +501,44 @@ serve(async (req) => {
         );
       }
       freshResults = aiResponse.criteria_results;
+
+      // Persist combined-pipe summary (if AI produced one).
+      if (shouldGenerateSummary && aiResponse.summary_text) {
+        try {
+          await supabase.from('candidate_summaries').upsert({
+            job_id,
+            applicant_id,
+            application_id: application?.id ?? null,
+            summary_text: aiResponse.summary_text,
+            key_points: aiResponse.key_points ?? [],
+            raw_text: rawText,
+            generated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'job_id,applicant_id' });
+          console.log('Combined pipe: candidate_summaries filled from same AI call');
+        } catch (err) {
+          console.warn('Combined pipe summary upsert failed (non-blocking):', err);
+        }
+      }
+
+      // Save embeddings for fresh criteria (best-effort, non-blocking).
+      const hashByCriterionId = new Map(criteriaWithHashes.map(c => [c.id, c._criterion_hash]));
+      const embeddingsToInsert = criteriaToEvaluate
+        .filter((c: any) => Array.isArray(c._embedding) && c._embedding.length > 0)
+        .map((c: any) => ({
+          criterion_hash: hashByCriterionId.get(c.id),
+          normalized_prompt: `${normalizeForHash(c.title)} ${normalizeForHash(c.prompt)}`.trim(),
+          embedding: c._embedding as any,
+        }))
+        .filter((r: any) => !!r.criterion_hash);
+      if (embeddingsToInsert.length > 0) {
+        supabase
+          .from('criterion_prompt_embeddings')
+          .upsert(embeddingsToInsert, { onConflict: 'criterion_hash' })
+          .then(({ error }) => {
+            if (error) console.warn('Embedding upsert failed (non-blocking):', error.message);
+          });
+      }
     }
 
     // Persist ONLY fresh results (cached rows already exist in DB)
@@ -462,7 +602,11 @@ serve(async (req) => {
         cache_hits: cachedResults.length,
         fresh_calls: freshResults.length,
         duration_ms: Date.now() - evalStartMs,
-        model: freshResults.length > 0 ? 'google/gemini-2.5-flash' : null,
+        model: freshResults.length > 0 ? 'google/gemini-3.6-flash' : null,
+        metadata: {
+          semantic_cache_hits: semanticHits,
+          prompt_version: PROMPT_VERSION,
+        },
       });
     } catch (logErr) {
       console.warn('ai_usage_log insert failed (non-blocking):', logErr);
@@ -835,7 +979,8 @@ async function callLovableAI(
   jobContext: string,
   candidateContext: string,
   criteria: any[],
-  feedbackContext: string
+  feedbackContext: string,
+  includeSummary: boolean = false,
 ): Promise<EvaluationResponse | null> {
   try {
     const systemPrompt = `Du är en professionell svensk rekryteringsassistent som utvärderar kandidater mot urvalskriterier.
@@ -921,7 +1066,10 @@ VIKTIGT:
 - Saknad information ≠ negativ information — men båda ger no_match
 - Var STRIKT vid diskvalificerande krav (t.ex. certifikat), MJUKARE vid nice-to-haves`;
 
-    const userPrompt = `${jobContext}\n\n${candidateContext}${feedbackContext}\n\nUtvärdera kandidaten mot varje urvalskriterium.`;
+    const summaryInstruction = includeSummary
+      ? `\n\nBonus: Skriv även en kort professionell sammanfattning (2–4 meningar på svenska) av kandidatens profil samt 3–6 nyckelpunkter (kort text + typ: strength|experience|skill|note).`
+      : '';
+    const userPrompt = `${jobContext}\n\n${candidateContext}${feedbackContext}\n\nUtvärdera kandidaten mot varje urvalskriterium.${summaryInstruction}`;
 
     const response = await fetchWithRetry(
       'https://ai.gateway.lovable.dev/v1/chat/completions',
@@ -963,8 +1111,20 @@ VIKTIGT:
                         additionalProperties: false,
                       },
                     },
+                    summary_text: includeSummary ? { type: 'string', description: 'Kort sammanfattning på svenska (2-4 meningar)' } : undefined,
+                    key_points: includeSummary ? {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          text: { type: 'string' },
+                          type: { type: 'string', enum: ['strength', 'experience', 'skill', 'note'] },
+                        },
+                        required: ['text'],
+                      },
+                    } : undefined,
                   },
-                  required: ['criteria_results'],
+                  required: includeSummary ? ['criteria_results', 'summary_text', 'key_points'] : ['criteria_results'],
                   additionalProperties: false,
                 },
               },
@@ -1018,7 +1178,11 @@ VIKTIGT:
           }
         }
 
-        return { criteria_results: validResults };
+        return {
+          criteria_results: validResults,
+          summary_text: typeof parsed.summary_text === 'string' ? parsed.summary_text : undefined,
+          key_points: Array.isArray(parsed.key_points) ? parsed.key_points : undefined,
+        };
       } catch (parseError) {
         console.error('Failed to parse tool call:', parseError);
       }

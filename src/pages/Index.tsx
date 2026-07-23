@@ -32,6 +32,7 @@ import Support from '@/pages/Support';
 import SavedJobs from '@/pages/SavedJobs';
 import MyApplications from '@/pages/MyApplications';
 import SupportAdmin from '@/pages/SupportAdmin';
+import AiUsage from '@/pages/AiUsage';
 import EmployerProfile from '@/pages/employer/EmployerProfile';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
@@ -520,7 +521,7 @@ const Index = () => {
   }
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/status', '/consent', '/templates'];
+  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/status', '/ai-usage', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
   // Behåll senaste sidebar-path så JobView-overlay vet vilken vy som
   // ska visas underst (utan att KeepAlive byter activeKey och fadar).
@@ -586,6 +587,13 @@ const Index = () => {
         case '/status':
           if (isAdmin) {
             return <RealtimeStatusPage />;
+          } else {
+            navigate('/support');
+            return <Support />;
+          }
+        case '/ai-usage':
+          if (isAdmin) {
+            return <AiUsage />;
           } else {
             navigate('/support');
             return <Support />;
@@ -667,6 +675,13 @@ const Index = () => {
         case '/status':
           if (isAdmin) {
             return <RealtimeStatusPage />;
+          } else {
+            navigate('/support');
+            return <Support />;
+          }
+        case '/ai-usage':
+          if (isAdmin) {
+            return <AiUsage />;
           } else {
             navigate('/support');
             return <Support />;
