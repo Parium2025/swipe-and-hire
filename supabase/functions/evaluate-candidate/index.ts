@@ -344,6 +344,17 @@ serve(async (req) => {
     // Call AI only for criteria that need fresh evaluation
     let freshResults: CriterionResult[] = [];
     if (criteriaToEvaluate.length > 0) {
+      // Rate-limit ONLY fresh AI calls (cache hits are always free)
+      if (callerId) {
+        const rl = checkRateLimit(callerId, criteriaToEvaluate.length);
+        if (!rl.allowed) {
+          console.warn(`Rate limit exceeded for user ${callerId}`);
+          return new Response(
+            JSON.stringify({ error: 'För många utvärderingar just nu. Vänta en stund.', retry_after_seconds: rl.retryAfterSec }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': String(rl.retryAfterSec) } }
+          );
+        }
+      }
       const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteriaToEvaluate, feedbackContext);
 
       if (!aiResponse) {
