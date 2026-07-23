@@ -388,7 +388,16 @@ export function SelectionCriteriaDialog({
       
       // Start evaluation silently in background
       if (candidates.length > 0) {
-        evaluateAllCandidates.mutate({ jobId, candidates });
+        evaluateAllCandidates.mutate(
+          { jobId, candidates },
+          {
+            onError: () => {
+              toast.error('Kunde inte utvärdera kandidater', {
+                description: 'Försök igen om en stund.',
+              });
+            },
+          }
+        );
       }
     } catch (error) {
       console.error('Error saving criteria:', error);
