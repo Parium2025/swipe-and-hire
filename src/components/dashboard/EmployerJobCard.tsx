@@ -172,7 +172,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
       </div>
 
       {/* Content body */}
-      <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
+      <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5 cursor-pointer" onClick={handleBodyClick}>
         {/* Logo + Title */}
         <div className="flex flex-col items-center justify-start gap-1.5 px-2 pt-2">
           {logoUrl ? (
