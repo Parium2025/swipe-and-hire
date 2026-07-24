@@ -867,7 +867,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 className="flex flex-col items-center gap-2 w-full cursor-pointer hover:bg-white/10 active:bg-white/15 p-2 rounded-xl transition-all"
                 aria-label="Visa företagsprofil"
               >
-                <div className="h-14 w-14 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform [@media(hover:hover)]:hover:ring-2 [@media(hover:hover)]:hover:ring-white/30">
+                <div className="h-14 w-14 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform">
                   {companyLogoUrl ? (
                     <ResilientImage
                       src={companyLogoUrl}
