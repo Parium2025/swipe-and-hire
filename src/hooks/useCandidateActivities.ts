@@ -18,6 +18,7 @@ export interface CandidateActivity {
   // Joined data
   user_first_name?: string;
   user_last_name?: string;
+  user_profile_image_url?: string | null;
 }
 
 const ACTIVITY_CACHE_KEY = 'parium_candidate_activities_';
