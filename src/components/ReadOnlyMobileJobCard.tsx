@@ -408,7 +408,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           {/* Tid visas i taggraden endast när top-left är upptagen (statusBadge / Redan sökt).
               Annars ligger tid-badgen som overlay uppe i hörnet för snabbare skanning. */}
           {(statusBadge || hasApplied) && !(isExpired && statusBadge) && (
-            <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
+            <Badge variant={isExpired ? 'default' : 'glass'} className={`text-[11px] px-2 py-0.5 leading-snug inline-flex items-center text-white ${isExpired ? 'bg-red-500/80 border-0' : 'border-white/15'}`}>
               <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
               <span className="leading-snug">{isExpired ? 'Utgången' : `${timeText} kvar`}</span>
             </Badge>
