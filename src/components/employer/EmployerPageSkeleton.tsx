@@ -152,7 +152,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
     tab === 'expired' ? SKELETON_COUNT_KEYS.myJobsExpired
     : tab === 'draft' ? SKELETON_COUNT_KEYS.myJobsDraft
     : SKELETON_COUNT_KEYS.myJobsActive;
-  // Sidan paginerar med pageSize=20 — clampa så vi aldrig renderar fler placeholders
+  // Sidan paginerar med pageSize=18 — clampa så vi aldrig renderar fler placeholders
   // än vad som faktiskt får plats i första view.
   const cardCount = useLiveEmployerJobCount(tab, countKey);
 

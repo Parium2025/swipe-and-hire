@@ -1275,7 +1275,7 @@ interface UseInfiniteJobSearchOptions extends UseOptimizedJobSearchOptions {
 }
 
 export function useInfiniteJobSearch(options: UseInfiniteJobSearchOptions) {
-  const { enabled = true, pageSize = 20 } = options;
+  const { enabled = true, pageSize = 18 } = options;
   const queryClient = useQueryClient();
   const { cityFilter, countyFilter, employmentCodes, categoryFilter, fullSearchQuery, salarySearch } = useSearchParamsState(options);
 

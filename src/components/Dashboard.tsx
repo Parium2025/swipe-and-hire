@@ -157,7 +157,7 @@ const Dashboard = memo(() => {
 
   // Pagination state
   const [page, setPage] = useState(1);
-  const pageSize = 20;
+  const pageSize = 18;
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
 
