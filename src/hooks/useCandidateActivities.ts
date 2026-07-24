@@ -18,6 +18,7 @@ export interface CandidateActivity {
   // Joined data
   user_first_name?: string;
   user_last_name?: string;
+  user_profile_image_url?: string | null;
 }
 
 const ACTIVITY_CACHE_KEY = 'parium_candidate_activities_';
@@ -63,7 +64,7 @@ async function fetchActivitiesQueryFn(applicantId: string): Promise<CandidateAct
 
   const { data: profiles } = await supabase
     .from('profiles')
-    .select('user_id, first_name, last_name')
+    .select('user_id, first_name, last_name, profile_image_url')
     .in('user_id', userIds);
 
   const profileMap = new Map(
@@ -75,6 +76,7 @@ async function fetchActivitiesQueryFn(applicantId: string): Promise<CandidateAct
     activity_type: activity.activity_type as ActivityType,
     user_first_name: profileMap.get(activity.user_id)?.first_name || 'Okänd',
     user_last_name: profileMap.get(activity.user_id)?.last_name || '',
+    user_profile_image_url: profileMap.get(activity.user_id)?.profile_image_url || null,
   })) as CandidateActivity[];
 
   writeActivityCache(applicantId, result);

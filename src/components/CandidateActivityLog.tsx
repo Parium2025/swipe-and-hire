@@ -3,6 +3,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { Star, StickyNote, Edit3, Activity, UserPlus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 
 
 interface CandidateActivityLogProps {
@@ -181,11 +182,24 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
           <div className="space-y-2">
             {dateActivities.map((activity) => {
               const Icon = getActivityIcon(activity.activity_type);
+              const hasAvatar = !!activity.user_profile_image_url;
               return (
                 <div key={activity.id} className="flex gap-3 bg-white/5 rounded-lg p-2.5">
-                  <div className="flex-shrink-0 h-7 w-7 rounded-full bg-white/10 flex items-center justify-center">
-                    <Icon className="h-3.5 w-3.5 text-white" />
-                  </div>
+                  {hasAvatar ? (
+                    <div className="flex-shrink-0">
+                      <TeamMemberAvatar
+                        profileImageUrl={activity.user_profile_image_url}
+                        firstName={activity.user_first_name}
+                        lastName={activity.user_last_name}
+                        size="sm"
+                        className="h-7 w-7"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex-shrink-0 h-7 w-7 rounded-full bg-white/10 flex items-center justify-center">
+                      <Icon className="h-3.5 w-3.5 text-white" />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm leading-relaxed">
                       {getActivityDescription(activity)}
