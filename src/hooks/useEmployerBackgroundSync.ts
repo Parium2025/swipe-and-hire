@@ -18,7 +18,7 @@ const TAB_HIDDEN_THRESHOLD_MS = 30_000;
 // Större arbetsgivare laddar resten lazy via paginering i UI:t.
 // Före: 100 rader/tabell × 4 tabeller × 1 000 samtidiga arbetsgivare = 400 000 rader/sek vid login-spike.
 // Nu:   20 rader/tabell × 4 tabeller × 1 000 samtidiga arbetsgivare = 80 000 rader/sek (5× lägre peak).
-const INITIAL_PAGE_SIZE = 20;
+const INITIAL_PAGE_SIZE = 18;
 const CONVERSATIONS_INITIAL_PAGE_SIZE = 25;
 
 /**

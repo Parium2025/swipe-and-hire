@@ -335,17 +335,17 @@ const SearchJobs = memo(() => {
     try {
       const raw = sessionStorage.getItem(SEARCH_JOBS_DISPLAY_COUNT_KEY);
       const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
-      return Number.isFinite(parsed) && parsed >= 20 ? parsed : 20;
+      return Number.isFinite(parsed) && parsed >= 18 ? parsed : 18;
     } catch {
-      return 20;
+      return 18;
     }
-  }); // Start with 20 jobs
-  const loadMoreSize = 20; // Load 20 more each time
+  }); // Start with 18 jobs
+  const loadMoreSize = 18; // Load 18 more each time
   const listTopRef = useRef<HTMLDivElement>(null);
   const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
   const isLoadingMoreRef = useRef(false);
   const hasInitializedFiltersRef = useRef(false);
-  const [warmWindowEnd, setWarmWindowEnd] = useState(20);
+  const [warmWindowEnd, setWarmWindowEnd] = useState(18);
 
   // Debounced search for better performance
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput);

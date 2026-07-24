@@ -202,7 +202,7 @@ const EmployerDashboard = memo(() => {
   
   // Pagination state for mobile
   const [page, setPage] = useState(1);
-  const pageSize = 20;
+  const pageSize = 18;
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
   const editLaunchTimeoutRef = useRef<number | null>(null);
