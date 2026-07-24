@@ -109,7 +109,7 @@ export const DesktopJobCard = memo(function DesktopJobCard({
                 {job.applications_count || 0} sökande
               </Badge>
               {isExpired ? (
-                <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50">
+                <Badge className="bg-red-500/80 text-white border-0 text-xs px-2.5 py-1">
                   Utgången
                 </Badge>
               ) : (
