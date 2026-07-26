@@ -3392,6 +3392,7 @@ export type Database = {
         Returns: number
       }
       normalize_job_text: { Args: { t: string }; Returns: string }
+      parium_norm: { Args: { t: string }; Returns: string }
       purge_soft_deleted_jobs: {
         Args: never
         Returns: {
