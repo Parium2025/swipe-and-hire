@@ -170,10 +170,13 @@ export function useSwipeCardGesture({
       if (exitHandoffTimerRef.current !== null) {
         window.clearTimeout(exitHandoffTimerRef.current);
       }
-      exitHandoffTimerRef.current = window.setTimeout(() => {
-        exitHandoffTimerRef.current = null;
-        onSwipeLeft();
-      }, EXIT_HANDOFF_MS);
+      exitHandoffTimerRef.current = window.setTimeout(
+        () => {
+          exitHandoffTimerRef.current = null;
+          onSwipeLeft();
+        },
+        prefersReducedMotion ? REDUCED_EXIT_HANDOFF_MS : EXIT_HANDOFF_MS,
+      );
 
     },
     [
@@ -181,12 +184,14 @@ export function useSwipeCardGesture({
       exitOpacity,
       onSwipeLeft,
       onSwipeRight,
+      prefersReducedMotion,
       underlayOpacity,
       underlayScale,
       underlayY,
       x,
     ],
   );
+
 
   // Mouse-drag (desktop-fallback när touch-tunneln är av).
   const handleDragEnd = useCallback(
