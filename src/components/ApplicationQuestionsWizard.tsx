@@ -291,20 +291,21 @@ export function ApplicationQuestionsWizard({
 
   return (
     <div className={`relative flex flex-col h-full ${wizardMinHeightClass}`}>
-      {/* Quick-return to review — positioned top-right of parent card, aligned with section title */}
+      {/* Quick-return to review — sits on the dots row, never over the info card above */}
       {hasReachedReview && !previewMode && !hasAlreadyApplied && !isSubmitStep && (
         <button
           type="button"
           onClick={() => setCurrentStep(questions.length)}
           aria-label="Tillbaka till granskning"
-          className="absolute -top-12 right-0 w-11 h-11 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white inline-grid place-items-center leading-none transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
+          className="absolute top-0 right-0 w-9 h-9 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white inline-grid place-items-center leading-none transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
         >
           <X className="block w-5 h-5" />
         </button>
       )}
 
       {/* Step dots progress indicator - hidden when already applied (locked view) */}
-      <div className={'flex items-center justify-center gap-1.5 py-1 shrink-0' + (hasAlreadyApplied ? ' hidden' : '')}>
+      <div className={'flex items-center justify-center gap-1.5 min-h-9 py-1 shrink-0' + (hasAlreadyApplied ? ' hidden' : '')}>
+
         {Array.from({ length: totalSteps }).map((_, i) => (
           <button
             key={i}
