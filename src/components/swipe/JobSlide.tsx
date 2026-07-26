@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef } from 'react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCardImage } from '@/hooks/useCardImage';
@@ -40,7 +41,6 @@ interface JobSlideProps {
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
-  onTap: () => void;
   /**
    * Registrerar/avregistrerar aktivt korts swipe-API mot föräldern så att
    * den persistenta action-baren kan trigga vänster/höger-swipe.
@@ -64,7 +64,6 @@ export const JobSlide = memo(function JobSlide({
   onSwipeRight,
   onSwipeLeft,
   onSave,
-  onTap,
   onRegisterSwipeApi,
 }: JobSlideProps) {
   const inputCapability = useInputCapability();
@@ -157,7 +156,6 @@ export const JobSlide = memo(function JobSlide({
     underlayOpacity,
     onSwipeLeft,
     onSwipeRight,
-    onTap,
     onTapTitle: () => armTapHint('title'),
     onTapCompany: () => armTapHint('company'),
     clearTapHint,
@@ -225,7 +223,6 @@ export const JobSlide = memo(function JobSlide({
           onTouchMoveCapture={handleTouchMoveCapture}
           onTouchEndCapture={handleTouchEndCapture}
           onTouchCancelCapture={handleTouchCancelCapture}
-          onDoubleClick={useTouchTunnel ? undefined : onTap}
         >
           {/* Bakgrundsbild */}
           <div className="absolute inset-0">
@@ -252,20 +249,28 @@ export const JobSlide = memo(function JobSlide({
           {/* Kategori-badge */}
           {job.occupation && <OccupationBadge occupation={job.occupation} />}
 
-          {/* SÖK-stamp */}
+          {/* Gilla-indikator (höger) — premium glas, ingen skrikig ram */}
           <motion.div
-            className="absolute top-8 left-6 z-20 border-4 border-green-400 rounded-lg px-4 py-1 -rotate-12 pointer-events-none"
+            className="absolute inset-0 z-20 pointer-events-none"
             style={{ opacity: likeOpacity }}
           >
-            <span className="text-green-400 text-2xl font-black tracking-wider">SÖK</span>
+            <div className="absolute inset-0 bg-gradient-to-l from-emerald-400/25 via-emerald-400/5 to-transparent" />
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-5 py-2.5 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+              <Sparkles className="h-4 w-4 text-emerald-300" strokeWidth={2.5} />
+              <span className="text-white text-sm font-semibold tracking-[0.08em] uppercase">Intresserad</span>
+            </div>
           </motion.div>
 
-          {/* TYCKER INTE OM-stamp */}
+          {/* Hoppa över-indikator (vänster) — neutral, aldrig rött */}
           <motion.div
-            className="absolute top-8 right-6 z-20 border-4 border-red-400 rounded-lg px-3 py-1 rotate-12 pointer-events-none"
+            className="absolute inset-0 z-20 pointer-events-none"
             style={{ opacity: nopeOpacity }}
           >
-            <span className="text-red-400 text-lg font-black tracking-wider">TYCKER INTE OM</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/45 via-slate-900/10 to-transparent" />
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+              <ArrowRight className="h-4 w-4 text-white/80 rotate-180" strokeWidth={2.5} />
+              <span className="text-white/90 text-sm font-semibold tracking-[0.08em] uppercase">Hoppa över</span>
+            </div>
           </motion.div>
 
           {/* Applied stamp */}

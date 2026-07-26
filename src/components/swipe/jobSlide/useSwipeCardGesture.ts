@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, type TouchEvent as ReactTouchEvent } fr
 import { animate, type MotionValue, type PanInfo } from 'framer-motion';
 import { hapticLight, hapticMedium } from '@/lib/haptics';
 import {
-  DOUBLE_TAP_DELAY,
   EXIT_HANDOFF_MS,
   EXIT_OPACITY_DURATION,
   EXIT_SPRING,
@@ -42,7 +41,6 @@ interface UseSwipeCardGestureOptions {
   underlayOpacity: MotionValue<number>;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
-  onTap: () => void;
   onTapTitle: () => void;
   onTapCompany: () => void;
   clearTapHint: () => void;
@@ -69,7 +67,6 @@ export function useSwipeCardGesture({
   underlayOpacity,
   onSwipeLeft,
   onSwipeRight,
-  onTap,
   onTapTitle,
   onTapCompany,
   clearTapHint,
@@ -323,8 +320,6 @@ export function useSwipeCardGesture({
         return;
       }
 
-      const now = Date.now();
-
       if (showTapHint) {
         clearTapHint();
         lastTapTimestampRef.current = 0;
@@ -346,19 +341,12 @@ export function useSwipeCardGesture({
         return;
       }
 
-      if (now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
-        clearTapHint();
-        lastTapTimestampRef.current = 0;
-        onTap();
-        return;
-      }
-
+      // ℹ️ Tap öppnar INTE längre jobbdetaljer — hela infon visas när man
+      // swipar höger (gillar). Ett rent tap är därför en no-op.
       lastTapTimestampRef.current = 0;
-      onTap();
     },
     [
       clearTapHint,
-      onTap,
       onTapCompany,
       onTapTitle,
       overlayOpen,
@@ -367,6 +355,7 @@ export function useSwipeCardGesture({
       useTouchTunnel,
       x,
     ],
+
   );
 
   const handleTouchCancelCapture = useCallback(() => {
