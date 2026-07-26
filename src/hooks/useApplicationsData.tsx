@@ -250,6 +250,8 @@ export const useApplicationsData = (
   const {
     data,
     isLoading,
+    isFetching,
+
     error,
     fetchNextPage,
     hasNextPage,
