@@ -194,12 +194,42 @@ const CandidatesContent = () => {
   }), [filteredApplications]);
 
   if (isLoading || !showContent) {
+    const skeletonRows = readCachedCount(SKELETON_COUNT_KEYS.allCandidates, 5, 8);
     return (
-       <div className="responsive-container-wide opacity-0">
-        {/* Invisible placeholder to prevent layout shift */}
+      <div className="responsive-container-wide">
+        <div className="space-y-4">
+          <div className="text-center mb-6 space-y-2">
+            <Skeleton className="h-7 w-56 mx-auto bg-white/10" />
+            <Skeleton className="h-4 w-80 max-w-full mx-auto bg-white/10" />
+          </div>
+          <div className="mb-6 space-y-3">
+            <Skeleton className="h-11 w-full rounded-xl bg-white/10" />
+            <div className="flex items-center justify-center gap-2">
+              <Skeleton className="h-9 w-40 rounded-full bg-white/10" />
+              <Skeleton className="h-9 w-36 rounded-full bg-white/10" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            {Array.from({ length: skeletonRows }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4"
+              >
+                <Skeleton className="h-12 w-12 rounded-full bg-white/10 flex-shrink-0" />
+                <div className="flex-1 space-y-2 min-w-0">
+                  <Skeleton className="h-4 w-40 max-w-full bg-white/10" />
+                  <Skeleton className="h-3 w-24 bg-white/10" />
+                  <Skeleton className="h-3 w-56 max-w-full bg-white/10" />
+                </div>
+                <Skeleton className="h-8 w-8 rounded-full bg-white/10 flex-shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
+
 
   return (
      <div className="responsive-container-wide animate-fade-in">
