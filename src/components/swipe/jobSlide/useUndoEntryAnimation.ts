@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { animate, type MotionValue } from 'framer-motion';
+import { animate, useReducedMotion, type MotionValue } from 'framer-motion';
 
 interface UseUndoEntryAnimationOptions {
   isUndoEntry: boolean | undefined;
