@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef } from 'react';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Heart, X } from 'lucide-react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCardImage } from '@/hooks/useCardImage';
@@ -72,8 +72,11 @@ export const JobSlide = memo(function JobSlide({
   const x = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
   const entryScale = useMotionValue(1);
-  const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
-  const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
+  // Tydlig feedback direkt: indikatorn syns redan efter ~20px drag.
+  const likeOpacity = useTransform(x, [0, 20, 90], [0, 0.65, 1]);
+  const nopeOpacity = useTransform(x, [-90, -20, 0], [1, 0.65, 0]);
+  const likeScale = useTransform(x, [0, 90], [0.86, 1]);
+  const nopeScale = useTransform(x, [-90, 0], [1, 0.86]);
   // Mjukare rotate/scale-utslag = mindre visuell wobble under drag.
   // Rotate 10° → 6°, scale 0.95 → 0.98.
   const cardRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
@@ -249,28 +252,48 @@ export const JobSlide = memo(function JobSlide({
           {/* Kategori-badge */}
           {job.occupation && <OccupationBadge occupation={job.occupation} />}
 
-          {/* Gilla-indikator (höger) — premium glas, ingen skrikig ram */}
+          {/* Gilla-indikator (höger) — centrerad, omöjlig att missa */}
           <motion.div
-            className="absolute inset-0 z-20 pointer-events-none"
+            className="absolute inset-0 z-30 pointer-events-none grid place-items-center"
             style={{ opacity: likeOpacity }}
           >
-            <div className="absolute inset-0 bg-gradient-to-l from-emerald-400/25 via-emerald-400/5 to-transparent" />
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-5 py-2.5 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
-              <Sparkles className="h-4 w-4 text-emerald-300" strokeWidth={2.5} />
-              <span className="text-white text-sm font-semibold tracking-[0.08em] uppercase">Intresserad</span>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-l from-emerald-400/35 via-emerald-400/10 to-transparent" />
+            <motion.div
+              style={{ scale: likeScale }}
+              className="relative flex flex-col items-center gap-3"
+            >
+              <div className="grid place-items-center h-20 w-20 rounded-full bg-emerald-500/90 ring-4 ring-white/25 shadow-[0_16px_50px_rgba(16,185,129,0.55)] backdrop-blur-xl">
+                <Heart className="h-9 w-9 text-white" fill="currentColor" strokeWidth={0} />
+              </div>
+              <div className="rounded-full border border-white/25 bg-black/45 px-4 py-1.5 backdrop-blur-xl">
+                <span className="text-white text-[13px] font-semibold tracking-[0.1em] uppercase">
+                  Intresserad
+                </span>
+              </div>
+              <span className="text-white/85 text-xs font-medium">Släpp för att se jobbet</span>
+            </motion.div>
           </motion.div>
 
-          {/* Hoppa över-indikator (vänster) — neutral, aldrig rött */}
+          {/* Hoppa över-indikator (vänster) — neutral, aldrig skrikigt röd */}
           <motion.div
-            className="absolute inset-0 z-20 pointer-events-none"
+            className="absolute inset-0 z-30 pointer-events-none grid place-items-center"
             style={{ opacity: nopeOpacity }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/45 via-slate-900/10 to-transparent" />
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
-              <ArrowRight className="h-4 w-4 text-white/80 rotate-180" strokeWidth={2.5} />
-              <span className="text-white/90 text-sm font-semibold tracking-[0.08em] uppercase">Hoppa över</span>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/60 via-slate-950/20 to-transparent" />
+            <motion.div
+              style={{ scale: nopeScale }}
+              className="relative flex flex-col items-center gap-3"
+            >
+              <div className="grid place-items-center h-20 w-20 rounded-full bg-white/12 ring-4 ring-white/20 shadow-[0_16px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                <X className="h-9 w-9 text-white" strokeWidth={2.5} />
+              </div>
+              <div className="rounded-full border border-white/20 bg-black/45 px-4 py-1.5 backdrop-blur-xl">
+                <span className="text-white text-[13px] font-semibold tracking-[0.1em] uppercase">
+                  Hoppa över
+                </span>
+              </div>
+              <span className="text-white/85 text-xs font-medium">Släpp för nästa jobb</span>
+            </motion.div>
           </motion.div>
 
           {/* Applied stamp */}
