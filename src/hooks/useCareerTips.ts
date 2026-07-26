@@ -21,7 +21,10 @@ export interface CareerTipItem {
 
 // LocalStorage cache for instant load - syncs based on cron schedule
 const CACHE_KEY = 'parium_career_tips_cache';
-const MAX_VISIBLE_TIP_AGE_MS = 12 * 60 * 60 * 1000;
+// How long a locally cached payload may be shown before we distrust it (freeze protection)
+const MAX_CACHE_AGE_MS = 12 * 60 * 60 * 1000;
+// How old the newest tip may be before we refresh in the background
+const STALE_TIP_AGE_MS = 72 * 60 * 60 * 1000;
 
 // Cron runs at 06, 11, 18, 23 UTC — calculate ms until next slot
 function msUntilNextCronSlot(): number {
@@ -58,6 +61,11 @@ function readCache(): CareerTipItem[] | null {
       try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
       return null;
     }
+    // Freeze protection: distrust a cache that hasn't been refreshed in a long time
+    if (!cached.timestamp || Date.now() - cached.timestamp > MAX_CACHE_AGE_MS) {
+      try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
     return cached.items;
   } catch {
     try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
@@ -81,48 +89,43 @@ function hasStaleVisibleTips(items: CareerTipItem[] | null | undefined): boolean
     const time = new Date(item.published_at).getTime();
     return Number.isNaN(time) ? latest : Math.max(latest, time);
   }, 0);
-  return newest === 0 || Date.now() - newest > MAX_VISIBLE_TIP_AGE_MS;
+  return newest === 0 || Date.now() - newest > STALE_TIP_AGE_MS;
 }
 
 /**
  * BULLETPROOF CAREER TIPS FETCHER
- * 
- * PRINCIPLE: Backend is the ONLY gatekeeper
- * - Backend guarantees: all saved tips have valid published_at
- * - Backend guarantees: always tries to maintain 4 tips (RSS + AI fallback)
- * - Frontend: shows what's in DB, triggers refresh if < 4
- * 
- * NO FRONTEND FILTERING - trust the backend completely
+ *
+ * PRINCIPLE: never hide content we already have.
+ * - If the database returns tips, we always show them.
+ * - If they look old, the backend is asked for fresh ones in the background,
+ *   without ever emptying the card while it works.
  */
 const fetchRecentCareerTips = async (): Promise<CareerTipItem[]> => {
-  // Fetch ALL career tips - backend guarantees validity
   const { data: allTips, error } = await supabase
     .from('daily_career_tips')
     .select('*')
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(4);
 
-  // Happy path: we have fresh tips (1-4 is fine, we show what's available)
-  if (!error && allTips && allTips.length > 0 && !hasStaleVisibleTips(allTips)) {
-    // Update cache with fresh data
+  if (error) {
+    console.error('[Career Tips] Read error:', error.message);
+  }
+
+  if (allTips && allTips.length > 0) {
     writeCache(allTips);
+
+    if (hasStaleVisibleTips(allTips)) {
+      void supabase.functions
+        .invoke('fetch-career-tips', { body: { force: true } })
+        .catch(() => { /* background refresh, never blocks the UI */ });
+    }
+
     return allTips;
   }
 
-  // Not enough/fresh tips - trigger backend to fetch more
-  const currentCount = allTips?.length || 0;
-  console.log(`[Career Tips] ${currentCount} stale/missing tips, triggering backend refresh...`);
-
   try {
-    const { error: fnError } = await supabase.functions.invoke('fetch-career-tips', {
-      body: { force: true },
-    });
+    await supabase.functions.invoke('fetch-career-tips', { body: { force: true } });
 
-    if (fnError) {
-      console.error('[Career Tips] Backend refresh error:', fnError);
-    }
-
-    // Re-fetch after backend processed
     const { data: refreshedTips } = await supabase
       .from('daily_career_tips')
       .select('*')
@@ -133,13 +136,11 @@ const fetchRecentCareerTips = async (): Promise<CareerTipItem[]> => {
       writeCache(refreshedTips);
       return refreshedTips;
     }
-
-    // Return what we originally had (fallback)
-    return allTips || [];
-  } catch (err) {
-    console.error('[Career Tips] Fatal error:', err);
-    return allTips || [];
+  } catch {
+    /* offline or edge function unreachable — fall through to cache */
   }
+
+  return readCache() ?? [];
 };
 
 export const useCareerTips = () => {
