@@ -841,6 +841,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   };
 
+  // Reset all image state whenever the dialog closes or the job changes,
+  // so an unsaved/other job's image can never leak into the next annons.
+  useEffect(() => {
+    setJobImageDisplayUrl(null);
+    setOriginalImageUrl(null);
+    setJobImageDesktopDisplayUrl(null);
+    setOriginalDesktopImageUrl(null);
+  }, [job?.id, open]);
+
   // Load job image if exists - use public URL from job-images bucket (mobile)
   useEffect(() => {
     const loadJobImage = async () => {
