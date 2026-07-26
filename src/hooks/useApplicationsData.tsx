@@ -506,11 +506,6 @@ export const useApplicationsData = (
     fetchNextPage();
   }, [fetchNextPage, data?.pages?.length]);
 
-  // Funktion för att fortsätta ladda nästa 500 kandidater
-  const continueLoading = useCallback(() => {
-    setHasReachedLimit(false);
-    fetchNextPage();
-  }, [fetchNextPage]);
 
   // Flatten all pages
   const applications = data?.pages.flatMap(page => page.items) || [];
