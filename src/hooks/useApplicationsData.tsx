@@ -409,8 +409,9 @@ export const useApplicationsData = (searchQuery: string = '') => {
 
       const hasMore = items.length === PAGE_SIZE;
 
-      // Write snapshot on first page
-      if (pageParam === 0 && items.length > 0) {
+      // Write snapshot on first page — ALDRIG för sökresultat, annars skrivs
+      // hela "alla kandidater"-cachen över med ett filtrerat urval.
+      if (pageParam === 0 && items.length > 0 && !(searchQuery && searchQuery.trim())) {
         writeSnapshot(user.id, items);
       }
 
@@ -437,12 +438,17 @@ export const useApplicationsData = (searchQuery: string = '') => {
       return lastPage.hasMore ? allPages.length : undefined;
     },
     enabled: !!user,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    // Bas-listan cachas för alltid (realtime uppdaterar), men sökningar måste
+    // alltid gå mot databasens FTS — annars filtrerades bara den cachade sidan.
+    staleTime: searchQuery && searchQuery.trim() ? 0 : Infinity,
     gcTime: Infinity,
-    refetchOnMount: false,
+    refetchOnMount: !!(searchQuery && searchQuery.trim()),
     refetchOnWindowFocus: false,
     initialData: () => {
       if (!user) return undefined;
+      // Snapshot gäller bara den ofiltrerade listan.
+      if (searchQuery && searchQuery.trim()) return undefined;
+      
       
       const snapshot = readSnapshot(user.id);
       if (snapshot.length === 0) return undefined;

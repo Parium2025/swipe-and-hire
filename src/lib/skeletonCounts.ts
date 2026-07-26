@@ -19,6 +19,7 @@ export const SKELETON_COUNT_KEYS = {
   savedJobs: 'parium:savedJobs:lastCount',
   skippedJobs: 'parium:skippedJobs:lastCount',
   myCandidates: 'parium:myCandidates:lastCount',
+  allCandidates: 'parium:allCandidates:lastCount',
   messages: 'parium:messages:lastCount',
   myJobsActive: 'parium:myJobs:activeLastCount',
   myJobsExpired: 'parium:myJobs:expiredLastCount',
