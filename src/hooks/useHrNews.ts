@@ -21,7 +21,10 @@ export interface HrNewsItem {
 
 // LocalStorage cache for instant load - syncs based on cron schedule
 const CACHE_KEY = 'parium_hr_news_cache';
-const MAX_VISIBLE_NEWS_AGE_MS = 12 * 60 * 60 * 1000;
+// How long a locally cached payload may be shown before we distrust it (freeze protection)
+const MAX_CACHE_AGE_MS = 12 * 60 * 60 * 1000;
+// How old the newest article may be before we ask the backend for a refresh (in the background)
+const STALE_ARTICLE_AGE_MS = 72 * 60 * 60 * 1000;
 
 // Cron runs at 06, 11, 18, 23 UTC — calculate ms until next slot
 function msUntilNextCronSlot(): number {
