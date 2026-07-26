@@ -52,6 +52,7 @@ import Messages from '@/pages/Messages';
 import RealtimeStatusPage from '@/components/RealtimeStatusPage';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 import { useDevice } from '@/hooks/use-device';
+import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 // 🔥 Persistent-mount routes — these pages stay alive across navigation so that
 // data + DOM is loaded once per session and re-visiting feels instant.
