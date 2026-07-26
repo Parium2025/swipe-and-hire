@@ -86,11 +86,40 @@ const JOB_SEEKER_KEEP_KEYS = [
   '/support',
 ];
 
+const CANDIDATE_SEGMENTS = [
+  { id: 'all', label: 'Alla' },
+  { id: 'pending', label: 'Nya' },
+  { id: 'reviewing', label: 'Granskas' },
+  { id: 'hired', label: 'Anställda' },
+  { id: 'rejected', label: 'Avvisade' },
+] as const;
+
+const CANDIDATE_SORTS = [
+  { id: 'applied_at', label: 'Senast ansökt' },
+  { id: 'oldest', label: 'Äldst ansökt' },
+  { id: 'name', label: 'Namn (A–Ö)' },
+  { id: 'rating', label: 'Högst betyg' },
+] as const;
+
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [questionFilters, setQuestionFilters] = useState<QuestionFilterValue[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
+  // Segment och sortering behålls under sessionen så man inte tappar sin vy
+  const [statusFilter, setStatusFilter] = useState<string>(
+    () => sessionStorage.getItem('candidates_status_filter') || 'all',
+  );
+  const [sortBy, setSortBy] = useState<string>(
+    () => sessionStorage.getItem('candidates_sort_by') || 'applied_at',
+  );
+
+  useEffect(() => {
+    sessionStorage.setItem('candidates_status_filter', statusFilter);
+  }, [statusFilter]);
+  useEffect(() => {
+    sessionStorage.setItem('candidates_sort_by', sortBy);
+  }, [sortBy]);
 
   // Debounce search: 300ms delay before hitting the database
   // Prevents spamming FTS queries on every keystroke (critical at 500k+ candidates)
@@ -114,7 +143,9 @@ const CandidatesContent = () => {
     continueLoading,
     loadedCount,
     updateRating,
-  } = useApplicationsData(debouncedSearch);
+    totalCount,
+  } = useApplicationsData(debouncedSearch, { questionFilters, statusFilter, sortBy });
+
   
   // Instant render när datan redan finns i cache — fade-in bara vid cold load.
   const dataWasCached = useRef(!isLoading);
