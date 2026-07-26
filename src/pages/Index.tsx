@@ -208,9 +208,8 @@ const CandidatesContent = () => {
           </p>
         </div>
 
-        {/* Search Bar + Question Filter */}
-        {!isLoading && (
-          <div className="mb-6 space-y-3">
+        {/* Search Bar + Question Filter — alltid monterad så fokus aldrig tappas */}
+        <div className="mb-6 space-y-3">
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
               <Input
@@ -260,7 +259,7 @@ const CandidatesContent = () => {
             </div>
 
           </div>
-        )}
+
 
         {error ? (
           <div className="text-center py-12 text-destructive">
