@@ -855,7 +855,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     const loadJobImage = async () => {
       if (!open) return;
 
-      const url = job?.job_image_url;
+      // Form state wins (t.ex. återställt utkast eller nyss uppladdad bild),
+      // annars annonsens sparade bild.
+      const url = formData.job_image_url || job?.job_image_url;
 
       // No image on this job → clear any leftover state from a previously edited job
       if (!url) {
@@ -882,14 +884,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     };
     
     loadJobImage();
-  }, [job?.id, job?.job_image_url, open]);
+  }, [job?.id, job?.job_image_url, formData.job_image_url, open]);
 
   // Load desktop job image if exists
   useEffect(() => {
     const loadDesktopJobImage = async () => {
       if (!open) return;
 
-      const desktopUrl = (job as any)?.job_image_desktop_url;
+      const desktopUrl = formData.job_image_desktop_url || (job as any)?.job_image_desktop_url;
 
       if (!desktopUrl) {
         setJobImageDesktopDisplayUrl(null);
@@ -915,7 +917,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     };
     
     loadDesktopJobImage();
-  }, [job?.id, (job as any)?.job_image_desktop_url, open]);
+  }, [job?.id, (job as any)?.job_image_desktop_url, formData.job_image_desktop_url, open]);
 
 
   // Preload image when user reaches step 2 (jobbild section) to make preview faster
