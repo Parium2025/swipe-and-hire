@@ -201,7 +201,7 @@ const writeSnapshot = (userId: string, items: ApplicationData[]) => {
   try {
     const key = SNAPSHOT_KEY_PREFIX + userId;
     const snapshot: SnapshotData = {
-      items: items.slice(0, 50), // Max 50 items
+      items: dedupeByApplicant(items).slice(0, 50), // Max 50 unika kandidater
       timestamp: Date.now(),
     };
     safeSetItem(key, JSON.stringify(snapshot));
