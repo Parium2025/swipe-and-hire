@@ -855,7 +855,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     const loadJobImage = async () => {
       if (!open) return;
 
-      const url = job?.job_image_url;
+      // Form state wins (t.ex. återställt utkast eller nyss uppladdad bild),
+      // annars annonsens sparade bild.
+      const url = formData.job_image_url || job?.job_image_url;
 
       // No image on this job → clear any leftover state from a previously edited job
       if (!url) {
