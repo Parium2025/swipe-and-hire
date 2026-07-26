@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useRef, type TouchEvent as ReactTouchEvent } from 'react';
-import { animate, useReducedMotion, type MotionValue, type PanInfo } from 'framer-motion';
+import { animate, type MotionValue, type PanInfo } from 'framer-motion';
 import { hapticLight, hapticMedium } from '@/lib/haptics';
 import {
   EXIT_HANDOFF_MS,
-  REDUCED_EXIT_HANDOFF_MS,
-  REDUCED_FADE,
-  REDUCED_SNAP,
   EXIT_OPACITY_DURATION,
   EXIT_SPRING,
   EXIT_X,
@@ -102,9 +99,6 @@ export function useSwipeCardGesture({
     prevOverlayOpenRef.current = overlayOpen;
   }, [overlayOpen]);
 
-  // ♿️ Respektera systemets "Minska rörelse". Då byter vi spring/parallax mot
-  // korta linjära toningar och kortare handoff — samma flöde, ingen sväng.
-  const prefersReducedMotion = useReducedMotion();
 
   const triggerSwipe = useCallback(
     // Andra argumentet (velocity) behålls i signaturen för bakåtkompat med
@@ -118,7 +112,7 @@ export function useSwipeCardGesture({
       hapticMedium();
 
       if (direction === 'right') {
-        animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
+        animate(x, 0, SNAP_SPRING);
         onSwipeRight();
         return;
       }
@@ -128,28 +122,19 @@ export function useSwipeCardGesture({
       // Exit-animation för kortet — mjuk, förutsägbar, alltid samma känsla
       // oavsett hur snabbt användaren swipear. Detta är den ursprungliga
       // premium-exiten före velocity-experimentet.
-      // ♿️ Reduced motion: ingen spring/överslag — kortet tonar bort på plats
-      // istället för att kastas ut i sidled.
-      if (prefersReducedMotion) {
-        animate(exitOpacity, 0, { duration: REDUCED_FADE, ease: 'linear' });
-        underlayY.set(0);
-        underlayScale.set(1);
-        animate(underlayOpacity, 1, { duration: REDUCED_FADE, ease: 'linear' });
-      } else {
-        animate(x, -EXIT_X, EXIT_SPRING);
-        animate(exitOpacity, 0, {
-          duration: EXIT_OPACITY_DURATION,
-          ease: PREMIUM_EASE,
-        });
+      animate(x, -EXIT_X, EXIT_SPRING);
+      animate(exitOpacity, 0, {
+        duration: EXIT_OPACITY_DURATION,
+        ease: PREMIUM_EASE,
+      });
 
-        // Underlaget stiger upp bakom det utåkande kortet.
-        animate(underlayY, 0, UNDERLAY_RISE_SPRING);
-        animate(underlayScale, 1, UNDERLAY_RISE_SPRING);
-        animate(underlayOpacity, 1, {
-          duration: UNDERLAY_OPACITY_DURATION,
-          ease: PREMIUM_EASE,
-        });
-      }
+      // Underlaget stiger upp bakom det utåkande kortet.
+      animate(underlayY, 0, UNDERLAY_RISE_SPRING);
+      animate(underlayScale, 1, UNDERLAY_RISE_SPRING);
+      animate(underlayOpacity, 1, {
+        duration: UNDERLAY_OPACITY_DURATION,
+        ease: PREMIUM_EASE,
+      });
 
 
       // 🚀 Tinder/TikTok-handoff: mounta nästa kort mid-exit istället för
@@ -175,7 +160,7 @@ export function useSwipeCardGesture({
           exitHandoffTimerRef.current = null;
           onSwipeLeft();
         },
-        prefersReducedMotion ? REDUCED_EXIT_HANDOFF_MS : EXIT_HANDOFF_MS,
+        EXIT_HANDOFF_MS,
       );
 
     },
@@ -184,7 +169,6 @@ export function useSwipeCardGesture({
       exitOpacity,
       onSwipeLeft,
       onSwipeRight,
-      prefersReducedMotion,
       underlayOpacity,
       underlayScale,
       underlayY,
@@ -213,9 +197,9 @@ export function useSwipeCardGesture({
         lastTapTimestampRef.current = 0;
         clearTapHint();
       }
-      animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
+      animate(x, 0, SNAP_SPRING);
     },
-    [clearTapHint, prefersReducedMotion, triggerSwipe, x],
+    [clearTapHint, triggerSwipe, x],
   );
 
   const handleTouchStartCapture = useCallback(
@@ -332,7 +316,7 @@ export function useSwipeCardGesture({
           triggerSwipe('left', velocityX);
           return;
         }
-        animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
+        animate(x, 0, SNAP_SPRING);
         return;
       }
 
@@ -369,7 +353,6 @@ export function useSwipeCardGesture({
     },
     [
       clearTapHint,
-      prefersReducedMotion,
       onTapCompany,
       onTapTitle,
       overlayOpen,
@@ -385,9 +368,9 @@ export function useSwipeCardGesture({
     clearTapHint();
     touchGestureRef.current = null;
     if (!swipedRef.current) {
-      animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
+      animate(x, 0, SNAP_SPRING);
     }
-  }, [clearTapHint, prefersReducedMotion, x]);
+  }, [clearTapHint, x]);
 
   return {
     triggerSwipe,
