@@ -375,35 +375,35 @@ export const useApplicationsData = (
          writeCachedRatings(user.id, ratingsMap);
        }
 
-       // Transform data to flatten job_postings and add profile media + last_active_at + rating
+       // Transform data: RPC returnerar redan job_title/job_occupation/rating
        const items = baseData.map((item: any) => {
          const media =
            profileMediaMap[item.applicant_id] ||
            ({ profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null } as const);
 
          const activityLastActive = activityMap[item.applicant_id]?.last_active_at ?? null;
-         const rating = ratingsMap[item.applicant_id] ?? null;
+         const rating = ratingsMap[item.applicant_id] ?? item.rating ?? null;
 
          return {
            ...item,
-           job_title: item.job_postings?.title || 'Okänt jobb',
-           job_occupation: item.job_postings?.occupation || null,
+           job_title: item.job_title || 'Okänt jobb',
+           job_occupation: item.job_occupation || null,
            profile_image_url: media.profile_image_url,
            video_url: media.video_url,
            is_profile_video: media.is_profile_video,
-           // Prefer activity RPC to stay 1:1 with "Mina kandidater"
+           // Prefer activity RPC to stay 1:1 med "Mina kandidater"
            last_active_at: activityLastActive ?? media.last_active_at,
            viewed_at: item.viewed_at,
            rating,
-           job_postings: undefined,
+           total_count: undefined,
          };
        }) as ApplicationData[];
 
-      const hasMore = items.length === PAGE_SIZE;
+      const hasMore = from + items.length < totalCount;
 
-      // Write snapshot on first page — ALDRIG för sökresultat, annars skrivs
-      // hela "alla kandidater"-cachen över med ett filtrerat urval.
-      if (pageParam === 0 && items.length > 0 && !(searchQuery && searchQuery.trim())) {
+      // Snapshot skrivs BARA för den ofiltrerade standardvyn — annars skulle
+      // ett filtrerat urval återanvändas som "alla kandidater" nästa kalla start.
+      if (pageParam === 0 && items.length > 0 && isDefaultView) {
         writeSnapshot(user.id, items);
       }
 
@@ -424,23 +424,22 @@ export const useApplicationsData = (
         );
       })();
 
-      return { items, hasMore };
+      return { items, hasMore, totalCount };
     },
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.hasMore ? allPages.length : undefined;
     },
     enabled: !!user,
-    // Bas-listan cachas för alltid (realtime uppdaterar), men sökningar måste
-    // alltid gå mot databasens FTS — annars filtrerades bara den cachade sidan.
-    staleTime: searchQuery && searchQuery.trim() ? 0 : Infinity,
+    // Standardvyn cachas (realtime håller den fräsch). Sök/filter/sortering
+    // måste alltid gå mot databasen.
+    staleTime: isDefaultView ? Infinity : 0,
     gcTime: Infinity,
-    refetchOnMount: !!(searchQuery && searchQuery.trim()),
+    refetchOnMount: !isDefaultView,
     refetchOnWindowFocus: false,
     initialData: () => {
       if (!user) return undefined;
-      // Snapshot gäller bara den ofiltrerade listan.
-      if (searchQuery && searchQuery.trim()) return undefined;
-      
+      // Snapshot gäller bara den ofiltrerade standardvyn.
+      if (!isDefaultView) return undefined;
       
       const snapshot = readSnapshot(user.id);
       if (snapshot.length === 0) return undefined;
@@ -449,11 +448,12 @@ export const useApplicationsData = (
       const hasMore = snapshot.length >= PAGE_SIZE;
       
       return {
-        pages: [{ items: snapshot, hasMore }],
+        pages: [{ items: snapshot, hasMore, totalCount: snapshot.length }],
         pageParams: [0],
       };
     },
   });
+
 
   // PRE-FETCHING: Automatically load next batch in background after each page loads
   // BUT STOP after 500 candidates (20 pages) - user must click "Fortsätt" to load more
