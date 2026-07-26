@@ -875,6 +875,8 @@ export const useApplicationsData = (
     allApplications: enrichedApplications, // non-deduplicated, for consumers that need all
     stats,
     isLoading,
+    isFetching,
+
     error,
     refetch,
     invalidateApplications,
