@@ -365,24 +365,26 @@ export const useApplicationsData = (
          });
        }
 
-       // Fetch current user's ratings for these applicants in batch (instant display)
-       // Start with cached ratings for immediate display
+       // Hämta aktuella betyg för dessa kandidater i en batch.
        const cachedRatings = readCachedRatings(user.id);
        const ratingsMap: Record<string, number> = { ...cachedRatings };
-       
-       const { data: ratingsData } = await supabase
+
+       const { data: ratingsData, error: ratingsError } = await supabase
          .from('candidate_ratings')
          .select('applicant_id, rating')
          .eq('recruiter_id', user.id)
          .in('applicant_id', applicantIds);
 
-       if (ratingsData) {
+       if (!ratingsError && ratingsData) {
+         // Databasen är sanningen: rensa cachade betyg för de kandidater vi
+         // just frågade om, annars lever ett borttaget betyg kvar för alltid.
+         applicantIds.forEach((id) => { delete ratingsMap[id]; });
          ratingsData.forEach((row: any) => {
            ratingsMap[row.applicant_id] = row.rating;
          });
-         // Update cache with fresh data
          writeCachedRatings(user.id, ratingsMap);
        }
+
 
        // Transform data: RPC returnerar redan job_title/job_occupation/rating
        const items = baseData.map((item: any) => {
