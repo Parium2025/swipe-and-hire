@@ -2284,7 +2284,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.start_date || ''}
                           onChange={(v) => handleInputChange('start_date', v)}
                         />
-                        <p className="text-xs text-white/70 leading-relaxed">
+                        <p className="text-xs text-white leading-relaxed">
                           Om du inte väljer ett datum visas <span className="font-medium text-white">"Omgående"</span> i annonsen.
                         </p>
                       </div>
