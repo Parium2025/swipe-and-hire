@@ -170,59 +170,20 @@ const CandidatesContent = () => {
   // Safety check to prevent null crash
   const safeApplications = applications || [];
 
-  // Filter applications by question filters
-  // NOTE: Smart search is already applied inside useApplicationsData (enrichedApplications)
-  // Do NOT apply smartSearchCandidates again here — it would double-filter and drop valid results
-  const filteredApplications = useMemo(() => {
-    let result = safeApplications;
-    
-    // Only apply question filters (smart search already done in hook)
-    if (questionFilters.length === 0) return result;
+  // Sökning, frågefilter, statusfilter och sortering körs numera i databasen
+  // (RPC: search_employer_candidates). Ingen klientsidig filtrering här — det är
+  // det som gjorde räknarna missvisande så fort listan blev större än laddade sidor.
+  const filteredApplications = safeApplications;
 
-    return result.filter(app => {
-      const customAnswers = app.custom_answers || {};
-
-      return questionFilters.every(filter => {
-        // Exakt (case-insensitive, trimmad) matchning — undviker false positives
-        // när olika frågor delar ord, t.ex. "Har du körkort?" vs "Har du eget körkort i Stockholm?".
-        const normalizedFilterQuestion = filter.question.trim().toLowerCase();
-        const matchingKey = Object.keys(customAnswers).find(
-          key => key.trim().toLowerCase() === normalizedFilterQuestion,
-        );
-
-        if (!matchingKey) return false;
-
-        const answer = customAnswers[matchingKey];
-
-        if (filter.answers.length === 0) {
-          return answer !== undefined && answer !== null && answer !== '';
-        }
-
-        const normalizedAnswer = typeof answer === 'string' 
-          ? answer.toLowerCase() 
-          : typeof answer === 'boolean'
-            ? (answer ? 'ja' : 'nej')
-            : String(answer).toLowerCase();
-
-        return filter.answers.some(selectedAnswer => 
-          normalizedAnswer === selectedAnswer.toLowerCase() ||
-          (typeof answer === 'boolean' && (
-            (answer && selectedAnswer.toLowerCase() === 'ja') ||
-            (!answer && selectedAnswer.toLowerCase() === 'nej')
-          ))
-        );
-      });
-    });
-  }, [safeApplications, questionFilters]);
-
-  // Stats based on filtered results (already deduplicated by the hook)
   const filteredStats = useMemo(() => ({
-    total: filteredApplications.length,
-    new: filteredApplications.filter(app => app.status === 'pending').length,
-    reviewing: filteredApplications.filter(app => app.status === 'reviewing').length,
-    hired: filteredApplications.filter(app => app.status === 'hired').length,
-    rejected: filteredApplications.filter(app => app.status === 'rejected').length,
-  }), [filteredApplications]);
+    total: totalCount,
+    new: stats.new,
+    reviewing: stats.reviewing,
+    hired: stats.hired,
+    rejected: stats.rejected,
+  }), [totalCount, stats]);
+
+
 
   if (isLoading || !showContent) {
     const skeletonRows = readCachedCount(SKELETON_COUNT_KEYS.allCandidates, 5, 8);
