@@ -210,7 +210,7 @@ export const useApplicationsData = (
 ) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [jobTitles, setJobTitles] = useState<Record<string, string>>({});
+  
 
   const questionFilters = options.questionFilters ?? [];
   const statusFilter = options.statusFilter && options.statusFilter !== 'all' ? options.statusFilter : null;
