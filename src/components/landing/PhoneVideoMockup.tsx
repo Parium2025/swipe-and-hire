@@ -95,7 +95,7 @@ export const PhoneVideoMockup = ({
               playsInline
               preload="metadata"
               poster={POSTER_SRC}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             >
               <source src={VIDEO_SRC} type="video/mp4" />
             </video>
