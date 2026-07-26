@@ -95,7 +95,22 @@ const writeCachedRatings = (userId: string, ratings: Record<string, number>) => 
 // We accept slightly stale data to show content immediately on login/refresh
 // Now also merges cached ratings for instant rating display (no flicker)
 // Använder safeReadJsonCache så korrupt format inte kraschar via .map/.filter.
+// En kandidat = en rad (senaste ansökan vinner). Används både för snapshot och lista
+// så att räknaren i rubriken alltid matchar antalet kort.
+const dedupeByApplicant = (items: ApplicationData[]): ApplicationData[] => {
+  const byApplicant = new Map<string, ApplicationData>();
+  for (const app of items) {
+    if (!app?.applicant_id) continue;
+    const existing = byApplicant.get(app.applicant_id);
+    if (!existing || (app.applied_at && (!existing.applied_at || app.applied_at > existing.applied_at))) {
+      byApplicant.set(app.applicant_id, app);
+    }
+  }
+  return Array.from(byApplicant.values());
+};
+
 const readSnapshot = (userId: string): ApplicationData[] => {
+
   const key = SNAPSHOT_KEY_PREFIX + userId;
   const snapshot = safeReadJsonCache<SnapshotData>(
     key,
@@ -160,28 +175,33 @@ const readSnapshot = (userId: string): ApplicationData[] => {
       return [];
     }
 
+    // En kandidat = en rad. Äldre snapshots kan innehålla flera ansökningar per
+    // person (före serversidig dedup) — då blev räknaren fel ("13" men 1 kort).
+    const dedupedItems = dedupeByApplicant(snapshot.items || []);
+
     // CRITICAL: Merge cached ratings into snapshot items for instant rating display
     // This eliminates the "millisecond flicker" where ratings appear after the list
     const cachedRatings = readCachedRatings(userId);
     if (Object.keys(cachedRatings).length > 0) {
-      return snapshot.items.map(item => ({
+      return dedupedItems.map(item => ({
         ...item,
         rating: cachedRatings[item.applicant_id] ?? item.rating ?? null,
       }));
     }
 
-    return snapshot.items;
+    return dedupedItems;
   } catch {
     return [];
   }
 };
+
 
 // Write snapshot to localStorage
 const writeSnapshot = (userId: string, items: ApplicationData[]) => {
   try {
     const key = SNAPSHOT_KEY_PREFIX + userId;
     const snapshot: SnapshotData = {
-      items: items.slice(0, 50), // Max 50 items
+      items: dedupeByApplicant(items).slice(0, 50), // Max 50 unika kandidater
       timestamp: Date.now(),
     };
     safeSetItem(key, JSON.stringify(snapshot));
@@ -230,6 +250,8 @@ export const useApplicationsData = (
   const {
     data,
     isLoading,
+    isFetching,
+
     error,
     fetchNextPage,
     hasNextPage,
@@ -853,6 +875,8 @@ export const useApplicationsData = (
     allApplications: enrichedApplications, // non-deduplicated, for consumers that need all
     stats,
     isLoading,
+    isFetching,
+
     error,
     refetch,
     invalidateApplications,
@@ -862,7 +886,12 @@ export const useApplicationsData = (
     hasNextPage,
     isFetchingNextPage,
     // Totalt antal träffar i databasen (inte bara laddade sidor)
-    totalCount: data?.pages?.[0]?.totalCount ?? deduplicatedApplications.length,
+    // När allt är laddat är listan sanningen — annars kan en gammal cache visa
+    // fler "kandidater" i rubriken än det finns kort i listan.
+    totalCount: hasNextPage
+      ? Math.max(data?.pages?.[0]?.totalCount ?? 0, deduplicatedApplications.length)
+      : deduplicatedApplications.length,
+
     // Nya för "Vill du fortsätta?" banner
     hasReachedLimit,
     continueLoading,

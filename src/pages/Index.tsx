@@ -105,6 +105,7 @@ const CandidatesContent = () => {
     applications, 
     stats, 
     isLoading, 
+    isFetching,
     error, 
     refetch,
     fetchNextPage,
@@ -116,6 +117,15 @@ const CandidatesContent = () => {
     updateRating,
     totalCount,
   } = useApplicationsData(debouncedSearch, { questionFilters });
+
+  // Medan en ny sökning väntar/hämtas visar vi INTE ett nytt tomläge — annars
+  // blinkar "Inga kandidater än" förbi när man rensar filter.
+  const isSearchPending = searchQuery !== debouncedSearch;
+  const isBusy = isSearchPending || (isFetching && !isFetchingNextPage);
+  const stableSearchRef = useRef(debouncedSearch);
+  if (!isBusy) stableSearchRef.current = debouncedSearch;
+  const appliedSearch = stableSearchRef.current;
+
 
   
   // Instant render när datan redan finns i cache — fade-in bara vid cold load.
@@ -156,6 +166,13 @@ const CandidatesContent = () => {
     hired: stats.hired,
     rejected: stats.rejected,
   }), [totalCount, stats]);
+
+  // Frys räknaren medan en ny sökning hämtas så siffran inte hoppar till 0.
+  const lastTotalRef = useRef(totalCount);
+  if (!isBusy) lastTotalRef.current = totalCount;
+  const displayTotal = isBusy ? lastTotalRef.current : filteredStats.total;
+
+
 
 
 
@@ -204,7 +221,7 @@ const CandidatesContent = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
-            Alla kandidater ({isLoading ? '...' : filteredStats.total})
+            Alla kandidater ({isLoading ? '...' : displayTotal})
           </h1>
           <p className="text-sm text-white mt-1">
             Hantera och granska kandidater som sökt till dina jobbannonser
@@ -279,12 +296,25 @@ const CandidatesContent = () => {
               </div>
             </CardContent>
           </Card>
-        ) : safeApplications.length === 0 && !questionFilters.length && !searchQuery.trim() ? (
+        ) : safeApplications.length === 0 && !questionFilters.length && !appliedSearch.trim() && !isBusy ? (
           <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
             <p className="text-white text-center">
               Inga kandidater än.<br />
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
+          </div>
+        ) : filteredApplications.length === 0 && isBusy && !appliedSearch.trim() && !questionFilters.length ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                <Skeleton className="h-12 w-12 rounded-full bg-white/10 flex-shrink-0" />
+                <div className="flex-1 space-y-2 min-w-0">
+                  <Skeleton className="h-4 w-40 max-w-full bg-white/10" />
+                  <Skeleton className="h-3 w-24 bg-white/10" />
+                  <Skeleton className="h-3 w-56 max-w-full bg-white/10" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredApplications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/5 border border-white/10 rounded-lg">
@@ -293,13 +323,14 @@ const CandidatesContent = () => {
             </div>
             <p className="text-white font-medium text-base">Inga kandidater hittades</p>
             <p className="text-white text-sm mt-1 text-center max-w-xs">
-              {searchQuery.trim() 
+              {appliedSearch.trim() 
                 ? 'Försök med ett annat sökord eller kontrollera stavningen'
                 : 'Prova att ändra eller ta bort några filter'}
             </p>
             {(searchQuery.trim() || questionFilters.length > 0) && (
               <Button
                 variant="glass"
+
                 size="sm"
                 onClick={() => {
                   setSearchQuery('');
