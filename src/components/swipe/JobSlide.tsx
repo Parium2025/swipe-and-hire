@@ -87,12 +87,21 @@ export const JobSlide = memo(function JobSlide({
     [nopeDragOpacity, exitOpacity],
     ([o, e]) => (o as number) * (e as number) * (e as number),
   );
-  const likeScale = useTransform(x, [0, 90], [0.86, 1]);
-  const nopeScale = useTransform(x, [-90, 0], [1, 0.86]);
+  const likeScale = useTransform(x, [0, 90], prefersReducedMotion ? [1, 1] : [0.86, 1]);
+  const nopeScale = useTransform(x, [-90, 0], prefersReducedMotion ? [1, 1] : [1, 0.86]);
   // Mjukare rotate/scale-utslag = mindre visuell wobble under drag.
   // Rotate 10° → 6°, scale 0.95 → 0.98.
-  const cardRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
-  const cardScale = useTransform(x, [-200, 0, 200], [0.98, 1, 0.98]);
+  // ♿️ Reduced motion: ingen tilt/scale — kortet följer bara fingret i x-led.
+  const cardRotate = useTransform(
+    x,
+    [-200, 0, 200],
+    prefersReducedMotion ? [0, 0, 0] : [-6, 0, 6],
+  );
+  const cardScale = useTransform(
+    x,
+    [-200, 0, 200],
+    prefersReducedMotion ? [1, 1, 1] : [0.98, 1, 0.98],
+  );
   const combinedScale = useTransform(
     [cardScale, entryScale],
     ([cs, es]) => (cs as number) * (es as number),
