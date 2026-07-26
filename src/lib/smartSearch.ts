@@ -606,3 +606,59 @@ export function candidateMatchesSearch<T extends CandidateSearchFields>(
   const results = smartSearchCandidates([candidate], query);
   return results.length > 0;
 }
+// ============================================
+// JOB SMART SEARCH (employer dashboard / my jobs)
+// ============================================
+
+export interface WeightedField {
+  text: string;
+  weight: number;
+}
+
+/**
+ * Score a job against a multi-word query.
+ * - Every word in the query MUST match somewhere (AND-logic)
+ * - Each word can match exactly, by prefix, by synonym, by location group
+ *   or fuzzily (typo tolerance, å/ä/ö-normalized)
+ * - Returns 0 when the job does not match, otherwise a relevance score
+ */
+export function scoreJobMatch(fields: WeightedField[], query: string): number {
+  const tokens = query.toLowerCase().trim().split(/\s+/).filter(t => t.length > 0);
+  if (tokens.length === 0) return 0;
+
+  let total = 0;
+
+  for (const token of tokens) {
+    let best = 0;
+
+    // Synonym expansion once per token
+    const expanded = expandSearchTerms(token).map(t => normalizeSwedish(t));
+
+    for (const field of fields) {
+      if (!field.text) continue;
+      const normField = normalizeSwedish(field.text);
+
+      // Direct / prefix / location / fuzzy match
+      const { match, score } = fuzzyMatch(field.text, token);
+      if (match) {
+        best = Math.max(best, score * field.weight);
+      }
+
+      // Synonym hit (e.g. "del" -> "deltid", "rek" -> "rekryterare")
+      if (best < 80 * field.weight) {
+        for (const term of expanded) {
+          if (term.length >= 2 && normField.includes(term)) {
+            best = Math.max(best, 75 * field.weight);
+            break;
+          }
+        }
+      }
+    }
+
+    // AND-logic: one unmatched word = no hit at all
+    if (best === 0) return 0;
+    total += best;
+  }
+
+  return total;
+}
