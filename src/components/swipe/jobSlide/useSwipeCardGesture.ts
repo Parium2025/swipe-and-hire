@@ -99,6 +99,10 @@ export function useSwipeCardGesture({
     prevOverlayOpenRef.current = overlayOpen;
   }, [overlayOpen]);
 
+  // ♿️ Respektera systemets "Minska rörelse". Då byter vi spring/parallax mot
+  // korta linjära toningar och kortare handoff — samma flöde, ingen sväng.
+  const prefersReducedMotion = useReducedMotion();
+
   const triggerSwipe = useCallback(
     // Andra argumentet (velocity) behålls i signaturen för bakåtkompat med
     // anroparna, men används INTE längre — vi kör alltid den mjuka
