@@ -133,9 +133,12 @@ const CandidatesContent = () => {
   }, [isLoading, showContent]);
 
   // Cacha antalet så skeletonen matchar verkligt innehåll nästa cold load.
+  // Bara i ofiltrerad vy — annars sparas ett sökresultat som "antal kandidater".
   useEffect(() => {
-    if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.allCandidates, (applications || []).length);
-  }, [isLoading, applications]);
+    if (isLoading) return;
+    if (debouncedSearch.trim() || questionFilters.length > 0) return;
+    writeCachedCount(SKELETON_COUNT_KEYS.allCandidates, (applications || []).length);
+  }, [isLoading, applications, debouncedSearch, questionFilters]);
 
 
   // Safety check to prevent null crash
