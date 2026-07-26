@@ -160,21 +160,26 @@ const readSnapshot = (userId: string): ApplicationData[] => {
       return [];
     }
 
+    // En kandidat = en rad. Äldre snapshots kan innehålla flera ansökningar per
+    // person (före serversidig dedup) — då blev räknaren fel ("13" men 1 kort).
+    const dedupedItems = dedupeByApplicant(snapshot.items || []);
+
     // CRITICAL: Merge cached ratings into snapshot items for instant rating display
     // This eliminates the "millisecond flicker" where ratings appear after the list
     const cachedRatings = readCachedRatings(userId);
     if (Object.keys(cachedRatings).length > 0) {
-      return snapshot.items.map(item => ({
+      return dedupedItems.map(item => ({
         ...item,
         rating: cachedRatings[item.applicant_id] ?? item.rating ?? null,
       }));
     }
 
-    return snapshot.items;
+    return dedupedItems;
   } catch {
     return [];
   }
 };
+
 
 // Write snapshot to localStorage
 const writeSnapshot = (userId: string, items: ApplicationData[]) => {
