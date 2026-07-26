@@ -115,7 +115,7 @@ export function useSwipeCardGesture({
       hapticMedium();
 
       if (direction === 'right') {
-        animate(x, 0, SNAP_SPRING);
+        animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
         onSwipeRight();
         return;
       }
@@ -125,19 +125,29 @@ export function useSwipeCardGesture({
       // Exit-animation för kortet — mjuk, förutsägbar, alltid samma känsla
       // oavsett hur snabbt användaren swipear. Detta är den ursprungliga
       // premium-exiten före velocity-experimentet.
-      animate(x, -EXIT_X, EXIT_SPRING);
-      animate(exitOpacity, 0, {
-        duration: EXIT_OPACITY_DURATION,
-        ease: PREMIUM_EASE,
-      });
+      // ♿️ Reduced motion: ingen spring/överslag — kortet tonar bort på plats
+      // istället för att kastas ut i sidled.
+      if (prefersReducedMotion) {
+        animate(exitOpacity, 0, { duration: REDUCED_FADE, ease: 'linear' });
+        underlayY.set(0);
+        underlayScale.set(1);
+        animate(underlayOpacity, 1, { duration: REDUCED_FADE, ease: 'linear' });
+      } else {
+        animate(x, -EXIT_X, EXIT_SPRING);
+        animate(exitOpacity, 0, {
+          duration: EXIT_OPACITY_DURATION,
+          ease: PREMIUM_EASE,
+        });
 
-      // Underlaget stiger upp bakom det utåkande kortet.
-      animate(underlayY, 0, UNDERLAY_RISE_SPRING);
-      animate(underlayScale, 1, UNDERLAY_RISE_SPRING);
-      animate(underlayOpacity, 1, {
-        duration: UNDERLAY_OPACITY_DURATION,
-        ease: PREMIUM_EASE,
-      });
+        // Underlaget stiger upp bakom det utåkande kortet.
+        animate(underlayY, 0, UNDERLAY_RISE_SPRING);
+        animate(underlayScale, 1, UNDERLAY_RISE_SPRING);
+        animate(underlayOpacity, 1, {
+          duration: UNDERLAY_OPACITY_DURATION,
+          ease: PREMIUM_EASE,
+        });
+      }
+
 
       // 🚀 Tinder/TikTok-handoff: mounta nästa kort mid-exit istället för
       // att vänta på att springen landar. Timer trackas i ref → cleanup vid
