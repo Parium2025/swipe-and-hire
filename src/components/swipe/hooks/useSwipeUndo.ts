@@ -74,6 +74,7 @@ export function useSwipeUndo({ onUndoSwipeAction }: UseSwipeUndoOptions) {
     setUndoEntryJobId(lastId);
     onUndoSwipeAction(lastId);
     undoStackRef.current = stack.slice(0, -1);
+    persistStack(undoStackRef.current);
     setCanUndo(undoStackRef.current.length > 0);
     hapticSuccess();
 
