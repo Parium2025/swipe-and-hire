@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, type TouchEvent as ReactTouchEvent } fr
 import { animate, type MotionValue, type PanInfo } from 'framer-motion';
 import { hapticLight, hapticMedium } from '@/lib/haptics';
 import {
-  DOUBLE_TAP_DELAY,
   EXIT_HANDOFF_MS,
   EXIT_OPACITY_DURATION,
   EXIT_SPRING,
@@ -42,7 +41,6 @@ interface UseSwipeCardGestureOptions {
   underlayOpacity: MotionValue<number>;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
-  onTap: () => void;
   onTapTitle: () => void;
   onTapCompany: () => void;
   clearTapHint: () => void;
@@ -69,7 +67,6 @@ export function useSwipeCardGesture({
   underlayOpacity,
   onSwipeLeft,
   onSwipeRight,
-  onTap,
   onTapTitle,
   onTapCompany,
   clearTapHint,
