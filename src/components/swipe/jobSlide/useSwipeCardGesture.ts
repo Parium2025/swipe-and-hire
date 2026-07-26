@@ -215,7 +215,7 @@ export function useSwipeCardGesture({
       }
       animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
     },
-    [clearTapHint, triggerSwipe, x],
+    [clearTapHint, prefersReducedMotion, triggerSwipe, x],
   );
 
   const handleTouchStartCapture = useCallback(
