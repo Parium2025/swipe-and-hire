@@ -369,6 +369,7 @@ export function useSwipeCardGesture({
     },
     [
       clearTapHint,
+      prefersReducedMotion,
       onTapCompany,
       onTapTitle,
       overlayOpen,
