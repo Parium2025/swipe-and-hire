@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, type TouchEvent as ReactTouchEvent } from 'react';
-import { animate, type MotionValue, type PanInfo } from 'framer-motion';
+import { animate, useReducedMotion, type MotionValue, type PanInfo } from 'framer-motion';
 import { hapticLight, hapticMedium } from '@/lib/haptics';
 import {
   EXIT_HANDOFF_MS,
