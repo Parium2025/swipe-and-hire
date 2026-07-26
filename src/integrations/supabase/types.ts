@@ -3522,6 +3522,21 @@ export type Database = {
           work_schedule: string
         }[]
       }
+      search_employer_jobs: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_recruiter_id?: string
+          p_search?: string
+          p_sort?: string
+          p_status?: string
+        }
+        Returns: {
+          job_id: string
+          relevance: number
+          total_count: number
+        }[]
+      }
       search_jobs: {
         Args: {
           p_category?: string
@@ -3619,6 +3634,7 @@ export type Database = {
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
       trigger_news_health_watchdog: { Args: never; Returns: undefined }
       try_uuid: { Args: { p_text: string }; Returns: string }
+      unaccent: { Args: { "": string }; Returns: string }
       verify_cron_secret: {
         Args: { _secret_name?: string; _token: string }
         Returns: boolean
