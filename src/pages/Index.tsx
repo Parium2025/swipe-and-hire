@@ -167,6 +167,13 @@ const CandidatesContent = () => {
     rejected: stats.rejected,
   }), [totalCount, stats]);
 
+  // Frys räknaren medan en ny sökning hämtas så siffran inte hoppar till 0.
+  const lastTotalRef = useRef(totalCount);
+  if (!isBusy) lastTotalRef.current = totalCount;
+  const displayTotal = isBusy ? lastTotalRef.current : filteredStats.total;
+
+
+
 
 
   if (isLoading || !showContent) {
