@@ -39,8 +39,7 @@ import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
 import EmployerAnalytics from '@/components/EmployerAnalytics';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRightLeft, Search, ArrowUpDown } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ArrowRightLeft, Search } from 'lucide-react';
 
 
 import KeepAlive from '@/components/KeepAlive';
@@ -88,41 +87,11 @@ const JOB_SEEKER_KEEP_KEYS = [
   '/support',
 ];
 
-const CANDIDATE_SEGMENTS = [
-  { id: 'all', label: 'Alla' },
-  { id: 'pending', label: 'Nya' },
-  { id: 'reviewing', label: 'Granskas' },
-  { id: 'hired', label: 'Anställda' },
-  { id: 'rejected', label: 'Avvisade' },
-] as const;
-
-const CANDIDATE_SORTS = [
-  { id: 'applied_at', label: 'Senast ansökt' },
-  { id: 'oldest', label: 'Äldst ansökt' },
-  { id: 'name', label: 'Namn (A–Ö)' },
-  { id: 'rating', label: 'Högst betyg' },
-] as const;
-
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [questionFilters, setQuestionFilters] = useState<QuestionFilterValue[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
-  // Segment och sortering behålls under sessionen så man inte tappar sin vy
-  const [statusFilter, setStatusFilter] = useState<string>(
-    () => sessionStorage.getItem('candidates_status_filter') || 'all',
-  );
-  const [sortBy, setSortBy] = useState<string>(
-    () => sessionStorage.getItem('candidates_sort_by') || 'applied_at',
-  );
-
-  useEffect(() => {
-    sessionStorage.setItem('candidates_status_filter', statusFilter);
-  }, [statusFilter]);
-  useEffect(() => {
-    sessionStorage.setItem('candidates_sort_by', sortBy);
-  }, [sortBy]);
-
   // Debounce search: 300ms delay before hitting the database
   // Prevents spamming FTS queries on every keystroke (critical at 500k+ candidates)
   useEffect(() => {
@@ -146,7 +115,7 @@ const CandidatesContent = () => {
     loadedCount,
     updateRating,
     totalCount,
-  } = useApplicationsData(debouncedSearch, { questionFilters, statusFilter, sortBy });
+  } = useApplicationsData(debouncedSearch, { questionFilters });
 
   
   // Instant render när datan redan finns i cache — fade-in bara vid cold load.
@@ -278,42 +247,6 @@ const CandidatesContent = () => {
                   )}
                 </button>
               </div>
-              {/* Segment + sortering — körs serversidigt */}
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                {CANDIDATE_SEGMENTS.map((segment) => (
-                  <button
-                    key={segment.id}
-                    onClick={() => setStatusFilter(segment.id)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all active:scale-[0.97] touch-manipulation outline-none focus:outline-none ${
-                      statusFilter === segment.id
-                        ? 'bg-white/20 border-white/30 text-white'
-                        : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
-                    }`}
-                  >
-                    {segment.label}
-                  </button>
-                ))}
-                <span className="hidden sm:block h-4 w-px bg-white/15 mx-1" />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50 transition-all active:scale-[0.97] touch-manipulation outline-none focus:outline-none">
-                      <ArrowUpDown size={13} />
-                      {CANDIDATE_SORTS.find((s) => s.id === sortBy)?.label}
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="bg-slate-900 border-white/10">
-                    {CANDIDATE_SORTS.map((sort) => (
-                      <DropdownMenuItem
-                        key={sort.id}
-                        onClick={() => setSortBy(sort.id)}
-                        className={`text-sm cursor-pointer ${sortBy === sort.id ? 'text-white bg-white/10' : 'text-white/80'}`}
-                      >
-                        {sort.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
               {/* Filter chips below */}
               {questionFilters.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap">
@@ -351,7 +284,7 @@ const CandidatesContent = () => {
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
           </div>
-        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || statusFilter !== 'all' || searchQuery.trim()) ? (
+        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/5 border border-white/10 rounded-lg">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
               <Search className="h-5 w-5 text-white" />
@@ -362,14 +295,13 @@ const CandidatesContent = () => {
                 ? 'Försök med ett annat sökord eller kontrollera stavningen'
                 : 'Prova att ändra eller ta bort några filter'}
             </p>
-            {(searchQuery.trim() || questionFilters.length > 0 || statusFilter !== 'all') && (
+            {(searchQuery.trim() || questionFilters.length > 0) && (
               <Button
                 variant="glass"
                 size="sm"
                 onClick={() => {
                   setSearchQuery('');
                   setQuestionFilters([]);
-                  setStatusFilter('all');
                 }}
                 className="mt-3 text-xs"
               >
