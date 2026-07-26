@@ -537,7 +537,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     // på ett "SÖKT"-kort upplevdes störande. Nu är högerswipe en no-op.
     if (isApplied(currentJob.id)) return;
     onRecordSwipeAction?.(currentJob.id, 'liked');
-    setShowApply(true);
+    // 👉 Höger-swipe visar full jobbinfo direkt (tidigare "Snabb info").
+    // Ansökan startas därifrån via CTA:n i botten av detaljvyn.
+    setShowDetail(true);
   }, [currentJob, isApplied, onRecordSwipeAction]);
 
   const handleSwipeLeft = useCallback(() => {
@@ -558,11 +560,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const handleSwipeLeftRef = useRef(handleSwipeLeft);
   useEffect(() => { handleSwipeRightRef.current = handleSwipeRight; }, [handleSwipeRight]);
   useEffect(() => { handleSwipeLeftRef.current = handleSwipeLeft; }, [handleSwipeLeft]);
-
-  const handleTap = useCallback(() => {
-    if (isInCooldown()) return;
-    setShowDetail(true);
-  }, [isInCooldown]);
 
   const handleApplyFromDetail = useCallback(() => {
     setShowDetail(false);
@@ -701,7 +698,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                     onSwipeRight={handleSwipeRight}
                     onSwipeLeft={handleSwipeLeft}
                     onSave={() => onToggleSave(job.id)}
-                    onTap={handleTap}
                     onRegisterSwipeApi={registerActiveSwipeApi}
                   />
                 ) : null}

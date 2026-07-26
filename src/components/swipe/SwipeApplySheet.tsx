@@ -4,17 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
-import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
 import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
-import {
-  capitalize as cap,
-  getWorkLocationLabel,
-  getRemoteWorkLabel,
-  getSalaryTransparencyLabel,
-} from '@/lib/jobViewHelpers';
 import type { SwipeJob } from './types';
-import { useApplyData, type ExtraJobDetails } from './hooks/useApplyData';
+import { useApplyData } from './hooks/useApplyData';
 import { useApplySubmit } from './hooks/useApplySubmit';
 
 interface SwipeApplySheetProps {
@@ -27,81 +20,7 @@ interface SwipeApplySheetProps {
   onApplied: () => void;
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0">
-      <span className="text-white font-medium">{label}: </span>
-      <TruncatedText
-        text={value}
-        className="text-white font-medium inline-block align-bottom min-w-0 max-w-full"
-        tooltipSide="top"
-        style={{
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}
-      />
-    </div>
-  );
-}
-
-
-
-
-function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDetails | null }) {
-  const salaryTypeSuffix =
-    job.salary_type === 'hourly' || job.salary_type === 'rorlig' ? 'kr/tim' : 'kr/mån';
-
-  const salaryLabel = (() => {
-    if (job.salary_min && job.salary_max) {
-      return `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${salaryTypeSuffix}`;
-    }
-    if (job.salary_min) return `Från ${job.salary_min.toLocaleString('sv-SE')} ${salaryTypeSuffix}`;
-    if (job.salary_max) return `Upp till ${job.salary_max.toLocaleString('sv-SE')} ${salaryTypeSuffix}`;
-    if (job.salary_transparency) return getSalaryTransparencyLabel(job.salary_transparency);
-    return null;
-  })();
-
-  const workTimeLabel = (extra?.work_start_time || extra?.work_end_time)
-    ? `${extra?.work_start_time ?? ''} – ${extra?.work_end_time ?? ''}`
-    : null;
-
-  const startDateLabel = extra?.start_date
-    ? new Date(extra.start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
-    : null;
-
-  return (
-    <div className="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
-      <h3 className="text-white font-bold text-base">Snabb info</h3>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
-        {job.employment_type && (
-          <DetailRow
-            label="Anställning"
-            value={[
-              getEmploymentTypeLabel(job.employment_type),
-              formatEmploymentDetails({
-                employment_type: job.employment_type,
-                part_time_days: job.part_time_days,
-                part_time_shifts: job.part_time_shifts,
-                duration_amount: job.duration_amount,
-                duration_unit: job.duration_unit,
-              }),
-            ].filter(Boolean).join(' · ')}
-          />
-        )}
-        {job.occupation && <DetailRow label="Yrke" value={cap(job.occupation) ?? ''} />}
-        {job.location && <DetailRow label="Ort" value={cap(job.location) ?? ''} />}
-        {workTimeLabel && <DetailRow label="Arbetstid" value={workTimeLabel} />}
-        {startDateLabel && <DetailRow label="Startdatum" value={startDateLabel} />}
-        {salaryLabel && <DetailRow label="Lön" value={salaryLabel} />}
-        {job.positions_count && job.positions_count > 1 && <DetailRow label="Antal tjänster" value={`${job.positions_count} st`} />}
-      </div>
-    </div>
-  );
-}
-
-export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClose, onApplied }: SwipeApplySheetProps) {
+export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
   const [isClosing, setIsClosing] = useState(false);
 
@@ -110,7 +29,6 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
     answers,
     setAnswers,
     contactEmail,
-    extraDetails,
     hasAlreadyApplied,
     loading,
   } = useApplyData(jobId, open, user?.id);
@@ -268,12 +186,6 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
                 </motion.div>
               ) : (
                 <>
-                  {job && (
-                    <div className="mb-6">
-                      <JobDetailsSection job={job} extra={extraDetails} />
-                    </div>
-                  )}
-
                   {questions.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
                       <p className="text-white text-sm max-w-xs">
