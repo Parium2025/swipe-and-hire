@@ -710,36 +710,9 @@ export const useApplicationsData = (
     }
   }, [applications, user, queryKey, queryClient]);
 
-  // Enrich with additional job metadata if needed (kept for backwards compatibility)
-  // Track which IDs we've already attempted to fetch to prevent infinite loops
-  // (if a job_id doesn't exist in job_postings, we'd otherwise retry forever)
-  const fetchedJobIdsRef = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    if (applications.length === 0) return;
+  // (Borttaget) Extra hämtning av jobbtitlar — RPC:n returnerar redan job_title,
+  // så den gamla effekten gjorde ett onödigt DB-anrop per laddad sida.
 
-    const uniqueJobIds = [...new Set(applications.map(app => app.job_id))];
-    const missingIds = uniqueJobIds.filter(
-      id => !jobTitles[id] && !fetchedJobIdsRef.current.has(id)
-    );
-    
-    if (missingIds.length === 0) return;
-
-    // Mark as attempted BEFORE fetch to prevent re-entry
-    missingIds.forEach(id => fetchedJobIdsRef.current.add(id));
-
-    supabase
-      .from('job_postings')
-      .select('id, title')
-      .in('id', missingIds)
-      .then(({ data: jobData }) => {
-        if (jobData) {
-          const titleMap = Object.fromEntries(
-            jobData.map(job => [job.id, job.title])
-          );
-          setJobTitles(prev => ({ ...prev, ...titleMap }));
-        }
-      });
-  }, [applications, jobTitles]);
 
   // Sökningen filtreras helt i databasen (FTS + trigram + jobbtitel). Vi filtrerar
   // INTE om på klienten — det skulle bara kunna kasta bort giltiga serverträffar.
