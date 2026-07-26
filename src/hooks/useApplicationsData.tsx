@@ -210,7 +210,7 @@ export const useApplicationsData = (
 ) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [jobTitles, setJobTitles] = useState<Record<string, string>>({});
+  
 
   const questionFilters = options.questionFilters ?? [];
   const statusFilter = options.statusFilter && options.statusFilter !== 'all' ? options.statusFilter : null;
@@ -365,24 +365,26 @@ export const useApplicationsData = (
          });
        }
 
-       // Fetch current user's ratings for these applicants in batch (instant display)
-       // Start with cached ratings for immediate display
+       // Hämta aktuella betyg för dessa kandidater i en batch.
        const cachedRatings = readCachedRatings(user.id);
        const ratingsMap: Record<string, number> = { ...cachedRatings };
-       
-       const { data: ratingsData } = await supabase
+
+       const { data: ratingsData, error: ratingsError } = await supabase
          .from('candidate_ratings')
          .select('applicant_id, rating')
          .eq('recruiter_id', user.id)
          .in('applicant_id', applicantIds);
 
-       if (ratingsData) {
+       if (!ratingsError && ratingsData) {
+         // Databasen är sanningen: rensa cachade betyg för de kandidater vi
+         // just frågade om, annars lever ett borttaget betyg kvar för alltid.
+         applicantIds.forEach((id) => { delete ratingsMap[id]; });
          ratingsData.forEach((row: any) => {
            ratingsMap[row.applicant_id] = row.rating;
          });
-         // Update cache with fresh data
          writeCachedRatings(user.id, ratingsMap);
        }
+
 
        // Transform data: RPC returnerar redan job_title/job_occupation/rating
        const items = baseData.map((item: any) => {
@@ -439,6 +441,10 @@ export const useApplicationsData = (
       return lastPage.hasMore ? allPages.length : undefined;
     },
     enabled: !!user,
+    // Behåll föregående resultat medan en ny sökning/filtrering hämtas.
+    // Utan detta blir isLoading true vid varje ny sökbokstav → hela sidan
+    // (inklusive sökfältet) byts mot skeleton och input tappar fokus.
+    placeholderData: (previousData: any) => previousData,
     // Standardvyn cachas (realtime håller den fräsch). Sök/filter/sortering
     // måste alltid gå mot databasen.
     staleTime: isDefaultView ? Infinity : 0,
@@ -464,34 +470,44 @@ export const useApplicationsData = (
   });
 
 
-  // PRE-FETCHING: Automatically load next batch in background after each page loads
-  // BUT STOP after 500 candidates (20 pages) - user must click "Fortsätt" to load more
-  // This prevents 20,000 API calls for 500k candidates!
+  // PRE-FETCHING: laddar nästa sidor i bakgrunden, men bara upp till en budget.
+  // Utan budget skulle 10 000 kandidater ge 400 RPC-anrop direkt vid sidladdning.
+  const [prefetchBudget, setPrefetchBudget] = useState(MAX_AUTO_PREFETCH_PAGES);
   const [hasReachedLimit, setHasReachedLimit] = useState(false);
-  
+
   useEffect(() => {
     const currentPageCount = data?.pages?.length || 0;
-    
-    // Om vi nått 20 sidor (500 kandidater), sluta auto-prefetcha
-    if (currentPageCount >= MAX_AUTO_PREFETCH_PAGES) {
-      setHasReachedLimit(true);
+
+    if (currentPageCount >= prefetchBudget) {
+      // Visa "fortsätt"-läget bara om det faktiskt finns mer att hämta
+      setHasReachedLimit(!!hasNextPage);
       return;
     }
-    
-    // Fortsätt auto-prefetch för första 500 kandidater
+
+    setHasReachedLimit(false);
+
     if (hasNextPage && !isFetchingNextPage && currentPageCount > 0) {
       const timer = setTimeout(() => {
         fetchNextPage();
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [data?.pages?.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [data?.pages?.length, hasNextPage, isFetchingNextPage, fetchNextPage, prefetchBudget]);
 
-  // Funktion för att fortsätta ladda nästa 500 kandidater
+  // Nollställ budgeten när sök/filter ändras — annars ligger "fortsätt"-läget kvar
+  // från en tidigare sökning och nya träffar slutar ladda automatiskt.
+  useEffect(() => {
+    setPrefetchBudget(MAX_AUTO_PREFETCH_PAGES);
+    setHasReachedLimit(false);
+  }, [queryKey]);
+
+  // Fortsätt ladda nästa batch (höjer budgeten istället för att bara hämta 1 sida)
   const continueLoading = useCallback(() => {
     setHasReachedLimit(false);
+    setPrefetchBudget((prev) => (data?.pages?.length ?? prev) + MAX_AUTO_PREFETCH_PAGES);
     fetchNextPage();
-  }, [fetchNextPage]);
+  }, [fetchNextPage, data?.pages?.length]);
+
 
   // Flatten all pages
   const applications = data?.pages.flatMap(page => page.items) || [];
@@ -696,36 +712,9 @@ export const useApplicationsData = (
     }
   }, [applications, user, queryKey, queryClient]);
 
-  // Enrich with additional job metadata if needed (kept for backwards compatibility)
-  // Track which IDs we've already attempted to fetch to prevent infinite loops
-  // (if a job_id doesn't exist in job_postings, we'd otherwise retry forever)
-  const fetchedJobIdsRef = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    if (applications.length === 0) return;
+  // (Borttaget) Extra hämtning av jobbtitlar — RPC:n returnerar redan job_title,
+  // så den gamla effekten gjorde ett onödigt DB-anrop per laddad sida.
 
-    const uniqueJobIds = [...new Set(applications.map(app => app.job_id))];
-    const missingIds = uniqueJobIds.filter(
-      id => !jobTitles[id] && !fetchedJobIdsRef.current.has(id)
-    );
-    
-    if (missingIds.length === 0) return;
-
-    // Mark as attempted BEFORE fetch to prevent re-entry
-    missingIds.forEach(id => fetchedJobIdsRef.current.add(id));
-
-    supabase
-      .from('job_postings')
-      .select('id, title')
-      .in('id', missingIds)
-      .then(({ data: jobData }) => {
-        if (jobData) {
-          const titleMap = Object.fromEntries(
-            jobData.map(job => [job.id, job.title])
-          );
-          setJobTitles(prev => ({ ...prev, ...titleMap }));
-        }
-      });
-  }, [applications, jobTitles]);
 
   // Sökningen filtreras helt i databasen (FTS + trigram + jobbtitel). Vi filtrerar
   // INTE om på klienten — det skulle bara kunna kasta bort giltiga serverträffar.

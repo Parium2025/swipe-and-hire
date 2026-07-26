@@ -133,9 +133,12 @@ const CandidatesContent = () => {
   }, [isLoading, showContent]);
 
   // Cacha antalet så skeletonen matchar verkligt innehåll nästa cold load.
+  // Bara i ofiltrerad vy — annars sparas ett sökresultat som "antal kandidater".
   useEffect(() => {
-    if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.allCandidates, (applications || []).length);
-  }, [isLoading, applications]);
+    if (isLoading) return;
+    if (debouncedSearch.trim() || questionFilters.length > 0) return;
+    writeCachedCount(SKELETON_COUNT_KEYS.allCandidates, (applications || []).length);
+  }, [isLoading, applications, debouncedSearch, questionFilters]);
 
 
   // Safety check to prevent null crash
@@ -208,9 +211,8 @@ const CandidatesContent = () => {
           </p>
         </div>
 
-        {/* Search Bar + Question Filter */}
-        {!isLoading && (
-          <div className="mb-6 space-y-3">
+        {/* Search Bar + Question Filter — alltid monterad så fokus aldrig tappas */}
+        <div className="mb-6 space-y-3">
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
               <Input
@@ -260,7 +262,7 @@ const CandidatesContent = () => {
             </div>
 
           </div>
-        )}
+
 
         {error ? (
           <div className="text-center py-12 text-destructive">
@@ -277,14 +279,14 @@ const CandidatesContent = () => {
               </div>
             </CardContent>
           </Card>
-        ) : safeApplications.length === 0 ? (
+        ) : safeApplications.length === 0 && !questionFilters.length && !searchQuery.trim() ? (
           <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
             <p className="text-white text-center">
               Inga kandidater än.<br />
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
           </div>
-        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
+        ) : filteredApplications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/5 border border-white/10 rounded-lg">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
               <Search className="h-5 w-5 text-white" />
