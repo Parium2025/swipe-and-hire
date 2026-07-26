@@ -8,7 +8,7 @@ import { isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@
 // 🔥 SCALE: under denna gräns är klientsök snabbast (0 ms, instant medan man skriver).
 // Över den växlar sökningen automatiskt till serversidig RPC (fuzzy + relevans i DB),
 // så systemet klarar tusentals annonser utan att ladda ner allt.
-export const SERVER_SEARCH_THRESHOLD = 300;
+export const SERVER_SEARCH_THRESHOLD = 100;
 const SERVER_SEARCH_LIMIT = 200;
 
 
