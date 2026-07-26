@@ -276,6 +276,42 @@ const CandidatesContent = () => {
                   )}
                 </button>
               </div>
+              {/* Segment + sortering — körs serversidigt */}
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                {CANDIDATE_SEGMENTS.map((segment) => (
+                  <button
+                    key={segment.id}
+                    onClick={() => setStatusFilter(segment.id)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all active:scale-[0.97] touch-manipulation outline-none focus:outline-none ${
+                      statusFilter === segment.id
+                        ? 'bg-white/20 border-white/30 text-white'
+                        : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
+                    }`}
+                  >
+                    {segment.label}
+                  </button>
+                ))}
+                <span className="hidden sm:block h-4 w-px bg-white/15 mx-1" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50 transition-all active:scale-[0.97] touch-manipulation outline-none focus:outline-none">
+                      <ArrowUpDown size={13} />
+                      {CANDIDATE_SORTS.find((s) => s.id === sortBy)?.label}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="bg-slate-900 border-white/10">
+                    {CANDIDATE_SORTS.map((sort) => (
+                      <DropdownMenuItem
+                        key={sort.id}
+                        onClick={() => setSortBy(sort.id)}
+                        className={`text-sm cursor-pointer ${sortBy === sort.id ? 'text-white bg-white/10' : 'text-white/80'}`}
+                      >
+                        {sort.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               {/* Filter chips below */}
               {questionFilters.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap">
@@ -287,6 +323,7 @@ const CandidatesContent = () => {
                 </div>
               )}
             </div>
+
           </div>
         )}
 
