@@ -468,28 +468,43 @@ export const useApplicationsData = (
   });
 
 
-  // PRE-FETCHING: Automatically load next batch in background after each page loads
-  // BUT STOP after 500 candidates (20 pages) - user must click "Fortsätt" to load more
-  // This prevents 20,000 API calls for 500k candidates!
+  // PRE-FETCHING: laddar nästa sidor i bakgrunden, men bara upp till en budget.
+  // Utan budget skulle 10 000 kandidater ge 400 RPC-anrop direkt vid sidladdning.
+  const [prefetchBudget, setPrefetchBudget] = useState(MAX_AUTO_PREFETCH_PAGES);
   const [hasReachedLimit, setHasReachedLimit] = useState(false);
-  
+
   useEffect(() => {
     const currentPageCount = data?.pages?.length || 0;
-    
-    // Om vi nått 20 sidor (500 kandidater), sluta auto-prefetcha
-    if (currentPageCount >= MAX_AUTO_PREFETCH_PAGES) {
-      setHasReachedLimit(true);
+
+    if (currentPageCount >= prefetchBudget) {
+      // Visa "fortsätt"-läget bara om det faktiskt finns mer att hämta
+      setHasReachedLimit(!!hasNextPage);
       return;
     }
-    
-    // Fortsätt auto-prefetch för första 500 kandidater
+
+    setHasReachedLimit(false);
+
     if (hasNextPage && !isFetchingNextPage && currentPageCount > 0) {
       const timer = setTimeout(() => {
         fetchNextPage();
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [data?.pages?.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [data?.pages?.length, hasNextPage, isFetchingNextPage, fetchNextPage, prefetchBudget]);
+
+  // Nollställ budgeten när sök/filter ändras — annars ligger "fortsätt"-läget kvar
+  // från en tidigare sökning och nya träffar slutar ladda automatiskt.
+  useEffect(() => {
+    setPrefetchBudget(MAX_AUTO_PREFETCH_PAGES);
+    setHasReachedLimit(false);
+  }, [queryKey]);
+
+  // Fortsätt ladda nästa batch (höjer budgeten istället för att bara hämta 1 sida)
+  const continueLoading = useCallback(() => {
+    setHasReachedLimit(false);
+    setPrefetchBudget((prev) => (data?.pages?.length ?? prev) + MAX_AUTO_PREFETCH_PAGES);
+    fetchNextPage();
+  }, [fetchNextPage, data?.pages?.length]);
 
   // Funktion för att fortsätta ladda nästa 500 kandidater
   const continueLoading = useCallback(() => {
