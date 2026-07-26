@@ -850,8 +850,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
       // No image on this job → clear any leftover state from a previously edited job
       if (!url) {
-        setJobImageDisplayUrl('');
-        setOriginalImageUrl('');
+        setJobImageDisplayUrl(null);
+        setOriginalImageUrl(null);
         return;
       }
 
