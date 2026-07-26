@@ -8,6 +8,7 @@ vi.mock('@/lib/haptics', () => ({
 
 describe('useSwipeUndo', () => {
   beforeEach(() => {
+    sessionStorage.clear();
     vi.useFakeTimers();
   });
   afterEach(() => {
