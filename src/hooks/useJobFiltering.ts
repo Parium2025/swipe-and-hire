@@ -64,6 +64,8 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
   // Filter and sort jobs
   const filteredAndSortedJobs = useMemo(() => {
     let result = [...jobs];
+    const relevanceScores = new Map<string, number>();
+
     
     // Filter by recruiter if selected
     if (selectedRecruiterId) {
