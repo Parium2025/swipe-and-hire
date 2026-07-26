@@ -57,7 +57,7 @@ function readCache(): HrNewsItem[] | null {
     const cached: CachedData = JSON.parse(raw);
     if (!cached || !Array.isArray(cached.items)) return null;
     // Safety net: never show a cache that can't be refreshed (e.g. backend error)
-    if (!cached.timestamp || Date.now() - cached.timestamp > MAX_VISIBLE_NEWS_AGE_MS) {
+    if (!cached.timestamp || Date.now() - cached.timestamp > MAX_CACHE_AGE_MS) {
       try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
       return null;
     }
