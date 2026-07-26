@@ -883,8 +883,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       const desktopUrl = (job as any)?.job_image_desktop_url;
 
       if (!desktopUrl) {
-        setJobImageDesktopDisplayUrl('');
-        setOriginalDesktopImageUrl('');
+        setJobImageDesktopDisplayUrl(null);
+        setOriginalDesktopImageUrl(null);
         return;
       }
 
