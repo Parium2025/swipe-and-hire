@@ -1,7 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { detectSalarySearch, scoreJobMatch } from '@/lib/smartSearch';
 import { isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
+
+// 🔥 SCALE: under denna gräns är klientsök snabbast (0 ms, instant medan man skriver).
+// Över den växlar sökningen automatiskt till serversidig RPC (fuzzy + relevans i DB),
+// så systemet klarar tusentals annonser utan att ladda ner allt.
+export const SERVER_SEARCH_THRESHOLD = 300;
+const SERVER_SEARCH_LIMIT = 200;
+
 
 export interface FilterableJob {
   id: string;
