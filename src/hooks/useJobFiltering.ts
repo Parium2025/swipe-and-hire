@@ -96,40 +96,44 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
           }
         });
       } else {
-        // Regular text search with synonyms
-        const expandedTerms = expandSearchTerms(searchTerm);
-        result = result.filter(job => {
-          // Comprehensive searchable text including ALL relevant fields
-          const searchableText = [
-            job.title,
-            job.location,
-            job.workplace_city,
-            job.workplace_address,
-            job.workplace_name,
-            job.workplace_postal_code,
-            job.employment_type,
-            job.work_schedule,
-            job.occupation,
-            job.category,
-            job.description,
-            job.requirements,
-            job.pitch,
-            job.work_location_type,
-            job.remote_work_possible,
-            job.salary_type,
-            job.employer_profile?.first_name,
-            job.employer_profile?.last_name,
-            // Add formatted salary for search
-            job.salary_min && job.salary_max ? `${job.salary_min}-${job.salary_max}` : '',
-            job.positions_count ? `${job.positions_count} platser` : '',
-          ].filter(Boolean).join(' ').toLowerCase();
-          
-          return expandedTerms.some(term => 
-            searchableText.includes(term.toLowerCase())
-          );
-        });
+        // Smart text search: typo-tolerant, å/ä/ö-normalized, multi-word AND, ranked
+        for (const job of result) {
+          const score = scoreJobMatch([
+            { text: job.title || '', weight: 3 },
+            { text: job.occupation || '', weight: 2 },
+            { text: job.location || '', weight: 2 },
+            { text: job.workplace_city || '', weight: 2 },
+            { text: job.workplace_name || '', weight: 2 },
+            { text: `${job.employer_profile?.first_name || ''} ${job.employer_profile?.last_name || ''}`.trim(), weight: 2 },
+            { text: job.employment_type || '', weight: 1.5 },
+            { text: job.work_schedule || '', weight: 1.5 },
+            { text: job.category || '', weight: 1 },
+            { text: job.workplace_address || '', weight: 1 },
+            { text: job.workplace_postal_code || '', weight: 1 },
+            { text: job.work_location_type || '', weight: 1 },
+            { text: job.remote_work_possible || '', weight: 1 },
+            { text: job.salary_type || '', weight: 1 },
+            { text: job.description || '', weight: 0.5 },
+            { text: job.requirements || '', weight: 0.5 },
+            { text: job.pitch || '', weight: 0.5 },
+            { text: job.salary_min && job.salary_max ? `${job.salary_min}-${job.salary_max}` : '', weight: 0.5 },
+            { text: job.positions_count ? `${job.positions_count} platser` : '', weight: 0.5 },
+          ], searchTerm);
+          if (score > 0) relevanceScores.set(job.id, score);
+        }
+        result = result.filter(job => relevanceScores.has(job.id));
       }
     }
+
+    // When searching with default sort: rank by relevance first
+    if (relevanceScores.size > 0 && sortBy === 'newest') {
+      return result.sort((a, b) => {
+        const diff = (relevanceScores.get(b.id) || 0) - (relevanceScores.get(a.id) || 0);
+        if (diff !== 0) return diff;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+    }
+
     
     // Sort
     switch (sortBy) {
