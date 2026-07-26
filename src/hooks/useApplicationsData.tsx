@@ -222,6 +222,11 @@ export const useApplicationsData = (
   const isDefaultView =
     !searchQuery.trim() && questionFilters.length === 0 && !statusFilter && sortBy === 'applied_at';
 
+  const queryKey = useMemo(
+    () => ['applications', user?.id, searchQuery, filtersKey, statusFilter, sortBy] as const,
+    [user?.id, searchQuery, filtersKey, statusFilter, sortBy],
+  );
+
   const {
     data,
     isLoading,
@@ -231,7 +236,8 @@ export const useApplicationsData = (
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['applications', user?.id, searchQuery, filtersKey, statusFilter, sortBy],
+    queryKey,
+
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       if (!user) {
