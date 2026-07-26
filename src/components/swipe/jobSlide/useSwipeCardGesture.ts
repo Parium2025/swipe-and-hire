@@ -3,6 +3,9 @@ import { animate, useReducedMotion, type MotionValue, type PanInfo } from 'frame
 import { hapticLight, hapticMedium } from '@/lib/haptics';
 import {
   EXIT_HANDOFF_MS,
+  REDUCED_EXIT_HANDOFF_MS,
+  REDUCED_FADE,
+  REDUCED_SNAP,
   EXIT_OPACITY_DURATION,
   EXIT_SPRING,
   EXIT_X,
