@@ -439,6 +439,10 @@ export const useApplicationsData = (
       return lastPage.hasMore ? allPages.length : undefined;
     },
     enabled: !!user,
+    // Behåll föregående resultat medan en ny sökning/filtrering hämtas.
+    // Utan detta blir isLoading true vid varje ny sökbokstav → hela sidan
+    // (inklusive sökfältet) byts mot skeleton och input tappar fokus.
+    placeholderData: (previousData: any) => previousData,
     // Standardvyn cachas (realtime håller den fräsch). Sök/filter/sortering
     // måste alltid gå mot databasen.
     staleTime: isDefaultView ? Infinity : 0,
