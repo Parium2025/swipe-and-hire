@@ -219,8 +219,35 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
               {/* Divider */}
               <div className="h-px bg-white/10 mx-2" />
 
-              {/* Info rows */}
+              {/* Info rows — ordered by employer priority */}
               <div className="flex flex-col px-3 pb-1 [&>div]:py-2.5 [&>div]:border-b [&>div]:border-white/10 [&>div:last-child]:border-b-0">
+                {/* 1. Applications — most actionable metric */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm leading-snug text-white">Ansökningar:</span>
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
+                    <Users className="h-3.5 w-3.5 flex-shrink-0" />
+                    {job.applications_count || 0}
+                  </span>
+                </div>
+
+                {/* 2. Status — urgency / remaining time */}
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-between cursor-pointer">
+                        <span className="text-sm leading-snug text-white">Status:</span>
+                        <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-400' : 'text-white'}`}>
+                          {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
+                      <p className="text-xs">{formatExpirationDateTime(job.created_at, job.expires_at)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                {/* 3. Recruiter — ownership */}
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
                   <TruncatedText
@@ -228,6 +255,8 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                     className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
                   />
                 </div>
+
+                {/* 4. Employment type */}
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
                   {(() => {
@@ -248,6 +277,17 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                     );
                   })()}
                 </div>
+
+                {/* 5. Location */}
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
+                  <TruncatedText
+                    text={job.location || '–'}
+                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+                  />
+                </div>
+
+                {/* 6. Start date */}
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm leading-snug text-white flex-shrink-0">Startdatum:</span>
                   <span className="text-sm leading-snug text-white font-medium text-right">
@@ -256,24 +296,14 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                       : 'Omgående'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm leading-snug text-white">Ansökningar:</span>
-                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
-                    <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                    {job.applications_count || 0}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
-                  <TruncatedText
-                    text={job.location || '–'}
-                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
-                  />
-                </div>
+
+                {/* 7. Published date */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm leading-snug text-white">Publicerad:</span>
                   <span className="text-sm leading-snug text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
                 </div>
+
+                {/* 8. Salary */}
                 {(() => {
                   const salaryText = getJobBadgeSalary({
                     salary_min: job.salary_min,
@@ -291,22 +321,6 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                     </div>
                   );
                 })()}
-
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center justify-between cursor-pointer">
-                        <span className="text-sm leading-snug text-white">Status:</span>
-                        <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-400' : 'text-white'}`}>
-                          {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
-                        </span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
-                      <p className="text-xs">{formatExpirationDateTime(job.created_at, job.expires_at)}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
               </div>
 
               <div className="h-px bg-white/10 mx-2" />
