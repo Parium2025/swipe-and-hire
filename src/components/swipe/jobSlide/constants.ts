@@ -73,3 +73,9 @@ export const OVERLAY_CLOSE_INPUT_LOCK_MS = 150;
 export const EXIT_HANDOFF_MS = 240;
 
 
+
+// ♿️ Reduced motion: korta linjära toningar istället för spring/parallax.
+// Samma flöde och samma timing-kontrakt, men utan rörelse i sidled.
+export const REDUCED_FADE = 0.12;
+export const REDUCED_SNAP = { duration: 0.1, ease: 'linear' as const };
+export const REDUCED_EXIT_HANDOFF_MS = 120;
