@@ -276,14 +276,14 @@ const CandidatesContent = () => {
               </div>
             </CardContent>
           </Card>
-        ) : safeApplications.length === 0 ? (
+        ) : safeApplications.length === 0 && !questionFilters.length && !searchQuery.trim() ? (
           <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
             <p className="text-white text-center">
               Inga kandidater än.<br />
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
           </div>
-        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
+        ) : filteredApplications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/5 border border-white/10 rounded-lg">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
               <Search className="h-5 w-5 text-white" />
