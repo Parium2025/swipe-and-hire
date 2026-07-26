@@ -27,6 +27,15 @@ export const PhoneVideoMockup = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
+    const id = window.requestAnimationFrame(() => {
+      window.dispatchEvent(new Event('parium:spline-ready'));
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, []);
+
+
+
+  useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     v.muted = true;
