@@ -21,7 +21,10 @@ export interface CareerTipItem {
 
 // LocalStorage cache for instant load - syncs based on cron schedule
 const CACHE_KEY = 'parium_career_tips_cache';
-const MAX_VISIBLE_TIP_AGE_MS = 12 * 60 * 60 * 1000;
+// How long a locally cached payload may be shown before we distrust it (freeze protection)
+const MAX_CACHE_AGE_MS = 12 * 60 * 60 * 1000;
+// How old the newest tip may be before we refresh in the background
+const STALE_TIP_AGE_MS = 72 * 60 * 60 * 1000;
 
 // Cron runs at 06, 11, 18, 23 UTC — calculate ms until next slot
 function msUntilNextCronSlot(): number {
