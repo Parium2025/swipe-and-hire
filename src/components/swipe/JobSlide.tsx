@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { Heart, X } from 'lucide-react';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useReducedMotion, useTransform } from 'framer-motion';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCardImage } from '@/hooks/useCardImage';
 import type { SwipeJob } from './types';
@@ -68,6 +68,7 @@ export const JobSlide = memo(function JobSlide({
 }: JobSlideProps) {
   const inputCapability = useInputCapability();
   const useTouchTunnel = inputCapability !== 'mouse';
+  const prefersReducedMotion = useReducedMotion();
 
   const x = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
