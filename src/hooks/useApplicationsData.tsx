@@ -721,14 +721,10 @@ export const useApplicationsData = (
       });
   }, [applications, jobTitles]);
 
-  // Apply client-side fuzzy matching for typo tolerance on top of FTS results
-  // This runs on already-filtered data from the database, so it's fast
-  const enrichedApplications = useMemo(() => {
-    if (!searchQuery || !searchQuery.trim()) {
-      return applications;
-    }
-    return smartSearchCandidates(applications, searchQuery);
-  }, [applications, searchQuery]);
+  // Sökningen filtreras helt i databasen (FTS + trigram + jobbtitel). Vi filtrerar
+  // INTE om på klienten — det skulle bara kunna kasta bort giltiga serverträffar.
+  const enrichedApplications = applications;
+
 
   // Deduplicate: one row per unique person, keeping the most recent application
   // Moved here from UI layer so all consumers get deduplicated data by default
