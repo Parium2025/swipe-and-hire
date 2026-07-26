@@ -229,7 +229,7 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
     }
-  }, [jobs, searchTerm, sortBy, selectedRecruiterId]);
+  }, [jobs, searchTerm, sortBy, selectedRecruiterId, serverMode, serverJobs]);
 
   return {
     searchInput,
@@ -240,5 +240,8 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
     selectedRecruiterId,
     setSelectedRecruiterId,
     filteredAndSortedJobs,
+    isServerSearch: serverMode,
+    isServerSearching: serverMode && isServerSearching,
   };
 };
+
