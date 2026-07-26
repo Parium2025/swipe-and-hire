@@ -1,7 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { detectSalarySearch, scoreJobMatch } from '@/lib/smartSearch';
 import { isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
+
+// 🔥 SCALE: under denna gräns är klientsök snabbast (0 ms, instant medan man skriver).
+// Över den växlar sökningen automatiskt till serversidig RPC (fuzzy + relevans i DB),
+// så systemet klarar tusentals annonser utan att ladda ner allt.
+export const SERVER_SEARCH_THRESHOLD = 300;
+const SERVER_SEARCH_LIMIT = 200;
+
 
 export interface FilterableJob {
   id: string;
@@ -61,9 +70,48 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  // 🔥 SCALE: serversidig sökning aktiveras automatiskt vid stora annonsvolymer
+  const serverMode = jobs.length >= SERVER_SEARCH_THRESHOLD && !!searchTerm.trim();
+
+  const { data: serverJobs, isFetching: isServerSearching } = useQuery({
+    queryKey: ['employer-jobs-search', searchTerm, sortBy, selectedRecruiterId],
+    enabled: serverMode,
+    staleTime: 60 * 1000,
+    queryFn: async (): Promise<FilterableJob[]> => {
+      const { data: hits, error } = await supabase.rpc('search_employer_jobs', {
+        p_search: searchTerm,
+        p_status: 'all',
+        p_recruiter_id: selectedRecruiterId,
+        p_sort: sortBy,
+        p_limit: SERVER_SEARCH_LIMIT,
+        p_offset: 0,
+      });
+      if (error) throw error;
+
+      const ids = (hits ?? []).map((h: any) => h.job_id as string);
+      if (ids.length === 0) return [];
+
+      const localById = new Map(jobs.map(j => [j.id, j]));
+      const missing = ids.filter(id => !localById.has(id));
+
+      if (missing.length > 0) {
+        const { data: rows } = await supabase
+          .from('job_postings')
+          .select('*, employer_profile:profiles!job_postings_employer_id_fkey (first_name, last_name)')
+          .in('id', missing);
+        for (const row of (rows ?? []) as any[]) localById.set(row.id, row as FilterableJob);
+      }
+
+      return ids.map(id => localById.get(id)).filter(Boolean) as FilterableJob[];
+    },
+  });
+
   // Filter and sort jobs
   const filteredAndSortedJobs = useMemo(() => {
+    // Serverläge: databasen har redan filtrerat, rankat och sorterat
+    if (serverMode) return serverJobs ?? [];
     let result = [...jobs];
+
     const relevanceScores = new Map<string, number>();
 
     
@@ -181,7 +229,7 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
     }
-  }, [jobs, searchTerm, sortBy, selectedRecruiterId]);
+  }, [jobs, searchTerm, sortBy, selectedRecruiterId, serverMode, serverJobs]);
 
   return {
     searchInput,
@@ -192,5 +240,8 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
     selectedRecruiterId,
     setSelectedRecruiterId,
     filteredAndSortedJobs,
+    isServerSearch: serverMode,
+    isServerSearching: serverMode && isServerSearching,
   };
 };
+
