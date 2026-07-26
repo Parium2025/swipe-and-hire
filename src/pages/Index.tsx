@@ -115,14 +115,25 @@ const CandidatesContent = () => {
     updateRating,
   } = useApplicationsData(debouncedSearch);
   
-  // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
-  const [showContent, setShowContent] = useState(false);
+  // Instant render när datan redan finns i cache — fade-in bara vid cold load.
+  const dataWasCached = useRef(!isLoading);
+  const [showContent, setShowContent] = useState(() => !isLoading);
   useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => setShowContent(true), 150);
+    if (!isLoading && !showContent) {
+      if (dataWasCached.current) {
+        setShowContent(true);
+        return;
+      }
+      const timer = setTimeout(() => setShowContent(true), 100);
       return () => clearTimeout(timer);
     }
-  }, [isLoading]);
+  }, [isLoading, showContent]);
+
+  // Cacha antalet så skeletonen matchar verkligt innehåll nästa cold load.
+  useEffect(() => {
+    if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.allCandidates, (applications || []).length);
+  }, [isLoading, applications]);
+
 
   // Safety check to prevent null crash
   const safeApplications = applications || [];
