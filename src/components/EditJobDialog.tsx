@@ -844,55 +844,70 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   // Load job image if exists - use public URL from job-images bucket (mobile)
   useEffect(() => {
     const loadJobImage = async () => {
-      if (job?.job_image_url && open) {
-        const url = job.job_image_url;
-        
-        // If it's a storage path (not a full URL), get public URL
-        if (!url.startsWith('http')) {
-          const { data: { publicUrl } } = supabase.storage
-            .from('job-images')
-            .getPublicUrl(url);
-          if (publicUrl) {
-            setJobImageDisplayUrl(publicUrl);
-            setOriginalImageUrl(url); // Keep storage path as original
-            return;
-          }
-        }
-        
-        // Otherwise use URL as-is
-        setJobImageDisplayUrl(url);
-        setOriginalImageUrl(url);
+      if (!open) return;
+
+      const url = job?.job_image_url;
+
+      // No image on this job → clear any leftover state from a previously edited job
+      if (!url) {
+        setJobImageDisplayUrl('');
+        setOriginalImageUrl('');
+        return;
       }
+
+      // If it's a storage path (not a full URL), get public URL
+      if (!url.startsWith('http')) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('job-images')
+          .getPublicUrl(url);
+        if (publicUrl) {
+          setJobImageDisplayUrl(publicUrl);
+          setOriginalImageUrl(url); // Keep storage path as original
+          return;
+        }
+      }
+
+      // Otherwise use URL as-is
+      setJobImageDisplayUrl(url);
+      setOriginalImageUrl(url);
     };
     
     loadJobImage();
-  }, [job?.job_image_url, open]);
+  }, [job?.id, job?.job_image_url, open]);
 
   // Load desktop job image if exists
   useEffect(() => {
     const loadDesktopJobImage = async () => {
+      if (!open) return;
+
       const desktopUrl = (job as any)?.job_image_desktop_url;
-      if (desktopUrl && open) {
-        // If it's a storage path (not a full URL), get public URL
-        if (!desktopUrl.startsWith('http')) {
-          const { data: { publicUrl } } = supabase.storage
-            .from('job-images')
-            .getPublicUrl(desktopUrl);
-          if (publicUrl) {
-            setJobImageDesktopDisplayUrl(publicUrl);
-            setOriginalDesktopImageUrl(desktopUrl);
-            return;
-          }
-        }
-        
-        // Otherwise use URL as-is
-        setJobImageDesktopDisplayUrl(desktopUrl);
-        setOriginalDesktopImageUrl(desktopUrl);
+
+      if (!desktopUrl) {
+        setJobImageDesktopDisplayUrl('');
+        setOriginalDesktopImageUrl('');
+        return;
       }
+
+      // If it's a storage path (not a full URL), get public URL
+      if (!desktopUrl.startsWith('http')) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('job-images')
+          .getPublicUrl(desktopUrl);
+        if (publicUrl) {
+          setJobImageDesktopDisplayUrl(publicUrl);
+          setOriginalDesktopImageUrl(desktopUrl);
+          return;
+        }
+      }
+      
+      // Otherwise use URL as-is
+      setJobImageDesktopDisplayUrl(desktopUrl);
+      setOriginalDesktopImageUrl(desktopUrl);
     };
     
     loadDesktopJobImage();
-  }, [(job as any)?.job_image_desktop_url, open]);
+  }, [job?.id, (job as any)?.job_image_desktop_url, open]);
+
 
   // Preload image when user reaches step 2 (jobbild section) to make preview faster
   useEffect(() => {
