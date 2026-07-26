@@ -200,9 +200,9 @@ export const PhoneVideoMockup = ({
                   playsInline
                   preload="metadata"
                   poster={POSTER_SRC}
+                  src={VIDEO_SRC}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
-                <source src={VIDEO_SRC} type="video/mp4" />
 
                 {/* Dynamic Island */}
                 <div
