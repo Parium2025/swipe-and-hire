@@ -84,48 +84,45 @@ function hasStaleVisibleNews(items: HrNewsItem[] | null | undefined): boolean {
     const time = new Date(item.published_at).getTime();
     return Number.isNaN(time) ? latest : Math.max(latest, time);
   }, 0);
-  return newest === 0 || Date.now() - newest > MAX_VISIBLE_NEWS_AGE_MS;
+  return newest === 0 || Date.now() - newest > STALE_ARTICLE_AGE_MS;
 }
 
 /**
  * BULLETPROOF NEWS FETCHER
- * 
- * PRINCIPLE: Backend is the ONLY gatekeeper
- * - Backend guarantees: all saved articles have valid published_at
- * - Backend guarantees: always tries to maintain 4 articles (RSS + AI fallback)
- * - Frontend: shows what's in DB, triggers refresh if < 4
- * 
- * NO FRONTEND FILTERING - trust the backend completely
+ *
+ * PRINCIPLE: never hide content we already have.
+ * - If the database returns articles, we always show them.
+ * - If they look old, we ask the backend for fresh ones in the background —
+ *   silently, without ever emptying the card while it works.
  */
 const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
-  // Fetch ALL news (RSS + any AI fallback) - backend guarantees validity
   const { data: allNews, error } = await supabase
     .from('daily_hr_news')
     .select('*')
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(4);
 
-  // Happy path: we have fresh articles (1-4 is fine, we show what's available)
-  if (!error && allNews && allNews.length > 0 && !hasStaleVisibleNews(allNews)) {
-    // Update cache with fresh data
+  if (error) {
+    console.error('[HR News] Read error:', error.message);
+  }
+
+  // We have content — always show it, refresh in the background if it's old
+  if (allNews && allNews.length > 0) {
     writeCache(allNews);
+
+    if (hasStaleVisibleNews(allNews)) {
+      void supabase.functions
+        .invoke('fetch-hr-news', { body: { force: true } })
+        .catch(() => { /* background refresh, never blocks the UI */ });
+    }
+
     return allNews;
   }
 
-  // Not enough/fresh articles - trigger backend to fetch more
-  const currentCount = allNews?.length || 0;
-  console.log(`[HR News] ${currentCount} stale/missing articles, triggering backend refresh...`);
-
+  // Truly empty: try once to have the backend populate the feed
   try {
-    const { error: fnError } = await supabase.functions.invoke('fetch-hr-news', {
-      body: { force: true },
-    });
+    await supabase.functions.invoke('fetch-hr-news', { body: { force: true } });
 
-    if (fnError) {
-      console.error('[HR News] Backend refresh error:', fnError);
-    }
-
-    // Re-fetch after backend processed
     const { data: refreshedNews } = await supabase
       .from('daily_hr_news')
       .select('*')
@@ -136,13 +133,12 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
       writeCache(refreshedNews);
       return refreshedNews;
     }
-
-    // Return what we originally had (fallback)
-    return allNews || [];
-  } catch (err) {
-    console.error('[HR News] Fatal error:', err);
-    return allNews || [];
+  } catch {
+    /* offline or edge function unreachable — fall through to cache */
   }
+
+  // Last resort: whatever is still cached locally
+  return readCache() ?? [];
 };
 
 export const useHrNews = () => {
