@@ -61,6 +61,11 @@ function readCache(): CareerTipItem[] | null {
       try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
       return null;
     }
+    // Freeze protection: distrust a cache that hasn't been refreshed in a long time
+    if (!cached.timestamp || Date.now() - cached.timestamp > MAX_CACHE_AGE_MS) {
+      try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
     return cached.items;
   } catch {
     try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
