@@ -105,6 +105,7 @@ const CandidatesContent = () => {
     applications, 
     stats, 
     isLoading, 
+    isFetching,
     error, 
     refetch,
     fetchNextPage,
@@ -116,6 +117,15 @@ const CandidatesContent = () => {
     updateRating,
     totalCount,
   } = useApplicationsData(debouncedSearch, { questionFilters });
+
+  // Medan en ny sökning väntar/hämtas visar vi INTE ett nytt tomläge — annars
+  // blinkar "Inga kandidater än" förbi när man rensar filter.
+  const isSearchPending = searchQuery !== debouncedSearch;
+  const isBusy = isSearchPending || (isFetching && !isFetchingNextPage);
+  const stableSearchRef = useRef(debouncedSearch);
+  if (!isBusy) stableSearchRef.current = debouncedSearch;
+  const appliedSearch = stableSearchRef.current;
+
 
   
   // Instant render när datan redan finns i cache — fade-in bara vid cold load.
