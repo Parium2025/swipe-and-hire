@@ -351,7 +351,7 @@ const CandidatesContent = () => {
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
           </div>
-        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
+        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || statusFilter !== 'all' || searchQuery.trim()) ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/5 border border-white/10 rounded-lg">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
               <Search className="h-5 w-5 text-white" />
@@ -362,13 +362,14 @@ const CandidatesContent = () => {
                 ? 'Försök med ett annat sökord eller kontrollera stavningen'
                 : 'Prova att ändra eller ta bort några filter'}
             </p>
-            {(searchQuery.trim() || questionFilters.length > 0) && (
+            {(searchQuery.trim() || questionFilters.length > 0 || statusFilter !== 'all') && (
               <Button
                 variant="glass"
                 size="sm"
                 onClick={() => {
                   setSearchQuery('');
                   setQuestionFilters([]);
+                  setStatusFilter('all');
                 }}
                 className="mt-3 text-xs"
               >
@@ -382,7 +383,7 @@ const CandidatesContent = () => {
             applications={filteredApplications} 
             onUpdate={refetch}
             onLoadMore={fetchNextPage}
-            hasMore={hasNextPage && questionFilters.length === 0}
+            hasMore={hasNextPage}
             isLoadingMore={isFetchingNextPage}
             selectionMode={selectionMode}
             onSelectionModeChange={setSelectionMode}
