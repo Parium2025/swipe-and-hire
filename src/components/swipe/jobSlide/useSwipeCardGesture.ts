@@ -213,7 +213,7 @@ export function useSwipeCardGesture({
         lastTapTimestampRef.current = 0;
         clearTapHint();
       }
-      animate(x, 0, SNAP_SPRING);
+      animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
     },
     [clearTapHint, triggerSwipe, x],
   );
@@ -332,7 +332,7 @@ export function useSwipeCardGesture({
           triggerSwipe('left', velocityX);
           return;
         }
-        animate(x, 0, SNAP_SPRING);
+        animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
         return;
       }
 
@@ -384,7 +384,7 @@ export function useSwipeCardGesture({
     clearTapHint();
     touchGestureRef.current = null;
     if (!swipedRef.current) {
-      animate(x, 0, SNAP_SPRING);
+      animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
     }
   }, [clearTapHint, x]);
 
