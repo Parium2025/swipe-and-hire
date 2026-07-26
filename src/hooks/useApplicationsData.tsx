@@ -882,7 +882,12 @@ export const useApplicationsData = (
     hasNextPage,
     isFetchingNextPage,
     // Totalt antal träffar i databasen (inte bara laddade sidor)
-    totalCount: data?.pages?.[0]?.totalCount ?? deduplicatedApplications.length,
+    // När allt är laddat är listan sanningen — annars kan en gammal cache visa
+    // fler "kandidater" i rubriken än det finns kort i listan.
+    totalCount: hasNextPage
+      ? Math.max(data?.pages?.[0]?.totalCount ?? 0, deduplicatedApplications.length)
+      : deduplicatedApplications.length,
+
     // Nya för "Vill du fortsätta?" banner
     hasReachedLimit,
     continueLoading,
