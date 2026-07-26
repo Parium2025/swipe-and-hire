@@ -386,7 +386,7 @@ export function useSwipeCardGesture({
     if (!swipedRef.current) {
       animate(x, 0, prefersReducedMotion ? REDUCED_SNAP : SNAP_SPRING);
     }
-  }, [clearTapHint, x]);
+  }, [clearTapHint, prefersReducedMotion, x]);
 
   return {
     triggerSwipe,
