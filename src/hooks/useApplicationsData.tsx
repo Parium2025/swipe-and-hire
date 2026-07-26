@@ -39,7 +39,10 @@ export interface ApplicationData {
 }
 
 const PAGE_SIZE = 25;
-const MAX_AUTO_PREFETCH_PAGES = 20; // 500 kandidater innan "Vill du fortsätta?"
+// Auto-prefetch bara de första 100 kandidaterna. Varje sida kostar 3 extra
+// RPC-anrop (media, aktivitet, betyg) — vid 10 000+ kandidater blir 20 sidor ren
+// bortkastad trafik. Resten laddas när användaren faktiskt scrollar.
+const MAX_AUTO_PREFETCH_PAGES = 4;
 const SNAPSHOT_KEY_PREFIX = 'applications_snapshot_';
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const SNAPSHOT_TTL_MS = 60 * 60 * 1000; // 1 hour — safety net; realtime keeps data fresh within TTL
@@ -530,7 +533,7 @@ export const useApplicationsData = (
         });
 
         let updatedItems: ApplicationData[] | null = null;
-        queryClient.setQueryData(['applications', user.id, searchQuery], (old: any) => {
+        queryClient.setQueryData(queryKey, (old: any) => {
           if (!old?.pages) return old;
 
           const pages = old.pages.map((page: any) => ({
@@ -683,7 +686,7 @@ export const useApplicationsData = (
 
     if (!hasMediaFields) {
       fixedLegacyCacheRef.current = true;
-      queryClient.invalidateQueries({ queryKey: ['applications', user.id, searchQuery] });
+      queryClient.invalidateQueries({ queryKey });
     }
   }, [applications, user, searchQuery, queryClient]);
 
@@ -771,7 +774,7 @@ export const useApplicationsData = (
       // Optimistic update
       await queryClient.cancelQueries({ queryKey: ['applications', user?.id] });
       
-      queryClient.setQueryData(['applications', user?.id, searchQuery], (old: any) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
@@ -834,7 +837,7 @@ export const useApplicationsData = (
       // Optimistic update
       await queryClient.cancelQueries({ queryKey: ['applications', user?.id] });
 
-      queryClient.setQueryData(['applications', user?.id, searchQuery], (old: any) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
