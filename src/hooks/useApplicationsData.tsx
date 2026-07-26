@@ -187,10 +187,37 @@ const writeSnapshot = (userId: string, items: ApplicationData[]) => {
   }
 };
 
-export const useApplicationsData = (searchQuery: string = '') => {
+export interface QuestionFilterInput {
+  question: string;
+  answers: string[];
+}
+
+export interface ApplicationsDataOptions {
+  /** Frågefilter — körs serversidigt så räknare stämmer även vid 10 000+ kandidater */
+  questionFilters?: QuestionFilterInput[];
+  /** Segment: 'all' | 'pending' | 'reviewing' | 'hired' | 'rejected' */
+  statusFilter?: string;
+  /** Sortering: 'applied_at' | 'oldest' | 'name' | 'rating' */
+  sortBy?: string;
+}
+
+export const useApplicationsData = (
+  searchQuery: string = '',
+  options: ApplicationsDataOptions = {},
+) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [jobTitles, setJobTitles] = useState<Record<string, string>>({});
+
+  const questionFilters = options.questionFilters ?? [];
+  const statusFilter = options.statusFilter && options.statusFilter !== 'all' ? options.statusFilter : null;
+  const sortBy = options.sortBy || 'applied_at';
+
+  // Stabil nyckel så queryn inte refetchar på varje render
+  const filtersKey = useMemo(() => JSON.stringify(questionFilters), [questionFilters]);
+  // Ofiltrerad standardvy = den enda vy som får läsa/skriva localStorage-snapshoten
+  const isDefaultView =
+    !searchQuery.trim() && questionFilters.length === 0 && !statusFilter && sortBy === 'applied_at';
 
   const {
     data,
@@ -201,78 +228,31 @@ export const useApplicationsData = (searchQuery: string = '') => {
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['applications', user?.id, searchQuery],
+    queryKey: ['applications', user?.id, searchQuery, filtersKey, statusFilter, sortBy],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       if (!user) {
-        return { items: [], hasMore: false };
+        return { items: [], hasMore: false, totalCount: 0 };
       }
       
       const from = pageParam * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-      
-      // Build query with job title + occupation - profile image fetched via RPC for security
-      let query = supabase
-        .from('job_applications')
-        .select(`
-          id,
-          job_id,
-          applicant_id,
-          first_name,
-          last_name,
-          email,
-          phone,
-          location,
-          bio,
-          cv_url,
-          age,
-          employment_status,
-          work_schedule,
-          availability,
-          custom_answers,
-          questions_snapshot,
-          status,
-          applied_at,
-          updated_at,
-          viewed_at,
-          job_postings!inner(title, occupation)
-        `);
 
-      // Apply Full-Text Search for blazing fast filtering on 100k+ candidates
-      // Uses GIN-indexed tsvector column - 10-100x faster than ILIKE on large datasets
-      if (searchQuery && searchQuery.trim()) {
-        const searchTerm = searchQuery.trim();
-        
-        // SANITIZE: Strip tsquery-special characters to prevent syntax errors
-        // Characters like &, |, !, :, *, (, ), ', <, >, \, - break to_tsquery
-        // Also strip commas — they break PostgREST .or() parsing
-        const sanitized = searchTerm.replace(/[&|!:*()'"<>\\\-,./;@#$%^{}[\]~`]/g, ' ').replace(/\s+/g, ' ').trim();
-        
-        if (sanitized.length >= 2) {
-          // Convert search term to tsquery format (prefix matching for partial words)
-          // "Joh" becomes "Joh:*" to match "Johan", "Johansson" etc
-          const tsQueryTerm = sanitized
-            .split(/\s+/)
-            .filter(w => w.length >= 1)
-            .map(word => `${word}:*`)
-            .join(' & ');
-          
-          // Use Full-Text Search on the indexed search_vector column
-          // Also search job title/occupation with ILIKE as fallback (they're in a joined table)
-          // Escape ILIKE wildcards (% and _) in the user's term
-          const safeLike = searchTerm.replace(/[%_]/g, '');
-          query = query.or(`search_vector.fts.${tsQueryTerm},job_postings.title.ilike.%${safeLike}%,job_postings.occupation.ilike.%${safeLike}%`);
-        }
-      }
-
+      // Allt filtrerande (FTS + trigram-fuzzy + frågefilter + status + sortering)
+      // körs i databasen. Kritiskt vid tiotusentals kandidater: annars filtrerar
+      // vi bara de sidor som råkar vara nedladdade och räknaren blir fel.
       let baseData: any[] | null = null;
       let baseError: any = null;
 
       try {
-        const result = await query
-          .order('applied_at', { ascending: false })
-          .range(from, to);
-        baseData = result.data;
+        const result = await supabase.rpc('search_employer_candidates', {
+          p_search: searchQuery?.trim() ? searchQuery.trim() : null,
+          p_filters: questionFilters as any,
+          p_status: statusFilter,
+          p_sort: sortBy,
+          p_limit: PAGE_SIZE,
+          p_offset: from,
+        });
+        baseData = result.data as any[] | null;
         baseError = result.error;
       } catch (networkError) {
         // OFFLINE FALLBACK: If network fails, use cached snapshot with client-side search
@@ -283,7 +263,11 @@ export const useApplicationsData = (searchQuery: string = '') => {
             const filtered = searchQuery?.trim()
               ? smartSearchCandidates(snapshot, searchQuery)
               : snapshot;
-            return { items: filtered.slice(from, from + PAGE_SIZE), hasMore: filtered.length > from + PAGE_SIZE };
+            return {
+              items: filtered.slice(from, from + PAGE_SIZE),
+              hasMore: filtered.length > from + PAGE_SIZE,
+              totalCount: filtered.length,
+            };
           }
         }
         throw networkError;
@@ -298,15 +282,23 @@ export const useApplicationsData = (searchQuery: string = '') => {
             const filtered = searchQuery?.trim()
               ? smartSearchCandidates(snapshot, searchQuery)
               : snapshot;
-            return { items: filtered.slice(from, from + PAGE_SIZE), hasMore: filtered.length > from + PAGE_SIZE };
+            return {
+              items: filtered.slice(from, from + PAGE_SIZE),
+              hasMore: filtered.length > from + PAGE_SIZE,
+              totalCount: filtered.length,
+            };
           }
         }
         throw baseError;
       }
 
       if (!baseData) {
-        return { items: [], hasMore: false };
+        return { items: [], hasMore: false, totalCount: 0 };
       }
+
+      const totalCount = Number(baseData[0]?.total_count ?? baseData.length);
+
+
 
 
        // Fetch profile media (image, video, is_profile_video, last_active_at) via secure BATCH RPC function
