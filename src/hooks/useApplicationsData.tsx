@@ -39,7 +39,10 @@ export interface ApplicationData {
 }
 
 const PAGE_SIZE = 25;
-const MAX_AUTO_PREFETCH_PAGES = 20; // 500 kandidater innan "Vill du fortsätta?"
+// Auto-prefetch bara de första 100 kandidaterna. Varje sida kostar 3 extra
+// RPC-anrop (media, aktivitet, betyg) — vid 10 000+ kandidater blir 20 sidor ren
+// bortkastad trafik. Resten laddas när användaren faktiskt scrollar.
+const MAX_AUTO_PREFETCH_PAGES = 4;
 const SNAPSHOT_KEY_PREFIX = 'applications_snapshot_';
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const SNAPSHOT_TTL_MS = 60 * 60 * 1000; // 1 hour — safety net; realtime keeps data fresh within TTL
@@ -187,10 +190,42 @@ const writeSnapshot = (userId: string, items: ApplicationData[]) => {
   }
 };
 
-export const useApplicationsData = (searchQuery: string = '') => {
+export interface QuestionFilterInput {
+  question: string;
+  answers: string[];
+}
+
+export interface ApplicationsDataOptions {
+  /** Frågefilter — körs serversidigt så räknare stämmer även vid 10 000+ kandidater */
+  questionFilters?: QuestionFilterInput[];
+  /** Segment: 'all' | 'pending' | 'reviewing' | 'hired' | 'rejected' */
+  statusFilter?: string;
+  /** Sortering: 'applied_at' | 'oldest' | 'name' | 'rating' */
+  sortBy?: string;
+}
+
+export const useApplicationsData = (
+  searchQuery: string = '',
+  options: ApplicationsDataOptions = {},
+) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [jobTitles, setJobTitles] = useState<Record<string, string>>({});
+
+  const questionFilters = options.questionFilters ?? [];
+  const statusFilter = options.statusFilter && options.statusFilter !== 'all' ? options.statusFilter : null;
+  const sortBy = options.sortBy || 'applied_at';
+
+  // Stabil nyckel så queryn inte refetchar på varje render
+  const filtersKey = useMemo(() => JSON.stringify(questionFilters), [questionFilters]);
+  // Ofiltrerad standardvy = den enda vy som får läsa/skriva localStorage-snapshoten
+  const isDefaultView =
+    !searchQuery.trim() && questionFilters.length === 0 && !statusFilter && sortBy === 'applied_at';
+
+  const queryKey = useMemo(
+    () => ['applications', user?.id, searchQuery, filtersKey, statusFilter, sortBy] as const,
+    [user?.id, searchQuery, filtersKey, statusFilter, sortBy],
+  );
 
   const {
     data,
@@ -201,78 +236,32 @@ export const useApplicationsData = (searchQuery: string = '') => {
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['applications', user?.id, searchQuery],
+    queryKey,
+
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       if (!user) {
-        return { items: [], hasMore: false };
+        return { items: [], hasMore: false, totalCount: 0 };
       }
       
       const from = pageParam * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-      
-      // Build query with job title + occupation - profile image fetched via RPC for security
-      let query = supabase
-        .from('job_applications')
-        .select(`
-          id,
-          job_id,
-          applicant_id,
-          first_name,
-          last_name,
-          email,
-          phone,
-          location,
-          bio,
-          cv_url,
-          age,
-          employment_status,
-          work_schedule,
-          availability,
-          custom_answers,
-          questions_snapshot,
-          status,
-          applied_at,
-          updated_at,
-          viewed_at,
-          job_postings!inner(title, occupation)
-        `);
 
-      // Apply Full-Text Search for blazing fast filtering on 100k+ candidates
-      // Uses GIN-indexed tsvector column - 10-100x faster than ILIKE on large datasets
-      if (searchQuery && searchQuery.trim()) {
-        const searchTerm = searchQuery.trim();
-        
-        // SANITIZE: Strip tsquery-special characters to prevent syntax errors
-        // Characters like &, |, !, :, *, (, ), ', <, >, \, - break to_tsquery
-        // Also strip commas — they break PostgREST .or() parsing
-        const sanitized = searchTerm.replace(/[&|!:*()'"<>\\\-,./;@#$%^{}[\]~`]/g, ' ').replace(/\s+/g, ' ').trim();
-        
-        if (sanitized.length >= 2) {
-          // Convert search term to tsquery format (prefix matching for partial words)
-          // "Joh" becomes "Joh:*" to match "Johan", "Johansson" etc
-          const tsQueryTerm = sanitized
-            .split(/\s+/)
-            .filter(w => w.length >= 1)
-            .map(word => `${word}:*`)
-            .join(' & ');
-          
-          // Use Full-Text Search on the indexed search_vector column
-          // Also search job title/occupation with ILIKE as fallback (they're in a joined table)
-          // Escape ILIKE wildcards (% and _) in the user's term
-          const safeLike = searchTerm.replace(/[%_]/g, '');
-          query = query.or(`search_vector.fts.${tsQueryTerm},job_postings.title.ilike.%${safeLike}%,job_postings.occupation.ilike.%${safeLike}%`);
-        }
-      }
-
+      // Allt filtrerande (FTS + trigram-fuzzy + frågefilter + status + sortering)
+      // körs i databasen. Kritiskt vid tiotusentals kandidater: annars filtrerar
+      // vi bara de sidor som råkar vara nedladdade och räknaren blir fel.
       let baseData: any[] | null = null;
       let baseError: any = null;
 
       try {
-        const result = await query
-          .order('applied_at', { ascending: false })
-          .range(from, to);
-        baseData = result.data;
+        const result = await supabase.rpc('search_employer_candidates', {
+          p_search: searchQuery?.trim() ? searchQuery.trim() : null,
+          p_filters: questionFilters as any,
+          p_status: statusFilter,
+          p_sort: sortBy,
+          p_limit: PAGE_SIZE,
+          p_offset: from,
+        });
+        baseData = result.data as any[] | null;
         baseError = result.error;
       } catch (networkError) {
         // OFFLINE FALLBACK: If network fails, use cached snapshot with client-side search
@@ -283,7 +272,11 @@ export const useApplicationsData = (searchQuery: string = '') => {
             const filtered = searchQuery?.trim()
               ? smartSearchCandidates(snapshot, searchQuery)
               : snapshot;
-            return { items: filtered.slice(from, from + PAGE_SIZE), hasMore: filtered.length > from + PAGE_SIZE };
+            return {
+              items: filtered.slice(from, from + PAGE_SIZE),
+              hasMore: filtered.length > from + PAGE_SIZE,
+              totalCount: filtered.length,
+            };
           }
         }
         throw networkError;
@@ -298,15 +291,23 @@ export const useApplicationsData = (searchQuery: string = '') => {
             const filtered = searchQuery?.trim()
               ? smartSearchCandidates(snapshot, searchQuery)
               : snapshot;
-            return { items: filtered.slice(from, from + PAGE_SIZE), hasMore: filtered.length > from + PAGE_SIZE };
+            return {
+              items: filtered.slice(from, from + PAGE_SIZE),
+              hasMore: filtered.length > from + PAGE_SIZE,
+              totalCount: filtered.length,
+            };
           }
         }
         throw baseError;
       }
 
       if (!baseData) {
-        return { items: [], hasMore: false };
+        return { items: [], hasMore: false, totalCount: 0 };
       }
+
+      const totalCount = Number(baseData[0]?.total_count ?? baseData.length);
+
+
 
 
        // Fetch profile media (image, video, is_profile_video, last_active_at) via secure BATCH RPC function
@@ -383,35 +384,35 @@ export const useApplicationsData = (searchQuery: string = '') => {
          writeCachedRatings(user.id, ratingsMap);
        }
 
-       // Transform data to flatten job_postings and add profile media + last_active_at + rating
+       // Transform data: RPC returnerar redan job_title/job_occupation/rating
        const items = baseData.map((item: any) => {
          const media =
            profileMediaMap[item.applicant_id] ||
            ({ profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null } as const);
 
          const activityLastActive = activityMap[item.applicant_id]?.last_active_at ?? null;
-         const rating = ratingsMap[item.applicant_id] ?? null;
+         const rating = ratingsMap[item.applicant_id] ?? item.rating ?? null;
 
          return {
            ...item,
-           job_title: item.job_postings?.title || 'Okänt jobb',
-           job_occupation: item.job_postings?.occupation || null,
+           job_title: item.job_title || 'Okänt jobb',
+           job_occupation: item.job_occupation || null,
            profile_image_url: media.profile_image_url,
            video_url: media.video_url,
            is_profile_video: media.is_profile_video,
-           // Prefer activity RPC to stay 1:1 with "Mina kandidater"
+           // Prefer activity RPC to stay 1:1 med "Mina kandidater"
            last_active_at: activityLastActive ?? media.last_active_at,
            viewed_at: item.viewed_at,
            rating,
-           job_postings: undefined,
+           total_count: undefined,
          };
        }) as ApplicationData[];
 
-      const hasMore = items.length === PAGE_SIZE;
+      const hasMore = from + items.length < totalCount;
 
-      // Write snapshot on first page — ALDRIG för sökresultat, annars skrivs
-      // hela "alla kandidater"-cachen över med ett filtrerat urval.
-      if (pageParam === 0 && items.length > 0 && !(searchQuery && searchQuery.trim())) {
+      // Snapshot skrivs BARA för den ofiltrerade standardvyn — annars skulle
+      // ett filtrerat urval återanvändas som "alla kandidater" nästa kalla start.
+      if (pageParam === 0 && items.length > 0 && isDefaultView) {
         writeSnapshot(user.id, items);
       }
 
@@ -432,23 +433,22 @@ export const useApplicationsData = (searchQuery: string = '') => {
         );
       })();
 
-      return { items, hasMore };
+      return { items, hasMore, totalCount };
     },
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.hasMore ? allPages.length : undefined;
     },
     enabled: !!user,
-    // Bas-listan cachas för alltid (realtime uppdaterar), men sökningar måste
-    // alltid gå mot databasens FTS — annars filtrerades bara den cachade sidan.
-    staleTime: searchQuery && searchQuery.trim() ? 0 : Infinity,
+    // Standardvyn cachas (realtime håller den fräsch). Sök/filter/sortering
+    // måste alltid gå mot databasen.
+    staleTime: isDefaultView ? Infinity : 0,
     gcTime: Infinity,
-    refetchOnMount: !!(searchQuery && searchQuery.trim()),
+    refetchOnMount: !isDefaultView,
     refetchOnWindowFocus: false,
     initialData: () => {
       if (!user) return undefined;
-      // Snapshot gäller bara den ofiltrerade listan.
-      if (searchQuery && searchQuery.trim()) return undefined;
-      
+      // Snapshot gäller bara den ofiltrerade standardvyn.
+      if (!isDefaultView) return undefined;
       
       const snapshot = readSnapshot(user.id);
       if (snapshot.length === 0) return undefined;
@@ -457,11 +457,12 @@ export const useApplicationsData = (searchQuery: string = '') => {
       const hasMore = snapshot.length >= PAGE_SIZE;
       
       return {
-        pages: [{ items: snapshot, hasMore }],
+        pages: [{ items: snapshot, hasMore, totalCount: snapshot.length }],
         pageParams: [0],
       };
     },
   });
+
 
   // PRE-FETCHING: Automatically load next batch in background after each page loads
   // BUT STOP after 500 candidates (20 pages) - user must click "Fortsätt" to load more
@@ -538,7 +539,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
         });
 
         let updatedItems: ApplicationData[] | null = null;
-        queryClient.setQueryData(['applications', user.id, searchQuery], (old: any) => {
+        queryClient.setQueryData(queryKey, (old: any) => {
           if (!old?.pages) return old;
 
           const pages = old.pages.map((page: any) => ({
@@ -691,9 +692,9 @@ export const useApplicationsData = (searchQuery: string = '') => {
 
     if (!hasMediaFields) {
       fixedLegacyCacheRef.current = true;
-      queryClient.invalidateQueries({ queryKey: ['applications', user.id, searchQuery] });
+      queryClient.invalidateQueries({ queryKey });
     }
-  }, [applications, user, searchQuery, queryClient]);
+  }, [applications, user, queryKey, queryClient]);
 
   // Enrich with additional job metadata if needed (kept for backwards compatibility)
   // Track which IDs we've already attempted to fetch to prevent infinite loops
@@ -726,14 +727,10 @@ export const useApplicationsData = (searchQuery: string = '') => {
       });
   }, [applications, jobTitles]);
 
-  // Apply client-side fuzzy matching for typo tolerance on top of FTS results
-  // This runs on already-filtered data from the database, so it's fast
-  const enrichedApplications = useMemo(() => {
-    if (!searchQuery || !searchQuery.trim()) {
-      return applications;
-    }
-    return smartSearchCandidates(applications, searchQuery);
-  }, [applications, searchQuery]);
+  // Sökningen filtreras helt i databasen (FTS + trigram + jobbtitel). Vi filtrerar
+  // INTE om på klienten — det skulle bara kunna kasta bort giltiga serverträffar.
+  const enrichedApplications = applications;
+
 
   // Deduplicate: one row per unique person, keeping the most recent application
   // Moved here from UI layer so all consumers get deduplicated data by default
@@ -779,7 +776,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
       // Optimistic update
       await queryClient.cancelQueries({ queryKey: ['applications', user?.id] });
       
-      queryClient.setQueryData(['applications', user?.id, searchQuery], (old: any) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
@@ -842,7 +839,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
       // Optimistic update
       await queryClient.cancelQueries({ queryKey: ['applications', user?.id] });
 
-      queryClient.setQueryData(['applications', user?.id, searchQuery], (old: any) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
@@ -875,6 +872,8 @@ export const useApplicationsData = (searchQuery: string = '') => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    // Totalt antal träffar i databasen (inte bara laddade sidor)
+    totalCount: data?.pages?.[0]?.totalCount ?? deduplicatedApplications.length,
     // Nya för "Vill du fortsätta?" banner
     hasReachedLimit,
     continueLoading,
