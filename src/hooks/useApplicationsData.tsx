@@ -694,7 +694,7 @@ export const useApplicationsData = (
       fixedLegacyCacheRef.current = true;
       queryClient.invalidateQueries({ queryKey });
     }
-  }, [applications, user, searchQuery, queryClient]);
+  }, [applications, user, queryKey, queryClient]);
 
   // Enrich with additional job metadata if needed (kept for backwards compatibility)
   // Track which IDs we've already attempted to fetch to prevent infinite loops
@@ -872,6 +872,8 @@ export const useApplicationsData = (
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    // Totalt antal träffar i databasen (inte bara laddade sidor)
+    totalCount: data?.pages?.[0]?.totalCount ?? deduplicatedApplications.length,
     // Nya för "Vill du fortsätta?" banner
     hasReachedLimit,
     continueLoading,
