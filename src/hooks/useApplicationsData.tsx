@@ -95,7 +95,22 @@ const writeCachedRatings = (userId: string, ratings: Record<string, number>) => 
 // We accept slightly stale data to show content immediately on login/refresh
 // Now also merges cached ratings for instant rating display (no flicker)
 // Använder safeReadJsonCache så korrupt format inte kraschar via .map/.filter.
+// En kandidat = en rad (senaste ansökan vinner). Används både för snapshot och lista
+// så att räknaren i rubriken alltid matchar antalet kort.
+const dedupeByApplicant = (items: ApplicationData[]): ApplicationData[] => {
+  const byApplicant = new Map<string, ApplicationData>();
+  for (const app of items) {
+    if (!app?.applicant_id) continue;
+    const existing = byApplicant.get(app.applicant_id);
+    if (!existing || (app.applied_at && (!existing.applied_at || app.applied_at > existing.applied_at))) {
+      byApplicant.set(app.applicant_id, app);
+    }
+  }
+  return Array.from(byApplicant.values());
+};
+
 const readSnapshot = (userId: string): ApplicationData[] => {
+
   const key = SNAPSHOT_KEY_PREFIX + userId;
   const snapshot = safeReadJsonCache<SnapshotData>(
     key,
