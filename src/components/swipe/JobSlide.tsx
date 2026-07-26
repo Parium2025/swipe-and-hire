@@ -73,8 +73,20 @@ export const JobSlide = memo(function JobSlide({
   const exitOpacity = useMotionValue(1);
   const entryScale = useMotionValue(1);
   // Tydlig feedback direkt: indikatorn syns redan efter ~20px drag.
-  const likeOpacity = useTransform(x, [0, 20, 90], [0, 0.65, 1]);
-  const nopeOpacity = useTransform(x, [-90, -20, 0], [1, 0.65, 0]);
+  const likeDragOpacity = useTransform(x, [0, 20, 90], [0, 0.65, 1]);
+  const nopeDragOpacity = useTransform(x, [-90, -20, 0], [1, 0.65, 0]);
+  // ⚡️ Indikatorerna ligger utanför kortets motion.div och ärver därför INTE
+  // kortets exit-opacity. Utan detta stannade "Hoppa över"-cirkeln kvar på
+  // full opacity tills sliden unmountades → den "hängde kvar" till nästa jobb.
+  // Vi kopplar dem till exitOpacity² så de tonar ut snabbare än kortet.
+  const likeOpacity = useTransform(
+    [likeDragOpacity, exitOpacity],
+    ([o, e]) => (o as number) * (e as number) * (e as number),
+  );
+  const nopeOpacity = useTransform(
+    [nopeDragOpacity, exitOpacity],
+    ([o, e]) => (o as number) * (e as number) * (e as number),
+  );
   const likeScale = useTransform(x, [0, 90], [0.86, 1]);
   const nopeScale = useTransform(x, [-90, 0], [1, 0.86]);
   // Mjukare rotate/scale-utslag = mindre visuell wobble under drag.
