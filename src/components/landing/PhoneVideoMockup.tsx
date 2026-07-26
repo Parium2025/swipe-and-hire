@@ -22,7 +22,7 @@ export const PhoneVideoMockup = ({
   className,
   style,
   active = true,
-  scale = 0.86,
+  scale = 0.78,
 }: PhoneVideoMockupProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -85,8 +85,8 @@ export const PhoneVideoMockup = ({
         />
 
         {/* Ram */}
-        <div className="relative h-full w-full overflow-hidden rounded-[13%/6.2%] border border-white/15 bg-black/70 p-[2.4%] shadow-[0_40px_90px_-30px_rgba(0,0,0,0.75)]">
-          <div className="relative h-full w-full overflow-hidden rounded-[11%/5.4%] bg-black">
+        <div className="relative h-full w-full overflow-hidden rounded-[13%/6.2%] border-[3px] border-white/15 bg-black shadow-[0_40px_90px_-30px_rgba(0,0,0,0.75)]">
+          <div className="relative h-full w-full overflow-hidden rounded-[12%/5.8%] bg-black">
             <video
               ref={videoRef}
               autoPlay
