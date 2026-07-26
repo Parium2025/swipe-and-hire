@@ -110,10 +110,8 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
   const filteredAndSortedJobs = useMemo(() => {
     // Serverläge: databasen har redan filtrerat, rankat och sorterat
     if (serverMode) return serverJobs ?? [];
-
-
-  const filteredAndSortedJobs = useMemo(() => {
     let result = [...jobs];
+
     const relevanceScores = new Map<string, number>();
 
     
