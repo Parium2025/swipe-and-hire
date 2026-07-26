@@ -323,8 +323,6 @@ export function useSwipeCardGesture({
         return;
       }
 
-      const now = Date.now();
-
       if (showTapHint) {
         clearTapHint();
         lastTapTimestampRef.current = 0;
@@ -346,19 +344,12 @@ export function useSwipeCardGesture({
         return;
       }
 
-      if (now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
-        clearTapHint();
-        lastTapTimestampRef.current = 0;
-        onTap();
-        return;
-      }
-
+      // ℹ️ Tap öppnar INTE längre jobbdetaljer — hela infon visas när man
+      // swipar höger (gillar). Ett rent tap är därför en no-op.
       lastTapTimestampRef.current = 0;
-      onTap();
     },
     [
       clearTapHint,
-      onTap,
       onTapCompany,
       onTapTitle,
       overlayOpen,
@@ -367,6 +358,7 @@ export function useSwipeCardGesture({
       useTouchTunnel,
       x,
     ],
+
   );
 
   const handleTouchCancelCapture = useCallback(() => {
