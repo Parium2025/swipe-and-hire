@@ -728,6 +728,41 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
     // så att vanliga laptops aldrig råkar in i den här grenen.
     const isLandscapeTablet = isCoarse && width >= 900 && width <= 1400 && width > height && height <= 1050;
 
+    // ── Video-mockup på desktop/iPad: telefonen ska ligga exakt i linje med
+    // textblocket – toppen vid rubrikens topp, botten vid brödtextens slut.
+    // Vi mäter textankaret och speglar dess höjd rakt av (video-telefonen
+    // fyller hela sin box, till skillnad från Spline-canvasen).
+    if (variant === 'video' && width >= 768) {
+      const anchor = getVisibleAnchor();
+      const stageTop = (document.querySelector('[data-hero-intro-stage]') as HTMLElement | null)
+        ?.getBoundingClientRect().top ?? 0;
+      const rect = anchor?.getBoundingClientRect();
+      const anchorTop = rect ? rect.top - stageTop : clamp(height * 0.24, 130, 300);
+      const anchorHeight = rect?.height ?? height * 0.46;
+      const bottomSafe = clamp(height * 0.06, 40, 90);
+      const available = Math.max(260, height - anchorTop - bottomSafe);
+      const widthCap = Math.min(width * 0.24, 300);
+      const visualHeight = clamp(
+        Math.min(anchorHeight, available, widthCap / PHONE_ASPECT),
+        260,
+        720,
+      );
+      const metrics: HeroPhoneMetrics = {
+        isDesktop: true,
+        pinToViewport: true,
+        exactHeight: true,
+        top: Math.round(anchorTop + Math.max(0, (Math.min(anchorHeight, available) - visualHeight) / 2)),
+        height: visualHeight,
+        canvasHeight: visualHeight,
+        zoom: 0,
+        yOffset: 0,
+        right: 'clamp(2rem, 8vw, 10rem)',
+      };
+      lastHeroMetricsRef.current = metrics;
+      return metrics;
+    }
+
+
     if (isLandscapeTablet) {
       const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
       const navBottom = nav?.getBoundingClientRect().bottom ?? clamp(height * 0.12, 78, 112);
