@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_alert_cooldowns: {
+        Row: {
+          alert_key: string
+          last_sent_at: string
+          send_count: number
+        }
+        Insert: {
+          alert_key: string
+          last_sent_at?: string
+          send_count?: number
+        }
+        Update: {
+          alert_key?: string
+          last_sent_at?: string
+          send_count?: number
+        }
+        Relationships: []
+      }
       ai_usage_log: {
         Row: {
           applicant_id: string | null
@@ -3025,6 +3043,10 @@ export type Database = {
         Returns: boolean
       }
       can_view_job_application: { Args: { p_job_id: string }; Returns: boolean }
+      claim_admin_alert: {
+        Args: { _alert_key: string; _cooldown_minutes?: number }
+        Returns: boolean
+      }
       cleanup_stale_sessions: { Args: never; Returns: number }
       complete_cv_analysis: {
         Args: {
