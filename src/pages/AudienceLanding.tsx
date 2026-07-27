@@ -1742,7 +1742,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 </Suspense>
               </section>
 
-              <SectionDivider className="my-12 md:my-20" />
+              <SectionDivider className="mt-12 mb-24 md:mt-20 md:mb-36" />
+
             </>
           )}
 
