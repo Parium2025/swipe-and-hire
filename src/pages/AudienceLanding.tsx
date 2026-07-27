@@ -1115,7 +1115,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
             </motion.div>
             <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10">
-              <InlineHeroPhone placement="portraitTablet" />
+              <InlineHeroPhone placement="portraitTablet" variant={heroPhoneVariant} />
             </div>
           </div>
         </section>
