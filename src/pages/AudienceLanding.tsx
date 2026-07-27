@@ -1025,7 +1025,7 @@ const IntroSplinePhone = () => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 1, ease }}
-      className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[150px] sm:max-w-[165px] md:max-w-[175px] lg:max-w-[190px] xl:max-w-[205px]"
+      className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[140px] sm:max-w-[152px] md:max-w-[162px] lg:max-w-[172px] xl:max-w-[184px]"
     >
       <div
         aria-hidden
