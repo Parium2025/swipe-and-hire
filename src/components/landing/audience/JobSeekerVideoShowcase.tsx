@@ -3,8 +3,6 @@ import { motion } from 'framer-motion';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-/** Sekunder av korsfade i loop-skarven — döljer hoppet mellan sista och första bildrutan. */
-const CROSSFADE = 0.55;
 /** Videons nativa proportion (720 x 1560). */
 const ASPECT = '720 / 1560';
 
@@ -13,32 +11,16 @@ const SOURCES = [
   { src: '/showcase-jobseeker.mp4', type: 'video/mp4' },
 ] as const;
 
-/** Mjuk S-kurva så korsfaden aldrig "klipper" i ändarna. */
-const smoothstep = (t: number) => t * t * (3 - 2 * t);
-
 /**
  * Video-showcase för jobbsökare — en riktig telefoninspelning av appen i en
  * fotorealistisk iPhone-ram (titanram, tunna ramar, Dynamic Island och
  * sidoknappar).
  *
- * Sömlös loop: två videolager spelar växelvis och korsfadar i skarven. Faden
- * drivs av requestAnimationFrame (inte `timeupdate`, som bara fyrar ~4 ggr/s
- * och därför ger ett synligt hopp) och skriver opacity direkt på DOM-noderna —
- * noll React-renders under skarven, alltså ingen blixt.
+ * Uppspelning: ett enda videolager med native `loop` + autoplay. Ingen
+ * korsfade, ingen manuell omstart — bara rå, oavbruten loop.
  */
 const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
-  const aRef = useRef<HTMLVideoElement>(null);
-  const bRef = useRef<HTMLVideoElement>(null);
-
-  const prime = useCallback((v: HTMLVideoElement) => {
-    v.muted = true;
-    v.defaultMuted = true;
-    v.playsInline = true;
-    v.setAttribute('muted', '');
-    v.setAttribute('playsinline', '');
-    v.setAttribute('webkit-playsinline', '');
-    v.disablePictureInPicture = true;
-  }, []);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
     if (!v) return;
@@ -47,72 +29,37 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
   }, []);
 
   useEffect(() => {
-    const a = aRef.current;
-    const b = bRef.current;
-    if (!a || !b) return;
-    [a, b].forEach(prime);
+    const v = videoRef.current;
+    if (!v) return;
 
-    let active = 0;
-    let swapping = false;
-    let swapStart = 0;
-    let raf = 0;
-
-    const layers = [a, b];
-    a.style.opacity = '1';
-    b.style.opacity = '0';
-    b.currentTime = 0;
-    safePlay(a);
-
-    const tick = (now: number) => {
-      raf = requestAnimationFrame(tick);
-      const cur = layers[active];
-      const next = layers[1 - active];
-      if (!cur.duration || Number.isNaN(cur.duration)) return;
-
-      if (!swapping) {
-        if (cur.duration - cur.currentTime <= CROSSFADE) {
-          swapping = true;
-          swapStart = now;
-          next.currentTime = 0;
-          safePlay(next);
-        }
-        return;
-      }
-
-      const t = Math.min(1, (now - swapStart) / (CROSSFADE * 1000));
-      const e = smoothstep(t);
-      next.style.opacity = String(e);
-      cur.style.opacity = String(1 - e);
-
-      if (t >= 1) {
-        cur.pause();
-        cur.currentTime = 0;
-        active = 1 - active;
-        swapping = false;
-      }
-    };
-
-    raf = requestAnimationFrame(tick);
+    v.muted = true;
+    v.defaultMuted = true;
+    v.playsInline = true;
+    v.loop = true;
+    v.setAttribute('muted', '');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+    v.disablePictureInPicture = true;
+    safePlay(v);
 
     const resume = () => {
       if (document.visibilityState !== 'visible') return;
-      safePlay(layers[active]);
-      if (swapping) safePlay(layers[1 - active]);
+      if (v.paused) safePlay(v);
     };
 
     document.addEventListener('visibilitychange', resume);
     window.addEventListener('pageshow', resume);
-    a.addEventListener('canplay', resume);
-    b.addEventListener('canplay', resume);
+    v.addEventListener('canplay', resume);
+    v.addEventListener('pause', resume);
 
     return () => {
-      cancelAnimationFrame(raf);
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
-      a.removeEventListener('canplay', resume);
-      b.removeEventListener('canplay', resume);
+      v.removeEventListener('canplay', resume);
+      v.removeEventListener('pause', resume);
     };
-  }, [prime, safePlay]);
+  }, [safePlay]);
+
 
   return (
     <motion.div
@@ -153,32 +100,29 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
             className="relative overflow-hidden rounded-[10.5%/4.6%] bg-black"
             style={{ aspectRatio: ASPECT }}
           >
-            {[aRef, bRef].map((ref, i) => (
-              <video
-                key={i}
-                ref={ref}
-                autoPlay={i === 0}
-                muted
-                playsInline
-                preload="auto"
-                poster="/showcase-jobseeker-poster.jpg"
-                aria-hidden={i !== 0}
-                aria-label={i === 0 ? 'Demo av Parium-appen för jobbsökare' : undefined}
-                className="absolute inset-0 h-full w-full object-cover"
-                style={{
-                  opacity: i === 0 ? 1 : 0,
-                  // Kompenserar för att en liten skärm + glans-overlay plattar ut
-                  // kontrasten jämfört med en riktig telefon.
-                  filter: 'saturate(1.06) contrast(1.04)',
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                }}
-              >
-                {SOURCES.map((s) => (
-                  <source key={s.src} src={s.src} type={s.type} />
-                ))}
-              </video>
-            ))}
+            <video
+              ref={videoRef}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              poster="/showcase-jobseeker-poster.jpg"
+              aria-label="Demo av Parium-appen för jobbsökare"
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{
+                // Kompenserar för att en liten skärm + glans-overlay plattar ut
+                // kontrasten jämfört med en riktig telefon.
+                filter: 'saturate(1.06) contrast(1.04)',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+              }}
+            >
+              {SOURCES.map((s) => (
+                <source key={s.src} src={s.src} type={s.type} />
+              ))}
+            </video>
+
 
             {/* Maskar bort iOS utökade inspelnings-island (röd prick) med appens
                 exakta statusfältsfärg — klocka och batteri får vara kvar. */}
