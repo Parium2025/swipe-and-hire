@@ -654,7 +654,7 @@ type HeroPhoneMetrics = {
   yOffset: number;
 };
 
-const FixedPhoneLayer = () => {
+const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' }) => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   
   const lastHeroMetricsRef = useRef<HeroPhoneMetrics | null>(null);
