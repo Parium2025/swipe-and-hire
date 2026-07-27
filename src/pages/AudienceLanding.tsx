@@ -569,15 +569,16 @@ const InlineHeroPhone = ({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(() => getInlinePhonePlacement() === placement);
   const [active, setActive] = useState(() => getInlinePhonePlacement() === placement);
-  const [metrics, setMetrics] = useState(calculateInlinePhoneMetrics);
+  const [metrics, setMetrics] = useState(() => calculateInlinePhoneMetrics(variant));
 
   
 
   useEffect(() => {
     const sync = () => {
       setEnabled(getInlinePhonePlacement() === placement);
-      setMetrics(calculateInlinePhoneMetrics());
+      setMetrics(calculateInlinePhoneMetrics(variant));
     };
+
 
     sync();
     window.addEventListener('resize', sync, { passive: true });
