@@ -155,7 +155,7 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
                 exakta statusfältsfärg — klocka och batteri får vara kvar. */}
             <div
               aria-hidden
-              className="absolute left-[23%] right-[23%] top-0 h-[6.6%] bg-[#01182f]"
+              className="absolute left-[25%] right-[27.5%] top-0 h-[6.4%] bg-[#01182f]"
             />
             {/* Dynamic Island i normalt läge */}
             <div
