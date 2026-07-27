@@ -1,31 +1,34 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
 /** Sekunder av korsfade i loop-skarven — döljer hoppet mellan sista och första bildrutan. */
-const CROSSFADE = 0.6;
-/** Videons nativa proportion (540 x 1170). */
-const ASPECT = '540 / 1170';
+const CROSSFADE = 0.55;
+/** Videons nativa proportion (720 x 1560). */
+const ASPECT = '720 / 1560';
 
 const SOURCES = [
   { src: '/showcase-jobseeker.hevc.mp4', type: 'video/mp4; codecs="hvc1"' },
   { src: '/showcase-jobseeker.mp4', type: 'video/mp4' },
 ] as const;
 
+/** Mjuk S-kurva så korsfaden aldrig "klipper" i ändarna. */
+const smoothstep = (t: number) => t * t * (3 - 2 * t);
+
 /**
  * Video-showcase för jobbsökare — en riktig telefoninspelning av appen i en
  * fotorealistisk iPhone-ram (titanram, tunna ramar, Dynamic Island och
  * sidoknappar).
  *
- * Sömlös loop: två videolager spelar växelvis och korsfadar i skarven, så att
- * omstarten aldrig "blixtrar till". Dynamic Island-överlägget täcker samtidigt
- * iOS-statusfältets inspelningsindikator högst upp i klippet.
+ * Sömlös loop: två videolager spelar växelvis och korsfadar i skarven. Faden
+ * drivs av requestAnimationFrame (inte `timeupdate`, som bara fyrar ~4 ggr/s
+ * och därför ger ett synligt hopp) och skriver opacity direkt på DOM-noderna —
+ * noll React-renders under skarven, alltså ingen blixt.
  */
 const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
-  const videoRefs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
-  const [active, setActive] = useState(0);
-  const swapping = useRef(false);
+  const aRef = useRef<HTMLVideoElement>(null);
+  const bRef = useRef<HTMLVideoElement>(null);
 
   const prime = useCallback((v: HTMLVideoElement) => {
     v.muted = true;
@@ -34,6 +37,7 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
     v.setAttribute('muted', '');
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
+    v.disablePictureInPicture = true;
   }, []);
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
@@ -43,54 +47,72 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
   }, []);
 
   useEffect(() => {
-    const [a, b] = videoRefs.map((r) => r.current);
+    const a = aRef.current;
+    const b = bRef.current;
     if (!a || !b) return;
     [a, b].forEach(prime);
 
-    // Bara det aktiva lagret spelar; det andra står redo på frame 0.
-    safePlay(a);
-    b.currentTime = 0;
+    let active = 0;
+    let swapping = false;
+    let swapStart = 0;
+    let raf = 0;
 
-    const onTime = () => {
-      const cur = videoRefs[active].current;
-      const next = videoRefs[1 - active].current;
-      if (!cur || !next || !cur.duration || swapping.current) return;
-      if (cur.duration - cur.currentTime <= CROSSFADE) {
-        swapping.current = true;
-        next.currentTime = 0;
-        safePlay(next);
-        setActive((i) => 1 - i);
-        // Släpp spärren när skarven är passerad och pausa det utfadade lagret.
-        window.setTimeout(() => {
-          cur.pause();
-          cur.currentTime = 0;
-          swapping.current = false;
-        }, CROSSFADE * 1000);
+    const layers = [a, b];
+    a.style.opacity = '1';
+    b.style.opacity = '0';
+    b.currentTime = 0;
+    safePlay(a);
+
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick);
+      const cur = layers[active];
+      const next = layers[1 - active];
+      if (!cur.duration || Number.isNaN(cur.duration)) return;
+
+      if (!swapping) {
+        if (cur.duration - cur.currentTime <= CROSSFADE) {
+          swapping = true;
+          swapStart = now;
+          next.currentTime = 0;
+          safePlay(next);
+        }
+        return;
+      }
+
+      const t = Math.min(1, (now - swapStart) / (CROSSFADE * 1000));
+      const e = smoothstep(t);
+      next.style.opacity = String(e);
+      cur.style.opacity = String(1 - e);
+
+      if (t >= 1) {
+        cur.pause();
+        cur.currentTime = 0;
+        active = 1 - active;
+        swapping = false;
       }
     };
 
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') safePlay(videoRefs[active].current);
-    };
-    const onPageShow = () => safePlay(videoRefs[active].current);
+    raf = requestAnimationFrame(tick);
 
-    a.addEventListener('timeupdate', onTime);
-    b.addEventListener('timeupdate', onTime);
-    a.addEventListener('canplay', onPageShow);
-    b.addEventListener('canplay', onPageShow);
-    document.addEventListener('visibilitychange', onVisible);
-    window.addEventListener('pageshow', onPageShow);
+    const resume = () => {
+      if (document.visibilityState !== 'visible') return;
+      safePlay(layers[active]);
+      if (swapping) safePlay(layers[1 - active]);
+    };
+
+    document.addEventListener('visibilitychange', resume);
+    window.addEventListener('pageshow', resume);
+    a.addEventListener('canplay', resume);
+    b.addEventListener('canplay', resume);
 
     return () => {
-      a.removeEventListener('timeupdate', onTime);
-      b.removeEventListener('timeupdate', onTime);
-      a.removeEventListener('canplay', onPageShow);
-      b.removeEventListener('canplay', onPageShow);
-      document.removeEventListener('visibilitychange', onVisible);
-      window.removeEventListener('pageshow', onPageShow);
+      cancelAnimationFrame(raf);
+      document.removeEventListener('visibilitychange', resume);
+      window.removeEventListener('pageshow', resume);
+      a.removeEventListener('canplay', resume);
+      b.removeEventListener('canplay', resume);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, prime, safePlay]);
+  }, [prime, safePlay]);
 
   return (
     <motion.div
@@ -131,7 +153,7 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
             className="relative overflow-hidden rounded-[10.5%/4.6%] bg-black"
             style={{ aspectRatio: ASPECT }}
           >
-            {videoRefs.map((ref, i) => (
+            {[aRef, bRef].map((ref, i) => (
               <video
                 key={i}
                 ref={ref}
@@ -139,11 +161,18 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
                 muted
                 playsInline
                 preload="auto"
-                poster={i === 0 ? '/showcase-jobseeker-poster.jpg' : undefined}
-                aria-hidden={i !== active}
+                poster="/showcase-jobseeker-poster.jpg"
+                aria-hidden={i !== 0}
                 aria-label={i === 0 ? 'Demo av Parium-appen för jobbsökare' : undefined}
-                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-[600ms] ease-linear"
-                style={{ opacity: i === active ? 1 : 0 }}
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{
+                  opacity: i === 0 ? 1 : 0,
+                  // Kompenserar för att en liten skärm + glans-overlay plattar ut
+                  // kontrasten jämfört med en riktig telefon.
+                  filter: 'saturate(1.06) contrast(1.04)',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                }}
               >
                 {SOURCES.map((s) => (
                   <source key={s.src} src={s.src} type={s.type} />
@@ -164,13 +193,13 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
             />
 
 
-            {/* Skärmreflex + inre kant */}
+            {/* Skärmreflex + inre kant — hålls diskret så kontrasten inte tappas */}
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 rounded-[inherit]"
               style={{
                 background:
-                  'linear-gradient(115deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 22%, rgba(255,255,255,0) 45%)',
+                  'linear-gradient(115deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 20%, rgba(255,255,255,0) 42%)',
                 boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,0.08)',
               }}
             />
