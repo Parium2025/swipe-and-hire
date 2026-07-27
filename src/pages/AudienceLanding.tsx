@@ -571,14 +571,21 @@ const InlineHeroPhone = ({
       className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-center justify-center overflow-visible ${className}`}
       style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px`, marginBottom: `-${metrics.canvasBottomTrim ?? 0}px` }}
     >
-      <SplinePhone
-        className="h-full w-full"
-        zoom={metrics.zoom}
-        active={enabled && active}
-      />
+      {variant === 'video' ? (
+        <Suspense fallback={null}>
+          <JobSeekerVideoShowcase instant widthPx={metrics.width} />
+        </Suspense>
+      ) : (
+        <SplinePhone
+          className="h-full w-full"
+          zoom={metrics.zoom}
+          active={enabled && active}
+        />
+      )}
     </div>
   );
 };
+
 
 const calculateMobileHeroMinHeight = () => {
   if (typeof window === 'undefined' || getInlinePhonePlacement() !== 'mobile') return null;
