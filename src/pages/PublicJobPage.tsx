@@ -70,12 +70,14 @@ const PublicJobPage = () => {
     let cancelled = false;
     (async () => {
       setLoading(true);
+      const now = new Date().toISOString();
       const { data, error } = await supabase
         .from('job_postings')
         .select('id,title,description,requirements,location,occupation,employment_type,work_schedule,salary_min,salary_max,salary_type,workplace_city,workplace_county,workplace_postal_code,workplace_address,workplace_name,company_logo_url,job_image_url,benefits,created_at,expires_at,is_active,positions_count,remote_work_possible,work_location_type')
         .eq('id', jobId)
         .eq('is_active', true)
         .is('deleted_at', null)
+        .or(`expires_at.is.null,expires_at.gt.${now}`)
         .maybeSingle();
       if (cancelled) return;
       if (error || !data) {

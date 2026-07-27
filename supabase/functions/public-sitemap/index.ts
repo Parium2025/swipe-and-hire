@@ -11,16 +11,26 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error('Missing backend sitemap credentials');
+    }
+
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      supabaseUrl,
+      serviceRoleKey,
     );
+
+    const now = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('job_postings')
-      .select('id, updated_at, created_at')
+      .select('id, updated_at, created_at, expires_at')
       .eq('is_active', true)
       .is('deleted_at', null)
+      .or(`expires_at.is.null,expires_at.gt.${now}`)
       .order('created_at', { ascending: false })
       .limit(45000);
 
