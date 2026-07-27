@@ -997,7 +997,7 @@ const IntroSplinePhone = () => {
     const measure = () => {
       const height = wrapper.getBoundingClientRect().height;
       if (!height) return;
-      setZoom(clamp((height / 376) * 0.54, 0.24, 0.62));
+      setZoom(clamp((height / 376) * 0.44, 0.2, 0.55));
     };
 
     measure();
