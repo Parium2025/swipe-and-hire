@@ -1079,11 +1079,8 @@ const IntroSplinePhone = () => {
       transition={{ duration: 1, ease }}
       className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[140px] sm:max-w-[152px] md:max-w-[162px] lg:max-w-[172px] xl:max-w-[184px]"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-4 top-1/2 h-1/2 -translate-y-1/2 rounded-[3rem] bg-secondary/10 blur-3xl"
-      />
       <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} />
+
     </motion.div>
   );
 };
