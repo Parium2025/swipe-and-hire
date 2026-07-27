@@ -1156,11 +1156,10 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               >
                 <IntroText paragraphs={c.intro.paragraphs} />
               </motion.div>
-              <div className="order-1 md:order-2">
-                <Suspense fallback={null}>
-                  <JobSeekerVideoShowcase />
-                </Suspense>
+              <div className="order-1 flex justify-center md:order-2">
+                <IntroSplinePhone />
               </div>
+
             </div>
           ) : (
             <motion.div
