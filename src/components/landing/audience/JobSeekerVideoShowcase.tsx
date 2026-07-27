@@ -73,12 +73,14 @@ const JobSeekerVideoShowcase = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.94 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 1.1, ease }}
-      className={`relative mx-auto w-full max-w-[190px] sm:max-w-[215px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px] ${className}`}
+      initial={instant ? false : { opacity: 0, y: 40, scale: 0.94 }}
+      whileInView={instant ? undefined : { opacity: 1, y: 0, scale: 1 }}
+      viewport={instant ? undefined : { once: true, amount: 0.2 }}
+      transition={instant ? undefined : { duration: 1.1, ease }}
+      style={widthPx ? { width: `${widthPx}px`, maxWidth: '100%' } : undefined}
+      className={`relative mx-auto ${widthPx ? '' : 'w-full max-w-[190px] sm:max-w-[215px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px]'} ${className}`}
     >
+
       {/* Ambient glow */}
       <div
         aria-hidden
