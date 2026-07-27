@@ -123,7 +123,7 @@ export const HeroGlobe = () => {
           frameBorder={0}
           allow="autoplay; xr-spatial-tracking"
           loading="eager"
-          {...({ fetchPriority: 'high' } as React.IframeHTMLAttributes<HTMLIFrameElement>)}
+          {...fetchPriority('high')}
           allowTransparency={true}
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
