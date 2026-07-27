@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { authSplashEvents } from '@/lib/authSplashEvents';
 
 import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 // Bara en kort frame-cover. Logout är fast (den fungerar redan perfekt).
 // Login är route-aware: splashen får inte släppa medan vi fortfarande är kvar
@@ -238,7 +239,7 @@ export function AuthSplashScreen() {
           }}
           decoding="sync"
           loading="eager"
-          fetchPriority="high"
+          {...fetchPriority('high')}
         />
         
         {/* Tagline - exakt samma som index.html. Byter text beroende på

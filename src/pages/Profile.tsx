@@ -40,6 +40,7 @@ import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCachedImage } from '@/hooks/useCachedImage';
 import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificationSettings';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 // Draft key for localStorage
 const PROFILE_DRAFT_KEY = 'parium_draft_profile';
@@ -1790,7 +1791,7 @@ const Profile = () => {
                         className="object-cover"
                         decoding="sync"
                         loading="eager"
-                        fetchPriority="high"
+                        {...fetchPriority('high')}
                         draggable={false}
                       />
                     ) : null}

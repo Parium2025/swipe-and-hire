@@ -8,6 +8,7 @@ import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { toObjectPosition } from '@/lib/jobImageFocus';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 interface JobViewHeroProps {
   title: string;
@@ -123,7 +124,7 @@ export const JobViewHero = memo(function JobViewHero({
         className="w-full h-full object-cover"
         style={{ objectPosition }}
         loading="eager"
-        fetchPriority="high"
+        {...fetchPriority('high')}
         decoding="sync"
         fallbackClassName="w-full h-full flex flex-col items-center justify-center bg-white/5 text-white text-xs gap-1 p-2 text-center"
       />

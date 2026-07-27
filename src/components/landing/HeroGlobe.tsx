@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 /**
  * HeroGlobe — Spline 3D phone scene.
@@ -123,7 +124,7 @@ export const HeroGlobe = () => {
           frameBorder={0}
           allow="autoplay; xr-spatial-tracking"
           loading="eager"
-          {...({ fetchPriority: 'high' } as React.IframeHTMLAttributes<HTMLIFrameElement>)}
+          {...fetchPriority('high')}
           allowTransparency={true}
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));

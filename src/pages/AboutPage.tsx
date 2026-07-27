@@ -9,6 +9,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { ABOUT_BANNER_URL, preloadAboutPageAssets } from '@/lib/aboutPagePreload';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 const CANONICAL = 'https://www.parium.se/om-oss';
 const TITLE = 'Om Parium – Jobbappen som samlar allt på ett ställe';
@@ -104,7 +105,7 @@ const AboutPage = () => {
             className="absolute inset-0 h-full w-full object-cover object-center"
             loading="eager"
             decoding="sync"
-            fetchPriority="high"
+            {...fetchPriority('high')}
           />
           {/* Mörkningslager — kraftig kontrast så texten alltid är läsbar */}
           <div className="absolute inset-0 bg-black/60" />

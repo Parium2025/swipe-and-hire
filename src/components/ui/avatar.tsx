@@ -1,6 +1,7 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { fetchPriority } from '@/lib/fetchPriority';
 
 /**
  * Custom Avatar implementation that avoids Radix UI's internal loading state
@@ -117,7 +118,7 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
         data-state={status}
         loading="eager"
         decoding="async"
-        fetchPriority="high"
+        {...fetchPriority('high')}
         {...props}
       />
     );

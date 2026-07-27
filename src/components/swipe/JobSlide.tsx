@@ -20,6 +20,7 @@ import { NextCardUnderlay } from './jobSlide/NextCardUnderlay';
 import { useUndoEntryAnimation } from './jobSlide/useUndoEntryAnimation';
 import { useTapHint } from './jobSlide/useTapHint';
 import { useSwipeCardGesture, type SwipeDirection } from './jobSlide/useSwipeCardGesture';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 export interface JobSlideSwipeApi {
   swipe: (direction: SwipeDirection) => void;
@@ -249,7 +250,7 @@ export const JobSlide = memo(function JobSlide({
                 style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
                 loading={isVisible ? 'eager' : 'lazy'}
                 decoding="async"
-                fetchPriority={isVisible ? 'high' : 'auto'}
+                {...fetchPriority(isVisible ? 'high' : 'auto')}
                 draggable={false}
                 onError={handleImageError}
               />

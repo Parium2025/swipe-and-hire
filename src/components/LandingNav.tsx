@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 export interface LandingNavLink {
   label: string;
@@ -185,7 +186,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                 draggable={false}
                 loading="eager"
                 decoding="sync"
-                fetchPriority="high"
+                {...fetchPriority('high')}
                 className="h-auto w-36 sm:w-32 md:w-36 lg:w-40 pointer-events-none"
               />
             </a>

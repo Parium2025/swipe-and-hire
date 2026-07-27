@@ -1,6 +1,7 @@
 import pariumLogoRings from "@/assets/parium-logo-rings.png";
 import landingNavLogo from "/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png";
 import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
+import { fetchPriority } from '@/lib/fetchPriority';
 
 /**
  * Keeps critical UI assets warm in the browser cache/decoder so route changes
@@ -20,7 +21,7 @@ export function CriticalAssetPreloads() {
         aria-hidden="true"
         loading="eager"
         decoding="sync"
-        fetchPriority="high"
+        {...fetchPriority('high')}
         style={{
           position: "fixed",
           top: 0,
@@ -40,7 +41,7 @@ export function CriticalAssetPreloads() {
         aria-hidden="true"
         loading="eager"
         decoding="sync"
-        fetchPriority="high"
+        {...fetchPriority('high')}
         style={{
           position: "fixed",
           top: 0,
@@ -61,7 +62,7 @@ export function CriticalAssetPreloads() {
         aria-hidden="true"
         loading="eager"
         decoding="sync"
-        fetchPriority="high"
+        {...fetchPriority('high')}
         style={{
           position: "fixed",
           top: 0,
