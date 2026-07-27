@@ -19,7 +19,17 @@ const SOURCES = [
  * Uppspelning: ett enda videolager med native `loop` + autoplay. Ingen
  * korsfade, ingen manuell omstart — bara rå, oavbruten loop.
  */
-const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
+const JobSeekerVideoShowcase = ({
+  className = '',
+  widthPx,
+  instant = false,
+}: {
+  className?: string;
+  /** Explicit bredd i px — används när telefonen ska matcha hero-layoutens mått. */
+  widthPx?: number;
+  /** Hoppa över intro-animationen (telefonen är redan på plats direkt). */
+  instant?: boolean;
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
