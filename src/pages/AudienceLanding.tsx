@@ -689,6 +689,8 @@ type HeroPhoneMetrics = {
   isDesktop: boolean;
   isPortraitTablet?: boolean;
   pinToViewport?: boolean;
+  /** Höjden är redan den exakta visuella höjden – ingen variant-nedskalning. */
+  exactHeight?: boolean;
   right?: string;
   top: number;
   height: number;
@@ -696,6 +698,7 @@ type HeroPhoneMetrics = {
   zoom: number;
   yOffset: number;
 };
+
 
 const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' }) => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
