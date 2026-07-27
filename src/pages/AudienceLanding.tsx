@@ -975,6 +975,67 @@ const SectionDivider = ({ className = '' }: { className?: string }) => {
   );
 };
 
+/**
+ * IntroSplinePhone — Spline-telefonen i intro-sektionen ("Vi har gjort det enkelt för alla").
+ *
+ * Spline-scenen har ingen fast pixelstorlek: telefonens visuella höjd styrs av
+ * `zoom` i förhållande till canvasens höjd. Därför mäts containern här och
+ * zoom räknas fram med samma baslinje som hero-metriken (h/376 * 0.58), så att
+ * telefonen alltid får identiska proportioner oavsett breakpoint — och aldrig
+ * blir högre än textkolumnen bredvid.
+ */
+const IntroSplinePhone = () => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [active, setActive] = useState(false);
+  const [zoom, setZoom] = useState(0.4);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+    const measure = () => {
+      const height = wrapper.getBoundingClientRect().height;
+      if (!height) return;
+      setZoom(clamp((height / 376) * 0.44, 0.2, 0.55));
+    };
+
+    measure();
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(wrapper);
+
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const observer = new IntersectionObserver(
+      ([entry]) => setActive(entry.isIntersecting && entry.intersectionRatio > 0.01),
+      { root, rootMargin: '240px 0px 240px 0px', threshold: [0, 0.01, 0.25] },
+    );
+    observer.observe(wrapper);
+
+    return () => {
+      resizeObserver.disconnect();
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <motion.div
+      ref={wrapperRef}
+      aria-hidden="true"
+      initial={{ opacity: 0, y: 32, scale: 0.96 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 1, ease }}
+      className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[140px] sm:max-w-[152px] md:max-w-[162px] lg:max-w-[172px] xl:max-w-[184px]"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-4 top-1/2 h-1/2 -translate-y-1/2 rounded-[3rem] bg-secondary/10 blur-3xl"
+      />
+      <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} />
+    </motion.div>
+  );
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroIntroStage — Native scroll, inga hijacks.
 // Hero ligger som en vanlig 100svh-sektion. Intro ligger som en egen
@@ -986,6 +1047,10 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
   const mobileHeroMinHeight = useMobileHeroMinHeight();
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
+  // Jobbsökare: swipe-videon i hero (ritas direkt), Spline i intro (hinner ladda i lugn och ro).
+  const heroPhoneVariant = audience === 'job_seeker' ? 'video' : 'spline';
+
+
 
 
   return (
@@ -1025,7 +1090,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               headingId="audience-hero-heading-mobile"
             />
           </motion.div>
-          <InlineHeroPhone placement="mobile" className="mt-2" />
+          <InlineHeroPhone placement="mobile" className="mt-2" variant={heroPhoneVariant} />
         </section>
         )}
 
@@ -1050,7 +1115,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
             </motion.div>
             <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10">
-              <InlineHeroPhone placement="portraitTablet" />
+              <InlineHeroPhone placement="portraitTablet" variant={heroPhoneVariant} />
             </div>
           </div>
         </section>
@@ -1091,11 +1156,10 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               >
                 <IntroText paragraphs={c.intro.paragraphs} />
               </motion.div>
-              <div className="order-1 md:order-2">
-                <Suspense fallback={null}>
-                  <JobSeekerVideoShowcase />
-                </Suspense>
+              <div className="order-1 flex justify-center md:order-2">
+                <IntroSplinePhone />
               </div>
+
             </div>
           ) : (
             <motion.div
@@ -1531,7 +1595,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       <div className="pointer-events-none absolute inset-0 z-0">
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
-      <FixedPhoneLayer />
+      <FixedPhoneLayer variant={audience === 'job_seeker' ? 'video' : 'spline'} />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
