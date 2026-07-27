@@ -76,6 +76,20 @@ const getDisplayCompanyName = (job: JobPosting | null) => {
   return job.workplace_name?.trim() || 'Företag';
 };
 
+const getSchemaEmploymentType = (employmentType: string | null | undefined) => {
+  const value = employmentType?.toLowerCase().trim();
+  if (!value) return null;
+
+  if (value.includes('deltid') || value.includes('part')) return 'PART_TIME';
+  if (value.includes('heltid') || value.includes('tillsvidare') || value.includes('full')) return 'FULL_TIME';
+  if (value.includes('sommar') || value.includes('visstid') || value.includes('vikariat') || value.includes('temporary')) return 'TEMPORARY';
+  if (value.includes('konsult') || value.includes('interim') || value.includes('contract')) return 'CONTRACTOR';
+  if (value.includes('praktik') || value.includes('intern')) return 'INTERN';
+  if (value.includes('volontär') || value.includes('volunteer')) return 'VOLUNTEER';
+
+  return 'OTHER';
+};
+
 // Module-level cache: survives component remounts during viewport resizes
 const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
 const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
@@ -710,6 +724,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     }
   };
 
+  const publicCanonical = job ? `https://www.parium.se/annons/${job.id}` : '';
+  const schemaEmploymentType = job ? getSchemaEmploymentType(job.employment_type) : null;
+
   return (
     <div
       ref={contentRef}
@@ -740,10 +757,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             name="description"
             content={(job.description || job.pitch || `${job.title} hos ${getDisplayCompanyName(job)}`).replace(/\s+/g, ' ').slice(0, 155)}
           />
-          <link rel="canonical" href={`https://www.parium.se/job/${job.id}`} />
+          <link rel="canonical" href={publicCanonical} />
           <meta property="og:title" content={`${job.title} – ${getDisplayCompanyName(job)}`} />
           <meta property="og:description" content={(job.pitch || job.description || '').replace(/\s+/g, ' ').slice(0, 155)} />
-          <meta property="og:url" content={`https://www.parium.se/job/${job.id}`} />
+          <meta property="og:url" content={publicCanonical} />
           <meta property="og:type" content="website" />
           <script type="application/ld+json">{JSON.stringify({
             '@context': 'https://schema.org',
@@ -752,7 +769,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             description: job.description || job.pitch || '',
             datePosted: job.created_at,
             ...(job.expires_at ? { validThrough: job.expires_at } : {}),
-            ...(job.employment_type ? { employmentType: job.employment_type.toUpperCase() } : {}),
+            ...(schemaEmploymentType ? { employmentType: schemaEmploymentType } : {}),
             hiringOrganization: {
               '@type': 'Organization',
               name: getDisplayCompanyName(job),
@@ -788,7 +805,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               : {}),
             ...(job.positions_count ? { totalJobOpenings: job.positions_count } : {}),
             directApply: true,
-            url: `https://www.parium.se/job/${job.id}`,
+            url: publicCanonical,
           })}</script>
         </Helmet>
       )}
