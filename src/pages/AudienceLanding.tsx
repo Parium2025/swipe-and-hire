@@ -1730,7 +1730,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <main>
           <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
-          <SectionDivider className="my-12 md:my-20" />
+          <SectionDivider className="mt-28 mb-12 md:mt-40 md:mb-20" />
+
 
           {audience === 'job_seeker' && (
             <>
