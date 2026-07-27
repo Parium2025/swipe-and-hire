@@ -1572,7 +1572,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       <div className="pointer-events-none absolute inset-0 z-0">
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
-      <FixedPhoneLayer />
+      <FixedPhoneLayer variant={audience === 'job_seeker' ? 'video' : 'spline'} />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
