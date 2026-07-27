@@ -587,7 +587,7 @@ const InlineHeroPhone = ({
       window.removeEventListener('resize', sync);
       window.visualViewport?.removeEventListener('resize', sync);
     };
-  }, [placement]);
+  }, [placement, variant]);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -935,8 +935,13 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
 
 
 
-  const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
-  const phoneCanvasHeight = phoneMetrics.canvasHeight ?? phoneMetrics.height;
+  // Video-mockupen fyller hela sin box (till skillnad från Spline-canvasen som
+  // har luft runt telefonen). Utan nedskalning blir den därför dubbelt så stor
+  // som Spline-telefonen och klipps på iPad/laptop.
+  const isVideoPhone = variant === 'video';
+  const phoneVisualHeight = isVideoPhone ? phoneMetrics.height * 0.62 : phoneMetrics.height;
+  const phoneWidth = phoneVisualHeight * PHONE_ASPECT;
+  const phoneCanvasHeight = isVideoPhone ? phoneVisualHeight : (phoneMetrics.canvasHeight ?? phoneMetrics.height);
   const phoneCanvasLift = Math.max(0, (phoneCanvasHeight - phoneMetrics.height) / 2);
 
   if (isInlinePhone) return null;
@@ -1091,7 +1096,8 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
   // Jobbsökare: swipe-videon i hero (ritas direkt), Spline i intro (hinner ladda i lugn och ro).
-  const heroPhoneVariant = audience === 'job_seeker' ? 'video' : 'spline';
+  const heroPhoneVariant: 'spline' | 'video' = audience === 'job_seeker' ? 'video' : 'spline';
+  currentHeroPhoneVariant = heroPhoneVariant;
 
 
 
@@ -1164,8 +1170,6 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
         </section>
         )}
       </section>
-
-      <SectionDivider className="my-12 md:my-20" />
 
       {/* ─────────── INTRO ─────────── */}
       <section
