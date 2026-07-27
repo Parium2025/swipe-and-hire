@@ -82,7 +82,10 @@ serve(async (req) => {
             .map(([k, v]) => ({ label: k, value: typeof v === 'string' ? v : JSON.stringify(v) })),
           error_message: payload.error_message || '',
         };
+        alertKey = `system-critical-${payload.details?.message || 'unknown'}`.slice(0, 200);
+        cooldownMinutes = 60;
         idempotencyKey = `system-critical-${Date.now()}`;
+
         break;
 
       case 'storage_warning':
