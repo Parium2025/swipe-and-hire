@@ -975,6 +975,67 @@ const SectionDivider = ({ className = '' }: { className?: string }) => {
   );
 };
 
+/**
+ * IntroSplinePhone — Spline-telefonen i intro-sektionen ("Vi har gjort det enkelt för alla").
+ *
+ * Spline-scenen har ingen fast pixelstorlek: telefonens visuella höjd styrs av
+ * `zoom` i förhållande till canvasens höjd. Därför mäts containern här och
+ * zoom räknas fram med samma baslinje som hero-metriken (h/376 * 0.58), så att
+ * telefonen alltid får identiska proportioner oavsett breakpoint — och aldrig
+ * blir högre än textkolumnen bredvid.
+ */
+const IntroSplinePhone = () => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [active, setActive] = useState(false);
+  const [zoom, setZoom] = useState(0.4);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+    const measure = () => {
+      const height = wrapper.getBoundingClientRect().height;
+      if (!height) return;
+      setZoom(clamp((height / 376) * 0.54, 0.24, 0.62));
+    };
+
+    measure();
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(wrapper);
+
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const observer = new IntersectionObserver(
+      ([entry]) => setActive(entry.isIntersecting && entry.intersectionRatio > 0.01),
+      { root, rootMargin: '240px 0px 240px 0px', threshold: [0, 0.01, 0.25] },
+    );
+    observer.observe(wrapper);
+
+    return () => {
+      resizeObserver.disconnect();
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <motion.div
+      ref={wrapperRef}
+      aria-hidden="true"
+      initial={{ opacity: 0, y: 32, scale: 0.96 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 1, ease }}
+      className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[150px] sm:max-w-[165px] md:max-w-[175px] lg:max-w-[190px] xl:max-w-[205px]"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-4 top-1/2 h-1/2 -translate-y-1/2 rounded-[3rem] bg-secondary/10 blur-3xl"
+      />
+      <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} />
+    </motion.div>
+  );
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroIntroStage — Native scroll, inga hijacks.
 // Hero ligger som en vanlig 100svh-sektion. Intro ligger som en egen
@@ -986,6 +1047,10 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
   const mobileHeroMinHeight = useMobileHeroMinHeight();
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
+  // Jobbsökare: swipe-videon i hero (ritas direkt), Spline i intro (hinner ladda i lugn och ro).
+  const heroPhoneVariant = audience === 'job_seeker' ? 'video' : 'spline';
+
+
 
 
   return (
