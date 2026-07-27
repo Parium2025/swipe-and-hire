@@ -1132,7 +1132,7 @@ const IntroSplinePhone = () => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 1, ease }}
-      style={{ marginTop: -Math.round(trimPx * 0.35), marginBottom: -Math.round(trimPx * 1.65) }}
+      style={{ marginTop: 0, marginBottom: -Math.round(trimPx * 2) }}
       className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[140px] sm:max-w-[152px] md:max-w-[162px] lg:max-w-[172px] xl:max-w-[184px]"
 
     >
