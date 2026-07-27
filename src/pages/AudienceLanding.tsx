@@ -918,13 +918,24 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
               : { top: `${phoneMetrics.top}px`, height: `${phoneCanvasHeight}px`, width: `${phoneWidth}px` }
           }
         >
+          {variant === 'video' ? (
+            <div
+              className="flex h-full w-full items-center justify-center"
+              style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
+            >
+              <Suspense fallback={null}>
+                <JobSeekerVideoShowcase instant widthPx={phoneWidth} />
+              </Suspense>
+            </div>
+          ) : (
+            <SplinePhone
+              className="h-full w-full"
+              style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
+              zoom={phoneMetrics.zoom}
+              active={active}
+            />
+          )}
 
-          <SplinePhone
-            className="h-full w-full"
-            style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
-            zoom={phoneMetrics.zoom}
-            active={active}
-          />
         </div>
       </div>
     </div>
