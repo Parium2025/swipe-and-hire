@@ -1643,7 +1643,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       : 'Hitta rätt kandidater snabbt | Parium – för arbetsgivare';
     const description = isSeeker
       ? 'Slipp långa formulär. Bygg en profil som visar mer än ett CV och få relevanta jobb först. Gratis för jobbsökare i Sverige.'
-      : 'Hitta rätt kandidater på sekunder. Publicera jobb, matcha smart och anställ snabbare med Parium – rekrytering i en ny generation.';
+      : 'Hitta rätt kandidater på sekunder. Publicera jobb, se video och CV direkt och anställ snabbare med Parium – rekrytering i en ny generation.';
     const url = isSeeker ? 'https://www.parium.se/jobbsokare' : 'https://www.parium.se/arbetsgivare';
 
     document.title = title;
@@ -2137,7 +2137,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur får jag notiser om nya jobb?',
-                        a: 'Spara en sökning med dina önskemål kring roll, ort och erfarenhet. När en ny annons matchar får du en notis — så missar du aldrig ett relevant jobb.',
+                        a: 'Spara en sökning med dina önskemål kring roll, ort och erfarenhet. När en ny annons stämmer med sökningen får du en notis — så missar du aldrig ett relevant jobb.',
                       },
                       {
                         q: 'Hur ökar jag mina chanser att bli kontaktad?',
@@ -2147,7 +2147,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   : [
                       {
                         q: 'Hur fungerar Parium för arbetsgivare?',
-                        a: 'Ni publicerar jobb på minuter, kandidater visar intresse direkt i appen och ni får en överblick med video, CV och svar på era egna frågor. När ni matchar tillbaka öppnas en chatt — inga mejltrådar, inga betalda annonser som försvinner.',
+                        a: 'Ni publicerar jobb på minuter, kandidater visar intresse direkt i appen och ni får en överblick med video, CV och svar på era egna frågor. När ni visar intresse tillbaka öppnas en chatt — inga mejltrådar, inga betalda annonser som försvinner.',
                       },
                       {
                         q: 'Vad kostar det att rekrytera?',
@@ -2163,7 +2163,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur kvalitetssäkras kandidaterna?',
-                        a: 'Varje kandidat har en verifierad profil med video, erfarenhet och tydliga önskemål kring roll, ort och lön. Ni ser allt innan ni matchar, vilket minimerar tiden ni lägger på irrelevanta ansökningar.',
+                        a: 'Varje kandidat har en verifierad profil med video, erfarenhet och tydliga önskemål kring roll, ort och lön. Ni ser allt innan ni går vidare, vilket minimerar tiden ni lägger på irrelevanta ansökningar.',
                       },
                       {
                         q: 'Kan flera kollegor arbeta i samma konto?',
