@@ -1243,12 +1243,12 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
       </section>
 
       {/* Visuell paus mellan hero-telefonen och intro-sektionen */}
-      <SectionDivider className="mt-2 mb-0 sm:mt-4 md:mt-10" />
+      <SectionDivider className="mt-7 mb-0 sm:mt-10 md:mt-14" />
 
       {/* ─────────── INTRO ─────────── */}
       <section
         aria-label="Introduktion"
-        className="relative flex w-full items-center justify-center overflow-hidden px-5 pb-8 pt-20 sm:px-6 sm:pb-10 sm:pt-24 md:px-12 md:pb-12 md:pt-16 lg:px-24"
+        className="relative flex w-full items-center justify-center overflow-hidden px-5 pb-8 pt-16 sm:px-6 sm:pb-10 sm:pt-20 md:px-12 md:pb-12 md:pt-14 lg:px-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -1730,7 +1730,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <main>
           <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
-          <SectionDivider className="my-12 md:my-20" />
+          <SectionDivider className="mt-28 mb-12 md:mt-40 md:mb-20" />
+
 
           {audience === 'job_seeker' && (
             <>
@@ -1741,7 +1742,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 </Suspense>
               </section>
 
-              <SectionDivider className="my-12 md:my-20" />
+              <SectionDivider className="mt-12 mb-24 md:mt-20 md:mb-36" />
+
             </>
           )}
 
