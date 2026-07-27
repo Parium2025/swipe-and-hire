@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 /**
  * HeroGlobe — Spline 3D phone scene.
