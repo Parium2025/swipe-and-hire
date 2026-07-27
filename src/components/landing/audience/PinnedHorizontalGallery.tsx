@@ -6,6 +6,7 @@ import real4 from '@/assets/landing/jobseeker-real-4.jpg';
 import real5 from '@/assets/landing/jobseeker-real-5.jpg';
 import real6 from '@/assets/landing/jobseeker-real-6.jpg';
 import real7 from '@/assets/landing/jobseeker-real-7.jpg';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 /**
  * Apple-style "Så funkar det" sektion.
@@ -123,7 +124,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
           alt={item.title}
           loading={index < 3 ? 'eager' : 'lazy'}
           decoding="async"
-          fetchPriority={index < 2 ? 'high' : index >= 4 ? 'low' : 'auto'}
+          {...fetchPriority(index < 2 ? 'high' : index >= 4 ? 'low' : 'auto')}
           draggable={false}
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />

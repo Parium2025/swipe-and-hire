@@ -3,6 +3,7 @@ import { useDevice } from '@/hooks/use-device';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { Play, Pause } from 'lucide-react';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 interface ProfileVideoProps {
   videoUrl: string;
@@ -256,7 +257,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           className={`w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
           loading="eager"
           decoding="async"
-          fetchPriority="high"
+          {...fetchPriority('high')}
         />
       ) : (
         <div className={`w-full h-full bg-[hsl(210,35%,22%)] flex items-center justify-center text-white font-semibold text-2xl transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>

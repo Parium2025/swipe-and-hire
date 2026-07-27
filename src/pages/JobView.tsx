@@ -25,6 +25,7 @@ import { getCompanyInitials } from '@/lib/companyInitials';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { Helmet } from 'react-helmet-async';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 interface JobPosting {
   id: string;
@@ -891,7 +892,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       alt={getDisplayCompanyName(job)}
                       className="w-full h-full object-cover"
                       loading="eager"
-                      fetchPriority="high"
+                      {...fetchPriority('high')}
                       decoding="sync"
                       draggable={false}
                       fallbackClassName="w-full h-full"

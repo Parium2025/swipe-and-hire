@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart, X, Bookmark } from 'lucide-react';
 import officeBuilding from '@/assets/office-building.jpg';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 interface JobAdCardProps {
   imageUrl?: string;
@@ -51,7 +52,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
               <img
                 loading="eager"
                 decoding="sync"
-                fetchPriority="high"
+                {...fetchPriority('high')}
                 src={imageUrl}
                 alt={imageAlt || `${title} hos ${company}`}
                 className="absolute inset-0 w-full h-full object-cover will-change-transform"

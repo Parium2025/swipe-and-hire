@@ -21,6 +21,7 @@ import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelecto
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -1508,7 +1509,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                           className="object-cover"
                           decoding="sync"
                           loading="eager"
-                          fetchPriority="high"
+                          {...fetchPriority('high')}
                           draggable={false}
                         />
                         <AvatarFallback delayMs={0} className={`text-4xl font-semibold bg-white/20 text-white ${formData.profileImageUrl ? 'hidden' : ''}`}>

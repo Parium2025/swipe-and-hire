@@ -7,6 +7,7 @@ import { JobSlideContent, OccupationBadge } from './JobSlideContent';
 import { useCardImage } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
 import { SWIPE_IMG_TRANSFORM, SWIPE_LOGO_TRANSFORM } from './constants';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 interface NextCardUnderlayProps {
   job: SwipeJob;
@@ -87,7 +88,7 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
             style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
             loading="eager"
             decoding="async"
-            fetchPriority="high"
+            {...fetchPriority('high')}
             draggable={false}
           />
         ) : (
