@@ -151,11 +151,18 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
               </video>
             ))}
 
-            {/* Dynamic Island — döljer inspelningsindikatorn och ger äkta iPhone-känsla */}
+            {/* Maskar bort iOS utökade inspelnings-island (röd prick) med appens
+                exakta statusfältsfärg — klocka och batteri får vara kvar. */}
             <div
               aria-hidden
-              className="absolute left-1/2 top-[1.15%] h-[3.1%] w-[31%] -translate-x-1/2 rounded-full bg-black shadow-[0_0_0_0.5px_rgba(255,255,255,0.06)]"
+              className="absolute left-[23%] right-[23%] top-0 h-[6.6%] bg-[#01182f]"
             />
+            {/* Dynamic Island i normalt läge */}
+            <div
+              aria-hidden
+              className="absolute left-1/2 top-[1.2%] h-[4.3%] w-[30%] -translate-x-1/2 rounded-full bg-black"
+            />
+
 
             {/* Skärmreflex + inre kant */}
             <div
