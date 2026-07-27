@@ -1106,7 +1106,7 @@ const IntroSplinePhone = () => {
       setIsPortraitTablet(portraitTablet);
       // Samma baslinje som hero-metriken: telefonens synliga höjd blir ca 74 %
       // av canvasens höjd vid den här zoomen (högre zoom klipper toppen).
-      setZoom(clamp((height / 376) * (portraitTablet ? 0.5 : 0.46), 0.2, portraitTablet ? 0.66 : 0.58));
+      setZoom(clamp((height / 376) * (portraitTablet ? 0.42 : 0.46), 0.2, portraitTablet ? 0.54 : 0.58));
       setTrimPx(Math.round(height * 0.16));
     };
 
@@ -1144,7 +1144,7 @@ const IntroSplinePhone = () => {
       style={{ marginTop: 0, marginBottom: -Math.round(trimPx * 2) }}
       className={`pointer-events-none relative mx-auto aspect-[9/19.5] w-full ${
         isPortraitTablet
-          ? 'max-w-[215px]'
+          ? 'max-w-[192px]'
           : 'max-w-[140px] sm:max-w-[152px] md:max-w-[162px] lg:max-w-[172px] xl:max-w-[184px]'
       }`}
 
