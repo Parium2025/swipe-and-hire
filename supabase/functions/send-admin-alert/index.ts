@@ -8,7 +8,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_EMAIL = "pariumab@hotmail.com";
+// Mottagare kan bytas utan kodändring via secret ADMIN_ALERT_EMAIL.
+const ADMIN_EMAIL = Deno.env.get("ADMIN_ALERT_EMAIL") || "pariumab@hotmail.com";
+// Hård global tak-spärr: max så här många larmmejl per dygn, oavsett typ.
+// Skyddar både inkorgen och avsändarryktet mot larmstormar.
+const MAX_ALERTS_PER_DAY = 20;
 
 interface AlertPayload {
   type: 'rss_source_failure' | 'system_critical' | 'storage_warning' | 'news_watchdog';
