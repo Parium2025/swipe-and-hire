@@ -118,6 +118,8 @@ serve(async (req) => {
             .map(([k, v]) => ({ label: k, value: typeof v === 'string' ? v : JSON.stringify(v) })),
           error_message: payload.error_message || '',
         };
+        alertKey = `news-watchdog-${payload.details?.feed || 'all'}-${payload.details?.code || 'check'}`;
+        cooldownMinutes = 720; // 12 h per problemtyp och feed
         idempotencyKey = `news-watchdog-${new Date().toISOString().slice(0, 10)}-${payload.details?.feed || 'all'}-${payload.details?.code || 'check'}`;
         break;
 
@@ -128,7 +130,31 @@ serve(async (req) => {
         );
     }
 
+    // Cooldown-spärr: samma larm kan bara mejlas en gång per period.
+    // Detta är den enda vägen ut för admin-larm, så inget flöde kan spamma kön.
+    const { data: claimed, error: claimError } = await supabase.rpc('claim_admin_alert', {
+      _alert_key: alertKey,
+      _cooldown_minutes: cooldownMinutes,
+    });
+
+    if (claimError) {
+      console.error('Cooldown check failed, skipping alert to be safe:', claimError);
+      return new Response(
+        JSON.stringify({ success: false, skipped: 'cooldown_check_failed' }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    if (claimed !== true) {
+      console.log('Alert suppressed by cooldown:', alertKey);
+      return new Response(
+        JSON.stringify({ success: true, skipped: 'cooldown', alert_key: alertKey }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const { data, error } = await supabase.functions.invoke('send-transactional-email', {
+
       body: {
         templateName: 'admin-alert',
         recipientEmail: ADMIN_EMAIL,
