@@ -1102,7 +1102,7 @@ const IntroSplinePhone = () => {
       // Samma baslinje som hero-metriken: telefonens synliga höjd blir ca 74 %
       // av canvasens höjd vid den här zoomen (högre zoom klipper toppen).
       setZoom(clamp((height / 376) * 0.44, 0.2, 0.56));
-      setTrimPx(Math.round(height * 0.13));
+      setTrimPx(Math.round(height * 0.16));
     };
 
 
