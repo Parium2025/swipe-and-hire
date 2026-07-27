@@ -53,7 +53,7 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 1.1, ease }}
-      className={`relative mx-auto w-full max-w-[190px] xs:max-w-[205px] sm:max-w-[220px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px] ${className}`}
+      className={`relative mx-auto w-full max-w-[190px] sm:max-w-[215px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px] ${className}`}
     >
       {/* Ambient glow */}
       <div
