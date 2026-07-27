@@ -519,11 +519,16 @@ const calculateInlinePhoneMetrics = () => {
   };
 };
 
-const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 'portraitTablet'; className?: string }) => {
+const InlineHeroPhone = ({
+  placement,
+  className = '',
+  variant = 'spline',
+}: { placement: 'mobile' | 'portraitTablet'; className?: string; variant?: 'spline' | 'video' }) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(() => getInlinePhonePlacement() === placement);
   const [active, setActive] = useState(() => getInlinePhonePlacement() === placement);
   const [metrics, setMetrics] = useState(calculateInlinePhoneMetrics);
+
   
 
   useEffect(() => {
