@@ -1026,6 +1026,8 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
   const mobileHeroMinHeight = useMobileHeroMinHeight();
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
+  // Jobbsökare: swipe-video i hero (ritas direkt), Spline-telefon i intro.
+  const heroPhoneVariant = audience === 'job_seeker' ? 'video' : 'spline';
 
 
   return (
