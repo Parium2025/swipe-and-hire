@@ -100,32 +100,29 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
             className="relative overflow-hidden rounded-[10.5%/4.6%] bg-black"
             style={{ aspectRatio: ASPECT }}
           >
-            {[aRef, bRef].map((ref, i) => (
-              <video
-                key={i}
-                ref={ref}
-                autoPlay={i === 0}
-                muted
-                playsInline
-                preload="auto"
-                poster="/showcase-jobseeker-poster.jpg"
-                aria-hidden={i !== 0}
-                aria-label={i === 0 ? 'Demo av Parium-appen för jobbsökare' : undefined}
-                className="absolute inset-0 h-full w-full object-cover"
-                style={{
-                  opacity: i === 0 ? 1 : 0,
-                  // Kompenserar för att en liten skärm + glans-overlay plattar ut
-                  // kontrasten jämfört med en riktig telefon.
-                  filter: 'saturate(1.06) contrast(1.04)',
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                }}
-              >
-                {SOURCES.map((s) => (
-                  <source key={s.src} src={s.src} type={s.type} />
-                ))}
-              </video>
-            ))}
+            <video
+              ref={videoRef}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              poster="/showcase-jobseeker-poster.jpg"
+              aria-label="Demo av Parium-appen för jobbsökare"
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{
+                // Kompenserar för att en liten skärm + glans-overlay plattar ut
+                // kontrasten jämfört med en riktig telefon.
+                filter: 'saturate(1.06) contrast(1.04)',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+              }}
+            >
+              {SOURCES.map((s) => (
+                <source key={s.src} src={s.src} type={s.type} />
+              ))}
+            </video>
+
 
             {/* Maskar bort iOS utökade inspelnings-island (röd prick) med appens
                 exakta statusfältsfärg — klocka och batteri får vara kvar. */}
