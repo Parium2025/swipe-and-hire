@@ -977,7 +977,10 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
   // har luft runt telefonen). Utan nedskalning blir den därför dubbelt så stor
   // som Spline-telefonen och klipps på iPad/laptop.
   const isVideoPhone = variant === 'video';
-  const phoneVisualHeight = isVideoPhone ? phoneMetrics.height * 0.62 : phoneMetrics.height;
+  const phoneVisualHeight = isVideoPhone && !phoneMetrics.exactHeight
+    ? phoneMetrics.height * 0.62
+    : phoneMetrics.height;
+
   const phoneWidth = phoneVisualHeight * PHONE_ASPECT;
   const phoneCanvasHeight = isVideoPhone ? phoneVisualHeight : (phoneMetrics.canvasHeight ?? phoneMetrics.height);
   const phoneCanvasLift = Math.max(0, (phoneCanvasHeight - phoneMetrics.height) / 2);
