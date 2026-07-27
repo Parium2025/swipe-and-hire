@@ -458,7 +458,12 @@ const useHeroSafeTopPadding = () => {
 
 
 
-const calculateInlinePhoneMetrics = () => {
+// Vilken telefonvariant hero använder just nu (video för jobbsökare, Spline för
+// arbetsgivare). Sätts av HeroIntroStage så att alla mätfunktioner – även de som
+// körs utanför React-trädet – räknar på rätt mockup.
+let currentHeroPhoneVariant: 'spline' | 'video' = 'spline';
+
+const calculateInlinePhoneMetrics = (variant: 'spline' | 'video' = currentHeroPhoneVariant) => {
   if (typeof window === 'undefined') {
     return { height: 320, width: 320 * PHONE_ASPECT, zoom: 0.44, yOffset: 28 };
   }
@@ -467,7 +472,44 @@ const calculateInlinePhoneMetrics = () => {
   const { width, height } = getViewportSize();
   const placement = getInlinePhonePlacement();
   const isPortraitTablet = placement === 'portraitTablet';
+
+  // Video-mockupen är en ren DOM-telefon: den fyller hela sin box (ingen
+  // Spline-canvas med luft runt om). Därför får den egna mått – annars blir den
+  // dramatiskt större än Spline-telefonen och klipps mot viewportens botten.
+  if (variant === 'video') {
+    const bottomSafe = clamp(height * 0.05, 28, 60);
+    if (isPortraitTablet) {
+      const maxWidth = Math.min(width * 0.32, 290);
+      const h = Math.min(clamp(height * 0.38, 300, 500), maxWidth / PHONE_ASPECT);
+      return {
+        height: h,
+        width: h * PHONE_ASPECT,
+        canvasHeight: h,
+        canvasBottomTrim: 0,
+        zoom: 0,
+        topGap: clamp(height * 0.03, 16, 40),
+      };
+    }
+    const anchorEl = document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null;
+    const heroEl = document.querySelector('[data-mobile-hero-section]') as HTMLElement | null;
+    const tBottom = anchorEl && heroEl
+      ? anchorEl.getBoundingClientRect().bottom - heroEl.getBoundingClientRect().top
+      : height * 0.45;
+    const available = Math.max(220, height - tBottom - bottomSafe);
+    const maxWidth = Math.min(width * 0.5, 220);
+    const h = Math.min(available * 0.84, maxWidth / PHONE_ASPECT);
+    return {
+      height: h,
+      width: h * PHONE_ASPECT,
+      canvasHeight: h,
+      canvasBottomTrim: 0,
+      zoom: 0,
+      topGap: Math.max(clamp(height * 0.025, 16, 34), (available - h) / 2),
+    };
+  }
+
   const isWideInlineMobile = !isPortraitTablet && width >= 520;
+
   const mobileTextReserve = clamp(height * 0.49, 330, 430);
   const mobileBottomReserve = clamp(height * 0.09, 58, 86);
   const mobileAvailableHeight = Math.max(240, height - mobileTextReserve - mobileBottomReserve);
@@ -527,15 +569,16 @@ const InlineHeroPhone = ({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(() => getInlinePhonePlacement() === placement);
   const [active, setActive] = useState(() => getInlinePhonePlacement() === placement);
-  const [metrics, setMetrics] = useState(calculateInlinePhoneMetrics);
+  const [metrics, setMetrics] = useState(() => calculateInlinePhoneMetrics(variant));
 
   
 
   useEffect(() => {
     const sync = () => {
       setEnabled(getInlinePhonePlacement() === placement);
-      setMetrics(calculateInlinePhoneMetrics());
+      setMetrics(calculateInlinePhoneMetrics(variant));
     };
+
 
     sync();
     window.addEventListener('resize', sync, { passive: true });
@@ -544,7 +587,7 @@ const InlineHeroPhone = ({
       window.removeEventListener('resize', sync);
       window.visualViewport?.removeEventListener('resize', sync);
     };
-  }, [placement]);
+  }, [placement, variant]);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -892,8 +935,13 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
 
 
 
-  const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
-  const phoneCanvasHeight = phoneMetrics.canvasHeight ?? phoneMetrics.height;
+  // Video-mockupen fyller hela sin box (till skillnad från Spline-canvasen som
+  // har luft runt telefonen). Utan nedskalning blir den därför dubbelt så stor
+  // som Spline-telefonen och klipps på iPad/laptop.
+  const isVideoPhone = variant === 'video';
+  const phoneVisualHeight = isVideoPhone ? phoneMetrics.height * 0.62 : phoneMetrics.height;
+  const phoneWidth = phoneVisualHeight * PHONE_ASPECT;
+  const phoneCanvasHeight = isVideoPhone ? phoneVisualHeight : (phoneMetrics.canvasHeight ?? phoneMetrics.height);
   const phoneCanvasLift = Math.max(0, (phoneCanvasHeight - phoneMetrics.height) / 2);
 
   if (isInlinePhone) return null;
@@ -1048,7 +1096,8 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
   // Jobbsökare: swipe-videon i hero (ritas direkt), Spline i intro (hinner ladda i lugn och ro).
-  const heroPhoneVariant = audience === 'job_seeker' ? 'video' : 'spline';
+  const heroPhoneVariant: 'spline' | 'video' = audience === 'job_seeker' ? 'video' : 'spline';
+  currentHeroPhoneVariant = heroPhoneVariant;
 
 
 
@@ -1121,8 +1170,6 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
         </section>
         )}
       </section>
-
-      <SectionDivider className="my-12 md:my-20" />
 
       {/* ─────────── INTRO ─────────── */}
       <section
