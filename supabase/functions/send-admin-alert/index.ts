@@ -43,7 +43,12 @@ serve(async (req) => {
     });
 
     let templateData: Record<string, any>;
+    // Stabil nyckel per varningstyp — används för cooldown så samma larm
+    // aldrig kan spamma inkorgen (och kön) flera gånger per period.
+    let alertKey: string;
+    let cooldownMinutes = 360; // 6 h standard
     let idempotencyKey: string;
+
 
     switch (payload.type) {
       case 'rss_source_failure':
