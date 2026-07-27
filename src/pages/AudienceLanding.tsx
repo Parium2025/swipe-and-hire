@@ -1086,6 +1086,7 @@ const IntroSplinePhone = () => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [active, setActive] = useState(false);
   const [zoom, setZoom] = useState(0.4);
+  const [isPortraitTablet, setIsPortraitTablet] = useState(false);
   // Spline-canvasen renderar telefonen centrerat med luft över/under. Den luften
   // kollapsas med negativa marginaler så att den SYNLIGA telefonen hamnar exakt
   // centrerad mellan rubriken och brödtexten – ingen död yta.
@@ -1099,9 +1100,13 @@ const IntroSplinePhone = () => {
     const measure = () => {
       const height = wrapper.getBoundingClientRect().height;
       if (!height) return;
+      const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      const portraitTablet = viewportWidth >= 768 && viewportWidth < 1180 && viewportHeight > viewportWidth;
+      setIsPortraitTablet(portraitTablet);
       // Samma baslinje som hero-metriken: telefonens synliga höjd blir ca 74 %
       // av canvasens höjd vid den här zoomen (högre zoom klipper toppen).
-      setZoom(clamp((height / 376) * 0.5, 0.2, 0.66));
+      setZoom(clamp((height / 376) * (portraitTablet ? 0.5 : 0.46), 0.2, portraitTablet ? 0.66 : 0.58));
       setTrimPx(Math.round(height * 0.16));
     };
 
@@ -1110,6 +1115,8 @@ const IntroSplinePhone = () => {
     measure();
     const resizeObserver = new ResizeObserver(measure);
     resizeObserver.observe(wrapper);
+    window.addEventListener('resize', measure, { passive: true });
+    window.visualViewport?.addEventListener('resize', measure, { passive: true });
 
     const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     const observer = new IntersectionObserver(
@@ -1121,6 +1128,8 @@ const IntroSplinePhone = () => {
     return () => {
       resizeObserver.disconnect();
       observer.disconnect();
+      window.removeEventListener('resize', measure);
+      window.visualViewport?.removeEventListener('resize', measure);
     };
   }, []);
 
@@ -1133,7 +1142,11 @@ const IntroSplinePhone = () => {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 1, ease }}
       style={{ marginTop: 0, marginBottom: -Math.round(trimPx * 2) }}
-      className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[150px] sm:max-w-[185px] md:max-w-[215px] lg:max-w-[225px] xl:max-w-[240px]"
+      className={`pointer-events-none relative mx-auto aspect-[9/19.5] w-full ${
+        isPortraitTablet
+          ? 'max-w-[215px]'
+          : 'max-w-[140px] sm:max-w-[152px] md:max-w-[162px] lg:max-w-[172px] xl:max-w-[184px]'
+      }`}
 
     >
       <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} />
