@@ -1090,7 +1090,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               headingId="audience-hero-heading-mobile"
             />
           </motion.div>
-          <InlineHeroPhone placement="mobile" className="mt-2" />
+          <InlineHeroPhone placement="mobile" className="mt-2" variant={heroPhoneVariant} />
         </section>
         )}
 
