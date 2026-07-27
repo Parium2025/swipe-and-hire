@@ -64,7 +64,10 @@ serve(async (req) => {
           ],
           error_message: payload.error_message || '',
         };
+        alertKey = `rss-fail-${payload.source_name}`;
+        cooldownMinutes = 720; // 12 h per källa
         idempotencyKey = `rss-fail-${payload.source_name}-${payload.consecutive_failures}`;
+
         break;
 
       case 'system_critical':
