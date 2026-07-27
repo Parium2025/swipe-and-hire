@@ -100,7 +100,10 @@ serve(async (req) => {
             { label: 'Storlek', value: `${payload.details?.used ?? '?'} MB av ${payload.details?.limit ?? '?'} MB` },
           ],
         };
+        alertKey = `storage-${payload.details?.percentage}`;
+        cooldownMinutes = 1440; // 1 dygn
         idempotencyKey = `storage-${payload.details?.percentage}-${new Date().toISOString().slice(0, 10)}`;
+
         break;
 
       case 'news_watchdog':
