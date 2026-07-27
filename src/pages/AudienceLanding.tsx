@@ -1045,8 +1045,12 @@ const IntroSplinePhone = () => {
     const measure = () => {
       const height = wrapper.getBoundingClientRect().height;
       if (!height) return;
-      setZoom(clamp((height / 376) * 0.44, 0.2, 0.55));
+      // Telefonen ska fylla sin box (samma baslinje som hero-metriken) så att
+      // det inte uppstår tom luft över/under canvasen – då hamnar den optiskt
+      // centrerad mellan rubriken och texten under.
+      setZoom(clamp((height / 376) * 0.58, 0.24, 0.72));
     };
+
 
     measure();
     const resizeObserver = new ResizeObserver(measure);
