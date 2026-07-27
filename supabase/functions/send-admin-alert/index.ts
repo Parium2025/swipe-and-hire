@@ -8,7 +8,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_EMAIL = "pariumab@hotmail.com";
+// Mottagare kan bytas utan kodändring via secret ADMIN_ALERT_EMAIL.
+const ADMIN_EMAIL = Deno.env.get("ADMIN_ALERT_EMAIL") || "pariumab@hotmail.com";
+// Hård global tak-spärr: max så här många larmmejl per dygn, oavsett typ.
+// Skyddar både inkorgen och avsändarryktet mot larmstormar.
+const MAX_ALERTS_PER_DAY = 20;
 
 interface AlertPayload {
   type: 'rss_source_failure' | 'system_critical' | 'storage_warning' | 'news_watchdog';
@@ -149,6 +153,23 @@ serve(async (req) => {
       console.log('Alert suppressed by cooldown:', alertKey);
       return new Response(
         JSON.stringify({ success: true, skipped: 'cooldown', alert_key: alertKey }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Global dygnsspärr — stoppar larmstormar även om nya larmtyper tillkommer.
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: sentToday } = await supabase
+      .from('email_send_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('template_name', 'admin-alert')
+      .eq('status', 'sent')
+      .gte('created_at', since);
+
+    if ((sentToday ?? 0) >= MAX_ALERTS_PER_DAY) {
+      console.warn('Daily admin alert cap reached, suppressing:', alertKey);
+      return new Response(
+        JSON.stringify({ success: true, skipped: 'daily_cap', alert_key: alertKey }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
