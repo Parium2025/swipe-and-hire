@@ -8,7 +8,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import WaveDivider from '@/components/landing/WaveDivider';
 import SplitHeadline from '@/components/landing/audience/SplitHeadline';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
-import { PhoneVideoMockup } from '@/components/landing/PhoneVideoMockup';
+import { SplinePhone } from '@/components/landing/SplinePhone';
 import EmployerJourney from '@/components/landing/audience/EmployerJourney';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
@@ -566,7 +566,7 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
       className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-center justify-center overflow-visible ${className}`}
       style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px`, marginBottom: `-${metrics.canvasBottomTrim ?? 0}px` }}
     >
-      <PhoneVideoMockup
+      <SplinePhone
         className="h-full w-full"
         zoom={metrics.zoom}
         active={enabled && active}
@@ -907,7 +907,7 @@ const FixedPhoneLayer = () => {
           }
         >
 
-          <PhoneVideoMockup
+          <SplinePhone
             className="h-full w-full"
             style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
             zoom={phoneMetrics.zoom}
