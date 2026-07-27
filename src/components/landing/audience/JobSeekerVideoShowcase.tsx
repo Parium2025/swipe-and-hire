@@ -19,7 +19,17 @@ const SOURCES = [
  * Uppspelning: ett enda videolager med native `loop` + autoplay. Ingen
  * korsfade, ingen manuell omstart — bara rå, oavbruten loop.
  */
-const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
+const JobSeekerVideoShowcase = ({
+  className = '',
+  widthPx,
+  instant = false,
+}: {
+  className?: string;
+  /** Explicit bredd i px — används när telefonen ska matcha hero-layoutens mått. */
+  widthPx?: number;
+  /** Hoppa över intro-animationen (telefonen är redan på plats direkt). */
+  instant?: boolean;
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
@@ -63,12 +73,14 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.94 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 1.1, ease }}
-      className={`relative mx-auto w-full max-w-[190px] sm:max-w-[215px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px] ${className}`}
+      initial={instant ? false : { opacity: 0, y: 40, scale: 0.94 }}
+      whileInView={instant ? undefined : { opacity: 1, y: 0, scale: 1 }}
+      viewport={instant ? undefined : { once: true, amount: 0.2 }}
+      transition={instant ? undefined : { duration: 1.1, ease }}
+      style={widthPx ? { width: `${widthPx}px`, maxWidth: '100%' } : undefined}
+      className={`relative mx-auto ${widthPx ? '' : 'w-full max-w-[190px] sm:max-w-[215px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px]'} ${className}`}
     >
+
       {/* Ambient glow */}
       <div
         aria-hidden

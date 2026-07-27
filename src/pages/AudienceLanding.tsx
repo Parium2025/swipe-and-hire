@@ -519,11 +519,16 @@ const calculateInlinePhoneMetrics = () => {
   };
 };
 
-const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 'portraitTablet'; className?: string }) => {
+const InlineHeroPhone = ({
+  placement,
+  className = '',
+  variant = 'spline',
+}: { placement: 'mobile' | 'portraitTablet'; className?: string; variant?: 'spline' | 'video' }) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(() => getInlinePhonePlacement() === placement);
   const [active, setActive] = useState(() => getInlinePhonePlacement() === placement);
   const [metrics, setMetrics] = useState(calculateInlinePhoneMetrics);
+
   
 
   useEffect(() => {
@@ -566,14 +571,21 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
       className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-center justify-center overflow-visible ${className}`}
       style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px`, marginBottom: `-${metrics.canvasBottomTrim ?? 0}px` }}
     >
-      <SplinePhone
-        className="h-full w-full"
-        zoom={metrics.zoom}
-        active={enabled && active}
-      />
+      {variant === 'video' ? (
+        <Suspense fallback={null}>
+          <JobSeekerVideoShowcase instant widthPx={metrics.width} />
+        </Suspense>
+      ) : (
+        <SplinePhone
+          className="h-full w-full"
+          zoom={metrics.zoom}
+          active={enabled && active}
+        />
+      )}
     </div>
   );
 };
+
 
 const calculateMobileHeroMinHeight = () => {
   if (typeof window === 'undefined' || getInlinePhonePlacement() !== 'mobile') return null;
@@ -642,7 +654,7 @@ type HeroPhoneMetrics = {
   yOffset: number;
 };
 
-const FixedPhoneLayer = () => {
+const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' }) => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   
   const lastHeroMetricsRef = useRef<HeroPhoneMetrics | null>(null);
@@ -906,13 +918,24 @@ const FixedPhoneLayer = () => {
               : { top: `${phoneMetrics.top}px`, height: `${phoneCanvasHeight}px`, width: `${phoneWidth}px` }
           }
         >
+          {variant === 'video' ? (
+            <div
+              className="flex h-full w-full items-center justify-center"
+              style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
+            >
+              <Suspense fallback={null}>
+                <JobSeekerVideoShowcase instant widthPx={phoneWidth} />
+              </Suspense>
+            </div>
+          ) : (
+            <SplinePhone
+              className="h-full w-full"
+              style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
+              zoom={phoneMetrics.zoom}
+              active={active}
+            />
+          )}
 
-          <SplinePhone
-            className="h-full w-full"
-            style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
-            zoom={phoneMetrics.zoom}
-            active={active}
-          />
         </div>
       </div>
     </div>
@@ -952,6 +975,46 @@ const SectionDivider = ({ className = '' }: { className?: string }) => {
   );
 };
 
+/**
+ * Liten Spline-telefon för intro-sektionen ("Vi har gjort det enkelt för alla").
+ * Samma kolumnmått som video-showcasen tidigare hade — bara en ombytt plats.
+ */
+const IntroSplinePhone = () => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const observer = new IntersectionObserver(
+      ([entry]) => setActive(entry.isIntersecting && entry.intersectionRatio > 0.01),
+      { root, rootMargin: '240px 0px 240px 0px', threshold: [0, 0.01, 0.25] },
+    );
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <motion.div
+      ref={wrapperRef}
+      aria-hidden="true"
+      initial={{ opacity: 0, y: 40, scale: 0.94 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 1.1, ease }}
+      className="pointer-events-none relative mx-auto aspect-[9/22] w-full max-w-[190px] sm:max-w-[215px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px]"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-2 top-1/2 h-2/3 -translate-y-1/2 rounded-[3rem] bg-secondary/15 blur-3xl"
+      />
+      <SplinePhone className="relative h-full w-full" zoom={0.72} active={active} />
+    </motion.div>
+  );
+};
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroIntroStage — Native scroll, inga hijacks.
 // Hero ligger som en vanlig 100svh-sektion. Intro ligger som en egen
@@ -963,6 +1026,8 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
   const mobileHeroMinHeight = useMobileHeroMinHeight();
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
+  // Jobbsökare: swipe-video i hero (ritas direkt), Spline-telefon i intro.
+  const heroPhoneVariant = audience === 'job_seeker' ? 'video' : 'spline';
 
 
   return (
@@ -1002,7 +1067,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               headingId="audience-hero-heading-mobile"
             />
           </motion.div>
-          <InlineHeroPhone placement="mobile" className="mt-2" />
+          <InlineHeroPhone placement="mobile" className="mt-2" variant={heroPhoneVariant} />
         </section>
         )}
 
@@ -1027,7 +1092,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
             </motion.div>
             <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10">
-              <InlineHeroPhone placement="portraitTablet" />
+              <InlineHeroPhone placement="portraitTablet" variant={heroPhoneVariant} />
             </div>
           </div>
         </section>
@@ -1069,10 +1134,9 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
                 <IntroText paragraphs={c.intro.paragraphs} />
               </motion.div>
               <div className="order-1 md:order-2">
-                <Suspense fallback={null}>
-                  <JobSeekerVideoShowcase />
-                </Suspense>
+                <IntroSplinePhone />
               </div>
+
             </div>
           ) : (
             <motion.div
@@ -1508,7 +1572,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       <div className="pointer-events-none absolute inset-0 z-0">
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
-      <FixedPhoneLayer />
+      <FixedPhoneLayer variant={audience === 'job_seeker' ? 'video' : 'spline'} />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
