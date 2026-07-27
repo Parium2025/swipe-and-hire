@@ -1242,10 +1242,13 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
         )}
       </section>
 
+      {/* Visuell paus mellan hero-telefonen och intro-sektionen */}
+      <SectionDivider className="mt-10 mb-2 sm:mt-12 md:mt-16 md:mb-4" />
+
       {/* ─────────── INTRO ─────────── */}
       <section
         aria-label="Introduktion"
-        className="relative flex w-full items-center justify-center overflow-hidden px-5 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-28 md:px-12 md:pb-12 md:pt-16 lg:px-24"
+        className="relative flex w-full items-center justify-center overflow-hidden px-5 pb-8 pt-12 sm:px-6 sm:pb-10 sm:pt-14 md:px-12 md:pb-12 md:pt-12 lg:px-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 32 }}
