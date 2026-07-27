@@ -161,6 +161,27 @@ serve(async (req) => {
 
       body: {
         templateName: 'admin-alert',
+    // Global dygnsspärr — stoppar larmstormar även om nya larmtyper tillkommer.
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: sentToday } = await supabase
+      .from('email_send_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('template_name', 'admin-alert')
+      .eq('status', 'sent')
+      .gte('created_at', since);
+
+    if ((sentToday ?? 0) >= MAX_ALERTS_PER_DAY) {
+      console.warn('Daily admin alert cap reached, suppressing:', alertKey);
+      return new Response(
+        JSON.stringify({ success: true, skipped: 'daily_cap', alert_key: alertKey }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const { data, error } = await supabase.functions.invoke('send-transactional-email', {
+
+      body: {
+        templateName: 'admin-alert',
         recipientEmail: ADMIN_EMAIL,
         idempotencyKey,
         templateData,
