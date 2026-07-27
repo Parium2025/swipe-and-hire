@@ -1058,7 +1058,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
             {c.intro.title}
           </motion.h2>
           {audience === 'job_seeker' ? (
-            <div className="grid w-full items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(260px,340px)] md:gap-14 lg:gap-20 md:text-left">
+            <div className="grid w-full items-center gap-8 sm:gap-10 md:grid-cols-[minmax(0,1.6fr)_minmax(200px,240px)] md:gap-12 lg:grid-cols-[minmax(0,1.7fr)_minmax(230px,275px)] lg:gap-16 xl:gap-20 md:text-left">
               <motion.div
                 initial="hidden"
                 whileInView="visible"
