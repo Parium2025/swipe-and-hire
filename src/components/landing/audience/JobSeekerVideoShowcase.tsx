@@ -133,7 +133,7 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
               className="absolute inset-x-0 top-0 h-[6.4%] bg-[#01182f]"
             >
               <div className="flex h-full items-center justify-between px-[7.5%] text-[6px] font-semibold leading-none text-white sm:text-[7px] md:text-[7.5px] lg:text-[8px] xl:text-[9px]">
-                <span className="tabular-nums tracking-[-0.02em]">9:41</span>
+                <span className="tabular-nums tracking-[-0.02em]">19:41</span>
                 <span className="flex items-center gap-[0.35em]">
                   {/* Signal */}
                   <svg viewBox="0 0 18 12" className="h-[0.95em] w-auto" fill="currentColor">
