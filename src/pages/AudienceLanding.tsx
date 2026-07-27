@@ -975,46 +975,6 @@ const SectionDivider = ({ className = '' }: { className?: string }) => {
   );
 };
 
-/**
- * Liten Spline-telefon för intro-sektionen ("Vi har gjort det enkelt för alla").
- * Samma kolumnmått som video-showcasen tidigare hade — bara en ombytt plats.
- */
-const IntroSplinePhone = () => {
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const [active, setActive] = useState(false);
-
-  useEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    const observer = new IntersectionObserver(
-      ([entry]) => setActive(entry.isIntersecting && entry.intersectionRatio > 0.01),
-      { root, rootMargin: '240px 0px 240px 0px', threshold: [0, 0.01, 0.25] },
-    );
-    observer.observe(wrapper);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <motion.div
-      ref={wrapperRef}
-      aria-hidden="true"
-      initial={{ opacity: 0, y: 40, scale: 0.94 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 1.1, ease }}
-      className="pointer-events-none relative mx-auto aspect-[9/22] w-full max-w-[190px] sm:max-w-[215px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px]"
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-2 top-1/2 h-2/3 -translate-y-1/2 rounded-[3rem] bg-secondary/15 blur-3xl"
-      />
-      <SplinePhone className="relative h-full w-full" zoom={0.72} active={active} />
-    </motion.div>
-  );
-};
-
-
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroIntroStage — Native scroll, inga hijacks.
 // Hero ligger som en vanlig 100svh-sektion. Intro ligger som en egen
@@ -1026,8 +986,6 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
   const mobileHeroMinHeight = useMobileHeroMinHeight();
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
-  // Jobbsökare: swipe-video i hero (ritas direkt), Spline-telefon i intro.
-  const heroPhoneVariant = audience === 'job_seeker' ? 'video' : 'spline';
 
 
   return (
@@ -1067,7 +1025,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               headingId="audience-hero-heading-mobile"
             />
           </motion.div>
-          <InlineHeroPhone placement="mobile" className="mt-2" variant={heroPhoneVariant} />
+          <InlineHeroPhone placement="mobile" className="mt-2" />
         </section>
         )}
 
@@ -1092,7 +1050,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
             </motion.div>
             <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10">
-              <InlineHeroPhone placement="portraitTablet" variant={heroPhoneVariant} />
+              <InlineHeroPhone placement="portraitTablet" />
             </div>
           </div>
         </section>
@@ -1134,9 +1092,10 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
                 <IntroText paragraphs={c.intro.paragraphs} />
               </motion.div>
               <div className="order-1 md:order-2">
-                <IntroSplinePhone />
+                <Suspense fallback={null}>
+                  <JobSeekerVideoShowcase />
+                </Suspense>
               </div>
-
             </div>
           ) : (
             <motion.div
@@ -1572,7 +1531,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       <div className="pointer-events-none absolute inset-0 z-0">
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
-      <FixedPhoneLayer variant={audience === 'job_seeker' ? 'video' : 'spline'} />
+      <FixedPhoneLayer />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
