@@ -252,9 +252,14 @@ async function updateSourceHealth(
         .eq('source_name', source.name);
 
       return {
-        shouldAlert: !success && updates.consecutive_failures >= CONSECUTIVE_FAILURES_ALERT,
+        // Edge-trigger: larma bara när källan PASSERAR tröskeln, inte vid varje körning.
+        shouldAlert:
+          !success &&
+          updates.consecutive_failures >= CONSECUTIVE_FAILURES_ALERT &&
+          (existing.consecutive_failures || 0) < CONSECUTIVE_FAILURES_ALERT,
         consecutiveFailures: updates.consecutive_failures,
       };
+
     } else {
       // Create new record
       await supabase.from('rss_source_health').insert({
