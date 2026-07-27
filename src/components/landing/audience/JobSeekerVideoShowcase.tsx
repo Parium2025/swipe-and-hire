@@ -81,11 +81,7 @@ const JobSeekerVideoShowcase = ({
       className={`relative mx-auto ${widthPx ? '' : 'w-full max-w-[190px] sm:max-w-[215px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px]'} ${className}`}
     >
 
-      {/* Ambient glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-6 rounded-[3rem] bg-secondary/20 blur-3xl sm:-inset-8"
-      />
+
 
       {/* Sidoknappar — ligger under ramen så de "sticker ut" ur chassit */}
       <div aria-hidden className="pointer-events-none absolute inset-0">

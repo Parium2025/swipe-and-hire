@@ -689,6 +689,8 @@ type HeroPhoneMetrics = {
   isDesktop: boolean;
   isPortraitTablet?: boolean;
   pinToViewport?: boolean;
+  /** Höjden är redan den exakta visuella höjden – ingen variant-nedskalning. */
+  exactHeight?: boolean;
   right?: string;
   top: number;
   height: number;
@@ -696,6 +698,7 @@ type HeroPhoneMetrics = {
   zoom: number;
   yOffset: number;
 };
+
 
 const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' }) => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
@@ -724,6 +727,50 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
     // till ~1600px breda. Vi använder pointer:coarse + landskap som signal
     // så att vanliga laptops aldrig råkar in i den här grenen.
     const isLandscapeTablet = isCoarse && width >= 900 && width <= 1400 && width > height && height <= 1050;
+
+    // ── Video-mockup på desktop/iPad: telefonen ska ligga exakt i linje med
+    // textblocket – toppen vid rubrikens topp, botten vid brödtextens slut.
+    // Vi mäter textankaret och speglar dess höjd rakt av (video-telefonen
+    // fyller hela sin box, till skillnad från Spline-canvasen).
+    if (variant === 'video' && width >= 768) {
+      const anchor = getVisibleAnchor();
+      const stageTop = (document.querySelector('[data-hero-intro-stage]') as HTMLElement | null)
+        ?.getBoundingClientRect().top ?? 0;
+      // Mät INNEHÅLLET (första → sista barnet), inte ankarets padding-box, så
+      // att telefonens topp/botten linjerar med faktisk text.
+      const firstChild = anchor?.firstElementChild as HTMLElement | null;
+      const lastChild = anchor?.lastElementChild as HTMLElement | null;
+      const contentTop = firstChild ? firstChild.getBoundingClientRect().top - stageTop : null;
+      const contentBottom = lastChild ? lastChild.getBoundingClientRect().bottom - stageTop : null;
+      const rect = anchor?.getBoundingClientRect();
+      const anchorTop = contentTop ?? (rect ? rect.top - stageTop : clamp(height * 0.24, 130, 300));
+      const anchorHeight = contentTop != null && contentBottom != null
+        ? contentBottom - contentTop
+        : rect?.height ?? height * 0.46;
+
+      const bottomSafe = clamp(height * 0.06, 40, 90);
+      const available = Math.max(260, height - anchorTop - bottomSafe);
+      const widthCap = Math.min(width * 0.24, 300);
+      const visualHeight = clamp(
+        Math.min(anchorHeight, available, widthCap / PHONE_ASPECT),
+        260,
+        720,
+      );
+      const metrics: HeroPhoneMetrics = {
+        isDesktop: true,
+        pinToViewport: true,
+        exactHeight: true,
+        top: Math.round(anchorTop + Math.max(0, (Math.min(anchorHeight, available) - visualHeight) / 2)),
+        height: visualHeight,
+        canvasHeight: visualHeight,
+        zoom: 0,
+        yOffset: 0,
+        right: 'clamp(2rem, 8vw, 10rem)',
+      };
+      lastHeroMetricsRef.current = metrics;
+      return metrics;
+    }
+
 
     if (isLandscapeTablet) {
       const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
@@ -939,7 +986,10 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
   // har luft runt telefonen). Utan nedskalning blir den därför dubbelt så stor
   // som Spline-telefonen och klipps på iPad/laptop.
   const isVideoPhone = variant === 'video';
-  const phoneVisualHeight = isVideoPhone ? phoneMetrics.height * 0.62 : phoneMetrics.height;
+  const phoneVisualHeight = isVideoPhone && !phoneMetrics.exactHeight
+    ? phoneMetrics.height * 0.62
+    : phoneMetrics.height;
+
   const phoneWidth = phoneVisualHeight * PHONE_ASPECT;
   const phoneCanvasHeight = isVideoPhone ? phoneVisualHeight : (phoneMetrics.canvasHeight ?? phoneMetrics.height);
   const phoneCanvasLift = Math.max(0, (phoneCanvasHeight - phoneMetrics.height) / 2);
@@ -1036,6 +1086,10 @@ const IntroSplinePhone = () => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [active, setActive] = useState(false);
   const [zoom, setZoom] = useState(0.4);
+  // Spline-canvasen renderar telefonen centrerat med luft över/under. Den luften
+  // kollapsas med negativa marginaler så att den SYNLIGA telefonen hamnar exakt
+  // centrerad mellan rubriken och brödtexten – ingen död yta.
+  const [trimPx, setTrimPx] = useState(0);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -1045,8 +1099,13 @@ const IntroSplinePhone = () => {
     const measure = () => {
       const height = wrapper.getBoundingClientRect().height;
       if (!height) return;
-      setZoom(clamp((height / 376) * 0.44, 0.2, 0.55));
+      // Samma baslinje som hero-metriken: telefonens synliga höjd blir ca 74 %
+      // av canvasens höjd vid den här zoomen (högre zoom klipper toppen).
+      setZoom(clamp((height / 376) * 0.44, 0.2, 0.56));
+      setTrimPx(Math.round(height * 0.13));
     };
+
+
 
     measure();
     const resizeObserver = new ResizeObserver(measure);
@@ -1073,13 +1132,12 @@ const IntroSplinePhone = () => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 1, ease }}
+      style={{ marginTop: 0, marginBottom: -Math.round(trimPx * 2) }}
       className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[140px] sm:max-w-[152px] md:max-w-[162px] lg:max-w-[172px] xl:max-w-[184px]"
+
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-4 top-1/2 h-1/2 -translate-y-1/2 rounded-[3rem] bg-secondary/10 blur-3xl"
-      />
       <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} />
+
     </motion.div>
   );
 };
