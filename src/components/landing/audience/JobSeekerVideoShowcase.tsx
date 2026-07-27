@@ -98,7 +98,7 @@ const JobSeekerVideoShowcase = ({
         className="relative rounded-[13.5%/6.4%] p-[1.5px] shadow-[0_28px_70px_-24px_rgba(0,0,0,0.75),0_2px_8px_-2px_rgba(0,0,0,0.5)]"
         style={{
           background:
-            'linear-gradient(150deg, #e6e3de 0%, #a7a29b 18%, #6f6b66 42%, #b9b4ad 62%, #77736e 82%, #d5d1cb 100%)',
+            'linear-gradient(150deg, #6c6a66 0%, #4b4946 20%, #33322f 45%, #5a5854 64%, #3a3835 84%, #4f4d49 100%)',
         }}
       >
         {/* Svart ram runt skärmen */}

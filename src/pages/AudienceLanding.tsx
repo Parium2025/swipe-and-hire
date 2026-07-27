@@ -325,8 +325,8 @@ const useIsMobileLandingMotion = () => {
 
 
 
-const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
-  <div className="max-w-3xl text-center text-base leading-[1.6] sm:text-lg sm:leading-[1.75] md:text-xl md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]">
+const IntroText = ({ paragraphs, align = 'center' }: { paragraphs: string[]; align?: 'center' | 'start' }) => (
+  <div className={`max-w-3xl text-center text-base leading-[1.6] sm:text-lg sm:leading-[1.75] md:text-xl md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px] ${align === 'start' ? 'md:text-left' : ''}`}>
     {paragraphs.map((paragraph, pIdx) => (
       <p key={pIdx} className={`wave-text ${pIdx > 0 ? 'mt-3 sm:mt-6' : ''}`.trim()}>
         {paragraph}
@@ -765,7 +765,7 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
         canvasHeight: visualHeight,
         zoom: 0,
         yOffset: 0,
-        right: 'clamp(2rem, 8vw, 10rem)',
+        right: 'clamp(2rem, 11vw, 17rem)',
       };
       lastHeroMetricsRef.current = metrics;
       return metrics;
@@ -1239,14 +1239,20 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
           transition={{ duration: 1, ease }}
-          className="relative z-10 flex max-w-6xl flex-col items-center text-center"
+          className={`relative z-10 flex max-w-6xl flex-col ${
+            audience === 'job_seeker'
+              ? 'items-center text-center md:items-start md:text-left'
+              : 'items-center text-center'
+          }`}
         >
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
             transition={{ duration: 1.1, ease, delay: 0.05 }}
-            className="landing-h2 wave-text mb-5 sm:mb-8 max-w-[min(92vw,52rem)]"
+            className={`landing-h2 wave-text mb-5 sm:mb-8 max-w-[min(92vw,52rem)] ${
+              audience === 'job_seeker' ? 'md:max-w-[min(100%,34rem)] lg:max-w-[min(100%,38rem)]' : ''
+            }`}
           >
             {c.intro.title}
           </motion.h2>
@@ -1259,7 +1265,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } } }}
                 className="order-2 md:order-1"
               >
-                <IntroText paragraphs={c.intro.paragraphs} />
+                <IntroText paragraphs={c.intro.paragraphs} align="start" />
               </motion.div>
               <div className="order-1 flex justify-center md:order-2">
                 <IntroSplinePhone />
@@ -1282,7 +1288,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               onClick={onIntroCta}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
-              className="mt-16 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-20 sm:text-lg"
+              className="mt-16 inline-flex self-center items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-20 sm:text-lg"
             >
               {introCtaLabel ?? 'Skapa min profil idag'}
             </motion.button>
