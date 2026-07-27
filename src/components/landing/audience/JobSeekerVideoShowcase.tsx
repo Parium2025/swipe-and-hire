@@ -53,16 +53,16 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 1.1, ease }}
-      className={`relative mx-auto w-full max-w-[280px] sm:max-w-[300px] md:max-w-[320px] ${className}`}
+      className={`relative mx-auto w-full max-w-[190px] xs:max-w-[205px] sm:max-w-[220px] md:max-w-[230px] lg:max-w-[260px] xl:max-w-[285px] ${className}`}
     >
       {/* Ambient glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-8 rounded-[3rem] bg-secondary/25 blur-3xl"
+        className="pointer-events-none absolute -inset-6 rounded-[3rem] bg-secondary/20 blur-3xl sm:-inset-8"
       />
       {/* Phone frame */}
-      <div className="relative overflow-hidden rounded-[2.4rem] border border-white/15 bg-black/40 p-[6px] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-        <div className="relative overflow-hidden rounded-[2.05rem] bg-black">
+      <div className="relative overflow-hidden rounded-[1.9rem] border border-white/15 bg-black/40 p-[5px] shadow-[0_24px_60px_-22px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:rounded-[2.2rem] sm:p-[6px]">
+        <div className="relative overflow-hidden rounded-[1.6rem] bg-black sm:rounded-[1.9rem]">
           <video
             ref={videoRef}
             autoPlay
@@ -73,6 +73,7 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
             poster="/showcase-jobseeker-poster.jpg"
             aria-label="Demo av Parium-appen för jobbsökare"
             className="block h-auto w-full"
+            style={{ aspectRatio: '1180 / 2556' }}
           >
             <source src="/showcase-jobseeker.hevc.mp4" type='video/mp4; codecs="hvc1"' />
             <source src="/showcase-jobseeker.mp4" type="video/mp4" />
@@ -80,6 +81,7 @@ const JobSeekerVideoShowcase = ({ className = '' }: { className?: string }) => {
         </div>
       </div>
     </motion.div>
+
   );
 };
 
