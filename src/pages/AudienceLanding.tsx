@@ -1086,6 +1086,10 @@ const IntroSplinePhone = () => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [active, setActive] = useState(false);
   const [zoom, setZoom] = useState(0.4);
+  // Spline-canvasen renderar telefonen centrerat med luft över/under. Den luften
+  // kollapsas med negativa marginaler så att den SYNLIGA telefonen hamnar exakt
+  // centrerad mellan rubriken och brödtexten – ingen död yta.
+  const [trimPx, setTrimPx] = useState(0);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -1095,11 +1099,12 @@ const IntroSplinePhone = () => {
     const measure = () => {
       const height = wrapper.getBoundingClientRect().height;
       if (!height) return;
-      // Telefonen ska fylla sin box (samma baslinje som hero-metriken) så att
-      // det inte uppstår tom luft över/under canvasen – då hamnar den optiskt
-      // centrerad mellan rubriken och texten under.
-      setZoom(clamp((height / 376) * 0.58, 0.24, 0.72));
+      // Samma baslinje som hero-metriken: telefonens synliga höjd blir ca 74 %
+      // av canvasens höjd vid den här zoomen (högre zoom klipper toppen).
+      setZoom(clamp((height / 376) * 0.44, 0.2, 0.56));
+      setTrimPx(Math.round(height * 0.13));
     };
+
 
 
     measure();
