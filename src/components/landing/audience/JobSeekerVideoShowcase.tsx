@@ -93,12 +93,13 @@ const JobSeekerVideoShowcase = ({
         <span className="absolute -right-[2px] top-[27%] h-[9.5%] w-[2px] rounded-r-full bg-gradient-to-b from-[#8f8b85] to-[#5c5954]" />
       </div>
 
-      {/* Titanchassi */}
+      {/* Titanchassi — gradienten mörknar mot underkanten så ramen aldrig ritar
+          en ljus "kantlinje" mot den mörka sidbakgrunden. */}
       <div
-        className="relative rounded-[13.5%/6.4%] p-[1.5px] shadow-[0_28px_70px_-24px_rgba(0,0,0,0.75),0_2px_8px_-2px_rgba(0,0,0,0.5)]"
+        className="relative rounded-[13.5%/6.4%] p-[1.5px] shadow-[0_24px_60px_-28px_rgba(0,0,0,0.6)]"
         style={{
           background:
-            'linear-gradient(150deg, #6c6a66 0%, #4b4946 20%, #33322f 45%, #5a5854 64%, #3a3835 84%, #4f4d49 100%)',
+            'linear-gradient(162deg, #46443f 0%, #35332f 18%, #232220 42%, #17161a 66%, #101a26 84%, #0a1524 100%)',
         }}
       >
         {/* Svart ram runt skärmen */}

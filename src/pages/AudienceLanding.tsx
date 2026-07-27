@@ -1101,7 +1101,7 @@ const IntroSplinePhone = () => {
       if (!height) return;
       // Samma baslinje som hero-metriken: telefonens synliga höjd blir ca 74 %
       // av canvasens höjd vid den här zoomen (högre zoom klipper toppen).
-      setZoom(clamp((height / 376) * 0.44, 0.2, 0.56));
+      setZoom(clamp((height / 376) * 0.5, 0.2, 0.66));
       setTrimPx(Math.round(height * 0.16));
     };
 
@@ -1133,7 +1133,7 @@ const IntroSplinePhone = () => {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 1, ease }}
       style={{ marginTop: 0, marginBottom: -Math.round(trimPx * 2) }}
-      className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[140px] sm:max-w-[152px] md:max-w-[162px] lg:max-w-[172px] xl:max-w-[184px]"
+      className="pointer-events-none relative mx-auto aspect-[9/19.5] w-full max-w-[150px] sm:max-w-[185px] md:max-w-[215px] lg:max-w-[225px] xl:max-w-[240px]"
 
     >
       <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} />
