@@ -736,9 +736,18 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
       const anchor = getVisibleAnchor();
       const stageTop = (document.querySelector('[data-hero-intro-stage]') as HTMLElement | null)
         ?.getBoundingClientRect().top ?? 0;
+      // Mät INNEHÅLLET (första → sista barnet), inte ankarets padding-box, så
+      // att telefonens topp/botten linjerar med faktisk text.
+      const firstChild = anchor?.firstElementChild as HTMLElement | null;
+      const lastChild = anchor?.lastElementChild as HTMLElement | null;
+      const contentTop = firstChild ? firstChild.getBoundingClientRect().top - stageTop : null;
+      const contentBottom = lastChild ? lastChild.getBoundingClientRect().bottom - stageTop : null;
       const rect = anchor?.getBoundingClientRect();
-      const anchorTop = rect ? rect.top - stageTop : clamp(height * 0.24, 130, 300);
-      const anchorHeight = rect?.height ?? height * 0.46;
+      const anchorTop = contentTop ?? (rect ? rect.top - stageTop : clamp(height * 0.24, 130, 300));
+      const anchorHeight = contentTop != null && contentBottom != null
+        ? contentBottom - contentTop
+        : rect?.height ?? height * 0.46;
+
       const bottomSafe = clamp(height * 0.06, 40, 90);
       const available = Math.max(260, height - anchorTop - bottomSafe);
       const widthCap = Math.min(width * 0.24, 300);
