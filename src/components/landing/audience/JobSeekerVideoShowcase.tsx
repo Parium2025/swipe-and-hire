@@ -1,16 +1,20 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
-import mp4Asset from '@/assets/showcase-jobseeker.mp4.asset.json';
-import mobileMp4Asset from '@/assets/showcase-jobseeker-mobile.mp4.asset.json';
+import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
+import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsMp4Asset from '@/assets/showcase-jobseeker-windows-premium.mp4.asset.json';
 import { getVideoPlatform, isLowPowerDevice, prefersReducedData } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-/** Videons nativa proportion (720 x 1560). */
-const ASPECT = '720 / 1560';
+/**
+ * Skärmens proportion. Videon är 9:19.5 men iPhone-chassit blir visuellt för
+ * långsmalt när ramen läggs på — 9:19 ger en kropp på ca 2.04:1, vilket är
+ * exakt en riktig iPhone (149.6 × 71.5 mm). Videon täcker via object-cover.
+ */
+const ASPECT = '9 / 19';
 
 /**
  * HEVC erbjuds ENDAST till Apple-Safari.
@@ -30,8 +34,8 @@ const prefersHevc = () => {
 };
 
 /**
- * Den lätta H.264-källan (720x1560, Main@4.0) används på Windows-desktop och
- * i sparläge — hårdvaruvänlig där decode-budgeten är begränsad.
+ * Den lätta H.264-källan (720x1560, Main@4.0) används bara på svaga
+ * Windows-enheter och i sparläge — hårdvaruvänlig där decode-budgeten är slut.
  */
 const prefersPerformanceMp4 = () => {
   if (prefersReducedData()) return true;
@@ -39,26 +43,30 @@ const prefersPerformanceMp4 = () => {
 };
 
 /**
-  * Mobil och normal Windows-desktop får 810x1754 Main@4.0-källan. Den är
-  * skarpare än 720-filen men fortfarande hårdvaruvänlig. Den lättare 720-filen
-  * används bara på svaga Windows-enheter eller i sparläge.
+ * Windows-desktop får en egen 648x1404-master med hög bitrate (~3.1 Mbps).
+ *
+ * Varför lägre upplösning men HÖGRE bitrate: Chrome/Edge på Windows skalar ned
+ * video i overlay-lagret med en billig bilinjär filter. En 810px-källa som
+ * krymps till ~360 CSS-px (2.3x nedskalning) blir därför suddig — texten i
+ * annonsen går inte att läsa. 648px ligger nära 1.5x av den faktiska
+ * renderade storleken, vilket är den nedskalningsgrad där Chromes filter
+ * fortfarande behåller kantskärpa. Bitraten är höjd så att inget går förlorat
+ * i själva komprimeringen.
  */
-const prefersMobileMp4 = () =>
-  typeof window !== 'undefined' &&
-  (window.matchMedia('(pointer: coarse)').matches || (getVideoPlatform() === 'windows' && !isLowPowerDevice())) &&
-  !prefersReducedData();
+const prefersWindowsCrisp = () =>
+  getVideoPlatform() === 'windows' && !isLowPowerDevice() && !prefersReducedData();
 
 const getSources = () =>
   prefersHevc()
     ? [
         { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
-        { src: mp4Asset.url, type: 'video/mp4' },
+        { src: hiCrispAsset.url, type: 'video/mp4' },
       ]
-    : prefersMobileMp4()
-      ? [{ src: mobileMp4Asset.url, type: 'video/mp4' }]
+    : prefersWindowsCrisp()
+      ? [{ src: winCrispAsset.url, type: 'video/mp4' }]
     : prefersPerformanceMp4()
       ? [{ src: windowsMp4Asset.url, type: 'video/mp4' }]
-    : [{ src: mp4Asset.url, type: 'video/mp4' }];
+    : [{ src: hiCrispAsset.url, type: 'video/mp4' }];
 
 
 /**
