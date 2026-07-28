@@ -11,11 +11,17 @@ import { prefersReducedData } from '@/lib/videoPlatform';
 const ease = [0.16, 1, 0.3, 1] as const;
 
 /**
- * Skärmens proportion. Videon är 9:19.5, men med ramen påsatt blir chassit
- * visuellt för långsmalt. 9:18.3 ger en kropp på ca 1.96:1 — kompakt och
- * iPhone-likt. Videon täcker via object-cover.
+ * Skärmens proportion = videons EXAKTA proportion (9:19.5).
+ *
+ * Tidigare låg skärmen på 9:18.3 och videon täcktes med object-cover, vilket
+ * innebar att browsern skalade upp filmen ~6.6 % och klippte bort toppen och
+ * botten. Det var därför appens överkant ("Visa filter", krysset) hamnade fel
+ * och såg beskuren ut. Med exakt samma ratio ritas originalvideon 1:1 — inget
+ * klipps, inget skalas upp, och skärpan blir maximal.
+ *
+ * 9:19.5 ≈ 2.167 är dessutom en riktig iPhone 16 Pro-skärm (1206×2622).
  */
-const ASPECT = '9 / 18.3';
+const ASPECT = '9 / 19.5';
 
 
 /**
