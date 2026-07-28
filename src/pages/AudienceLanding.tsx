@@ -362,11 +362,15 @@ const PHONE_ASPECT = 9 / 19.5;
 
 /**
  * Video-mockupens FAKTISKA höjd/bredd-förhållande (hela chassit, inte skärmen).
- * Skärmen är 9/18.3 + ram/padding ⇒ ca 1.96. Används för att räkna telefonens
- * höjd UT FRÅN en deterministisk bredd — aldrig tvärtom. Det är det som gör att
- * telefonen får exakt samma storlek varje gång, oberoende av textmätningar.
+ *
+ * Härlett ur JobSeekerVideoShowcase: skärmen är 9/19.5 (2.1667) och sitter i en
+ * svart ram med 2.6 % padding, som i sin tur ligger i ett titanchassi.
+ *   höjd ≈ bredd × 0.948 × 2.1667 + bredd × 0.052 ≈ bredd × 2.106
+ *
+ * Detta MÅSTE matcha komponenten exakt — är värdet för lågt räknas telefonen
+ * som kortare än den ritas och överkanten/underkanten klipps av hero-boxen.
  */
-const VIDEO_PHONE_BODY_RATIO = 1.97;
+const VIDEO_PHONE_BODY_RATIO = 2.106;
 
 /** Deterministisk bredd på hero-videotelefonen (desktop/iPad). */
 const heroVideoPhoneWidth = (viewportWidth: number) =>
