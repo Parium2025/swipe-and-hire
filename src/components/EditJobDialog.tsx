@@ -24,6 +24,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { WizardSwipePreview, WizardListPreview, buildWizardPreviewData } from '@/components/wizard/WizardCardPreview';
 import { useToast } from '@/hooks/use-toast';
+import { RequiredMark } from '@/components/wizard/RequiredMark';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, formatEmploymentDetails, type DurationUnit } from '@/lib/employmentTypes';
 import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare, Copy, Palette } from 'lucide-react';
@@ -1985,7 +1986,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   {currentStep === 0 && (
                     <div className="premium-edit-step">
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
+                        <Label className="text-white font-medium text-sm">Jobbtitel<RequiredMark filled={!!formData.title?.trim()} /></Label>
                         <Input
                           value={formData.title}
                           onChange={(e) => handleInputChange('title', e.target.value)}
@@ -1995,7 +1996,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Yrke *</Label>
+                        <Label className="text-white font-medium text-sm">Yrke<RequiredMark filled={!!formData.occupation?.trim()} /></Label>
                         <div className="relative occupation-dropdown">
                           <Input
                             value={formData.occupation}
@@ -2050,7 +2051,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Jobbeskrivning *</Label>
+                        <Label className="text-white font-medium text-sm">Jobbeskrivning<RequiredMark filled={!!formData.description?.trim()} /></Label>
                         <Textarea
                           value={formData.description}
                           onChange={(e) => handleInputChange('description', e.target.value)}
@@ -2142,7 +2143,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Anställningsform *</Label>
+                        <Label className="text-white font-medium text-sm">Anställningsform<RequiredMark filled={!!formData.employment_type} /></Label>
                         <div className="relative employment-type-dropdown">
                           <Input
                             value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
@@ -2189,7 +2190,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Lönetyp *</Label>
+                        <Label className="text-white font-medium text-sm">Lönetyp<RequiredMark filled={!!formData.salary_type} /></Label>
                         <div className="relative salary-type-dropdown">
                           <Input
                             value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
@@ -2225,7 +2226,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026) *</Label>
+                        <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026)<RequiredMark filled={!!formData.salary_transparency} /></Label>
                         <div className="relative salary-transparency-dropdown">
                           <Input
                             value={salaryTransparencySearchTerm || (formData.salary_transparency ? salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '' : '')}
@@ -2261,7 +2262,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Antal personer att rekrytera *</Label>
+                        <Label className="text-white font-medium text-sm">Antal personer att rekrytera<RequiredMark filled={!!formData.positions_count} /></Label>
                         <div className="flex items-center gap-2">
                           <Input
                             type="text"
@@ -2317,7 +2318,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
+                        <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid)<RequiredMark filled={!!(formData.work_start_time && formData.work_end_time)} /></Label>
                         <div className="flex gap-3 items-center">
                           <div className="flex-1">
                             <Input
@@ -2383,7 +2384,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   {currentStep === 1 && (
                     <div className="premium-edit-step">
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
+                        <Label className="text-white font-medium text-sm">Var utförs arbetet?<RequiredMark filled={!!formData.work_location_type} /></Label>
                         <div className="relative work-location-dropdown">
                           <Input
                             value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
@@ -2419,7 +2420,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Är distansarbete möjligt? *</Label>
+                        <Label className="text-white font-medium text-sm">Är distansarbete möjligt?<RequiredMark filled={!!formData.remote_work_possible} /></Label>
                         <div className="relative remote-work-dropdown">
                           <Input
                             value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
@@ -2455,7 +2456,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Bolagsnamn *</Label>
+                        <Label className="text-white font-medium text-sm">Bolagsnamn<RequiredMark filled={!!formData.workplace_name?.trim()} /></Label>
                         <Input
                           value={formData.workplace_name}
                           onChange={(e) => handleInputChange('workplace_name', e.target.value)}
@@ -2465,7 +2466,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Kontakt e-mail *</Label>
+                        <Label className="text-white font-medium text-sm">Kontakt e-mail<RequiredMark filled={!!formData.contact_email?.trim()} /></Label>
                         <Input
                           type="email"
                           value={formData.contact_email}
