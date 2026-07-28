@@ -204,10 +204,14 @@ const JobSeekerVideoShowcase = ({
         }}
       >
         {/* Svart ram runt skärmen */}
-        <div className="relative rounded-[13.3%/6.3%] bg-[#050505] p-[3.2%]">
+        {/* Svart ram runt skärmen — iPhone 16 Pro har ~2 mm ram på 71.5 mm
+            bredd ≈ 2.6 %. Tidigare 3.2 % gjorde chassit "tjockt" och mindre
+            iPhone-likt. */}
+        <div className="relative rounded-[13.3%/6.3%] bg-[#050505] p-[2.6%]">
           {/* Skärm */}
           <div
-            className="relative overflow-hidden rounded-[10.5%/4.6%] bg-black"
+            className="relative overflow-hidden rounded-[11.2%/5.1%] bg-black"
+
             style={{ aspectRatio: ASPECT }}
           >
             <video
