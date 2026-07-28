@@ -709,6 +709,9 @@ type HeroPhoneMetrics = {
   right?: string;
   top: number;
   height: number;
+  /** Explicit bredd (video-mockupen): sätts deterministiskt, inte via PHONE_ASPECT. */
+  width?: number;
+
   canvasHeight?: number;
   zoom: number;
   yOffset: number;
