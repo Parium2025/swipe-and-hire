@@ -15,6 +15,7 @@ import winReal3 from '@/assets/landing/windows/jobseeker-real-3-windows.mp4.asse
 import winReal4 from '@/assets/landing/windows/jobseeker-real-4-windows.mp4.asset.json';
 import winRealCenter from '@/assets/landing/windows/jobseeker-real-center-windows.mp4.asset.json';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { getGalleryPreload, getMaxConcurrentVideos, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
 
 /**
  * Apple-style "Så funkar det" sektion.
@@ -64,9 +65,10 @@ type CardItemProps = {
  * mitt), och all mätning sker i EN rAF-tick istället för per scroll-event och
  * per video (annars tvingar varje getBoundingClientRect fram en ny layout).
  */
-const isWindowsDevice = () => typeof navigator !== 'undefined' && /Windows NT/i.test(navigator.userAgent);
-const getMaxConcurrent = () => (isWindowsDevice() ? 4 : 3);
-const getPlayableSrc = (item: MediaItem) => (isWindowsDevice() && item.windowsSrc ? item.windowsSrc : item.src);
+const getMaxConcurrent = () => getMaxConcurrentVideos();
+/** Lätt källa till Windows/Android/sparläge, full källa till Apple & desktop. */
+const getPlayableSrc = (item: MediaItem) =>
+  prefersLightweightVideo() && item.windowsSrc ? item.windowsSrc : item.src;
 const registry = new Set<HTMLVideoElement>();
 let rafId = 0;
 
@@ -154,7 +156,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
           muted
           loop
           playsInline
-          preload={isWindowsDevice() ? 'none' : 'metadata'}
+          preload={getGalleryPreload()}
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
@@ -374,8 +376,8 @@ const PinnedHorizontalGallery = () => {
       warmed = true;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
-      const initialBatch = isWindowsDevice()
-        ? videos.slice(0, 1)
+      const initialBatch = prefersLightweightVideo()
+        ? videos.slice(0, getMaxConcurrent())
         : profile === 'slim'
           ? videos.slice(0, 4)
           : videos;
@@ -426,7 +428,7 @@ const PinnedHorizontalGallery = () => {
       playTimer = window.setTimeout(() => {
         const maxConcurrent = getMaxConcurrent();
         videos.slice(0, maxConcurrent).forEach(playSafe);
-        if (!isWindowsDevice()) window.setTimeout(() => videos.slice(maxConcurrent).forEach(playSafe), 600);
+        if (!prefersLightweightVideo()) window.setTimeout(() => videos.slice(maxConcurrent).forEach(playSafe), 600);
       }, 800);
     };
     const leave = () => {
@@ -447,7 +449,7 @@ const PinnedHorizontalGallery = () => {
           gsapInstance.set(header, { y: 0, opacity: 1, force3D: true });
         }
       }
-      const shouldFreeDecode = isWindowsDevice() || window.matchMedia('(pointer: coarse)').matches;
+      const shouldFreeDecode = shouldFreeDecodersOnLeave();
       if (shouldFreeDecode) {
         const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
         videos.forEach((video) => video.pause());

@@ -4,6 +4,7 @@ import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import mp4Asset from '@/assets/showcase-jobseeker.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsMp4Asset from '@/assets/showcase-jobseeker-windows-premium.mp4.asset.json';
+import { prefersLightweightVideo } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -27,10 +28,11 @@ const prefersHevc = () => {
   return probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
 };
 
-const prefersWindowsPerformanceMp4 = () => {
-  if (typeof navigator === 'undefined') return false;
-  return /Windows NT/i.test(navigator.userAgent);
-};
+/**
+ * Den lätta H.264-källan (720x1560, Main@4.0) används på Windows, Android och
+ * i sparläge — hårdvaruvänlig överallt och skarp på telefonskärmar.
+ */
+const prefersPerformanceMp4 = () => prefersLightweightVideo();
 
 const getSources = () =>
   prefersHevc()
@@ -38,7 +40,7 @@ const getSources = () =>
         { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
         { src: mp4Asset.url, type: 'video/mp4' },
       ]
-    : prefersWindowsPerformanceMp4()
+    : prefersPerformanceMp4()
       ? [{ src: windowsMp4Asset.url, type: 'video/mp4' }]
     : [{ src: mp4Asset.url, type: 'video/mp4' }];
 
