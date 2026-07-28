@@ -23,10 +23,10 @@
       })();
     </script>
     <script>
-      // Skicka noindex-signal till crawlers när de är på lovable.app-domänen.
+      // Skicka ej-indexera-signal till crawlers när de är på lovable.app-domänen.
       // På parium.se är denna tag frånvarande, så indexering fungerar normalt där.
       // Strängen byggs ihop i delar så att statiska HTML-skannrar inte
-      // felaktigt läser den som en noindex-tagg på produktionsdomänen.
+      // felaktigt läser den som en blockerande robots-tagg på produktionsdomänen.
       (function() {
         try {
           if (window.location.hostname.endsWith('.lovable.app')) {
@@ -139,7 +139,7 @@
       // Ingen dubblering här — det orsakade kapplöpningar mot Safari.)
 
       // 🚨 CANONICAL DOMAIN REDIRECT + NOINDEX på staging
-      // 1) Skriver noindex + canonical till www.parium.se INNAN React mountar,
+      // 1) Skriver ej-indexera + canonical till www.parium.se INNAN React mountar,
       //    så Googlebot (som inte alltid följer JS-redirects) ändå konsoliderar
       //    alla signaler till parium.se och slutar visa lovable.app i SERP.
       // 2) Tvingar samtidigt full redirect för riktiga användare.
@@ -152,7 +152,7 @@
           var isLovableHost = h === 'parium-ab.lovable.app' || (h.endsWith('.lovable.app') && h.indexOf('parium-ab') === 0);
           if (!isLovableHost) return;
           var pariumUrl = 'https://www.parium.se' + p + window.location.search + window.location.hash;
-          // Canonical mot produktionsdomänen. (noindex sätts redan i blocket ovan
+          // Canonical mot produktionsdomänen. (robots-taggen sätts redan i blocket ovan
           // för alla lovable.app-värdar — därför ingen dubblett här.)
           document.write('<link rel="canonical" href="' + pariumUrl.split('#')[0] + '">');
 
