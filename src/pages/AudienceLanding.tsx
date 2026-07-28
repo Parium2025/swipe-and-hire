@@ -1499,6 +1499,33 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // Native scroll på /jobbsokare — inga scroll-hijacks, inga snap-låsningar.
   // Hjul/touch beter sig 1:1 som på en vanlig premium-sajt. Sektioners
   // entry-animationer drivs av framer-motion `whileInView`.
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+    if (!root || window.matchMedia('(pointer: coarse)').matches) return;
+
+    const onWheel = (event: WheelEvent) => {
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey) return;
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
+      let node = event.target as HTMLElement | null;
+      while (node && node !== root && node !== document.body) {
+        const style = node.scrollHeight > node.clientHeight ? getComputedStyle(node) : null;
+        if (style && (style.overflowY === 'auto' || style.overflowY === 'scroll')) return;
+        node = node.parentElement;
+      }
+
+      const max = root.scrollHeight - root.clientHeight;
+      if (max <= 0) return;
+      const next = Math.max(0, Math.min(max, root.scrollTop + event.deltaY));
+      if (next === root.scrollTop) return;
+
+      event.preventDefault();
+      root.scrollTop = next;
+    };
+
+    root.addEventListener('wheel', onWheel, { passive: false });
+    return () => root.removeEventListener('wheel', onWheel);
+  }, []);
 
 
 
