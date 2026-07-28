@@ -491,11 +491,11 @@ const calculateInlinePhoneMetrics = (variant: 'spline' | 'video' = currentHeroPh
   if (variant === 'video') {
     const bottomSafe = clamp(height * 0.05, 28, 60);
     if (isPortraitTablet) {
-      const maxWidth = Math.min(width * 0.32, 290);
-      const h = Math.min(clamp(height * 0.38, 300, 500), maxWidth / PHONE_ASPECT);
+      const w = Math.round(clamp(width * 0.3, 200, 268));
+      const h = w * VIDEO_PHONE_BODY_RATIO;
       return {
         height: h,
-        width: h * PHONE_ASPECT,
+        width: w,
         canvasHeight: h,
         canvasBottomTrim: 0,
         zoom: 0,
@@ -508,17 +508,23 @@ const calculateInlinePhoneMetrics = (variant: 'spline' | 'video' = currentHeroPh
       ? anchorEl.getBoundingClientRect().bottom - heroEl.getBoundingClientRect().top
       : height * 0.45;
     const available = Math.max(220, height - tBottom - bottomSafe);
-    const maxWidth = Math.min(width * 0.5, 220);
-    const h = Math.min(available * 0.84, maxWidth / PHONE_ASPECT);
+    // Bredden är deterministisk (samma viewport ⇒ samma telefon), höjden följer.
+    let w = Math.round(clamp(width * 0.46, 150, 208));
+    let h = w * VIDEO_PHONE_BODY_RATIO;
+    if (h > available * 0.9) {
+      h = available * 0.9;
+      w = Math.round(h / VIDEO_PHONE_BODY_RATIO);
+    }
     return {
       height: h,
-      width: h * PHONE_ASPECT,
+      width: w,
       canvasHeight: h,
       canvasBottomTrim: 0,
       zoom: 0,
       topGap: Math.max(clamp(height * 0.025, 16, 34), (available - h) / 2),
     };
   }
+
 
   const isWideInlineMobile = !isPortraitTablet && width >= 520;
 
