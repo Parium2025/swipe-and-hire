@@ -144,7 +144,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
           muted
           loop
           playsInline
-          preload="metadata"
+          preload={isWindowsDevice() ? 'none' : 'metadata'}
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"

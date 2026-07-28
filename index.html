@@ -342,9 +342,12 @@
                 var appleSafari = /Safari/.test(ua) && !/Chrome|Chromium|Edg\//.test(ua);
                 var probe = document.createElement('video');
                 var hevcOk = appleSafari && probe.canPlayType && probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
+                var windows = /Windows NT/i.test(ua);
                 add(hevcOk
                   ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
-                  : { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/9683d292-964a-4f62-9a0b-269892faa6d2/showcase-jobseeker-v2.mp4', type: 'video/mp4', fetchpriority: 'high' });
+                  : windows
+                    ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/8dccb6f1-ea8d-4c69-bffe-f1d681810f0d/showcase-jobseeker-windows.mp4', type: 'video/mp4; codecs="avc1.4D401F"', fetchpriority: 'high' }
+                    : { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/9683d292-964a-4f62-9a0b-269892faa6d2/showcase-jobseeker-v2.mp4', type: 'video/mp4', fetchpriority: 'high' });
               }
             }
             add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'low' });
