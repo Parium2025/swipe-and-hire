@@ -2,9 +2,10 @@ import { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import mp4Asset from '@/assets/showcase-jobseeker.mp4.asset.json';
+import mobileMp4Asset from '@/assets/showcase-jobseeker-mobile.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsMp4Asset from '@/assets/showcase-jobseeker-windows-premium.mp4.asset.json';
-import { prefersLightweightVideo } from '@/lib/videoPlatform';
+import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
