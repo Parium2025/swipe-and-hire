@@ -161,12 +161,18 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         await app.load(SCENE_URL);
         try {
           const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
-          const cap = isCoarse ? 1.5 : 2;
+          // Windows-laptops med integrerad grafik delar GPU:n med
+          // video-avkodaren. En WebGL-scen som renderas i DPR 2 äter då så
+          // mycket fill rate att hero-videon börjar hacka. Apple-enheter har
+          // marginal och behåller full skärpa.
+          const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
+          const cap = isCoarse ? 1.5 : isApple ? 2 : 1.25;
           const renderer = (app as unknown as { renderer?: { setPixelRatio?: (n: number) => void } }).renderer;
           renderer?.setPixelRatio?.(Math.min(window.devicePixelRatio || 1, cap));
         } catch {
           /* no-op */
         }
+
         app.setZoom(zoomRef.current);
         requestAnimationFrame(() => app?.setZoom(zoomRef.current));
         if (!activeRef.current) app.stop();
