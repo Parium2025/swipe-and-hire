@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import mp4Asset from '@/assets/showcase-jobseeker.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
-import windowsMp4Asset from '@/assets/showcase-jobseeker-windows.mp4.asset.json';
+import windowsMp4Asset from '@/assets/showcase-jobseeker-windows-premium.mp4.asset.json';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -39,7 +39,7 @@ const getSources = () =>
         { src: mp4Asset.url, type: 'video/mp4' },
       ]
     : prefersWindowsPerformanceMp4()
-      ? [{ src: windowsMp4Asset.url, type: 'video/mp4; codecs="avc1.4D401F"' }]
+      ? [{ src: windowsMp4Asset.url, type: 'video/mp4' }]
     : [{ src: mp4Asset.url, type: 'video/mp4' }];
 
 

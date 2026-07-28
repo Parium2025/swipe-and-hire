@@ -6,6 +6,14 @@ import real4 from '@/assets/landing/jobseeker-real-4.jpg';
 import real5 from '@/assets/landing/jobseeker-real-5.jpg';
 import real6 from '@/assets/landing/jobseeker-real-6.jpg';
 import real7 from '@/assets/landing/jobseeker-real-7.jpg';
+import winElectrician from '@/assets/landing/windows/jobseeker-electrician-windows.mp4.asset.json';
+import winFarmer from '@/assets/landing/windows/jobseeker-farmer-windows.mp4.asset.json';
+import winNurse from '@/assets/landing/windows/jobseeker-nurse-windows.mp4.asset.json';
+import winPlumber from '@/assets/landing/windows/jobseeker-plumber-windows.mp4.asset.json';
+import winPt from '@/assets/landing/windows/jobseeker-pt-windows.mp4.asset.json';
+import winReal3 from '@/assets/landing/windows/jobseeker-real-3-windows.mp4.asset.json';
+import winReal4 from '@/assets/landing/windows/jobseeker-real-4-windows.mp4.asset.json';
+import winRealCenter from '@/assets/landing/windows/jobseeker-real-center-windows.mp4.asset.json';
 import { fetchPriority } from '@/lib/fetchPriority';
 
 /**
@@ -18,6 +26,7 @@ import { fetchPriority } from '@/lib/fetchPriority';
 type MediaItem = {
   type: 'image' | 'video';
   src: string;
+  windowsSrc?: string;
   poster?: string;
   position?: string;
   eyebrow: string;
@@ -28,14 +37,14 @@ type MediaItem = {
 // 404, codec-issue) renderas posterbilden istället för en svart ruta —
 // användaren ser alltid något meningsfullt i kortet.
 const items: MediaItem[] = [
-  { type: 'video', src: '/landing/jobseeker-pt.mp4', poster: real1, position: '50% 30%', eyebrow: 'Träning', title: 'Personliga tränare' },
-  { type: 'video', src: '/landing/jobseeker-plumber.mp4', poster: real5, position: '50% 30%', eyebrow: 'Hantverk', title: 'Rörmokare & byggare' },
-  { type: 'video', src: '/landing/jobseeker-real-center.mp4', poster: real1, eyebrow: 'Affärer', title: 'Yrkespersoner i sitt element' },
-  { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
-  { type: 'video', src: '/landing/jobseeker-real-3.mp4', poster: real3, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
-  { type: 'video', src: '/landing/jobseeker-electrician.mp4', poster: real4, position: '50% 28%', eyebrow: 'Elektriker', title: 'Elektriker' },
-  { type: 'video', src: '/landing/jobseeker-farmer.mp4', poster: real7, eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
-  { type: 'video', src: '/landing/jobseeker-nurse.mp4', poster: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
+  { type: 'video', src: '/landing/jobseeker-pt.mp4', windowsSrc: winPt.url, poster: real1, position: '50% 30%', eyebrow: 'Träning', title: 'Personliga tränare' },
+  { type: 'video', src: '/landing/jobseeker-plumber.mp4', windowsSrc: winPlumber.url, poster: real5, position: '50% 30%', eyebrow: 'Hantverk', title: 'Rörmokare & byggare' },
+  { type: 'video', src: '/landing/jobseeker-real-center.mp4', windowsSrc: winRealCenter.url, poster: real1, eyebrow: 'Affärer', title: 'Yrkespersoner i sitt element' },
+  { type: 'video', src: '/landing/jobseeker-real-4.mp4', windowsSrc: winReal4.url, poster: real2, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
+  { type: 'video', src: '/landing/jobseeker-real-3.mp4', windowsSrc: winReal3.url, poster: real3, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
+  { type: 'video', src: '/landing/jobseeker-electrician.mp4', windowsSrc: winElectrician.url, poster: real4, position: '50% 28%', eyebrow: 'Elektriker', title: 'Elektriker' },
+  { type: 'video', src: '/landing/jobseeker-farmer.mp4', windowsSrc: winFarmer.url, poster: real7, eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
+  { type: 'video', src: '/landing/jobseeker-nurse.mp4', windowsSrc: winNurse.url, poster: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
 ];
 
 type CardItemProps = {
@@ -56,7 +65,8 @@ type CardItemProps = {
  * per video (annars tvingar varje getBoundingClientRect fram en ny layout).
  */
 const isWindowsDevice = () => typeof navigator !== 'undefined' && /Windows NT/i.test(navigator.userAgent);
-const getMaxConcurrent = () => (isWindowsDevice() ? 1 : 3);
+const getMaxConcurrent = () => (isWindowsDevice() ? 4 : 3);
+const getPlayableSrc = (item: MediaItem) => (isWindowsDevice() && item.windowsSrc ? item.windowsSrc : item.src);
 const registry = new Set<HTMLVideoElement>();
 let rafId = 0;
 
@@ -139,7 +149,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
       {item.type === 'video' && !failed ? (
         <video
           ref={videoRef}
-          src={item.src}
+          src={getPlayableSrc(item)}
           poster={item.poster}
           muted
           loop
