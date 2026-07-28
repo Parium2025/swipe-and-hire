@@ -351,11 +351,13 @@
                 var lowPowerWin = isWin && (mem <= 4 || cores <= 4);
                 add(hevcOk
                   ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
-                  : (coarse || (isWin && !lowPowerWin))
-                    ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/a47f6b62-4255-400d-afda-be54a136517c/showcase-jobseeker-mobile.mp4', type: 'video/mp4', fetchpriority: 'high' }
+                  : (isWin && !lowPowerWin)
+                    ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/824c9bad-ed77-41f5-9941-3e99d6249a0b/showcase-jobseeker-win-crisp.mp4', type: 'video/mp4', fetchpriority: 'high' }
+                  : coarse
+                    ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/fcdc9ff9-d4c5-4224-b75a-b28c76ad5934/showcase-jobseeker-hi-crisp.mp4', type: 'video/mp4', fetchpriority: 'high' }
                   : lowPowerWin
                     ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/6e4ad1ea-5108-44f1-b18c-3684c3aadad9/showcase-jobseeker-windows-premium.mp4', type: 'video/mp4', fetchpriority: 'high' }
-                    : { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/9683d292-964a-4f62-9a0b-269892faa6d2/showcase-jobseeker-v2.mp4', type: 'video/mp4', fetchpriority: 'high' });
+                    : { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/fcdc9ff9-d4c5-4224-b75a-b28c76ad5934/showcase-jobseeker-hi-crisp.mp4', type: 'video/mp4', fetchpriority: 'high' });
               }
             }
             var uaStr = typeof ua === 'string' ? ua : (navigator.userAgent || '');
