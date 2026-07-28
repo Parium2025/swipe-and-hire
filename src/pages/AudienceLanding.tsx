@@ -15,6 +15,7 @@ import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { preloadAudienceLandingAssets } from '@/lib/audienceLandingPreload';
 import { AppBadges } from '@/components/landing/AppBadges';
+import { prefersStaticGlass } from '@/lib/videoPlatform';
 
 // Under-fold sektioner — lata in för att korta första paint.
 // Preloadas via requestIdleCallback så de är redo innan användaren scrollar dit.
