@@ -1,6 +1,6 @@
 import * as React from "react"
 import { format } from "date-fns"
-import { CalendarIcon, ChevronDown } from "lucide-react"
+import { CalendarIcon, ChevronDown, X } from "lucide-react"
 import { sv } from "date-fns/locale"
 
 import { cn } from "@/lib/utils"
@@ -88,27 +88,49 @@ export function StartDatePicker({
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          onMouseDown={(e) => e.currentTarget.blur()}
-          onMouseUp={(e) => e.currentTarget.blur()}
-          className={cn(
-            "w-full h-11 !min-h-0 pl-3 pr-3 text-left text-sm font-normal bg-white/10 backdrop-blur-sm border-white/20 !text-white hover:bg-white/15 hover:!text-white hover:border-white/40 md:hover:bg-white/15 md:hover:!text-white md:hover:border-white/40 justify-start",
-            "outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 focus:border-white/20 focus-visible:border-white/20 active:border-white/20 transition-none",
-            className
-          )}
-        >
-          <span className="mr-2 inline-flex items-center">
-            <CalendarIcon className="h-4 w-4 text-white" />
-          </span>
-          {selectedDate ? (
-            <span className="text-white">{format(selectedDate, "d MMMM yyyy", { locale: sv })}</span>
-          ) : (
-            <span className="text-white">{placeholder}</span>
-          )}
-        </Button>
-      </PopoverTrigger>
+      <div className="relative w-full">
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
+            className={cn(
+              "w-full h-11 !min-h-0 pl-3 text-left text-sm font-normal bg-white/10 backdrop-blur-sm border-white/20 !text-white justify-start",
+              selectedDate ? "pr-10" : "pr-3",
+              // Håll glaset mörkt i alla states – aldrig vit yta vid tryck/öppen popover
+              "hover:bg-white/15 hover:!text-white hover:border-white/40 md:hover:bg-white/15 md:hover:!text-white md:hover:border-white/40",
+              "active:bg-white/10 active:!text-white data-[state=open]:bg-white/15 data-[state=open]:!text-white data-[state=open]:border-white/40",
+              "outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 focus:bg-white/10 focus-visible:bg-white/10 transition-colors",
+              className
+            )}
+          >
+            <span className="mr-2 inline-flex items-center">
+              <CalendarIcon className="h-4 w-4 text-white" />
+            </span>
+            {selectedDate ? (
+              <span className="text-white">{format(selectedDate, "d MMMM yyyy", { locale: sv })}</span>
+            ) : (
+              <span className="text-white">{placeholder}</span>
+            )}
+          </Button>
+        </PopoverTrigger>
+
+        {selectedDate && (
+          <button
+            type="button"
+            aria-label="Rensa startdatum (visa Omgående)"
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedDate(undefined)
+              onChange("")
+              setIsOpen(false)
+            }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/15 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
       <PopoverContent
         className="w-auto p-0 glass-panel rounded-xl shadow-xl z-50"
         align="start"
