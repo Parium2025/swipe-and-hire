@@ -91,7 +91,7 @@ export default function RealtimeStatusPage() {
   const OverallIcon = overall.icon;
 
   return (
-    <main className="min-h-screen bg-background px-4 py-6 text-foreground md:px-8 lg:px-10">
+    <div className="min-h-screen bg-background px-4 py-6 text-foreground md:px-8 lg:px-10">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">
@@ -242,7 +242,7 @@ export default function RealtimeStatusPage() {
           )}
         </section>
       </div>
-    </main>
+    </div>
   );
 }
 

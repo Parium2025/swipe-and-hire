@@ -118,7 +118,7 @@ export default function IntegrityPolicyPage() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[880px] px-5 pb-28 pt-36 sm:px-8 sm:pt-40 md:px-12">
+        <div className="mx-auto w-full max-w-[880px] px-5 pb-28 pt-36 sm:px-8 sm:pt-40 md:px-12">
           <motion.header
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -450,7 +450,7 @@ export default function IntegrityPolicyPage() {
               </p>
             </Section>
           </div>
-        </main>
+        </div>
 
         <SiteFooter />
       </div>

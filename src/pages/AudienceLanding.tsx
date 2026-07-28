@@ -1727,7 +1727,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
 
-        <main>
+        <div>
           <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
           <SectionDivider className="mt-28 mb-12 md:mt-40 md:mb-20" />
@@ -2277,7 +2277,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </Suspense>
 
 
-        </main>
+        </div>
       </div>
     </div>
     </>

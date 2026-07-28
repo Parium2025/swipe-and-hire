@@ -123,7 +123,7 @@ export default function CvTunnel() {
         </div>
       </header>
 
-      <main className="flex-1">
+      <div className="flex-1">
         {loading && (
           <div className="h-full flex items-center justify-center">
             <p className="text-sm text-white">Laddar CV…</p>
@@ -157,7 +157,7 @@ export default function CvTunnel() {
             className="w-full h-[calc(100vh-56px)]"
           />
         )}
-      </main>
+      </div>
     </div>
   );
 }

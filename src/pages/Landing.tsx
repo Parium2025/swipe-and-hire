@@ -107,9 +107,9 @@ const Landing = () => {
     >
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
-        <main>
+        <div>
           <LandingHero scrollContainerRef={scrollContainerRef} />
-        </main>
+        </div>
       </div>
     </div>
   );
