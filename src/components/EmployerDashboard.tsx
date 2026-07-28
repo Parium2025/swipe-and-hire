@@ -489,21 +489,31 @@ const EmployerDashboard = memo(() => {
       />
 
       {/* Status tabs: Aktiva / Utgångna / Utkast + sidindikator */}
-      <div className="relative flex justify-center items-center">
-        <JobStatusTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          activeCount={serverCounts?.active ?? activeJobs.length}
-          expiredCount={serverCounts?.expired ?? expiredJobsCount}
-          draftCount={serverCounts?.draft ?? draftJobsCount}
-          showDrafts
-        />
+      <div className="relative flex items-center gap-2">
+        {/* Osynlig spegel av knappen — håller flikarna optiskt centrerade utan overlap */}
+        <div
+          aria-hidden
+          className="invisible shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1.5 text-xs font-medium"
+        >
+          <span className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Visa detaljer</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <JobStatusTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            activeCount={serverCounts?.active ?? activeJobs.length}
+            expiredCount={serverCounts?.expired ?? expiredJobsCount}
+            draftCount={serverCounts?.draft ?? draftJobsCount}
+            showDrafts
+          />
+        </div>
         <button
           type="button"
           onClick={toggleExpandAll}
           aria-label={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
           title={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
-          className="absolute right-0 inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
         >
           {expandAll ? <ChevronsDownUp className="h-3.5 w-3.5" /> : <ChevronsUpDown className="h-3.5 w-3.5" />}
           <span className="hidden sm:inline">{expandAll ? 'Dölj detaljer' : 'Visa detaljer'}</span>
