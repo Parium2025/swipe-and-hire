@@ -53,7 +53,7 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
 
   const startDateLabel = startDate
     ? new Date(startDate).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
-    : null;
+    : 'Omgående';
 
   // Arbetsgivar-preview-stil: label v\u00e4nster (dimmad), v\u00e4rde h\u00f6gerjusterat (vitt),
   // tunn avdelare mellan raderna. En kolumn, ren och stram.
@@ -161,12 +161,10 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
             <span className={valueClass}>{workStartTime} – {workEndTime}</span>
           </div>
         )}
-        {startDateLabel && (
-          <div className={rowClass}>
-            <span className={labelClass}>Startdatum:</span>
-            <span className={valueClass}>{startDateLabel}</span>
-          </div>
-        )}
+        <div className={rowClass}>
+          <span className={labelClass}>Start:</span>
+          <span className={valueClass}>{startDateLabel}</span>
+        </div>
         <div className={rowClass}>
           <span className={labelClass}>Antal tjänster:</span>
           <span className={valueClass}>{(positionsCount || 1)} st</span>
