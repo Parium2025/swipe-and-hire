@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "asset_id": "581cadae-be5e-4807-a094-f2b423606d36",
+  "asset_id": "036f770d-d1fd-486e-a69a-1f8452a9c10c",
   "project_id": "09c4e686-17a9-467e-89b1-3cf832371d49",
-  "url": "/__l5e/assets-v1/581cadae-be5e-4807-a094-f2b423606d36/showcase-jobseeker.hevc.mp4",
-  "r2_key": "a/v1/09c4e686-17a9-467e-89b1-3cf832371d49/581cadae-be5e-4807-a094-f2b423606d36/showcase-jobseeker.hevc.mp4",
-  "original_filename": "showcase-jobseeker.hevc.mp4",
-  "size": 1670187,
+  "url": "/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4",
+  "r2_key": "a/v1/09c4e686-17a9-467e-89b1-3cf832371d49/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4",
+  "original_filename": "showcase-jobseeker-v2.hevc.mp4",
+  "size": 2449483,
   "content_type": "video/mp4",
-  "created_at": "2026-07-28T04:23:16Z"
+  "created_at": "2026-07-28T07:37:14Z"
 }
