@@ -11,11 +11,12 @@ import { prefersReducedData } from '@/lib/videoPlatform';
 const ease = [0.16, 1, 0.3, 1] as const;
 
 /**
- * Skärmens proportion. Videon är 9:19.5 men iPhone-chassit blir visuellt för
- * långsmalt när ramen läggs på — 9:19 ger en kropp på ca 2.04:1, vilket är
- * exakt en riktig iPhone (149.6 × 71.5 mm). Videon täcker via object-cover.
+ * Skärmens proportion. Videon är 9:19.5, men med ramen påsatt blir chassit
+ * visuellt för långsmalt. 9:18.3 ger en kropp på ca 1.96:1 — kompakt och
+ * iPhone-likt. Videon täcker via object-cover.
  */
-const ASPECT = '9 / 19';
+const ASPECT = '9 / 18.3';
+
 
 /**
  * HEVC erbjuds ENDAST till Apple-Safari.
@@ -75,9 +76,11 @@ const estimateCssWidth = (widthPx?: number) => {
 const pickLadder = (widthPx?: number) => {
   const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 3);
   const target = estimateCssWidth(widthPx) * dpr;
-  // Välj minsta rung som täcker målet (uppskalning undviks helt).
-  return (LADDER.find((r) => r.w >= target - 24) ?? LADDER[LADDER.length - 1]).url;
+  // Välj minsta rung som TÄCKER målet fullt ut. Ingen tolerans nedåt: en källa
+  // som är smalare än ytan måste skalas UPP av browsern = garanterat suddig text.
+  return (LADDER.find((r) => r.w >= target) ?? LADDER[LADDER.length - 1]).url;
 };
+
 
 const getSources = (widthPx?: number) =>
   prefersHevc()
