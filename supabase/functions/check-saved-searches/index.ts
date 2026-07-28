@@ -249,7 +249,7 @@ serve(async (req) => {
               await supabase.functions.invoke('send-push-notification', {
                 body: {
                   recipient_id: search.user_id,
-                  title: '🔔 Nytt jobb matchar din sökning!',
+                  title: '🔔 Nytt jobb för din sökning!',
                   body: `${title} - ${workplace_city || 'Okänd plats'}`,
                   data: {
                     type: 'saved_search_match',

@@ -30,7 +30,7 @@ const faqsJobSeeker = [
   },
   {
     q: 'Hur hittar jag jobb som passar mig?',
-    a: 'Skapa din profil på minuter. Parium matchar dig automatiskt med lediga jobb baserat på dina mål, erfarenhet och plats.',
+    a: 'Skapa din profil på minuter. Sedan söker och filtrerar du bland lediga jobb utifrån dina mål, din erfarenhet och din plats.',
   },
   {
     q: 'Finns Parium som app?',

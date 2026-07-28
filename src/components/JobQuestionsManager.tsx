@@ -689,7 +689,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
             <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="font-semibold mb-2">Inga resultat</h3>
             <p className="text-muted-foreground">
-              Hittade inga frågor som matchar "{searchQuery}"
+              Hittade inga frågor som stämmer med "{searchQuery}"
             </p>
           </CardContent>
         </Card>

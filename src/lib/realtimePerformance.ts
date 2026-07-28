@@ -27,7 +27,7 @@ const WINDOW_MS = 15 * 60 * 1000;
 const subscribers = new Set<() => void>();
 const labels: Record<PerformanceArea, string> = {
   search: 'Search',
-  matching: 'Matchning',
+  matching: 'Sökning',
   chat: 'Chatt',
 };
 

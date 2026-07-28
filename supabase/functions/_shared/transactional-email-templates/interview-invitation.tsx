@@ -96,7 +96,7 @@ const InterviewInvitationEmail = ({
           </Section>
 
           <Hr style={hr} />
-          <Text style={footer}>Parium · Sveriges nya jobbmatchning</Text>
+          <Text style={footer}>Parium · Sveriges nya jobbplattform</Text>
           <Text style={noReply}>
             Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
           </Text>

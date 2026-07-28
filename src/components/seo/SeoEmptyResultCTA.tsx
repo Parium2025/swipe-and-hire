@@ -36,9 +36,9 @@ const SeoEmptyResultCTA = ({
       </h3>
       <p className="mx-auto mt-2 max-w-md text-sm text-white">
         {query
-          ? `Inga sidor matchar "${query}" — men vi har förmodligen jobbet ändå.`
+          ? `Inga sidor stämmer med "${query}" — men vi har förmodligen jobbet ändå.`
           : 'Vi har förmodligen jobbet ändå.'}{' '}
-        Skapa din profil så matchar vi dig direkt när rätt arbetsgivare lägger ut sitt nästa jobb.
+        Skapa din profil så hittar du jobben direkt när rätt arbetsgivare lägger ut sitt nästa jobb.
       </p>
       <div className="mt-5 flex justify-center">
         <SeoCTAButton label="Skapa profil gratis" size="md" />

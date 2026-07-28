@@ -244,7 +244,7 @@ export const useSavedSearches = () => {
 
       if (error) throw error;
 
-      toast.success('Sökning sparad! Du får notiser när nya jobb matchar.');
+      toast.success('Sökning sparad! Du får notiser när nya jobb dyker upp.');
       await fetchSavedSearches();
       return data as SavedSearch;
     } catch (err) {

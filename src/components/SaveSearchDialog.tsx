@@ -89,7 +89,7 @@ export function SaveSearchDialog({
             Spara sökning
           </DialogTitle>
           <DialogDescription className="text-white">
-            Få notiser när nya jobb matchar dina kriterier.
+            Få notiser när nya jobb stämmer med dina kriterier.
           </DialogDescription>
         </DialogHeader>
 
@@ -131,7 +131,7 @@ export function SaveSearchDialog({
           <div className="flex flex-col items-center gap-1 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
             <Bell className="h-5 w-5 text-white shrink-0" />
             <p className="font-medium text-sm text-white">Realtidsnotiser</p>
-            <p className="text-sm text-white">Du får en notis direkt när nya jobb publiceras som matchar din sökning.</p>
+            <p className="text-sm text-white">Du får en notis direkt när nya jobb publiceras som stämmer med din sökning.</p>
           </div>
         </div>
 
