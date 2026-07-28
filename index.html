@@ -291,12 +291,10 @@
     <!-- Instrument Serif italic — endast för accentord på landningssidan -->
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <!-- Preload den vanligaste vikten (400) som WOFF2 så LCP-texten renderas utan FOIT-flimmer -->
-    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2" crossorigin />
+    
     <!-- Preload Parium logos for instant rendering (logo-rings preloadas via main.tsx med hashad asset-URL) -->
     <link rel="preload" as="image" href="/parium-auth-logo.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
-    <!-- Preload NASA Earth day image for Globe component -->
-    <link rel="preload" as="image" href="/images/earth-day.webp" type="image/webp" fetchpriority="low" />
     <!-- 🎯 Route-scoped preloads: undviker att slösa bandbredd genom att ladda
          landing-videon på /jobbsokare eller Spline-scenen på /. Detta gör att
          varje rutt får just ihjäl-snabb LCP utan att betala för andras assets. -->
@@ -318,19 +316,10 @@
             var saveData = !!(conn && conn.saveData);
             var slowNet = !!(conn && /(^|-)2g$/.test(conn.effectiveType || ''));
             if (!saveData && !slowNet) {
-              // Breakpoint MÅSTE matcha <source media> i HeroVideo.tsx för att undvika dubbel-fetch.
+              // Breakpoint MÅSTE stämma med <source media> i HeroVideo.tsx för att undvika dubbel-fetch.
               var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
-              // Plocka exakt samma codec som <video><source> kommer välja — annars dubbel-laddning.
-              var probe = document.createElement('video');
-              var hasAV1 = probe.canPlayType('video/mp4; codecs="av01.0.05M.08"') !== '';
-              var hasHEVC = probe.canPlayType('video/mp4; codecs="hvc1"') !== '';
-              var videoHref, videoType;
-              if (isDesktop && hasAV1) { videoHref = '/hero-video.av1.mp4'; videoType = 'video/mp4; codecs="av01.0.05M.08"'; }
-              else if (isDesktop && hasHEVC) { videoHref = '/hero-video.hevc.mp4'; videoType = 'video/mp4; codecs="hvc1"'; }
-              else if (isDesktop) { videoHref = '/hero-video.mp4'; videoType = 'video/mp4'; }
-              else if (hasHEVC) { videoHref = '/hero-video-720.hevc.mp4'; videoType = 'video/mp4; codecs="hvc1"'; }
-              else { videoHref = '/hero-video-720.mp4'; videoType = 'video/mp4'; }
-              add({ rel: 'preload', as: 'video', href: videoHref, type: videoType, fetchpriority: 'high' });
+              var videoHref = isDesktop ? '/hero-video.mp4' : '/hero-video-720.mp4';
+              add({ rel: 'preload', as: 'video', href: videoHref, type: 'video/mp4', fetchpriority: 'high' });
             }
           } else if (path === '/jobbsokare' || path === '/arbetsgivare') {
             add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'high' });
