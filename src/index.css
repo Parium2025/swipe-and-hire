@@ -2111,6 +2111,11 @@ video::-webkit-media-controls {
   transition:
     opacity 780ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 780ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* will-change bara medan steget FAKTISKT ska animeras. Permanent will-change
+   håller ett eget kompositorlager vid liv för varje steg resten av sessionen
+   — på integrerad GPU (Windows) äter det VRAM och kostar frames i scrollen. */
+.employer-journey-step[data-journey-shown="false"] {
   will-change: opacity, transform;
 }
 .employer-journey-step[data-journey-shown="false"] {
