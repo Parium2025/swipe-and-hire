@@ -36,6 +36,7 @@ import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, formatEmploymentDetails, type DurationUnit } from '@/lib/employmentTypes';
 import { EmploymentTypeExtras } from '@/components/wizard/EmploymentTypeExtras';
+import { RequiredMark } from '@/components/wizard/RequiredMark';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, ArrowDown, Pencil, Smartphone, Monitor, Check, AlertTriangle, Copy, Palette } from 'lucide-react';
@@ -2690,6 +2691,21 @@ const MobileJobWizard = ({
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
+
+  // Anställningsform räknas som klar först när eventuella följdfält
+  // (deltidsdagar/pass eller antal månader) också är ifyllda.
+  const employmentSectionComplete = (() => {
+    const type = formData.employment_type;
+    if (!type) return false;
+    if (TYPES_WITH_PART_TIME_DAYS.has(type)) {
+      return (formData.part_time_days?.length ?? 0) > 0 && (formData.part_time_shifts?.length ?? 0) > 0;
+    }
+    if (TYPES_WITH_DURATION.has(type)) {
+      return !!formData.duration_amount && parseInt(String(formData.duration_amount), 10) > 0;
+    }
+    return true;
+  })();
+
   const isLastStep = !isInitializing && currentStep === steps.length - 1;
 
   // Don't render Dialog until initialization is complete to prevent button flash
@@ -2750,7 +2766,7 @@ const MobileJobWizard = ({
             {currentStep === 0 && (
               <div className="premium-edit-step">
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
+                  <Label className="text-white font-medium text-sm">Jobbtitel<RequiredMark filled={!!formData.title?.trim()} /></Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
@@ -2760,7 +2776,7 @@ const MobileJobWizard = ({
                 </div>
 
                  <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Yrke *</Label>
+                  <Label className="text-white font-medium text-sm">Yrke<RequiredMark filled={!!formData.occupation?.trim()} /></Label>
                   <div className="relative occupation-dropdown">
                     <Input
                       value={formData.occupation}
@@ -2817,7 +2833,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Jobbeskrivning *</Label>
+                  <Label className="text-white font-medium text-sm">Jobbeskrivning<RequiredMark filled={!!formData.description?.trim()} /></Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
@@ -2933,7 +2949,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Anställningsform *</Label>
+                  <Label className="text-white font-medium text-sm">Anställningsform<RequiredMark filled={employmentSectionComplete} /></Label>
                   <div className="relative employment-type-dropdown">
                     <Input
                       value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
@@ -2981,7 +2997,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Lönetyp *</Label>
+                  <Label className="text-white font-medium text-sm">Lönetyp<RequiredMark filled={!!formData.salary_type} /></Label>
                   <div className="relative salary-type-dropdown">
                     <Input
                       value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
@@ -3018,7 +3034,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026) *</Label>
+                  <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026)<RequiredMark filled={!!formData.salary_transparency} /></Label>
                   <div className="relative salary-transparency-dropdown">
                     <Input
                       value={salaryTransparencySearchTerm || (formData.salary_transparency ? salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '' : '')}
@@ -3055,7 +3071,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Antal personer att rekrytera *</Label>
+                  <Label className="text-white font-medium text-sm">Antal personer att rekrytera<RequiredMark filled={!!formData.positions_count} /></Label>
                   <div className="flex items-center gap-2">
                     <Input
                       type="text"
@@ -3107,7 +3123,7 @@ const MobileJobWizard = ({
 
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
+                  <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid)<RequiredMark filled={!!(formData.work_start_time && formData.work_end_time)} /></Label>
                   <div className="flex gap-3 items-center">
                     <div className="flex-1">
                       <Input
@@ -3175,7 +3191,7 @@ const MobileJobWizard = ({
             {currentStep === 1 && (
               <div className="premium-edit-step">
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
+                  <Label className="text-white font-medium text-sm">Var utförs arbetet?<RequiredMark filled={!!formData.work_location_type} /></Label>
                   <div className="relative work-location-dropdown">
                     <Input
                       value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
@@ -3212,7 +3228,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Är distansarbete möjligt? *</Label>
+                  <Label className="text-white font-medium text-sm">Är distansarbete möjligt?<RequiredMark filled={!!formData.remote_work_possible} /></Label>
                   <div className="relative remote-work-dropdown">
                     <Input
                       value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
@@ -3249,7 +3265,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Bolagsnamn *</Label>
+                  <Label className="text-white font-medium text-sm">Bolagsnamn<RequiredMark filled={!!formData.workplace_name?.trim()} /></Label>
                   <Input
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
@@ -3259,7 +3275,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Kontakt e-mail *</Label>
+                  <Label className="text-white font-medium text-sm">Kontakt e-mail<RequiredMark filled={!!formData.contact_email?.trim()} /></Label>
                   <Input
                     type="email"
                     value={formData.contact_email}
