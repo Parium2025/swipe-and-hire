@@ -100,7 +100,7 @@ export default function RealtimeStatusPage() {
             </div>
             <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Realtidsstatus</h1>
             <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
-              Mäter search, matchning, chatt, runtime-fel, misslyckade async-flöden och kritiska backend-anrop.
+              Mäter search, sökflöden, chatt, runtime-fel, misslyckade async-flöden och kritiska backend-anrop.
             </p>
           </div>
           <div className={`inline-flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold ${overall.className}`}>
