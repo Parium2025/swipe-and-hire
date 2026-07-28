@@ -2691,6 +2691,21 @@ const MobileJobWizard = ({
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
+
+  // Anställningsform räknas som klar först när eventuella följdfält
+  // (deltidsdagar/pass eller antal månader) också är ifyllda.
+  const employmentSectionComplete = (() => {
+    const type = formData.employment_type;
+    if (!type) return false;
+    if (TYPES_WITH_PART_TIME_DAYS.has(type)) {
+      return (formData.part_time_days?.length ?? 0) > 0 && (formData.part_time_shifts?.length ?? 0) > 0;
+    }
+    if (TYPES_WITH_DURATION.has(type)) {
+      return !!formData.duration_amount && parseInt(String(formData.duration_amount), 10) > 0;
+    }
+    return true;
+  })();
+
   const isLastStep = !isInitializing && currentStep === steps.length - 1;
 
   // Don't render Dialog until initialization is complete to prevent button flash
