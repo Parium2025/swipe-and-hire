@@ -115,7 +115,7 @@ const JobSeekerVideoShowcase = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
-  if (sourcesRef.current === null) sourcesRef.current = getSources();
+  if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
   const sources = sourcesRef.current;
 
 
