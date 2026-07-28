@@ -18,7 +18,7 @@ const SEO: Record<AudienceRole, SEOConfig> = {
   employer: {
     title: 'Rekrytera rätt kandidater snabbt & enkelt | Parium',
     description:
-      'Snabbare rekrytering med smart matchning. Få kvalificerade kandidater i flödet, granska mobilt och boka samtal direkt. Testa Parium gratis.',
+      'Snabbare rekrytering med smart sökning. Få kvalificerade kandidater i flödet, granska mobilt och boka samtal direkt. Testa Parium gratis.',
     canonical: 'https://www.parium.se/arbetsgivare',
   },
 };
@@ -41,11 +41,11 @@ const faqsJobSeeker = [
 const faqsEmployer = [
   {
     q: 'Hur snabbt kan jag börja rekrytera med Parium?',
-    a: 'Du kan publicera en roll och få första matchningarna inom 60 sekunder.',
+    a: 'Du kan publicera en roll och få första relevanta kandidaterna inom 60 sekunder.',
   },
   {
-    q: 'Hur fungerar matchningen?',
-    a: 'Vår smarta matchning visar de mest relevanta kandidaterna först, baserat på kraven du satt för rollen.',
+    q: 'Hur fungerar sökningen?',
+    a: 'Vår smarta sökning visar de mest relevanta kandidaterna först, baserat på kraven du satt för rollen.',
   },
   {
     q: 'Vad kostar Parium för arbetsgivare?',
