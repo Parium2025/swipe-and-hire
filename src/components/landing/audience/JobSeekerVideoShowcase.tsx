@@ -190,22 +190,22 @@ const JobSeekerVideoShowcase = ({
           Vänster: Action (≈15.8%), volym upp (≈21.6%), volym ner (≈28.2%).
           Höger: Power (≈25.5%, ca 9% hög). Utsticket är ~0.8% av bredden. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <span className="absolute -left-[0.8%] top-[15.8%] h-[3%] w-[0.8%] rounded-l-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
-        <span className="absolute -left-[0.8%] top-[21.6%] h-[5.2%] w-[0.8%] rounded-l-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
-        <span className="absolute -left-[0.8%] top-[28.2%] h-[5.2%] w-[0.8%] rounded-l-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
-        <span className="absolute -right-[0.8%] top-[25.5%] h-[8.4%] w-[0.8%] rounded-r-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
+        <span className="absolute -left-[0.8%] top-[14.9%] h-[2.8%] w-[0.8%] rounded-l-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
+        <span className="absolute -left-[0.8%] top-[20.4%] h-[4.9%] w-[0.8%] rounded-l-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
+        <span className="absolute -left-[0.8%] top-[26.6%] h-[4.9%] w-[0.8%] rounded-l-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
+        <span className="absolute -right-[0.8%] top-[24.1%] h-[7.9%] w-[0.8%] rounded-r-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
       </div>
 
 
       {/* Titanchassi — behåll borstad metall, men klipp bort den sista
           subpixeln längst ned som annars kan ritas som en horisontell kant. */}
       <div
-        className="relative rounded-[13.5%/6.4%] p-[1.5px]"
+        className="relative rounded-[13.5%/6.0%] p-[1.5px]"
         style={{
           background:
             'linear-gradient(158deg, #4a4844 0%, #3a3835 22%, #2b2a27 48%, #34322f 66%, #232220 86%, #1b1a18 100%)',
           boxShadow: '0 22px 52px -34px rgba(0, 0, 0, 0.72)',
-          clipPath: 'inset(0 0 1.2px 0 round 13.5% / 6.4%)',
+          clipPath: 'inset(0 0 1.2px 0 round 13.5% / 6.0%)',
           transform: 'translateZ(0)',
         }}
       >
@@ -213,10 +213,10 @@ const JobSeekerVideoShowcase = ({
         {/* Svart ram runt skärmen — iPhone 16 Pro har ~2 mm ram på 71.5 mm
             bredd ≈ 2.6 %. Tidigare 3.2 % gjorde chassit "tjockt" och mindre
             iPhone-likt. */}
-        <div className="relative rounded-[13.3%/6.3%] bg-[#050505] p-[2.6%]">
+        <div className="relative rounded-[13.3%/5.9%] bg-[#050505] p-[2.6%]">
           {/* Skärm */}
           <div
-            className="relative overflow-hidden rounded-[11.2%/5.1%] bg-black"
+            className="relative overflow-hidden rounded-[11.2%/4.8%] bg-black"
 
             style={{ aspectRatio: ASPECT }}
           >
@@ -251,7 +251,7 @@ const JobSeekerVideoShowcase = ({
                 kan då "blixtra till" när loopen startar om. */}
             <div
               aria-hidden
-              className="absolute inset-x-0 top-0 h-[6.4%] bg-[#01182f]"
+              className="absolute inset-x-0 top-0 h-[6.0%] bg-[#01182f]"
             >
               <div className="flex h-full items-center justify-between px-[7.5%] text-[6px] font-semibold leading-none text-white sm:text-[7px] md:text-[7.5px] lg:text-[8px] xl:text-[9px]">
                 <span className="tabular-nums tracking-[-0.02em]">19:41</span>
@@ -295,7 +295,7 @@ const JobSeekerVideoShowcase = ({
             {/* Dynamic Island i normalt läge */}
             <div
               aria-hidden
-              className="absolute left-1/2 top-[1.2%] h-[4.3%] w-[30%] -translate-x-1/2 rounded-full bg-black"
+              className="absolute left-1/2 top-[1.1%] h-[4.0%] w-[30%] -translate-x-1/2 rounded-full bg-black"
             />
 
 
