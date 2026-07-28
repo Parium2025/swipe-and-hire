@@ -9,10 +9,31 @@ const ease = [0.16, 1, 0.3, 1] as const;
 /** Videons nativa proportion (720 x 1560). */
 const ASPECT = '720 / 1560';
 
-const SOURCES = [
-  { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
-  { src: mp4Asset.url, type: 'video/mp4' },
-] as const;
+/**
+ * HEVC erbjuds ENDAST till Apple-Safari.
+ *
+ * Varför: Edge/Chrome på Windows rapporterar ofta stöd för `hvc1`
+ * (HEVC Video Extension / Win11) men saknar i praktiken hårdvaruavkodning för
+ * den profilen → browsern faller tillbaka på software-decode och videon hackar.
+ * H.264 High@4.0 är däremot hårdvaruaccelererat på i princip alla Windows-GPU:er.
+ */
+const prefersHevc = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isAppleSafari = /Safari/.test(ua) && !/Chrome|Chromium|Edg\//.test(ua);
+  if (!isAppleSafari) return false;
+  const probe = document.createElement('video');
+  return probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
+};
+
+const getSources = () =>
+  prefersHevc()
+    ? [
+        { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
+        { src: mp4Asset.url, type: 'video/mp4' },
+      ]
+    : [{ src: mp4Asset.url, type: 'video/mp4' }];
+
 
 /**
  * Video-showcase för jobbsökare — en riktig telefoninspelning av appen i en
