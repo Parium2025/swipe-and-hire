@@ -43,6 +43,63 @@ type CardItemProps = {
   index: number;
 };
 
+/**
+ * Global uppspelnings-koordinator för galleriets videor.
+ *
+ * Varför: på Windows-laptops utan dedikerad GPU faller browsern tillbaka på
+ * software-decode så fort flera H.264-strömmar spelas samtidigt — då hackar
+ * både galleriet och resten av sidan. macOS/iOS har hårdvaruavkodning för
+ * många parallella strömmar och märker därför ingenting.
+ *
+ * Lösning: max MAX_CONCURRENT videor spelar samtidigt (de närmast viewportens
+ * mitt), och all mätning sker i EN rAF-tick istället för per scroll-event och
+ * per video (annars tvingar varje getBoundingClientRect fram en ny layout).
+ */
+const MAX_CONCURRENT = 3;
+const registry = new Set<HTMLVideoElement>();
+let rafId = 0;
+
+const evaluateAll = () => {
+  rafId = 0;
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  const vw = window.innerWidth || document.documentElement.clientWidth;
+  const centerX = vw / 2;
+  const hidden = document.hidden;
+
+  const candidates: { el: HTMLVideoElement; dist: number }[] = [];
+  registry.forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    const inView =
+      !hidden &&
+      rect.bottom > 0 &&
+      rect.top < vh &&
+      rect.right > 0 &&
+      rect.left < vw;
+    if (inView) {
+      candidates.push({ el, dist: Math.abs((rect.left + rect.right) / 2 - centerX) });
+    } else if (!el.paused) {
+      el.pause();
+    }
+  });
+
+  candidates.sort((a, b) => a.dist - b.dist);
+  candidates.forEach(({ el }, i) => {
+    if (i < MAX_CONCURRENT) {
+      if (el.paused) {
+        const p = el.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      }
+    } else if (!el.paused) {
+      el.pause();
+    }
+  });
+};
+
+const scheduleEvaluate = () => {
+  if (rafId) return;
+  rafId = requestAnimationFrame(evaluateAll);
+};
+
 const CardItem = ({ item, index }: CardItemProps) => {
   // failed=true → byt ut <video> mot poster-bild som fallback. Triggas vid
   // network error, 404, codec-fel eller om användaren är offline när videon
@@ -50,51 +107,27 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [failed, setFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-
-  // Pausa videor som ligger utanför viewporten. Annars håller browsern igång
-  // 8 parallella H.264-dekodrar samtidigt vilket hackar/lagger på Windows-
-  // laptops utan dedikerad GPU. Vi använder gallery-progress (samma event
-  // som strippens transform) eftersom IntersectionObserver inte triggar på
-  // ren transform-ändring inom overflow:hidden-strippen.
   useEffect(() => {
     const v = videoRef.current;
     if (!v || item.type !== 'video' || failed) return;
     const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    const evaluate = () => {
-      if (document.hidden) {
-        v.pause();
-        return;
-      }
-      const rect = v.getBoundingClientRect();
-      const vw = window.innerWidth || document.documentElement.clientWidth;
-      const vh = window.innerHeight || document.documentElement.clientHeight;
-      // Margin: håll grannkort "varma" så vi inte pausar precis när de glider in.
-      const margin = vw * 0.15;
-      const visibleH = rect.bottom > 0 && rect.top < vh;
-      const visibleX = rect.right > -margin && rect.left < vw + margin;
-      const shouldPlay = visibleH && visibleX;
-      if (shouldPlay && v.paused) {
-        const p = v.play();
-        if (p && typeof p.catch === 'function') p.catch(() => {});
-      } else if (!shouldPlay && !v.paused) {
-        v.pause();
-      }
-    };
-    const onProgress = () => evaluate();
-    window.addEventListener('parium:gallery-progress', onProgress);
-    window.addEventListener('resize', evaluate);
-    window.addEventListener('scroll', evaluate, { passive: true });
-    root?.addEventListener('scroll', evaluate, { passive: true });
-    document.addEventListener('visibilitychange', evaluate);
-    evaluate();
+    registry.add(v);
+    window.addEventListener('parium:gallery-progress', scheduleEvaluate);
+    window.addEventListener('resize', scheduleEvaluate);
+    window.addEventListener('scroll', scheduleEvaluate, { passive: true });
+    root?.addEventListener('scroll', scheduleEvaluate, { passive: true });
+    document.addEventListener('visibilitychange', scheduleEvaluate);
+    scheduleEvaluate();
     return () => {
-      window.removeEventListener('parium:gallery-progress', onProgress);
-      window.removeEventListener('resize', evaluate);
-      window.removeEventListener('scroll', evaluate);
-      root?.removeEventListener('scroll', evaluate);
-      document.removeEventListener('visibilitychange', evaluate);
+      registry.delete(v);
+      window.removeEventListener('parium:gallery-progress', scheduleEvaluate);
+      window.removeEventListener('resize', scheduleEvaluate);
+      window.removeEventListener('scroll', scheduleEvaluate);
+      root?.removeEventListener('scroll', scheduleEvaluate);
+      document.removeEventListener('visibilitychange', scheduleEvaluate);
     };
   }, [item.type, failed]);
+
 
   return (
     <div
