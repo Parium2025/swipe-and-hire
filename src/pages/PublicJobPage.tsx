@@ -175,7 +175,7 @@ const PublicJobPage = () => {
           <link rel="canonical" href={ctxOccSlug ? `${BASE}/yrke/${ctxOccSlug}` : `${BASE}/jobb`} />
         </Helmet>
         <LandingNav onLoginClick={() => navigate("/auth")} />
-        <main className="relative overflow-hidden max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
+        <div className="relative overflow-hidden max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
           <SeoBubbles />
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -235,7 +235,7 @@ const PublicJobPage = () => {
               </div>
             </section>
           </motion.div>
-        </main>
+        </div>
       </div>
     );
   }
@@ -336,7 +336,7 @@ const PublicJobPage = () => {
 
       <LandingNav onLoginClick={() => navigate("/auth")} />
 
-      <main className="max-w-3xl mx-auto px-6 pt-28 pb-24">
+      <div className="max-w-3xl mx-auto px-6 pt-28 pb-24">
         <nav className="text-sm text-white/50 mb-6 flex items-center gap-2 flex-wrap" aria-label="Brödsmulor">
           <Link to="/" className="hover:text-white/80">Hem</Link>
           <span>/</span>
@@ -453,7 +453,7 @@ const PublicJobPage = () => {
             ))}
           </div>
         </section>
-      </main>
+      </div>
       <MobileStickyCTA
         label={user ? 'Skicka ansökan' : 'Skapa profil & ansök'}
         to={user ? `/job-application/${job.id}` : '/auth'}

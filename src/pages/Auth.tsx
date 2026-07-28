@@ -726,7 +726,7 @@ const Auth = () => {
         />
 
         {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
-        <main
+        <div
           className="relative z-10 h-full min-h-0 w-full max-w-full overflow-y-auto overflow-x-hidden"
           style={{ 
             WebkitOverflowScrolling: 'touch',
@@ -747,7 +747,7 @@ const Auth = () => {
             initialMode={initialMode}
             initialRole={initialRole}
           />
-        </main>
+        </div>
       </div>
     );
   }
@@ -763,7 +763,7 @@ const Auth = () => {
       </div>
 
       {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
-      <main
+      <div
         className="h-full w-full min-h-0 overflow-y-auto overflow-x-hidden relative z-10"
         style={{ 
           WebkitOverflowScrolling: 'touch',
@@ -784,7 +784,7 @@ const Auth = () => {
           initialMode={initialMode}
           initialRole={initialRole}
         />
-      </main>
+      </div>
     </div>
   );
 };
