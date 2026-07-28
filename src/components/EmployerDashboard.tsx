@@ -520,7 +520,7 @@ const EmployerDashboard = memo(() => {
       {searchTerm && (
         <div className="text-sm text-white mb-4">
           {tabFilteredJobs.length === 0 ? (
-            <span>Inga annonser matchar din sökning</span>
+            <span>Inga annonser stämde med din sökning</span>
           ) : (
             <span>
               Visar {tabFilteredJobs.length} av {jobs.length} annonser
@@ -535,7 +535,7 @@ const EmployerDashboard = memo(() => {
         {tabFilteredJobs.length === 0 ? (
           <div className="text-center text-white py-12 font-medium text-sm">
             {searchTerm.trim() 
-              ? 'Inga annonser matchar din sökning' 
+              ? 'Inga annonser stämde med din sökning' 
               : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
               : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
               : 'Inga utkast.'}
@@ -596,7 +596,7 @@ const EmployerDashboard = memo(() => {
           <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh]  flex items-center justify-center">
             <span>
             {searchTerm.trim() 
-              ? 'Inga annonser matchar din sökning' 
+              ? 'Inga annonser stämde med din sökning' 
               : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
               : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
               : 'Inga utkast.'}

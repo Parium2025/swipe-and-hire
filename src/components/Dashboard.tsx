@@ -24,7 +24,7 @@ type JobStatusTab = 'active' | 'expired' | 'draft';
 
 /** Shared empty state message for both desktop and mobile */
 const getEmptyMessage = (searchTerm: string, activeTab: JobStatusTab): string => {
-  if (searchTerm) return 'Inga annonser matchar din sökning';
+  if (searchTerm) return 'Inga annonser stämde med din sökning';
   return activeTab === 'active'
     ? 'Inga aktiva jobbannonser. Skapa din första annons!'
     : 'Inga utgångna jobbannonser.';
