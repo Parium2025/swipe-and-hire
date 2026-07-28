@@ -178,19 +178,18 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         await app.load(SCENE_URL);
         try {
           const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
-          // Windows-laptops med integrerad grafik delar GPU:n med
-          // video-avkodaren. Men en för LÅG pixel ratio gör att tunna
-          // geometrikanter (sidoknappen, chassikanten) hamnar mellan två
-          // pixelcentrum och "blinkar" när modellen roterar långsamt —
-          // klassisk temporal aliasing. 1.5 är den lägsta nivån där kanten
-          // ligger still utan att fill rate blir ett problem.
+          // Mobiler har redan dpr 2–3: en cap på 1.5 innebar 1.5x fler pixlar
+          // per bildruta än 1.0 på en telefon-GPU som samtidigt avkodar video
+          // → frame drops och synligt glitchande. Mobil renderar därför på 1.0
+          // (skarpt nog vid den lilla ytan) och desktop får full kvalitet.
           const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
-          const cap = isCoarse ? 1.5 : isApple ? 2 : 1.5;
+          const cap = isCoarse ? 1 : isApple ? 2 : 1.5;
           const renderer = (app as unknown as { renderer?: { setPixelRatio?: (n: number) => void } }).renderer;
           renderer?.setPixelRatio?.(Math.min(window.devicePixelRatio || 1, cap));
         } catch {
           /* no-op */
         }
+
 
         app.setZoom(zoomRef.current);
         requestAnimationFrame(() => app?.setZoom(zoomRef.current));
