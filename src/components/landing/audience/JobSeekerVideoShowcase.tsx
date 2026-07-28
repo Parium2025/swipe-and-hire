@@ -76,9 +76,11 @@ const estimateCssWidth = (widthPx?: number) => {
 const pickLadder = (widthPx?: number) => {
   const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 3);
   const target = estimateCssWidth(widthPx) * dpr;
-  // Välj minsta rung som täcker målet (uppskalning undviks helt).
-  return (LADDER.find((r) => r.w >= target - 24) ?? LADDER[LADDER.length - 1]).url;
+  // Välj minsta rung som TÄCKER målet fullt ut. Ingen tolerans nedåt: en källa
+  // som är smalare än ytan måste skalas UPP av browsern = garanterat suddig text.
+  return (LADDER.find((r) => r.w >= target) ?? LADDER[LADDER.length - 1]).url;
 };
+
 
 const getSources = (widthPx?: number) =>
   prefersHevc()
