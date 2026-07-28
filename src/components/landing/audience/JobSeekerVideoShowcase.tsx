@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import mp4Asset from '@/assets/showcase-jobseeker.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
+import windowsMp4Asset from '@/assets/showcase-jobseeker-windows.mp4.asset.json';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -26,12 +27,19 @@ const prefersHevc = () => {
   return probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
 };
 
+const prefersWindowsPerformanceMp4 = () => {
+  if (typeof navigator === 'undefined') return false;
+  return /Windows NT/i.test(navigator.userAgent);
+};
+
 const getSources = () =>
   prefersHevc()
     ? [
         { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
         { src: mp4Asset.url, type: 'video/mp4' },
       ]
+    : prefersWindowsPerformanceMp4()
+      ? [{ src: windowsMp4Asset.url, type: 'video/mp4; codecs="avc1.4D401F"' }]
     : [{ src: mp4Asset.url, type: 'video/mp4' }];
 
 
@@ -47,12 +55,15 @@ const JobSeekerVideoShowcase = ({
   className = '',
   widthPx,
   instant = false,
+  active = true,
 }: {
   className?: string;
   /** Explicit bredd i px — används när telefonen ska matcha hero-layoutens mått. */
   widthPx?: number;
   /** Hoppa över intro-animationen (telefonen är redan på plats direkt). */
   instant?: boolean;
+  /** Pausa videodecode helt när telefonen är visuellt dold utanför hero-zonen. */
+  active?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
@@ -61,10 +72,10 @@ const JobSeekerVideoShowcase = ({
 
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
-    if (!v) return;
+    if (!v || !active || document.visibilityState !== 'visible') return;
     const p = v.play();
     if (p && typeof p.catch === 'function') p.catch(() => {});
-  }, []);
+  }, [active]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -78,9 +89,14 @@ const JobSeekerVideoShowcase = ({
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
     v.disablePictureInPicture = true;
-    safePlay(v);
+    if (active) safePlay(v);
+    else v.pause();
 
     const resume = () => {
+      if (!active) {
+        if (!v.paused) v.pause();
+        return;
+      }
       if (document.visibilityState !== 'visible') return;
       if (v.paused) safePlay(v);
     };
@@ -96,7 +112,7 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('canplay', resume);
       v.removeEventListener('pause', resume);
     };
-  }, [safePlay]);
+  }, [active, safePlay]);
 
 
   return (
@@ -156,8 +172,6 @@ const JobSeekerVideoShowcase = ({
                 // hårdvaruaccelererade video-overlayen och varje bildruta måste
                 // då komposit-renderas → hackig uppspelning på laptops utan
                 // dedikerad GPU.
-                transform: 'translateZ(0)',
-                backfaceVisibility: 'hidden',
               }}
             >
               {sources.map((s) => (
