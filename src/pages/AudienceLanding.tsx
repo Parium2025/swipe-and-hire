@@ -343,6 +343,19 @@ type HeroIntroStageProps = {
 
 const PHONE_ASPECT = 9 / 19.5;
 
+/**
+ * Video-mockupens FAKTISKA höjd/bredd-förhållande (hela chassit, inte skärmen).
+ * Skärmen är 9/18.3 + ram/padding ⇒ ca 1.96. Används för att räkna telefonens
+ * höjd UT FRÅN en deterministisk bredd — aldrig tvärtom. Det är det som gör att
+ * telefonen får exakt samma storlek varje gång, oberoende av textmätningar.
+ */
+const VIDEO_PHONE_BODY_RATIO = 1.96;
+
+/** Deterministisk bredd på hero-videotelefonen (desktop/iPad). */
+const heroVideoPhoneWidth = (viewportWidth: number) =>
+  Math.round(Math.max(184, Math.min(viewportWidth * 0.185, 244)));
+
+
 const getViewportSize = () => ({
   width: window.visualViewport?.width ?? window.innerWidth,
   height: window.visualViewport?.height ?? window.innerHeight,
