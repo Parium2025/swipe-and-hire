@@ -55,6 +55,10 @@ const JobSeekerVideoShowcase = ({
   instant?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
+  if (sourcesRef.current === null) sourcesRef.current = getSources();
+  const sources = sourcesRef.current;
+
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
     if (!v) return;
