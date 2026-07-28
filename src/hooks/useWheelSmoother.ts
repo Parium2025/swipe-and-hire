@@ -15,8 +15,21 @@ export function useWheelSmoother(enabled: boolean = true) {
     if (window.matchMedia('(pointer: coarse)').matches) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    let targetY = window.scrollY;
-    let currentY = window.scrollY;
+    const getScroller = () => document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+    const getScrollTop = () => getScroller()?.scrollTop ?? window.scrollY;
+    const setScrollTop = (top: number) => {
+      const scroller = getScroller();
+      if (scroller) scroller.scrollTo({ top, left: 0, behavior: 'auto' });
+      else window.scrollTo(0, top);
+    };
+    const getMaxScrollTop = () => {
+      const scroller = getScroller();
+      if (scroller) return scroller.scrollHeight - scroller.clientHeight;
+      return document.documentElement.scrollHeight - window.innerHeight;
+    };
+
+    let targetY = getScrollTop();
+    let currentY = getScrollTop();
     let rafId = 0;
     let animating = false;
 
@@ -27,12 +40,12 @@ export function useWheelSmoother(enabled: boolean = true) {
       const diff = targetY - currentY;
       if (Math.abs(diff) < STOP_THRESHOLD) {
         currentY = targetY;
-        window.scrollTo(0, currentY);
+        setScrollTop(currentY);
         animating = false;
         return;
       }
       currentY += diff * EASE;
-      window.scrollTo(0, currentY);
+      setScrollTop(currentY);
       rafId = requestAnimationFrame(tick);
     };
 
@@ -47,8 +60,9 @@ export function useWheelSmoother(enabled: boolean = true) {
       if (!isMouseWheel) return;
 
       // Kolla om scroll-target är ett scrollbart child (modal, textarea, kodblock)
+      const scroller = getScroller();
       let node = e.target as HTMLElement | null;
-      while (node && node !== document.body) {
+      while (node && node !== document.body && node !== scroller) {
         const style = node.scrollHeight > node.clientHeight ? getComputedStyle(node) : null;
         if (style && (style.overflowY === 'auto' || style.overflowY === 'scroll')) return;
         node = node.parentElement;
@@ -57,9 +71,9 @@ export function useWheelSmoother(enabled: boolean = true) {
       e.preventDefault();
 
       // Synka om användaren har scrollat med scrollbaren under pågående animation
-      if (!animating) currentY = window.scrollY;
+      if (!animating) currentY = getScrollTop();
 
-      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const max = getMaxScrollTop();
       targetY = Math.max(0, Math.min(max, targetY + e.deltaY));
 
       if (!animating) {

@@ -13,7 +13,6 @@ import EmployerJourney from '@/components/landing/audience/EmployerJourney';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
-import { useWheelSmoother } from '@/hooks/useWheelSmoother';
 import { preloadAudienceLandingAssets } from '@/lib/audienceLandingPreload';
 import { AppBadges } from '@/components/landing/AppBadges';
 
@@ -1390,13 +1389,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       highlight: true,
     },
   ];
-
-
-  // Mjuk musscroll på Windows/desktop. Inaktiv på touch, trackpad, reduced-motion.
-  useWheelSmoother(true);
-
-
-
 
   // Mobil: trigga `.landing-feature-mobile-in` först när varje element faktiskt
   // scrollas in. Tidigare markerades rubriker i alla sektioner som visade direkt
