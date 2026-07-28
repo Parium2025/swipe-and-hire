@@ -674,9 +674,9 @@ const PinnedHorizontalGallery = () => {
         @media (max-width: 767px) {
           /* Mobil touch: tillräcklig pin för mjuk horisontell rörelse, men utan den långa tomkänslan mellan sektionerna. */
           .phg-section { height: 420vh; }
-          /* Sticky-höjden kapas till innehållets höjd så att luften ovanför och
-             under blir exakt lika stor — då hamnar avdelarens ljus i mitten. */
-          .phg-sticky { height: 86svh; justify-content: center; padding-top: 0; }
+          /* Sticky-höjden kapas till innehållet med exakt uträknad luft över/under
+             så att avdelarens ljus hamnar mitt emellan sektionerna. */
+          .phg-sticky { height: auto; justify-content: flex-start; padding: 64px 0 36px; }
           .phg-header { padding: 0 24px clamp(16px, 2.4vh, 26px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: none; }
