@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { StaggerReveal, StaggerItem } from './ScrollReveal';
 
 const steps = [
-  { icon: Search, num: '01', title: 'Skapa din profil', description: 'Lägg upp det viktigaste: erfarenhet, önskemål, roll och vad som gör matchningen relevant.' },
+  { icon: Search, num: '01', title: 'Skapa din profil', description: 'Lägg upp det viktigaste: erfarenhet, önskemål, roll och vad du söker.' },
   { icon: Sparkles, num: '02', title: 'Få relevanta förslag', description: 'Parium sorterar fram jobb och kandidater som passar — utan att upplevelsen känns tung.' },
   { icon: MessageCircle, num: '03', title: 'Ta nästa steg', description: 'När båda sidor är intresserade kan ni prata direkt, boka intervju och komma vidare.' },
 ];
