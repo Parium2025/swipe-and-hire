@@ -5,7 +5,8 @@ import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsMp4Asset from '@/assets/showcase-jobseeker-windows-premium.mp4.asset.json';
-import { getVideoPlatform, isLowPowerDevice, prefersReducedData } from '@/lib/videoPlatform';
+import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
+import { prefersReducedData } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
