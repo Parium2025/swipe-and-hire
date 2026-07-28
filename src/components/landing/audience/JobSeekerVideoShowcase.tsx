@@ -178,15 +178,18 @@ const JobSeekerVideoShowcase = ({
 
 
 
-      {/* Sidoknappar — ligger under ramen så de "sticker ut" ur chassit */}
+      {/* Sidoknappar — måtten är hämtade från en iPhone 16 Pro och uttrycks i
+          procent så att de skalar med telefonen istället för att bli klumpiga
+          2px-klossar på små storlekar.
+          Vänster: Action (≈15.8%), volym upp (≈21.6%), volym ner (≈28.2%).
+          Höger: Power (≈25.5%, ca 9% hög). Utsticket är ~0.8% av bredden. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        {/* Action-knapp + volym (vänster sida) */}
-        <span className="absolute -left-[2px] top-[16.5%] h-[3.4%] w-[2px] rounded-l-full bg-gradient-to-b from-[#8f8b85] to-[#5c5954]" />
-        <span className="absolute -left-[2px] top-[24%] h-[6.4%] w-[2px] rounded-l-full bg-gradient-to-b from-[#8f8b85] to-[#5c5954]" />
-        <span className="absolute -left-[2px] top-[32.5%] h-[6.4%] w-[2px] rounded-l-full bg-gradient-to-b from-[#8f8b85] to-[#5c5954]" />
-        {/* Power (höger sida) */}
-        <span className="absolute -right-[2px] top-[27%] h-[9.5%] w-[2px] rounded-r-full bg-gradient-to-b from-[#8f8b85] to-[#5c5954]" />
+        <span className="absolute -left-[0.8%] top-[15.8%] h-[3%] w-[0.8%] rounded-l-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
+        <span className="absolute -left-[0.8%] top-[21.6%] h-[5.2%] w-[0.8%] rounded-l-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
+        <span className="absolute -left-[0.8%] top-[28.2%] h-[5.2%] w-[0.8%] rounded-l-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
+        <span className="absolute -right-[0.8%] top-[25.5%] h-[8.4%] w-[0.8%] rounded-r-[2px] bg-gradient-to-b from-[#7e7a74] to-[#4f4c48]" />
       </div>
+
 
       {/* Titanchassi — behåll borstad metall, men klipp bort den sista
           subpixeln längst ned som annars kan ritas som en horisontell kant. */}
@@ -201,10 +204,14 @@ const JobSeekerVideoShowcase = ({
         }}
       >
         {/* Svart ram runt skärmen */}
-        <div className="relative rounded-[13.3%/6.3%] bg-[#050505] p-[3.2%]">
+        {/* Svart ram runt skärmen — iPhone 16 Pro har ~2 mm ram på 71.5 mm
+            bredd ≈ 2.6 %. Tidigare 3.2 % gjorde chassit "tjockt" och mindre
+            iPhone-likt. */}
+        <div className="relative rounded-[13.3%/6.3%] bg-[#050505] p-[2.6%]">
           {/* Skärm */}
           <div
-            className="relative overflow-hidden rounded-[10.5%/4.6%] bg-black"
+            className="relative overflow-hidden rounded-[11.2%/5.1%] bg-black"
+
             style={{ aspectRatio: ASPECT }}
           >
             <video
