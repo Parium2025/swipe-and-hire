@@ -330,7 +330,7 @@
             if (path === '/jobbsokare') {
               // Hero-telefonen på /jobbsokare är en video → postern är LCP-kandidat
               // och videon ska ligga i cachen innan React ens har hydrerat.
-              add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/265bfcc1-830b-4759-aad4-03e35bb722de/showcase-jobseeker-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+              add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/f6e43581-cbc9-4c69-89d8-7325ceb63e74/showcase-jobseeker-v2-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
               var c2 = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
               var save2 = !!(c2 && c2.saveData);
               var slow2 = !!(c2 && /(^|-)2g$/.test(c2.effectiveType || ''));
@@ -343,8 +343,8 @@
                 var probe = document.createElement('video');
                 var hevcOk = appleSafari && probe.canPlayType && probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
                 add(hevcOk
-                  ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/581cadae-be5e-4807-a094-f2b423606d36/showcase-jobseeker.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
-                  : { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/64319b8b-2cfe-4cb1-8581-9adf2c4ec6b8/showcase-jobseeker.mp4', type: 'video/mp4', fetchpriority: 'high' });
+                  ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
+                  : { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/9683d292-964a-4f62-9a0b-269892faa6d2/showcase-jobseeker-v2.mp4', type: 'video/mp4', fetchpriority: 'high' });
               }
             }
             add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'low' });
