@@ -674,9 +674,9 @@ const PinnedHorizontalGallery = () => {
         @media (max-width: 767px) {
           /* Mobil touch: tillräcklig pin för mjuk horisontell rörelse, men utan den långa tomkänslan mellan sektionerna. */
           .phg-section { height: 420vh; }
-          /* Innehållet toppställs så att luften mellan avdelaren och rubriken
-             blir densamma som i övriga sektioner (ingen extra centrerings-luft). */
-          .phg-sticky { justify-content: flex-start; padding-top: 64px; }
+          /* Sticky-höjden kapas till innehållets höjd så att luften ovanför och
+             under blir exakt lika stor — då hamnar avdelarens ljus i mitten. */
+          .phg-sticky { height: 86svh; justify-content: center; padding-top: 0; }
           .phg-header { padding: 0 24px clamp(16px, 2.4vh, 26px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: none; }
@@ -684,6 +684,7 @@ const PinnedHorizontalGallery = () => {
           .phg-strip { padding: 0 13vw 0 6vw; }
           .phg-footer { padding: 8px 24px 16px; gap: 8px; }
         }
+
 
         /* Ultra-små skärmar ENDAST (iPhone SE, små Android ≤ 380px).
            Standardmobiler (iPhone 12/13/14/15, Pro, Pro Max) använder
