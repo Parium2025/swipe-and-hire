@@ -34,39 +34,60 @@ const prefersHevc = () => {
 };
 
 /**
- * Den lätta H.264-källan (720x1560, Main@4.0) används bara på svaga
- * Windows-enheter och i sparläge — hårdvaruvänlig där decode-budgeten är slut.
+ * Den lätta H.264-källan (720x1560, Main@4.0) används bara i sparläge.
  */
-const prefersPerformanceMp4 = () => {
-  if (prefersReducedData()) return true;
-  return getVideoPlatform() === 'windows' && isLowPowerDevice();
-};
+const prefersPerformanceMp4 = () => prefersReducedData();
 
 /**
- * Windows-desktop får en egen 648x1404-master med hög bitrate (~3.1 Mbps).
+ * Upplösningsstege — vald efter FAKTISKA enhetspixlar, inte efter operativsystem.
  *
- * Varför lägre upplösning men HÖGRE bitrate: Chrome/Edge på Windows skalar ned
- * video i overlay-lagret med en billig bilinjär filter. En 810px-källa som
- * krymps till ~360 CSS-px (2.3x nedskalning) blir därför suddig — texten i
- * annonsen går inte att läsa. 648px ligger nära 1.5x av den faktiska
- * renderade storleken, vilket är den nedskalningsgrad där Chromes filter
- * fortfarande behåller kantskärpa. Bitraten är höjd så att inget går förlorat
- * i själva komprimeringen.
+ * Detta är kärnan i skärpeproblemet på Windows: en video som är bredare än den
+ * yta den ritas på måste skalas ned av browsern. Chrome/Edge på Windows gör den
+ * nedskalningen i video-overlayen med ett billigt bilinjärt filter — text blir
+ * grötig oavsett hur hög bitrate källan har (därför gav bitrate-höjningen noll
+ * skillnad). Safari på Apple använder ett betydligt bättre filter, vilket är
+ * exakt varför samma fil ser skarp ut där och suddig här.
+ *
+ * Lösningen är att INTE låta browsern skala: vi levererar en master vars bredd
+ * ligger så nära `CSS-bredd × devicePixelRatio` som möjligt. Nedskalningen görs
+ * då i förväg med Lanczos + lätt unsharp (offline, högsta kvalitet) istället för
+ * av Chrome i realtid.
  */
-const prefersWindowsCrisp = () =>
-  getVideoPlatform() === 'windows' && !isLowPowerDevice() && !prefersReducedData();
+const LADDER = [
+  { w: 432, url: fit432Asset.url },
+  { w: 648, url: winCrispAsset.url },
+  { w: 810, url: hiCrispAsset.url },
+] as const;
 
-const getSources = () =>
+/** Uppskattad CSS-bredd på telefonen innan första målningen (matchar max-w-stegen). */
+const estimateCssWidth = (widthPx?: number) => {
+  if (widthPx) return widthPx;
+  if (typeof window === 'undefined') return 285;
+  const vw = window.innerWidth;
+  if (vw >= 1280) return 285;
+  if (vw >= 1024) return 260;
+  if (vw >= 768) return 230;
+  if (vw >= 640) return 215;
+  return Math.min(190, vw - 48);
+};
+
+const pickLadder = (widthPx?: number) => {
+  const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 3);
+  const target = estimateCssWidth(widthPx) * dpr;
+  // Välj minsta rung som täcker målet (uppskalning undviks helt).
+  return (LADDER.find((r) => r.w >= target - 24) ?? LADDER[LADDER.length - 1]).url;
+};
+
+const getSources = (widthPx?: number) =>
   prefersHevc()
     ? [
         { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
         { src: hiCrispAsset.url, type: 'video/mp4' },
       ]
-    : prefersWindowsCrisp()
-      ? [{ src: winCrispAsset.url, type: 'video/mp4' }]
     : prefersPerformanceMp4()
       ? [{ src: windowsMp4Asset.url, type: 'video/mp4' }]
-    : [{ src: hiCrispAsset.url, type: 'video/mp4' }];
+      : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
+
 
 
 /**
