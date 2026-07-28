@@ -2133,7 +2133,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Måste jag ha CV och video?',
-                        a: 'Nej, men vi rekommenderar det starkt. En video på 30–60 sekunder gör att du sticker ut på ett sätt som ingen text kan matcha, och arbetsgivare svarar snabbare på profiler där de får en känsla för personen bakom orden.',
+                        a: 'Nej, men vi rekommenderar det starkt. En video på 30–60 sekunder gör att du sticker ut på ett sätt som ingen text kan ge, och arbetsgivare svarar snabbare på profiler där de får en känsla för personen bakom orden.',
                       },
                       {
                         q: 'Hur får jag notiser om nya jobb?',

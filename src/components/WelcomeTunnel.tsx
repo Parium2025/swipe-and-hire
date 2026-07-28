@@ -1178,7 +1178,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Heart className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <h3 className="text-white text-center font-semibold">Jobbmatchning på ett helt nytt sätt</h3>
+                <h3 className="text-white text-center font-semibold">Hitta jobb på ett helt nytt sätt</h3>
               </div>
             </div>
 
@@ -1731,7 +1731,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-400" />
-                    <span>Postnummer (för geografisk matchning)</span>
+                    <span>Postnummer (för jobb nära dig)</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-400" />

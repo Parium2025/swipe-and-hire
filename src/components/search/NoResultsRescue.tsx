@@ -59,7 +59,7 @@ const NoResultsRescue = memo(function NoResultsRescue({ query, onSuggestionClick
           <Search className="h-6 w-6 text-white" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-lg font-semibold text-white">Inga jobb matchade din sökning</h3>
+          <h3 className="text-lg font-semibold text-white">Inga jobb stämde med din sökning</h3>
           <p className="text-sm text-white/70 max-w-md">
             {query ? <>Vi hittade inga jobb för <span className="text-white font-medium">"{query}"</span>. Prova något av förslagen nedan eller rensa filtren.</> : 'Prova att justera dina filter för att hitta fler jobb.'}
           </p>

@@ -25,7 +25,7 @@ const stats: Stat[] = [
   {
     icon: TrendingUp,
     value: 95,
-    label: 'Matchningsrate',
+    label: 'Svarsfrekvens',
     suffix: '%'
   },
   {

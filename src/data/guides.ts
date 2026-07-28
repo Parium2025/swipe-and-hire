@@ -290,7 +290,7 @@ export const GUIDES: GuideData[] = [
       },
       {
         heading: 'Strukturen som funkar (4 stycken)',
-        body: '1. Krok – en mening som visar varför just det här jobbet, inte ett generiskt "jag söker härmed".\n2. Värdebevis – 2–3 konkreta resultat från tidigare jobb med siffror.\n3. Matchning – koppla din erfarenhet direkt till deras annons (citera 1–2 nyckelord).\n4. Avslut – tydlig call-to-action: "Jag vill gärna berätta mer i ett samtal."\n\nMaxlängd: 250–350 ord. En A4-sida räcker mer än väl.',
+        body: '1. Krok – en mening som visar varför just det här jobbet, inte ett generiskt "jag söker härmed".\n2. Värdebevis – 2–3 konkreta resultat från tidigare jobb med siffror.\n3. Koppling – knyt din erfarenhet direkt till deras annons (citera 1–2 nyckelord).\n4. Avslut – tydlig call-to-action: "Jag vill gärna berätta mer i ett samtal."\n\nMaxlängd: 250–350 ord. En A4-sida räcker mer än väl.',
       },
       {
         heading: 'Mall du kan kopiera',

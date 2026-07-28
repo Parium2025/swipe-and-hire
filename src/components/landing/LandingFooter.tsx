@@ -32,7 +32,7 @@ const LandingFooter = () => (
             Enklare väg.
             <br />
             <span className="bg-gradient-to-r from-secondary/20 to-[hsl(190_100%_55%/0.20)] bg-clip-text text-transparent">
-              Bättre matchning.
+              Rätt jobb, snabbare.
             </span>
           </p>
         </motion.div>

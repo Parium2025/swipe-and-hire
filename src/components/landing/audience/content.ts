@@ -84,7 +84,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     },
     steps: [
       { title: 'Lägg upp rollen', description: 'Definiera vad ni söker på minuter — vi sköter strukturen.' },
-      { title: 'Få matchade kandidater', description: 'De mest relevanta profilerna lyfts fram först.' },
+      { title: 'Få relevanta kandidater', description: 'De mest relevanta profilerna lyfts fram först.' },
       { title: 'Filtrera och välj', description: 'Granska, sortera och besluta i ett snabbt, mobilt flöde.' },
       { title: 'Boka samtal', description: 'När intresset är ömsesidigt öppnas dialogen direkt.' },
     ],
@@ -94,7 +94,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
       { title: 'Rekrytera på språng', description: 'Granska, sortera och svara direkt i mobilen. Hela rekryteringen följer med er — vart ni än är.', icon: Filter },
       { title: 'Beslut i team', description: 'Bjud in kollegor, dela kandidater och fatta beslut tillsammans i en gemensam Kanban-vy.', icon: Users },
       { title: 'Direkt dialog', description: 'Öppna chatten med kandidater som vill prata. Ta nästa steg utan att lämna plattformen.', icon: Zap },
-      { title: 'Strukturerade profiler', description: 'Video, bild, erfarenhet och AI-sammanfattningar — beslutsunderlag samlat på ett ställe.', icon: FileText },
+      { title: 'Strukturerade profiler', description: 'Video, bild, erfarenhet och tydliga sammanfattningar — beslutsunderlag samlat på ett ställe.', icon: FileText },
       { title: 'Insikter i realtid', description: 'Följ annonsens räckvidd, ansökningstakt och kandidatflöde löpande. Optimera utan att gissa.', icon: BarChart3 },
     ],
     proof: [

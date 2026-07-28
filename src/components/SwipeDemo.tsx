@@ -93,7 +93,7 @@ export const SwipeDemo = () => {
         <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 backdrop-blur-[2px] rounded-full border border-white/20">
           <Heart className="w-5 h-5 text-secondary fill-secondary" />
           <span className="text-white font-semibold">
-            {matchCount} Matchningar
+            {matchCount} Intressen
           </span>
         </div>
       </motion.div>
