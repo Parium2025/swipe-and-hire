@@ -29,10 +29,21 @@ const prefersHevc = () => {
 };
 
 /**
- * Den lätta H.264-källan (720x1560, Main@4.0) används på Windows, Android och
- * i sparläge — hårdvaruvänlig överallt och skarp på telefonskärmar.
+ * Den lätta H.264-källan (720x1560, Main@4.0) används på Windows-desktop och
+ * i sparläge — hårdvaruvänlig där decode-budgeten är begränsad.
  */
 const prefersPerformanceMp4 = () => prefersLightweightVideo();
+
+/**
+ * Mobil (touch) får en egen 810x1754 Main@4.0-källa med högre bitrate än
+ * Windows-filen. Skärmarna har 3x pixeltäthet — den nedskalade 720-filen gjorde
+ * texten i annonserna suddig. Main profile hålls kvar för hårdvaruavkodning
+ * på Android.
+ */
+const prefersMobileMp4 = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia('(pointer: coarse)').matches &&
+  !prefersReducedData();
 
 const getSources = () =>
   prefersHevc()
@@ -40,6 +51,8 @@ const getSources = () =>
         { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
         { src: mp4Asset.url, type: 'video/mp4' },
       ]
+    : prefersMobileMp4()
+      ? [{ src: mobileMp4Asset.url, type: 'video/mp4' }]
     : prefersPerformanceMp4()
       ? [{ src: windowsMp4Asset.url, type: 'video/mp4' }]
     : [{ src: mp4Asset.url, type: 'video/mp4' }];
