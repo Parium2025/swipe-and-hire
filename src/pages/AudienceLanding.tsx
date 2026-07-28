@@ -1496,31 +1496,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   useWaveAwareText();
 
-  // Desktop-wheel mot den fasta landing-rooten. Inga animationer/smoothing här:
-  // delta går 1:1 till root.scrollTop så den horisontella sektionen inte låser sig.
-  useEffect(() => {
-    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-    if (!root || window.matchMedia('(pointer: coarse)').matches) return;
+  // Ingen wheel-hijack här. Landing-rooten scrollar nativt (samma känsla som
+  // resten av OS:et/Apple) — all egen interpolering gjorde scrollen seg.
 
-    const onWheel = (event: WheelEvent) => {
-      if (event.defaultPrevented || event.ctrlKey || event.metaKey) return;
-      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-
-      let node = event.target as HTMLElement | null;
-      while (node && node !== root && node !== document.body) {
-        const style = node.scrollHeight > node.clientHeight ? getComputedStyle(node) : null;
-        if (style && (style.overflowY === 'auto' || style.overflowY === 'scroll')) return;
-        node = node.parentElement;
-      }
-
-      const max = root.scrollHeight - root.clientHeight;
-      if (max <= 0) return;
-      const next = Math.max(0, Math.min(max, root.scrollTop + event.deltaY));
-      if (next === root.scrollTop) return;
-
-      event.preventDefault();
-      root.scrollTop = next;
-    };
 
     window.addEventListener('wheel', onWheel, { passive: false, capture: true });
     return () => window.removeEventListener('wheel', onWheel, { capture: true });
