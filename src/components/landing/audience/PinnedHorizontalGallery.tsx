@@ -255,6 +255,18 @@ const PinnedHorizontalGallery = () => {
     let frozen = false;
     const isTouchScroll = window.matchMedia('(pointer: coarse)').matches;
 
+    /**
+     * Enhetspixel-rutnät. Windows kör nästan alltid fraktionell skalning
+     * (125 % → dpr 1.25, 150 % → 1.5). Läggs strippen då på en position som
+     * inte ligger på ett helt ENHETS-pixelsteg måste kompositorn resampla hela
+     * kortraden varje frame — det syns som att bild och text "kokar"/skimrar
+     * under scroll. Vi snappar därför till 1/dpr (0.8 px vid 125 %), vilket är
+     * långt under vad ögat uppfattar som ryckighet men tar bort resamplingen.
+     * På Apple (dpr 2/3) blir steget 0.33–0.5 px och märks inte alls.
+     */
+    const dpr = Math.min(Math.max(window.devicePixelRatio || 1, 1), 3);
+    const snapToDevicePixel = (v: number) => Math.round(v * dpr) / dpr;
+
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
       // Mät faktisk overflow så att alla kort alltid exponeras oavsett viewport.
@@ -264,13 +276,11 @@ const PinnedHorizontalGallery = () => {
       const startPx = viewport * 0.07; // 7vw inledande marginal (matchar gammal start)
       // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
       const endPx = Math.min(startPx, viewport - stripWidth - startPx);
-      const xPx = startPx + (endPx - startPx) * p;
-      // INGEN Math.round här. Strippen är composited (translate3d på GPU) så
-      // sub-pixel-värden re-rastrerar inte. Avrundning gav istället synligt
-      // hack på touch där momentum-scroll ger många små deltas — då stannar
-      // korten 1px i taget istället för att glida mjukt. Mus märks inte lika
-      // mycket eftersom wheel-deltan är större per event.
-      strip.style.setProperty('--phg-x', `${xPx.toFixed(2)}px`);
+      const xPx = snapToDevicePixel(startPx + (endPx - startPx) * p);
+      // OBS: aldrig Math.round till hela CSS-pixlar — det gav synligt hack på
+      // touch (korten stannar 1 px i taget). Snappning till enhetspixel enligt
+      // ovan är en helt annan sak: steget är 1/dpr, alltså finare än en CSS-px.
+      strip.style.setProperty('--phg-x', `${xPx.toFixed(3)}px`);
       section.style.setProperty('--phg-progress', `${p}`);
       section.dataset.phgProgress = p.toFixed(4);
       window.dispatchEvent(new CustomEvent('parium:gallery-progress', { detail: { progress: p } }));
@@ -289,26 +299,38 @@ const PinnedHorizontalGallery = () => {
       if (rafRef.current === null) rafRef.current = window.requestAnimationFrame(tick);
     };
 
+    /**
+     * Smoothing-faktor per inmatningstyp.
+     *
+     * Ett mushjul på Windows levererar scroll i diskreta hopp (~100 px per
+     * hack) — helt olikt en Mac-trackpad som ger många små deltas. Utan
+     * smoothing "teleporterar" därför kortraden ett stycke per hjulhack, vilket
+     * är exakt den känsla som gör att sidan upplevs billigare på Windows.
+     * 0.5 når målet på ~5 frames (~80 ms): tillräckligt för att hoppet ska
+     * läsas som en glidning, för snabbt för att kännas som eftersläpning.
+     */
+    const LERP = isTouchScroll ? 0.38 : 0.5;
+
     const tick = () => {
       rafRef.current = null;
       if (frozen) return;
       const target = targetProgressRef.current;
-      if (!isTouchScroll || target < 0.002 || target > 0.998) {
+      // Vid pinnens absoluta start/slut går vi rakt på målet, annars kan
+      // strippen se ut att släpa efter när sektionen tas i bruk eller lämnas.
+      if (target < 0.002 || target > 0.998) {
         renderedProgressRef.current = target;
         applyProgress(target);
         return;
       }
-      // Touch-scroll kommer i grövre momentum-steg än mus/trackpad. En liten
-      // visuell smoothing på just coarse pointer tar bort "hack" utan att ändra
-      // desktop-känslan eller låta strippen släpa vid början/slut av pinnen.
       const current = renderedProgressRef.current;
-      const next = current + (target - current) * 0.38;
+      const next = current + (target - current) * LERP;
       renderedProgressRef.current = Math.abs(target - next) < 0.001 ? target : next;
       applyProgress(renderedProgressRef.current);
       if (Math.abs(target - renderedProgressRef.current) > 0.001 && rafRef.current === null) {
         rafRef.current = window.requestAnimationFrame(tick);
       }
     };
+
 
     // Frys enbart vid 3→2 (gallery-leave). Vid 2→3 återställer vi först till
     // startpositionen, annars kan ett gammalt p=1-läge ligga kvar fryst från

@@ -2150,3 +2150,26 @@ video::-webkit-media-controls {
   /* Ikonen påverkas medvetet INTE på touch – bara kortet får glowen. */
 }
 
+
+/* ============================================================
+   Windows / svag-GPU: statiskt glas istället för backdrop-blur
+   ============================================================
+   backdrop-filter måste räkna om suddningen av ALLT bakom elementet varje
+   gång bakgrunden rör sig. Landningssidans kort ligger ovanpå en animerad
+   gradient, så blurren räknas om varje frame. macOS gör det på GPU via en
+   optimerad pass; Chrome/Edge på Windows med integrerad GPU och fraktionell
+   DPR (125 %/150 %) hamnar ofta på en betydligt dyrare väg — resultatet är
+   tappade frames exakt när man scrollar förbi kortsektionerna.
+
+   Vi tar bort blurren där och kompenserar med en något tätare yta + tydligare
+   kant, så glaskänslan finns kvar men kompositorn slipper jobbet. */
+html[data-glass="static"] [data-landing-scroll-root] *,
+html[data-glass="static"] [data-landing-scroll-root] *::before,
+html[data-glass="static"] [data-landing-scroll-root] *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
+  background-color: hsl(215 70% 16% / 0.72);
+}

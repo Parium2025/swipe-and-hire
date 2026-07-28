@@ -61,12 +61,19 @@ export const prefersLightweightVideo = () => {
   return prefersReducedData();
 };
 
-/** Antal videor som får spela samtidigt i galleriet. */
+/**
+ * Antal videor som får spela samtidigt i galleriet.
+ *
+ * Windows sänktes 4 → 3: fyra parallella H.264-strömmar på en integrerad GPU
+ * (Iris Xe/UHD) delar samma fasta decode-budget som kompositorn använder för
+ * scroll. Tre strömmar räcker visuellt (bara ~3 kort är nära mitten ändå) men
+ * lämnar headroom så att scrollen aldrig tappar frames.
+ */
 export const getMaxConcurrentVideos = () => {
   if (prefersReducedData()) return 1;
   switch (getVideoPlatform()) {
     case 'windows':
-      return isLowPowerDevice() ? 2 : 4;
+      return isLowPowerDevice() ? 2 : 3;
     case 'android':
       return isLowPowerDevice() ? 1 : 2;
     case 'apple':
@@ -86,9 +93,34 @@ export const shouldFreeDecodersOnLeave = () => {
   );
 };
 
-/** `preload`-strategi för gallerivideor. */
+/**
+ * `preload`-strategi för gallerivideor.
+ *
+ * Windows-desktop får `metadata`: utan det ligger kortet kvar på poster tills
+ * decodern hunnit initieras när kortet når mitten — det syns som ett "pop" när
+ * bilden byts mot första bildrutan. Med metadata är decodern redan varm och
+ * bytet blir osynligt. Android och sparläge behåller `none` (bandbredd).
+ */
 export const getGalleryPreload = (): 'none' | 'metadata' => {
   const platform = getVideoPlatform();
-  if (platform === 'windows' || platform === 'android' || prefersReducedData()) return 'none';
+  if (prefersReducedData()) return 'none';
+  if (platform === 'android') return 'none';
+  if (platform === 'windows') return isLowPowerDevice() ? 'none' : 'metadata';
   return 'metadata';
+};
+
+/**
+ * Ska tunga `backdrop-filter`-ytor ersättas med en statisk translucent yta?
+ *
+ * Varför: backdrop-blur måste räkna om suddningen av allt som ligger BAKOM
+ * elementet varje gång bakgrunden rör sig. På landningssidan ligger korten
+ * ovanpå en animerad gradient som rör sig konstant, så blurren räknas om varje
+ * frame. macOS gör det på GPU med en optimerad separabel pass; Chrome/Edge på
+ * Windows med integrerad GPU (och fraktionell DPR) faller ofta tillbaka på en
+ * betydligt dyrare väg → tappade frames exakt när användaren scrollar förbi
+ * feature-korten. Vi behåller glaskänslan via en tätare bakgrundsfärg istället.
+ */
+export const prefersStaticGlass = () => {
+  if (typeof window === 'undefined') return false;
+  return getVideoPlatform() === 'windows' || isLowPowerDevice();
 };

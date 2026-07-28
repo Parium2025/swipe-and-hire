@@ -15,6 +15,7 @@ import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { preloadAudienceLandingAssets } from '@/lib/audienceLandingPreload';
 import { AppBadges } from '@/components/landing/AppBadges';
+import { prefersStaticGlass } from '@/lib/videoPlatform';
 
 // Under-fold sektioner — lata in för att korta första paint.
 // Preloadas via requestIdleCallback så de är redo innan användaren scrollar dit.
@@ -193,6 +194,22 @@ const waveYAtViewBoxX = (x: number) => {
   }
   const t = (lo + hi) / 2;
   return cubic(segment.y0, segment.y1, segment.y2, segment.y3, t);
+};
+
+/**
+ * Markerar dokumentet med data-glass="static" på plattformar där
+ * backdrop-filter är dyrt (Windows/integrerad GPU). CSS:en i index.css byter
+ * då ut blurren mot en tätare, statisk yta — samma glaskänsla, utan att
+ * kompositorn måste räkna om suddningen varje scroll-frame.
+ */
+const useAdaptiveGlass = () => {
+  useEffect(() => {
+    if (!prefersStaticGlass()) return;
+    document.documentElement.dataset.glass = 'static';
+    return () => {
+      delete document.documentElement.dataset.glass;
+    };
+  }, []);
 };
 
 const useWaveAwareText = () => {
@@ -1521,6 +1538,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
   useWaveAwareText();
+  useAdaptiveGlass();
 
   // Ingen wheel-hijack här. Landing-rooten scrollar nativt (samma känsla som
   // resten av OS:et/Apple) — all egen interpolering gjorde scrollen seg.
