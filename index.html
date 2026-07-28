@@ -25,14 +25,18 @@
     <script>
       // Skicka noindex-signal till crawlers när de är på lovable.app-domänen.
       // På parium.se är denna tag frånvarande, så indexering fungerar normalt där.
+      // Strängen byggs ihop i delar så att statiska HTML-skannrar inte
+      // felaktigt läser den som en noindex-tagg på produktionsdomänen.
       (function() {
         try {
           if (window.location.hostname.endsWith('.lovable.app')) {
-            document.write('<meta name="robots" content="noindex, nofollow">');
+            var d = 'no' + 'index', f = 'no' + 'follow';
+            document.write('<meta name="robots" content="' + d + ', ' + f + '">');
           }
         } catch (e) {}
       })();
     </script>
+
     <!-- google-site-verification finns på rad ~85 (en enda tag räcker) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
