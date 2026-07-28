@@ -13,6 +13,8 @@ const SPLINE_SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
 let started = false;
 
+const isWindowsDevice = () => typeof navigator !== 'undefined' && /Windows NT/i.test(navigator.userAgent);
+
 const addLink = (rel: string, href: string, as?: string, priority?: 'high' | 'low') => {
   if (typeof document === 'undefined') return;
   const exists = Array.from(document.head.querySelectorAll<HTMLLinkElement>(`link[rel="${rel}"]`)).some(
@@ -46,9 +48,9 @@ export const preloadAudienceLandingAssets = () => {
   addLink('preload', realPosters, 'image', 'high');
   addLink('preload', realPoster2, 'image', 'low');
 
-  // 2. Spline-scenen: prefetch så filen redan ligger i cache när
-  //    runtime-importen kickar in.
-  addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
+  // 2. Spline-scenen: på Windows väntar vi tills hero-videon fått spela stabilt
+  //    först. Annars konkurrerar prefetch + lazy chunks med video-LCP på laptops.
+  if (!isWindowsDevice()) addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
 
   // 3. Dekoda bilderna i bakgrunden (idle) + preloada under-fold chunks
   //    så Suspense-fallback aldrig hinner synas när användaren scrollar.
@@ -56,10 +58,16 @@ export const preloadAudienceLandingAssets = () => {
   const run = () => {
     decode(realPosters);
     decode(realPoster2);
-    // Prefetch lazy-chunkarna i bakgrunden — helt osynligt för användaren.
-    import('@/components/landing/audience/PinnedHorizontalGallery').catch(() => {});
-    import('@/components/landing/audience/BouncyFooter').catch(() => {});
-    import('@/components/landing/SiteFooter').catch(() => {});
+    // Prefetch lazy-chunkarna i bakgrunden — på Windows fördröjs detta så hero-
+    // videon inte delar CPU/GPU/network med under-fold work första sekunderna.
+    const importUnderFold = () => {
+      if (isWindowsDevice()) addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
+      import('@/components/landing/audience/PinnedHorizontalGallery').catch(() => {});
+      import('@/components/landing/audience/BouncyFooter').catch(() => {});
+      import('@/components/landing/SiteFooter').catch(() => {});
+    };
+    if (isWindowsDevice()) window.setTimeout(importUnderFold, 2200);
+    else importUnderFold();
   };
   if (typeof w.requestIdleCallback === 'function') w.requestIdleCallback(run);
   else window.setTimeout(run, 600);

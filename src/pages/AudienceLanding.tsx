@@ -1025,7 +1025,7 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
               style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
             >
               <Suspense fallback={null}>
-                <JobSeekerVideoShowcase instant widthPx={phoneWidth} />
+                <JobSeekerVideoShowcase instant widthPx={phoneWidth} active={active} />
               </Suspense>
             </div>
           ) : (

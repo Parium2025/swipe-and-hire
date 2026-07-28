@@ -55,7 +55,8 @@ type CardItemProps = {
  * mitt), och all mätning sker i EN rAF-tick istället för per scroll-event och
  * per video (annars tvingar varje getBoundingClientRect fram en ny layout).
  */
-const MAX_CONCURRENT = 3;
+const isWindowsDevice = () => typeof navigator !== 'undefined' && /Windows NT/i.test(navigator.userAgent);
+const getMaxConcurrent = () => (isWindowsDevice() ? 1 : 3);
 const registry = new Set<HTMLVideoElement>();
 let rafId = 0;
 
@@ -83,8 +84,9 @@ const evaluateAll = () => {
   });
 
   candidates.sort((a, b) => a.dist - b.dist);
+  const maxConcurrent = getMaxConcurrent();
   candidates.forEach(({ el }, i) => {
-    if (i < MAX_CONCURRENT) {
+    if (i < maxConcurrent) {
       if (el.paused) {
         const p = el.play();
         if (p && typeof p.catch === 'function') p.catch(() => {});
@@ -142,7 +144,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
           muted
           loop
           playsInline
-          preload="metadata"
+          preload={isWindowsDevice() ? 'none' : 'metadata'}
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
@@ -362,7 +364,11 @@ const PinnedHorizontalGallery = () => {
       warmed = true;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
-      const initialBatch = profile === 'slim' ? videos.slice(0, 4) : videos;
+      const initialBatch = isWindowsDevice()
+        ? videos.slice(0, 1)
+        : profile === 'slim'
+          ? videos.slice(0, 4)
+          : videos;
       initialBatch.forEach((v, index) => {
         warmTimers.push(window.setTimeout(() => {
           try {
@@ -408,8 +414,9 @@ const PinnedHorizontalGallery = () => {
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
       if (playTimer) window.clearTimeout(playTimer);
       playTimer = window.setTimeout(() => {
-        videos.slice(0, 3).forEach(playSafe);
-        window.setTimeout(() => videos.slice(3).forEach(playSafe), 600);
+        const maxConcurrent = getMaxConcurrent();
+        videos.slice(0, maxConcurrent).forEach(playSafe);
+        if (!isWindowsDevice()) window.setTimeout(() => videos.slice(maxConcurrent).forEach(playSafe), 600);
       }, 800);
     };
     const leave = () => {
@@ -430,8 +437,8 @@ const PinnedHorizontalGallery = () => {
           gsapInstance.set(header, { y: 0, opacity: 1, force3D: true });
         }
       }
-      const shouldFreeMobileDecode = window.matchMedia('(pointer: coarse)').matches;
-      if (shouldFreeMobileDecode) {
+      const shouldFreeDecode = isWindowsDevice() || window.matchMedia('(pointer: coarse)').matches;
+      if (shouldFreeDecode) {
         const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
         videos.forEach((video) => video.pause());
       }
