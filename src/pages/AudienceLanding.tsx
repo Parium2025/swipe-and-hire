@@ -1730,7 +1730,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <div>
           <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
-          <SectionDivider className="my-12 md:my-20" />
+          <SectionDivider className="my-2 md:my-20" />
 
 
           {audience === 'job_seeker' && (
@@ -1742,7 +1742,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 </Suspense>
               </section>
 
-              <SectionDivider className="my-12 md:my-20" />
+              <SectionDivider className="my-2 md:my-20" />
 
             </>
           )}
@@ -1779,7 +1779,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             `}</style>
           )}
 
-          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-visible px-5 pb-12 pt-10 sm:px-6 sm:pb-14 sm:pt-12 md:px-12 md:py-20 md:[@media_(orientation:portrait)]:pt-8 lg:px-24 lg:[@media_(orientation:portrait)]:pt-20">
+          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-visible px-5 pb-12 pt-4 sm:px-6 sm:pb-14 sm:pt-12 md:px-12 md:py-20 md:[@media_(orientation:portrait)]:pt-8 lg:px-24 lg:[@media_(orientation:portrait)]:pt-20">
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
                 initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
