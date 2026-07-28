@@ -1725,12 +1725,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       style={{
         overscrollBehavior: 'none',
         // -webkit-overflow-scrolling: touch ger iOS Safari momentum-scroll
-        // i fixed-containrar; utan denna känns 2↔3-overgången "stelare" på
-        // iPhone/iPad jämfört med desktop. scrollBehavior: 'smooth' säkrar
-        // att Android Chrome och Firefox använder samma native easing som
-        // Safari för scrollTo(..., {behavior: 'smooth'}).
+        // i fixed-containrar. scrollBehavior lämnas 'auto' — annars animerar
+        // browsern VARJE mushjulstick, vilket gör desktop-scrollen seg och
+        // hackig. Programmatiska hopp anger behavior: 'smooth' explicit.
         WebkitOverflowScrolling: 'touch',
-        scrollBehavior: 'smooth',
+        scrollBehavior: 'auto',
+
         backgroundImage:
           'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 65svh, hsl(var(--primary)) 100%)',
         backgroundAttachment: 'scroll',
