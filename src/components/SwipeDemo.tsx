@@ -210,7 +210,7 @@ const SwipeCard = ({
           className="absolute top-8 right-8 text-secondary font-bold text-4xl border-4 border-secondary rounded-xl px-6 py-2 rotate-12"
           style={{ opacity: useTransform(x, [0, 100], [0, 1]) }}
         >
-          MATCH!
+          INTRESSE!
         </motion.div>
         <motion.div
           className="absolute top-8 left-8 text-destructive font-bold text-4xl border-4 border-destructive rounded-xl px-6 py-2 -rotate-12"
