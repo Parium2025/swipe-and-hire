@@ -743,16 +743,15 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
     // så att vanliga laptops aldrig råkar in i den här grenen.
     const isLandscapeTablet = isCoarse && width >= 900 && width <= 1400 && width > height && height <= 1050;
 
-    // ── Video-mockup på desktop/iPad: telefonen ska ligga exakt i linje med
-    // textblocket – toppen vid rubrikens topp, botten vid brödtextens slut.
-    // Vi mäter textankaret och speglar dess höjd rakt av (video-telefonen
-    // fyller hela sin box, till skillnad från Spline-canvasen).
+    // ── Video-mockup på desktop/iPad: STORLEKEN är deterministisk (härledd ur
+    // viewportbredden), inte mätt ur textblocket. Textmätning gav olika höjd
+    // beroende på när fonter/radbrytningar landade → telefonen kunde "hoppa"
+    // i storlek mellan laddningar. Nu är bredden alltid densamma för en given
+    // viewport och höjden följer chassits verkliga proportion.
     if (variant === 'video' && width >= 768) {
       const anchor = getVisibleAnchor();
       const stageTop = (document.querySelector('[data-hero-intro-stage]') as HTMLElement | null)
         ?.getBoundingClientRect().top ?? 0;
-      // Mät INNEHÅLLET (första → sista barnet), inte ankarets padding-box, så
-      // att telefonens topp/botten linjerar med faktisk text.
       const firstChild = anchor?.firstElementChild as HTMLElement | null;
       const lastChild = anchor?.lastElementChild as HTMLElement | null;
       const contentTop = firstChild ? firstChild.getBoundingClientRect().top - stageTop : null;
@@ -765,18 +764,22 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
 
       const bottomSafe = clamp(height * 0.06, 40, 90);
       const available = Math.max(260, height - anchorTop - bottomSafe);
-      const widthCap = Math.min(width * 0.24, 300);
-      const visualHeight = clamp(
-        Math.min(anchorHeight, available, widthCap / PHONE_ASPECT),
-        260,
-        720,
-      );
+
+      // Bredd först — höjden är en ren följd av den.
+      let phoneWidth = heroVideoPhoneWidth(width);
+      let visualHeight = phoneWidth * VIDEO_PHONE_BODY_RATIO;
+      if (visualHeight > available) {
+        visualHeight = available;
+        phoneWidth = Math.round(visualHeight / VIDEO_PHONE_BODY_RATIO);
+      }
+
       const metrics: HeroPhoneMetrics = {
         isDesktop: true,
         pinToViewport: true,
         exactHeight: true,
         top: Math.round(anchorTop + Math.max(0, (Math.min(anchorHeight, available) - visualHeight) / 2)),
         height: visualHeight,
+        width: phoneWidth,
         canvasHeight: visualHeight,
         zoom: 0,
         yOffset: 0,
@@ -785,6 +788,7 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
       lastHeroMetricsRef.current = metrics;
       return metrics;
     }
+
 
 
     if (isLandscapeTablet) {
