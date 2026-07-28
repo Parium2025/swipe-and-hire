@@ -99,13 +99,16 @@ const evaluateAll = () => {
     }
   });
 
-  // Hysteres: redan spelande videor behåller sin plats i kön så länge de är
-  // synliga. Utan detta byter "närmast mitten"-sorteringen plats på spelarna
-  // för varje scroll-tick → videor pausas/startas om hela tiden och det ser ut
-  // som en blinkande effekt på korten. Nu spelar de lugnt vidare.
+  // Hysteres: redan spelande videor får en distans-bonus så att små
+  // scroll-rörelser inte kastar om kön (blinkande start/stopp). Bonusen är
+  // MEDVETET begränsad — absolut prioritet gjorde att kort längst ut i
+  // strippen (t.ex. Vård) aldrig fick en plats när tidigare kort låg kvar
+  // synliga i kön. Nu tar ett kort närmare mitten alltid över.
+  const HYSTERESIS_PX = 200;
   candidates.sort((a, b) => {
-    if (a.playing !== b.playing) return a.playing ? -1 : 1;
-    return a.dist - b.dist;
+    const aScore = a.dist - (a.playing ? HYSTERESIS_PX : 0);
+    const bScore = b.dist - (b.playing ? HYSTERESIS_PX : 0);
+    return aScore - bScore;
   });
   const maxConcurrent = getMaxConcurrent();
   candidates.forEach(({ el }, i) => {
