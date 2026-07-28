@@ -1496,35 +1496,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   useWaveAwareText();
 
-  // Desktop-wheel mot den fasta landing-rooten. Inga animationer/smoothing här:
-  // delta går 1:1 till root.scrollTop så den horisontella sektionen inte låser sig.
-  useEffect(() => {
-    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-    if (!root || window.matchMedia('(pointer: coarse)').matches) return;
-
-    const onWheel = (event: WheelEvent) => {
-      if (event.defaultPrevented || event.ctrlKey || event.metaKey) return;
-      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-
-      let node = event.target as HTMLElement | null;
-      while (node && node !== root && node !== document.body) {
-        const style = node.scrollHeight > node.clientHeight ? getComputedStyle(node) : null;
-        if (style && (style.overflowY === 'auto' || style.overflowY === 'scroll')) return;
-        node = node.parentElement;
-      }
-
-      const max = root.scrollHeight - root.clientHeight;
-      if (max <= 0) return;
-      const next = Math.max(0, Math.min(max, root.scrollTop + event.deltaY));
-      if (next === root.scrollTop) return;
-
-      event.preventDefault();
-      root.scrollTop = next;
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: false, capture: true });
-    return () => window.removeEventListener('wheel', onWheel, { capture: true });
-  }, []);
+  // Ingen wheel-hijack här. Landing-rooten scrollar nativt (samma känsla som
+  // resten av OS:et/Apple) — all egen interpolering gjorde scrollen seg.
 
 
 
@@ -1725,12 +1698,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       style={{
         overscrollBehavior: 'none',
         // -webkit-overflow-scrolling: touch ger iOS Safari momentum-scroll
-        // i fixed-containrar; utan denna känns 2↔3-overgången "stelare" på
-        // iPhone/iPad jämfört med desktop. scrollBehavior: 'smooth' säkrar
-        // att Android Chrome och Firefox använder samma native easing som
-        // Safari för scrollTo(..., {behavior: 'smooth'}).
+        // i fixed-containrar. scrollBehavior lämnas 'auto' — annars animerar
+        // browsern VARJE mushjulstick, vilket gör desktop-scrollen seg och
+        // hackig. Programmatiska hopp anger behavior: 'smooth' explicit.
         WebkitOverflowScrolling: 'touch',
-        scrollBehavior: 'smooth',
+        scrollBehavior: 'auto',
+
         backgroundImage:
           'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 65svh, hsl(var(--primary)) 100%)',
         backgroundAttachment: 'scroll',
