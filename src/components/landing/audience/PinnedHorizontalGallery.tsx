@@ -690,7 +690,7 @@ const PinnedHorizontalGallery = () => {
            Standardmobiler (iPhone 12/13/14/15, Pro, Pro Max) använder
            default-mobilreglerna ovan (max-width: 767px) helt orörda. */
         @media (max-width: 380px) {
-          .phg-sticky { justify-content: flex-start; padding-top: 96px; }
+          .phg-sticky { justify-content: center; padding-top: 0; height: 82svh; }
           .phg-header { padding: 8px 20px 32px; }
           .phg-title { font-size: 2.25rem; line-height: 1.05; }
           .phg-strip-wrap { min-height: 0; margin-top: 8px; }
