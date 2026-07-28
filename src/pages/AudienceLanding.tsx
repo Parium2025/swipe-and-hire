@@ -195,6 +195,22 @@ const waveYAtViewBoxX = (x: number) => {
   return cubic(segment.y0, segment.y1, segment.y2, segment.y3, t);
 };
 
+/**
+ * Markerar dokumentet med data-glass="static" på plattformar där
+ * backdrop-filter är dyrt (Windows/integrerad GPU). CSS:en i index.css byter
+ * då ut blurren mot en tätare, statisk yta — samma glaskänsla, utan att
+ * kompositorn måste räkna om suddningen varje scroll-frame.
+ */
+const useAdaptiveGlass = () => {
+  useEffect(() => {
+    if (!prefersStaticGlass()) return;
+    document.documentElement.dataset.glass = 'static';
+    return () => {
+      delete document.documentElement.dataset.glass;
+    };
+  }, []);
+};
+
 const useWaveAwareText = () => {
   useEffect(() => {
     const isTouchViewport = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
