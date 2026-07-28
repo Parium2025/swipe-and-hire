@@ -1538,6 +1538,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
   useWaveAwareText();
+  useAdaptiveGlass();
 
   // Ingen wheel-hijack här. Landing-rooten scrollar nativt (samma känsla som
   // resten av OS:et/Apple) — all egen interpolering gjorde scrollen seg.
