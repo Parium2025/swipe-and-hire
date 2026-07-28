@@ -1496,9 +1496,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   useWaveAwareText();
 
-  // Native scroll på /jobbsokare — inga scroll-hijacks, inga snap-låsningar.
-  // Hjul/touch beter sig 1:1 som på en vanlig premium-sajt. Sektioners
-  // entry-animationer drivs av framer-motion `whileInView`.
+  // Desktop-wheel mot den fasta landing-rooten. Inga animationer/smoothing här:
+  // delta går 1:1 till root.scrollTop så den horisontella sektionen inte låser sig.
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
     if (!root || window.matchMedia('(pointer: coarse)').matches) return;
@@ -1523,8 +1522,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       root.scrollTop = next;
     };
 
-    root.addEventListener('wheel', onWheel, { passive: false });
-    return () => root.removeEventListener('wheel', onWheel);
+    window.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    return () => window.removeEventListener('wheel', onWheel, { capture: true });
   }, []);
 
 
