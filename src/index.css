@@ -500,17 +500,19 @@ All colors MUST be HSL.
   }
 }
 
+/* OBS: ingen `filter` här. Att animera filter tvingar bort elementet från den
+   kompositor-accelererade vägen (transform/opacity) och varje bildruta måste
+   målas om — märks som hack när modaler öppnas på Windows/integrerad GPU.
+   Skillnaden saturate(0.94) → 1 var i praktiken osynlig. */
 @keyframes premium-modal-in {
   from {
     opacity: 0;
     transform: translate3d(0, 0.875rem, 0) scale(0.985);
-    filter: saturate(0.94);
   }
 
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
-    filter: saturate(1);
   }
 }
 
