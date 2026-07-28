@@ -48,7 +48,7 @@ const AccountConfirmationEmail = ({
                 Välkommen till Parium — nästa steg i ett smartare jobbsökande. Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
               </Text>
               <Text style={textBold}>Med Parium kan du:</Text>
-              <Text style={bullet}>• Hitta jobb som verkligen matchar din profil</Text>
+              <Text style={bullet}>• Hitta jobb som verkligen passar din profil</Text>
               <Text style={bullet}>• Swipea dig igenom alternativ och ansöka på några sekunder</Text>
               <Text style={bullet}>• Spara tid med verktyg som gör processen både enkel och effektiv</Text>
             </>

@@ -181,7 +181,7 @@ const JobbCityYrke = () => {
               transition={{ duration: 0.35, delay: 0.08 }}
               className="mx-auto mt-5 max-w-2xl text-base text-white sm:text-lg"
             >
-              {occ.intro} I {city.name} matchar Parium dig direkt med arbetsgivare som söker {occ.plural}.
+              {occ.intro} I {city.name} visar Parium dig direkt för arbetsgivare som söker {occ.plural}.
             </motion.p>
 
             <motion.div
@@ -303,7 +303,7 @@ const JobbCityYrke = () => {
               Sök jobb {occ.asForm} {city.inForm} idag
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-white">
-              Skapa en profil gratis. Matcha med arbetsgivare {city.inForm} på sekunder.
+              Skapa en profil gratis. Kom i kontakt med arbetsgivare {city.inForm} på sekunder.
             </p>
             <div className="mt-7 flex justify-center">
               <SeoCTAButton
