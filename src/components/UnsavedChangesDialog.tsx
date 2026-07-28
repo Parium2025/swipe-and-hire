@@ -117,7 +117,7 @@ export function UnsavedChangesDialog({
               onCancel();
             }}
             disabled={isSaving}
-            className={`order-3 sm:order-none w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50 mt-0 ${noFocusRing}`}
+            className={`order-3 sm:order-first w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50 mt-0 ${noFocusRing}`}
           >
             Avbryt
           </AlertDialogCancel>
