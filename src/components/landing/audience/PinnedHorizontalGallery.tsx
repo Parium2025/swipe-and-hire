@@ -700,7 +700,7 @@ const PinnedHorizontalGallery = () => {
 
         @media (max-width: 360px) {
           /* Extra trångt på iPhone SE 1:a/2:a och små Android. */
-          .phg-sticky { padding-top: 84px; }
+          .phg-sticky { padding-top: 0; height: 80svh; }
           .phg-header { padding: 8px 20px 28px; }
           .phg-title { font-size: 1.95rem; line-height: 1.06; }
           .phg-strip-wrap { margin-top: 6px; }
