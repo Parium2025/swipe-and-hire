@@ -1,5 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
+import mp4Asset from '@/assets/showcase-jobseeker.mp4.asset.json';
+import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -7,8 +10,8 @@ const ease = [0.16, 1, 0.3, 1] as const;
 const ASPECT = '720 / 1560';
 
 const SOURCES = [
-  { src: '/showcase-jobseeker.hevc.mp4', type: 'video/mp4; codecs="hvc1"' },
-  { src: '/showcase-jobseeker.mp4', type: 'video/mp4' },
+  { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
+  { src: mp4Asset.url, type: 'video/mp4' },
 ] as const;
 
 /**
@@ -119,7 +122,7 @@ const JobSeekerVideoShowcase = ({
               muted
               playsInline
               preload="auto"
-              poster="/showcase-jobseeker-poster.jpg"
+              poster={posterAsset.url}
               aria-label="Demo av Parium-appen för jobbsökare"
               className="absolute inset-0 h-full w-full object-cover"
               style={{
