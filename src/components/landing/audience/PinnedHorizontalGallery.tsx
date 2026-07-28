@@ -157,6 +157,36 @@ const CardItem = ({ item, index }: CardItemProps) => {
     };
   }, [item.type, failed]);
 
+  /**
+   * Mjuk loop-söm. Klippen är korta (~5 s) och `loop` hoppar hårt tillbaka till
+   * frame 0 — på Windows syns det extra tydligt eftersom decodern samtidigt
+   * gör en keyframe-seek. Vi dimmar kortet till 0.82 de sista ~0.32 s och
+   * tillbaka till 1 direkt efter wrapet. Ren compositor-opacity, inga filter,
+   * så hardware overlay behålls.
+   */
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || item.type !== 'video' || failed) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const FADE_WINDOW = 0.32;
+    const onTime = () => {
+      const d = v.duration;
+      if (!Number.isFinite(d) || d <= FADE_WINDOW * 3) return;
+      const remaining = d - v.currentTime;
+      v.style.opacity = remaining <= FADE_WINDOW ? '0.82' : '1';
+    };
+    const onSeekedOrPlay = () => { v.style.opacity = '1'; };
+    v.addEventListener('timeupdate', onTime);
+    v.addEventListener('seeked', onSeekedOrPlay);
+    v.addEventListener('play', onSeekedOrPlay);
+    return () => {
+      v.removeEventListener('timeupdate', onTime);
+      v.removeEventListener('seeked', onSeekedOrPlay);
+      v.removeEventListener('play', onSeekedOrPlay);
+      v.style.opacity = '1';
+    };
+  }, [item.type, failed]);
+
 
   return (
     <div
@@ -396,7 +426,7 @@ const PinnedHorizontalGallery = () => {
         : profile === 'slim'
           ? videos.slice(0, 4)
           : videos;
-      initialBatch.forEach((v, index) => {
+      const warm = (v: HTMLVideoElement, delay: number) => {
         warmTimers.push(window.setTimeout(() => {
           try {
             v.preload = 'auto';
@@ -404,8 +434,15 @@ const PinnedHorizontalGallery = () => {
           } catch {
             // Video warmup is best-effort only.
           }
-        }, index * 140));
-      });
+        }, delay));
+      };
+      initialBatch.forEach((v, index) => warm(v, index * 140));
+      // Andra vågen: resterande kort buffras i lugn takt efter att de första
+      // är igång. Utan detta möter Windows-användaren en kall video (poster →
+      // hårt hopp till frame 0) varje gång ett nytt kort scrollas in.
+      const rest = videos.filter((v) => !initialBatch.includes(v));
+      const base = initialBatch.length * 140 + 1400;
+      rest.forEach((v, index) => warm(v, base + index * 420));
     };
 
     const onWarm = () => warmVideos();
@@ -666,6 +703,14 @@ const PinnedHorizontalGallery = () => {
           display: block;
           pointer-events: none;
           user-select: none;
+        }
+        /* Mjuk in/ut kring loop-sömmen — endast opacity, ingen filter/blur,
+           så videon ligger kvar i hardware overlay på Windows. */
+        .phg-card video {
+          transition: opacity 300ms ease;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .phg-card video { transition: none; }
         }
         @keyframes phg-kenburns {
           0%   { transform: scale(1.04) translate3d(0,0,0); }
