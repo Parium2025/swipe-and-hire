@@ -674,9 +674,12 @@ const PinnedHorizontalGallery = () => {
         @media (max-width: 767px) {
           /* Mobil touch: tillräcklig pin för mjuk horisontell rörelse, men utan den långa tomkänslan mellan sektionerna. */
           .phg-section { height: 420vh; }
-          .phg-header { padding: clamp(28px, 5vh, 56px) 24px clamp(20px, 3vh, 36px); }
+          /* Innehållet toppställs så att luften mellan avdelaren och rubriken
+             blir densamma som i övriga sektioner (ingen extra centrerings-luft). */
+          .phg-sticky { justify-content: flex-start; padding-top: 84px; }
+          .phg-header { padding: 0 24px clamp(20px, 3vh, 32px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
-          .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
+          .phg-strip-wrap { transform: none; }
           .phg-card { width: 64vw; border-radius: 18px; }
           .phg-strip { padding: 0 18vw 0 8vw; }
           .phg-footer { padding: 8px 24px 16px; gap: 8px; }
