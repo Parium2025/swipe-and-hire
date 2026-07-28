@@ -9,10 +9,31 @@ const ease = [0.16, 1, 0.3, 1] as const;
 /** Videons nativa proportion (720 x 1560). */
 const ASPECT = '720 / 1560';
 
-const SOURCES = [
-  { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
-  { src: mp4Asset.url, type: 'video/mp4' },
-] as const;
+/**
+ * HEVC erbjuds ENDAST till Apple-Safari.
+ *
+ * Varför: Edge/Chrome på Windows rapporterar ofta stöd för `hvc1`
+ * (HEVC Video Extension / Win11) men saknar i praktiken hårdvaruavkodning för
+ * den profilen → browsern faller tillbaka på software-decode och videon hackar.
+ * H.264 High@4.0 är däremot hårdvaruaccelererat på i princip alla Windows-GPU:er.
+ */
+const prefersHevc = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isAppleSafari = /Safari/.test(ua) && !/Chrome|Chromium|Edg\//.test(ua);
+  if (!isAppleSafari) return false;
+  const probe = document.createElement('video');
+  return probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
+};
+
+const getSources = () =>
+  prefersHevc()
+    ? [
+        { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
+        { src: mp4Asset.url, type: 'video/mp4' },
+      ]
+    : [{ src: mp4Asset.url, type: 'video/mp4' }];
+
 
 /**
  * Video-showcase för jobbsökare — en riktig telefoninspelning av appen i en
@@ -34,6 +55,10 @@ const JobSeekerVideoShowcase = ({
   instant?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
+  if (sourcesRef.current === null) sourcesRef.current = getSources();
+  const sources = sourcesRef.current;
+
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
     if (!v) return;
@@ -126,16 +151,19 @@ const JobSeekerVideoShowcase = ({
               aria-label="Demo av Parium-appen för jobbsökare"
               className="absolute inset-0 h-full w-full object-cover"
               style={{
-                // Kompenserar för att en liten skärm + glans-overlay plattar ut
-                // kontrasten jämfört med en riktig telefon.
-                filter: 'saturate(1.06) contrast(1.04)',
+                // OBS: ingen CSS-`filter` här. En filter-property på ett
+                // <video> tvingar Chrome/Edge på Windows bort från den
+                // hårdvaruaccelererade video-overlayen och varje bildruta måste
+                // då komposit-renderas → hackig uppspelning på laptops utan
+                // dedikerad GPU.
                 transform: 'translateZ(0)',
                 backfaceVisibility: 'hidden',
               }}
             >
-              {SOURCES.map((s) => (
+              {sources.map((s) => (
                 <source key={s.src} src={s.src} type={s.type} />
               ))}
+
             </video>
 
 

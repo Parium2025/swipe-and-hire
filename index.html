@@ -336,8 +336,12 @@
               var slow2 = !!(c2 && /(^|-)2g$/.test(c2.effectiveType || ''));
               if (!save2 && !slow2) {
                 // Välj exakt samma källa som <video> kommer att välja, annars dubbel-fetch.
+                // HEVC endast till Apple-Safari — Windows-browsers rapporterar stöd
+                // men saknar hårdvaruavkodning → hackig uppspelning.
+                var ua = navigator.userAgent;
+                var appleSafari = /Safari/.test(ua) && !/Chrome|Chromium|Edg\//.test(ua);
                 var probe = document.createElement('video');
-                var hevcOk = !!(probe.canPlayType && probe.canPlayType('video/mp4; codecs="hvc1"'));
+                var hevcOk = appleSafari && probe.canPlayType && probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
                 add(hevcOk
                   ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/581cadae-be5e-4807-a094-f2b423606d36/showcase-jobseeker.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
                   : { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/64319b8b-2cfe-4cb1-8581-9adf2c4ec6b8/showcase-jobseeker.mp4', type: 'video/mp4', fetchpriority: 'high' });
