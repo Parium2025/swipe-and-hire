@@ -28,6 +28,9 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const location = useLocation();
   const pillScrollerRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  // Döljer "Meny"-knappen medan man scrollar; den fadar in igen när scrollen stannar.
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollIdleTimer = useRef<number | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   // Hela sidan är mörkblå nu — håll alltid nav i mörkt glas-läge
