@@ -193,11 +193,23 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         appRef.current = app;
         await app.load(SCENE_URL);
         try {
-          const renderer = (app as unknown as { renderer?: { setPixelRatio?: (n: number) => void } }).renderer;
-          renderer?.setPixelRatio?.(ssaa());
+          // OBS: Splines interna renderer ligger på `_renderer` (den publika
+          // `renderer` finns inte) — tidigare försök att höja pixel ratio
+          // träffade därför ingenting alls.
+          const internal = app as unknown as {
+            _renderer?: { setPixelRatio?: (n: number) => void };
+            setSize?: (w: number, h: number) => void;
+            requestRender?: () => void;
+          };
+          const ratio = ssaa();
+          internal._renderer?.setPixelRatio?.(ratio);
+          const rect = canvas.getBoundingClientRect();
+          if (rect.width && rect.height) internal.setSize?.(rect.width, rect.height);
+          internal.requestRender?.();
         } catch {
           /* no-op */
         }
+
 
 
 
