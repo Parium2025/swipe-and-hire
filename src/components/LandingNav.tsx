@@ -142,6 +142,9 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     const onScroll = () => {
       setScrolled(getY() > 40);
       computeActive();
+      setIsScrolling(true);
+      if (scrollIdleTimer.current) window.clearTimeout(scrollIdleTimer.current);
+      scrollIdleTimer.current = window.setTimeout(() => setIsScrolling(false), 220);
     };
 
     onScroll();
@@ -150,8 +153,15 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     return () => {
       scroller.removeEventListener('scroll', onScroll as any);
       window.removeEventListener('resize', onScroll);
+      if (scrollIdleTimer.current) window.clearTimeout(scrollIdleTimer.current);
     };
   }, [location.pathname, links]);
+
+  // Stäng dropdownen om användaren börjar scrolla (knappen fadar ut).
+  useEffect(() => {
+    if (isScrolling && menuOpen) setMenuOpen(false);
+  }, [isScrolling, menuOpen]);
+
 
   // Auto-centrera aktiv chip i pillen när scroll ändrar aktiv sektion
   useEffect(() => {
