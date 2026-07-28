@@ -349,7 +349,7 @@ const PHONE_ASPECT = 9 / 19.5;
  * höjd UT FRÅN en deterministisk bredd — aldrig tvärtom. Det är det som gör att
  * telefonen får exakt samma storlek varje gång, oberoende av textmätningar.
  */
-const VIDEO_PHONE_BODY_RATIO = 1.96;
+const VIDEO_PHONE_BODY_RATIO = 1.97;
 
 /** Deterministisk bredd på hero-videotelefonen (desktop/iPad). */
 const heroVideoPhoneWidth = (viewportWidth: number) =>
