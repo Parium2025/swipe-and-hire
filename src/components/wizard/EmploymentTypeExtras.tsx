@@ -6,6 +6,7 @@ import {
   TYPES_WITH_PART_TIME_DAYS,
   type DurationUnit,
 } from '@/lib/employmentTypes';
+import { RequiredMark } from '@/components/wizard/RequiredMark';
 
 interface EmploymentTypeExtrasProps {
   employmentType?: string;
@@ -76,7 +77,7 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
     return (
       <div className="mt-3 space-y-3">
         <div className="space-y-2">
-          <div className="text-white text-xs font-medium">Vilka dagar? (välj en eller flera)</div>
+          <div className="text-white text-xs font-medium">Vilka dagar? (välj en eller flera)<RequiredMark filled={partTimeDays.length > 0} /></div>
           <div className="flex flex-wrap gap-1.5">
             {WEEKDAYS.map(day => {
               const active = partTimeDays.includes(day.value);
@@ -99,7 +100,7 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
           </div>
         </div>
         <div className="space-y-2">
-          <div className="text-white text-xs font-medium">Arbetspass (välj en eller flera)</div>
+          <div className="text-white text-xs font-medium">Arbetspass (välj en eller flera)<RequiredMark filled={partTimeShifts.length > 0} /></div>
           <div className="flex flex-wrap gap-1.5">
             {PART_TIME_SHIFTS.map(shift => {
               const active = partTimeShifts.includes(shift.value);
@@ -129,7 +130,7 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
     return (
 
       <div className="mt-3 space-y-2">
-        <div className="text-white text-xs font-medium">Hur många månader?</div>
+        <div className="text-white text-xs font-medium">Hur många månader?<RequiredMark filled={!!durationAmount && durationAmount > 0} /></div>
         <div className="flex items-center gap-2">
           <input
             type="number"
