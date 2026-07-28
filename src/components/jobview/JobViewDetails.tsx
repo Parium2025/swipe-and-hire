@@ -83,6 +83,10 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
       <h2 className="text-section-title mb-2">Detaljer om tjänsten</h2>
       <div className="flex flex-col">
+        <div className={rowClass}>
+          <span className={labelClass}>Start:</span>
+          <span className={valueClass}>{startDateLabel}</span>
+        </div>
         {employmentValue && (
           <div className={rowClass}>
             <span className={labelClass}>Anställning:</span>
@@ -95,10 +99,19 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
             <span className={valueClass}>{cap(workSchedule)}</span>
           </div>
         )}
-        {location && (
+        {(location || workplaceCity) && (
           <div className={rowClass}>
             <span className={labelClass}>Ort:</span>
-            <span className={valueClass}>{cap(location)}</span>
+            <span className={valueClass}>
+              {workplacePostalCode ? `${workplacePostalCode} ` : ''}
+              {cap(location || workplaceCity || '')}
+            </span>
+          </div>
+        )}
+        {workplaceAddress && (
+          <div className={rowClass}>
+            <span className={labelClass}>Gatuadress:</span>
+            <span className={valueClass}>{workplaceAddress}</span>
           </div>
         )}
         {workplaceName && (
@@ -114,33 +127,6 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
                 overflow: 'hidden',
               }}
             />
-          </div>
-        )}
-        {workplaceAddress && (
-          <div className={rowClass}>
-            <span className={labelClass}>Adress:</span>
-            <span className={valueClass}>
-              {workplaceAddress}
-              {workplacePostalCode && `, ${workplacePostalCode}`}
-              {workplaceCity && ` ${workplaceCity}`}
-              {workplaceMunicipality && workplaceMunicipality !== workplaceCity && ` (${workplaceMunicipality})`}
-            </span>
-          </div>
-        )}
-        {workplaceCity && workplaceCity !== location && !workplaceAddress && (
-          <div className={rowClass}>
-            <span className={labelClass}>Stad:</span>
-            <span className={valueClass}>
-              {workplaceCity}
-              {workplaceMunicipality && workplaceMunicipality !== workplaceCity ? `, ${workplaceMunicipality}` : ''}
-              {workplaceCounty ? `, ${workplaceCounty}` : ''}
-            </span>
-          </div>
-        )}
-        {workplaceMunicipality && !workplaceAddress && (!workplaceCity || workplaceCity === location) && (
-          <div className={rowClass}>
-            <span className={labelClass}>Kommun:</span>
-            <span className={valueClass}>{workplaceMunicipality}</span>
           </div>
         )}
         {workLocationType && (
@@ -161,10 +147,6 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
             <span className={valueClass}>{workStartTime} – {workEndTime}</span>
           </div>
         )}
-        <div className={rowClass}>
-          <span className={labelClass}>Start:</span>
-          <span className={valueClass}>{startDateLabel}</span>
-        </div>
         <div className={rowClass}>
           <span className={labelClass}>Antal tjänster:</span>
           <span className={valueClass}>{(positionsCount || 1)} st</span>
