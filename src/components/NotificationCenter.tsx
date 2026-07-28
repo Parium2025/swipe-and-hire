@@ -122,9 +122,9 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
         className={triggerClass}
         aria-label="Notifikationer"
       >
-        <Bell className={variant === 'rect' ? 'h-4 w-4' : 'h-[18px] w-[18px]'} />
+        <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[10px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}

@@ -31,6 +31,7 @@ export interface FullJobData {
   workplace_postal_code?: string;
   contact_email?: string;
   application_instructions?: string;
+  start_date?: string | null;
 }
 
 /**
@@ -74,7 +75,7 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
             positions_count, occupation,
             workplace_name, workplace_city, workplace_county,
             workplace_municipality, workplace_address, workplace_postal_code,
-            contact_email, application_instructions
+            contact_email, application_instructions, start_date
           `)
           .eq('id', jobId)
           .single(),
