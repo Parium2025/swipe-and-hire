@@ -676,12 +676,12 @@ const PinnedHorizontalGallery = () => {
           .phg-section { height: 420vh; }
           /* Innehållet toppställs så att luften mellan avdelaren och rubriken
              blir densamma som i övriga sektioner (ingen extra centrerings-luft). */
-          .phg-sticky { justify-content: flex-start; padding-top: 84px; }
-          .phg-header { padding: 0 24px clamp(20px, 3vh, 32px); }
+          .phg-sticky { justify-content: flex-start; padding-top: 64px; }
+          .phg-header { padding: 0 24px clamp(16px, 2.4vh, 26px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: none; }
-          .phg-card { width: 64vw; border-radius: 18px; }
-          .phg-strip { padding: 0 18vw 0 8vw; }
+          .phg-card { width: 74vw; border-radius: 18px; }
+          .phg-strip { padding: 0 13vw 0 6vw; }
           .phg-footer { padding: 8px 24px 16px; gap: 8px; }
         }
 
