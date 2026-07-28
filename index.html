@@ -152,9 +152,10 @@
           var isLovableHost = h === 'parium-ab.lovable.app' || (h.endsWith('.lovable.app') && h.indexOf('parium-ab') === 0);
           if (!isLovableHost) return;
           var pariumUrl = 'https://www.parium.se' + p + window.location.search + window.location.hash;
-          // Injicera noindex + canonical INNAN body parsas — Googlebot ser detta även utan JS-exec.
-          document.write('<meta name="robots" content="noindex,nofollow">');
+          // Canonical mot produktionsdomänen. (noindex sätts redan i blocket ovan
+          // för alla lovable.app-värdar — därför ingen dubblett här.)
           document.write('<link rel="canonical" href="' + pariumUrl.split('#')[0] + '">');
+
           var isStagingRootForVerification = h === 'parium-ab.lovable.app' && (p === '/' || p === '/index.html');
           if (isStagingRootForVerification) return;
           // Hard redirect för riktiga besökare.
