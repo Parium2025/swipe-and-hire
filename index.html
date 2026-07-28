@@ -327,7 +327,24 @@
               add({ rel: 'preload', as: 'video', href: videoHref, type: 'video/mp4', fetchpriority: 'high' });
             }
           } else if (path === '/jobbsokare' || path === '/arbetsgivare') {
-            add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'high' });
+            if (path === '/jobbsokare') {
+              // Hero-telefonen på /jobbsokare är en video → postern är LCP-kandidat
+              // och videon ska ligga i cachen innan React ens har hydrerat.
+              add({ rel: 'preload', as: 'image', href: '/showcase-jobseeker-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+              var c2 = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
+              var save2 = !!(c2 && c2.saveData);
+              var slow2 = !!(c2 && /(^|-)2g$/.test(c2.effectiveType || ''));
+              if (!save2 && !slow2) {
+                // Välj exakt samma källa som <video> kommer att välja, annars dubbel-fetch.
+                var probe = document.createElement('video');
+                var hevcOk = !!(probe.canPlayType && probe.canPlayType('video/mp4; codecs="hvc1"'));
+                add(hevcOk
+                  ? { rel: 'preload', as: 'video', href: '/showcase-jobseeker.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
+                  : { rel: 'preload', as: 'video', href: '/showcase-jobseeker.mp4', type: 'video/mp4', fetchpriority: 'high' });
+              }
+            }
+            add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'low' });
+
           } else if (path === '/om-oss') {
             add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/95a6e9aa-759c-48fc-8a0f-ee4ae6239167/om-oss-banner.png', type: 'image/png', fetchpriority: 'high' });
           }
