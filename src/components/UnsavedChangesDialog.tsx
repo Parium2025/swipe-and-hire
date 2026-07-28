@@ -67,25 +67,12 @@ export function UnsavedChangesDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {/* All buttons in one row with smaller sizing */}
+        {/* Stackade knappar på mobil, en rad från sm och uppåt */}
         <div
-          className="flex flex-row gap-2 justify-center pt-2"
+          className="flex flex-col sm:flex-row gap-2 sm:justify-center pt-2 w-full"
           onMouseDown={handleGapMouseDown}
           onTouchStart={handleGapTouchStart}
         >
-          <AlertDialogCancel
-            onMouseDown={handleButtonMouseDown}
-            onTouchStart={handleButtonTouchStart}
-            onClick={(e) => {
-              e.currentTarget.blur();
-              onCancel();
-            }}
-            disabled={isSaving}
-            className={`rounded-full px-3 py-2 text-sm bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50 mt-0 ${noFocusRing}`}
-          >
-            Avbryt
-          </AlertDialogCancel>
-
           {onSaveAndLeave && (
             <AlertDialogAction
               onMouseDown={handleButtonMouseDown}
@@ -96,7 +83,7 @@ export function UnsavedChangesDialog({
                 void onSaveAndLeave();
               }}
               disabled={isSaving}
-              className={`rounded-full px-3 py-2 text-sm bg-amber-500/20 backdrop-blur-sm text-white border border-amber-500/40 md:hover:bg-amber-500/30 md:hover:border-amber-500/50 transition-all duration-300 whitespace-nowrap ${noFocusRing}`}
+              className={`order-1 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-amber-500/20 backdrop-blur-sm text-white border border-amber-500/40 md:hover:bg-amber-500/30 md:hover:border-amber-500/50 transition-all duration-300 whitespace-nowrap ${noFocusRing}`}
             >
               {isSaving ? (
                 <>
@@ -117,11 +104,25 @@ export function UnsavedChangesDialog({
               onConfirm();
             }}
             disabled={isSaving}
-            className={`rounded-full px-3 py-2 text-sm bg-red-500/20 backdrop-blur-sm text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap ${noFocusRing}`}
+            className={`order-2 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-red-500/20 backdrop-blur-sm text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap ${noFocusRing}`}
           >
             Lämna utan att spara
           </AlertDialogAction>
+
+          <AlertDialogCancel
+            onMouseDown={handleButtonMouseDown}
+            onTouchStart={handleButtonTouchStart}
+            onClick={(e) => {
+              e.currentTarget.blur();
+              onCancel();
+            }}
+            disabled={isSaving}
+            className={`order-3 sm:order-first w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50 mt-0 ${noFocusRing}`}
+          >
+            Avbryt
+          </AlertDialogCancel>
         </div>
+
       </AlertDialogContentNoFocus>
     </AlertDialog>
   );
