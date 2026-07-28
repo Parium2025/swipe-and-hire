@@ -157,6 +157,36 @@ const CardItem = ({ item, index }: CardItemProps) => {
     };
   }, [item.type, failed]);
 
+  /**
+   * Mjuk loop-söm. Klippen är korta (~5 s) och `loop` hoppar hårt tillbaka till
+   * frame 0 — på Windows syns det extra tydligt eftersom decodern samtidigt
+   * gör en keyframe-seek. Vi dimmar kortet till 0.82 de sista ~0.32 s och
+   * tillbaka till 1 direkt efter wrapet. Ren compositor-opacity, inga filter,
+   * så hardware overlay behålls.
+   */
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || item.type !== 'video' || failed) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const FADE_WINDOW = 0.32;
+    const onTime = () => {
+      const d = v.duration;
+      if (!Number.isFinite(d) || d <= FADE_WINDOW * 3) return;
+      const remaining = d - v.currentTime;
+      v.style.opacity = remaining <= FADE_WINDOW ? '0.82' : '1';
+    };
+    const onSeekedOrPlay = () => { v.style.opacity = '1'; };
+    v.addEventListener('timeupdate', onTime);
+    v.addEventListener('seeked', onSeekedOrPlay);
+    v.addEventListener('play', onSeekedOrPlay);
+    return () => {
+      v.removeEventListener('timeupdate', onTime);
+      v.removeEventListener('seeked', onSeekedOrPlay);
+      v.removeEventListener('play', onSeekedOrPlay);
+      v.style.opacity = '1';
+    };
+  }, [item.type, failed]);
+
 
   return (
     <div
