@@ -674,22 +674,23 @@ const PinnedHorizontalGallery = () => {
         @media (max-width: 767px) {
           /* Mobil touch: tillräcklig pin för mjuk horisontell rörelse, men utan den långa tomkänslan mellan sektionerna. */
           .phg-section { height: 420vh; }
-          /* Innehållet toppställs så att luften mellan avdelaren och rubriken
-             blir densamma som i övriga sektioner (ingen extra centrerings-luft). */
-          .phg-sticky { justify-content: flex-start; padding-top: 64px; }
+          /* Sticky-höjden kapas till innehållet med exakt uträknad luft över/under
+             så att avdelarens ljus hamnar mitt emellan sektionerna. */
+          .phg-sticky { height: auto; justify-content: flex-start; padding: 64px 0 12px; }
           .phg-header { padding: 0 24px clamp(16px, 2.4vh, 26px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: none; }
           .phg-card { width: 74vw; border-radius: 18px; }
           .phg-strip { padding: 0 13vw 0 6vw; }
-          .phg-footer { padding: 8px 24px 16px; gap: 8px; }
+          .phg-footer { padding: 8px 24px 0; gap: 8px; }
         }
+
 
         /* Ultra-små skärmar ENDAST (iPhone SE, små Android ≤ 380px).
            Standardmobiler (iPhone 12/13/14/15, Pro, Pro Max) använder
            default-mobilreglerna ovan (max-width: 767px) helt orörda. */
         @media (max-width: 380px) {
-          .phg-sticky { justify-content: flex-start; padding-top: 96px; }
+          .phg-sticky { height: auto; justify-content: flex-start; padding: 56px 0 32px; }
           .phg-header { padding: 8px 20px 32px; }
           .phg-title { font-size: 2.25rem; line-height: 1.05; }
           .phg-strip-wrap { min-height: 0; margin-top: 8px; }
@@ -699,7 +700,7 @@ const PinnedHorizontalGallery = () => {
 
         @media (max-width: 360px) {
           /* Extra trångt på iPhone SE 1:a/2:a och små Android. */
-          .phg-sticky { padding-top: 84px; }
+          .phg-sticky { padding: 48px 0 28px; }
           .phg-header { padding: 8px 20px 28px; }
           .phg-title { font-size: 1.95rem; line-height: 1.06; }
           .phg-strip-wrap { margin-top: 6px; }

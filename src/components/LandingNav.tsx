@@ -28,6 +28,9 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const location = useLocation();
   const pillScrollerRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  // Döljer "Meny"-knappen medan man scrollar; den fadar in igen när scrollen stannar.
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollIdleTimer = useRef<number | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   // Hela sidan är mörkblå nu — håll alltid nav i mörkt glas-läge
@@ -139,6 +142,9 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     const onScroll = () => {
       setScrolled(getY() > 40);
       computeActive();
+      setIsScrolling(true);
+      if (scrollIdleTimer.current) window.clearTimeout(scrollIdleTimer.current);
+      scrollIdleTimer.current = window.setTimeout(() => setIsScrolling(false), 220);
     };
 
     onScroll();
@@ -147,8 +153,15 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     return () => {
       scroller.removeEventListener('scroll', onScroll as any);
       window.removeEventListener('resize', onScroll);
+      if (scrollIdleTimer.current) window.clearTimeout(scrollIdleTimer.current);
     };
   }, [location.pathname, links]);
+
+  // Stäng dropdownen om användaren börjar scrolla (knappen fadar ut).
+  useEffect(() => {
+    if (isScrolling && menuOpen) setMenuOpen(false);
+  }, [isScrolling, menuOpen]);
+
 
   // Auto-centrera aktiv chip i pillen när scroll ändrar aktiv sektion
   useEffect(() => {
@@ -193,7 +206,11 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
             {/* Mobil: dropdown-meny. Från tablet-bredd visas hela list-pillen så layout styrs av tillgänglig bredd, inte enhetsnamn. */}
             {links.length > 0 && (
-              <div className="flex-1 min-w-0 flex justify-center md:hidden -translate-x-3 sm:-translate-x-2">
+              <div
+                className={`flex-1 min-w-0 flex justify-center md:hidden -translate-x-3 sm:-translate-x-2 transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none ${
+                  isScrolling ? 'pointer-events-none opacity-0 scale-95' : 'opacity-100 scale-100'
+                }`}
+              >
                 <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button
