@@ -162,10 +162,26 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
 
+        // Spline renderar utan MSAA (getContextAttributes().antialias === false,
+        // SAMPLES === 0) och till en offscreen render target. Tunna kanter —
+        // som sidoknappen — saknar därför helt kantutjämning: när modellen
+        // roterar långsamt hoppar kanten mellan två pixelcentrum och ser ut
+        // att blinka (temporal aliasing). Enda sättet att bli av med det utan
+        // tillgång till Splines pipeline är supersampling: rendera canvasen
+        // med fler pixlar än skärmen och låta browsern skala ned = äkta SSAA.
+        // Canvasen är bara ~177x383 CSS-px, så 3x är ca 0,6 MP — försumbart.
+        const ssaa = () => {
+          const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
+          const dpr = window.devicePixelRatio || 1;
+          // Mobil: 2.5 räcker och håller GPU-budgeten nere bredvid videon.
+          // Desktop: 3x, oavsett att skärmen bara har 1x/1.25x.
+          return isCoarse ? Math.min(3, Math.max(dpr, 2.5)) : Math.min(3, Math.max(dpr, 3));
+        };
+
         if (typeof window !== 'undefined' && 'devicePixelRatio' in window) {
           try {
             Object.defineProperty(canvas, '_dprCap', {
-              value: Math.min(window.devicePixelRatio || 1, 2),
+              value: ssaa(),
               configurable: true,
             });
           } catch {
@@ -177,18 +193,24 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         appRef.current = app;
         await app.load(SCENE_URL);
         try {
-          const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
-          // Mobiler har redan dpr 2–3: en cap på 1.5 innebar 1.5x fler pixlar
-          // per bildruta än 1.0 på en telefon-GPU som samtidigt avkodar video
-          // → frame drops och synligt glitchande. Mobil renderar därför på 1.0
-          // (skarpt nog vid den lilla ytan) och desktop får full kvalitet.
-          const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
-          const cap = isCoarse ? 1 : isApple ? 2 : 1.5;
-          const renderer = (app as unknown as { renderer?: { setPixelRatio?: (n: number) => void } }).renderer;
-          renderer?.setPixelRatio?.(Math.min(window.devicePixelRatio || 1, cap));
+          // OBS: Splines interna renderer ligger på `_renderer` (den publika
+          // `renderer` finns inte) — tidigare försök att höja pixel ratio
+          // träffade därför ingenting alls.
+          const internal = app as unknown as {
+            _renderer?: { setPixelRatio?: (n: number) => void };
+            setSize?: (w: number, h: number) => void;
+            requestRender?: () => void;
+          };
+          const ratio = ssaa();
+          internal._renderer?.setPixelRatio?.(ratio);
+          const rect = canvas.getBoundingClientRect();
+          if (rect.width && rect.height) internal.setSize?.(rect.width, rect.height);
+          internal.requestRender?.();
         } catch {
           /* no-op */
         }
+
+
 
 
         app.setZoom(zoomRef.current);
