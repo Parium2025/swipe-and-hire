@@ -133,14 +133,6 @@ export const JobDetailInfoGrid = memo(function JobDetailInfoGrid({
           </div>
         )}
 
-        <div className="flex items-center text-white text-[15px] sm:text-sm">
-          <span className="shrink-0 w-[110px] text-white">Start:</span>
-          <span className="font-medium">
-            {detail.start_date
-              ? new Date(detail.start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
-              : 'Omgående'}
-          </span>
-        </div>
 
         {detail.positions_count && detail.positions_count > 1 && (
           <div className="flex text-white text-[15px] sm:text-sm">
