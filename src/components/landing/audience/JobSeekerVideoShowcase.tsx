@@ -11,11 +11,12 @@ import { prefersReducedData } from '@/lib/videoPlatform';
 const ease = [0.16, 1, 0.3, 1] as const;
 
 /**
- * Skärmens proportion. Videon är 9:19.5 men iPhone-chassit blir visuellt för
- * långsmalt när ramen läggs på — 9:19 ger en kropp på ca 2.04:1, vilket är
- * exakt en riktig iPhone (149.6 × 71.5 mm). Videon täcker via object-cover.
+ * Skärmens proportion. Videon är 9:19.5, men med ramen påsatt blir chassit
+ * visuellt för långsmalt. 9:18.3 ger en kropp på ca 1.96:1 — kompakt och
+ * iPhone-likt. Videon täcker via object-cover.
  */
-const ASPECT = '9 / 19';
+const ASPECT = '9 / 18.3';
+
 
 /**
  * HEVC erbjuds ENDAST till Apple-Safari.
