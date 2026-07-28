@@ -676,7 +676,7 @@ const PinnedHorizontalGallery = () => {
           .phg-section { height: 420vh; }
           /* Sticky-höjden kapas till innehållet med exakt uträknad luft över/under
              så att avdelarens ljus hamnar mitt emellan sektionerna. */
-          .phg-sticky { height: auto; justify-content: flex-start; padding: 64px 0 44px; }
+          .phg-sticky { height: auto; justify-content: flex-start; padding: 112px 0 44px; }
           .phg-header { padding: 0 24px clamp(16px, 2.4vh, 26px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: none; }
@@ -690,7 +690,7 @@ const PinnedHorizontalGallery = () => {
            Standardmobiler (iPhone 12/13/14/15, Pro, Pro Max) använder
            default-mobilreglerna ovan (max-width: 767px) helt orörda. */
         @media (max-width: 380px) {
-          .phg-sticky { height: auto; justify-content: flex-start; padding: 56px 0 32px; }
+          .phg-sticky { height: auto; justify-content: flex-start; padding: 104px 0 32px; }
           .phg-header { padding: 8px 20px 32px; }
           .phg-title { font-size: 2.25rem; line-height: 1.05; }
           .phg-strip-wrap { min-height: 0; margin-top: 8px; }
