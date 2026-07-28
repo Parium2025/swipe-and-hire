@@ -151,16 +151,19 @@ const JobSeekerVideoShowcase = ({
               aria-label="Demo av Parium-appen för jobbsökare"
               className="absolute inset-0 h-full w-full object-cover"
               style={{
-                // Kompenserar för att en liten skärm + glans-overlay plattar ut
-                // kontrasten jämfört med en riktig telefon.
-                filter: 'saturate(1.06) contrast(1.04)',
+                // OBS: ingen CSS-`filter` här. En filter-property på ett
+                // <video> tvingar Chrome/Edge på Windows bort från den
+                // hårdvaruaccelererade video-overlayen och varje bildruta måste
+                // då komposit-renderas → hackig uppspelning på laptops utan
+                // dedikerad GPU.
                 transform: 'translateZ(0)',
                 backfaceVisibility: 'hidden',
               }}
             >
-              {SOURCES.map((s) => (
+              {sources.map((s) => (
                 <source key={s.src} src={s.src} type={s.type} />
               ))}
+
             </video>
 
 
