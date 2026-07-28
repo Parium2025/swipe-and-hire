@@ -697,6 +697,14 @@ const PinnedHorizontalGallery = () => {
           pointer-events: none;
           user-select: none;
         }
+        /* Mjuk in/ut kring loop-sömmen — endast opacity, ingen filter/blur,
+           så videon ligger kvar i hardware overlay på Windows. */
+        .phg-card video {
+          transition: opacity 300ms ease;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .phg-card video { transition: none; }
+        }
         @keyframes phg-kenburns {
           0%   { transform: scale(1.04) translate3d(0,0,0); }
           50%  { transform: scale(1.10) translate3d(-1.2%,-0.8%,0); }
