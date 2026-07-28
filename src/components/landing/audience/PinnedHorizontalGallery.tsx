@@ -426,7 +426,7 @@ const PinnedHorizontalGallery = () => {
         : profile === 'slim'
           ? videos.slice(0, 4)
           : videos;
-      initialBatch.forEach((v, index) => {
+      const warm = (v: HTMLVideoElement, delay: number) => {
         warmTimers.push(window.setTimeout(() => {
           try {
             v.preload = 'auto';
@@ -434,8 +434,15 @@ const PinnedHorizontalGallery = () => {
           } catch {
             // Video warmup is best-effort only.
           }
-        }, index * 140));
-      });
+        }, delay));
+      };
+      initialBatch.forEach((v, index) => warm(v, index * 140));
+      // Andra vågen: resterande kort buffras i lugn takt efter att de första
+      // är igång. Utan detta möter Windows-användaren en kall video (poster →
+      // hårt hopp till frame 0) varje gång ett nytt kort scrollas in.
+      const rest = videos.filter((v) => !initialBatch.includes(v));
+      const base = initialBatch.length * 140 + 1400;
+      rest.forEach((v, index) => warm(v, base + index * 420));
     };
 
     const onWarm = () => warmVideos();
