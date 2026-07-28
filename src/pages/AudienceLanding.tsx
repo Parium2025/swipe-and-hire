@@ -1012,7 +1012,7 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
     ? phoneMetrics.height * 0.62
     : phoneMetrics.height;
 
-  const phoneWidth = phoneVisualHeight * PHONE_ASPECT;
+  const phoneWidth = phoneMetrics.width ?? phoneVisualHeight * PHONE_ASPECT;
   const phoneCanvasHeight = isVideoPhone ? phoneVisualHeight : (phoneMetrics.canvasHeight ?? phoneMetrics.height);
   const phoneCanvasLift = Math.max(0, (phoneCanvasHeight - phoneMetrics.height) / 2);
 
