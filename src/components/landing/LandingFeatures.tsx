@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { StaggerReveal, StaggerItem } from './ScrollReveal';
 
 const features = [
-  { title: 'Matchning som känns relevant', description: 'Rekommendationer baserade på roll, plats, erfarenhet och vad båda sidor faktiskt söker.', icon: Brain },
+  { title: 'Träffar som känns relevanta', description: 'Rekommendationer baserade på roll, plats, erfarenhet och vad båda sidor faktiskt söker.', icon: Brain },
   { title: 'Mobil upplevelse först', description: 'Sök, granska och svara snabbt i ett flöde som är gjort för vardagen — inte för långa formulär.', icon: Smartphone },
   { title: 'Snabbare kontakt', description: 'När intresset är ömsesidigt öppnas dialogen direkt så att processen fortsätter naturligt.', icon: Zap },
   { title: 'Trygg hantering', description: 'Strukturerad profilinformation, tydliga val och säkrare flöden för både kandidat och arbetsgivare.', icon: ShieldCheck },

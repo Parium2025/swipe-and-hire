@@ -7,10 +7,10 @@ const groups = [
   {
     label: 'Jobbsökare',
     title: 'Ett enklare sätt att hitta jobb som passar.',
-    description: 'Se relevanta roller, förstå matchningen och visa intresse utan att fastna i långa processer.',
+    description: 'Se relevanta roller, förstå kraven och visa intresse utan att fastna i långa processer.',
     role: 'job_seeker' as const,
     icon: Search,
-    bullets: ['Relevanta jobb först', 'Profil som visar mer än ett CV', 'Snabb dialog vid matchning'],
+    bullets: ['Relevanta jobb först', 'Profil som visar mer än ett CV', 'Snabb dialog vid intresse'],
   },
   {
     label: 'Arbetsgivare',
@@ -18,7 +18,7 @@ const groups = [
     description: 'Få en tydligare bild av kandidater, sortera smartare och kom snabbare till samtal.',
     role: 'employer' as const,
     icon: BriefcaseBusiness,
-    bullets: ['Matchade kandidater', 'Smidigare urval', 'Tydligare nästa steg'],
+    bullets: ['Relevanta kandidater', 'Smidigare urval', 'Tydligare nästa steg'],
   },
 ];
 

@@ -5,7 +5,7 @@ import { StaggerReveal, StaggerItem } from './ScrollReveal';
 const testimonials = [
   { quote: 'Det känns modernt, tydligt och mycket närmare hur människor faktiskt söker jobb idag.', name: 'Arbetsgivare', role: 'Team som rekryterar löpande', initials: 'AG' },
   { quote: 'Jag vill snabbt förstå vilka jobb som passar mig och kunna visa intresse utan friktion.', name: 'Jobbsökare', role: 'Kandidat i aktiv process', initials: 'JS' },
-  { quote: 'När urval, matchning och dialog sitter ihop blir hela processen lättare att driva framåt.', name: 'Rekryteringsteam', role: 'Operativt HR-flöde', initials: 'RT' },
+  { quote: 'När urval och dialog sitter ihop blir hela processen lättare att driva framåt.', name: 'Rekryteringsteam', role: 'Operativt HR-flöde', initials: 'RT' },
 ];
 
 const LandingTestimonials = () => {

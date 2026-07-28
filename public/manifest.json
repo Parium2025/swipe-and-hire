@@ -1,7 +1,7 @@
 {
   "name": "Parium",
   "short_name": "Parium",
-  "description": "Parium matchar kandidater och arbetsgivare på sekunder.",
+  "description": "Parium kopplar samman kandidater och arbetsgivare på sekunder.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",

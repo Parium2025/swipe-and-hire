@@ -1,4 +1,4 @@
-const items = ['MATCHNING', 'JOBB', 'KANDIDATER', 'INTERVJUER', 'TEAM', 'MOBILT', 'SVERIGE'];
+const items = ['REKRYTERING', 'JOBB', 'KANDIDATER', 'INTERVJUER', 'TEAM', 'MOBILT', 'SVERIGE'];
 
 const LandingMarquee = () => (
   <section className="relative overflow-hidden border-y border-white/[0.04] py-5 sm:py-7" aria-hidden="true">
