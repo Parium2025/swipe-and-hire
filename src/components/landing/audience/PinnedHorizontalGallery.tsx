@@ -157,35 +157,31 @@ const CardItem = ({ item, index }: CardItemProps) => {
     };
   }, [item.type, failed]);
 
-  /**
-   * Mjuk loop-söm. Klippen är korta (~5 s) och `loop` hoppar hårt tillbaka till
-   * frame 0 — på Windows syns det extra tydligt eftersom decodern samtidigt
-   * gör en keyframe-seek. Vi dimmar kortet till 0.82 de sista ~0.32 s och
-   * tillbaka till 1 direkt efter wrapet. Ren compositor-opacity, inga filter,
-   * så hardware overlay behålls.
-   */
+  // Starta varje kort på en egen tidsposition första gången metadata finns.
+  // Då loopar inte alla Windows-videor samtidigt, utan varje kort börjar om i
+  // sin egen lugna takt — utan fade/transition-effekt på bilden.
   useEffect(() => {
     const v = videoRef.current;
     if (!v || item.type !== 'video' || failed) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const FADE_WINDOW = 0.32;
-    const onTime = () => {
+    const applyOffset = () => {
+      if (v.dataset.loopOffsetApplied === '1') return;
       const d = v.duration;
-      if (!Number.isFinite(d) || d <= FADE_WINDOW * 3) return;
-      const remaining = d - v.currentTime;
-      v.style.opacity = remaining <= FADE_WINDOW ? '0.82' : '1';
+      if (!Number.isFinite(d) || d <= 1) return;
+      const safeDuration = Math.max(0.5, d - 0.35);
+      const offset = (index * 0.73) % safeDuration;
+      try {
+        v.currentTime = offset;
+        v.dataset.loopOffsetApplied = '1';
+      } catch {
+        // Best-effort only — native looping still works.
+      }
     };
-    const onSeekedOrPlay = () => { v.style.opacity = '1'; };
-    v.addEventListener('timeupdate', onTime);
-    v.addEventListener('seeked', onSeekedOrPlay);
-    v.addEventListener('play', onSeekedOrPlay);
+    if (v.readyState >= 1) applyOffset();
+    else v.addEventListener('loadedmetadata', applyOffset);
     return () => {
-      v.removeEventListener('timeupdate', onTime);
-      v.removeEventListener('seeked', onSeekedOrPlay);
-      v.removeEventListener('play', onSeekedOrPlay);
-      v.style.opacity = '1';
+      v.removeEventListener('loadedmetadata', applyOffset);
     };
-  }, [item.type, failed]);
+  }, [item.type, failed, index]);
 
 
   return (
@@ -703,14 +699,6 @@ const PinnedHorizontalGallery = () => {
           display: block;
           pointer-events: none;
           user-select: none;
-        }
-        /* Mjuk in/ut kring loop-sömmen — endast opacity, ingen filter/blur,
-           så videon ligger kvar i hardware overlay på Windows. */
-        .phg-card video {
-          transition: opacity 300ms ease;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .phg-card video { transition: none; }
         }
         @keyframes phg-kenburns {
           0%   { transform: scale(1.04) translate3d(0,0,0); }

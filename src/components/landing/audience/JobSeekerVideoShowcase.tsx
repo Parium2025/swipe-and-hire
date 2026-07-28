@@ -5,7 +5,7 @@ import mp4Asset from '@/assets/showcase-jobseeker.mp4.asset.json';
 import mobileMp4Asset from '@/assets/showcase-jobseeker-mobile.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsMp4Asset from '@/assets/showcase-jobseeker-windows-premium.mp4.asset.json';
-import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
+import { getVideoPlatform, isLowPowerDevice, prefersReducedData } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -33,17 +33,19 @@ const prefersHevc = () => {
  * Den lätta H.264-källan (720x1560, Main@4.0) används på Windows-desktop och
  * i sparläge — hårdvaruvänlig där decode-budgeten är begränsad.
  */
-const prefersPerformanceMp4 = () => prefersLightweightVideo();
+const prefersPerformanceMp4 = () => {
+  if (prefersReducedData()) return true;
+  return getVideoPlatform() === 'windows' && isLowPowerDevice();
+};
 
 /**
- * Mobil (touch) får en egen 810x1754 Main@4.0-källa med högre bitrate än
- * Windows-filen. Skärmarna har 3x pixeltäthet — den nedskalade 720-filen gjorde
- * texten i annonserna suddig. Main profile hålls kvar för hårdvaruavkodning
- * på Android.
+  * Mobil och normal Windows-desktop får 810x1754 Main@4.0-källan. Den är
+  * skarpare än 720-filen men fortfarande hårdvaruvänlig. Den lättare 720-filen
+  * används bara på svaga Windows-enheter eller i sparläge.
  */
 const prefersMobileMp4 = () =>
   typeof window !== 'undefined' &&
-  window.matchMedia('(pointer: coarse)').matches &&
+  (window.matchMedia('(pointer: coarse)').matches || (getVideoPlatform() === 'windows' && !isLowPowerDevice())) &&
   !prefersReducedData();
 
 const getSources = () =>

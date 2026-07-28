@@ -342,15 +342,18 @@
                 var appleSafari = /Safari/.test(ua) && !/Chrome|Chromium|Edg\//.test(ua);
                 var probe = document.createElement('video');
                 var hevcOk = appleSafari && probe.canPlayType && probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
-                // Mobil (touch) får den skarpa 810p-mobilkällan; Windows-desktop
-                // den lätta 720p-filen (begränsad decode-budget).
+                // Mobil och normal Windows-desktop får den skarpa 810p/Main-källan.
+                // Den lätta 720p-filen används bara på svaga Windows-enheter.
                 var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-                var lightweight = /Windows NT/i.test(ua) && !coarse;
+                var isWin = /Windows NT/i.test(ua);
+                var mem = navigator.deviceMemory || 8;
+                var cores = navigator.hardwareConcurrency || 8;
+                var lowPowerWin = isWin && (mem <= 4 || cores <= 4);
                 add(hevcOk
                   ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
-                  : coarse
+                  : (coarse || (isWin && !lowPowerWin))
                     ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/a47f6b62-4255-400d-afda-be54a136517c/showcase-jobseeker-mobile.mp4', type: 'video/mp4', fetchpriority: 'high' }
-                  : lightweight
+                  : lowPowerWin
                     ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/6e4ad1ea-5108-44f1-b18c-3684c3aadad9/showcase-jobseeker-windows-premium.mp4', type: 'video/mp4', fetchpriority: 'high' }
                     : { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/9683d292-964a-4f62-9a0b-269892faa6d2/showcase-jobseeker-v2.mp4', type: 'video/mp4', fetchpriority: 'high' });
               }

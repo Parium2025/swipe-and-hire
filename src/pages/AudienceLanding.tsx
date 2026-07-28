@@ -13,7 +13,6 @@ import EmployerJourney from '@/components/landing/audience/EmployerJourney';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
-import { useWheelSmoother } from '@/hooks/useWheelSmoother';
 import { preloadAudienceLandingAssets } from '@/lib/audienceLandingPreload';
 import { AppBadges } from '@/components/landing/AppBadges';
 
@@ -1391,13 +1390,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     },
   ];
 
-
-  // Mjuk musscroll på Windows/desktop. Inaktiv på touch, trackpad, reduced-motion.
-  useWheelSmoother(true);
-
-
-
-
   // Mobil: trigga `.landing-feature-mobile-in` först när varje element faktiskt
   // scrollas in. Tidigare markerades rubriker i alla sektioner som visade direkt
   // vid mount, vilket gjorde att t.ex. Pris-rubriken saknade animation på mobil.
@@ -1504,9 +1496,35 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   useWaveAwareText();
 
-  // Native scroll på /jobbsokare — inga scroll-hijacks, inga snap-låsningar.
-  // Hjul/touch beter sig 1:1 som på en vanlig premium-sajt. Sektioners
-  // entry-animationer drivs av framer-motion `whileInView`.
+  // Desktop-wheel mot den fasta landing-rooten. Inga animationer/smoothing här:
+  // delta går 1:1 till root.scrollTop så den horisontella sektionen inte låser sig.
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+    if (!root || window.matchMedia('(pointer: coarse)').matches) return;
+
+    const onWheel = (event: WheelEvent) => {
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey) return;
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
+      let node = event.target as HTMLElement | null;
+      while (node && node !== root && node !== document.body) {
+        const style = node.scrollHeight > node.clientHeight ? getComputedStyle(node) : null;
+        if (style && (style.overflowY === 'auto' || style.overflowY === 'scroll')) return;
+        node = node.parentElement;
+      }
+
+      const max = root.scrollHeight - root.clientHeight;
+      if (max <= 0) return;
+      const next = Math.max(0, Math.min(max, root.scrollTop + event.deltaY));
+      if (next === root.scrollTop) return;
+
+      event.preventDefault();
+      root.scrollTop = next;
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    return () => window.removeEventListener('wheel', onWheel, { capture: true });
+  }, []);
 
 
 
