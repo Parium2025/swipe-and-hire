@@ -342,16 +342,18 @@
                 var appleSafari = /Safari/.test(ua) && !/Chrome|Chromium|Edg\//.test(ua);
                 var probe = document.createElement('video');
                 var hevcOk = appleSafari && probe.canPlayType && probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
-                var windows = /Windows NT/i.test(ua);
+                // Lätt H.264-källa till Windows OCH Android (svag/varierande decode).
+                var lightweight = /Windows NT/i.test(ua) || /Android/i.test(ua);
                 add(hevcOk
                   ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
-                  : windows
+                  : lightweight
                     ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/6e4ad1ea-5108-44f1-b18c-3684c3aadad9/showcase-jobseeker-windows-premium.mp4', type: 'video/mp4', fetchpriority: 'high' }
                     : { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/9683d292-964a-4f62-9a0b-269892faa6d2/showcase-jobseeker-v2.mp4', type: 'video/mp4', fetchpriority: 'high' });
               }
             }
-            var audienceWindows = typeof ua === 'string' ? /Windows NT/i.test(ua) : /Windows NT/i.test(navigator.userAgent || '');
-            if (!(path === '/jobbsokare' && audienceWindows)) {
+            var uaStr = typeof ua === 'string' ? ua : (navigator.userAgent || '');
+            var deferSpline = /Windows NT/i.test(uaStr) || /Android/i.test(uaStr);
+            if (!(path === '/jobbsokare' && deferSpline)) {
               add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'low' });
             }
 
