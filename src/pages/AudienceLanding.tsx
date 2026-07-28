@@ -1730,7 +1730,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <div>
           <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
-          <SectionDivider className="mt-28 mb-12 md:mt-40 md:mb-20" />
+          <SectionDivider className="my-12 md:my-20" />
 
 
           {audience === 'job_seeker' && (
@@ -1742,7 +1742,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 </Suspense>
               </section>
 
-              <SectionDivider className="mt-9 mb-[4.25rem] md:mt-24 md:mb-12" />
+              <SectionDivider className="my-12 md:my-20" />
 
             </>
           )}
