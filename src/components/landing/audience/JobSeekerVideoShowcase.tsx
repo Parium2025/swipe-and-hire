@@ -39,7 +39,7 @@ const getSources = () =>
         { src: mp4Asset.url, type: 'video/mp4' },
       ]
     : prefersWindowsPerformanceMp4()
-      ? [{ src: windowsMp4Asset.url, type: 'video/mp4; codecs="avc1.4D401F"' }]
+      ? [{ src: windowsMp4Asset.url, type: 'video/mp4' }]
     : [{ src: mp4Asset.url, type: 'video/mp4' }];
 
 
