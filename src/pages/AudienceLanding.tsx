@@ -1500,11 +1500,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // resten av OS:et/Apple) — all egen interpolering gjorde scrollen seg.
 
 
-    window.addEventListener('wheel', onWheel, { passive: false, capture: true });
-    return () => window.removeEventListener('wheel', onWheel, { capture: true });
-  }, []);
-
-
 
   // Premium-prefetch: när användaren landat och tråden är ledig, ladda
   // /auth-route-chunken i bakgrunden så att "Skapa min profil"-CTA känns instant.
