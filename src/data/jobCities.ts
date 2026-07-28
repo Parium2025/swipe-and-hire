@@ -26,7 +26,7 @@ export const CITIES: CityData[] = [
     inForm: 'i Göteborg',
     county: 'Västra Götalands län',
     areas: ['Centrum', 'Majorna', 'Linné', 'Hisingen', 'Lundby', 'Angered', 'Mölndal', 'Partille', 'Kungsbacka', 'Lerum', 'Backaplan', 'Frölunda'],
-    intro: 'Göteborg är västkustens jobbmotor med starka arbetsgivare inom industri, handel, restaurang och vård. Hitta lediga jobb i Göteborg som matchar dig.',
+    intro: 'Göteborg är västkustens jobbmotor med starka arbetsgivare inom industri, handel, restaurang och vård. Hitta lediga jobb i Göteborg som passar dig.',
   },
   {
     slug: 'malmo',

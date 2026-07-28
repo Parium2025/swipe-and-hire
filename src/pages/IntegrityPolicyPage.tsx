@@ -240,7 +240,7 @@ export default function IntegrityPolicyPage() {
                       basis="Avtal"
                     />
                     <Row
-                      what="Matcha kandidater med arbetsgivare"
+                      what="Koppla samman kandidater och arbetsgivare"
                       basis="Avtal"
                     />
                     <Row
