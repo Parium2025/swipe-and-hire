@@ -79,7 +79,7 @@ const evaluateAll = () => {
   const centerX = vw / 2;
   const hidden = document.hidden;
 
-  const candidates: { el: HTMLVideoElement; dist: number }[] = [];
+  const candidates: { el: HTMLVideoElement; dist: number; playing: boolean }[] = [];
   registry.forEach((el) => {
     const rect = el.getBoundingClientRect();
     const inView =
@@ -89,13 +89,24 @@ const evaluateAll = () => {
       rect.right > 0 &&
       rect.left < vw;
     if (inView) {
-      candidates.push({ el, dist: Math.abs((rect.left + rect.right) / 2 - centerX) });
+      candidates.push({
+        el,
+        dist: Math.abs((rect.left + rect.right) / 2 - centerX),
+        playing: !el.paused,
+      });
     } else if (!el.paused) {
       el.pause();
     }
   });
 
-  candidates.sort((a, b) => a.dist - b.dist);
+  // Hysteres: redan spelande videor behåller sin plats i kön så länge de är
+  // synliga. Utan detta byter "närmast mitten"-sorteringen plats på spelarna
+  // för varje scroll-tick → videor pausas/startas om hela tiden och det ser ut
+  // som en blinkande effekt på korten. Nu spelar de lugnt vidare.
+  candidates.sort((a, b) => {
+    if (a.playing !== b.playing) return a.playing ? -1 : 1;
+    return a.dist - b.dist;
+  });
   const maxConcurrent = getMaxConcurrent();
   candidates.forEach(({ el }, i) => {
     if (i < maxConcurrent) {
@@ -107,6 +118,7 @@ const evaluateAll = () => {
       el.pause();
     }
   });
+
 };
 
 const scheduleEvaluate = () => {
