@@ -35,6 +35,23 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     }
   }, [active, isReady]);
 
+  // Pausa renderloopen när fliken är dold — annars fortsätter WebGL tugga GPU
+  // i bakgrunden och konkurrerar med videoavkodningen när man kommer tillbaka.
+  useEffect(() => {
+    const onVisibility = () => {
+      const app = appRef.current;
+      if (!app) return;
+      if (document.hidden) {
+        if (!app.isStopped) app.stop();
+      } else if (activeRef.current && app.isStopped) {
+        app.play();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
+
+
   useEffect(() => {
     zoomRef.current = zoom;
     const app = appRef.current;
