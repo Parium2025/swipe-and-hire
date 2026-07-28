@@ -1124,8 +1124,10 @@ const IntroSplinePhone = () => {
     const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     const observer = new IntersectionObserver(
       ([entry]) => setActive(entry.isIntersecting && entry.intersectionRatio > 0.01),
-      { root, rootMargin: '240px 0px 240px 0px', threshold: [0, 0.01, 0.25] },
+      // Ingen rootMargin: scenen startar först när sektionen är i bild.
+      { root, threshold: [0, 0.01, 0.25] },
     );
+
     observer.observe(wrapper);
 
     return () => {
