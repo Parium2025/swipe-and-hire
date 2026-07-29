@@ -119,22 +119,8 @@ export function EmployerJourney({
       timers.push(window.setTimeout(syncVisible, 80), window.setTimeout(syncVisible, 260), window.setTimeout(syncVisible, 900));
     };
 
-    const isCookieBannerOpen = () => document.documentElement.dataset.cookieBannerOpen === 'true';
-    if (isCookieBannerOpen()) {
-      const onConsent = () => {
-        window.removeEventListener('parium:cookie-consent-updated', onConsent);
-        window.setTimeout(start, 50);
-      };
-      window.addEventListener('parium:cookie-consent-updated', onConsent);
-      return () => {
-        cancelled = true;
-        window.removeEventListener('parium:cookie-consent-updated', onConsent);
-        if (raf) window.cancelAnimationFrame(raf);
-        timers.forEach((timer) => window.clearTimeout(timer));
-      };
-    }
-
     start();
+
     scrollRoot?.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
     window.addEventListener('orientationchange', schedule, { passive: true });
