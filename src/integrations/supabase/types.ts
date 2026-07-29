@@ -448,6 +448,45 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_records: {
+        Row: {
+          accepted_at: string
+          consent_type: string
+          created_at: string
+          document_url: string | null
+          document_version: string
+          email: string | null
+          id: string
+          role: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          consent_type: string
+          created_at?: string
+          document_url?: string | null
+          document_version: string
+          email?: string | null
+          id?: string
+          role?: string | null
+          source?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          consent_type?: string
+          created_at?: string
+          document_url?: string | null
+          document_version?: string
+          email?: string | null
+          id?: string
+          role?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversation_members: {
         Row: {
           conversation_id: string
