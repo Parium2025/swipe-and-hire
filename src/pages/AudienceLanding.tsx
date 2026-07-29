@@ -2222,10 +2222,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         a: 'Ni når oss på hej@parium.se alla vardagar. Vi hjälper till med allt från annonsupplägg och kandidattips till fakturafrågor — svar inom 24 timmar, oftast samma dag. På Pro får ni dessutom en dedikerad kontaktperson.',
                       },
                       {
-                        q: 'Finns det någon bindningstid?',
-                        a: 'Nej. Alla månadspaket löper månadsvis och ni säger upp när ni vill från era kontoinställningar. Ingen uppsägningstid, inga dolda avgifter. Betalar ni för en enkelannons gäller den i 14 dagar och avslutas automatiskt.',
-                      },
-                      {
                         q: 'Vad händer om vi inte förnyar?',
                         a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
                       },
