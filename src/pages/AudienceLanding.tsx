@@ -1525,27 +1525,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       });
     };
 
-    // Vänta tills cookie-bannern är stängd innan vi observerar korten —
-    // annars körs slide-in-animationen bakom bannerns blur och användaren
-    // ser aldrig entrén när de sen börjar scrolla.
-    const isBannerOpen = () => document.documentElement.dataset.cookieBannerOpen === 'true';
-    if (!isBannerOpen()) {
-      start();
-    } else {
-      const onConsent = () => {
-        window.removeEventListener('parium:cookie-consent-updated', onConsent);
-        // Vänta en tick så body-scroll unlockas innan vi mäter viewport
-        window.setTimeout(start, 50);
-      };
-      window.addEventListener('parium:cookie-consent-updated', onConsent);
-      return () => {
-        cancelled = true;
-        window.removeEventListener('parium:cookie-consent-updated', onConsent);
-        if (raf) window.cancelAnimationFrame(raf);
-        timers.forEach((timer) => window.clearTimeout(timer));
-        cleanupFns.forEach((fn) => fn());
-      };
-    }
+    start();
+
     return () => {
       cancelled = true;
       if (raf) window.cancelAnimationFrame(raf);
