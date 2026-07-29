@@ -2179,7 +2179,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Är mina uppgifter säkra?',
-                        a: 'Ja. Vi använder etablerade europeiska leverantörer och krypterar data under överföring. Din fullständiga profil visas bara för arbetsgivare du aktivt visat intresse för. Du kan kontakta oss på hej@parium.se för att få ut eller radera din data.',
+                        a: 'Ja. All data lagras i EU (våra servrar ligger i Paris) och krypteras under överföring. Din fullständiga profil visas bara för arbetsgivare du aktivt visat intresse för. I inställningarna kan du när som helst ladda ner alla dina uppgifter eller radera hela ditt konto direkt — utan att kontakta oss. Har du inte loggat in på 24 månader mejlar vi en varning och raderar kontot 30 dagar senare.',
+
                       },
                       {
                         q: 'Vilka företag finns här?',
