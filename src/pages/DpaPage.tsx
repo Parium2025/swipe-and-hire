@@ -9,7 +9,7 @@ import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.pn
 const CANONICAL = 'https://www.parium.se/dpa';
 const TITLE = 'Personuppgiftsbiträdesavtal (DPA) – Parium';
 const DESCRIPTION =
-  'Pariums personuppgiftsbiträdesavtal enligt GDPR art. 28 för arbetsgivarkunder: behandling, säkerhet, underbiträden, gallringsrutin och radering av kandidatdata.';
+  'Pariums personuppgiftsbiträdesavtal enligt GDPR art. 28 för arbetsgivarkunder: behandling, säkerhet, underbiträden, automatisk radering av kandidatdata.';
 const LAST_UPDATED = '29 juli 2026';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -23,7 +23,7 @@ const sections = [
   { id: 'overforing', title: '6. Överföring till tredjeland' },
   { id: 'bistand', title: '7. Bistånd till er som kund' },
   { id: 'incident', title: '8. Personuppgiftsincidenter' },
-  { id: 'gallring', title: '9. Gallringsrutin och lagringstider' },
+  { id: 'gallring', title: '9. Lagringstider och automatisk radering' },
   { id: 'avslut', title: '10. Radering vid avslutat avtal' },
   { id: 'granskning', title: '11. Granskning och revision' },
   { id: 'kontakt', title: '12. Ikraftträdande och kontakt' },
@@ -182,7 +182,7 @@ export default function DpaPage() {
                 <table className="w-full text-left text-[14px]">
                   <tbody className="divide-y divide-white/[0.06]">
                     <Row k="Ändamål" v="Rekrytering: publicering av annonser, mottagande och bedömning av ansökningar, kommunikation med kandidater och intervjubokning." />
-                    <Row k="Varaktighet" v="Så länge ni har ett aktivt arbetsgivarkonto, med de gallringstider som anges i punkt 9." />
+                    <Row k="Varaktighet" v="Så länge ni har ett aktivt arbetsgivarkonto, med de lagringstider som anges i punkt 9." />
                     <Row k="Typ av uppgifter" v="Namn, kontaktuppgifter, ålder, ort, CV, presentationsvideo, arbetslivserfarenhet, svar på era urvalsfrågor, meddelanden och interna noteringar." />
                     <Row k="Kategorier av registrerade" v="Kandidater som ansökt eller visat intresse för era annonser, samt era egna användare." />
                     <Row k="Känsliga uppgifter" v="Parium efterfrågar inte känsliga personuppgifter (art. 9). Ni får inte begära sådana uppgifter via urvalsfrågor eller fritextfält." />
@@ -204,7 +204,7 @@ export default function DpaPage() {
                 </li>
                 <li>
                   AI-stödet (sammanfattning av CV och bedömning mot era kriterier) tar
-                  fram ett rådgivande underlag. Ingen automatisk gallring eller
+                  fram ett rådgivande underlag. Ingen automatisk radering eller
                   automatiserat beslut i den mening som avses i art. 22 sker — ni fattar
                   alltid besluten om kandidaterna.
                 </li>
@@ -234,7 +234,7 @@ export default function DpaPage() {
                 </li>
                 <li>Rollbaserad åtkomst inom ert konto och separata inloggningar per användare.</li>
                 <li>Loggning av åtkomst och förändringar samt regelbundna säkerhetskopior.</li>
-                <li>Automatisk gallring av gammal data enligt punkt 9.</li>
+                <li>Automatisk radering av gammal data enligt punkt 9.</li>
               </ul>
             </Section>
 
@@ -291,10 +291,10 @@ export default function DpaPage() {
               </p>
             </Section>
 
-            <Section id="gallring" title="9. Gallringsrutin och lagringstider">
+            <Section id="gallring" title="9. Lagringstider och automatisk radering">
               <p>
                 Personuppgifter sparas inte längre än nödvändigt. Parium kör en automatisk
-                gallring varje natt som raderar data enligt tabellen nedan – det sker utan
+                rutin varje natt som raderar data enligt tabellen nedan – det sker utan
                 att någon behöver göra något manuellt.
               </p>
               <div className="mt-4 overflow-hidden rounded-2xl">
@@ -318,7 +318,7 @@ export default function DpaPage() {
               </div>
               <p className="rounded-xl bg-white/[0.05] p-4 text-[14.5px]">
                 Ni kan när som helst ta bort en enskild kandidat eller en annons tidigare än
-                gallringstiden – då raderas uppgifterna direkt ur er vy och ur databasen.
+                lagringstiden – då raderas uppgifterna direkt ur er vy och ur databasen.
               </p>
             </Section>
 
