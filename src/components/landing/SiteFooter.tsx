@@ -142,7 +142,7 @@ function ColumnPair({
     <div
       className="grid grid-cols-2 gap-x-8"
       style={{
-        gridTemplateRows: `auto repeat(${rows}, 44px)`,
+        gridTemplateRows: `auto repeat(${rows}, minmax(44px, auto))`,
       }}
     >
       <ColumnHeader title={leftTitle} />
