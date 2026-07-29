@@ -394,7 +394,7 @@ const JobSeekerVideoShowcase = ({
           >
             <video
               ref={videoRef}
-              autoPlay
+              autoPlay={!coldGate}
               loop
               muted
               playsInline
