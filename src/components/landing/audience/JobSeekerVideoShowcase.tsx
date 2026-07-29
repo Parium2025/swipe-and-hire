@@ -468,8 +468,11 @@ const JobSeekerVideoShowcase = ({
     v.addEventListener('loadeddata', resume);
     v.addEventListener('waiting', onWaiting);
     v.addEventListener('stalled', onWaiting);
+    const markPainted = () => setFirstFramePainted(true);
     v.addEventListener('playing', onPlaying);
     v.addEventListener('playing', onFirstStablePlay);
+    v.addEventListener('playing', markPainted);
+    v.addEventListener('timeupdate', markPainted);
 
     return () => {
       clearRetry();
