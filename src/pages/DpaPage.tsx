@@ -185,6 +185,7 @@ export default function DpaPage() {
                     <Row k="Varaktighet" v="Så länge ni har ett aktivt arbetsgivarkonto, med de lagringstider som anges i punkt 9." />
                     <Row k="Typ av uppgifter" v="Namn, kontaktuppgifter, ålder, ort, CV, presentationsvideo, arbetslivserfarenhet, svar på era urvalsfrågor, meddelanden och interna noteringar." />
                     <Row k="Kategorier av registrerade" v="Kandidater som ansökt eller visat intresse för era annonser, samt era egna användare." />
+                    <Row k="Personnummer" v="Parium efterfrågar aldrig personnummer. Ni får inte begära det via urvalsfrågor eller fritextfält. Skulle en kandidat själv ha skrivit in det i sitt CV behandlas det som en del av CV-filen." />
                     <Row k="Känsliga uppgifter" v="Parium efterfrågar inte känsliga personuppgifter (art. 9). Ni får inte begära sådana uppgifter via urvalsfrågor eller fritextfält." />
                   </tbody>
                 </table>
