@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_inactivity_notices: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          deleted_at: string | null
+          email: string | null
+          error_message: string | null
+          id: string
+          last_active_at: string | null
+          scheduled_delete_at: string
+          updated_at: string
+          user_id: string
+          warned_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          error_message?: string | null
+          id?: string
+          last_active_at?: string | null
+          scheduled_delete_at: string
+          updated_at?: string
+          user_id: string
+          warned_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          error_message?: string | null
+          id?: string
+          last_active_at?: string | null
+          scheduled_delete_at?: string
+          updated_at?: string
+          user_id?: string
+          warned_at?: string
+        }
+        Relationships: []
+      }
       admin_alert_cooldowns: {
         Row: {
           alert_key: string
@@ -3680,6 +3722,7 @@ export type Database = {
       }
       trigger_career_tips_fetch: { Args: never; Returns: undefined }
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
+      trigger_inactive_account_retention: { Args: never; Returns: undefined }
       trigger_news_health_watchdog: { Args: never; Returns: undefined }
       try_uuid: { Args: { p_text: string }; Returns: string }
       unaccent: { Args: { "": string }; Returns: string }
