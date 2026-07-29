@@ -361,7 +361,6 @@ export function ScrollRestoration() {
       }
       scrollContainer.style.scrollBehavior = previousBehavior;
 
-      console.log('[SR]',{targetTop,now:scrollContainer.scrollTop,sh:scrollContainer.scrollHeight,stored:storedPosition?.scrollHeight,anchorDelta,layoutIdentical});
       const verifyDelta = getAnchorDelta(
         scrollContainer,
         storedPosition?.anchorId,
@@ -373,12 +372,38 @@ export function ScrollRestoration() {
 
       if (closeEnough) {
         restored = true;
-        finish();
+        holdPosition(scrollContainer);
         return true;
       }
 
       return false;
     };
+
+    // 🛟 Efter första lyckade återställningen kan sidhöjden fortfarande krympa
+    // (lazy-sektioner, videos, pinnade gallerier som settlar). Webbläsarens
+    // scroll-anchoring drar då iväg positionen. Vi håller kvar exakt läge en
+    // kort stund tills höjden är stabil — men släpper direkt vid touch/scroll.
+    const HOLD_MS = 1200;
+    function holdPosition(container: HTMLElement) {
+      const holdStart = performance.now();
+      const tick = () => {
+        if (cancelled || userInterrupted) return;
+        const maxTop = Math.max(0, container.scrollHeight - container.clientHeight);
+        const desired = Math.min(targetTop, maxTop);
+        if (Math.abs(container.scrollTop - desired) > RESTORE_TOLERANCE_PX) {
+          const previous = container.style.scrollBehavior;
+          container.style.scrollBehavior = 'auto';
+          container.scrollTop = desired;
+          container.style.scrollBehavior = previous;
+        }
+        if (performance.now() - holdStart < HOLD_MS) {
+          rafId = requestAnimationFrame(tick);
+          return;
+        }
+        finish();
+      };
+      rafId = requestAnimationFrame(tick);
+    }
 
     const scheduleRetry = () => {
       if (cancelled || userInterrupted || restored) return;
