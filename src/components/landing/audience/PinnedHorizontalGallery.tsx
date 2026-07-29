@@ -565,12 +565,19 @@ const PinnedHorizontalGallery = () => {
           position: relative;
           width: 100%;
           /* Pin-distans = hur mycket vertikal scroll som "kostar" att
-             traversera hela kortstrippen. 240vh gjorde att korten flög förbi
-             på Mac-trackpad; 340vh ger lugn rörelse utan att kännas segt på
-             mushjul. */
-          height: 340vh;
+             traversera hela kortstrippen.
+             BAS (Windows/övriga desktop): 240vh — rörd inte, den är avstämd
+             mot mushjulets stegning och Windows scroll-skuld. */
+          height: 240vh;
 
         }
+        /* Apple-desktop (Mac/trackpad) ENDAST: trackpaden ger mycket mer
+           scrolldelta per rörelse, så 240vh gjorde att korten flög förbi.
+           Windows påverkas inte av denna regel. */
+        [data-phg-platform="apple"].phg-section {
+          height: 340vh;
+        }
+
         .phg-sticky {
           position: sticky;
           top: 0;
