@@ -63,6 +63,10 @@ export const preloadAudienceLandingAssets = () => {
   //    först. Annars konkurrerar prefetch + lazy chunks med video-LCP på laptops.
   if (!shouldDeferHeavyAssets()) addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
 
+  // Dekoda telefonens poster omedelbart (inte i idle) så bilden är klar att
+  // ritas i samma frame som hero visas.
+  decode(phonePoster.url);
+
   // 3. Dekoda bilderna i bakgrunden (idle) + preloada under-fold chunks
   //    så Suspense-fallback aldrig hinner synas när användaren scrollar.
   const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
