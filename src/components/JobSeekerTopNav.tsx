@@ -45,7 +45,6 @@ const jobItems = [
 const profileItems = [
   { title: "Min Profil", url: "/profile", icon: User },
   { title: "Förhandsgranska Profil", url: "/profile-preview", icon: Eye },
-  { title: "Mitt samtycke", url: "/consent", icon: Settings },
 ];
 
 // Ekonomi dropdown items
