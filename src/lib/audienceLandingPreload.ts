@@ -51,8 +51,18 @@ export const preloadAudienceLandingAssets = () => {
   if (started || typeof window === 'undefined') return;
   started = true;
 
-  // 1. Första gallery-postern: high-priority preload (LCP-kandidat under hero).
-  addLink('preload', realPosters, 'image', 'high');
+  // 1. Hero-telefonens poster FÖRST med high priority.
+  //    Utan denna hint upptäcks postern (som bara ligger som poster-attribut
+  //    på <video>) först när React monterat komponenten — alltså efter att
+  //    JS-bundlen hämtats, parsats och körts. På en svagare laptop står
+  //    telefonskärmen svart under hela den tiden. Med preload hämtas den
+  //    parallellt med JS och telefonen är "tänd" nästan direkt.
+  //    Assetet är hashat och same-origin, så det cachas permanent.
+  addLink('preload', heroPosterAsset.url, 'image', 'high');
+
+  // 2. Gallery-postrarna ligger under fold — de får normal respektive låg
+  //    prioritet så att de inte konkurrerar med hero-postern above the fold.
+  addLink('preload', realPosters, 'image');
   addLink('preload', realPoster2, 'image', 'low');
 
   // 2. Spline-scenen: på Windows väntar vi tills hero-videon fått spela stabilt
