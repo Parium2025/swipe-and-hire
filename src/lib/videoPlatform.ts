@@ -64,16 +64,16 @@ export const prefersLightweightVideo = () => {
 /**
  * Antal videor som får spela samtidigt i galleriet.
  *
- * Windows sänktes 4 → 3: fyra parallella H.264-strömmar på en integrerad GPU
- * (Iris Xe/UHD) delar samma fasta decode-budget som kompositorn använder för
- * scroll. Tre strömmar räcker visuellt (bara ~3 kort är nära mitten ändå) men
- * lämnar headroom så att scrollen aldrig tappar frames.
+ * Windows kör de små gallerifilerna i 5 samtidiga strömmar. Tidigare 3 gjorde
+ * att sista helt synliga kortet (Vård) ofta hamnade utanför playback-budgeten
+ * på breda Windows-vyer. Telefonvideon har nu en separat lätt Windows-källa,
+ * så fem små 520px-kort ryms utan att konkurrera med hero-videon.
  */
 export const getMaxConcurrentVideos = () => {
   if (prefersReducedData()) return 1;
   switch (getVideoPlatform()) {
     case 'windows':
-      return isLowPowerDevice() ? 2 : 3;
+      return isLowPowerDevice() ? 4 : 5;
     case 'android':
       return isLowPowerDevice() ? 1 : 2;
     case 'apple':

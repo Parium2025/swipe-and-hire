@@ -4,9 +4,9 @@ import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
-import windowsMp4Asset from '@/assets/showcase-jobseeker-windows-premium.mp4.asset.json';
+import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
-import { prefersReducedData } from '@/lib/videoPlatform';
+import { isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -42,9 +42,11 @@ const prefersHevc = () => {
 };
 
 /**
- * Den lätta H.264-källan (720x1560, Main@4.0) används bara i sparläge.
+ * Windows får en egen lätt H.264 Main@3.1-källa (~0.68 Mbps, 432×936).
+ * Den är avsiktligt lättare än crisp-stegen: telefonen är liten i hero och ska
+ * aldrig konkurrera ut gallerivideorna eller fastna vid kallstart på riktigt nät.
  */
-const prefersPerformanceMp4 = () => prefersReducedData();
+const prefersLiteMp4 = () => isWindowsDevice() || prefersReducedData();
 
 /**
  * Upplösningsstege — vald efter FAKTISKA enhetspixlar, inte efter operativsystem.
@@ -124,8 +126,8 @@ const getSources = (widthPx?: number) =>
         { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
         { src: hiCrispAsset.url, type: 'video/mp4' },
       ]
-    : prefersPerformanceMp4()
-      ? [{ src: windowsMp4Asset.url, type: 'video/mp4' }]
+    : prefersLiteMp4()
+      ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
 
 
@@ -215,11 +217,13 @@ const JobSeekerVideoShowcase = ({
     /**
      * Buffringsvakt (kallstart på riktigt nät).
      *
-     * När bufferten tar slut fortsätter browsern att försöka rita bildruta för
-     * bildruta i takt med att data trillar in — det är exakt den ryckiga,
-     * "fastnande" känslan på Windows. Istället pausar vi medvetet och
-     * återupptar först när det finns ≥ 3 s färdigbuffrat framför oss. Då blir
-     * det en (1) kort paus istället för tio sekunder av hack.
+     * Buffringsvakt utan tvångspaus.
+     *
+     * Den tidigare varianten pausade videon tills ≥3 s var buffrat. På riktigt
+     * Windows-nät kunde det ge exakt den premium-dödaren användaren ser: bilden
+     * står still i 20–30 sekunder. Nu låter vi browsern fortsätta native och
+     * försöker bara kicka igång igen när lite data finns, eller om den faktiskt
+     * har hamnat i paused-läge.
      */
     let stallTimer: number | null = null;
     const clearStall = () => {
@@ -238,12 +242,14 @@ const JobSeekerVideoShowcase = ({
     };
     const onWaiting = () => {
       if (!active || stallTimer !== null) return;
-      v.pause();
+      try { v.preload = 'auto'; } catch { /* noop */ }
+      let ticks = 0;
       stallTimer = window.setInterval(() => {
+        ticks += 1;
         if (!active || document.visibilityState !== 'visible') return;
         const ahead = bufferedAhead();
-        const nearEnd = v.duration > 0 && v.currentTime > v.duration - 3.2;
-        if (ahead >= 3 || nearEnd || v.readyState >= 4) {
+        const nearEnd = v.duration > 0 && v.currentTime > v.duration - 1.2;
+        if (ahead >= 0.65 || nearEnd || v.readyState >= 3 || ticks >= 20) {
           clearStall();
           attempt();
         }
