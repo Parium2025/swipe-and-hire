@@ -8,6 +8,7 @@
  */
 import realPosters from '@/assets/landing/jobseeker-real-1.jpg';
 import realPoster2 from '@/assets/landing/jobseeker-real-2.jpg';
+import phonePoster from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import { isLowPowerDevice, prefersLightweightVideo } from '@/lib/videoPlatform';
 
 const SPLINE_SCENE_URL = '/spline/parium-phone-scene.splinecode';
