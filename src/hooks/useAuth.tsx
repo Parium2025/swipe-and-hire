@@ -139,6 +139,7 @@ interface AuthContextType {
     website?: string;
     company_description?: string;
     employee_count?: string;
+    terms_accepted_at?: string;
   }) => Promise<{ error?: any }>;
   signIn: (email: string, password: string, roleHint?: UserRole) => Promise<{ error?: any }>;
   signInWithPhone: (phone: string) => Promise<{ error?: any }>;
@@ -992,6 +993,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     website?: string;
     company_description?: string;
     employee_count?: string;
+    terms_accepted_at?: string;
   }) => {
     try {
       // Anropar custom-signup Edge Function (skickar bekräftelsemejl via Lovable Emails)

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useNavigate, useNavigationType } from 'react-router-dom';
+import { Link, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -66,8 +66,22 @@ function FaqAccordion({ q, a }: { q: string; a: string }) {
             className="overflow-hidden"
           >
             <p className="px-6 pb-6 text-sm leading-7 text-white">
-              <span className="font-semibold text-secondary">Svar: </span>{a}
+              <span className="font-semibold text-secondary">Svar: </span>
+              {a.split('parium.se/dpa').map((part, i, arr) => (
+                <span key={i}>
+                  {part}
+                  {i < arr.length - 1 && (
+                    <Link
+                      to="/dpa"
+                      className="font-semibold text-secondary underline underline-offset-2 transition hover:text-secondary/80"
+                    >
+                      parium.se/dpa
+                    </Link>
+                  )}
+                </span>
+              ))}
             </p>
+
           </motion.div>
         )}
       </AnimatePresence>
@@ -2228,7 +2242,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur länge sparas kandidatdata?',
-                        a: 'Vi kör en automatisk gallring varje natt. Ansökningar och tillhörande chattar raderas 24 månader efter ansökan (diskrimineringslagens preskriptionstid), aktivitetslogg efter 24 månader, visningsstatistik efter 12 månader och notiser efter 6 månader. Ni kan alltid ta bort en kandidat eller annons tidigare, och kandidaten kan radera hela sitt konto själv när som helst. Hela gallringsrutinen finns i vårt personuppgiftsbiträdesavtal.',
+                        a: 'Vi raderar gammal data automatiskt varje natt (kallas gallringsrutin i GDPR-språk). Ansökningar och tillhörande chattar raderas 24 månader efter ansökan (diskrimineringslagens preskriptionstid), aktivitetslogg efter 24 månader, visningsstatistik efter 12 månader och notiser efter 6 månader. Ni kan alltid ta bort en kandidat eller annons tidigare, och kandidaten kan radera hela sitt konto själv när som helst. Hela gallringsrutinen finns i vårt personuppgiftsbiträdesavtal.',
                       },
                       {
                         q: 'Vilken support får vi som kund?',

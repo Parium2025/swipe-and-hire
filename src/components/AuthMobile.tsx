@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, startTransition } from 'react';
 
 import { useNavigate } from 'react-router-dom';
+import { SignupConsent } from '@/components/auth/SignupConsent';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -52,6 +53,7 @@ const AuthMobile = ({
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(initialMode !== 'register');
+  const [consentAccepted, setConsentAccepted] = useState(false);
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
   // Separate form data for each role
@@ -471,7 +473,20 @@ const AuthMobile = ({
           return;
         }
 
+        if (!consentAccepted) {
+          toast({
+            title: "Godkännande krävs",
+            description: role === 'employer'
+              ? "Du behöver godkänna integritetspolicyn och personuppgiftsbiträdesavtalet."
+              : "Du behöver godkänna integritetspolicyn.",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
         const result = await signUp(currentEmail, currentPassword, {
+          terms_accepted_at: new Date().toISOString(),
           role,
           first_name: currentData.firstName,
           last_name: currentData.lastName,
@@ -1232,6 +1247,12 @@ const AuthMobile = ({
                         </div>
                       )}
                       
+                      <SignupConsent
+                        role={role}
+                        checked={consentAccepted}
+                        onCheckedChange={setConsentAccepted}
+                      />
+
                        <Button 
                           type="submit" 
                           variant="glass"
