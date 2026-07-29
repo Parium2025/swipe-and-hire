@@ -306,9 +306,20 @@ export default function IntegrityPolicyPage() {
                   <strong>Aktivt konto:</strong> så länge du använder tjänsten.
                 </li>
                 <li>
-                  <strong>Inaktivt konto:</strong> raderas automatiskt efter 24
-                  månaders inaktivitet.
+                  <strong>Inaktivt konto:</strong> efter 24 månader utan
+                  inloggning mejlar vi dig en varning. Loggar du inte in inom 30
+                  dagar raderas kontot och all din data permanent.
                 </li>
+                <li>
+                  <strong>Jobbansökningar och tillhörande chattar:</strong> raderas
+                  automatiskt 24 månader efter att ansökan skickades.
+                </li>
+                <li>
+                  <strong>Notiser:</strong> 6 månader.{' '}
+                  <strong>Visningsstatistik</strong> (vem som sett en annons eller
+                  profil): 12 månader.
+                </li>
+
                 <li>
                   <strong>Bokföringsunderlag (fakturor):</strong> 7 år enligt
                   bokföringslagen.
