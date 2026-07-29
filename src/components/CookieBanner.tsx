@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Cookie, X } from 'lucide-react';
+import { Cookie, X, ChevronDown } from 'lucide-react';
 
 const STORAGE_KEY = 'parium-cookie-consent';
-const CONSENT_VERSION = 2; // Höj om policyn ändras — då triggas ny fråga
+const CONSENT_VERSION = 3; // Höj om policyn ändras — då triggas ny fråga
 const OPEN_EVENT = 'parium:open-cookie-settings';
 
 export type CookieCategory = 'necessary' | 'analytics' | 'marketing' | 'preferences';
@@ -17,8 +17,8 @@ export type CookieConsent = {
 };
 
 /**
- * Läs sparat cookie-besked.
- * Returnerar `null` om användaren inte kvitterat rutan eller om versionen ändrats.
+ * Läs sparat cookie-val.
+ * Returnerar `null` om användaren inte svarat eller om versionen ändrats.
  */
 export function getCookieConsent(): CookieConsent | null {
   if (typeof window === 'undefined') return null;
@@ -35,11 +35,15 @@ export function getCookieConsent(): CookieConsent | null {
 
 /**
  * Kolla om en kategori är godkänd.
- * Parium använder i dag enbart nödvändig lagring — statistik- och
- * marknadsföringscookies finns inte i tjänsten och returnerar därför alltid false.
+ * Nödvändig lagring är alltid tillåten. Övriga kategorier styrs av
+ * användarens val — Parium använder dem inte i dag, men valet respekteras
+ * automatiskt den dag en sådan cookie införs.
  */
 export function hasConsent(category: CookieCategory): boolean {
-  return category === 'necessary';
+  if (category === 'necessary') return true;
+  const consent = getCookieConsent();
+  if (!consent) return false;
+  return consent[category] === true;
 }
 
 /** Öppna rutan igen (används från footer-länken "Cookies"). */
@@ -48,10 +52,18 @@ export function openCookieSettings() {
   window.dispatchEvent(new CustomEvent(OPEN_EVENT));
 }
 
+type Choices = { analytics: boolean; marketing: boolean; preferences: boolean };
+
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
+  const [customizing, setCustomizing] = useState(false);
+  const [choices, setChoices] = useState<Choices>({
+    analytics: false,
+    marketing: false,
+    preferences: false,
+  });
 
-  // Initial visning: om rutan inte kvitterats, visa den.
+  // Initial visning: om användaren inte svarat, visa rutan.
   // Undantag: på /integritetspolicy — användaren ska kunna läsa i lugn och ro.
   useEffect(() => {
     const path = typeof window !== 'undefined' ? window.location.pathname : '';
@@ -64,7 +76,17 @@ export function CookieBanner() {
 
   // Lyssna på "öppna igen"-event från footern
   useEffect(() => {
-    const open = () => setVisible(true);
+    const open = () => {
+      const saved = getCookieConsent();
+      if (saved) {
+        setChoices({
+          analytics: saved.analytics,
+          marketing: saved.marketing,
+          preferences: saved.preferences,
+        });
+      }
+      setVisible(true);
+    };
     window.addEventListener(OPEN_EVENT, open);
     return () => window.removeEventListener(OPEN_EVENT, open);
   }, []);
@@ -82,14 +104,12 @@ export function CookieBanner() {
     };
   }, [visible]);
 
-  const acknowledge = () => {
+  const save = (next: Choices) => {
     const consent: CookieConsent = {
       version: CONSENT_VERSION,
       timestamp: new Date().toISOString(),
       necessary: true,
-      analytics: false,
-      marketing: false,
-      preferences: false,
+      ...next,
     };
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
@@ -100,13 +120,17 @@ export function CookieBanner() {
       /* ignore */
     }
     setVisible(false);
+    setCustomizing(false);
   };
 
-  // Stäng med Escape → kvitterar rutan
+  const acceptAll = () => save({ analytics: true, marketing: true, preferences: true });
+  const onlyNecessary = () => save({ analytics: false, marketing: false, preferences: false });
+
+  // Stäng med Escape → sparar "endast nödvändiga"
   useEffect(() => {
     if (!visible) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') acknowledge();
+      if (e.key === 'Escape') onlyNecessary();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -121,7 +145,7 @@ export function CookieBanner() {
         aria-hidden="true"
         className="fixed inset-0 animate-fade-in bg-black/70"
         style={{ zIndex: 2147483646 }}
-        onClick={acknowledge}
+        onClick={onlyNecessary}
       />
 
       <div
@@ -139,7 +163,7 @@ export function CookieBanner() {
         <div className="pointer-events-auto relative flex max-h-[calc(100svh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-2rem)] w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0b1220]/95 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95)]">
           <button
             type="button"
-            onClick={acknowledge}
+            onClick={onlyNecessary}
             aria-label="Stäng"
             className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full text-white transition hover:bg-white/10"
           >
@@ -153,21 +177,16 @@ export function CookieBanner() {
               </span>
 
               <h2 id="cookie-title" className="mt-5 text-xl font-bold text-white sm:text-2xl">
-                Om cookies på Parium
+                Cookies på Parium
               </h2>
 
               <p
                 id="cookie-desc"
                 className="mt-3 max-w-[440px] text-[14px] leading-6 text-white sm:text-[15px]"
               >
-                Vi använder bara nödvändig lagring — det som krävs för att du ska kunna logga
-                in, för säkerhet och för att appen ska minnas dina inställningar i webbläsaren.
-              </p>
-
-              <p className="mt-3 max-w-[440px] text-[14px] leading-6 text-white sm:text-[15px]">
-                Vi använder <strong>inga</strong> cookies för statistik, spårning eller
-                marknadsföring, och delar inget med tredje part i reklamsyfte. Därför finns
-                inget att välja bort — nödvändig lagring kräver inte ditt samtycke.{' '}
+                Vi använder nödvändig lagring för inloggning, säkerhet och dina inställningar.
+                Den kräver inget samtycke. Övriga kategorier är avstängda i dag — väljer du att
+                tillåta dem gäller ditt val automatiskt om vi inför dem i framtiden.{' '}
                 <a
                   href="/integritetspolicy"
                   className="underline underline-offset-2 hover:text-secondary"
@@ -177,20 +196,118 @@ export function CookieBanner() {
                 .
               </p>
 
-              <div className="mt-6 w-full">
+              <button
+                type="button"
+                onClick={() => setCustomizing((v) => !v)}
+                aria-expanded={customizing}
+                className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-white underline underline-offset-4 transition hover:text-secondary"
+              >
+                Anpassa mina cookies
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${customizing ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {customizing && (
+                <div className="mt-4 w-full space-y-2 text-left">
+                  <CategoryRow
+                    title="Nödvändiga"
+                    desc="Inloggning, säkerhet och grundläggande funktioner. Kan inte stängas av."
+                    checked
+                    locked
+                  />
+                  <CategoryRow
+                    title="Funktion och inställningar"
+                    desc="Kommer ihåg dina filter och val i appen. Används inte i dag."
+                    checked={choices.preferences}
+                    onChange={(v) => setChoices((c) => ({ ...c, preferences: v }))}
+                  />
+                  <CategoryRow
+                    title="Statistik"
+                    desc="Anonym besöksstatistik för att förbättra tjänsten. Används inte i dag."
+                    checked={choices.analytics}
+                    onChange={(v) => setChoices((c) => ({ ...c, analytics: v }))}
+                  />
+                  <CategoryRow
+                    title="Marknadsföring"
+                    desc="Annonsering och spårning. Används inte i dag."
+                    checked={choices.marketing}
+                    onChange={(v) => setChoices((c) => ({ ...c, marketing: v }))}
+                  />
+                </div>
+              )}
+
+              <div className="mt-6 flex w-full flex-col gap-2">
                 <button
                   type="button"
-                  onClick={acknowledge}
+                  onClick={acceptAll}
                   className="min-h-[50px] w-full rounded-xl bg-secondary px-5 text-sm font-bold text-white shadow-[0_14px_35px_-16px_hsl(var(--secondary))] transition hover:-translate-y-0.5"
                 >
-                  Jag förstår
+                  Acceptera alla
                 </button>
+                {customizing ? (
+                  <button
+                    type="button"
+                    onClick={() => save(choices)}
+                    className="min-h-[50px] w-full rounded-xl border border-white/20 bg-white/5 px-5 text-sm font-bold text-white transition hover:bg-white/10"
+                  >
+                    Spara mina val
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onlyNecessary}
+                    className="min-h-[50px] w-full rounded-xl border border-white/20 bg-white/5 px-5 text-sm font-bold text-white transition hover:bg-white/10"
+                  >
+                    Endast nödvändiga
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
     </>
+  );
+}
+
+function CategoryRow({
+  title,
+  desc,
+  checked,
+  onChange,
+  locked = false,
+}: {
+  title: string;
+  desc: string;
+  checked: boolean;
+  onChange?: (v: boolean) => void;
+  locked?: boolean;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+      <div className="min-w-0">
+        <p className="text-[13px] font-semibold text-white">{title}</p>
+        <p className="mt-0.5 text-[12px] leading-5 text-white/90">{desc}</p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={title}
+        disabled={locked}
+        onClick={() => onChange?.(!checked)}
+        className={`mt-0.5 h-6 w-11 shrink-0 rounded-full border transition ${
+          checked ? 'border-secondary bg-secondary' : 'border-white/25 bg-white/10'
+        } ${locked ? 'opacity-60' : ''}`}
+      >
+        <span
+          className={`block h-5 w-5 rounded-full bg-white transition-transform ${
+            checked ? 'translate-x-[22px]' : 'translate-x-[2px]'
+          }`}
+        />
+      </button>
+    </div>
   );
 }
 
