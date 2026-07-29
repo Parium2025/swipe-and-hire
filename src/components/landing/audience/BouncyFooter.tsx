@@ -118,7 +118,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
         </svg>
 
         {/* Content overlay – sits inside the colored bounce */}
-          <div className="absolute inset-x-0 bottom-0 top-0 flex items-center justify-center px-6 pb-8 pt-16 sm:pb-10 md:items-end md:pb-28 md:pt-0">
+          <div className="absolute inset-x-0 bottom-0 top-0 flex items-center justify-center px-6 pb-8 pt-16 sm:pb-10 md:items-center md:pb-14 md:pt-20">
             <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
