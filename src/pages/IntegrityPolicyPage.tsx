@@ -36,6 +36,21 @@ export default function IntegrityPolicyPage() {
   const navigate = useNavigate();
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-policy-scroll-root]');
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      // Vänta in layouten så att ankaret hamnar rätt
+      const id = window.setTimeout(() => {
+        const target = document.getElementById(hash);
+        if (!target) return;
+        if (root) {
+          const top = root.scrollTop + target.getBoundingClientRect().top - 144;
+          root.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+        } else {
+          target.scrollIntoView({ block: 'start', behavior: 'auto' });
+        }
+      }, 120);
+      return () => window.clearTimeout(id);
+    }
     if (root) root.scrollTop = 0;
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, []);
