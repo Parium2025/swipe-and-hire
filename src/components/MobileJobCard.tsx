@@ -286,12 +286,14 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
               className="overflow-hidden"
             >
               <div className="h-px bg-white/10 mx-2" />
-              <div className="flex gap-2 px-2 py-1.5">
+              <div ref={actionsRef} className="flex gap-2 px-2 py-1.5">
                 {!hideActions && !isExpired && (
 
                   <Button
                     variant="glass"
                     size="sm"
+                    aria-label="Redigera annons"
+                    title="Redigera annons"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (isDraft && onEditDraft) {
@@ -300,23 +302,25 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                         onEdit(job);
                       }
                     }}
-                    className="flex-1 h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40"
+                    className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11 text-sm'} transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40`}
                   >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Redigera
+                    <Edit className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
+                    {!compactActions && <span className="truncate">Redigera</span>}
                   </Button>
                 )}
                 {!hideActions && isExpired && onRepublish && (
                   <Button
                     size="sm"
+                    aria-label="Återpublicera annons"
+                    title="Återpublicera annons"
                     onClick={(e) => {
                       e.stopPropagation();
                       onRepublish(job);
                     }}
-                    className="flex-1 h-11 rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]"
+                    className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]`}
                   >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Återpublicera
+                    <RotateCcw className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
+                    {!compactActions && <span className="truncate">Återpublicera</span>}
                   </Button>
                 )}
                 {!isDraft && (
@@ -326,27 +330,30 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                     aria-label="Förhandsgranska annons"
                     title="Förhandsgranska annons"
                     onClick={handlePreviewClick}
-                    className={`${hideActions ? 'flex-1 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
+                    className={`${hideActions && !compactActions ? 'flex-1 min-w-0 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
                   >
                     <Eye className="h-4 w-4" />
-                    {hideActions && <span className="text-sm">Visa annons</span>}
+                    {hideActions && !compactActions && <span className="text-sm truncate">Visa annons</span>}
                   </Button>
                 )}
                 {!hideActions && (
                   <Button
                     variant="glass"
                     size="sm"
+                    aria-label="Ta bort annons"
+                    title="Ta bort annons"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(job);
                     }}
-                    className={`flex-1 h-11 rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
+                    className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 bg-red-500/80 text-white transition-[background-color,transform] duration-150 hover:bg-red-500/90 active:scale-[0.97]`}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Ta bort
+                    <Trash2 className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
+                    {!compactActions && <span className="truncate">Ta bort</span>}
                   </Button>
                 )}
               </div>
+
             </motion.div>
           )}
         </AnimatePresence>
