@@ -19,7 +19,7 @@ const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const SNAPSHOT_PREFIX = 'parium-auth-snapshot:';
 
-const SUPABASE_AUTH_KEY_PATTERN = /sb-[a-z]+-auth-token/;
+const SUPABASE_AUTH_KEY_PATTERN = /sb-[a-z0-9]+-auth-token/;
 
 const isAuthStorageKey = (key: string): boolean => {
   return SUPABASE_AUTH_KEY_PATTERN.test(key) || key.includes('supabase.auth');
@@ -37,36 +37,66 @@ let _inactivityLogoutFromStorage = false;
 export const isInactivityLogoutFromStorage = () => _inactivityLogoutFromStorage;
 export const clearInactivityLogoutFromStorage = () => { _inactivityLogoutFromStorage = false; };
 
+/**
+ * In-memory mirror used when localStorage is unavailable (Lovable-preview
+ * iframe with partitionerad lagring, inkognito, Safari ITP m.m.).
+ * Utan detta blir "Håll mig inloggad" helt verkningslös i preview.
+ */
+const memoryMirror = new Map<string, string>();
+
+const readLocal = (key: string): string | null => {
+  try {
+    const v = localStorage.getItem(key);
+    if (v !== null) return v;
+  } catch {}
+  return memoryMirror.has(key) ? memoryMirror.get(key)! : null;
+};
+
+const writeLocal = (key: string, value: string): void => {
+  memoryMirror.set(key, value);
+  try { localStorage.setItem(key, value); } catch {}
+};
+
+const removeLocal = (key: string): void => {
+  memoryMirror.delete(key);
+  try { localStorage.removeItem(key); } catch {}
+};
 
 // Track if we should use persistent storage
 export const shouldRememberUser = (): boolean => {
+  if (readLocal(REMEMBER_ME_KEY) === 'true') return true;
+  // Fallback: preferensen speglas även i sessionStorage så att den överlever
+  // en blockerad localStorage inom samma flik/iframe.
   try {
-    return localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+    return sessionStorage.getItem(REMEMBER_ME_KEY) === 'true';
   } catch {
     return false;
   }
 };
 
+
 // Set remember me preference
 export const setRememberMe = (value: boolean): void => {
-  try {
-    localStorage.setItem(REMEMBER_ME_KEY, value.toString());
-    // If user turns Remember Me OFF, wipe any existing snapshots so future
-    // tabs don't auto-restore.
-    if (!value) {
-      try {
-        const toRemove: string[] = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith(SNAPSHOT_PREFIX)) toRemove.push(k);
-        }
-        toRemove.forEach((k) => { try { localStorage.removeItem(k); } catch {} });
-      } catch {}
-    }
-  } catch (e) {
-    console.warn('Failed to save remember me preference:', e);
+  writeLocal(REMEMBER_ME_KEY, value.toString());
+  try { sessionStorage.setItem(REMEMBER_ME_KEY, value.toString()); } catch {}
+
+  // If user turns Remember Me OFF, wipe any existing snapshots so future
+  // tabs don't auto-restore.
+  if (!value) {
+    try {
+      const toRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(SNAPSHOT_PREFIX)) toRemove.push(k);
+      }
+      toRemove.forEach((k) => removeLocal(k));
+    } catch {}
+    Array.from(memoryMirror.keys())
+      .filter((k) => k.startsWith(SNAPSHOT_PREFIX))
+      .forEach((k) => memoryMirror.delete(k));
   }
 };
+
 
 const getLastActivityTimestamp = (): number => {
   try {
@@ -206,15 +236,13 @@ export class AuthStorageAdapter implements Storage {
       // 2. Fallback: Remember Me snapshot in localStorage (renamed key —
       //    Supabase does NOT watch this key, so it won't trigger cross-tab sync).
       if (shouldRememberUser()) {
-        try {
-          const snap = localStorage.getItem(snapshotKey(key));
-          if (snap) {
-            // Hydrate sessionStorage so subsequent reads are fast and
-            // Supabase's normal flow continues from sessionStorage only.
-            try { sessionStorage.setItem(key, snap); } catch {}
-            return snap;
-          }
-        } catch {}
+        const snap = readLocal(snapshotKey(key));
+        if (snap) {
+          // Hydrate sessionStorage so subsequent reads are fast and
+          // Supabase's normal flow continues from sessionStorage only.
+          try { sessionStorage.setItem(key, snap); } catch {}
+          return snap;
+        }
       }
 
       // 3. Legacy migration: previous versions stored auth tokens directly in
@@ -226,7 +254,7 @@ export class AuthStorageAdapter implements Storage {
         if (legacy) {
           try { sessionStorage.setItem(key, legacy); } catch {}
           if (shouldRememberUser()) {
-            try { localStorage.setItem(snapshotKey(key), legacy); } catch {}
+            writeLocal(snapshotKey(key), legacy);
           }
           try { localStorage.removeItem(key); } catch {}
           return legacy;
@@ -251,11 +279,7 @@ export class AuthStorageAdapter implements Storage {
 
       // Snapshot in localStorage under renamed key — only if Remember Me is on.
       if (shouldRememberUser()) {
-        try {
-          localStorage.setItem(snapshotKey(key), value);
-        } catch (lsError) {
-          console.warn('Failed to write auth snapshot to localStorage:', lsError);
-        }
+        writeLocal(snapshotKey(key), value);
       }
 
       updateLastActivity();
@@ -263,6 +287,7 @@ export class AuthStorageAdapter implements Storage {
       try { sessionStorage.setItem(key, value); } catch {}
     }
   }
+
 
   removeItem(key: string): void {
     // Per-tab logout: clear from sessionStorage in this tab only.
@@ -272,10 +297,11 @@ export class AuthStorageAdapter implements Storage {
     // for future new tabs. Other tabs that are still logged in will rewrite
     // the snapshot on their next token refresh (since they continue running).
     if (isAuthStorageKey(key)) {
-      try { localStorage.removeItem(snapshotKey(key)); } catch {}
+      removeLocal(snapshotKey(key));
       // Belt-and-suspenders: also remove any leftover legacy entry.
-      try { localStorage.removeItem(key); } catch {}
+      removeLocal(key);
     }
+
   }
 
   clear(): void {
@@ -308,9 +334,13 @@ export class AuthStorageAdapter implements Storage {
         }
       }
     } catch {}
-    localKeysToRemove.forEach((key) => {
-      try { localStorage.removeItem(key); } catch {}
-    });
+    localKeysToRemove.forEach((key) => removeLocal(key));
+
+    // Spegeln (används när localStorage är blockerat) måste också rensas.
+    Array.from(memoryMirror.keys())
+      .filter((k) => k.startsWith(SNAPSHOT_PREFIX) || isAuthStorageKey(k))
+      .forEach((k) => memoryMirror.delete(k));
+
   }
 }
 
