@@ -316,8 +316,15 @@ const PinnedHorizontalGallery = () => {
      * är exakt den känsla som gör att sidan upplevs billigare på Windows.
      * 0.5 når målet på ~5 frames (~80 ms): tillräckligt för att hoppet ska
      * läsas som en glidning, för snabbt för att kännas som eftersläpning.
+     *
+     * TOUCH (iOS/Android): 1 = ingen smoothing alls. iOS levererar redan en
+     * kontinuerlig momentum-kurva, så all extra interpolering blir bara
+     * eftersläpning — fingret/momentum går före och kortraden hamnar efter,
+     * vilket läses som "inte smooth". Touch följer därför scrollen 1:1 igen,
+     * exakt som före Windows-optimeringen.
      */
-    const LERP = isTouchScroll ? 0.38 : 0.5;
+    const LERP = isTouchScroll ? 1 : 0.5;
+
 
     const tick = () => {
       rafRef.current = null;
