@@ -177,7 +177,10 @@ function ColumnPair({
 
 const SiteFooter = () => {
   const { pathname } = useLocation();
-  const filteredCompanyLinks = companyLinks.filter((l) => l.to !== pathname);
+  const contextualCompanyLinks = isEmployerContext(pathname)
+    ? [...companyLinks, dpaLink]
+    : companyLinks;
+  const filteredCompanyLinks = contextualCompanyLinks.filter((l) => l.to !== pathname);
   const reduce = useReducedMotion();
 
   const motionProps = reduce
