@@ -576,6 +576,7 @@ const PinnedHorizontalGallery = () => {
       disposed = true;
       if (playTimer) window.clearTimeout(playTimer);
       warmTimers.forEach((timer) => window.clearTimeout(timer));
+      gateCleanups.forEach((dispose) => dispose());
       window.removeEventListener('parium:gallery-warm', onWarm);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
