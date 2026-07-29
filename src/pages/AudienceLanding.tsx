@@ -2215,7 +2215,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur hanteras GDPR och kandidatdata?',
-                        a: 'All data lagras inom EU enligt GDPR. Kandidater äger sin egen data och delar bara fullständig profil med er när de aktivt visat intresse. Ni kan exportera, anonymisera och radera kandidatdata direkt från dashboarden.',
+                        a: 'Kandidatdata lagras i EU (våra servrar ligger i Paris, Frankrike). Kandidaten äger sin egen data och delar sin fullständiga profil med er först när hen aktivt ansökt eller visat intresse. Ni ser bara kandidater kopplade till era egna annonser. Kandidaten kan själv radera sitt konto och sina uppgifter när som helst, och ni kan ta bort kandidater från er vy. Läs mer i vår integritetspolicy.',
                       },
                       {
                         q: 'Vilken support får vi som kund?',
