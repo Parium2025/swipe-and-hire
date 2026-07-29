@@ -180,6 +180,12 @@ const JobSeekerVideoShowcase = ({
   if (windowsColdStartRef.current === null) windowsColdStartRef.current = isWindowsDevice();
   const windowsColdStart = windowsColdStartRef.current;
   const [windowsBlobSource, setWindowsBlobSource] = useState<string | null>(null);
+  /**
+   * Posterlager: <video poster> ritas inte alltid direkt i Safari/iOS — ramen
+   * kan stå svart tills första bildrutan är dekodad. Ett riktigt <img> ovanpå
+   * ritas i samma frame som layouten och fasas ut vid första `playing`.
+   */
+  const [firstFramePainted, setFirstFramePainted] = useState(false);
   const visibleSources = windowsColdStart
     ? (windowsBlobSource ? [{ src: windowsBlobSource, type: 'video/mp4' }] : [])
     : sources;
@@ -462,8 +468,11 @@ const JobSeekerVideoShowcase = ({
     v.addEventListener('loadeddata', resume);
     v.addEventListener('waiting', onWaiting);
     v.addEventListener('stalled', onWaiting);
+    const markPainted = () => setFirstFramePainted(true);
     v.addEventListener('playing', onPlaying);
     v.addEventListener('playing', onFirstStablePlay);
+    v.addEventListener('playing', markPainted);
+    v.addEventListener('timeupdate', markPainted);
 
     return () => {
       clearRetry();
@@ -481,6 +490,8 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('stalled', onWaiting);
       v.removeEventListener('playing', onPlaying);
       v.removeEventListener('playing', onFirstStablePlay);
+      v.removeEventListener('playing', markPainted);
+      v.removeEventListener('timeupdate', markPainted);
     };
   }, [active, safePlay, coldGate, geometryGate, keepAliveWhenHidden, windowsColdStart, windowsBlobSource]);
 
@@ -536,6 +547,20 @@ const JobSeekerVideoShowcase = ({
 
             style={{ aspectRatio: ASPECT }}
           >
+            {/* Posterlager: ritas i samma frame som layouten (till skillnad från
+                <video poster> som Safari ibland håller tillbaka) och fasas ut
+                först när videon faktiskt spelar. */}
+            {!firstFramePainted && (
+              <img
+                src={posterAsset.url}
+                alt=""
+                aria-hidden
+                decoding="sync"
+                loading="eager"
+                {...({ fetchpriority: 'high' } as Record<string, string>)}
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+              />
+            )}
             <video
               ref={videoRef}
               autoPlay={!coldGate}
