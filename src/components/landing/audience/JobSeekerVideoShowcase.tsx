@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
@@ -174,6 +174,13 @@ const JobSeekerVideoShowcase = ({
   const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
   if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
   const sources = sourcesRef.current;
+  const windowsColdStartRef = useRef<boolean | null>(null);
+  if (windowsColdStartRef.current === null) windowsColdStartRef.current = isWindowsDevice();
+  const windowsColdStart = windowsColdStartRef.current;
+  const [windowsBlobSource, setWindowsBlobSource] = useState<string | null>(null);
+  const visibleSources = windowsColdStart
+    ? (windowsBlobSource ? [{ src: windowsBlobSource, type: 'video/mp4' }] : [])
+    : sources;
 
   /**
    * Kallstartsspärr (ENDAST Windows / sparläge).
@@ -200,6 +207,55 @@ const JobSeekerVideoShowcase = ({
   const warmRef = useRef(false);
 
 
+  /**
+   * Windows Incognito-kallstart: spela inte direkt från nätverksströmmen.
+   *
+   * I privatläge är diskcache/HTTP-range-cachen mycket mer begränsad. Det gör
+   * att Chrome/Edge kan försöka både hämta och avkoda samma första segment i
+   * realtid, vilket ger exakt beteendet användaren beskriver: första visningen
+   * hackar, men efter en liten scroll är filen varm i minnet och flyter perfekt.
+   *
+   * Därför gör Windows — och bara Windows — en hel, liten fetch av den redan
+   * Windows-optimerade MP4:an (~2 MB) till ett Blob-URL innan första play(). Då
+   * får videon en sammanhängande minneskälla och cold start blir poster → mjuk
+   * uppspelning, istället för poster → nätverksstream → decode-stutter.
+   */
+  useEffect(() => {
+    if (!windowsColdStart) return;
+    const source = sources[0]?.src;
+    if (!source) return;
+
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    const controller = new AbortController();
+
+    const loadIntoMemory = async () => {
+      try {
+        const response = await fetch(source, {
+          cache: 'force-cache',
+          signal: controller.signal,
+          priority: 'high',
+        } as RequestInit & { priority?: 'high' | 'low' });
+        if (!response.ok) throw new Error('video fetch failed');
+        const blob = await response.blob();
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setWindowsBlobSource(objectUrl);
+      } catch {
+        if (!cancelled) setWindowsBlobSource(source);
+      }
+    };
+
+    loadIntoMemory();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [sources, windowsColdStart]);
+
+
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
     if (!v || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
@@ -210,6 +266,7 @@ const JobSeekerVideoShowcase = ({
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
+    if (windowsColdStart && !windowsBlobSource) return;
 
     v.muted = true;
     v.defaultMuted = true;
@@ -416,7 +473,7 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('playing', onPlaying);
       v.removeEventListener('playing', onFirstStablePlay);
     };
-  }, [active, safePlay, coldGate, geometryGate, keepAliveWhenHidden]);
+  }, [active, safePlay, coldGate, geometryGate, keepAliveWhenHidden, windowsColdStart, windowsBlobSource]);
 
 
 
@@ -488,7 +545,7 @@ const JobSeekerVideoShowcase = ({
                 // dedikerad GPU.
               }}
             >
-              {sources.map((s) => (
+              {visibleSources.map((s) => (
                 <source key={s.src} src={s.src} type={s.type} />
               ))}
 
