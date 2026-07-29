@@ -72,8 +72,23 @@ export const preloadAudienceLandingAssets = () => {
       import('@/components/landing/audience/BouncyFooter').catch(() => {});
       import('@/components/landing/SiteFooter').catch(() => {});
     };
-    if (shouldDeferHeavyAssets()) window.setTimeout(importUnderFold, 2200);
-    else importUnderFold();
+    if (shouldDeferHeavyAssets()) {
+      // Windows-kallstarten är känslig: om galleriet/Spline/lazy chunks börjar
+      // laddas efter en fast timeout kan de landa exakt när hero-videon avkodar
+      // sina första sekunder. Vänta därför på faktisk första `playing` från
+      // telefonvideon och ge den sedan lite ostörd decode-budget. Fallbacken är
+      // medvetet lång så långsamma Windows-maskiner inte störs av under-fold work.
+      let done = false;
+      const start = () => {
+        if (done) return;
+        done = true;
+        window.removeEventListener('parium:jobseeker-video-stable', onStable);
+        importUnderFold();
+      };
+      const onStable = () => window.setTimeout(start, 2500);
+      window.addEventListener('parium:jobseeker-video-stable', onStable, { once: true });
+      window.setTimeout(start, 8000);
+    } else importUnderFold();
   };
   if (typeof w.requestIdleCallback === 'function') w.requestIdleCallback(run);
   else window.setTimeout(run, 600);

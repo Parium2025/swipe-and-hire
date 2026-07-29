@@ -4,7 +4,7 @@ import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
-import windowsSmoothAsset from '@/assets/showcase-jobseeker-windows-smooth60.mp4.asset.json';
+import windowsSafeAsset from '@/assets/showcase-jobseeker-windows-safe60.mp4.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
@@ -43,11 +43,13 @@ const prefersHevc = () => {
 };
 
 /**
- * Windows får en egen H.264 Main@3.2-källa i 60 fps (~0.97 Mbps, 432×936).
+ * Windows får en egen H.264 Constrained Baseline@3.2-källa i 60 fps
+ * (~1.07 Mbps, 432×936).
  * Viktigt: originalinspelningen är 60 fps. När Windows tidigare fick en 30 fps-
  * transcode såg swipe-animationerna ut som lagg även när bufferten var varm.
- * Den här varianten behåller rörelsens cadence men är fortfarande liten nog för
- * kallstart och hårdvaruavkodning i Chrome/Edge på Windows.
+ * Lika viktigt: Chrome/Edge på Windows kan hacka på B-frames/frame reordering
+ * vid kallstart. Därför är Windows-filen kodad utan B-frames, med kort GOP och
+ * `fastdecode`, så varje bildruta kan avkodas i ordning utan omkastningsbuffert.
  */
 const usesBufferedStart = () => isWindowsDevice() || prefersReducedData();
 
@@ -130,7 +132,7 @@ const getSources = (widthPx?: number) =>
         { src: hiCrispAsset.url, type: 'video/mp4' },
       ]
     : isWindowsDevice()
-      ? [{ src: windowsSmoothAsset.url, type: 'video/mp4' }]
+      ? [{ src: windowsSafeAsset.url, type: 'video/mp4' }]
       : prefersReducedData()
         ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
@@ -314,6 +316,10 @@ const JobSeekerVideoShowcase = ({
       }, 250);
     };
     const onPlaying = () => clearStall();
+    const onFirstStablePlay = () => {
+      window.dispatchEvent(new CustomEvent('parium:jobseeker-video-stable'));
+      v.removeEventListener('playing', onFirstStablePlay);
+    };
 
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
@@ -327,6 +333,7 @@ const JobSeekerVideoShowcase = ({
     v.addEventListener('waiting', onWaiting);
     v.addEventListener('stalled', onWaiting);
     v.addEventListener('playing', onPlaying);
+    v.addEventListener('playing', onFirstStablePlay);
 
     return () => {
       clearRetry();
@@ -342,6 +349,7 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('waiting', onWaiting);
       v.removeEventListener('stalled', onWaiting);
       v.removeEventListener('playing', onPlaying);
+      v.removeEventListener('playing', onFirstStablePlay);
     };
   }, [active, safePlay, coldGate]);
 
