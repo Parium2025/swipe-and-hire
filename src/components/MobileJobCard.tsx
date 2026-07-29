@@ -54,6 +54,7 @@ function getGradientForId(id: string) {
 
 export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp }: MobileJobCardProps) => {
   const navigate = useNavigate();
+  const { ref: actionsRef, compact: compactActions } = useCompactWidth(300);
   const [expanded, setExpanded] = useState(expandedProp ?? defaultExpanded);
   // Sync with controlled prop (used for global "Visa detaljer alla")
   useEffect(() => {
