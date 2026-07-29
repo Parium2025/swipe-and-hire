@@ -15,7 +15,6 @@ import winReal3 from '@/assets/landing/windows/jobseeker-real-3-windows.mp4.asse
 import winReal4 from '@/assets/landing/windows/jobseeker-real-4-windows.mp4.asset.json';
 import winRealCenter from '@/assets/landing/windows/jobseeker-real-center-windows.mp4.asset.json';
 import { fetchPriority } from '@/lib/fetchPriority';
-import { whenHeroVideoReady } from '@/lib/heroVideoReady';
 import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
 
 /**
@@ -411,7 +410,6 @@ const PinnedHorizontalGallery = () => {
 
     let playTimer: number | null = null;
     const warmTimers: number[] = [];
-    const gateCleanups: Array<() => void> = [];
     let disposed = false;
     let warmed = false;
     let entered = false;
@@ -478,18 +476,7 @@ const PinnedHorizontalGallery = () => {
       rest.forEach((v, index) => warm(v, base + index * 420));
     };
 
-    // Kallstart-grind: warmup väntar tills hero-videon (above the fold) är
-    // redo, annars konkurrerar 8 gallery-strömmar med det användaren faktiskt
-    // tittar på under de första sekunderna. Efter första gången är hero redan
-    // markerad som redo och detta blir en direkt anropskedja utan fördröjning.
-    // Grinden släpper alltid igenom senast efter 2 s (se heroVideoReady.ts),
-    // så galleriet kan aldrig fastna. Själva warmup-logiken är oförändrad.
-    const requestWarm = () => {
-      if (warmed) return;
-      gateCleanups.push(whenHeroVideoReady(warmVideos));
-    };
-
-    const onWarm = () => requestWarm();
+    const onWarm = () => warmVideos();
 
     const enter = () => {
       if (entered) return;
@@ -498,7 +485,7 @@ const PinnedHorizontalGallery = () => {
       hasEnteredOnce = true;
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
-      requestWarm();
+      warmVideos();
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
       const header = headerRef.current;
       if (gsapInstance) {
@@ -576,7 +563,6 @@ const PinnedHorizontalGallery = () => {
       disposed = true;
       if (playTimer) window.clearTimeout(playTimer);
       warmTimers.forEach((timer) => window.clearTimeout(timer));
-      gateCleanups.forEach((dispose) => dispose());
       window.removeEventListener('parium:gallery-warm', onWarm);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);

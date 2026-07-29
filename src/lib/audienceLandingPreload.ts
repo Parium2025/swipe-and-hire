@@ -8,7 +8,6 @@
  */
 import realPosters from '@/assets/landing/jobseeker-real-1.jpg';
 import realPoster2 from '@/assets/landing/jobseeker-real-2.jpg';
-import heroPosterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import { isLowPowerDevice, prefersLightweightVideo } from '@/lib/videoPlatform';
 
 const SPLINE_SCENE_URL = '/spline/parium-phone-scene.splinecode';
@@ -51,18 +50,8 @@ export const preloadAudienceLandingAssets = () => {
   if (started || typeof window === 'undefined') return;
   started = true;
 
-  // 1. Hero-telefonens poster FÖRST med high priority.
-  //    Utan denna hint upptäcks postern (som bara ligger som poster-attribut
-  //    på <video>) först när React monterat komponenten — alltså efter att
-  //    JS-bundlen hämtats, parsats och körts. På en svagare laptop står
-  //    telefonskärmen svart under hela den tiden. Med preload hämtas den
-  //    parallellt med JS och telefonen är "tänd" nästan direkt.
-  //    Assetet är hashat och same-origin, så det cachas permanent.
-  addLink('preload', heroPosterAsset.url, 'image', 'high');
-
-  // 2. Gallery-postrarna ligger under fold — de får normal respektive låg
-  //    prioritet så att de inte konkurrerar med hero-postern above the fold.
-  addLink('preload', realPosters, 'image');
+  // 1. Första gallery-postern: high-priority preload (LCP-kandidat under hero).
+  addLink('preload', realPosters, 'image', 'high');
   addLink('preload', realPoster2, 'image', 'low');
 
   // 2. Spline-scenen: på Windows väntar vi tills hero-videon fått spela stabilt

@@ -7,7 +7,6 @@ import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsMp4Asset from '@/assets/showcase-jobseeker-windows-premium.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { prefersReducedData } from '@/lib/videoPlatform';
-import { markHeroVideoReady } from '@/lib/heroVideoReady';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -192,17 +191,6 @@ const JobSeekerVideoShowcase = ({
     v.addEventListener('loadeddata', resume);
     v.addEventListener('pause', resume);
 
-    // Kallstart-grind: så fort hero-videon kan spela släpper vi fram
-    // galleriets warmup. Hero är above the fold och ska ha ostörd bandbredd
-    // och decode-budget först — annars slåss 8 gallery-videor + Spline om
-    // samma budget på svagare laptops. Vi markerar även vid `error` så att
-    // galleriet aldrig blockeras om hero-videon failar.
-    const signalReady = () => markHeroVideoReady();
-    if (v.readyState >= 3) signalReady();
-    v.addEventListener('canplay', signalReady);
-    v.addEventListener('loadeddata', signalReady);
-    v.addEventListener('error', signalReady);
-
     return () => {
       clearRetry();
       document.removeEventListener('visibilitychange', resume);
@@ -213,9 +201,6 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('canplay', resume);
       v.removeEventListener('loadeddata', resume);
       v.removeEventListener('pause', resume);
-      v.removeEventListener('canplay', signalReady);
-      v.removeEventListener('loadeddata', signalReady);
-      v.removeEventListener('error', signalReady);
     };
   }, [active, safePlay]);
 
