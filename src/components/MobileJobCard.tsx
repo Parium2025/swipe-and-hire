@@ -288,7 +288,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
               className="overflow-hidden"
             >
               <div className="h-px bg-white/10 mx-2" />
-              <div ref={actionsRef} className="flex gap-2 px-2 py-1.5">
+              <div ref={actionsRef} className={`flex gap-2 px-2 py-1.5 ${compactActions ? 'justify-center' : ''}`}>
                 {!hideActions && !isExpired && (
 
                   <Button
