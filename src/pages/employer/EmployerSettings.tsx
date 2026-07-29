@@ -6,6 +6,8 @@ import { Capacitor } from '@capacitor/core';
 import { MessageTemplatesSettings } from '@/components/MessageTemplatesSettings';
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
+import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
+
 import EmployerAccountEmailPanel from '@/components/employer/settings/EmployerAccountEmailPanel';
 import EmployerPasswordPanel from '@/components/employer/settings/EmployerPasswordPanel';
 import EmployerNotificationsPanel from '@/components/employer/settings/EmployerNotificationsPanel';
