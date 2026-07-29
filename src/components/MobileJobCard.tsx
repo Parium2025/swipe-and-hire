@@ -10,6 +10,7 @@ import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmen
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 import { isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
+import { useCompactWidth } from '@/hooks/useCompactWidth';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getCompanyInitials } from '@/lib/companyInitials';
