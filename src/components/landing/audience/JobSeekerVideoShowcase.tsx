@@ -275,51 +275,41 @@ const JobSeekerVideoShowcase = ({
         if (!v.paused) v.pause();
         return;
       }
-      attempt();
+      kick();
     };
 
     /**
-     * Buffringsvakt (kallstart på riktigt nät).
+     * Buffringsvakt under uppspelning.
      *
-     * Buffringsvakt utan tvångspaus.
-     *
-     * Den tidigare varianten pausade videon tills ≥3 s var buffrat. På riktigt
-     * Windows-nät kunde det ge exakt den premium-dödaren användaren ser: bilden
-     * står still i 20–30 sekunder. Nu låter vi browsern fortsätta native och
-     * försöker bara kicka igång igen när lite data finns, eller om den faktiskt
-     * har hamnat i paused-läge.
+     * Kallstarten hanteras av spärren ovan. Här fångar vi bara stopp som sker
+     * mitt i loopen: vi väntar in lite ny data innan vi kickar igång igen,
+     * istället för att spamma play() mot en tom buffert (vilket är precis det
+     * som ger den hackiga känslan).
      */
     let stallTimer: number | null = null;
     const clearStall = () => {
       if (stallTimer !== null) { window.clearInterval(stallTimer); stallTimer = null; }
     };
-    const bufferedAhead = () => {
-      try {
-        const t = v.currentTime;
-        for (let i = 0; i < v.buffered.length; i += 1) {
-          if (v.buffered.start(i) <= t + 0.1 && v.buffered.end(i) > t) return v.buffered.end(i) - t;
-        }
-      } catch {
-        return Infinity;
-      }
-      return 0;
-    };
     const onWaiting = () => {
       if (!active || stallTimer !== null) return;
       try { v.preload = 'auto'; } catch { /* noop */ }
+      // Windows behöver mer marginal innan återstart, annars stannar den igen
+      // direkt. Apple/touch behåller det tidigare, snabbare tröskelvärdet.
+      const needAhead = coldGate ? 1.5 : 0.65;
       let ticks = 0;
       stallTimer = window.setInterval(() => {
         ticks += 1;
         if (!active || document.visibilityState !== 'visible') return;
-        const ahead = bufferedAhead();
+        const ahead = aheadOf(v);
         const nearEnd = v.duration > 0 && v.currentTime > v.duration - 1.2;
-        if (ahead >= 0.65 || nearEnd || v.readyState >= 3 || ticks >= 20) {
+        if (ahead >= needAhead || nearEnd || v.readyState >= 4 || ticks >= 20) {
           clearStall();
           attempt();
         }
       }, 250);
     };
     const onPlaying = () => clearStall();
+
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
     document.addEventListener('visibilitychange', resume);
