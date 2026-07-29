@@ -145,8 +145,32 @@ const JobSeekerVideoShowcase = ({
     v.setAttribute('muted', '');
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
+    v.setAttribute('autoplay', '');
     v.disablePictureInPicture = true;
-    if (active) safePlay(v);
+    try { (v as unknown as { disableRemotePlayback?: boolean }).disableRemotePlayback = true; } catch { /* noop */ }
+
+    // iOS Lågeffektläge (sparläge) blockerar autoplay helt tills sidan får en
+    // användarinteraktion. Vi försöker därför om med kort intervall och
+    // återupptar direkt vid första touch/scroll — samma mönster som hero-videon
+    // på startsidan, så telefonen aldrig står kvar på en still bild.
+    let retryTimer: number | null = null;
+    const clearRetry = () => {
+      if (retryTimer !== null) { window.clearTimeout(retryTimer); retryTimer = null; }
+    };
+
+    const attempt = () => {
+      if (!active || document.visibilityState !== 'visible') return;
+      if (!v.paused && !v.ended) return;
+      const p = v.play();
+      if (p && typeof p.catch === 'function') {
+        p.then(clearRetry).catch(() => {
+          clearRetry();
+          retryTimer = window.setTimeout(attempt, 600);
+        });
+      }
+    };
+
+    if (active) attempt();
     else v.pause();
 
     const resume = () => {
@@ -154,22 +178,32 @@ const JobSeekerVideoShowcase = ({
         if (!v.paused) v.pause();
         return;
       }
-      if (document.visibilityState !== 'visible') return;
-      if (v.paused) safePlay(v);
+      attempt();
     };
 
+    const gestureOpts: AddEventListenerOptions = { passive: true };
     document.addEventListener('visibilitychange', resume);
     window.addEventListener('pageshow', resume);
+    window.addEventListener('touchstart', resume, gestureOpts);
+    window.addEventListener('pointerdown', resume, gestureOpts);
+    window.addEventListener('scroll', resume, gestureOpts);
     v.addEventListener('canplay', resume);
+    v.addEventListener('loadeddata', resume);
     v.addEventListener('pause', resume);
 
     return () => {
+      clearRetry();
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
+      window.removeEventListener('touchstart', resume);
+      window.removeEventListener('pointerdown', resume);
+      window.removeEventListener('scroll', resume);
       v.removeEventListener('canplay', resume);
+      v.removeEventListener('loadeddata', resume);
       v.removeEventListener('pause', resume);
     };
   }, [active, safePlay]);
+
 
 
   return (
