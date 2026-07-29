@@ -410,6 +410,7 @@ const PinnedHorizontalGallery = () => {
 
     let playTimer: number | null = null;
     const warmTimers: number[] = [];
+    const gateCleanups: Array<() => void> = [];
     let disposed = false;
     let warmed = false;
     let entered = false;
