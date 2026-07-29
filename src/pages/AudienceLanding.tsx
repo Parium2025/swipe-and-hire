@@ -2242,7 +2242,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur länge sparas kandidatdata?',
-                        a: 'Vi raderar gammal data automatiskt varje natt (kallas gallringsrutin i GDPR-språk). Ansökningar och tillhörande chattar raderas 24 månader efter ansökan (diskrimineringslagens preskriptionstid), aktivitetslogg efter 24 månader, visningsstatistik efter 12 månader och notiser efter 6 månader. Ni kan alltid ta bort en kandidat eller annons tidigare, och kandidaten kan radera hela sitt konto själv när som helst. Hela gallringsrutinen finns i vårt personuppgiftsbiträdesavtal.',
+                        a: 'Vi raderar gammal data automatiskt varje natt. Ansökningar och tillhörande chattar raderas 24 månader efter ansökan (diskrimineringslagens preskriptionstid), aktivitetslogg efter 24 månader, visningsstatistik efter 12 månader och notiser efter 6 månader. Konton som inte använts på 24 månader får en varning via mejl och raderas 30 dagar senare. Era annonser ligger kvar så länge ni vill — det är kandidatuppgifterna i dem som gallras. Ni kan alltid ta bort en kandidat eller annons tidigare, och kandidaten kan radera hela sitt konto själv när som helst. Hela rutinen finns i vårt personuppgiftsbiträdesavtal.',
                       },
                       {
                         q: 'Vilken support får vi som kund?',
