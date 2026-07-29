@@ -107,29 +107,42 @@ const evaluateAll = () => {
   });
 
   // Rangordning:
-  //  1. Helt (≥92 %) synliga kort går alltid före delvis avklippta kort.
+  //  1. Kort som är mest synliga går före kort som råkar ligga närmare mitten.
+  //     Det är avgörande för sista kortet (Vård): när det syns tydligt vid
+  //     högerkanten ska det spela, även om ett avklippt kort till vänster har
+  //     kortare avstånd till viewportens mitt.
   //  2. Därefter avstånd till viewportens mitt.
   //  3. Hysteres: redan spelande kort får en distans-bonus så att små
   //     scroll-rörelser inte kastar om kön (blinkande start/stopp).
   const HYSTERESIS_PX = 200;
-  const FULLY_VISIBLE = 0.92;
   const rank = (c: { dist: number; playing: boolean; covered: number }) => ({
-    tier: c.covered >= FULLY_VISIBLE ? 0 : 1,
+    visibility: Math.round(c.covered * 10),
     score: c.dist - (c.playing ? HYSTERESIS_PX : 0),
   });
   candidates.sort((a, b) => {
     const ra = rank(a);
     const rb = rank(b);
-    if (ra.tier !== rb.tier) return ra.tier - rb.tier;
+    if (ra.visibility !== rb.visibility) return rb.visibility - ra.visibility;
     return ra.score - rb.score;
   });
   const maxConcurrent = getMaxConcurrent();
+  const playVisible = (el: HTMLVideoElement) => {
+    el.muted = true;
+    el.playsInline = true;
+    try {
+      el.preload = 'auto';
+      if (el.readyState < 2) el.load();
+    } catch {
+      // Best-effort only — playback coordinator must never throw during scroll.
+    }
+    if (el.paused) {
+      const p = el.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    }
+  };
   candidates.forEach(({ el }, i) => {
     if (i < maxConcurrent) {
-      if (el.paused) {
-        const p = el.play();
-        if (p && typeof p.catch === 'function') p.catch(() => {});
-      }
+      playVisible(el);
     } else if (!el.paused) {
       el.pause();
     }
@@ -148,6 +161,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
   // network error, 404, codec-fel eller om användaren är offline när videon
   // ska laddas. Användaren ser alltid en relevant bild istället för svart ruta.
   const [failed, setFailed] = useState(false);
+  const [src, setSrc] = useState(() => getPlayableSrc(item));
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -206,7 +220,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
       {item.type === 'video' && !failed ? (
         <video
           ref={videoRef}
-          src={getPlayableSrc(item)}
+          src={src}
           poster={item.poster}
           muted
           loop
@@ -216,7 +230,15 @@ const CardItem = ({ item, index }: CardItemProps) => {
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
           onContextMenu={(e) => e.preventDefault()}
-          onError={() => setFailed(true)}
+          onCanPlay={scheduleEvaluate}
+          onLoadedData={scheduleEvaluate}
+          onError={() => {
+            if (src !== item.src) {
+              setSrc(item.src);
+              return;
+            }
+            setFailed(true);
+          }}
           style={{ objectPosition: item.position ?? '50% 50%' }}
           className="pointer-events-none"
         />
@@ -554,6 +576,7 @@ const PinnedHorizontalGallery = () => {
         const maxConcurrent = getMaxConcurrent();
         videos.slice(0, maxConcurrent).forEach(playSafe);
         if (!prefersLightweightVideo()) window.setTimeout(() => videos.slice(maxConcurrent).forEach(playSafe), 600);
+        scheduleEvaluate();
       }, 800);
     };
     const leave = () => {
