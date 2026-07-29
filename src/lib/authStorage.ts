@@ -77,24 +77,26 @@ export const shouldRememberUser = (): boolean => {
 
 // Set remember me preference
 export const setRememberMe = (value: boolean): void => {
-  try {
-    localStorage.setItem(REMEMBER_ME_KEY, value.toString());
-    // If user turns Remember Me OFF, wipe any existing snapshots so future
-    // tabs don't auto-restore.
-    if (!value) {
-      try {
-        const toRemove: string[] = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith(SNAPSHOT_PREFIX)) toRemove.push(k);
-        }
-        toRemove.forEach((k) => { try { localStorage.removeItem(k); } catch {} });
-      } catch {}
-    }
-  } catch (e) {
-    console.warn('Failed to save remember me preference:', e);
+  writeLocal(REMEMBER_ME_KEY, value.toString());
+  try { sessionStorage.setItem(REMEMBER_ME_KEY, value.toString()); } catch {}
+
+  // If user turns Remember Me OFF, wipe any existing snapshots so future
+  // tabs don't auto-restore.
+  if (!value) {
+    try {
+      const toRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(SNAPSHOT_PREFIX)) toRemove.push(k);
+      }
+      toRemove.forEach((k) => removeLocal(k));
+    } catch {}
+    Array.from(memoryMirror.keys())
+      .filter((k) => k.startsWith(SNAPSHOT_PREFIX))
+      .forEach((k) => memoryMirror.delete(k));
   }
 };
+
 
 const getLastActivityTimestamp = (): number => {
   try {
