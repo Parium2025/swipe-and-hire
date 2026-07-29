@@ -383,22 +383,12 @@ export default function IntegrityPolicyPage() {
               </div>
               <p className="mt-4">
                 Nödvändig lagring av det här slaget kräver inte ditt samtycke enligt
-                lagen om elektronisk kommunikation. Kategorierna statistik och
-                marknadsföring är avstängda i dag — du kan ändå göra ditt val i
-                cookieinställningarna, och valet gäller automatiskt om vi någon gång
-                inför sådana cookies.
+                lagen om elektronisk kommunikation, och därför visar vi ingen
+                cookieruta. Skulle vi i framtiden införa cookies för statistik eller
+                marknadsföring kommer vi att be om ditt samtycke innan de aktiveras
+                och uppdatera den här sidan.
               </p>
 
-              <p className="mt-5">
-                Du kan ändra ditt val när som helst:
-              </p>
-              <button
-                type="button"
-                onClick={openCookieSettings}
-                className="mt-3 inline-flex min-h-[44px] items-center rounded-xl border border-secondary/40 bg-secondary/15 px-5 text-sm font-bold text-secondary transition hover:bg-secondary/25"
-              >
-                Cookieinställningar
-              </button>
 
             </Section>
 
