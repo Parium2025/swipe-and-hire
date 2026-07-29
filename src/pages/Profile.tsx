@@ -2444,6 +2444,12 @@ const Profile = () => {
         <ActiveSessionsSettings />
       </div>
 
+      {/* GDPR: dataportabilitet */}
+      <div className="responsive-container mt-8">
+        <PrivacyDataPanel />
+      </div>
+
+
       {/* Image Editors — speglar arbetsgivarsidans exakta struktur:
           aspectRatio, isCircular och onRestoreOriginal så att "Spara" utan
           ändringar BEHÅLLER originalet istället för att re-encoda. */}
