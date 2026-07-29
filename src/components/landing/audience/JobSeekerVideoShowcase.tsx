@@ -54,6 +54,14 @@ const prefersHevc = () => {
 const usesBufferedStart = () => isWindowsDevice() || prefersReducedData();
 
 /**
+ * Windows/Chromium kan droppa frames när en <video>-overlay börjar spela medan
+ * planet samtidigt flyttas/skalats av layouten. Det matchar beteendet här:
+ * första rendern hackar, men efter att användaren scrollat bort och tillbaka är
+ * telefonens geometri redan stabil och videon flyter perfekt.
+ */
+const usesStableGeometryStart = () => isWindowsDevice();
+
+/**
  * Upplösningsstege — vald efter FAKTISKA enhetspixlar, inte efter operativsystem.
  *
  * Detta är kärnan i skärpeproblemet på Windows: en video som är bredare än den
@@ -183,15 +191,21 @@ const JobSeekerVideoShowcase = ({
   const coldGateRef = useRef<boolean | null>(null);
   if (coldGateRef.current === null) coldGateRef.current = usesBufferedStart();
   const coldGate = coldGateRef.current;
+  const geometryGateRef = useRef<boolean | null>(null);
+  if (geometryGateRef.current === null) geometryGateRef.current = usesStableGeometryStart();
+  const geometryGate = geometryGateRef.current;
+  const keepAliveRef = useRef<boolean | null>(null);
+  if (keepAliveRef.current === null) keepAliveRef.current = isWindowsDevice();
+  const keepAliveWhenHidden = keepAliveRef.current;
   const warmRef = useRef(false);
 
 
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
-    if (!v || !active || document.visibilityState !== 'visible') return;
+    if (!v || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
     const p = v.play();
     if (p && typeof p.catch === 'function') p.catch(() => {});
-  }, [active]);
+  }, [active, keepAliveWhenHidden]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -218,7 +232,7 @@ const JobSeekerVideoShowcase = ({
     };
 
     const attempt = () => {
-      if (!active || document.visibilityState !== 'visible') return;
+      if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
       if (!v.paused && !v.ended) return;
       const p = v.play();
       if (p && typeof p.catch === 'function') {
@@ -247,8 +261,56 @@ const JobSeekerVideoShowcase = ({
     const COLD_TARGET_SECONDS = 2;
     const COLD_MAX_WAIT_MS = 4000;
     let coldTimer: number | null = null;
+    let geometryFrame: number | null = null;
     const clearCold = () => {
       if (coldTimer !== null) { window.clearInterval(coldTimer); coldTimer = null; }
+    };
+
+    /**
+     * Windows-start: ladda/buffra direkt, men vänta med play() tills telefonens
+     * pixelbox varit stabil i några frames. Annars kan Chrome flytta video-MPO-
+     * planet samtidigt som första frames avkodas, vilket ser ut som nät-/codec-
+     * lagg fast filen egentligen är rätt.
+     */
+    let geometrySettled = !geometryGate;
+    let geometryWaitStarted = false;
+    const waitForStableGeometry = (then: () => void) => {
+      if (geometrySettled) { then(); return; }
+      if (geometryWaitStarted) return;
+      geometryWaitStarted = true;
+      const startedAt = performance.now();
+      let stableFrames = 0;
+      let last: DOMRectReadOnly | null = null;
+
+      const tick = () => {
+        if (!keepAliveWhenHidden && !active) {
+          geometryFrame = null;
+          geometryWaitStarted = false;
+          return;
+        }
+
+        const rect = v.getBoundingClientRect();
+        const stable = last
+          ? Math.abs(rect.left - last.left) < 0.25 &&
+            Math.abs(rect.top - last.top) < 0.25 &&
+            Math.abs(rect.width - last.width) < 0.25 &&
+            Math.abs(rect.height - last.height) < 0.25
+          : false;
+
+        stableFrames = stable ? stableFrames + 1 : 0;
+        last = rect;
+
+        if (stableFrames >= 10 || performance.now() - startedAt >= 2500) {
+          geometrySettled = true;
+          geometryFrame = null;
+          then();
+          return;
+        }
+
+        geometryFrame = window.requestAnimationFrame(tick);
+      };
+
+      geometryFrame = window.requestAnimationFrame(tick);
     };
 
     const startWhenBuffered = () => {
@@ -257,7 +319,7 @@ const JobSeekerVideoShowcase = ({
       if (v.readyState < 2) { try { v.load(); } catch { /* noop */ } }
       const startedAt = Date.now();
       coldTimer = window.setInterval(() => {
-        if (!active) { clearCold(); return; }
+        if (!active && !keepAliveWhenHidden) { clearCold(); return; }
         const ready = v.readyState >= 4 || aheadOf(v) >= COLD_TARGET_SECONDS;
         if (ready || Date.now() - startedAt >= COLD_MAX_WAIT_MS) {
           clearCold();
@@ -269,16 +331,18 @@ const JobSeekerVideoShowcase = ({
 
     /** Startpunkt: kallstartsspärr på Windows, direkt play överallt annars. */
     const kick = () => {
-      if (coldGate && !warmRef.current) startWhenBuffered();
-      else attempt();
+      waitForStableGeometry(() => {
+        if (coldGate && !warmRef.current) startWhenBuffered();
+        else attempt();
+      });
     };
 
-    if (active) kick();
+    if (active || keepAliveWhenHidden) kick();
     else v.pause();
 
 
     const resume = () => {
-      if (!active) {
+      if (!active && !keepAliveWhenHidden) {
         if (!v.paused) v.pause();
         return;
       }
@@ -298,7 +362,7 @@ const JobSeekerVideoShowcase = ({
       if (stallTimer !== null) { window.clearInterval(stallTimer); stallTimer = null; }
     };
     const onWaiting = () => {
-      if (!active || stallTimer !== null) return;
+      if ((!active && !keepAliveWhenHidden) || stallTimer !== null) return;
       try { v.preload = 'auto'; } catch { /* noop */ }
       // Windows behöver mer marginal innan återstart, annars stannar den igen
       // direkt. Apple/touch behåller det tidigare, snabbare tröskelvärdet.
@@ -306,7 +370,7 @@ const JobSeekerVideoShowcase = ({
       let ticks = 0;
       stallTimer = window.setInterval(() => {
         ticks += 1;
-        if (!active || document.visibilityState !== 'visible') return;
+        if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
         const ahead = aheadOf(v);
         const nearEnd = v.duration > 0 && v.currentTime > v.duration - 1.2;
         if (ahead >= needAhead || nearEnd || v.readyState >= 4 || ticks >= 20) {
@@ -339,6 +403,7 @@ const JobSeekerVideoShowcase = ({
       clearRetry();
       clearStall();
       clearCold();
+      if (geometryFrame !== null) window.cancelAnimationFrame(geometryFrame);
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
       window.removeEventListener('touchstart', resume);
@@ -351,7 +416,7 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('playing', onPlaying);
       v.removeEventListener('playing', onFirstStablePlay);
     };
-  }, [active, safePlay, coldGate]);
+  }, [active, safePlay, coldGate, geometryGate, keepAliveWhenHidden]);
 
 
 
