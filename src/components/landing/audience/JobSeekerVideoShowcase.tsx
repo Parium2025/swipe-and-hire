@@ -281,8 +281,8 @@ const JobSeekerVideoShowcase = ({
 
             {/* Statiskt statusfält — täcker hela inspelningens statusrad (klocka,
                 wifi, batteri och iOS inspelningsindikator) med appens exakta
-                bakgrundsfärg och ritar en helt stilla egen rad ovanpå. Inget
-                kan då "blixtra till" när loopen startar om. */}
+                bakgrundsfärg och ritar en helt stilla egen rad ovanpå. Signalstaplarna
+                är borttagna eftersom de kapades på vissa skärmstorlekar. */}
             <div
               aria-hidden
               className="absolute inset-x-0 top-0 h-[6.6%] bg-[#01182f]"
