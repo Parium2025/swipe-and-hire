@@ -242,6 +242,10 @@ export default function IntegrityPolicyPage() {
                 <li>
                   <strong>Teknisk data:</strong> IP-adress, enhetstyp, webbläsare och
                   hur du använder tjänsten (klick, sökningar, sessionslängd).
+                  Din IP-adress används också för att uppskatta vilken ort du
+                  befinner dig i, så att vi kan visa lokalt väder och jobb nära
+                  dig. Vi sparar ingen exakt GPS-position och bygger inga
+                  platsprofiler över tid.
                 </li>
               </ul>
             </Section>

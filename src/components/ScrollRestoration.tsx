@@ -161,7 +161,19 @@ export function ScrollRestoration() {
     const isBackForwardDocument = documentNavigationType === 'back_forward';
     const isFreshDocumentEntry = location.key === 'default' && navigationType === 'POP' && !isBackForwardDocument;
     const isReturningFromJobOverlay = isJobOverlayPath(previousPathRef.current);
-    const shouldForceTop = isReload || (isFreshDocumentEntry && !isReturningFromJobOverlay);
+    // 🛟 Tillbaka från en footer-navigering (t.ex. /jobbsokare-footern → /jobb → back).
+    // Historikens första entry har alltid key === 'default', vilket annars felaktigt
+    // tolkas som "ny flik" och tvingar toppen. Har vi en färsk footer-snapshot för
+    // den här sidan ska den istället återställas exakt där användaren klickade.
+    const footerSnapshot = readPositions()[location.pathname];
+    const isReturningFromFooterNavigation =
+      navigationType === 'POP' &&
+      footerSnapshot?.restoreSource === 'footer' &&
+      typeof footerSnapshot.restoreSavedAt === 'number' &&
+      Date.now() - footerSnapshot.restoreSavedAt < 30 * 60 * 1000;
+    const shouldForceTop =
+      isReload ||
+      (isFreshDocumentEntry && !isReturningFromJobOverlay && !isReturningFromFooterNavigation);
 
     if (shouldForceTop) {
       clearScrollPosition(location.pathname);
@@ -335,9 +347,14 @@ export function ScrollRestoration() {
       }
 
       isRestoringRef.current = true;
+      // Om sidan har exakt samma höjd som när positionen sparades är layouten
+      // identisk — då är den absoluta positionen alltid mest korrekt. Ankaret
+      // kan ha flyttats av pinnade/animerade sektioner och ge fel offset.
+      const layoutIdentical = typeof storedPosition?.scrollHeight === 'number'
+        && Math.abs(scrollContainer.scrollHeight - storedPosition.scrollHeight) <= RESTORE_TOLERANCE_PX;
       const previousBehavior = scrollContainer.style.scrollBehavior;
       scrollContainer.style.scrollBehavior = 'auto';
-      if (anchorDelta !== null) {
+      if (anchorDelta !== null && !layoutIdentical) {
         scrollContainer.scrollTop = scrollContainer.scrollTop + anchorDelta;
       } else {
         scrollContainer.scrollTop = targetTop;
@@ -349,18 +366,44 @@ export function ScrollRestoration() {
         storedPosition?.anchorId,
         storedPosition?.anchorOffset,
       );
-      const closeEnough = verifyDelta !== null
+      const closeEnough = (verifyDelta !== null && !layoutIdentical)
         ? Math.abs(verifyDelta) <= RESTORE_TOLERANCE_PX
         : Math.abs(scrollContainer.scrollTop - targetTop) <= RESTORE_TOLERANCE_PX;
 
       if (closeEnough) {
         restored = true;
-        finish();
+        holdPosition(scrollContainer);
         return true;
       }
 
       return false;
     };
+
+    // 🛟 Efter första lyckade återställningen kan sidhöjden fortfarande krympa
+    // (lazy-sektioner, videos, pinnade gallerier som settlar). Webbläsarens
+    // scroll-anchoring drar då iväg positionen. Vi håller kvar exakt läge en
+    // kort stund tills höjden är stabil — men släpper direkt vid touch/scroll.
+    const HOLD_MS = 1200;
+    function holdPosition(container: HTMLElement) {
+      const holdStart = performance.now();
+      const tick = () => {
+        if (cancelled || userInterrupted) return;
+        const maxTop = Math.max(0, container.scrollHeight - container.clientHeight);
+        const desired = Math.min(targetTop, maxTop);
+        if (Math.abs(container.scrollTop - desired) > RESTORE_TOLERANCE_PX) {
+          const previous = container.style.scrollBehavior;
+          container.style.scrollBehavior = 'auto';
+          container.scrollTop = desired;
+          container.style.scrollBehavior = previous;
+        }
+        if (performance.now() - holdStart < HOLD_MS) {
+          rafId = requestAnimationFrame(tick);
+          return;
+        }
+        finish();
+      };
+      rafId = requestAnimationFrame(tick);
+    }
 
     const scheduleRetry = () => {
       if (cancelled || userInterrupted || restored) return;
