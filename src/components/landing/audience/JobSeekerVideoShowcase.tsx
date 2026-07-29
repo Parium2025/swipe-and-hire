@@ -160,6 +160,25 @@ const JobSeekerVideoShowcase = ({
   if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
   const sources = sourcesRef.current;
 
+  /**
+   * Kallstartsspärr (ENDAST Windows / sparläge).
+   *
+   * Problemet: browsern startar uppspelningen så fort `readyState >= 2`, dvs.
+   * när bara någon tiondels sekund är buffrad. På ett kallt nät hinner
+   * bufferten ta slut direkt och de första sekunderna blir en serie
+   * mikro-stopp — exakt det "oj vad tömtladdat" användaren ser. När filen väl
+   * ligger i HTTP-cachen (varm) startar den full och allt känns perfekt.
+   *
+   * Lösningen: håll videon pausad på posterbilden tills ~2 s faktiskt är
+   * buffrat (eller max 4 s), och starta först då. Poster = stillbild = noll
+   * hack. Apple/touch-vägen behåller native autoplay helt orörd.
+   */
+  const coldGateRef = useRef<boolean | null>(null);
+  if (coldGateRef.current === null) coldGateRef.current = prefersLiteMp4();
+  const coldGate = coldGateRef.current;
+  const warmRef = useRef(false);
+
+
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
     if (!v || !active || document.visibilityState !== 'visible') return;
