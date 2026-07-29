@@ -197,7 +197,7 @@ const JobSeekerVideoShowcase = ({
     v.setAttribute('muted', '');
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
-    v.setAttribute('autoplay', '');
+    if (!coldGate) v.setAttribute('autoplay', '');
     v.disablePictureInPicture = true;
     try { (v as unknown as { disableRemotePlayback?: boolean }).disableRemotePlayback = true; } catch { /* noop */ }
 
@@ -222,8 +222,53 @@ const JobSeekerVideoShowcase = ({
       }
     };
 
-    if (active) attempt();
+    /** Hur många sekunder som är buffrat framför nuvarande position. */
+    const aheadOf = (el: HTMLVideoElement) => {
+      try {
+        const t = el.currentTime;
+        for (let i = 0; i < el.buffered.length; i += 1) {
+          if (el.buffered.start(i) <= t + 0.1 && el.buffered.end(i) > t) return el.buffered.end(i) - t;
+        }
+      } catch {
+        return Infinity;
+      }
+      return 0;
+    };
+
+    // Kallstart: vänta in en riktig buffert innan första play(). Max 4 s, sedan
+    // startar vi ändå så att telefonen aldrig blir stående på posterbilden.
+    const COLD_TARGET_SECONDS = 2;
+    const COLD_MAX_WAIT_MS = 4000;
+    let coldTimer: number | null = null;
+    const clearCold = () => {
+      if (coldTimer !== null) { window.clearInterval(coldTimer); coldTimer = null; }
+    };
+
+    const startWhenBuffered = () => {
+      if (coldTimer !== null) return;
+      try { v.preload = 'auto'; } catch { /* noop */ }
+      if (v.readyState < 2) { try { v.load(); } catch { /* noop */ } }
+      const startedAt = Date.now();
+      coldTimer = window.setInterval(() => {
+        if (!active) { clearCold(); return; }
+        const ready = v.readyState >= 4 || aheadOf(v) >= COLD_TARGET_SECONDS;
+        if (ready || Date.now() - startedAt >= COLD_MAX_WAIT_MS) {
+          clearCold();
+          warmRef.current = true;
+          attempt();
+        }
+      }, 150);
+    };
+
+    /** Startpunkt: kallstartsspärr på Windows, direkt play överallt annars. */
+    const kick = () => {
+      if (coldGate && !warmRef.current) startWhenBuffered();
+      else attempt();
+    };
+
+    if (active) kick();
     else v.pause();
+
 
     const resume = () => {
       if (!active) {
