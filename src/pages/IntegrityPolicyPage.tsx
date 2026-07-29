@@ -210,10 +210,18 @@ export default function IntegrityPolicyPage() {
                   arbetsgivare/kandidater samt supportärenden.
                 </li>
                 <li>
-                  <strong>Betaluppgifter:</strong> vid uppgradering till Premium
-                  hanteras kortuppgifter av vår betalleverantör (Stripe). Vi lagrar
-                  aldrig fullständiga kortnummer.
+                  <strong>AI-genererat underlag:</strong> arbetsgivare kan få en
+                  sammanfattning av ditt CV och en bedömning mot sina egna kriterier.
+                  Underlaget är rådgivande — ingen automatisk gallring eller
+                  automatiserat beslut sker, en människa fattar alltid beslutet. Dina
+                  uppgifter används inte för att träna AI-modeller.
                 </li>
+                <li>
+                  <strong>Betaluppgifter:</strong> betalfunktionen är ännu inte
+                  aktiverad. När den lanseras hanteras kortuppgifter av vår
+                  betalleverantör (Stripe). Vi lagrar aldrig fullständiga kortnummer.
+                </li>
+
                 <li>
                   <strong>Teknisk data:</strong> IP-adress, enhetstyp, webbläsare och
                   hur du använder tjänsten (klick, sökningar, sessionslängd).
@@ -256,13 +264,14 @@ export default function IntegrityPolicyPage() {
                       basis="Berättigat intresse"
                     />
                     <Row
-                      what="Skicka nyhetsbrev och marknadsföring"
-                      basis="Samtycke"
+                      what="Notiser om nya jobb, meddelanden och intervjuer"
+                      basis="Avtal (kan stängas av i inställningarna)"
                     />
                     <Row
-                      what="Statistik och analys via cookies"
-                      basis="Samtycke"
+                      what="Statistik, analys och marknadsföring via cookies"
+                      basis="Samtycke (används inte i dag)"
                     />
+
                   </tbody>
                 </table>
               </div>
@@ -281,9 +290,13 @@ export default function IntegrityPolicyPage() {
                 </li>
                 <li>
                   <strong>Underleverantörer (personuppgiftsbiträden):</strong> Supabase
-                  (databas och autentisering, EU), Lovable Cloud (e-postutskick via
-                  notify.parium.se), Stripe (betalningar).
+                  via Lovable Cloud (databas, filer och autentisering — servrar i
+                  Paris, Frankrike), Resend via Lovable (transaktionsmejl från
+                  notify.parium.se), Lovable AI Gateway (AI-sammanfattning och
+                  kriteriebedömning) samt Stripe (betalningar — aktiveras först när
+                  betalfunktionen lanseras).
                 </li>
+
                 <li>
                   <strong>Myndigheter:</strong> om vi enligt lag är skyldiga att lämna
                   ut uppgifter.
@@ -364,13 +377,19 @@ export default function IntegrityPolicyPage() {
                 />
                 <CookieCat
                   title="Statistik & analys"
-                  desc="Anonymiserad data om hur sidan används. Ingen enskild person kan identifieras."
+                  desc="Anonymiserad data om hur sidan används. Används inte i dag — aktiveras först om du gett ditt samtycke."
                 />
                 <CookieCat
                   title="Marknadsföring"
-                  desc="Låter oss visa mer relevanta annonser och mäta våra kampanjer."
+                  desc="Skulle låta oss mäta kampanjer och visa mer relevanta annonser. Vi använder inga marknadsföringscookies i dag."
                 />
               </div>
+              <p className="mt-4">
+                I dag använder Parium endast nödvändiga cookies och
+                preferenscookies. Statistik- och marknadsföringscookies är
+                avstängda och sätts aldrig utan att du först aktivt godkänner dem.
+              </p>
+
               <p className="mt-5">
                 Du kan när som helst ändra dina cookie-val:
               </p>
