@@ -8,6 +8,7 @@
  */
 import realPosters from '@/assets/landing/jobseeker-real-1.jpg';
 import realPoster2 from '@/assets/landing/jobseeker-real-2.jpg';
+import phonePoster from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import { isLowPowerDevice, prefersLightweightVideo } from '@/lib/videoPlatform';
 
 const SPLINE_SCENE_URL = '/spline/parium-phone-scene.splinecode';
@@ -50,6 +51,10 @@ export const preloadAudienceLandingAssets = () => {
   if (started || typeof window === 'undefined') return;
   started = true;
 
+  // 0. Telefonens poster: måste ligga på plats i samma frame som hero ritas,
+  //    annars syns en svart skärm i ramen innan videons första bild dekodats.
+  addLink('preload', phonePoster.url, 'image', 'high');
+
   // 1. Första gallery-postern: high-priority preload (LCP-kandidat under hero).
   addLink('preload', realPosters, 'image', 'high');
   addLink('preload', realPoster2, 'image', 'low');
@@ -57,6 +62,10 @@ export const preloadAudienceLandingAssets = () => {
   // 2. Spline-scenen: på Windows väntar vi tills hero-videon fått spela stabilt
   //    först. Annars konkurrerar prefetch + lazy chunks med video-LCP på laptops.
   if (!shouldDeferHeavyAssets()) addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
+
+  // Dekoda telefonens poster omedelbart (inte i idle) så bilden är klar att
+  // ritas i samma frame som hero visas.
+  decode(phonePoster.url);
 
   // 3. Dekoda bilderna i bakgrunden (idle) + preloada under-fold chunks
   //    så Suspense-fallback aldrig hinner synas när användaren scrollar.
