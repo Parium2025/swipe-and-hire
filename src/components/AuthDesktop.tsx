@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, startTransition } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 import { SignupConsent } from '@/components/auth/SignupConsent';
+import { PRIVACY_POLICY_VERSION, DPA_VERSION } from '@/lib/consentVersions';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -438,6 +439,8 @@ const AuthDesktop = ({
 
         const result = await signUp(currentEmail, currentPassword, {
           terms_accepted_at: new Date().toISOString(),
+          policy_version: PRIVACY_POLICY_VERSION,
+          dpa_version: DPA_VERSION,
           role,
           first_name: currentData.firstName,
           last_name: currentData.lastName,

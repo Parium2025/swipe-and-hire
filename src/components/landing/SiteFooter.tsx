@@ -58,7 +58,7 @@ const companyLinks: ColLink[] = [
   { label: 'Lediga jobb', to: '/jobb' },
   { label: 'Integritetspolicy', to: '/integritetspolicy' },
   { label: 'Personuppgiftsbiträdesavtal', to: '/dpa' },
-  { label: 'Cookie-inställningar', to: '#cookies', action: 'cookies' },
+  { label: 'Om cookies', to: '#cookies', action: 'cookies' },
 ];
 
 
