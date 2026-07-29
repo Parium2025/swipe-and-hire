@@ -297,10 +297,11 @@ export class AuthStorageAdapter implements Storage {
     // for future new tabs. Other tabs that are still logged in will rewrite
     // the snapshot on their next token refresh (since they continue running).
     if (isAuthStorageKey(key)) {
-      try { localStorage.removeItem(snapshotKey(key)); } catch {}
+      removeLocal(snapshotKey(key));
       // Belt-and-suspenders: also remove any leftover legacy entry.
-      try { localStorage.removeItem(key); } catch {}
+      removeLocal(key);
     }
+
   }
 
   clear(): void {
