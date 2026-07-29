@@ -120,7 +120,9 @@ const EmployerSettings = () => {
 
       <MessageTemplatesSettings />
       <ActiveSessionsSettings />
+      <PrivacyDataPanel showDpaLink />
       <TeamManagement />
+
     </div>
   );
 };
