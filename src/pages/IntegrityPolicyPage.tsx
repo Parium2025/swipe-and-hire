@@ -405,8 +405,10 @@ export default function IntegrityPolicyPage() {
                 </li>
                 <li>
                   <strong>Dataportabilitet</strong> — få ut dina uppgifter i ett
-                  strukturerat, maskinläsbart format.
+                  strukturerat, maskinläsbart format. Du gör det själv direkt i
+                  appen via "Ladda ner mina uppgifter" i dina inställningar.
                 </li>
+
                 <li>
                   <strong>Återkalla samtycke</strong> när som helst — det påverkar
                   inte lagligheten av behandling som skett innan återkallelsen.
