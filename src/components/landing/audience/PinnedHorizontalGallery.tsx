@@ -264,13 +264,12 @@ const PinnedHorizontalGallery = () => {
     const isTouchScroll = window.matchMedia('(pointer: coarse)').matches;
 
     /**
-     * Enhetspixel-rutnät. Windows kör nästan alltid fraktionell skalning
-     * (125 % → dpr 1.25, 150 % → 1.5). Läggs strippen då på en position som
-     * inte ligger på ett helt ENHETS-pixelsteg måste kompositorn resampla hela
-     * kortraden varje frame — det syns som att bild och text "kokar"/skimrar
-     * under scroll. Vi snappar därför till 1/dpr (0.8 px vid 125 %), vilket är
-     * långt under vad ögat uppfattar som ryckighet men tar bort resamplingen.
-     * På Apple (dpr 2/3) blir steget 0.33–0.5 px och märks inte alls.
+     * Enhetspixel-rutnät för icke-touch. Windows kör ofta fraktionell skalning
+     * (125 % → dpr 1.25, 150 % → 1.5), där osnappade positioner kan skimra.
+     *
+     * VIKTIGT: Touch (iPhone/iPad/Android) ska INTE snappas alls. iOS momentum
+     * producerar extremt fina subpixel-värden; även 1/dpr-snappning kan då läsas
+     * som små steg/hack i kortstrippen. Touch kör därför exakt fri subpixel.
      */
     const dpr = Math.min(Math.max(window.devicePixelRatio || 1, 1), 3);
     const snapToDevicePixel = (v: number) => Math.round(v * dpr) / dpr;
@@ -284,11 +283,11 @@ const PinnedHorizontalGallery = () => {
       const startPx = viewport * 0.07; // 7vw inledande marginal (matchar gammal start)
       // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
       const endPx = Math.min(startPx, viewport - stripWidth - startPx);
-      const xPx = snapToDevicePixel(startPx + (endPx - startPx) * p);
-      // OBS: aldrig Math.round till hela CSS-pixlar — det gav synligt hack på
-      // touch (korten stannar 1 px i taget). Snappning till enhetspixel enligt
-      // ovan är en helt annan sak: steget är 1/dpr, alltså finare än en CSS-px.
-      strip.style.setProperty('--phg-x', `${xPx.toFixed(3)}px`);
+      const rawXPx = startPx + (endPx - startPx) * p;
+      const xPx = isTouchScroll ? rawXPx : snapToDevicePixel(rawXPx);
+      // Touch: fri subpixel-rörelse (ingen avrundning/snappning). Icke-touch:
+      // device-pixel-snappning för Windows/fraktionell desktop-skalning.
+      strip.style.setProperty('--phg-x', `${xPx.toFixed(isTouchScroll ? 2 : 3)}px`);
       section.style.setProperty('--phg-progress', `${p}`);
       section.dataset.phgProgress = p.toFixed(4);
       window.dispatchEvent(new CustomEvent('parium:gallery-progress', { detail: { progress: p } }));
