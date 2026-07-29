@@ -19,7 +19,7 @@ const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const SNAPSHOT_PREFIX = 'parium-auth-snapshot:';
 
-const SUPABASE_AUTH_KEY_PATTERN = /sb-[a-z]+-auth-token/;
+const SUPABASE_AUTH_KEY_PATTERN = /sb-[a-z0-9]+-auth-token/;
 
 const isAuthStorageKey = (key: string): boolean => {
   return SUPABASE_AUTH_KEY_PATTERN.test(key) || key.includes('supabase.auth');
@@ -37,15 +37,43 @@ let _inactivityLogoutFromStorage = false;
 export const isInactivityLogoutFromStorage = () => _inactivityLogoutFromStorage;
 export const clearInactivityLogoutFromStorage = () => { _inactivityLogoutFromStorage = false; };
 
+/**
+ * In-memory mirror used when localStorage is unavailable (Lovable-preview
+ * iframe with partitionerad lagring, inkognito, Safari ITP m.m.).
+ * Utan detta blir "Håll mig inloggad" helt verkningslös i preview.
+ */
+const memoryMirror = new Map<string, string>();
+
+const readLocal = (key: string): string | null => {
+  try {
+    const v = localStorage.getItem(key);
+    if (v !== null) return v;
+  } catch {}
+  return memoryMirror.has(key) ? memoryMirror.get(key)! : null;
+};
+
+const writeLocal = (key: string, value: string): void => {
+  memoryMirror.set(key, value);
+  try { localStorage.setItem(key, value); } catch {}
+};
+
+const removeLocal = (key: string): void => {
+  memoryMirror.delete(key);
+  try { localStorage.removeItem(key); } catch {}
+};
 
 // Track if we should use persistent storage
 export const shouldRememberUser = (): boolean => {
+  if (readLocal(REMEMBER_ME_KEY) === 'true') return true;
+  // Fallback: preferensen speglas även i sessionStorage så att den överlever
+  // en blockerad localStorage inom samma flik/iframe.
   try {
-    return localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+    return sessionStorage.getItem(REMEMBER_ME_KEY) === 'true';
   } catch {
     return false;
   }
 };
+
 
 // Set remember me preference
 export const setRememberMe = (value: boolean): void => {
