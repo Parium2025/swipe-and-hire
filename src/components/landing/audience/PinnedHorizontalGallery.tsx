@@ -15,7 +15,7 @@ import winReal3 from '@/assets/landing/windows/jobseeker-real-3-windows.mp4.asse
 import winReal4 from '@/assets/landing/windows/jobseeker-real-4-windows.mp4.asset.json';
 import winRealCenter from '@/assets/landing/windows/jobseeker-real-center-windows.mp4.asset.json';
 import { fetchPriority } from '@/lib/fetchPriority';
-import { getGalleryPreload, getMaxConcurrentVideos, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
+import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
 
 /**
  * Apple-style "Så funkar det" sektion.
@@ -233,6 +233,14 @@ const PinnedHorizontalGallery = () => {
   const renderedProgressRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const [, setReady] = useState(false);
+
+  // Apple-desktop (Mac med trackpad/mus) får en egen pin-distans. Windows,
+  // touch-enheter och övriga plattformar rörs inte alls av flaggan.
+  const isAppleDesktop =
+    typeof window !== 'undefined' &&
+    isAppleDevice() &&
+    window.matchMedia('(pointer: fine)').matches;
+
 
   useEffect(() => {
     const el = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
@@ -565,12 +573,19 @@ const PinnedHorizontalGallery = () => {
           position: relative;
           width: 100%;
           /* Pin-distans = hur mycket vertikal scroll som "kostar" att
-             traversera hela kortstrippen. 240vh gjorde att korten flög förbi
-             på Mac-trackpad; 340vh ger lugn rörelse utan att kännas segt på
-             mushjul. */
-          height: 340vh;
+             traversera hela kortstrippen.
+             BAS (Windows/övriga desktop): 240vh — rörd inte, den är avstämd
+             mot mushjulets stegning och Windows scroll-skuld. */
+          height: 240vh;
 
         }
+        /* Apple-desktop (Mac/trackpad) ENDAST: trackpaden ger mycket mer
+           scrolldelta per rörelse, så 240vh gjorde att korten flög förbi.
+           Windows påverkas inte av denna regel. */
+        [data-phg-platform="apple"].phg-section {
+          height: 340vh;
+        }
+
         .phg-sticky {
           position: sticky;
           top: 0;
@@ -843,7 +858,7 @@ const PinnedHorizontalGallery = () => {
         }
       `}</style>
 
-      <div ref={sectionRef} data-phg-section className="phg-section">
+      <div ref={sectionRef} data-phg-section data-phg-platform={isAppleDesktop ? "apple" : undefined} className="phg-section">
         <div className="phg-sticky">
 
           <div ref={headerRef} className="phg-header" style={{ opacity: 0, transform: 'translate3d(0, 44px, 0)' }}>
