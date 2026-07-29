@@ -490,6 +490,8 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('stalled', onWaiting);
       v.removeEventListener('playing', onPlaying);
       v.removeEventListener('playing', onFirstStablePlay);
+      v.removeEventListener('playing', markPainted);
+      v.removeEventListener('timeupdate', markPainted);
     };
   }, [active, safePlay, coldGate, geometryGate, keepAliveWhenHidden, windowsColdStart, windowsBlobSource]);
 
