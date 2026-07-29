@@ -203,6 +203,13 @@ export default function DpaPage() {
                   eller för att träna AI-modeller åt tredje part.
                 </li>
                 <li>
+                  AI-stödet (sammanfattning av CV och bedömning mot era kriterier) tar
+                  fram ett rådgivande underlag. Ingen automatisk gallring eller
+                  automatiserat beslut i den mening som avses i art. 22 sker — ni fattar
+                  alltid besluten om kandidaterna.
+                </li>
+
+                <li>
                   Personal hos Parium som får åtkomst till uppgifterna omfattas av
                   sekretessåtagande och får bara åtkomst när det behövs för drift och
                   support.
@@ -247,8 +254,10 @@ export default function DpaPage() {
                   </thead>
                   <tbody className="divide-y divide-white/[0.06]">
                     <Sub name="Supabase (Lovable Cloud)" purpose="Databas, filer och autentisering" place="Paris, Frankrike (EU)" />
-                    <Sub name="Resend" purpose="Utskick av transaktionsmejl" place="EU/USA (SCC)" />
-                    <Sub name="Stripe" purpose="Betalningar och fakturering" place="EU/USA (SCC)" />
+                    <Sub name="Resend (via Lovable)" purpose="Utskick av transaktionsmejl" place="EU/USA (SCC)" />
+                    <Sub name="Lovable AI Gateway" purpose="AI-sammanfattning av CV och bedömning mot era kriterier" place="EU/USA (SCC)" />
+                    <Sub name="Stripe" purpose="Betalningar och fakturering (aktiveras när betalfunktionen lanseras)" place="EU/USA (SCC)" />
+
                   </tbody>
                 </table>
               </div>
