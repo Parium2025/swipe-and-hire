@@ -334,9 +334,13 @@ export class AuthStorageAdapter implements Storage {
         }
       }
     } catch {}
-    localKeysToRemove.forEach((key) => {
-      try { localStorage.removeItem(key); } catch {}
-    });
+    localKeysToRemove.forEach((key) => removeLocal(key));
+
+    // Spegeln (används när localStorage är blockerat) måste också rensas.
+    Array.from(memoryMirror.keys())
+      .filter((k) => k.startsWith(SNAPSHOT_PREFIX) || isAuthStorageKey(k))
+      .forEach((k) => memoryMirror.delete(k));
+
   }
 }
 
