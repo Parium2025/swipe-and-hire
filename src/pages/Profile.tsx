@@ -40,6 +40,8 @@ import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCachedImage } from '@/hooks/useCachedImage';
 import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificationSettings';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
+import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
+
 import { fetchPriority } from '@/lib/fetchPriority';
 
 // Draft key for localStorage
