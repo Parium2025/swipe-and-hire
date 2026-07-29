@@ -2194,7 +2194,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         a: 'Ni publicerar jobb på minuter, kandidater visar intresse direkt i appen och ni får en överblick med video, CV och svar på era egna frågor. När ni visar intresse tillbaka öppnas en chatt — inga mejltrådar, inga betalda annonser som försvinner.',
                       },
                       {
-                        q: 'Vad kostar det att rekrytera?',
+                        q: 'Vad kostar det hos oss?',
                         a: 'Vi har tre månadspaket: Start på 5 000 kr/mån (1 användare, upp till 40 annonser i månaden), Växa på 7 500 kr/mån (2 användare, obegränsat antal annonser) och Pro på 10 000 kr/mån (obegränsat antal användare och annonser). Behöver ni bara rekrytera en gång kan ni publicera en enskild annons för 799 kr som ligger uppe i 14 dagar. Alla annonser är aktiva i 14 dagar och det är inga bindningstider.',
                       },
                       {
@@ -2210,9 +2210,18 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         a: 'Varje kandidat har en verifierad profil med video, erfarenhet och tydliga önskemål kring roll, ort och lön. Ni ser allt innan ni går vidare, vilket minimerar tiden ni lägger på irrelevanta ansökningar.',
                       },
                       {
-                        q: 'Kan flera kollegor arbeta i samma konto?',
+                        q: 'Kan vi vara flera i kontot?',
                         a: 'Ja. På Växa bjuder ni in en kollega, på Pro får ni obegränsat antal användare. Ni delar kandidater i en gemensam Kanban-vy, kommenterar och fattar beslut tillsammans — utan att någon information faller mellan stolarna.',
                       },
+                      {
+                        q: 'Hur länge ligger annonsen uppe?',
+                        a: 'Varje annons är aktiv i 14 dagar. När den går ut ligger den kvar bland era utgångna annonser och kan återpubliceras med ett klick — alla kandidater, chattar och noteringar följer med.',
+                      },
+                      {
+                        q: 'Kan vi rekrytera i hela Sverige?',
+                        a: 'Ja. Ni når kandidater i hela landet och väljer själva ort, kommun och om rollen är på plats, hybrid eller distans. Samma pris oavsett var ni rekryterar.',
+                      },
+
                       {
                         q: 'Hur hanteras GDPR och kandidatdata?',
                         a: 'Kandidatdata lagras i EU (våra servrar ligger i Paris, Frankrike). Kandidaten äger sin egen data och delar sin fullständiga profil med er först när hen aktivt ansökt eller visat intresse. Ni ser bara kandidater kopplade till era egna annonser. Kandidaten kan själv radera sitt konto och sina uppgifter när som helst, och ni kan ta bort kandidater från er vy. Läs mer i vår integritetspolicy.',
