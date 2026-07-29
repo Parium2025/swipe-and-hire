@@ -213,7 +213,10 @@ export default function IntegrityPolicyPage() {
                 <li>
                   <strong>Profiluppgifter (jobbsökare):</strong> CV, presentationsvideo,
                   arbetslivserfarenhet, utbildning, önskad ort, önskad lön och
-                  tillgänglighet.
+                  tillgänglighet. Vi frågar aldrig efter personnummer — lägg inte in
+                  det i ditt CV, och undvik uppgifter om hälsa, facklig tillhörighet,
+                  religion eller etniskt ursprung. Sådant behöver arbetsgivaren inte
+                  för att bedöma dig, och du väljer själv vad du laddar upp.
                 </li>
                 <li>
                   <strong>Företagsuppgifter (arbetsgivare):</strong> företagsnamn,
@@ -226,7 +229,7 @@ export default function IntegrityPolicyPage() {
                 <li>
                   <strong>AI-genererat underlag:</strong> arbetsgivare kan få en
                   sammanfattning av ditt CV och en bedömning mot sina egna kriterier.
-                  Underlaget är rådgivande — ingen automatisk gallring eller
+                  Underlaget är rådgivande — inget automatiskt urval och inget
                   automatiserat beslut sker, en människa fattar alltid beslutet. Dina
                   uppgifter används inte för att träna AI-modeller.
                 </li>
