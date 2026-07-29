@@ -236,15 +236,13 @@ export class AuthStorageAdapter implements Storage {
       // 2. Fallback: Remember Me snapshot in localStorage (renamed key —
       //    Supabase does NOT watch this key, so it won't trigger cross-tab sync).
       if (shouldRememberUser()) {
-        try {
-          const snap = localStorage.getItem(snapshotKey(key));
-          if (snap) {
-            // Hydrate sessionStorage so subsequent reads are fast and
-            // Supabase's normal flow continues from sessionStorage only.
-            try { sessionStorage.setItem(key, snap); } catch {}
-            return snap;
-          }
-        } catch {}
+        const snap = readLocal(snapshotKey(key));
+        if (snap) {
+          // Hydrate sessionStorage so subsequent reads are fast and
+          // Supabase's normal flow continues from sessionStorage only.
+          try { sessionStorage.setItem(key, snap); } catch {}
+          return snap;
+        }
       }
 
       // 3. Legacy migration: previous versions stored auth tokens directly in
@@ -256,7 +254,7 @@ export class AuthStorageAdapter implements Storage {
         if (legacy) {
           try { sessionStorage.setItem(key, legacy); } catch {}
           if (shouldRememberUser()) {
-            try { localStorage.setItem(snapshotKey(key), legacy); } catch {}
+            writeLocal(snapshotKey(key), legacy);
           }
           try { localStorage.removeItem(key); } catch {}
           return legacy;
@@ -281,11 +279,7 @@ export class AuthStorageAdapter implements Storage {
 
       // Snapshot in localStorage under renamed key — only if Remember Me is on.
       if (shouldRememberUser()) {
-        try {
-          localStorage.setItem(snapshotKey(key), value);
-        } catch (lsError) {
-          console.warn('Failed to write auth snapshot to localStorage:', lsError);
-        }
+        writeLocal(snapshotKey(key), value);
       }
 
       updateLastActivity();
@@ -293,6 +287,7 @@ export class AuthStorageAdapter implements Storage {
       try { sessionStorage.setItem(key, value); } catch {}
     }
   }
+
 
   removeItem(key: string): void {
     // Per-tab logout: clear from sessionStorage in this tab only.
