@@ -887,6 +887,30 @@ export type Database = {
         }
         Relationships: []
       }
+      data_retention_runs: {
+        Row: {
+          deleted_count: number
+          error_message: string | null
+          id: string
+          ran_at: string
+          target_table: string
+        }
+        Insert: {
+          deleted_count?: number
+          error_message?: string | null
+          id?: string
+          ran_at?: string
+          target_table: string
+        }
+        Update: {
+          deleted_count?: number
+          error_message?: string | null
+          id?: string
+          ran_at?: string
+          target_table?: string
+        }
+        Relationships: []
+      }
       device_push_tokens: {
         Row: {
           created_at: string
@@ -3505,6 +3529,7 @@ export type Database = {
         }
         Returns: Json
       }
+      run_data_retention: { Args: never; Returns: undefined }
       same_organization: {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
