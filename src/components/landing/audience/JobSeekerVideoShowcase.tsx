@@ -326,6 +326,7 @@ const JobSeekerVideoShowcase = ({
     return () => {
       clearRetry();
       clearStall();
+      clearCold();
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
       window.removeEventListener('touchstart', resume);
@@ -337,7 +338,8 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('stalled', onWaiting);
       v.removeEventListener('playing', onPlaying);
     };
-  }, [active, safePlay]);
+  }, [active, safePlay, coldGate]);
+
 
 
 
