@@ -180,6 +180,12 @@ const JobSeekerVideoShowcase = ({
   if (windowsColdStartRef.current === null) windowsColdStartRef.current = isWindowsDevice();
   const windowsColdStart = windowsColdStartRef.current;
   const [windowsBlobSource, setWindowsBlobSource] = useState<string | null>(null);
+  /**
+   * Posterlager: <video poster> ritas inte alltid direkt i Safari/iOS — ramen
+   * kan stå svart tills första bildrutan är dekodad. Ett riktigt <img> ovanpå
+   * ritas i samma frame som layouten och fasas ut vid första `playing`.
+   */
+  const [firstFramePainted, setFirstFramePainted] = useState(false);
   const visibleSources = windowsColdStart
     ? (windowsBlobSource ? [{ src: windowsBlobSource, type: 'video/mp4' }] : [])
     : sources;
