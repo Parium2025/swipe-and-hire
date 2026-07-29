@@ -51,6 +51,10 @@ export const preloadAudienceLandingAssets = () => {
   if (started || typeof window === 'undefined') return;
   started = true;
 
+  // 0. Telefonens poster: måste ligga på plats i samma frame som hero ritas,
+  //    annars syns en svart skärm i ramen innan videons första bild dekodats.
+  addLink('preload', phonePoster.url, 'image', 'high');
+
   // 1. Första gallery-postern: high-priority preload (LCP-kandidat under hero).
   addLink('preload', realPosters, 'image', 'high');
   addLink('preload', realPoster2, 'image', 'low');
