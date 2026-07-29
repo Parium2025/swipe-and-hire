@@ -4,6 +4,7 @@ import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
+import windowsSmoothAsset from '@/assets/showcase-jobseeker-windows-smooth60.mp4.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
@@ -42,11 +43,13 @@ const prefersHevc = () => {
 };
 
 /**
- * Windows får en egen lätt H.264 Main@3.1-källa (~0.68 Mbps, 432×936).
- * Den är avsiktligt lättare än crisp-stegen: telefonen är liten i hero och ska
- * aldrig konkurrera ut gallerivideorna eller fastna vid kallstart på riktigt nät.
+ * Windows får en egen H.264 Main@3.2-källa i 60 fps (~0.97 Mbps, 432×936).
+ * Viktigt: originalinspelningen är 60 fps. När Windows tidigare fick en 30 fps-
+ * transcode såg swipe-animationerna ut som lagg även när bufferten var varm.
+ * Den här varianten behåller rörelsens cadence men är fortfarande liten nog för
+ * kallstart och hårdvaruavkodning i Chrome/Edge på Windows.
  */
-const prefersLiteMp4 = () => isWindowsDevice() || prefersReducedData();
+const usesBufferedStart = () => isWindowsDevice() || prefersReducedData();
 
 /**
  * Upplösningsstege — vald efter FAKTISKA enhetspixlar, inte efter operativsystem.
@@ -126,8 +129,10 @@ const getSources = (widthPx?: number) =>
         { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
         { src: hiCrispAsset.url, type: 'video/mp4' },
       ]
-    : prefersLiteMp4()
-      ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
+    : isWindowsDevice()
+      ? [{ src: windowsSmoothAsset.url, type: 'video/mp4' }]
+      : prefersReducedData()
+        ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
 
 
@@ -174,7 +179,7 @@ const JobSeekerVideoShowcase = ({
    * hack. Apple/touch-vägen behåller native autoplay helt orörd.
    */
   const coldGateRef = useRef<boolean | null>(null);
-  if (coldGateRef.current === null) coldGateRef.current = prefersLiteMp4();
+  if (coldGateRef.current === null) coldGateRef.current = usesBufferedStart();
   const coldGate = coldGateRef.current;
   const warmRef = useRef(false);
 
