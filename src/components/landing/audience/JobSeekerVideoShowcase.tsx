@@ -237,6 +237,10 @@ const JobSeekerVideoShowcase = ({
           priority: 'high',
         } as RequestInit & { priority?: 'high' | 'low' });
         if (!response.ok) throw new Error('video fetch failed');
+        const contentType = response.headers.get('content-type') ?? '';
+        if (contentType && !contentType.includes('video/') && !contentType.includes('application/octet-stream')) {
+          throw new Error('video fetch returned non-video content');
+        }
         const blob = await response.blob();
         if (cancelled) return;
         objectUrl = URL.createObjectURL(blob);
