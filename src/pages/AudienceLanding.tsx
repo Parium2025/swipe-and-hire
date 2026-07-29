@@ -2224,7 +2224,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
                       {
                         q: 'Hur hanteras GDPR och kandidatdata?',
-                        a: 'Kandidatdata lagras i EU (våra servrar ligger i Paris, Frankrike). Kandidaten äger sin egen data och delar sin fullständiga profil med er först när hen aktivt ansökt eller visat intresse. Ni ser bara kandidater kopplade till era egna annonser. Kandidaten kan själv radera sitt konto och sina uppgifter när som helst, och ni kan ta bort kandidater från er vy. Läs mer i vår integritetspolicy.',
+                        a: 'Kandidatdata lagras i EU (våra servrar ligger i Paris, Frankrike). Kandidaten äger sin egen data och delar sin fullständiga profil med er först när hen aktivt ansökt eller visat intresse. Ni ser bara kandidater kopplade till era egna annonser. Vårt personuppgiftsbiträdesavtal (DPA) enligt GDPR art. 28 ingår som bilaga i användarvillkoren och accepteras när ni registrerar kontot — inget separat dokument behöver signeras. Läs det på parium.se/dpa.',
+                      },
+                      {
+                        q: 'Hur länge sparas kandidatdata?',
+                        a: 'Vi kör en automatisk gallring varje natt. Ansökningar och tillhörande chattar raderas 24 månader efter ansökan (diskrimineringslagens preskriptionstid), aktivitetslogg efter 24 månader, visningsstatistik efter 12 månader och notiser efter 6 månader. Ni kan alltid ta bort en kandidat eller annons tidigare, och kandidaten kan radera hela sitt konto själv när som helst. Hela gallringsrutinen finns i vårt personuppgiftsbiträdesavtal.',
                       },
                       {
                         q: 'Vilken support får vi som kund?',
@@ -2242,6 +2246,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         q: 'Ingår moms?',
                         a: 'Priserna är exklusive moms. 25 % moms läggs på i checkouten och specificeras på fakturan. Momsregistrerade företag drar av den som ingående moms som vanligt.',
                       },
+
                     ]
                 ).map(({ q, a }, i) => (
                   <motion.div
