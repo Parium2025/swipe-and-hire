@@ -160,6 +160,25 @@ const JobSeekerVideoShowcase = ({
   if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
   const sources = sourcesRef.current;
 
+  /**
+   * Kallstartsspärr (ENDAST Windows / sparläge).
+   *
+   * Problemet: browsern startar uppspelningen så fort `readyState >= 2`, dvs.
+   * när bara någon tiondels sekund är buffrad. På ett kallt nät hinner
+   * bufferten ta slut direkt och de första sekunderna blir en serie
+   * mikro-stopp — exakt det "oj vad tömtladdat" användaren ser. När filen väl
+   * ligger i HTTP-cachen (varm) startar den full och allt känns perfekt.
+   *
+   * Lösningen: håll videon pausad på posterbilden tills ~2 s faktiskt är
+   * buffrat (eller max 4 s), och starta först då. Poster = stillbild = noll
+   * hack. Apple/touch-vägen behåller native autoplay helt orörd.
+   */
+  const coldGateRef = useRef<boolean | null>(null);
+  if (coldGateRef.current === null) coldGateRef.current = prefersLiteMp4();
+  const coldGate = coldGateRef.current;
+  const warmRef = useRef(false);
+
+
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
     if (!v || !active || document.visibilityState !== 'visible') return;
@@ -178,7 +197,7 @@ const JobSeekerVideoShowcase = ({
     v.setAttribute('muted', '');
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
-    v.setAttribute('autoplay', '');
+    if (!coldGate) v.setAttribute('autoplay', '');
     v.disablePictureInPicture = true;
     try { (v as unknown as { disableRemotePlayback?: boolean }).disableRemotePlayback = true; } catch { /* noop */ }
 
@@ -203,59 +222,94 @@ const JobSeekerVideoShowcase = ({
       }
     };
 
-    if (active) attempt();
-    else v.pause();
-
-    const resume = () => {
-      if (!active) {
-        if (!v.paused) v.pause();
-        return;
-      }
-      attempt();
-    };
-
-    /**
-     * Buffringsvakt (kallstart på riktigt nät).
-     *
-     * Buffringsvakt utan tvångspaus.
-     *
-     * Den tidigare varianten pausade videon tills ≥3 s var buffrat. På riktigt
-     * Windows-nät kunde det ge exakt den premium-dödaren användaren ser: bilden
-     * står still i 20–30 sekunder. Nu låter vi browsern fortsätta native och
-     * försöker bara kicka igång igen när lite data finns, eller om den faktiskt
-     * har hamnat i paused-läge.
-     */
-    let stallTimer: number | null = null;
-    const clearStall = () => {
-      if (stallTimer !== null) { window.clearInterval(stallTimer); stallTimer = null; }
-    };
-    const bufferedAhead = () => {
+    /** Hur många sekunder som är buffrat framför nuvarande position. */
+    const aheadOf = (el: HTMLVideoElement) => {
       try {
-        const t = v.currentTime;
-        for (let i = 0; i < v.buffered.length; i += 1) {
-          if (v.buffered.start(i) <= t + 0.1 && v.buffered.end(i) > t) return v.buffered.end(i) - t;
+        const t = el.currentTime;
+        for (let i = 0; i < el.buffered.length; i += 1) {
+          if (el.buffered.start(i) <= t + 0.1 && el.buffered.end(i) > t) return el.buffered.end(i) - t;
         }
       } catch {
         return Infinity;
       }
       return 0;
     };
+
+    // Kallstart: vänta in en riktig buffert innan första play(). Max 4 s, sedan
+    // startar vi ändå så att telefonen aldrig blir stående på posterbilden.
+    const COLD_TARGET_SECONDS = 2;
+    const COLD_MAX_WAIT_MS = 4000;
+    let coldTimer: number | null = null;
+    const clearCold = () => {
+      if (coldTimer !== null) { window.clearInterval(coldTimer); coldTimer = null; }
+    };
+
+    const startWhenBuffered = () => {
+      if (coldTimer !== null) return;
+      try { v.preload = 'auto'; } catch { /* noop */ }
+      if (v.readyState < 2) { try { v.load(); } catch { /* noop */ } }
+      const startedAt = Date.now();
+      coldTimer = window.setInterval(() => {
+        if (!active) { clearCold(); return; }
+        const ready = v.readyState >= 4 || aheadOf(v) >= COLD_TARGET_SECONDS;
+        if (ready || Date.now() - startedAt >= COLD_MAX_WAIT_MS) {
+          clearCold();
+          warmRef.current = true;
+          attempt();
+        }
+      }, 150);
+    };
+
+    /** Startpunkt: kallstartsspärr på Windows, direkt play överallt annars. */
+    const kick = () => {
+      if (coldGate && !warmRef.current) startWhenBuffered();
+      else attempt();
+    };
+
+    if (active) kick();
+    else v.pause();
+
+
+    const resume = () => {
+      if (!active) {
+        if (!v.paused) v.pause();
+        return;
+      }
+      kick();
+    };
+
+    /**
+     * Buffringsvakt under uppspelning.
+     *
+     * Kallstarten hanteras av spärren ovan. Här fångar vi bara stopp som sker
+     * mitt i loopen: vi väntar in lite ny data innan vi kickar igång igen,
+     * istället för att spamma play() mot en tom buffert (vilket är precis det
+     * som ger den hackiga känslan).
+     */
+    let stallTimer: number | null = null;
+    const clearStall = () => {
+      if (stallTimer !== null) { window.clearInterval(stallTimer); stallTimer = null; }
+    };
     const onWaiting = () => {
       if (!active || stallTimer !== null) return;
       try { v.preload = 'auto'; } catch { /* noop */ }
+      // Windows behöver mer marginal innan återstart, annars stannar den igen
+      // direkt. Apple/touch behåller det tidigare, snabbare tröskelvärdet.
+      const needAhead = coldGate ? 1.5 : 0.65;
       let ticks = 0;
       stallTimer = window.setInterval(() => {
         ticks += 1;
         if (!active || document.visibilityState !== 'visible') return;
-        const ahead = bufferedAhead();
+        const ahead = aheadOf(v);
         const nearEnd = v.duration > 0 && v.currentTime > v.duration - 1.2;
-        if (ahead >= 0.65 || nearEnd || v.readyState >= 3 || ticks >= 20) {
+        if (ahead >= needAhead || nearEnd || v.readyState >= 4 || ticks >= 20) {
           clearStall();
           attempt();
         }
       }, 250);
     };
     const onPlaying = () => clearStall();
+
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
     document.addEventListener('visibilitychange', resume);
@@ -272,6 +326,7 @@ const JobSeekerVideoShowcase = ({
     return () => {
       clearRetry();
       clearStall();
+      clearCold();
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
       window.removeEventListener('touchstart', resume);
@@ -283,7 +338,8 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('stalled', onWaiting);
       v.removeEventListener('playing', onPlaying);
     };
-  }, [active, safePlay]);
+  }, [active, safePlay, coldGate]);
+
 
 
 
@@ -338,7 +394,7 @@ const JobSeekerVideoShowcase = ({
           >
             <video
               ref={videoRef}
-              autoPlay
+              autoPlay={!coldGate}
               loop
               muted
               playsInline
