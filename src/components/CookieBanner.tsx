@@ -330,7 +330,7 @@ function CustomizeView({
         <Category
           icon={<Megaphone className="h-4 w-4" />}
           title="Marknadsföring"
-          description="Låter oss visa mer relevanta annonser på andra sajter och mäta hur våra kampanjer fungerar."
+          description="Skulle låta oss mäta kampanjer och visa mer relevanta annonser. Vi använder inga marknadsföringscookies i dag."
           checked={marketing}
           onChange={setMarketing}
         />
