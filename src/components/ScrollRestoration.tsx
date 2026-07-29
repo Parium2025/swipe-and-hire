@@ -161,7 +161,19 @@ export function ScrollRestoration() {
     const isBackForwardDocument = documentNavigationType === 'back_forward';
     const isFreshDocumentEntry = location.key === 'default' && navigationType === 'POP' && !isBackForwardDocument;
     const isReturningFromJobOverlay = isJobOverlayPath(previousPathRef.current);
-    const shouldForceTop = isReload || (isFreshDocumentEntry && !isReturningFromJobOverlay);
+    // 🛟 Tillbaka från en footer-navigering (t.ex. /jobbsokare-footern → /jobb → back).
+    // Historikens första entry har alltid key === 'default', vilket annars felaktigt
+    // tolkas som "ny flik" och tvingar toppen. Har vi en färsk footer-snapshot för
+    // den här sidan ska den istället återställas exakt där användaren klickade.
+    const footerSnapshot = readPositions()[location.pathname];
+    const isReturningFromFooterNavigation =
+      navigationType === 'POP' &&
+      footerSnapshot?.restoreSource === 'footer' &&
+      typeof footerSnapshot.restoreSavedAt === 'number' &&
+      Date.now() - footerSnapshot.restoreSavedAt < 30 * 60 * 1000;
+    const shouldForceTop =
+      isReload ||
+      (isFreshDocumentEntry && !isReturningFromJobOverlay && !isReturningFromFooterNavigation);
 
     if (shouldForceTop) {
       clearScrollPosition(location.pathname);
@@ -335,21 +347,27 @@ export function ScrollRestoration() {
       }
 
       isRestoringRef.current = true;
+      // Om sidan har exakt samma höjd som när positionen sparades är layouten
+      // identisk — då är den absoluta positionen alltid mest korrekt. Ankaret
+      // kan ha flyttats av pinnade/animerade sektioner och ge fel offset.
+      const layoutIdentical = typeof storedPosition?.scrollHeight === 'number'
+        && Math.abs(scrollContainer.scrollHeight - storedPosition.scrollHeight) <= RESTORE_TOLERANCE_PX;
       const previousBehavior = scrollContainer.style.scrollBehavior;
       scrollContainer.style.scrollBehavior = 'auto';
-      if (anchorDelta !== null) {
+      if (anchorDelta !== null && !layoutIdentical) {
         scrollContainer.scrollTop = scrollContainer.scrollTop + anchorDelta;
       } else {
         scrollContainer.scrollTop = targetTop;
       }
       scrollContainer.style.scrollBehavior = previousBehavior;
 
+      console.log('[SR]',{targetTop,now:scrollContainer.scrollTop,sh:scrollContainer.scrollHeight,stored:storedPosition?.scrollHeight,anchorDelta,layoutIdentical});
       const verifyDelta = getAnchorDelta(
         scrollContainer,
         storedPosition?.anchorId,
         storedPosition?.anchorOffset,
       );
-      const closeEnough = verifyDelta !== null
+      const closeEnough = (verifyDelta !== null && !layoutIdentical)
         ? Math.abs(verifyDelta) <= RESTORE_TOLERANCE_PX
         : Math.abs(scrollContainer.scrollTop - targetTop) <= RESTORE_TOLERANCE_PX;
 
