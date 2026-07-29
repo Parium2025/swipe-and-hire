@@ -476,7 +476,18 @@ const PinnedHorizontalGallery = () => {
       rest.forEach((v, index) => warm(v, base + index * 420));
     };
 
-    const onWarm = () => warmVideos();
+    // Kallstart-grind: warmup väntar tills hero-videon (above the fold) är
+    // redo, annars konkurrerar 8 gallery-strömmar med det användaren faktiskt
+    // tittar på under de första sekunderna. Efter första gången är hero redan
+    // markerad som redo och detta blir en direkt anropskedja utan fördröjning.
+    // Grinden släpper alltid igenom senast efter 2 s (se heroVideoReady.ts),
+    // så galleriet kan aldrig fastna. Själva warmup-logiken är oförändrad.
+    const requestWarm = () => {
+      if (warmed) return;
+      gateCleanups.push(whenHeroVideoReady(warmVideos));
+    };
+
+    const onWarm = () => requestWarm();
 
     const enter = () => {
       if (entered) return;
@@ -485,7 +496,7 @@ const PinnedHorizontalGallery = () => {
       hasEnteredOnce = true;
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
-      warmVideos();
+      requestWarm();
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
       const header = headerRef.current;
       if (gsapInstance) {
