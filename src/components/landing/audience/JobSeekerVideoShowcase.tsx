@@ -5,6 +5,7 @@ import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsSmoothAsset from '@/assets/showcase-jobseeker-windows-smooth60.mp4.asset.json';
+import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
 
@@ -48,7 +49,7 @@ const prefersHevc = () => {
  * Den här varianten behåller rörelsens cadence men är fortfarande liten nog för
  * kallstart och hårdvaruavkodning i Chrome/Edge på Windows.
  */
-const prefersLiteMp4 = () => isWindowsDevice() || prefersReducedData();
+const usesBufferedStart = () => isWindowsDevice() || prefersReducedData();
 
 /**
  * Upplösningsstege — vald efter FAKTISKA enhetspixlar, inte efter operativsystem.
@@ -128,8 +129,10 @@ const getSources = (widthPx?: number) =>
         { src: hevcAsset.url, type: 'video/mp4; codecs="hvc1"' },
         { src: hiCrispAsset.url, type: 'video/mp4' },
       ]
-    : prefersLiteMp4()
+    : isWindowsDevice()
       ? [{ src: windowsSmoothAsset.url, type: 'video/mp4' }]
+      : prefersReducedData()
+        ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
 
 
@@ -176,7 +179,7 @@ const JobSeekerVideoShowcase = ({
    * hack. Apple/touch-vägen behåller native autoplay helt orörd.
    */
   const coldGateRef = useRef<boolean | null>(null);
-  if (coldGateRef.current === null) coldGateRef.current = prefersLiteMp4();
+  if (coldGateRef.current === null) coldGateRef.current = usesBufferedStart();
   const coldGate = coldGateRef.current;
   const warmRef = useRef(false);
 
