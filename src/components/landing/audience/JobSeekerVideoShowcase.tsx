@@ -547,6 +547,20 @@ const JobSeekerVideoShowcase = ({
 
             style={{ aspectRatio: ASPECT }}
           >
+            {/* Posterlager: ritas i samma frame som layouten (till skillnad från
+                <video poster> som Safari ibland håller tillbaka) och fasas ut
+                först när videon faktiskt spelar. */}
+            {!firstFramePainted && (
+              <img
+                src={posterAsset.url}
+                alt=""
+                aria-hidden
+                decoding="sync"
+                loading="eager"
+                {...({ fetchpriority: 'high' } as Record<string, string>)}
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+              />
+            )}
             <video
               ref={videoRef}
               autoPlay={!coldGate}
