@@ -66,8 +66,22 @@ function FaqAccordion({ q, a }: { q: string; a: string }) {
             className="overflow-hidden"
           >
             <p className="px-6 pb-6 text-sm leading-7 text-white">
-              <span className="font-semibold text-secondary">Svar: </span>{a}
+              <span className="font-semibold text-secondary">Svar: </span>
+              {a.split('parium.se/dpa').map((part, i, arr) => (
+                <span key={i}>
+                  {part}
+                  {i < arr.length - 1 && (
+                    <Link
+                      to="/dpa"
+                      className="font-semibold text-secondary underline underline-offset-2 transition hover:text-secondary/80"
+                    >
+                      parium.se/dpa
+                    </Link>
+                  )}
+                </span>
+              ))}
             </p>
+
           </motion.div>
         )}
       </AnimatePresence>
