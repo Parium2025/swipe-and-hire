@@ -79,7 +79,7 @@ const evaluateAll = () => {
   const centerX = vw / 2;
   const hidden = document.hidden;
 
-  const candidates: { el: HTMLVideoElement; dist: number; playing: boolean }[] = [];
+  const candidates: { el: HTMLVideoElement; dist: number; playing: boolean; covered: number }[] = [];
   registry.forEach((el) => {
     const rect = el.getBoundingClientRect();
     const inView =
@@ -89,26 +89,39 @@ const evaluateAll = () => {
       rect.right > 0 &&
       rect.left < vw;
     if (inView) {
+      // Hur stor del av kortets BREDD som faktiskt syns. Kort längst ut i
+      // strippen (t.ex. Vård) är ofta helt synliga men långt från mitten —
+      // utan detta mått förlorade de alltid mot kort närmare centrum och
+      // spelade därför aldrig upp.
+      const visibleW = Math.max(0, Math.min(rect.right, vw) - Math.max(rect.left, 0));
+      const covered = rect.width > 0 ? visibleW / rect.width : 0;
       candidates.push({
         el,
         dist: Math.abs((rect.left + rect.right) / 2 - centerX),
         playing: !el.paused,
+        covered,
       });
     } else if (!el.paused) {
       el.pause();
     }
   });
 
-  // Hysteres: redan spelande videor får en distans-bonus så att små
-  // scroll-rörelser inte kastar om kön (blinkande start/stopp). Bonusen är
-  // MEDVETET begränsad — absolut prioritet gjorde att kort längst ut i
-  // strippen (t.ex. Vård) aldrig fick en plats när tidigare kort låg kvar
-  // synliga i kön. Nu tar ett kort närmare mitten alltid över.
+  // Rangordning:
+  //  1. Helt (≥92 %) synliga kort går alltid före delvis avklippta kort.
+  //  2. Därefter avstånd till viewportens mitt.
+  //  3. Hysteres: redan spelande kort får en distans-bonus så att små
+  //     scroll-rörelser inte kastar om kön (blinkande start/stopp).
   const HYSTERESIS_PX = 200;
+  const FULLY_VISIBLE = 0.92;
+  const rank = (c: { dist: number; playing: boolean; covered: number }) => ({
+    tier: c.covered >= FULLY_VISIBLE ? 0 : 1,
+    score: c.dist - (c.playing ? HYSTERESIS_PX : 0),
+  });
   candidates.sort((a, b) => {
-    const aScore = a.dist - (a.playing ? HYSTERESIS_PX : 0);
-    const bScore = b.dist - (b.playing ? HYSTERESIS_PX : 0);
-    return aScore - bScore;
+    const ra = rank(a);
+    const rb = rank(b);
+    if (ra.tier !== rb.tier) return ra.tier - rb.tier;
+    return ra.score - rb.score;
   });
   const maxConcurrent = getMaxConcurrent();
   candidates.forEach(({ el }, i) => {
@@ -121,6 +134,7 @@ const evaluateAll = () => {
       el.pause();
     }
   });
+
 
 };
 
@@ -447,34 +461,62 @@ const PinnedHorizontalGallery = () => {
       }
     };
 
+    /**
+     * Sekventiell warmup — EN video i taget.
+     *
+     * Tidigare startades alla åtta korten med 140 ms mellanrum, vilket i
+     * praktiken betyder åtta parallella nedladdningar samtidigt som
+     * hero-videon (~3 MB) fortfarande buffrar. På localhost märks det inte
+     * alls; på ett riktigt nät delar strömmarna bandbredd, varje video når
+     * `canplay` för tidigt och Windows spelar upp ryckigt vid kallstart.
+     *
+     * Nu laddas nästa video först när den föregående är spelbar (eller efter
+     * en timeout), så bandbredden går till det kort användaren faktiskt ser.
+     */
     const warmVideos = () => {
       if (warmed) return;
       warmed = true;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
-      const initialBatch = prefersLightweightVideo()
+      const priority = prefersLightweightVideo()
         ? videos.slice(0, getMaxConcurrent())
         : profile === 'slim'
-          ? videos.slice(0, 4)
-          : videos;
-      const warm = (v: HTMLVideoElement, delay: number) => {
-        warmTimers.push(window.setTimeout(() => {
-          try {
-            v.preload = 'auto';
-            if (v.readyState < 2) v.load();
-          } catch {
-            // Video warmup is best-effort only.
-          }
-        }, delay));
+          ? videos.slice(0, 3)
+          : videos.slice(0, 4);
+      const queue = [...priority, ...videos.filter((v) => !priority.includes(v))];
+
+      let index = 0;
+      const step = () => {
+        if (disposed) return;
+        const v = queue[index++];
+        if (!v) return;
+        if (v.readyState >= 3) {
+          warmTimers.push(window.setTimeout(step, 60));
+          return;
+        }
+        let done = false;
+        const next = () => {
+          if (done) return;
+          done = true;
+          v.removeEventListener('canplay', next);
+          v.removeEventListener('error', next);
+          // Liten paus mellan kort så att decode/nätverk hinner andas.
+          warmTimers.push(window.setTimeout(step, 180));
+        };
+        v.addEventListener('canplay', next, { once: true });
+        v.addEventListener('error', next, { once: true });
+        // Skyddsnät: fastnar en video i buffring får kön inte stanna.
+        warmTimers.push(window.setTimeout(next, 2500));
+        try {
+          v.preload = 'auto';
+          if (v.readyState < 2) v.load();
+        } catch {
+          // Video warmup is best-effort only.
+        }
       };
-      initialBatch.forEach((v, index) => warm(v, index * 140));
-      // Andra vågen: resterande kort buffras i lugn takt efter att de första
-      // är igång. Utan detta möter Windows-användaren en kall video (poster →
-      // hårt hopp till frame 0) varje gång ett nytt kort scrollas in.
-      const rest = videos.filter((v) => !initialBatch.includes(v));
-      const base = initialBatch.length * 140 + 1400;
-      rest.forEach((v, index) => warm(v, base + index * 420));
+      step();
     };
+
 
     const onWarm = () => warmVideos();
 

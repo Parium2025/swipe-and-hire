@@ -79,12 +79,42 @@ const estimateCssWidth = (widthPx?: number) => {
   return Math.min(190, vw - 48);
 };
 
+/**
+ * Bandbreddstak för stegen.
+ *
+ * Filerna ligger på 1.55 / 3.12 / 3.30 Mbps. En video kan bara spelas
+ * oavbrutet om nätet klarar mer än videons bitrate med marginal — annars
+ * hinner bufferten ta slut och Chrome/Edge på Windows visar det som att
+ * videon "fastnar" mitt i loopen. I preview (localhost) händer det aldrig,
+ * vilket är precis därför problemet bara syns i skarpt läge.
+ *
+ * Vi låter därför uppmätt `downlink` sätta ett TAK för vilket steg som får
+ * väljas. Har vi ingen mätning behålls det skarpaste steget.
+ */
+const maxWidthForConnection = () => {
+  if (typeof navigator === 'undefined') return Infinity;
+  const c = (navigator as unknown as {
+    connection?: { saveData?: boolean; downlink?: number; effectiveType?: string };
+  }).connection;
+  if (!c) return Infinity;
+  if (c.saveData) return 432;
+  if (c.effectiveType && /(^|-)(2g|slow-2g|3g)$/i.test(c.effectiveType)) return 432;
+  const down = typeof c.downlink === 'number' ? c.downlink : undefined;
+  if (down === undefined || down <= 0) return Infinity;
+  if (down < 4) return 432;
+  if (down < 8) return 648;
+  return Infinity;
+};
+
 const pickLadder = (widthPx?: number) => {
   const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 3);
   const target = estimateCssWidth(widthPx) * dpr;
+  const cap = maxWidthForConnection();
+  const allowed = LADDER.filter((r) => r.w <= cap);
+  const pool = allowed.length > 0 ? allowed : [LADDER[0]];
   // Välj minsta rung som TÄCKER målet fullt ut. Ingen tolerans nedåt: en källa
   // som är smalare än ytan måste skalas UPP av browsern = garanterat suddig text.
-  return (LADDER.find((r) => r.w >= target) ?? LADDER[LADDER.length - 1]).url;
+  return (pool.find((r) => r.w >= target) ?? pool[pool.length - 1]).url;
 };
 
 
@@ -97,6 +127,7 @@ const getSources = (widthPx?: number) =>
     : prefersPerformanceMp4()
       ? [{ src: windowsMp4Asset.url, type: 'video/mp4' }]
       : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
+
 
 
 
@@ -181,6 +212,45 @@ const JobSeekerVideoShowcase = ({
       attempt();
     };
 
+    /**
+     * Buffringsvakt (kallstart på riktigt nät).
+     *
+     * När bufferten tar slut fortsätter browsern att försöka rita bildruta för
+     * bildruta i takt med att data trillar in — det är exakt den ryckiga,
+     * "fastnande" känslan på Windows. Istället pausar vi medvetet och
+     * återupptar först när det finns ≥ 3 s färdigbuffrat framför oss. Då blir
+     * det en (1) kort paus istället för tio sekunder av hack.
+     */
+    let stallTimer: number | null = null;
+    const clearStall = () => {
+      if (stallTimer !== null) { window.clearInterval(stallTimer); stallTimer = null; }
+    };
+    const bufferedAhead = () => {
+      try {
+        const t = v.currentTime;
+        for (let i = 0; i < v.buffered.length; i += 1) {
+          if (v.buffered.start(i) <= t + 0.1 && v.buffered.end(i) > t) return v.buffered.end(i) - t;
+        }
+      } catch {
+        return Infinity;
+      }
+      return 0;
+    };
+    const onWaiting = () => {
+      if (!active || stallTimer !== null) return;
+      v.pause();
+      stallTimer = window.setInterval(() => {
+        if (!active || document.visibilityState !== 'visible') return;
+        const ahead = bufferedAhead();
+        const nearEnd = v.duration > 0 && v.currentTime > v.duration - 3.2;
+        if (ahead >= 3 || nearEnd || v.readyState >= 4) {
+          clearStall();
+          attempt();
+        }
+      }, 250);
+    };
+    const onPlaying = () => clearStall();
+
     const gestureOpts: AddEventListenerOptions = { passive: true };
     document.addEventListener('visibilitychange', resume);
     window.addEventListener('pageshow', resume);
@@ -189,10 +259,13 @@ const JobSeekerVideoShowcase = ({
     window.addEventListener('scroll', resume, gestureOpts);
     v.addEventListener('canplay', resume);
     v.addEventListener('loadeddata', resume);
-    v.addEventListener('pause', resume);
+    v.addEventListener('waiting', onWaiting);
+    v.addEventListener('stalled', onWaiting);
+    v.addEventListener('playing', onPlaying);
 
     return () => {
       clearRetry();
+      clearStall();
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
       window.removeEventListener('touchstart', resume);
@@ -200,9 +273,12 @@ const JobSeekerVideoShowcase = ({
       window.removeEventListener('scroll', resume);
       v.removeEventListener('canplay', resume);
       v.removeEventListener('loadeddata', resume);
-      v.removeEventListener('pause', resume);
+      v.removeEventListener('waiting', onWaiting);
+      v.removeEventListener('stalled', onWaiting);
+      v.removeEventListener('playing', onPlaying);
     };
   }, [active, safePlay]);
+
 
 
 
