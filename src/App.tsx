@@ -201,7 +201,6 @@ const AnimatedRoutes = () => {
           <Route path="/valj-plan" element={<ValjPlan />} />
           <Route path="/home" element={<Index />} />
           <Route path="/index" element={<Index />} />
-          <Route path="/consent" element={<Index />} />
           <Route path="/verify" element={<EmailVerification />} />
           <Route path="/email-redirect" element={<EmailRedirect />} />
           <Route path="/confirm" element={<EmailConfirm />} />

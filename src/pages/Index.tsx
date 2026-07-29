@@ -24,7 +24,6 @@ import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour from '@/components/AppOnboardingTour';
 import Profile from '@/pages/Profile';
-import Consent from '@/pages/Consent';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
 import Billing from '@/pages/Billing';
@@ -560,7 +559,7 @@ const Index = () => {
   }
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/status', '/ai-usage', '/consent', '/templates'];
+  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/status', '/ai-usage', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
   // Behåll senaste sidebar-path så JobView-overlay vet vilken vy som
   // ska visas underst (utan att KeepAlive byter activeKey och fadar).
@@ -599,8 +598,6 @@ const Index = () => {
           return <Profile />;
         case '/profile-preview':
           return <ProfilePreview />;
-        case '/consent':
-          return <Consent />;
         case '/search-jobs':
           return <SearchJobs />;
         case '/saved-jobs':
