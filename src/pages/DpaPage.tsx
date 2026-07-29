@@ -119,8 +119,8 @@ export default function DpaPage() {
             <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">
               Juridiskt · Bilaga till användarvillkoren
             </span>
-            <h1 className="mt-4 hyphens-auto break-words text-[26px] font-black leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl" lang="sv">
-              Personuppgiftsbiträdesavtal
+            <h1 className="mt-4 break-words text-[26px] font-black leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl" lang="sv">
+              {'Personuppgifts\u00ADbiträdes\u00ADavtal'}
             </h1>
             <p className="mt-4 text-[15px] text-white">Senast uppdaterad: {LAST_UPDATED}</p>
             <p className="mt-6 max-w-[680px] text-[16px] leading-7 text-white sm:text-[17px]">
