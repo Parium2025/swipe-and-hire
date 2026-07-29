@@ -1,0 +1,252 @@
+// GDPR: automatisk hantering av inaktiva konton.
+//
+// Steg 1 — VARNING: konton utan aktivitet på 24 månader får ett mejl och
+//          schemaläggs för radering 30 dagar senare.
+// Steg 2 — RADERING: konton vars varningsperiod löpt ut och som fortfarande är
+//          inaktiva raderas permanent (profil, data, storage, auth-konto).
+// Steg 3 — ÅTERKALLNING: har personen loggat in efter varningen avbryts allt.
+//
+// Körs nattligt via pg_cron (04:15) → trigger_inactive_account_retention().
+
+import { createClient } from 'npm:@supabase/supabase-js@2'
+import { requireServiceRoleOrCronSecret } from '../_shared/service-auth.ts'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
+const INACTIVE_MONTHS = 24
+const GRACE_DAYS = 30
+const WARN_BATCH = 200
+const DELETE_BATCH = 50
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+function monthsAgo(months: number): string {
+  const d = new Date()
+  d.setMonth(d.getMonth() - months)
+  return d.toISOString()
+}
+
+/** Full radering av en användares data — samma ordning som delete-my-account. */
+async function purgeUser(admin: ReturnType<typeof createClient>, userId: string, email: string | null) {
+  const buckets = ['job-applications', 'company-logos', 'job-images', 'message-attachments']
+  for (const bucket of buckets) {
+    try {
+      const { data: files } = await admin.storage.from(bucket).list(userId, { limit: 1000 })
+      if (files?.length) {
+        await admin.storage.from(bucket).remove(files.map((f) => `${userId}/${f.name}`))
+      }
+    } catch (e) {
+      console.warn(`storage cleanup ${bucket}:`, (e as Error).message)
+    }
+  }
+
+  const { data: jobIds } = await admin.from('job_postings').select('id').eq('employer_id', userId)
+  const ids = (jobIds ?? []).map((j: { id: string }) => j.id)
+  if (ids.length > 0) {
+    await admin.from('one_time_purchases').update({ job_id: null }).in('job_id', ids)
+    await admin.from('candidate_ratings').update({ job_id: null }).in('job_id', ids)
+    await admin.from('conversations').update({ job_id: null }).in('job_id', ids)
+    await admin.from('outreach_dispatch_logs').update({ job_id: null }).in('job_id', ids)
+    await admin.from('profile_views').update({ job_id: null }).in('job_id', ids)
+    await admin.from('job_postings').delete().eq('employer_id', userId)
+  }
+
+  await admin.from('job_applications').delete().eq('applicant_id', userId)
+
+  const userScopedTables: { table: string; column: string }[] = [
+    { table: 'saved_jobs', column: 'user_id' },
+    { table: 'swipe_actions', column: 'user_id' },
+    { table: 'candidate_notes', column: 'author_id' },
+    { table: 'jobseeker_notes', column: 'jobseeker_id' },
+    { table: 'employer_notes', column: 'author_id' },
+    { table: 'candidate_ratings', column: 'employer_id' },
+    { table: 'candidate_activities', column: 'user_id' },
+    { table: 'device_push_tokens', column: 'user_id' },
+    { table: 'notification_preferences', column: 'user_id' },
+    { table: 'notifications', column: 'user_id' },
+    { table: 'user_sessions', column: 'user_id' },
+    { table: 'user_data_consents', column: 'user_id' },
+    { table: 'saved_searches', column: 'user_id' },
+    { table: 'user_subscriptions', column: 'user_id' },
+    { table: 'profile_cv_summaries', column: 'user_id' },
+    { table: 'profile_views', column: 'viewer_id' },
+    { table: 'job_views', column: 'user_id' },
+    { table: 'email_confirmations', column: 'user_id' },
+    { table: 'email_unsubscribe_tokens', column: 'user_id' },
+    { table: 'user_roles', column: 'user_id' },
+    { table: 'conversation_members', column: 'user_id' },
+    { table: 'conversation_message_reactions', column: 'user_id' },
+    { table: 'criterion_feedback', column: 'author_id' },
+  ]
+  for (const { table, column } of userScopedTables) {
+    const { error } = await admin.from(table).delete().eq(column, userId)
+    if (error) console.warn(`cleanup ${table}.${column}:`, error.message)
+  }
+
+  await admin.from('profiles').delete().eq('user_id', userId)
+
+  const { error: authErr } = await admin.auth.admin.deleteUser(userId)
+  if (authErr) throw new Error(`auth delete failed: ${authErr.message}`)
+
+  if (email) {
+    await admin.from('suppressed_emails').upsert(
+      { email: email.toLowerCase(), reason: 'account_deleted_inactive' },
+      { onConflict: 'email' },
+    )
+  }
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
+
+  const authResp = await requireServiceRoleOrCronSecret(req, corsHeaders)
+  if (authResp) return authResp
+
+  const admin = createClient(supabaseUrl, serviceKey)
+  const now = new Date()
+  const stats = { warned: 0, deleted: 0, cancelled: 0, errors: 0 }
+
+  try {
+    // ── Steg 3: avbryt varningar för konton som blivit aktiva igen ──
+    const { data: pending } = await admin
+      .from('account_inactivity_notices')
+      .select('id, user_id, warned_at')
+      .is('deleted_at', null)
+      .is('cancelled_at', null)
+
+    const pendingList = pending ?? []
+    if (pendingList.length > 0) {
+      const { data: activeProfiles } = await admin
+        .from('profiles')
+        .select('user_id, last_active_at')
+        .in('user_id', pendingList.map((p: { user_id: string }) => p.user_id))
+
+      const activeMap = new Map(
+        (activeProfiles ?? []).map((p: { user_id: string; last_active_at: string | null }) => [p.user_id, p.last_active_at]),
+      )
+
+      for (const notice of pendingList as { id: string; user_id: string; warned_at: string }[]) {
+        const lastActive = activeMap.get(notice.user_id)
+        if (lastActive && new Date(lastActive) > new Date(notice.warned_at)) {
+          await admin
+            .from('account_inactivity_notices')
+            .update({ cancelled_at: now.toISOString() })
+            .eq('id', notice.id)
+          stats.cancelled++
+        }
+      }
+    }
+
+    // ── Steg 2: radera konton vars frist löpt ut ──
+    const { data: due } = await admin
+      .from('account_inactivity_notices')
+      .select('id, user_id, email')
+      .is('deleted_at', null)
+      .is('cancelled_at', null)
+      .lte('scheduled_delete_at', now.toISOString())
+      .limit(DELETE_BATCH)
+
+    for (const notice of (due ?? []) as { id: string; user_id: string; email: string | null }[]) {
+      try {
+        await purgeUser(admin, notice.user_id, notice.email)
+        await admin
+          .from('account_inactivity_notices')
+          .update({ deleted_at: now.toISOString(), error_message: null })
+          .eq('id', notice.id)
+        stats.deleted++
+      } catch (e) {
+        stats.errors++
+        console.error(`purge failed for ${notice.user_id}:`, (e as Error).message)
+        await admin
+          .from('account_inactivity_notices')
+          .update({ error_message: (e as Error).message })
+          .eq('id', notice.id)
+      }
+    }
+
+    // ── Steg 1: varna nya inaktiva konton ──
+    const cutoff = monthsAgo(INACTIVE_MONTHS)
+    const { data: candidates } = await admin
+      .from('profiles')
+      .select('user_id, email, first_name, last_active_at, created_at')
+      .or(`last_active_at.lt.${cutoff},and(last_active_at.is.null,created_at.lt.${cutoff})`)
+      .limit(WARN_BATCH)
+
+    const candidateList = (candidates ?? []) as {
+      user_id: string
+      email: string | null
+      first_name: string | null
+      last_active_at: string | null
+      created_at: string
+    }[]
+
+    if (candidateList.length > 0) {
+      const { data: existing } = await admin
+        .from('account_inactivity_notices')
+        .select('user_id')
+        .in('user_id', candidateList.map((c) => c.user_id))
+      const alreadyNoticed = new Set((existing ?? []).map((e: { user_id: string }) => e.user_id))
+
+      const deleteAt = new Date(now.getTime() + GRACE_DAYS * 24 * 60 * 60 * 1000)
+
+      for (const profile of candidateList) {
+        if (alreadyNoticed.has(profile.user_id)) continue
+
+        let email = profile.email
+        if (!email) {
+          const { data: authUser } = await admin.auth.admin.getUserById(profile.user_id)
+          email = authUser?.user?.email ?? null
+        }
+
+        const { error: insertErr } = await admin.from('account_inactivity_notices').insert({
+          user_id: profile.user_id,
+          email,
+          last_active_at: profile.last_active_at ?? profile.created_at,
+          warned_at: now.toISOString(),
+          scheduled_delete_at: deleteAt.toISOString(),
+        })
+        if (insertErr) {
+          console.warn(`notice insert failed for ${profile.user_id}:`, insertErr.message)
+          continue
+        }
+        stats.warned++
+
+        if (email) {
+          try {
+            await admin.functions.invoke('send-transactional-email', {
+              body: {
+                templateName: 'account-inactivity-warning',
+                recipientEmail: email,
+                idempotencyKey: `inactivity-warning-${profile.user_id}`,
+                templateData: {
+                  first_name: profile.first_name || 'där',
+                  delete_date: deleteAt.toLocaleDateString('sv-SE'),
+                  days_left: String(GRACE_DAYS),
+                },
+              },
+            })
+          } catch (e) {
+            console.warn(`warning email failed for ${email}:`, (e as Error).message)
+          }
+        }
+      }
+    }
+
+    console.log('inactive-account-retention done', stats)
+    return new Response(JSON.stringify({ success: true, ...stats }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  } catch (err) {
+    console.error('inactive-account-retention error:', err)
+    return new Response(JSON.stringify({ error: (err as Error).message, ...stats }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+})
