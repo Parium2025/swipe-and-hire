@@ -80,18 +80,6 @@ function FooterLink({ link }: { link: ColLink }) {
     if (link.to === '/om-oss') void preloadAboutPageAssets('low');
   };
 
-  if (link.action === 'cookies') {
-    return (
-      <button
-        type="button"
-        onClick={openCookieSettings}
-        className="inline-flex min-h-11 items-center whitespace-nowrap text-[15px] font-medium leading-none text-white transition-colors hover:text-secondary"
-      >
-        {link.label}
-      </button>
-    );
-  }
-
   return (
     <Link
       to={link.to}
@@ -103,7 +91,7 @@ function FooterLink({ link }: { link: ColLink }) {
         remember(link.to);
       }}
       onClick={() => remember(link.to)}
-      className="inline-flex min-h-11 items-center whitespace-nowrap text-[15px] font-medium leading-none text-white transition-colors hover:text-secondary"
+      className="inline-flex min-h-11 items-center text-balance break-words text-[15px] font-medium leading-snug text-white transition-colors hover:text-secondary"
     >
       {link.label}
     </Link>
