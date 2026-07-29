@@ -1754,8 +1754,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     className="mt-1 rounded border-white/30 bg-white/10 text-primary focus:ring-primary focus:ring-offset-0"
                   />
                   <div className="text-sm text-white">
-                    <p className="font-medium mb-1">Jag godkänner att mina uppgifter delas</p>
-                    <p className="text-white">Genom att kryssa i denna ruta godkänner jag att Parium delar ovanstående information med arbetsgivare när jag ansöker om jobb. Du kan när som helst återkalla detta samtycke från din profil.</p>
+                    <p className="font-medium mb-1">Jag förstår hur mina uppgifter delas</p>
+                    <p className="text-white">Ovanstående information visas för en arbetsgivare först när du själv söker ett av deras jobb. Du kan när som helst ändra dina uppgifter, ta tillbaka en ansökan eller radera ditt konto under Min profil.</p>
                   </div>
                 </label>
               </div>
