@@ -23,6 +23,7 @@ import GuiderHub from "./pages/GuiderHub";
 import GuidePage from "./pages/GuidePage";
 import AboutPage from "./pages/AboutPage";
 import IntegrityPolicyPage from "./pages/IntegrityPolicyPage";
+import DpaPage from "./pages/DpaPage";
 import Auth from "./pages/Auth";
 import Checkout from "./pages/Checkout";
 import EmailConfirm from "./pages/EmailConfirm";
@@ -148,7 +149,7 @@ const LazyFallback = () => (
   <div className="min-h-screen bg-parium-gradient" />
 );
 
-const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare', '/om-oss', '/integritetspolicy'];
+const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare', '/om-oss', '/integritetspolicy', '/dpa'];
 const isPublicLightweightPath = (pathname: string) =>
   LIGHTWEIGHT_ROUTES.includes(pathname) ||
   pathname === '/jobb' ||
@@ -194,6 +195,7 @@ const AnimatedRoutes = () => {
           <Route path="/guider/:slug" element={<GuidePage />} />
           <Route path="/om-oss" element={<AboutPage />} />
           <Route path="/integritetspolicy" element={<IntegrityPolicyPage />} />
+          <Route path="/dpa" element={<DpaPage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/valj-plan" element={<ValjPlan />} />
