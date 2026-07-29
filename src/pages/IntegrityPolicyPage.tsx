@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import SiteFooter from '@/components/landing/SiteFooter';
-import { openCookieSettings } from '@/components/CookieBanner';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
 const CANONICAL = 'https://www.parium.se/integritetspolicy';
