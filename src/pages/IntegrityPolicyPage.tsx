@@ -268,9 +268,10 @@ export default function IntegrityPolicyPage() {
                       basis="Avtal (kan stängas av i inställningarna)"
                     />
                     <Row
-                      what="Statistik, analys och marknadsföring via cookies"
-                      basis="Samtycke (används inte i dag)"
+                      what="Nödvändig lagring i webbläsaren (inloggning, inställningar)"
+                      basis="Nödvändigt för att leverera tjänsten"
                     />
+
 
                   </tbody>
                 </table>
@@ -362,45 +363,44 @@ export default function IntegrityPolicyPage() {
 
             <Section id="cookies" title="7. Cookies och liknande tekniker">
               <p>
-                Parium använder cookies för att sidan ska fungera, komma ihåg dina
-                val och (med ditt samtycke) för statistik och marknadsföring. Vi
-                delar in cookies i fyra kategorier:
+                Parium använder endast nödvändig lagring i din webbläsare — det som
+                krävs för att tjänsten ska fungera. Vi använder inga cookies för
+                statistik, spårning eller marknadsföring, och delar inget med tredje
+                part i reklamsyfte.
               </p>
               <div className="mt-4 space-y-3">
                 <CookieCat
-                  title="Nödvändiga"
-                  desc="Krävs för att sidan ska fungera — inloggning, sessioner och säkerhet. Kan inte stängas av."
+                  title="Inloggning och säkerhet"
+                  desc="Din session sparas så att du håller dig inloggad och för att skydda kontot mot obehörig åtkomst."
                 />
                 <CookieCat
-                  title="Preferenser"
-                  desc="Kommer ihåg dina val, t.ex. språk och sparade filter."
+                  title="Dina inställningar"
+                  desc="Val du gör i appen — t.ex. sparade filter och visningslägen — sparas lokalt så att du slipper göra om dem."
                 />
                 <CookieCat
-                  title="Statistik & analys"
-                  desc="Anonymiserad data om hur sidan används. Används inte i dag — aktiveras först om du gett ditt samtycke."
-                />
-                <CookieCat
-                  title="Marknadsföring"
-                  desc="Skulle låta oss mäta kampanjer och visa mer relevanta annonser. Vi använder inga marknadsföringscookies i dag."
+                  title="Teknisk prestanda"
+                  desc="Lokal cache av bilder och innehåll så att appen laddar snabbt. Ingen data skickas vidare till tredje part."
                 />
               </div>
               <p className="mt-4">
-                I dag använder Parium endast nödvändiga cookies och
-                preferenscookies. Statistik- och marknadsföringscookies är
-                avstängda och sätts aldrig utan att du först aktivt godkänner dem.
+                Nödvändig lagring av det här slaget kräver inte ditt samtycke enligt
+                lagen om elektronisk kommunikation. Om vi i framtiden inför
+                statistik- eller marknadsföringscookies kommer vi först att fråga
+                dig och uppdatera den här policyn.
               </p>
 
               <p className="mt-5">
-                Du kan när som helst ändra dina cookie-val:
+                Du kan läsa informationen om cookies igen här:
               </p>
               <button
                 type="button"
                 onClick={openCookieSettings}
                 className="mt-3 inline-flex min-h-[44px] items-center rounded-xl border border-secondary/40 bg-secondary/15 px-5 text-sm font-bold text-secondary transition hover:bg-secondary/25"
               >
-                Öppna cookie-inställningar
+                Om cookies på Parium
               </button>
             </Section>
+
 
             <Section id="rattigheter" title="8. Dina rättigheter enligt GDPR">
               <p>Enligt dataskyddsförordningen har du rätt att:</p>
