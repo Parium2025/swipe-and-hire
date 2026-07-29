@@ -323,7 +323,7 @@ function CustomizeView({
         <Category
           icon={<BarChart3 className="h-4 w-4" />}
           title="Statistik & analys"
-          description="Anonymiserad data om hur sidan används så vi kan förbättra Parium. Ingen enskild person kan identifieras."
+          description="Anonymiserad data om hur sidan används så vi kan förbättra Parium. Används inte i dag — aktiveras först om du godkänner."
           checked={analytics}
           onChange={setAnalytics}
         />
