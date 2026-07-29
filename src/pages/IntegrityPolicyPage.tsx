@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import SiteFooter from '@/components/landing/SiteFooter';
-import { openCookieSettings } from '@/components/CookieBanner';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
 const CANONICAL = 'https://www.parium.se/integritetspolicy';
@@ -37,6 +36,21 @@ export default function IntegrityPolicyPage() {
   const navigate = useNavigate();
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-policy-scroll-root]');
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      // Vänta in layouten så att ankaret hamnar rätt
+      const id = window.setTimeout(() => {
+        const target = document.getElementById(hash);
+        if (!target) return;
+        if (root) {
+          const top = root.scrollTop + target.getBoundingClientRect().top - 144;
+          root.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+        } else {
+          target.scrollIntoView({ block: 'start', behavior: 'auto' });
+        }
+      }, 120);
+      return () => window.clearTimeout(id);
+    }
     if (root) root.scrollTop = 0;
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, []);
@@ -384,22 +398,12 @@ export default function IntegrityPolicyPage() {
               </div>
               <p className="mt-4">
                 Nödvändig lagring av det här slaget kräver inte ditt samtycke enligt
-                lagen om elektronisk kommunikation. Kategorierna statistik och
-                marknadsföring är avstängda i dag — du kan ändå göra ditt val i
-                cookieinställningarna, och valet gäller automatiskt om vi någon gång
-                inför sådana cookies.
+                lagen om elektronisk kommunikation, och därför visar vi ingen
+                cookieruta. Skulle vi i framtiden införa cookies för statistik eller
+                marknadsföring kommer vi att be om ditt samtycke innan de aktiveras
+                och uppdatera den här sidan.
               </p>
 
-              <p className="mt-5">
-                Du kan ändra ditt val när som helst:
-              </p>
-              <button
-                type="button"
-                onClick={openCookieSettings}
-                className="mt-3 inline-flex min-h-[44px] items-center rounded-xl border border-secondary/40 bg-secondary/15 px-5 text-sm font-bold text-secondary transition hover:bg-secondary/25"
-              >
-                Cookieinställningar
-              </button>
 
             </Section>
 

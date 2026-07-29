@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { preloadAboutPageAssets } from '@/lib/aboutPagePreload';
 import { saveScrollNow } from '@/lib/scrollRestoration';
-import { openCookieSettings } from '@/components/CookieBanner';
+
 
 // Apple-style premium entry — samma timing/easing som AboutPage så
 // hela sajten har symmetrisk rörelsekänsla.
@@ -22,7 +22,7 @@ const footerContainerVariants: Variants = {
 };
 
 
-type ColLink = { label: string; to: string; action?: 'cookies' };
+type ColLink = { label: string; to: string };
 
 const cityLinks: ColLink[] = [
   { label: 'Stockholm', to: '/jobb/stockholm' },
@@ -58,7 +58,7 @@ const companyLinks: ColLink[] = [
   { label: 'Lediga jobb', to: '/jobb' },
   { label: 'Integritetspolicy', to: '/integritetspolicy' },
   { label: 'Personuppgiftsbiträdesavtal', to: '/dpa' },
-  { label: 'Om cookies', to: '#cookies', action: 'cookies' },
+  { label: 'Om cookies', to: '/integritetspolicy#cookies' },
 ];
 
 
@@ -80,18 +80,6 @@ function FooterLink({ link }: { link: ColLink }) {
     if (link.to === '/om-oss') void preloadAboutPageAssets('low');
   };
 
-  if (link.action === 'cookies') {
-    return (
-      <button
-        type="button"
-        onClick={openCookieSettings}
-        className="inline-flex min-h-11 items-center whitespace-nowrap text-[15px] font-medium leading-none text-white transition-colors hover:text-secondary"
-      >
-        {link.label}
-      </button>
-    );
-  }
-
   return (
     <Link
       to={link.to}
@@ -103,7 +91,7 @@ function FooterLink({ link }: { link: ColLink }) {
         remember(link.to);
       }}
       onClick={() => remember(link.to)}
-      className="inline-flex min-h-11 items-center whitespace-nowrap text-[15px] font-medium leading-none text-white transition-colors hover:text-secondary"
+      className="inline-flex min-h-11 items-center text-balance break-words text-[15px] font-medium leading-snug text-white transition-colors hover:text-secondary"
     >
       {link.label}
     </Link>
@@ -154,7 +142,7 @@ function ColumnPair({
     <div
       className="grid grid-cols-2 gap-x-8"
       style={{
-        gridTemplateRows: `auto repeat(${rows}, 44px)`,
+        gridTemplateRows: `auto repeat(${rows}, minmax(44px, auto))`,
       }}
     >
       <ColumnHeader title={leftTitle} />
