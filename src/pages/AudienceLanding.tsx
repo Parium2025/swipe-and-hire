@@ -2215,15 +2215,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur hanteras GDPR och kandidatdata?',
-                        a: 'All data lagras inom EU enligt GDPR. Kandidater äger sin egen data och delar bara fullständig profil med er när de aktivt visat intresse. Ni kan exportera, anonymisera och radera kandidatdata direkt från dashboarden.',
+                        a: 'Kandidatdata lagras i EU (våra servrar ligger i Paris, Frankrike). Kandidaten äger sin egen data och delar sin fullständiga profil med er först när hen aktivt ansökt eller visat intresse. Ni ser bara kandidater kopplade till era egna annonser. Kandidaten kan själv radera sitt konto och sina uppgifter när som helst, och ni kan ta bort kandidater från er vy. Läs mer i vår integritetspolicy.',
                       },
                       {
                         q: 'Vilken support får vi som kund?',
                         a: 'Ni når oss på hej@parium.se alla vardagar. Vi hjälper till med allt från annonsupplägg och kandidattips till fakturafrågor — svar inom 24 timmar, oftast samma dag. På Pro får ni dessutom en dedikerad kontaktperson.',
-                      },
-                      {
-                        q: 'Finns det någon bindningstid?',
-                        a: 'Nej. Alla månadspaket löper månadsvis och ni säger upp när ni vill från era kontoinställningar. Ingen uppsägningstid, inga dolda avgifter. Betalar ni för en enkelannons gäller den i 14 dagar och avslutas automatiskt.',
                       },
                       {
                         q: 'Vad händer om vi inte förnyar?',
