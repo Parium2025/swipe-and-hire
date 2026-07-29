@@ -234,6 +234,14 @@ const PinnedHorizontalGallery = () => {
   const rafRef = useRef<number | null>(null);
   const [, setReady] = useState(false);
 
+  // Apple-desktop (Mac med trackpad/mus) får en egen pin-distans. Windows,
+  // touch-enheter och övriga plattformar rörs inte alls av flaggan.
+  const isAppleDesktop =
+    typeof window !== 'undefined' &&
+    isAppleDevice() &&
+    window.matchMedia('(pointer: fine)').matches;
+
+
   useEffect(() => {
     const el = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     containerRef.current = el;
