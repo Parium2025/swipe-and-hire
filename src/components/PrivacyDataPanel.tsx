@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { ShieldCheck, Download, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { buildDataExportPdf } from '@/lib/dataExportPdf';
 
 interface PrivacyDataPanelProps {
   /** Arbetsgivare ser även länk till personuppgiftsbiträdesavtalet */
@@ -17,6 +18,17 @@ interface PrivacyDataPanelProps {
 export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps) {
   const [downloading, setDownloading] = useState(false);
 
+  const saveBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const handleDownload = async () => {
     setDownloading(true);
     try {
@@ -29,19 +41,23 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
       });
       if (error) throw error;
 
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `parium-mina-uppgifter-${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const stamp = new Date().toISOString().slice(0, 10);
+      const payload = data as Record<string, unknown>;
+      const account = payload?.account as { email?: string } | undefined;
+
+      // 1) Läsbar PDF (art. 15)
+      const pdf = buildDataExportPdf(payload, account?.email);
+      pdf.save(`parium-mina-uppgifter-${stamp}.pdf`);
+
+      // 2) Maskinläsbar JSON (art. 20)
+      saveBlob(
+        new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }),
+        `parium-mina-uppgifter-${stamp}.json`,
+      );
 
       toast({
         title: 'Nedladdning klar',
-        description: 'Dina uppgifter har laddats ner som en JSON-fil.',
+        description: 'Du har fått en läsbar PDF och en JSON-fil för dataportabilitet.',
       });
     } catch (e) {
       toast({
@@ -64,8 +80,8 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
 
         <p className="text-xs text-white">
           Du kan när som helst ladda ner en kopia av allt vi sparar om dig — profil, ansökningar,
-          meddelanden du skrivit, sparade jobb och inställningar. Filen är maskinläsbar (JSON) och
-          kan tas med till en annan tjänst.
+          meddelanden du skrivit, sparade jobb och inställningar. Du får två filer: en läsbar
+          PDF och en JSON-fil som kan tas med till en annan tjänst.
         </p>
 
         <Button
@@ -81,6 +97,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
           )}
           {downloading ? 'Hämtar dina uppgifter…' : 'Ladda ner mina uppgifter'}
         </Button>
+
 
         <p className="text-xs text-white">
           Läs mer i{' '}
