@@ -281,8 +281,8 @@ const JobSeekerVideoShowcase = ({
 
             {/* Statiskt statusfält — täcker hela inspelningens statusrad (klocka,
                 wifi, batteri och iOS inspelningsindikator) med appens exakta
-                bakgrundsfärg och ritar en helt stilla egen rad ovanpå. Inget
-                kan då "blixtra till" när loopen startar om. */}
+                bakgrundsfärg och ritar en helt stilla egen rad ovanpå. Signalstaplarna
+                är borttagna eftersom de kapades på vissa skärmstorlekar. */}
             <div
               aria-hidden
               className="absolute inset-x-0 top-0 h-[6.6%] bg-[#01182f]"
@@ -290,15 +290,6 @@ const JobSeekerVideoShowcase = ({
               <div className="flex h-full items-center justify-between px-[9.5%] text-[6px] font-semibold leading-none text-white sm:text-[7px] md:text-[7.5px] lg:text-[8px] xl:text-[9px]">
                 <span className="tabular-nums tracking-[-0.02em]">19:41</span>
                 <span className="flex items-center gap-[0.35em]">
-                  {/* Signal — viewBox har 1px luft upptill/nedtill så staplarna
-                      aldrig kapas av avrundning på små skärmar. */}
-                  <svg viewBox="-0.5 -1 19 14" className="h-[1.05em] w-auto overflow-visible" fill="currentColor">
-                    <rect x="0" y="8" width="3" height="4" rx="1" />
-                    <rect x="5" y="5.5" width="3" height="6.5" rx="1" />
-                    <rect x="10" y="3" width="3" height="9" rx="1" />
-                    <rect x="15" y="0" width="3" height="12" rx="1" />
-                  </svg>
-
                   {/* Wifi */}
                   <svg viewBox="0 0 16 12" className="h-[0.95em] w-auto" fill="currentColor">
                     <path d="M8 11.2 5.9 8.9a3 3 0 0 1 4.2 0L8 11.2Z" />
