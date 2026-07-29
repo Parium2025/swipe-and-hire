@@ -57,9 +57,22 @@ const companyLinks: ColLink[] = [
   { label: 'Om oss', to: '/om-oss' },
   { label: 'Lediga jobb', to: '/jobb' },
   { label: 'Integritetspolicy', to: '/integritetspolicy' },
-  { label: 'Personuppgiftsbiträdesavtal', to: '/dpa' },
-  
 ];
+
+const dpaLink: ColLink = { label: 'Personuppgiftsbiträdesavtal', to: '/dpa' };
+
+/**
+ * DPA:t reglerar arbetsgivarens roll som personuppgiftsansvarig och är
+ * irrelevant för jobbsökare — visas därför bara i arbetsgivarkontext.
+ */
+function isEmployerContext(pathname: string) {
+  return (
+    pathname.startsWith('/arbetsgivare') ||
+    pathname.startsWith('/employer') ||
+    pathname.startsWith('/dpa')
+  );
+}
+
 
 
 
