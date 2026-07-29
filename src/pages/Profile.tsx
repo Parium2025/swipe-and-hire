@@ -40,6 +40,8 @@ import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCachedImage } from '@/hooks/useCachedImage';
 import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificationSettings';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
+import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
+
 import { fetchPriority } from '@/lib/fetchPriority';
 
 // Draft key for localStorage
@@ -2443,6 +2445,12 @@ const Profile = () => {
       <div className="responsive-container mt-8">
         <ActiveSessionsSettings />
       </div>
+
+      {/* GDPR: dataportabilitet */}
+      <div className="responsive-container mt-8">
+        <PrivacyDataPanel />
+      </div>
+
 
       {/* Image Editors — speglar arbetsgivarsidans exakta struktur:
           aspectRatio, isCircular och onRestoreOriginal så att "Spara" utan
