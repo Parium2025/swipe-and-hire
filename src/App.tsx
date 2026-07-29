@@ -272,7 +272,6 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
         <AuthSplashScreen />
       </UnsavedChangesProvider>
       <PremiumLimitListener />
-      {isLightweightRoute && <CookieBanner />}
     </>
   );
 };
