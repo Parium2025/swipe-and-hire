@@ -7,6 +7,7 @@ import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsMp4Asset from '@/assets/showcase-jobseeker-windows-premium.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { prefersReducedData } from '@/lib/videoPlatform';
+import { markHeroVideoReady } from '@/lib/heroVideoReady';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
