@@ -51,7 +51,9 @@ const prefersHevc = () => {
  * vid kallstart. Därför är Windows-filen kodad utan B-frames, med kort GOP och
  * `fastdecode`, så varje bildruta kan avkodas i ordning utan omkastningsbuffert.
  */
-const usesBufferedStart = () => isWindowsDevice() || prefersReducedData();
+// VIKTIGT: kallstartsspärren är ENBART till för Windows. Apple/iOS ska starta
+// native och direkt — ingen buffertväntan, ingen svart ruta före första bilden.
+const usesBufferedStart = () => isWindowsDevice();
 
 /**
  * Windows/Chromium kan droppa frames när en <video>-overlay börjar spela medan
@@ -397,6 +399,9 @@ const JobSeekerVideoShowcase = ({
         else attempt();
       });
     };
+
+    // Apple/touch: starta omedelbart, redan innan events hinner trigga.
+    if (!coldGate && !geometryGate && (active || keepAliveWhenHidden)) attempt();
 
     if (active || keepAliveWhenHidden) kick();
     else v.pause();
