@@ -284,20 +284,21 @@ const PublicJobPage = () => {
     ...(job.remote_work_possible === 'yes' || job.work_location_type === 'remote'
       ? { jobLocationType: 'TELECOMMUTE', applicantLocationRequirements: { '@type': 'Country', name: 'SE' } }
       : {}),
-    ...(job.salary_min || job.salary_max
+    ...(parsedSalary && !parsedSalary.afterInterview
       ? {
           baseSalary: {
             '@type': 'MonetaryAmount',
             currency: 'SEK',
             value: {
               '@type': 'QuantitativeValue',
-              ...(job.salary_min ? { minValue: job.salary_min } : {}),
-              ...(job.salary_max ? { maxValue: job.salary_max } : {}),
-              unitText: (job.salary_type || '').toLowerCase().includes('tim') ? 'HOUR' : 'MONTH',
+              ...(parsedSalary.min !== null ? { minValue: parsedSalary.min } : {}),
+              ...(parsedSalary.max !== null ? { maxValue: parsedSalary.max } : {}),
+              unitText: parsedSalary.unitText,
             },
           },
         }
       : {}),
+
     ...(job.positions_count && job.positions_count > 1 ? { totalJobOpenings: job.positions_count } : {}),
     ...(job.occupation ? { occupationalCategory: job.occupation } : {}),
     identifier: {
