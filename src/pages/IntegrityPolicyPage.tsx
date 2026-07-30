@@ -342,9 +342,12 @@ export default function IntegrityPolicyPage() {
                 </li>
                 <li>
                   <strong>Inaktivt konto:</strong> efter 24 månader utan
-                  inloggning mejlar vi dig en varning. Loggar du inte in inom 30
-                  dagar raderas kontot och all din data permanent.
+                  inloggning mejlar vi dig en varning. Du har därefter 90 dagar på
+                  dig att logga in — vi påminner dig igen 30 dagar och 7 dagar
+                  innan. Loggar du inte in raderas kontot och all din data
+                  permanent.
                 </li>
+
                 <li>
                   <strong>Jobbansökningar och tillhörande chattar:</strong> raderas
                   automatiskt 24 månader efter att ansökan skickades.

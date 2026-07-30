@@ -29,6 +29,8 @@ interface EmployerJobCardProps {
     is_active: boolean;
     views_count: number;
     applications_count: number;
+    removed_applicants_count?: number;
+
     created_at: string;
     expires_at?: string;
     overlay_text_color?: string | null;
@@ -229,6 +231,14 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                     {job.applications_count || 0}
                   </span>
                 </div>
+                {(job.removed_applicants_count ?? 0) > 0 && (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm leading-snug text-white">Raderade konton:</span>
+                    <span className="whitespace-nowrap text-sm leading-snug text-white/90 font-medium">
+                      {job.removed_applicants_count}
+                    </span>
+                  </div>
+                )}
 
                 {/* 2. Status — urgency / remaining time */}
                 <TooltipProvider delayDuration={0}>

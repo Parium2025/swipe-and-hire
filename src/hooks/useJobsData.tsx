@@ -35,6 +35,7 @@ export interface JobPosting {
   is_active: boolean;
   views_count: number;
   applications_count: number;
+  removed_applicants_count?: number;
   created_at: string;
   updated_at: string;
   expires_at?: string;

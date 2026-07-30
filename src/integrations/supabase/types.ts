@@ -23,6 +23,8 @@ export type Database = {
           error_message: string | null
           id: string
           last_active_at: string | null
+          reminder_30_sent_at: string | null
+          reminder_7_sent_at: string | null
           scheduled_delete_at: string
           updated_at: string
           user_id: string
@@ -36,6 +38,8 @@ export type Database = {
           error_message?: string | null
           id?: string
           last_active_at?: string | null
+          reminder_30_sent_at?: string | null
+          reminder_7_sent_at?: string | null
           scheduled_delete_at: string
           updated_at?: string
           user_id: string
@@ -49,6 +53,8 @@ export type Database = {
           error_message?: string | null
           id?: string
           last_active_at?: string | null
+          reminder_30_sent_at?: string | null
+          reminder_7_sent_at?: string | null
           scheduled_delete_at?: string
           updated_at?: string
           user_id?: string
@@ -1442,6 +1448,7 @@ export type Database = {
           pitch: string | null
           positions_count: number | null
           remote_work_possible: string | null
+          removed_applicants_count: number
           requirements: string | null
           salary_max: number | null
           salary_min: number | null
@@ -1497,6 +1504,7 @@ export type Database = {
           pitch?: string | null
           positions_count?: number | null
           remote_work_possible?: string | null
+          removed_applicants_count?: number
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
@@ -1552,6 +1560,7 @@ export type Database = {
           pitch?: string | null
           positions_count?: number | null
           remote_work_possible?: string | null
+          removed_applicants_count?: number
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
@@ -3467,6 +3476,10 @@ export type Database = {
       heartbeat_session: { Args: { p_session_token: string }; Returns: boolean }
       increment_app_exception_count: {
         Args: { _fingerprint: string; _owner_user_id: string }
+        Returns: undefined
+      }
+      increment_removed_applicants: {
+        Args: { _counts: number[]; _job_ids: string[] }
         Returns: undefined
       }
       is_conversation_admin: {

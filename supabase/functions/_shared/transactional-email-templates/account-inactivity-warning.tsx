@@ -13,8 +13,8 @@ interface Props {
 
 const AccountInactivityWarningEmail = ({
   first_name = 'där',
-  delete_date = 'om 30 dagar',
-  days_left = '30',
+  delete_date = 'om 90 dagar',
+  days_left = '90',
 }: Props) => (
   <Html lang="sv" dir="ltr">
     <Head />
@@ -59,9 +59,10 @@ const AccountInactivityWarningEmail = ({
 
 export const template = {
   component: AccountInactivityWarningEmail,
-  subject: () => 'Ditt Parium-konto raderas om 30 dagar',
+  subject: (data?: Record<string, unknown>) =>
+    `Ditt Parium-konto raderas om ${(data?.days_left as string) ?? '90'} dagar`,
   displayName: 'Inaktivt konto – varning före radering',
-  previewData: { first_name: 'Anna', delete_date: '2026-09-01', days_left: '30' },
+  previewData: { first_name: 'Anna', delete_date: '2026-09-01', days_left: '90' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }
