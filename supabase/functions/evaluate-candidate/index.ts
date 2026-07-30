@@ -644,17 +644,27 @@ async function analyzeVideoCV(
   apiKey: string,
   videoPath: string
 ): Promise<string | null> {
-  console.log('Analyzing video CV:', videoPath);
+  console.log('Analyzing video CV');
+
+  // Normalisera bort ev. legacy-prefix/URL och peka på rätt bucket.
+  // Video-CV:n ligger i 'job-applications' — den gamla 'profile-media'-bucketen finns inte längre.
+  let cleanPath = videoPath.trim();
+  const legacyMatch = cleanPath.match(
+    /\/storage\/v1\/object\/(?:public|sign)\/(?:profile-media|job-applications)\/(.+?)(?:\?|$)/
+  );
+  if (legacyMatch) cleanPath = decodeURIComponent(legacyMatch[1]);
+  cleanPath = cleanPath.replace(/^(?:profile-media|job-applications)\//, '');
 
   // Get signed URL for the video
   const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-    .from('profile-media')
-    .createSignedUrl(videoPath, 300);
+    .from('job-applications')
+    .createSignedUrl(cleanPath, 300);
 
   if (signedUrlError || !signedUrlData?.signedUrl) {
-    console.error('Failed to get signed URL for video:', signedUrlError);
+    console.error('Failed to get signed URL for video CV:', signedUrlError?.message ?? 'unknown error');
     return null;
   }
+
 
   // Download video (limited to 10MB to avoid memory issues)
   const videoController = new AbortController();

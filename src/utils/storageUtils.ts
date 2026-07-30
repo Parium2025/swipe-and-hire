@@ -75,7 +75,7 @@ export const getStoragePathFromUrl = (url: string): string | null => {
 
 /**
  * Auto-detects bucket from URL and converts to signed URL
- * Skips signing for public buckets (profile-media, company-logos, job-images)
+ * Skips signing for public buckets (company-logos, job-images, email-assets)
  */
 export const convertToSignedUrl = async (
   url: string,
@@ -94,9 +94,17 @@ export const convertToSignedUrl = async (
     }
   }
 
+  // Legacy: den gamla publika bucketen 'profile-media' finns inte längre.
+  // Innehållet migrerades till den privata bucketen 'job-applications',
+  // så gamla referenser måste signeras därifrån i stället för att peka på en död publik URL.
+  if (detectedBucket === 'profile-media') {
+    detectedBucket = 'job-applications';
+  }
+
   // Public buckets don't need signing - return public URL directly
-  const publicBuckets = ['profile-media', 'company-logos', 'job-images'];
+  const publicBuckets = ['company-logos', 'job-images', 'email-assets'];
   const isPublicBucket = publicBuckets.includes(detectedBucket);
+
 
   const ensureCached = (path: string) => {
     const key = `${detectedBucket}/${path}`;
@@ -133,10 +141,12 @@ export const convertToSignedUrl = async (
     return url; // If we can't parse, just reuse the given URL
   }
 
-  // Case 2: Already a public URL -> just return it
-  if (url.includes('/storage/v1/object/public/')) {
+  // Case 2: Already a public URL -> return as-is, men bara om bucketen faktiskt är publik.
+  // Gamla 'profile-media'-URL:er ser publika ut men 404:ar; de signeras om nedan.
+  if (url.includes('/storage/v1/object/public/') && isPublicBucket) {
     return url;
   }
+
 
   // Case 3: Raw storage path like `folder/id/filename.ext`
   const isLikelyPath = !/^https?:\/\//i.test(url) && !url.startsWith('data:');

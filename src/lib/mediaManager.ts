@@ -269,21 +269,13 @@ export async function getMediaUrl(
   if (error) {
     console.error(`Error creating signed URL for ${mediaType}:`, error);
 
-    // Backwards compatibility: some older profile/cover images may live in public 'profile-media'
-    // IMPORTANT: This fallback must NEVER run for cv/video/application docs.
-    const isLegacyProfileImage = mediaType === 'profile-image' || mediaType === 'cover-image';
-    const isNotFound =
-      (error as any)?.statusCode === '404' ||
-      (error as any)?.message?.includes('Object not found') ||
-      (error as any)?.message?.includes('Bucket not found');
-
-    if (isLegacyProfileImage && isNotFound) {
-      const { data: pub } = supabase.storage.from('profile-media').getPublicUrl(cleanPath);
-      return pub?.publicUrl ?? null;
-    }
-
+    // OBS: den gamla publika bucketen 'profile-media' finns inte längre.
+    // Tidigare fallback hit gav en URL som alltid 404:ade, vilket renderade
+    // en trasig bild i stället för korrekt platshållare/initialer.
+    // Returnera null så att UI:t faller tillbaka på sin placeholder.
     return null;
   }
+
   
   return data.signedUrl;
 }
