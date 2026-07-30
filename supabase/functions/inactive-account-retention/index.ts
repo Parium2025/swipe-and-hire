@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     // ── Steg 3: avbryt varningar för konton som blivit aktiva igen ──
     const { data: pending } = await admin
       .from('account_inactivity_notices')
-      .select('id, user_id, email, warned_at, scheduled_delete_at, reminder_30_sent_at, reminder_7_sent_at')
+      .select('id, user_id, email, warned_at, scheduled_delete_at, reminder_180_sent_at, reminder_90_sent_at, reminder_7_sent_at')
       .is('deleted_at', null)
       .is('cancelled_at', null)
 
