@@ -25,7 +25,7 @@ const AccountInactivityWarningEmail = ({
         <Section style={brandSection}>
           <Text style={brand}>Parium</Text>
         </Section>
-        <Heading style={h1}>Ditt konto raderas snart</Heading>
+        <Heading style={h1}>Ditt konto raderas om du inte loggar in</Heading>
         <Text style={text}>Hej {first_name}!</Text>
         <Text style={text}>
           Du har inte använt Parium på 24 månader. Enligt vår integritetspolicy och GDPR
