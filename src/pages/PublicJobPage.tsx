@@ -33,7 +33,7 @@ type Job = {
   work_schedule: string | null;
   salary_min: number | null;
   salary_max: number | null;
-  salary_type: string | null;
+  salary_transparency: string | null;
   workplace_city: string | null;
   workplace_county: string | null;
   workplace_postal_code: string | null;
