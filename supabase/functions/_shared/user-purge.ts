@@ -236,12 +236,32 @@ export async function purgeUserData(
   const appIds = await idsOf(admin, 'job_applications', 'applicant_id', userId);
   stats.applications_deleted = appIds.length;
   if (appIds.length > 0) {
+    // Anonym räknare per annons så att arbetsgivaren ser att antalet minskat
+    // p.g.a. kontoradering (inga personuppgifter sparas).
+    const perJob = new Map<string, number>();
+    {
+      const { data } = await admin
+        .from('job_applications')
+        .select('job_id')
+        .eq('applicant_id', userId);
+      for (const row of (data ?? []) as { job_id: string | null }[]) {
+        if (row.job_id) perJob.set(row.job_id, (perJob.get(row.job_id) ?? 0) + 1);
+      }
+    }
     for (const table of APPLICATION_SCOPED) {
       await delIn(admin, table, 'application_id', appIds);
     }
     await delIn(admin, 'conversations', 'application_id', appIds);
     await del(admin, 'job_applications', 'applicant_id', userId);
+    if (perJob.size > 0) {
+      const { error: rpcErr } = await admin.rpc('increment_removed_applicants', {
+        _job_ids: [...perJob.keys()],
+        _counts: [...perJob.values()],
+      });
+      if (rpcErr) console.warn('⚠️ increment_removed_applicants:', rpcErr.message);
+    }
   }
+
 
   // 4. Konversationer & meddelanden
   const convIds = new Set<string>();
