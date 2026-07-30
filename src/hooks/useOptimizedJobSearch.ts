@@ -979,7 +979,7 @@ function useCompanyReviews(employerIds: string[]) {
       if (employerIds.length === 0) return {};
 
       const { data } = await supabase
-        .from('company_reviews')
+        .from('company_reviews_public')
         .select('company_id, rating')
         .in('company_id', employerIds);
 

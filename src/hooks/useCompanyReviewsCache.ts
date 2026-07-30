@@ -75,7 +75,7 @@ export function useCompanyReviewsCache(companyId: string | null) {
 
       // Fetch reviews from database
       const { data: reviews, error } = await supabase
-        .from('company_reviews')
+        .from('company_reviews_public')
         .select('*')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
@@ -170,7 +170,7 @@ export function useCompanyReviewsCache(companyId: string | null) {
       queryKey: ['company-reviews-cached', targetCompanyId],
       queryFn: async () => {
         const { data: reviews, error } = await supabase
-          .from('company_reviews')
+          .from('company_reviews_public')
           .select('*')
           .eq('company_id', targetCompanyId)
           .order('created_at', { ascending: false });
@@ -247,7 +247,7 @@ export function useBatchPrefetchReviews() {
 
     // Batch fetch all reviews at once
     const { data: allReviews } = await supabase
-      .from('company_reviews')
+      .from('company_reviews_public')
       .select('*')
       .in('company_id', uncachedIds)
       .order('created_at', { ascending: false });

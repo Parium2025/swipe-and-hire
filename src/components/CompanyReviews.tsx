@@ -94,7 +94,7 @@ const CompanyReviews = () => {
       
       // Fetch reviews without JOIN since there's no FK relationship
       const { data, error } = await supabase
-        .from('company_reviews')
+        .from('company_reviews_public')
         .select('*')
         .eq('company_id', user.id)
         .order('created_at', { ascending: false });
