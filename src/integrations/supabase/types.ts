@@ -3351,6 +3351,18 @@ export type Database = {
           schedule: string
         }[]
       }
+      get_cron_recent_failures: {
+        Args: { _hours?: number }
+        Returns: {
+          end_time: string
+          jobid: number
+          jobname: string
+          return_message: string
+          runid: number
+          start_time: string
+          status: string
+        }[]
+      }
       get_cv_queue_batch: {
         Args: { p_batch_size?: number }
         Returns: {
