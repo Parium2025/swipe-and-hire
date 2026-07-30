@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { requireAdmin } from "../_shared/admin-auth.ts";
 import { purgeUserData } from "../_shared/user-purge.ts";
+import { findUserByEmail } from '../_shared/find-user.ts';
 
 // Service role client for admin operations
 const supabaseAdmin = createClient(
@@ -58,14 +59,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Admin user deletion started", { hasEmail: true });
 
     // 1. Hitta alla användare med denna e-post (även obekräftade)
-    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (listError) {
-      console.error('Error listing users:', listError);
-      throw listError;
-    }
-
-    const userToDelete = users.users.find(user => user.email?.toLowerCase() === normalizedEmail);
+    const userToDelete = await findUserByEmail(supabaseAdmin, normalizedEmail);
     
     if (!userToDelete) {
       console.log('User not found in auth.users');
