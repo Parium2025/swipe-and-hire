@@ -2621,6 +2621,27 @@ export type Database = {
           },
         ]
       }
+      rate_limits: {
+        Row: {
+          bucket_key: string
+          hits: number
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          hits?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          bucket_key?: string
+          hits?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       rss_source_health: {
         Row: {
           consecutive_failures: number
@@ -3180,6 +3201,10 @@ export type Database = {
         Args: { j: Database["public"]["Tables"]["job_postings"]["Row"] }
         Returns: string
       }
+      consume_rate_limit: {
+        Args: { _key: string; _limit: number; _window_seconds: number }
+        Returns: boolean
+      }
       count_distinct_candidates: {
         Args: { p_job_ids: string[] }
         Returns: number
@@ -3309,6 +3334,17 @@ export type Database = {
           last_message_is_system: boolean
           last_message_sender_id: string
           unread_count: number
+        }[]
+      }
+      get_cron_job_health: {
+        Args: never
+        Returns: {
+          active: boolean
+          jobname: string
+          last_run_at: string
+          last_status: string
+          last_success_at: string
+          schedule: string
         }[]
       }
       get_cv_queue_batch: {
