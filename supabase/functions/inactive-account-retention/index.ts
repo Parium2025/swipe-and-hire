@@ -1,7 +1,8 @@
 // GDPR: automatisk hantering av inaktiva konton.
 //
 // Steg 1 — VARNING: konton utan aktivitet på 24 månader får ett mejl och
-//          schemaläggs för radering 30 dagar senare.
+//          schemaläggs för radering 90 dagar senare, med påminnelser 30 och 7
+//          dagar innan.
 // Steg 2 — RADERING: konton vars varningsperiod löpt ut och som fortfarande är
 //          inaktiva raderas permanent (profil, data, storage, auth-konto).
 // Steg 3 — ÅTERKALLNING: har personen loggat in efter varningen avbryts allt.
@@ -208,6 +209,8 @@ Deno.serve(async (req) => {
             cancelled_at: null,
             deleted_at: null,
             error_message: null,
+            reminder_30_sent_at: null,
+            reminder_7_sent_at: null,
           },
           { onConflict: 'user_id' },
         )

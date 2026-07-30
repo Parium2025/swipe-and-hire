@@ -19,7 +19,7 @@ Gäller Pariums egen behandling: konton, profiler, plattformens drift och suppor
 - **Kategorier av registrerade:** Jobbsökare, arbetsgivaranvändare.
 - **Kategorier av uppgifter:** Namn, e-post, telefonnummer, lösenordshash, roll, organisationstillhörighet, tidpunkt för senaste aktivitet.
 - **Rättslig grund:** Avtal (art. 6.1 b).
-- **Lagringstid:** Så länge kontot är aktivt. Efter 24 månaders inaktivitet: varningsmejl + radering efter 30 dagar. Radering på egen begäran sker omedelbart.
+- **Lagringstid:** Så länge kontot är aktivt. Efter 24 månaders inaktivitet: varningsmejl + påminnelser (30 och 7 dagar kvar) + radering efter 90 dagar. Radering på egen begäran sker omedelbart.
 - **Mottagare:** Supabase (Lovable Cloud) som databas- och autentiseringsleverantör.
 
 ### A2. Jobbsökarprofil
