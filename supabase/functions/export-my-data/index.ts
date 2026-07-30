@@ -185,7 +185,26 @@ Deno.serve(async (req) => {
       notification_preferences: notificationPrefs,
       cv_analyses: cvSummaries,
       subscriptions,
+      purchases,
+      push_devices: pushDevices,
+      support_tickets: supportTickets,
+      support_messages: supportMessages,
+      company_reviews: reviews,
+
+      // Uppgifter som arbetsgivare registrerat om dig. Vem hos arbetsgivaren
+      // som skrivit posten är utelämnat — det är den personens personuppgift.
+      employer_records_about_me: {
+        notes: notesAboutMe,
+        ratings: ratingsAboutMe,
+        evaluations: evaluationsAboutMe,
+        ai_summaries: summariesAboutMe,
+        criterion_feedback: criterionFeedbackAboutMe,
+        activity_log: activityAboutMe,
+        pipeline_entries: pipelineEntries,
+        profile_views: profileViewsOfMe,
+      },
     };
+
 
     return new Response(JSON.stringify(payload, null, 2), {
       status: 200,
