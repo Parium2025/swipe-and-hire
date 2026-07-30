@@ -87,6 +87,56 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+  // 0. Avstämning: 'pending'-rader som aldrig fick ett slutstatus (kön tappade
+  // meddelandet, eller funktionen kraschade mitt i) ska inte ligga kvar och se
+  // ut som om mejlet är på väg. Efter 6 timmar markeras de som övergivna.
+  {
+    const cutoff = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+    const { data: stale, error: staleError } = await supabase
+      .from('email_send_log')
+      .select('message_id')
+      .eq('status', 'pending')
+      .lt('created_at', cutoff)
+      .limit(200)
+
+    if (staleError) {
+      console.error('Failed to scan stale pending emails', { error: staleError })
+    } else if (stale?.length) {
+      const staleIds = stale
+        .map((row) => row.message_id)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0)
+
+      // Rör inte rader där ett slutstatus redan finns loggat separat.
+      const { data: resolved } = await supabase
+        .from('email_send_log')
+        .select('message_id')
+        .in('message_id', staleIds)
+        .in('status', ['sent', 'failed', 'dlq', 'suppressed', 'abandoned'])
+
+      const resolvedIds = new Set((resolved ?? []).map((r) => r.message_id))
+      const abandoned = staleIds.filter((id) => !resolvedIds.has(id))
+
+      if (abandoned.length > 0) {
+        const { error: updateError } = await supabase
+          .from('email_send_log')
+          .update({
+            status: 'abandoned',
+            error_message: 'Ingen leveransbekräftelse inom 6 timmar — meddelandet saknas i kön',
+          })
+          .in('message_id', abandoned)
+          .eq('status', 'pending')
+
+        if (updateError) {
+          console.error('Failed to mark abandoned emails', { error: updateError })
+        } else {
+          console.warn('Marked abandoned emails', { count: abandoned.length })
+        }
+      }
+    }
+  }
+
+
+
   // 1. Check rate-limit cooldown and read queue config
   const { data: state } = await supabase
     .from('email_send_state')
