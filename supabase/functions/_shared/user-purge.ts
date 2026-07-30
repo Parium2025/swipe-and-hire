@@ -53,7 +53,7 @@ async function idsOf(
     console.warn(`⚠️ list ${table}.${column}:`, error.message);
     return [];
   }
-  return (data ?? []).map((r: Record<string, string>) => r.id).filter(Boolean);
+  return ((data ?? []) as unknown as Record<string, string>[]).map((r) => r.id).filter(Boolean);
 }
 
 /** Tabeller kopplade till ett jobb (job_id) — inga FK-cascades finns. */
@@ -167,7 +167,8 @@ export interface PurgeStats {
  * kandidatdata hos rekryterare, konversationer, profil och auth-kontot.
  */
 export async function purgeUserData(
-  admin: SupabaseClient,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   userId: string,
   email: string | null,
 ): Promise<PurgeStats> {
