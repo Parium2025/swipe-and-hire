@@ -53,7 +53,7 @@ export const GUIDES: GuideData[] = [
   {
     slug: 'anstallningsintervju-tips',
     title: 'Anställningsintervju – 12 frågor du måste kunna svara på',
-    metaTitle: 'Anställningsintervju 2026: 12 frågor & svar du måste kunna | Parium',
+    metaTitle: 'Anställningsintervju 2026: 12 frågor & svar | Parium',
     description: 'Komplett guide till anställningsintervjun. De 12 vanligaste frågorna med exempelsvar, vad du ska fråga själv, och hur du undviker de värsta misstagen.',
     excerpt: 'En intervju vinns ofta innan du ens öppnar munnen. Här är de 12 frågor du garanterat får – och hur du svarar på dem så att du sticker ut.',
     category: 'Intervju',
@@ -129,7 +129,7 @@ export const GUIDES: GuideData[] = [
   {
     slug: 'extrajobb-student-2026',
     title: 'Extrajobb för studenter 2026 – så hittar du jobb vid sidan av studierna',
-    metaTitle: 'Extrajobb student 2026: bästa jobben & så hittar du dem | Parium',
+    metaTitle: 'Extrajobb student 2026: bästa jobben & tips | Parium',
     description: 'Bästa extrajobben för studenter 2026: lön, flexibilitet och hur du söker. Lager, kassa, vård, hemtjänst, leverans, korttidsuppdrag.',
     excerpt: 'Extrajobb som funkar med studierna finns – om du vet var du ska leta. Här är de bästa typerna 2026 och hur du landar dem snabbt.',
     category: 'Jobbsökning',
@@ -197,7 +197,7 @@ export const GUIDES: GuideData[] = [
   {
     slug: 'lonesamtal-tips',
     title: 'Lönesamtal – så förhandlar du upp lönen 2026',
-    metaTitle: 'Lönesamtal 2026: 10 tips för att förhandla högre lön | Parium',
+    metaTitle: 'Lönesamtal 2026: 10 tips för högre lön | Parium',
     description: 'Konkreta tips inför lönesamtalet. Hur du förbereder dig, vad du ska säga, vilka siffror att begära och hur du undviker de vanligaste misstagen.',
     excerpt: 'Tre minuter av samtalet avgör tusenlappar varje månad i flera år framåt. Här är receptet rekryterare och chefer själva använder när de byter jobb.',
     category: 'Lön',
