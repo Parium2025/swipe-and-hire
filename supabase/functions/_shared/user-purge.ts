@@ -214,10 +214,7 @@ export async function purgeUserData(
     for (const table of APPLICATION_SCOPED) {
       await delIn(admin, table, 'application_id', appIds);
     }
-    for (const chunk of chunked(appIds)) {
-      await admin.from('conversations').update({ application_id: null }).in('id', []); // no-op guard
-      await admin.from('conversations').delete().in('application_id', chunk);
-    }
+    await delIn(admin, 'conversations', 'application_id', appIds);
     await del(admin, 'job_applications', 'applicant_id', userId);
   }
 
@@ -280,7 +277,14 @@ export async function purgeUserData(
     .update({ email: null })
     .eq('user_id', userId);
 
-  // 9. Suppression — förhindra oavsiktlig återkontakt
+  // 9. E-postbaserade spår (dessa tabeller saknar user_id)
+  if (email) {
+    const lower = email.toLowerCase();
+    await del(admin, 'email_unsubscribe_tokens', 'email', lower);
+    await del(admin, 'email_send_log', 'recipient_email', lower);
+  }
+
+  // 10. Suppression — förhindra oavsiktlig återkontakt
   if (email) {
     await admin.from('suppressed_emails').upsert(
       { email: email.toLowerCase(), reason: 'account_deleted' },
