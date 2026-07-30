@@ -15,7 +15,9 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
  import { setPendingJob } from '@/lib/pendingJobIntent';
  import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
  import { OCCUPATIONS } from '@/data/jobOccupations';
- import { TruncatedText } from '@/components/TruncatedText';
+import { TruncatedText } from '@/components/TruncatedText';
+import { parseSalary, formatSalary } from '@/lib/salaryRange';
+
  
 
 const BASE = 'https://www.parium.se';
