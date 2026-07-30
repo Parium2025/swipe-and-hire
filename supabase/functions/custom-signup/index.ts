@@ -55,11 +55,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 1. Kontrollera om användaren redan finns och är bekräftad
     try {
-      const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
-      
-      if (!listError && listData?.users) {
-        const existingUser = listData.users.find(u => u.email?.toLowerCase() === normalizedEmail);
-        
+      const existingUser = await findUserByEmail(supabase, normalizedEmail);
+
+      {
         if (existingUser) {
           // Kontrollera om användaren är bekräftad
           if (existingUser.email_confirmed_at) {
