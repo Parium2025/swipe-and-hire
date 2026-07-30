@@ -125,11 +125,12 @@ Tredjelandsöverföring sker endast med standardavtalsklausuler och kompletteran
 
 | Rättighet | Hur den uppfylls |
 |---|---|
-| Tillgång (art. 15) | Självbetjäning: "Ladda ner mina uppgifter" i inställningarna. Alternativt hej@parium.se. |
+| Tillgång (art. 15) | Självbetjäning: "Ladda ner mina uppgifter" i inställningarna. Exporten omfattar både uppgifter den registrerade själv lämnat och uppgifter som arbetsgivare registrerat om personen (omdömen, betyg, AI-sammanfattningar, aktivitetslogg, profilvisningar). Vilken enskild handläggare hos arbetsgivaren som skrivit en post utelämnas, eftersom det är den personens egen personuppgift. Alternativt hej@parium.se. |
 | Rättelse (art. 16) | Användaren redigerar sin profil direkt i appen. |
-| Radering (art. 17) | "Radera konto" i inställningarna – raderar profil, ansökningar, chattar och inloggning. |
+| Radering (art. 17) | "Radera konto" i inställningarna – raderar profil, ansökningar, chattar, filer i lagring och inloggning. Undantag enligt art. 17.3 e: raden i `consent_records` behålls i pseudonymiserad form (e-post och roll nollställs) som bevis för vilken villkorsversion som accepterats och när. |
 | Begränsning/invändning (art. 18, 21) | Manuell hantering via hej@parium.se, svar inom 30 dagar. |
 | Dataportabilitet (art. 20) | Samma JSON-export som art. 15, maskinläsbar. |
+
 | Återkalla samtycke (art. 7) | Cookie-inställningar och notisinställningar i appen. |
 | Klagomål | Integritetsskyddsmyndigheten, imy.se. |
 

@@ -22,6 +22,8 @@
 - [Navigering & UX](mem://logic/navigation-snabbhet) — JobView Overlay, instant back, wizard shortcuts.
 - [SEO-sidor i projektet](mem://reference/seo-pages-list) — Tabell med alla 14 SEO-routes.
 - [Candidate-Organization Isolation](mem://architecture/candidate-org-isolation) — Fullständig dataisolering per ansökan och organisation.
+- [RPC EXECUTE-behörigheter](mem://architecture/rpc-execute-grants) — Vilka databasfunktioner som får vara anropbara av anon/authenticated.
+
 - [Cache Validation Policy](mem://constraints/cache-array-validation) — Obligatorisk validering av cache-data.
 - [Mobile Ergonomics](mem://constraints/mobile-premium-ergonomics) — Touch targets, haptics, iOS-optimeringar.
 - [Destructive Actions](mem://style/destructive-action-standard) — Röda visuella element och AlertDialog-skydd.

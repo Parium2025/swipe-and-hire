@@ -59,6 +59,31 @@ Deno.serve(async (req) => {
     return data ?? [];
   };
 
+  // Rekryterarförfattat material om kandidaten omfattas av art. 15, men får
+  // inte röja VEM hos arbetsgivaren som skrivit det (den personens egna
+  // personuppgifter). Därför strippas identifierande motpartskolumner.
+  const REDACTED = [
+    'recruiter_id',
+    'employer_id',
+    'evaluated_by',
+    'user_id',
+    'viewer_user_id',
+    'viewer_org_id',
+    'organization_id',
+    'owner_user_id',
+  ];
+  const grabAbout = async (table: string, column: string) => {
+    const rows = await grab(table, column);
+    return (rows as Record<string, unknown>[]).map((row) => {
+      const clean: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(row)) {
+        if (!REDACTED.includes(k)) clean[k] = v;
+      }
+      return clean;
+    });
+  };
+
+
   try {
     const [
       profile,
@@ -76,6 +101,19 @@ Deno.serve(async (req) => {
       interviewsAsEmployer,
       subscriptions,
       memberships,
+      pushDevices,
+      purchases,
+      supportTickets,
+      supportMessages,
+      reviews,
+      notesAboutMe,
+      ratingsAboutMe,
+      evaluationsAboutMe,
+      summariesAboutMe,
+      criterionFeedbackAboutMe,
+      activityAboutMe,
+      pipelineEntries,
+      profileViewsOfMe,
     ] = await Promise.all([
       grab('profiles', 'user_id'),
       grab('user_roles', 'user_id'),
@@ -92,7 +130,22 @@ Deno.serve(async (req) => {
       grab('interviews', 'employer_id'),
       grab('user_subscriptions', 'user_id'),
       grab('conversation_members', 'user_id'),
+      grab('device_push_tokens', 'user_id'),
+      grab('one_time_purchases', 'user_id'),
+      grab('support_tickets', 'user_id'),
+      grab('support_messages', 'user_id'),
+      grab('company_reviews', 'user_id'),
+      // Material som arbetsgivare registrerat OM användaren (art. 15.1)
+      grabAbout('candidate_notes', 'applicant_id'),
+      grabAbout('candidate_ratings', 'applicant_id'),
+      grabAbout('candidate_evaluations', 'applicant_id'),
+      grabAbout('candidate_summaries', 'applicant_id'),
+      grabAbout('criterion_feedback', 'applicant_id'),
+      grabAbout('candidate_activities', 'applicant_id'),
+      grabAbout('my_candidates', 'applicant_id'),
+      grabAbout('profile_views', 'viewed_user_id'),
     ]);
+
 
     // Meddelanden: bara de användaren själv har skrivit
     const { data: messages } = await admin
@@ -132,7 +185,26 @@ Deno.serve(async (req) => {
       notification_preferences: notificationPrefs,
       cv_analyses: cvSummaries,
       subscriptions,
+      purchases,
+      push_devices: pushDevices,
+      support_tickets: supportTickets,
+      support_messages: supportMessages,
+      company_reviews: reviews,
+
+      // Uppgifter som arbetsgivare registrerat om dig. Vem hos arbetsgivaren
+      // som skrivit posten är utelämnat — det är den personens personuppgift.
+      employer_records_about_me: {
+        notes: notesAboutMe,
+        ratings: ratingsAboutMe,
+        evaluations: evaluationsAboutMe,
+        ai_summaries: summariesAboutMe,
+        criterion_feedback: criterionFeedbackAboutMe,
+        activity_log: activityAboutMe,
+        pipeline_entries: pipelineEntries,
+        profile_views: profileViewsOfMe,
+      },
     };
+
 
     return new Response(JSON.stringify(payload, null, 2), {
       status: 200,

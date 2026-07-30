@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
 
   const admin = createClient(supabaseUrl, serviceKey)
   const now = new Date()
-  const stats = { warned: 0, deleted: 0, cancelled: 0, errors: 0 }
+  const stats = { warned: 0, deleted: 0, cancelled: 0, orphans_deleted: 0, errors: 0 }
 
   try {
     // ── Steg 3: avbryt varningar för konton som blivit aktiva igen ──
@@ -125,6 +125,24 @@ Deno.serve(async (req) => {
         const patch: Record<string, string> = {}
         for (const t of due) patch[REMINDER_FIELD[t]] = now.toISOString()
 
+        // VIKTIGT: vi "checkar ut" påminnelsen i databasen INNAN mejlet skickas.
+        // Om vi istället markerade efteråt och den skrivningen misslyckades
+        // skulle samma påminnelse mejlas ut på nytt varje natt tills den gick
+        // igenom — dvs en utskickskaskad mot samma mottagare.
+        const { error: claimError } = await admin
+          .from('account_inactivity_notices')
+          .update(patch)
+          .eq('id', notice.id)
+          .is(field, null)
+          .select('id')
+          .maybeSingle()
+
+        if (claimError) {
+          console.error(`kunde inte reservera påminnelse ${threshold}d:`, claimError.message)
+          stats.errors++
+          continue
+        }
+
         try {
           await admin.functions.invoke('send-transactional-email', {
             body: {
@@ -138,10 +156,17 @@ Deno.serve(async (req) => {
               },
             },
           })
-          await admin.from('account_inactivity_notices').update(patch).eq('id', notice.id)
         } catch (e) {
+          // Skicket misslyckades → släpp reservationen så att nästa körning
+          // kan försöka igen. Endast det aktuella steget återställs.
           console.warn(`reminder ${threshold}d failed for ${notice.email}:`, (e as Error).message)
+          await admin
+            .from('account_inactivity_notices')
+            .update({ [field]: null })
+            .eq('id', notice.id)
+          stats.errors++
         }
+
       }
 
     }
@@ -260,7 +285,50 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ── Steg 4: föräldralösa auth-konton ──
+    // Steg 1 utgår från `profiles`. Ett auth-konto utan profilrad (avbruten
+    // registrering, eller en profil som raderats separat) skulle därför aldrig
+    // varnas och aldrig raderas — kontot och dess e-post skulle ligga kvar för
+    // alltid. Här fångas de upp: saknar profil + äldre än inaktivitetsgränsen
+    // och aldrig inloggad sedan dess → radera direkt. Det finns ingen
+    // användardata att varna om.
+    try {
+      const { data: authPage } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 })
+      const authUsers = authPage?.users ?? []
+      if (authUsers.length > 0) {
+        const { data: profileRows } = await admin
+          .from('profiles')
+          .select('user_id')
+          .in('user_id', authUsers.map((u: { id: string }) => u.id))
+        const hasProfile = new Set(
+          (profileRows ?? []).map((p: { user_id: string }) => p.user_id),
+        )
+
+        for (const u of authUsers as {
+          id: string
+          email?: string | null
+          created_at: string
+          last_sign_in_at?: string | null
+        }[]) {
+          if (hasProfile.has(u.id)) continue
+          const lastSeen = u.last_sign_in_at ?? u.created_at
+          if (lastSeen >= cutoff) continue
+
+          try {
+            await purgeUser(admin, u.id, u.email ?? null)
+            stats.orphans_deleted++
+          } catch (e) {
+            stats.errors++
+            console.error(`orphan purge failed for ${u.id}:`, (e as Error).message)
+          }
+        }
+      }
+    } catch (e) {
+      console.error('orphan sweep failed:', (e as Error).message)
+    }
+
     console.log('inactive-account-retention done', stats)
+
     return new Response(JSON.stringify({ success: true, ...stats }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
