@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { enforceRateLimit, normalizeEmail, requestIp } from "../_shared/rate-limit.ts";
+import { findUserByEmail } from "../_shared/find-user.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,10 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Resending confirmation", { hasEmail: true });
 
     // 1) Hitta användaren via admin-API.
-    const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    if (listError) throw listError;
-
-    const user = listData?.users?.find((u) => u.email?.toLowerCase() === normalizedEmail);
+    const user = await findUserByEmail(supabaseAdmin, normalizedEmail);
     if (!user) {
       // Ge generisk framgång för att inte avslöja huruvida adressen finns.
       return new Response(

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { enforceRateLimit, normalizeEmail, requestIp } from "../_shared/rate-limit.ts";
+import { findUserByEmail } from "../_shared/find-user.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -55,11 +56,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 1. Kontrollera om användaren redan finns och är bekräftad
     try {
-      const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
-      
-      if (!listError && listData?.users) {
-        const existingUser = listData.users.find(u => u.email?.toLowerCase() === normalizedEmail);
-        
+      const existingUser = await findUserByEmail(supabase, normalizedEmail);
+
+      {
         if (existingUser) {
           // Kontrollera om användaren är bekräftad
           if (existingUser.email_confirmed_at) {

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
-import { requireAuthenticated } from "../_shared/service-auth.ts";
+import { requireServiceRoleOrCronSecret } from "../_shared/service-auth.ts";
+import { purgeUserData } from "../_shared/user-purge.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -17,7 +18,8 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-  const authResp = await requireAuthenticated(req, corsHeaders);
+  // Endast bakgrundsjobb (service role / cron) får massradera obekräftade konton.
+  const authResp = await requireServiceRoleOrCronSecret(req, corsHeaders);
   if (authResp) return authResp;
 
 
@@ -41,7 +43,8 @@ const handler = async (req: Request): Promise<Response> => {
       // Ta bort obekräftade användare
       for (const confirmation of expiredConfirmations) {
         try {
-          await supabase.auth.admin.deleteUser(confirmation.user_id);
+          // Full städning (profil, media, relationer) — inte bara auth-raden.
+          await purgeUserData(supabase, confirmation.user_id, null);
           console.log(`Deleted user: ${confirmation.user_id}`);
         } catch (error) {
           console.error(`Error deleting user ${confirmation.user_id}:`, error);
