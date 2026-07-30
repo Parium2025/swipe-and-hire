@@ -27,8 +27,9 @@ Gäller Pariums egen behandling: konton, profiler, plattformens drift och suppor
 - **Registrerade:** Jobbsökare.
 - **Uppgifter:** Profilbild, presentationsvideo, CV-fil och AI-genererad sammanfattning av CV, bio, ort/postnummer, födelsedatum, yrke, anställningsform, tillgänglighet, intressen.
 - **Rättslig grund:** Avtal (art. 6.1 b). Frivilliga fält (video, CV, intressen) fylls i av användaren själv.
-- **Lagringstid:** Så länge kontot finns (se A1).
-- **Mottagare:** Supabase (lagring och filer).
+- **Lagringstid:** Så länge kontot finns (se A1). Filer (bilder, video, CV) raderas fysiskt ur fillagringen samtidigt som kontot raderas. Ersatta eller överblivna filer raderas automatiskt av ett veckovis städjobb (`purge-orphaned-media`).
+- **Mottagare:** Supabase (lagring och filer). Filerna ligger i en privat lagringsyta; visning sker via tidsbegränsade, behörighetskontrollerade länkar.
+
 
 ### A3. Arbetsgivarkonto och annonser
 - **Ändamål:** Publicera jobbannonser och administrera arbetsgivarens konto.
@@ -114,6 +115,8 @@ Tredjelandsöverföring sker endast med standardavtalsklausuler och kompletteran
 - Autentisering med e-post/lösenord och OAuth, sessionshantering med förnyelse.
 - Loggning av åtkomst och statusändringar, dagliga säkerhetskopior hos leverantören.
 - Nattlig automatisk gallring (`run_data_retention`) och automatisk radering av inaktiva konton.
+- Veckovis radering av överblivna filer i fillagringen (`purge-orphaned-media`) så att inga bilder, videor eller CV:n blir kvar utan koppling till en profil eller ansökan.
+
 - Åtkomst till produktionsdata begränsad till behörig personal, endast vid drift och support.
 
 ---

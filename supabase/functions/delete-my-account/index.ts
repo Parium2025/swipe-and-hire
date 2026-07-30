@@ -3,6 +3,8 @@
 // Ingen admin-behörighet krävs — men användaren måste vara inloggad (JWT valideras).
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { purgeUserStorage, USER_STORAGE_BUCKETS } from '../_shared/storage-cleanup.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -79,36 +81,15 @@ Deno.serve(async (req) => {
 
   try {
     // ============================================================
-    // 1. Städa storage: alla mappar som är namngivna med user_id
+    // 1. Städa storage: ALLA filer (rekursivt + paginerat) i användarens mappar
+    //    — bilder, profilvideo, cover-bilder, CV och bilagor.
     // ============================================================
-    const bucketsWithUserFolders = [
-      'job-applications', // CV, cover letters
-      'company-logos',
-      'job-images',
-      'message-attachments',
-    ];
+    stats.storage_files_removed = await purgeUserStorage(
+      admin,
+      userId,
+      USER_STORAGE_BUCKETS,
+    );
 
-    for (const bucket of bucketsWithUserFolders) {
-      try {
-        const { data: files, error: listErr } = await admin.storage
-          .from(bucket)
-          .list(userId, { limit: 1000 });
-        if (listErr) {
-          console.warn(`⚠️ Kunde inte lista ${bucket}/${userId}:`, listErr.message);
-          continue;
-        }
-        if (!files || files.length === 0) continue;
-        const paths = files.map((f) => `${userId}/${f.name}`);
-        const { error: rmErr } = await admin.storage.from(bucket).remove(paths);
-        if (rmErr) {
-          console.warn(`⚠️ Kunde inte radera från ${bucket}:`, rmErr.message);
-        } else {
-          stats.storage_files_removed += paths.length;
-        }
-      } catch (e) {
-        console.warn(`⚠️ storage cleanup ${bucket} error:`, (e as Error).message);
-      }
-    }
 
     // ============================================================
     // 2. Räkna & radera jobbannonser (kaskaderar till frågor, kriterier osv.)
