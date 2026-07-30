@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
+import { enforceRateLimit, normalizeEmail, requestIp } from "../_shared/rate-limit.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -26,24 +27,43 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { email, password, data }: SignupRequest = await req.json();
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail || !password) {
+      return new Response(JSON.stringify({ error: "E-post och lösenord krävs" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const rateLimitResponse = await enforceRateLimit(
+      supabase,
+      "custom-signup",
+      [
+        { scope: "email", identifier: normalizedEmail, limit: 3, windowSeconds: 60 * 60 },
+        { scope: "ip", identifier: requestIp(req), limit: 10, windowSeconds: 60 * 60 },
+      ],
+      corsHeaders,
+    );
+    if (rateLimitResponse) return rateLimitResponse;
     
     const firstName = data?.first_name || 'där';
     const isEmployer = data?.role === 'employer';
     const companyName = data?.company_name || 'Ditt företag';
 
-    console.log(`Attempting signup for email: ${email}`);
+    console.log("Attempting signup", { role: data?.role === "employer" ? "employer" : "job_seeker" });
 
     // 1. Kontrollera om användaren redan finns och är bekräftad
     try {
       const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
       
       if (!listError && listData?.users) {
-        const existingUser = listData.users.find(u => u.email === email);
+        const existingUser = listData.users.find(u => u.email?.toLowerCase() === normalizedEmail);
         
         if (existingUser) {
           // Kontrollera om användaren är bekräftad
           if (existingUser.email_confirmed_at) {
-            console.log(`User ${email} already exists and is confirmed`);
+            console.log("Signup target already exists and is confirmed");
             // Generic response — do NOT reveal that this specific email is registered.
             // Mirrors resend-confirmation / send-reset-password to prevent enumeration.
             return new Response(JSON.stringify({
@@ -60,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
 
           } else {
             // Användaren finns men är inte bekräftad - ta bort och skapa ny
-            console.log(`Found existing unconfirmed user ${existingUser.id}, deleting first...`);
+            console.log('Found existing unconfirmed signup, deleting first');
             
             // Ta bort från relaterade tabeller
             await supabase.from('email_confirmations').delete().eq('user_id', existingUser.id);
@@ -79,13 +99,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 2. Skapa användare utan automatisk bekräftelse
     const { data: user, error: signupError } = await supabase.auth.admin.createUser({
-      email,
+      email: normalizedEmail,
       password,
       email_confirm: false, // Användaren måste bekräfta via mejl
       user_metadata: data || {}
     });
 
-    console.log('Signup result:', { userId: user?.user?.id, error: signupError?.message });
+    console.log('Signup result:', { hasUser: !!user?.user?.id, error: signupError?.message });
 
     if (signupError) {
       console.error('Signup error details:', signupError);
@@ -141,7 +161,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const confirmationUrl = `${appBase}/email-confirm?confirm=${confirmationToken}`;
     
-    console.log(`Sending confirmation email to ${email} with URL: ${confirmationUrl}`);
+    console.log("Sending confirmation email");
 
 
 
@@ -163,7 +183,7 @@ const handler = async (req: Request): Promise<Response> => {
             'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`
           },
           body: JSON.stringify({
-            email,
+            email: normalizedEmail,
             role: data?.role || 'job_seeker',
             first_name: firstName,
             confirmation_url: confirmationUrl,
@@ -203,7 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
       
       // KRITISKT: Radera användaren om mejlet inte kunde skickas
       // Annars blir användaren fast (kan inte logga in, kan inte registrera igen)
-      console.log(`Deleting user ${user.user.id} due to email send failure...`);
+      console.log('Deleting newly-created user due to email send failure');
       
       try {
         await supabase.from('email_confirmations').delete().eq('user_id', user.user.id);

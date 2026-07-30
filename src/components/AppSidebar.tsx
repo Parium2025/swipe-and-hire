@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo, useMemo, useCallback, startTransition } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
+import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSidebarRoutePrefetch } from "@/hooks/useSidebarRoutePrefetch";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
@@ -107,12 +107,12 @@ export function AppSidebar() {
     }
   }, [preloadedVideoUrl]);
 
-  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
+  const { isPlatformAdmin } = useIsPlatformAdmin();
 
   // Support items - add admin for Fredrik
   const supportItems = [
     { title: 'Kundtjänst', url: '/support', icon: MessageCircle },
-    ...(isOrgAdmin ? [{ title: 'Admin Panel', url: '/admin', icon: Settings }] : [])
+    ...(isPlatformAdmin ? [{ title: 'Admin Panel', url: '/admin', icon: Settings }] : [])
   ];
 
   // Listen for unsaved changes cancel/confirm events to close sidebar

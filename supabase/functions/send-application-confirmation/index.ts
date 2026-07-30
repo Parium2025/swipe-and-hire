@@ -72,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
         p_type: 'application_status',
       });
       if (allowed === false) {
-        console.log(`Skipping application confirmation email for ${applicant_email} (email pref off)`);
+        console.log('Skipping application confirmation email because preference is off');
         return new Response(JSON.stringify({ success: true, skipped: 'email_disabled' }), {
           status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -106,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Application confirmation enqueued:", data);
+    console.log("Application confirmation enqueued", { queued: !!data });
 
     return new Response(JSON.stringify({ success: true, ...data }), {
       status: 200,

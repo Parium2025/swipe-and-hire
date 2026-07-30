@@ -8,7 +8,11 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
 
-  console.log("auth hook accessed:", url.toString());
+  // Logga aldrig full URL här: auth-länkar kan innehålla återställnings- eller sessionsparametrar.
+  console.log("auth hook accessed", {
+    hasQuery: url.search.length > 0,
+    queryKeys: Array.from(url.searchParams.keys()),
+  });
 
   const envRedirect = Deno.env.get("REDIRECT_URL") || "";
   const defaultRedirect = "https://parium.se";

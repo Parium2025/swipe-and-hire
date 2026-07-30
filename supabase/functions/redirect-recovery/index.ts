@@ -51,7 +51,13 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!isAllowed(decodedUrl)) {
-      console.warn("redirect-recovery blocked non-allowlisted target:", decodedUrl);
+      let blockedHost = "invalid";
+      try {
+        blockedHost = new URL(decodedUrl).hostname;
+      } catch {
+        blockedHost = "unparseable";
+      }
+      console.warn("redirect-recovery blocked non-allowlisted target", { blockedHost });
       return new Response(null, {
         status: 302,
         headers: { Location: FALLBACK, ...corsHeaders },

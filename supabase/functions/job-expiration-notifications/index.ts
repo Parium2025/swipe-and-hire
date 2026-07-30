@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         if (!email) {
-          console.log(`No email found for employer ${job.employer_id}, skipping notification`);
+          console.log('No email found for employer, skipping notification');
           continue;
         }
 
@@ -93,9 +93,9 @@ const handler = async (req: Request): Promise<Response> => {
           });
           if (sendError) throw sendError;
           emailsSent++;
-          console.log(`Enqueued job expiration email to ${email} for "${job.title}"`);
+          console.log('Enqueued job expiration email', { jobId: job.id });
         } catch (emailError) {
-          console.error(`Failed to enqueue email to ${email}:`, emailError);
+          console.error('Failed to enqueue job expiration email', { jobId: job.id, error: emailError });
         }
       }
     }

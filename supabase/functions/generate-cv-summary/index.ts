@@ -219,7 +219,7 @@ let contentType = '';
     let rawExtractedText: string | null = null; // Store raw text for evaluate-candidate
 
     if (finalCvUrl) {
-      console.log('CV URL found:', finalCvUrl);
+      console.log('CV URL found', { hasCvUrl: !!finalCvUrl });
 
       try {
         // Get signed URL for the CV

@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
       if (type) redirectUrl += `&type=${type}`;
       if (issued) redirectUrl += `&issued=${issued}`;
       
-      console.log(`✅ LÄNK GILTIG (under 1.5 min) - Redirecting to: ${redirectUrl}`);
+      console.log("Reset-redirect skickar vidare till auth", { hasToken: true, type: type ?? null });
       return new Response(null, {
         status: 302,
         headers: { "Location": redirectUrl, ...corsHeaders },

@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
   const userId = userData.user.id;
   const email = userData.user.email;
-  console.log(`🗑️  Self-service account deletion started for user ${userId} (${email})`);
+  console.log('Self-service account deletion started', { userId, hasEmail: !!email });
 
   // Kräv explicit bekräftelse i body (skydd mot råk-anrop)
   let body: { confirm?: string } = {};

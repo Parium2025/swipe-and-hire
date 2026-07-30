@@ -8,7 +8,8 @@ const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
   const token = url.searchParams.get("confirm");
 
-  console.log("email-confirm hook accessed with token:", token);
+  // Logga aldrig bekräftelsetoken — den kan aktivera ett konto.
+  console.log("email-confirm hook accessed", { hasToken: !!token });
 
   const envRedirect = Deno.env.get("REDIRECT_URL") || "";
   const defaultRedirect = "https://parium.se";
