@@ -257,6 +257,11 @@ const PublicJobPage = () => {
 
   const validThrough = job.expires_at || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
+  const parsedSalary = parseSalary(job);
+  const salaryText = formatSalary(job);
+
+
+
   const jobLD: any = {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
