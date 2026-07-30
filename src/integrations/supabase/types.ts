@@ -3176,7 +3176,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      company_reviews_public: {
+        Row: {
+          comment: string | null
+          company_id: string | null
+          created_at: string | null
+          id: string | null
+          is_anonymous: boolean | null
+          rating: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          rating?: number | null
+          updated_at?: string | null
+          user_id?: never
+        }
+        Update: {
+          comment?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          rating?: number | null
+          updated_at?: string | null
+          user_id?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_employer_read_application_file: {
