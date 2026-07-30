@@ -125,9 +125,14 @@ Deno.serve(async (req) => {
     }[]
 
     if (candidateList.length > 0) {
+      // OBS: bara PÅGÅENDE varningar räknas som "redan varnad". En användare som
+      // loggade in (cancelled_at satt) och sedan blev inaktiv igen måste kunna
+      // varnas på nytt — annars fastnar kontot och raderas aldrig.
       const { data: existing } = await admin
         .from('account_inactivity_notices')
         .select('user_id')
+        .is('deleted_at', null)
+        .is('cancelled_at', null)
         .in('user_id', candidateList.map((c) => c.user_id))
       const alreadyNoticed = new Set((existing ?? []).map((e: { user_id: string }) => e.user_id))
 
@@ -142,13 +147,20 @@ Deno.serve(async (req) => {
           email = authUser?.user?.email ?? null
         }
 
-        const { error: insertErr } = await admin.from('account_inactivity_notices').insert({
-          user_id: profile.user_id,
-          email,
-          last_active_at: profile.last_active_at ?? profile.created_at,
-          warned_at: now.toISOString(),
-          scheduled_delete_at: deleteAt.toISOString(),
-        })
+        // user_id är unikt — återanvänd raden vid en ny varningsomgång.
+        const { error: insertErr } = await admin.from('account_inactivity_notices').upsert(
+          {
+            user_id: profile.user_id,
+            email,
+            last_active_at: profile.last_active_at ?? profile.created_at,
+            warned_at: now.toISOString(),
+            scheduled_delete_at: deleteAt.toISOString(),
+            cancelled_at: null,
+            deleted_at: null,
+            error_message: null,
+          },
+          { onConflict: 'user_id' },
+        )
         if (insertErr) {
           console.warn(`notice insert failed for ${profile.user_id}:`, insertErr.message)
           continue
@@ -161,7 +173,9 @@ Deno.serve(async (req) => {
               body: {
                 templateName: 'account-inactivity-warning',
                 recipientEmail: email,
-                idempotencyKey: `inactivity-warning-${profile.user_id}`,
+                // datumstämpel så att en ny varningsomgång inte dedupliceras bort
+                idempotencyKey: `inactivity-warning-${profile.user_id}-${now.toISOString().slice(0, 10)}`,
+
                 templateData: {
                   first_name: profile.first_name || 'där',
                   delete_date: deleteAt.toLocaleDateString('sv-SE'),
