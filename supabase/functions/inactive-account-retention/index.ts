@@ -34,7 +34,8 @@ function monthsAgo(months: number): string {
 }
 
 /** Full radering av en användares data — samma modul som delete-my-account. */
-async function purgeUser(admin: ReturnType<typeof createClient>, userId: string, email: string | null) {
+// deno-lint-ignore no-explicit-any
+async function purgeUser(admin: any, userId: string, email: string | null) {
   const stats = await purgeUserData(admin, userId, email)
   console.log(`🗑️ inaktivt konto ${userId} raderat`, stats)
 }
