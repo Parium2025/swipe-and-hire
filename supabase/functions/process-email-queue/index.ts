@@ -1,5 +1,7 @@
 import { sendLovableEmail } from 'npm:@lovable.dev/email-js'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { requireServiceRoleOrCronSecret } from '../_shared/service-auth.ts'
+
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -34,23 +36,8 @@ function getRetryAfterSeconds(error: unknown): number {
   return 60
 }
 
-function parseJwtClaims(token: string): Record<string, unknown> | null {
-  const parts = token.split('.')
-  if (parts.length < 2) {
-    return null
-  }
 
-  try {
-    const payload = parts[1]
-      .replaceAll('-', '+')
-      .replaceAll('_', '/')
-      .padEnd(Math.ceil(parts[1].length / 4) * 4, '=')
 
-    return JSON.parse(atob(payload)) as Record<string, unknown>
-  } catch {
-    return null
-  }
-}
 
 // Move a message to the dead letter queue and log the reason.
 async function moveToDlq(
@@ -91,27 +78,81 @@ Deno.serve(async (req) => {
     )
   }
 
-  const authHeader = req.headers.get('Authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
-    return new Response(
-      JSON.stringify({ error: 'Unauthorized' }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    )
+  // 🔒 Interna anrop endast. Vi litar ALDRIG på base64-avkodade JWT-claims
+  // (de går att förfalska). Godkänns: literal service-role-nyckel, lagrad
+  // cron-hemlighet, eller ett kryptografiskt verifierat service_role-JWT
+  // (bakåtkompatibelt med en äldre nyckel lagrad i vault).
+  const authError = await requireServiceRoleOrCronSecret(req)
+  if (authError) {
+    const legacyToken = req.headers.get('Authorization')?.replace('Bearer ', '').trim()
+    let legacyOk = false
+    if (legacyToken) {
+      try {
+        const verifier = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') ?? '')
+        const { data } = await verifier.auth.getClaims(legacyToken)
+        legacyOk = (data?.claims as Record<string, unknown> | undefined)?.role === 'service_role'
+      } catch {
+        legacyOk = false
+      }
+    }
+    if (!legacyOk) return authError
+    console.warn('process-email-queue: accepted legacy verified service_role JWT')
   }
 
-  // Defense in depth: verify_jwt=true already requires a valid JWT at the
-  // gateway layer. This adds an explicit role check so only service-role
-  // callers can trigger queue processing.
-  const token = authHeader.slice('Bearer '.length).trim()
-  const claims = parseJwtClaims(token)
-  if (claims?.role !== 'service_role') {
-    return new Response(
-      JSON.stringify({ error: 'Forbidden' }),
-      { status: 403, headers: { 'Content-Type': 'application/json' } }
-    )
-  }
+
+
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+  // 0. Avstämning: 'pending'-rader som aldrig fick ett slutstatus (kön tappade
+  // meddelandet, eller funktionen kraschade mitt i) ska inte ligga kvar och se
+  // ut som om mejlet är på väg. Efter 6 timmar markeras de som övergivna.
+  {
+    const cutoff = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+    const { data: stale, error: staleError } = await supabase
+      .from('email_send_log')
+      .select('message_id')
+      .eq('status', 'pending')
+      .lt('created_at', cutoff)
+      .limit(200)
+
+    if (staleError) {
+      console.error('Failed to scan stale pending emails', { error: staleError })
+    } else if (stale?.length) {
+      const staleIds = stale
+        .map((row) => row.message_id)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0)
+
+      // Rör inte rader där ett slutstatus redan finns loggat separat.
+      const { data: resolved } = await supabase
+        .from('email_send_log')
+        .select('message_id')
+        .in('message_id', staleIds)
+        .in('status', ['sent', 'failed', 'dlq', 'suppressed', 'abandoned'])
+
+      const resolvedIds = new Set((resolved ?? []).map((r) => r.message_id))
+      const abandoned = staleIds.filter((id) => !resolvedIds.has(id))
+
+      if (abandoned.length > 0) {
+        const { error: updateError } = await supabase
+          .from('email_send_log')
+          .update({
+            status: 'abandoned',
+            error_message: 'Ingen leveransbekräftelse inom 6 timmar — meddelandet saknas i kön',
+          })
+          .in('message_id', abandoned)
+          .eq('status', 'pending')
+
+        if (updateError) {
+          console.error('Failed to mark abandoned emails', { error: updateError })
+        } else {
+          console.warn('Marked abandoned emails', { count: abandoned.length })
+        }
+      }
+    }
+  }
+
+
 
   // 1. Check rate-limit cooldown and read queue config
   const { data: state } = await supabase
