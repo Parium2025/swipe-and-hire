@@ -23,8 +23,10 @@ export type Database = {
           error_message: string | null
           id: string
           last_active_at: string | null
+          reminder_180_sent_at: string | null
           reminder_30_sent_at: string | null
           reminder_7_sent_at: string | null
+          reminder_90_sent_at: string | null
           scheduled_delete_at: string
           updated_at: string
           user_id: string
@@ -38,8 +40,10 @@ export type Database = {
           error_message?: string | null
           id?: string
           last_active_at?: string | null
+          reminder_180_sent_at?: string | null
           reminder_30_sent_at?: string | null
           reminder_7_sent_at?: string | null
+          reminder_90_sent_at?: string | null
           scheduled_delete_at: string
           updated_at?: string
           user_id: string
@@ -53,8 +57,10 @@ export type Database = {
           error_message?: string | null
           id?: string
           last_active_at?: string | null
+          reminder_180_sent_at?: string | null
           reminder_30_sent_at?: string | null
           reminder_7_sent_at?: string | null
+          reminder_90_sent_at?: string | null
           scheduled_delete_at?: string
           updated_at?: string
           user_id?: string
