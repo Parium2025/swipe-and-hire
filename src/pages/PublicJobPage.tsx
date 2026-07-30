@@ -15,7 +15,9 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
  import { setPendingJob } from '@/lib/pendingJobIntent';
  import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
  import { OCCUPATIONS } from '@/data/jobOccupations';
- import { TruncatedText } from '@/components/TruncatedText';
+import { TruncatedText } from '@/components/TruncatedText';
+import { parseSalary, formatSalary } from '@/lib/salaryRange';
+
  
 
 const BASE = 'https://www.parium.se';
@@ -32,6 +34,8 @@ type Job = {
   salary_min: number | null;
   salary_max: number | null;
   salary_type: string | null;
+  salary_transparency: string | null;
+
   workplace_city: string | null;
   workplace_county: string | null;
   workplace_postal_code: string | null;
@@ -73,7 +77,7 @@ const PublicJobPage = () => {
       const now = new Date().toISOString();
       const { data, error } = await supabase
         .from('job_postings')
-        .select('id,title,description,requirements,location,occupation,employment_type,work_schedule,salary_min,salary_max,salary_type,workplace_city,workplace_county,workplace_postal_code,workplace_address,workplace_name,company_logo_url,job_image_url,benefits,created_at,expires_at,is_active,positions_count,remote_work_possible,work_location_type')
+        .select('id,title,description,requirements,location,occupation,employment_type,work_schedule,salary_min,salary_max,salary_type,salary_transparency,workplace_city,workplace_county,workplace_postal_code,workplace_address,workplace_name,company_logo_url,job_image_url,benefits,created_at,expires_at,is_active,positions_count,remote_work_possible,work_location_type')
         .eq('id', jobId)
         .eq('is_active', true)
         .is('deleted_at', null)
@@ -257,6 +261,11 @@ const PublicJobPage = () => {
 
   const validThrough = job.expires_at || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
+  const parsedSalary = parseSalary(job);
+  const salaryText = formatSalary(job);
+
+
+
   const jobLD: any = {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
@@ -284,20 +293,21 @@ const PublicJobPage = () => {
     ...(job.remote_work_possible === 'yes' || job.work_location_type === 'remote'
       ? { jobLocationType: 'TELECOMMUTE', applicantLocationRequirements: { '@type': 'Country', name: 'SE' } }
       : {}),
-    ...(job.salary_min || job.salary_max
+    ...(parsedSalary && !parsedSalary.afterInterview
       ? {
           baseSalary: {
             '@type': 'MonetaryAmount',
             currency: 'SEK',
             value: {
               '@type': 'QuantitativeValue',
-              ...(job.salary_min ? { minValue: job.salary_min } : {}),
-              ...(job.salary_max ? { maxValue: job.salary_max } : {}),
-              unitText: (job.salary_type || '').toLowerCase().includes('tim') ? 'HOUR' : 'MONTH',
+              ...(parsedSalary.min !== null ? { minValue: parsedSalary.min } : {}),
+              ...(parsedSalary.max !== null ? { maxValue: parsedSalary.max } : {}),
+              unitText: parsedSalary.unitText,
             },
           },
         }
       : {}),
+
     ...(job.positions_count && job.positions_count > 1 ? { totalJobOpenings: job.positions_count } : {}),
     ...(job.occupation ? { occupationalCategory: job.occupation } : {}),
     identifier: {
@@ -420,19 +430,13 @@ const PublicJobPage = () => {
           </section>
         )}
 
-        {(job.salary_min || job.salary_max) && (
+        {salaryText && (
           <section className="mb-12">
             <h2 className="text-xl font-semibold mb-4">Lön</h2>
-            <p className="text-white/80">
-              {job.salary_min && job.salary_max
-                ? `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} kr`
-                : job.salary_min
-                  ? `Från ${job.salary_min.toLocaleString('sv-SE')} kr`
-                  : `Upp till ${job.salary_max!.toLocaleString('sv-SE')} kr`}
-              {job.salary_type ? ` (${job.salary_type})` : ''}
-            </p>
+            <p className="text-white">{salaryText}</p>
           </section>
         )}
+
 
         <section className="mb-12 p-6 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10">
           <h2 className="text-xl font-semibold mb-2">Ansök direkt i Parium</h2>
