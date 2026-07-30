@@ -20,9 +20,12 @@ const corsHeaders = {
 }
 
 const INACTIVE_MONTHS = 24
-const GRACE_DAYS = 30
+// 90 dagars frist — en 30-dagarsfrist är för kort (semester, sjukdom, föräldraledighet).
+const GRACE_DAYS = 90
+const REMINDER_DAYS = [30, 7] as const
 const WARN_BATCH = 200
 const DELETE_BATCH = 50
+
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
