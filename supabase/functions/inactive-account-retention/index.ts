@@ -10,6 +10,8 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { requireServiceRoleOrCronSecret } from '../_shared/service-auth.ts'
+import { purgeUserStorage, USER_STORAGE_BUCKETS } from '../_shared/storage-cleanup.ts'
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
