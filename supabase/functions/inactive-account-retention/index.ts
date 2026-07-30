@@ -10,7 +10,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { requireServiceRoleOrCronSecret } from '../_shared/service-auth.ts'
-import { purgeUserStorage, USER_STORAGE_BUCKETS } from '../_shared/storage-cleanup.ts'
+import { purgeUserData } from '../_shared/user-purge.ts'
 
 
 const corsHeaders = {
@@ -33,67 +33,10 @@ function monthsAgo(months: number): string {
   return d.toISOString()
 }
 
-/** Full radering av en användares data — samma ordning som delete-my-account. */
+/** Full radering av en användares data — samma modul som delete-my-account. */
 async function purgeUser(admin: ReturnType<typeof createClient>, userId: string, email: string | null) {
-  // Rekursiv + paginerad radering av ALLA filer (bilder, video, CV) i storage
-  const removedFiles = await purgeUserStorage(admin, userId, USER_STORAGE_BUCKETS)
-  console.log(`🗑️ ${removedFiles} filer raderade i storage för ${userId}`)
-
-
-  const { data: jobIds } = await admin.from('job_postings').select('id').eq('employer_id', userId)
-  const ids = (jobIds ?? []).map((j: { id: string }) => j.id)
-  if (ids.length > 0) {
-    await admin.from('one_time_purchases').update({ job_id: null }).in('job_id', ids)
-    await admin.from('candidate_ratings').update({ job_id: null }).in('job_id', ids)
-    await admin.from('conversations').update({ job_id: null }).in('job_id', ids)
-    await admin.from('outreach_dispatch_logs').update({ job_id: null }).in('job_id', ids)
-    await admin.from('profile_views').update({ job_id: null }).in('job_id', ids)
-    await admin.from('job_postings').delete().eq('employer_id', userId)
-  }
-
-  await admin.from('job_applications').delete().eq('applicant_id', userId)
-
-  const userScopedTables: { table: string; column: string }[] = [
-    { table: 'saved_jobs', column: 'user_id' },
-    { table: 'swipe_actions', column: 'user_id' },
-    { table: 'candidate_notes', column: 'author_id' },
-    { table: 'jobseeker_notes', column: 'jobseeker_id' },
-    { table: 'employer_notes', column: 'author_id' },
-    { table: 'candidate_ratings', column: 'employer_id' },
-    { table: 'candidate_activities', column: 'user_id' },
-    { table: 'device_push_tokens', column: 'user_id' },
-    { table: 'notification_preferences', column: 'user_id' },
-    { table: 'notifications', column: 'user_id' },
-    { table: 'user_sessions', column: 'user_id' },
-    { table: 'user_data_consents', column: 'user_id' },
-    { table: 'saved_searches', column: 'user_id' },
-    { table: 'user_subscriptions', column: 'user_id' },
-    { table: 'profile_cv_summaries', column: 'user_id' },
-    { table: 'profile_views', column: 'viewer_id' },
-    { table: 'job_views', column: 'user_id' },
-    { table: 'email_confirmations', column: 'user_id' },
-    { table: 'email_unsubscribe_tokens', column: 'user_id' },
-    { table: 'user_roles', column: 'user_id' },
-    { table: 'conversation_members', column: 'user_id' },
-    { table: 'conversation_message_reactions', column: 'user_id' },
-    { table: 'criterion_feedback', column: 'author_id' },
-  ]
-  for (const { table, column } of userScopedTables) {
-    const { error } = await admin.from(table).delete().eq(column, userId)
-    if (error) console.warn(`cleanup ${table}.${column}:`, error.message)
-  }
-
-  await admin.from('profiles').delete().eq('user_id', userId)
-
-  const { error: authErr } = await admin.auth.admin.deleteUser(userId)
-  if (authErr) throw new Error(`auth delete failed: ${authErr.message}`)
-
-  if (email) {
-    await admin.from('suppressed_emails').upsert(
-      { email: email.toLowerCase(), reason: 'account_deleted_inactive' },
-      { onConflict: 'email' },
-    )
-  }
+  const stats = await purgeUserData(admin, userId, email)
+  console.log(`🗑️ inaktivt konto ${userId} raderat`, stats)
 }
 
 Deno.serve(async (req) => {
