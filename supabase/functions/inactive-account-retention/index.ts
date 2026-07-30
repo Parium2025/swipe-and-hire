@@ -3,7 +3,6 @@
 // Steg 1 — VARNING: konton utan aktivitet på 24 månader får ett mejl och
 //          schemaläggs för radering 365 dagar senare, med påminnelser när 180,
 //          90 respektive 7 dagar återstår.
-
 // Steg 2 — RADERING: konton vars varningsperiod löpt ut och som fortfarande är
 //          inaktiva raderas permanent (profil, data, storage, auth-konto).
 // Steg 3 — ÅTERKALLNING: har personen loggat in efter varningen avbryts allt.
