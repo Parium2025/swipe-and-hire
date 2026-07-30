@@ -20,7 +20,7 @@ const GuiderHub = () => {
   }, []);
 
   const canonical = `${BASE}/guider`;
-  const title = 'Karriärguider & jobbtips 2026 – CV, lön, intervju | Parium';
+  const title = 'Karriärguider & jobbtips 2026 – CV och lön | Parium';
   const description =
     'Gratis guider om jobbsökning, CV, lön, anställningsintervju och karriärbyte. Uppdaterat för 2026 med svenska siffror och tips från rekryterare.';
 

@@ -41,7 +41,7 @@ const POPULAR_OCCUPATIONS = [
 ];
 
 const CANONICAL = 'https://www.parium.se/jobb';
-const TITLE = 'Lediga jobb i hela Sverige – jobbapp & lediga tjänster | Parium';
+const TITLE = 'Lediga jobb i hela Sverige – sök jobb i appen | Parium';
 const DESCRIPTION = 'Hitta lediga jobb i hela Sverige. Stockholm, Göteborg, Malmö, Uppsala och fler – sök jobb i jobbappen Parium.';
 
 const normalize = (s: string) =>

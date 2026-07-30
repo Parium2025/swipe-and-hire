@@ -33,7 +33,7 @@ const YrkePage = () => {
   if (!occ) return <Navigate to="/yrken" replace />;
 
   const canonical = `${BASE}/yrke/${occ.slug}`;
-  const title = `Lediga jobb ${occ.asForm} – sök ${occ.plural}jobb med Parium`;
+  const title = `Lediga jobb ${occ.asForm} | Parium`;
   const description = `Hitta lediga jobb ${occ.asForm} i hela Sverige. Se vanliga arbetsuppgifter, krav och lön. Skapa min profil idag i Parium och sök jobb på sekunder.`;
 
   // Top 5 städer för cross-linking
