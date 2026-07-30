@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
 
   const admin = createClient(supabaseUrl, serviceKey)
   const now = new Date()
-  const stats = { warned: 0, deleted: 0, cancelled: 0, errors: 0 }
+  const stats = { warned: 0, deleted: 0, cancelled: 0, orphans_deleted: 0, errors: 0 }
 
   try {
     // ── Steg 3: avbryt varningar för konton som blivit aktiva igen ──
