@@ -130,7 +130,7 @@ const YrkenHub = () => {
   const canonical = `${BASE}/yrken`;
   const title = 'Lediga jobb per yrke – sök jobb i hela Sverige | Parium';
   const description =
-    'Sök lediga jobb per yrke i hela Sverige. Snickare, elektriker, undersköterska, lager, restaurang, butik och fler. Kom i kontakt med arbetsgivare direkt i Parium.';
+    'Sök lediga jobb per yrke i hela Sverige. Snickare, elektriker, undersköterska, lager, restaurang, butik och fler – kontakta arbetsgivare direkt i Parium.';
 
   const itemListLd = {
     '@context': 'https://schema.org',
