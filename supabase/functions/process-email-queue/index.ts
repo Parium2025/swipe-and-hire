@@ -78,11 +78,28 @@ Deno.serve(async (req) => {
     )
   }
 
-  // 🔒 Interna anrop endast: acceptera bara den literala service-role-nyckeln
-  // eller den lagrade cron-hemligheten. Vi litar ALDRIG på base64-avkodade
-  // JWT-claims (de går att förfalska).
+  // 🔒 Interna anrop endast. Vi litar ALDRIG på base64-avkodade JWT-claims
+  // (de går att förfalska). Godkänns: literal service-role-nyckel, lagrad
+  // cron-hemlighet, eller ett kryptografiskt verifierat service_role-JWT
+  // (bakåtkompatibelt med en äldre nyckel lagrad i vault).
   const authError = await requireServiceRoleOrCronSecret(req)
-  if (authError) return authError
+  if (authError) {
+    const legacyToken = req.headers.get('Authorization')?.replace('Bearer ', '').trim()
+    let legacyOk = false
+    if (legacyToken) {
+      try {
+        const verifier = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') ?? '')
+        const { data } = await verifier.auth.getClaims(legacyToken)
+        legacyOk = (data?.claims as Record<string, unknown> | undefined)?.role === 'service_role'
+      } catch {
+        legacyOk = false
+      }
+    }
+    if (!legacyOk) return authError
+    console.warn('process-email-queue: accepted legacy verified service_role JWT')
+  }
+
+
 
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
