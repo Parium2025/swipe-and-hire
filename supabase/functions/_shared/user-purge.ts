@@ -101,7 +101,10 @@ const USER_SCOPED: { table: string; column: string }[] = [
   { table: 'jobseeker_notes', column: 'user_id' },
   { table: 'profile_cv_summaries', column: 'user_id' },
   { table: 'user_data_consents', column: 'user_id' },
-  { table: 'consent_records', column: 'user_id' },
+  // OBS: consent_records raderas INTE här. Raden pseudonymiseras i steg 8
+  // nedan (e-post nollas) så att beviset för accepterade villkor finns kvar
+  // enligt art. 17.3 e (rättsliga anspråk) utan att personuppgifter sparas.
+
   { table: 'user_stage_settings', column: 'user_id' },
   { table: 'user_roles', column: 'user_id' },
   { table: 'user_sessions', column: 'user_id' },
@@ -321,6 +324,15 @@ export async function purgeUserData(
     .from('account_inactivity_notices')
     .update({ email: null })
     .eq('user_id', userId);
+
+  // Samtyckesbevis pseudonymiseras istället för att raderas: e-post och roll
+  // nollas, kvar blir enbart vilken version som accepterades och när.
+  // Rättslig grund: art. 17.3 e — nödvändigt för rättsliga anspråk.
+  await admin
+    .from('consent_records')
+    .update({ email: null, role: null })
+    .eq('user_id', userId);
+
 
   // 9. E-postbaserade spår (dessa tabeller saknar user_id)
   if (email) {
