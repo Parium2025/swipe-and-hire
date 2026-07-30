@@ -35,5 +35,6 @@
 - [Pre-launch Checklist](mem://launch/pre-launch-checklist) — Kapacitetströsklar, Resend Pro, Cloud-uppgradering.
 - [Samtyckessidan borttagen](mem://constraints/no-data-sharing-consent-toggle) — Inget samtyckesreglage för datadelning; rättslig grund är avtal.
 - [Ingen cookie-banner](mem://constraints/no-cookie-banner) — Bannern borttagen; endast nödvändig lagring.
+- [Databasbehörigheter](mem://constraints/db-permission-policy) — GRANT/REVOKE-regler, policyroller, auth.uid()-kontroll i SECURITY DEFINER.
 - [Raderingstider](mem://features/data-retention-timings) — 24 mån + 365 dagars frist, påminnelser 180/90/7 dagar, anonym räknare för raderade sökande.
 - [Stripe-lansering: juridik](mem://launch/stripe-legal-reminder) — Policy, DPA, registerförteckning och FAQ måste uppdateras när betalningar aktiveras.
