@@ -14,6 +14,8 @@ import { useCompactWidth } from '@/hooks/useCompactWidth';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { RemovedApplicantsInfo } from '@/components/dashboard/RemovedApplicantsInfo';
+
 
 interface MobileJobCardProps {
   job: JobPosting;

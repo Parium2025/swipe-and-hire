@@ -14,6 +14,8 @@ import { useCardImage } from '@/hooks/useCardImage';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { RemovedApplicantsInfo } from '@/components/dashboard/RemovedApplicantsInfo';
+
 
 interface EmployerJobCardProps {
   job: {
@@ -231,14 +233,8 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                     {job.applications_count || 0}
                   </span>
                 </div>
-                {(job.removed_applicants_count ?? 0) > 0 && (
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm leading-snug text-white">Raderade konton:</span>
-                    <span className="whitespace-nowrap text-sm leading-snug text-white/90 font-medium">
-                      {job.removed_applicants_count}
-                    </span>
-                  </div>
-                )}
+                <RemovedApplicantsInfo count={job.removed_applicants_count} />
+
 
                 {/* 2. Status — urgency / remaining time */}
                 <TooltipProvider delayDuration={0}>
