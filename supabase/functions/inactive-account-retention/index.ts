@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     // ── Steg 3: avbryt varningar för konton som blivit aktiva igen ──
     const { data: pending } = await admin
       .from('account_inactivity_notices')
-      .select('id, user_id, warned_at')
+      .select('id, user_id, email, warned_at, scheduled_delete_at, reminder_30_sent_at, reminder_7_sent_at')
       .is('deleted_at', null)
       .is('cancelled_at', null)
 
@@ -65,14 +65,27 @@ Deno.serve(async (req) => {
     if (pendingList.length > 0) {
       const { data: activeProfiles } = await admin
         .from('profiles')
-        .select('user_id, last_active_at')
+        .select('user_id, last_active_at, first_name')
         .in('user_id', pendingList.map((p: { user_id: string }) => p.user_id))
 
       const activeMap = new Map(
         (activeProfiles ?? []).map((p: { user_id: string; last_active_at: string | null }) => [p.user_id, p.last_active_at]),
       )
+      const nameMap = new Map(
+        (activeProfiles ?? []).map((p: { user_id: string; first_name: string | null }) => [p.user_id, p.first_name]),
+      )
 
-      for (const notice of pendingList as { id: string; user_id: string; warned_at: string }[]) {
+      type Notice = {
+        id: string
+        user_id: string
+        email: string | null
+        warned_at: string
+        scheduled_delete_at: string
+        reminder_30_sent_at: string | null
+        reminder_7_sent_at: string | null
+      }
+
+      for (const notice of pendingList as Notice[]) {
         const lastActive = activeMap.get(notice.user_id)
         if (lastActive && new Date(lastActive) > new Date(notice.warned_at)) {
           await admin
@@ -80,9 +93,43 @@ Deno.serve(async (req) => {
             .update({ cancelled_at: now.toISOString() })
             .eq('id', notice.id)
           stats.cancelled++
+          continue
+        }
+
+        // ── Påminnelser 30 och 7 dagar före radering ──
+        const daysLeft = Math.ceil(
+          (new Date(notice.scheduled_delete_at).getTime() - now.getTime()) / 86_400_000,
+        )
+        for (const threshold of REMINDER_DAYS) {
+          const field = threshold === 30 ? 'reminder_30_sent_at' : 'reminder_7_sent_at'
+          const alreadySent = threshold === 30 ? notice.reminder_30_sent_at : notice.reminder_7_sent_at
+          if (alreadySent || daysLeft > threshold || daysLeft <= 0 || !notice.email) continue
+
+          try {
+            await admin.functions.invoke('send-transactional-email', {
+              body: {
+                templateName: 'account-inactivity-warning',
+                recipientEmail: notice.email,
+                idempotencyKey: `inactivity-reminder-${threshold}-${notice.user_id}-${notice.warned_at.slice(0, 10)}`,
+                templateData: {
+                  first_name: nameMap.get(notice.user_id) || 'där',
+                  delete_date: new Date(notice.scheduled_delete_at).toLocaleDateString('sv-SE'),
+                  days_left: String(Math.max(daysLeft, 1)),
+                },
+              },
+            })
+            await admin
+              .from('account_inactivity_notices')
+              .update({ [field]: now.toISOString() })
+              .eq('id', notice.id)
+          } catch (e) {
+            console.warn(`reminder ${threshold}d failed for ${notice.email}:`, (e as Error).message)
+          }
+          break
         }
       }
     }
+
 
     // ── Steg 2: radera konton vars frist löpt ut ──
     const { data: due } = await admin
