@@ -133,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
     // 3. Skapa bekräftelsetoken och spara i databasen
     const confirmationToken = crypto.randomUUID();
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24); // 24 timmars giltighet
+    expiresAt.setHours(expiresAt.getHours() + 24 * 7); // 7 dagars giltighet
 
     const { error: tokenError } = await supabase
       .from('email_confirmations')

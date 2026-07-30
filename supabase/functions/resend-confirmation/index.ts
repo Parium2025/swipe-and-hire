@@ -73,7 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
     // 2) Skapa ny bekräftelsetoken i egen tabell (samma mönster som custom-signup).
     const confirmationToken = crypto.randomUUID();
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
+    expiresAt.setHours(expiresAt.getHours() + 24 * 7); // 7 dagars giltighet
 
     // Rensa gamla tokens för användaren först
     await supabaseAdmin
