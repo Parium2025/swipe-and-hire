@@ -58,7 +58,7 @@ export function useEmployerPrefetch() {
         queryKey: ['company-reviews', userId],
         queryFn: async () => {
           const { data: reviews, error } = await supabase
-            .from('company_reviews')
+            .from('company_reviews_public')
             .select('*')
             .eq('company_id', userId)
             .order('created_at', { ascending: false });

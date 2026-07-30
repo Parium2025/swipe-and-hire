@@ -2003,7 +2003,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Hämta antal company reviews för denna employer
       const { count: reviewsCount } = await supabase
-        .from('company_reviews')
+        .from('company_reviews_public')
         .select('id', { count: 'exact', head: true })
         .eq('company_id', user.id);
       
