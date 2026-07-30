@@ -430,19 +430,13 @@ const PublicJobPage = () => {
           </section>
         )}
 
-        {(job.salary_min || job.salary_max) && (
+        {salaryText && (
           <section className="mb-12">
             <h2 className="text-xl font-semibold mb-4">Lön</h2>
-            <p className="text-white/80">
-              {job.salary_min && job.salary_max
-                ? `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} kr`
-                : job.salary_min
-                  ? `Från ${job.salary_min.toLocaleString('sv-SE')} kr`
-                  : `Upp till ${job.salary_max!.toLocaleString('sv-SE')} kr`}
-              {job.salary_type ? ` (${job.salary_type})` : ''}
-            </p>
+            <p className="text-white">{salaryText}</p>
           </section>
         )}
+
 
         <section className="mb-12 p-6 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10">
           <h2 className="text-xl font-semibold mb-2">Ansök direkt i Parium</h2>
