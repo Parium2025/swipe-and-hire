@@ -3179,6 +3179,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_employer_read_application_file: {
+        Args: { p_name: string }
+        Returns: boolean
+      }
       can_manage_outreach_scope: {
         Args: { p_organization_id?: string; p_owner_user_id: string }
         Returns: boolean
