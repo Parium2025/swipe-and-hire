@@ -115,6 +115,8 @@ Tredjelandsöverföring sker endast med standardavtalsklausuler och kompletteran
 - Autentisering med e-post/lösenord och OAuth, sessionshantering med förnyelse.
 - Loggning av åtkomst och statusändringar, dagliga säkerhetskopior hos leverantören.
 - Nattlig automatisk gallring (`run_data_retention`) och automatisk radering av inaktiva konton.
+- Veckovis radering av överblivna filer i fillagringen (`purge-orphaned-media`) så att inga bilder, videor eller CV:n blir kvar utan koppling till en profil eller ansökan.
+
 - Åtkomst till produktionsdata begränsad till behörig personal, endast vid drift och support.
 
 ---
