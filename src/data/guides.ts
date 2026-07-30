@@ -92,7 +92,7 @@ export const GUIDES: GuideData[] = [
     slug: 'byta-jobb-checklista',
     title: 'Byta jobb 2026 – komplett checklista steg för steg',
     metaTitle: 'Byta jobb 2026: checklista, uppsägning & nytt jobb | Parium',
-    description: 'Komplett checklista för dig som vill byta jobb 2026. Uppsägningstid, lön, semester, intervjuer, hur du säger upp dig snyggt – och hur du hittar nästa jobb snabbt.',
+    description: 'Komplett checklista för dig som vill byta jobb 2026. Uppsägningstid, lön, semester, intervjuer och hur du hittar nästa jobb snabbt.',
     excerpt: 'Att byta jobb är ett av de största besluten du tar. Här är checklistan steg för steg – från att inse att det är dags, till att signera nästa kontrakt.',
     category: 'Karriär',
     readingMinutes: 7,
