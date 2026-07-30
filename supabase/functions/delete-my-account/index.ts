@@ -3,6 +3,8 @@
 // Ingen admin-behörighet krävs — men användaren måste vara inloggad (JWT valideras).
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { purgeUserStorage, USER_STORAGE_BUCKETS } from '../_shared/storage-cleanup.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
