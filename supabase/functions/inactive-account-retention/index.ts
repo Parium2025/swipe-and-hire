@@ -21,9 +21,17 @@ const corsHeaders = {
 }
 
 const INACTIVE_MONTHS = 24
-// 90 dagars frist — en 30-dagarsfrist är för kort (semester, sjukdom, föräldraledighet).
-const GRACE_DAYS = 90
-const REMINDER_DAYS = [30, 7] as const
+// 365 dagars frist — ett helt år. Kortare frister (30/90 dagar) riskerar att
+// missas vid semester, sjukdom eller föräldraledighet.
+const GRACE_DAYS = 365
+// Påminnelser när det återstår 180, 90 respektive 7 dagar (fallande ordning).
+const REMINDER_DAYS = [180, 90, 7] as const
+const REMINDER_FIELD: Record<number, string> = {
+  180: 'reminder_180_sent_at',
+  90: 'reminder_90_sent_at',
+  7: 'reminder_7_sent_at',
+}
+
 const WARN_BATCH = 200
 const DELETE_BATCH = 50
 
