@@ -293,8 +293,10 @@ Deno.serve(async (req) => {
     // och aldrig inloggad sedan dess → radera direkt. Det finns ingen
     // användardata att varna om.
     try {
-      const { data: authPage } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 })
-      const authUsers = authPage?.users ?? []
+      const authUsers: { id: string; email?: string | null; created_at: string; last_sign_in_at?: string | null }[] = []
+      await forEachAuthUser(admin, (u) => {
+        authUsers.push(u as typeof authUsers[number])
+      })
       if (authUsers.length > 0) {
         const { data: profileRows } = await admin
           .from('profiles')
