@@ -94,7 +94,8 @@ function normalize(value: string | null | undefined): string | null {
 
 /** Hämtar alla refererade storage-paths ur databasen (paginerat). */
 async function collectReferencedPaths(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   sources: Source[],
 ): Promise<Set<string>> {
   const referenced = new Set<string>()
@@ -129,7 +130,8 @@ async function collectReferencedPaths(
 }
 
 async function sweepBucket(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   config: BucketConfig,
   dryRun: boolean,
 ) {
