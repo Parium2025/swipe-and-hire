@@ -33,17 +33,10 @@ function monthsAgo(months: number): string {
 
 /** Full radering av en användares data — samma ordning som delete-my-account. */
 async function purgeUser(admin: ReturnType<typeof createClient>, userId: string, email: string | null) {
-  const buckets = ['job-applications', 'company-logos', 'job-images', 'message-attachments']
-  for (const bucket of buckets) {
-    try {
-      const { data: files } = await admin.storage.from(bucket).list(userId, { limit: 1000 })
-      if (files?.length) {
-        await admin.storage.from(bucket).remove(files.map((f) => `${userId}/${f.name}`))
-      }
-    } catch (e) {
-      console.warn(`storage cleanup ${bucket}:`, (e as Error).message)
-    }
-  }
+  // Rekursiv + paginerad radering av ALLA filer (bilder, video, CV) i storage
+  const removedFiles = await purgeUserStorage(admin, userId, USER_STORAGE_BUCKETS)
+  console.log(`🗑️ ${removedFiles} filer raderade i storage för ${userId}`)
+
 
   const { data: jobIds } = await admin.from('job_postings').select('id').eq('employer_id', userId)
   const ids = (jobIds ?? []).map((j: { id: string }) => j.id)
