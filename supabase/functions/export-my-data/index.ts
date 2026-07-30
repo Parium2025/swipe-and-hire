@@ -59,6 +59,31 @@ Deno.serve(async (req) => {
     return data ?? [];
   };
 
+  // Rekryterarförfattat material om kandidaten omfattas av art. 15, men får
+  // inte röja VEM hos arbetsgivaren som skrivit det (den personens egna
+  // personuppgifter). Därför strippas identifierande motpartskolumner.
+  const REDACTED = [
+    'recruiter_id',
+    'employer_id',
+    'evaluated_by',
+    'user_id',
+    'viewer_user_id',
+    'viewer_org_id',
+    'organization_id',
+    'owner_user_id',
+  ];
+  const grabAbout = async (table: string, column: string) => {
+    const rows = await grab(table, column);
+    return (rows as Record<string, unknown>[]).map((row) => {
+      const clean: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(row)) {
+        if (!REDACTED.includes(k)) clean[k] = v;
+      }
+      return clean;
+    });
+  };
+
+
   try {
     const [
       profile,
