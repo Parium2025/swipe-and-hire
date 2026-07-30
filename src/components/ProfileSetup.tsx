@@ -45,35 +45,31 @@ const ProfileSetup = () => {
   const uploadProfileImage = async (file: File) => {
     try {
       const { compressImageBlob } = await import('@/lib/imageUploadOptimization');
-      const { uploadWithRetry } = await import('@/lib/uploadWithProgress');
+      const { uploadMedia } = await import('@/lib/mediaManager');
       const optimized = await compressImageBlob(file, { maxDimension: 1024, quality: 0.9 });
       const isOptimized = optimized !== file;
       const fileExt = isOptimized ? 'webp' : (file.name.split('.').pop() || 'jpg');
-      const fileName = `${user?.id}/${Date.now()}-profile-image.${fileExt}`;
+      const uploadFile =
+        optimized instanceof File
+          ? optimized
+          : new File([optimized], `profile-image.${fileExt}`, {
+              type: (optimized as Blob).type || file.type,
+            });
 
-      // 🚀 Resilient upload med retry + exponential backoff
-      await uploadWithRetry({
-        bucket: 'profile-media',
-        path: fileName,
-        file: optimized,
-        contentType: optimized.type || file.type,
-        cacheControl: '31536000',
-        upsert: true,
-      });
+      // 🔒 Använd den centrala media-hanteraren (rätt bucket, storlek- och typkontroll).
+      const { storagePath, error: uploadError } = await uploadMedia(
+        uploadFile,
+        'profile-image',
+        user?.id ?? ''
+      );
 
-      // Use public URL for profile media (no expiration)
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-media')
-        .getPublicUrl(fileName);
+      if (uploadError || !storagePath) {
+        throw uploadError ?? new Error('Uppladdningen misslyckades');
+      }
 
-      const imageUrl = `${publicUrl}?t=${Date.now()}`;
-      
-      // Förladdda bilden direkt i Service Worker
-      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-      await preloadSingleFile(imageUrl);
-      
-      setProfileImageUrl(imageUrl);
-      
+      // Spara endast storage-path i state/databasen — visning sker via signerad URL.
+      setProfileImageUrl(storagePath);
+
       toast({
         title: "Profilbild uppladdad!",
         description: "Din profilbild har uppdaterats."
@@ -87,6 +83,7 @@ const ProfileSetup = () => {
       });
     }
   };
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
