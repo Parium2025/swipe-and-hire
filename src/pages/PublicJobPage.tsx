@@ -248,7 +248,12 @@ const PublicJobPage = () => {
   const city = job.workplace_city || job.location || 'Sverige';
   const company = job.workplace_name || 'Arbetsgivare';
   const canonical = `${BASE}/annons/${job.id}`;
-  const title = `${job.title} – ${city} | Parium`;
+  // Klipp aldrig i Google: håll titeln under 60 tecken genom att korta jobbtiteln vid behov
+  const titleSuffix = ` – ${city} | Parium`;
+  const maxJobTitle = Math.max(20, 60 - titleSuffix.length);
+  const shortJobTitle =
+    job.title.length > maxJobTitle ? `${job.title.slice(0, maxJobTitle - 1).trimEnd()}…` : job.title;
+  const title = `${shortJobTitle}${titleSuffix}`;
   const rawDesc = (job.description || '').replace(/\s+/g, ' ').trim();
   const description = (rawDesc.slice(0, 155) || `Lediga jobb som ${job.title} ${city ? 'i ' + city : ''}. Ansök direkt i Parium-appen.`).slice(0, 158);
 
