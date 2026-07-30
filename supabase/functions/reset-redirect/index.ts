@@ -22,14 +22,9 @@ const handler = async (req: Request): Promise<Response> => {
     const type = url.searchParams.get('type');
     const issued = url.searchParams.get('issued');
     
-    console.log('🔍 RESET-REDIRECT FUNKTIONEN KALLAD!');
-    console.log('Reset redirect called with:', { 
-      token: !!token, 
-      type, 
-      issued,
-      fullUrl: req.url,
-      allParams: Object.fromEntries(url.searchParams.entries())
-    });
+    // 🔒 Logga ALDRIG token, full URL eller query-parametrar här —
+    // en återställningstoken i loggen räcker för att kapa ett konto.
+    console.log('Reset-redirect anropad:', { hasToken: !!token, type, issued });
 
     // Ingen extra tidskontroll längre - vi förlitar oss på backend-tokenens egen expiration
     console.log('Reset-redirect utan extra tidskontroll - token expiration hanteras av backend.');

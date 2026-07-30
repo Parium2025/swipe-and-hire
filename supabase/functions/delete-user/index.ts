@@ -7,18 +7,28 @@ const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
 );
 
-// Restricted CORS - only allow trusted domains
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+// Restricted CORS - endast Pariums egna domäner
+const ALLOWED_ORIGINS = [
+  "https://parium.se",
+  "https://www.parium.se",
+  "https://parium-ab.lovable.app",
+];
+function corsFor(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  return {
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
+    "Vary": "Origin",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
 interface DeleteUserRequest {
   email: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const corsHeaders = corsFor(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

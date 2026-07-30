@@ -2,9 +2,20 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, Download, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ShieldCheck, Download, Loader2, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buildDataExportPdf } from '@/lib/dataExportPdf';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface PrivacyDataPanelProps {
   /** Arbetsgivare ser även länk till personuppgiftsbiträdesavtalet */
@@ -17,6 +28,38 @@ interface PrivacyDataPanelProps {
  */
 export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps) {
   const [downloading, setDownloading] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (confirmText.trim().toUpperCase() !== 'RADERA') return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-my-account', {
+        body: { confirm: 'RADERA' },
+      });
+      if (error) throw error;
+      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+
+      toast({
+        title: 'Ditt konto är raderat',
+        description: 'All din data har tagits bort. Tack för den här tiden.',
+      });
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    } catch (e) {
+      toast({
+        title: 'Kunde inte radera kontot',
+        description:
+          (e as Error).message ||
+          'Försök igen, eller kontakta support@parium.se så hjälper vi dig.',
+        variant: 'destructive',
+      });
+      setDeleting(false);
+    }
+  };
+
 
   const saveBlob = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
@@ -97,7 +140,20 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
           )}
           {downloading ? 'Hämtar dina uppgifter…' : 'Ladda ner mina uppgifter'}
         </Button>
-
+        <div className="pt-1 border-t border-white/10 space-y-3">
+          <p className="text-xs text-white">
+            Vill du radera ditt konto raderas allt permanent — profil, ansökningar, CV,
+            bilder och meddelanden. Det går inte att ångra.
+          </p>
+          <Button
+            variant="glass"
+            onClick={() => { setConfirmText(''); setDeleteOpen(true); }}
+            className="h-10 rounded-full px-5 text-sm text-red-300 hover:text-red-200 border-red-400/40"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Radera mitt konto
+          </Button>
+        </div>
 
         <p className="text-xs text-white">
           Läs mer i{' '}
@@ -112,13 +168,49 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
               </Link>
             </>
           )}
-          . Vill du radera ditt konto helt, kontakta{' '}
+          . Har du frågor, hör av dig till{' '}
           <a href="mailto:support@parium.se" className="underline underline-offset-2">
             support@parium.se
           </a>
           .
         </p>
       </div>
+
+      <AlertDialog open={deleteOpen} onOpenChange={(o) => !deleting && setDeleteOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Radera ditt konto permanent?</AlertDialogTitle>
+            <AlertDialogDescription>
+              All din data raderas direkt och går inte att återskapa: profil, CV, bilder,
+              video, ansökningar, meddelanden och sparade jobb. Skriv{' '}
+              <span className="font-semibold">RADERA</span> för att bekräfta.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <Input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="RADERA"
+            autoComplete="off"
+            className="text-base"
+            disabled={deleting}
+          />
+
+          <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row">
+            <AlertDialogCancel disabled={deleting} className="w-full sm:w-auto">
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDeleteAccount(); }}
+              disabled={deleting || confirmText.trim().toUpperCase() !== 'RADERA'}
+              className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {deleting ? 'Raderar…' : 'Radera permanent'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
