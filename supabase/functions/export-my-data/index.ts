@@ -101,6 +101,19 @@ Deno.serve(async (req) => {
       interviewsAsEmployer,
       subscriptions,
       memberships,
+      pushDevices,
+      purchases,
+      supportTickets,
+      supportMessages,
+      reviews,
+      notesAboutMe,
+      ratingsAboutMe,
+      evaluationsAboutMe,
+      summariesAboutMe,
+      criterionFeedbackAboutMe,
+      activityAboutMe,
+      pipelineEntries,
+      profileViewsOfMe,
     ] = await Promise.all([
       grab('profiles', 'user_id'),
       grab('user_roles', 'user_id'),
@@ -117,7 +130,22 @@ Deno.serve(async (req) => {
       grab('interviews', 'employer_id'),
       grab('user_subscriptions', 'user_id'),
       grab('conversation_members', 'user_id'),
+      grab('device_push_tokens', 'user_id'),
+      grab('one_time_purchases', 'user_id'),
+      grab('support_tickets', 'user_id'),
+      grab('support_messages', 'user_id'),
+      grab('company_reviews', 'user_id'),
+      // Material som arbetsgivare registrerat OM användaren (art. 15.1)
+      grabAbout('candidate_notes', 'applicant_id'),
+      grabAbout('candidate_ratings', 'applicant_id'),
+      grabAbout('candidate_evaluations', 'applicant_id'),
+      grabAbout('candidate_summaries', 'applicant_id'),
+      grabAbout('criterion_feedback', 'applicant_id'),
+      grabAbout('candidate_activities', 'applicant_id'),
+      grabAbout('my_candidates', 'applicant_id'),
+      grabAbout('profile_views', 'viewed_user_id'),
     ]);
+
 
     // Meddelanden: bara de användaren själv har skrivit
     const { data: messages } = await admin
