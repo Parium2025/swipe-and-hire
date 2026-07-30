@@ -28,6 +28,38 @@ interface PrivacyDataPanelProps {
  */
 export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps) {
   const [downloading, setDownloading] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (confirmText.trim().toUpperCase() !== 'RADERA') return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-my-account', {
+        body: { confirm: 'RADERA' },
+      });
+      if (error) throw error;
+      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+
+      toast({
+        title: 'Ditt konto är raderat',
+        description: 'All din data har tagits bort. Tack för den här tiden.',
+      });
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    } catch (e) {
+      toast({
+        title: 'Kunde inte radera kontot',
+        description:
+          (e as Error).message ||
+          'Försök igen, eller kontakta support@parium.se så hjälper vi dig.',
+        variant: 'destructive',
+      });
+      setDeleting(false);
+    }
+  };
+
 
   const saveBlob = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
