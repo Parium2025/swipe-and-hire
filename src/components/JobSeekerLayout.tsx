@@ -1,7 +1,7 @@
 import { ReactNode, memo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
+import { useIsPlatformAdmin } from '@/hooks/useIsPlatformAdmin';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';
 import JobSeekerTopNav from '@/components/JobSeekerTopNav';
@@ -92,7 +92,7 @@ const MobileProfileAvatar = () => {
 
 const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
-  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
+  const { isPlatformAdmin } = useIsPlatformAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -130,7 +130,7 @@ const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }
             <JobSeekerTopNav />
             {/* Developer controls */}
             <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
-              {isOrgAdmin && onViewChange && (
+              {isPlatformAdmin && onViewChange && (
                 <DeveloperControls 
                   onViewChange={onViewChange}
                   currentView={developerView || 'dashboard'}
@@ -200,7 +200,7 @@ const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }
               <NotificationCenter />
               {/* Profile Avatar */}
               <MobileProfileAvatar />
-              {isOrgAdmin && onViewChange && (
+              {isPlatformAdmin && onViewChange && (
                 <div className="hidden md:block">
                   <DeveloperControls 
                     onViewChange={onViewChange}
