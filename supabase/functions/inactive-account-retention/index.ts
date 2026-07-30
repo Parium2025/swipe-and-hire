@@ -1,8 +1,8 @@
 // GDPR: automatisk hantering av inaktiva konton.
 //
 // Steg 1 — VARNING: konton utan aktivitet på 24 månader får ett mejl och
-//          schemaläggs för radering 90 dagar senare, med påminnelser 30 och 7
-//          dagar innan.
+//          schemaläggs för radering 365 dagar senare, med påminnelser när 180,
+//          90 respektive 7 dagar återstår.
 // Steg 2 — RADERING: konton vars varningsperiod löpt ut och som fortfarande är
 //          inaktiva raderas permanent (profil, data, storage, auth-konto).
 // Steg 3 — ÅTERKALLNING: har personen loggat in efter varningen avbryts allt.
@@ -21,9 +21,17 @@ const corsHeaders = {
 }
 
 const INACTIVE_MONTHS = 24
-// 90 dagars frist — en 30-dagarsfrist är för kort (semester, sjukdom, föräldraledighet).
-const GRACE_DAYS = 90
-const REMINDER_DAYS = [30, 7] as const
+// 365 dagars frist — ett helt år. Kortare frister (30/90 dagar) riskerar att
+// missas vid semester, sjukdom eller föräldraledighet.
+const GRACE_DAYS = 365
+// Påminnelser när det återstår 180, 90 respektive 7 dagar (fallande ordning).
+const REMINDER_DAYS = [180, 90, 7] as const
+const REMINDER_FIELD: Record<number, string> = {
+  180: 'reminder_180_sent_at',
+  90: 'reminder_90_sent_at',
+  7: 'reminder_7_sent_at',
+}
+
 const WARN_BATCH = 200
 const DELETE_BATCH = 50
 
@@ -58,7 +66,7 @@ Deno.serve(async (req) => {
     // ── Steg 3: avbryt varningar för konton som blivit aktiva igen ──
     const { data: pending } = await admin
       .from('account_inactivity_notices')
-      .select('id, user_id, email, warned_at, scheduled_delete_at, reminder_30_sent_at, reminder_7_sent_at')
+      .select('id, user_id, email, warned_at, scheduled_delete_at, reminder_180_sent_at, reminder_90_sent_at, reminder_7_sent_at')
       .is('deleted_at', null)
       .is('cancelled_at', null)
 
@@ -82,7 +90,8 @@ Deno.serve(async (req) => {
         email: string | null
         warned_at: string
         scheduled_delete_at: string
-        reminder_30_sent_at: string | null
+        reminder_180_sent_at: string | null
+        reminder_90_sent_at: string | null
         reminder_7_sent_at: string | null
       }
 
@@ -97,38 +106,44 @@ Deno.serve(async (req) => {
           continue
         }
 
-        // ── Påminnelser 30 och 7 dagar före radering ──
+        // ── Påminnelser 180, 90 och 7 dagar före radering ──
         const daysLeft = Math.ceil(
           (new Date(notice.scheduled_delete_at).getTime() - now.getTime()) / 86_400_000,
         )
-        for (const threshold of REMINDER_DAYS) {
-          const field = threshold === 30 ? 'reminder_30_sent_at' : 'reminder_7_sent_at'
-          const alreadySent = threshold === 30 ? notice.reminder_30_sent_at : notice.reminder_7_sent_at
-          if (alreadySent || daysLeft > threshold || daysLeft <= 0 || !notice.email) continue
+        if (daysLeft <= 0 || !notice.email) continue
 
-          try {
-            await admin.functions.invoke('send-transactional-email', {
-              body: {
-                templateName: 'account-inactivity-warning',
-                recipientEmail: notice.email,
-                idempotencyKey: `inactivity-reminder-${threshold}-${notice.user_id}-${notice.warned_at.slice(0, 10)}`,
-                templateData: {
-                  first_name: nameMap.get(notice.user_id) || 'där',
-                  delete_date: new Date(notice.scheduled_delete_at).toLocaleDateString('sv-SE'),
-                  days_left: String(Math.max(daysLeft, 1)),
-                },
+        // Mest brådskande steg som redan passerats (minsta tröskel >= daysLeft).
+        const due = REMINDER_DAYS.filter((t) => daysLeft <= t)
+        if (due.length === 0) continue
+        const threshold = due[due.length - 1]
+        const field = REMINDER_FIELD[threshold]
+        // deno-lint-ignore no-explicit-any
+        if ((notice as any)[field]) continue
+
+        // Överhoppade (större) steg markeras som skickade så att de inte
+        // triggar retroaktivt om jobbet legat nere en period.
+        const patch: Record<string, string> = {}
+        for (const t of due) patch[REMINDER_FIELD[t]] = now.toISOString()
+
+        try {
+          await admin.functions.invoke('send-transactional-email', {
+            body: {
+              templateName: 'account-inactivity-warning',
+              recipientEmail: notice.email,
+              idempotencyKey: `inactivity-reminder-${threshold}-${notice.user_id}-${notice.warned_at.slice(0, 10)}`,
+              templateData: {
+                first_name: nameMap.get(notice.user_id) || 'där',
+                delete_date: new Date(notice.scheduled_delete_at).toLocaleDateString('sv-SE'),
+                days_left: String(Math.max(daysLeft, 1)),
               },
-            })
-            await admin
-              .from('account_inactivity_notices')
-              .update({ [field]: now.toISOString() })
-              .eq('id', notice.id)
-          } catch (e) {
-            console.warn(`reminder ${threshold}d failed for ${notice.email}:`, (e as Error).message)
-          }
-          break
+            },
+          })
+          await admin.from('account_inactivity_notices').update(patch).eq('id', notice.id)
+        } catch (e) {
+          console.warn(`reminder ${threshold}d failed for ${notice.email}:`, (e as Error).message)
         }
       }
+
     }
 
 
@@ -209,8 +224,10 @@ Deno.serve(async (req) => {
             cancelled_at: null,
             deleted_at: null,
             error_message: null,
-            reminder_30_sent_at: null,
+            reminder_180_sent_at: null,
+            reminder_90_sent_at: null,
             reminder_7_sent_at: null,
+
           },
           { onConflict: 'user_id' },
         )

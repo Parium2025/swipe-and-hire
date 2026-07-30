@@ -13,9 +13,10 @@ interface Props {
 
 const AccountInactivityWarningEmail = ({
   first_name = 'där',
-  delete_date = 'om 90 dagar',
-  days_left = '90',
+  delete_date = 'om ett år',
+  days_left = '365',
 }: Props) => (
+
   <Html lang="sv" dir="ltr">
     <Head />
     <Preview>{`Ditt Parium-konto raderas ${delete_date} om du inte loggar in`}</Preview>
@@ -24,7 +25,7 @@ const AccountInactivityWarningEmail = ({
         <Section style={brandSection}>
           <Text style={brand}>Parium</Text>
         </Section>
-        <Heading style={h1}>Ditt konto raderas snart</Heading>
+        <Heading style={h1}>Ditt konto raderas om du inte loggar in</Heading>
         <Text style={text}>Hej {first_name}!</Text>
         <Text style={text}>
           Du har inte använt Parium på 24 månader. Enligt vår integritetspolicy och GDPR
@@ -60,9 +61,10 @@ const AccountInactivityWarningEmail = ({
 export const template = {
   component: AccountInactivityWarningEmail,
   subject: (data?: Record<string, unknown>) =>
-    `Ditt Parium-konto raderas om ${(data?.days_left as string) ?? '90'} dagar`,
+    `Ditt Parium-konto raderas om ${(data?.days_left as string) ?? '365'} dagar`,
   displayName: 'Inaktivt konto – varning före radering',
-  previewData: { first_name: 'Anna', delete_date: '2026-09-01', days_left: '90' },
+  previewData: { first_name: 'Anna', delete_date: '2027-07-30', days_left: '365' },
+
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }
