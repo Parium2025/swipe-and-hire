@@ -10,7 +10,8 @@ const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
   const token = url.searchParams.get('token');
 
-  console.log('Redirect-confirm accessed with token:', token);
+  // 🔒 Logga aldrig själva token — den aktiverar ett konto.
+  console.log('Redirect-confirm anropad, token medskickad:', !!token);
 
   const envRedirect = Deno.env.get('REDIRECT_URL') || '';
   const defaultRedirect = 'https://parium.se';
