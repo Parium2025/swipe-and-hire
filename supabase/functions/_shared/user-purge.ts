@@ -197,6 +197,30 @@ export async function purgeUserData(
     for (const table of APPLICATION_SCOPED) {
       if (appIdsOnJobs.length > 0) await delIn(admin, table, 'application_id', appIdsOnJobs);
     }
+    // Chattar som hör till ansökningar på arbetsgivarens jobb ska bort helt —
+    // annars kan meddelanden ligga kvar när annonsen och ansökan raderas.
+    if (appIdsOnJobs.length > 0) {
+      const jobConvIds: string[] = [];
+      for (const chunk of chunked(appIdsOnJobs)) {
+        const { data } = await admin.from('conversations').select('id').in('application_id', chunk);
+        jobConvIds.push(...(data ?? []).map((r: { id: string }) => r.id));
+      }
+      if (jobConvIds.length > 0) {
+        const msgIds: string[] = [];
+        for (const chunk of chunked(jobConvIds)) {
+          const { data } = await admin
+            .from('conversation_messages')
+            .select('id')
+            .in('conversation_id', chunk);
+          msgIds.push(...(data ?? []).map((r: { id: string }) => r.id));
+        }
+        if (msgIds.length > 0) await delIn(admin, 'conversation_message_reactions', 'message_id', msgIds);
+        await delIn(admin, 'conversation_messages', 'conversation_id', jobConvIds);
+        await delIn(admin, 'conversation_members', 'conversation_id', jobConvIds);
+        await delIn(admin, 'conversations', 'id', jobConvIds);
+      }
+    }
+
     // Konversationer kopplade till jobben
     for (const chunk of chunked(jobIds)) {
       await admin.from('conversations').update({ job_id: null }).in('job_id', chunk);
