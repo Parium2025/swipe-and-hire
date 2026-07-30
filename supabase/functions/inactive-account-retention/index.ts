@@ -125,6 +125,24 @@ Deno.serve(async (req) => {
         const patch: Record<string, string> = {}
         for (const t of due) patch[REMINDER_FIELD[t]] = now.toISOString()
 
+        // VIKTIGT: vi "checkar ut" påminnelsen i databasen INNAN mejlet skickas.
+        // Om vi istället markerade efteråt och den skrivningen misslyckades
+        // skulle samma påminnelse mejlas ut på nytt varje natt tills den gick
+        // igenom — dvs en utskickskaskad mot samma mottagare.
+        const { error: claimError } = await admin
+          .from('account_inactivity_notices')
+          .update(patch)
+          .eq('id', notice.id)
+          .is(field, null)
+          .select('id')
+          .maybeSingle()
+
+        if (claimError) {
+          console.error(`kunde inte reservera påminnelse ${threshold}d:`, claimError.message)
+          stats.errors++
+          continue
+        }
+
         try {
           await admin.functions.invoke('send-transactional-email', {
             body: {
@@ -138,10 +156,17 @@ Deno.serve(async (req) => {
               },
             },
           })
-          await admin.from('account_inactivity_notices').update(patch).eq('id', notice.id)
         } catch (e) {
+          // Skicket misslyckades → släpp reservationen så att nästa körning
+          // kan försöka igen. Endast det aktuella steget återställs.
           console.warn(`reminder ${threshold}d failed for ${notice.email}:`, (e as Error).message)
+          await admin
+            .from('account_inactivity_notices')
+            .update({ [field]: null })
+            .eq('id', notice.id)
+          stats.errors++
         }
+
       }
 
     }
