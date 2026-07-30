@@ -299,9 +299,16 @@ const PublicJobPage = () => {
         }
       : {}),
     ...(job.positions_count && job.positions_count > 1 ? { totalJobOpenings: job.positions_count } : {}),
+    ...(job.occupation ? { occupationalCategory: job.occupation } : {}),
+    identifier: {
+      '@type': 'PropertyValue',
+      name: company,
+      value: job.id,
+    },
     directApply: true,
     url: canonical,
   };
+
 
   const breadcrumbLD = {
     '@context': 'https://schema.org',
