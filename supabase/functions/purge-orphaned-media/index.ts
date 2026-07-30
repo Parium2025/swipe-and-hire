@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
-  const denied = requireServiceRoleOrCronSecret(req, corsHeaders)
+  const denied = await requireServiceRoleOrCronSecret(req, corsHeaders)
   if (denied) return denied
 
   let dryRun = true
