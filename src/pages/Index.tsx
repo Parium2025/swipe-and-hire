@@ -7,6 +7,7 @@ import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import CompanyReviews from '@/components/CompanyReviews';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
+import { useIsPlatformAdmin } from '@/hooks/useIsPlatformAdmin';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -364,7 +365,8 @@ const CandidatesContent = () => {
 
 const Index = () => {
   const { user, profile, userRole, signOut, loading, authAction, switchRole } = useAuth();
-  const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
+  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
+  const { isPlatformAdmin, loading: platformAdminLoading } = useIsPlatformAdmin();
   const [switching, setSwitching] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
@@ -436,6 +438,11 @@ const Index = () => {
     );
   }
 
+  const ownerOnlyRoutes = ['/admin', '/status', '/ai-usage'];
+  if (platformAdminLoading && ownerOnlyRoutes.includes(location.pathname)) {
+    return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
+  }
+
   if (location.pathname === '/') {
     if ((userRole?.role as string) === 'employer') {
       return <Navigate to="/home" replace />;
@@ -446,7 +453,7 @@ const Index = () => {
 
   // Show profile selector first (admin only)
   // Show profile selector for admins (database-based check)
-  if (showProfileSelector && isAdmin) {
+  if (showProfileSelector && isPlatformAdmin) {
     return <ProfileSelector onProfileSelected={() => setShowProfileSelector(false)} />;
   }
 
@@ -454,7 +461,7 @@ const Index = () => {
   const needsOnboarding = !profile?.onboarding_completed;
   
   // Developer overrides for admin users (database-based check)
-  if (isAdmin) {
+  if (isPlatformAdmin) {
     // Support "welcome_tunnel:<step>" / "employer_welcome_tunnel:<step>" syntax
     // so admins can jump directly to a specific step from DeveloperControls.
     const [devViewName, devStepRaw] = (developerView || '').split(':');
@@ -544,7 +551,7 @@ const Index = () => {
     return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
   
-  // isAdmin is now from database via useIsOrgAdmin hook
+  // Org-admin styr företagsbehörigheter; plattformsadmin styr Parium-ägarytor.
 
   // Job seekers should never land on employer-only routes. If they do (via a
   // stale link, back-navigation efter rollbyte, eller en tabb som glömt bort
@@ -614,21 +621,21 @@ const Index = () => {
           return <Support />;
         case '/admin':
           // Endast Fredrik kan komma åt admin-sidan
-          if (isAdmin) {
+          if (isPlatformAdmin) {
             return <SupportAdmin />;
           } else {
             navigate('/support');
             return <Support />;
           }
         case '/status':
-          if (isAdmin) {
+          if (isPlatformAdmin) {
             return <RealtimeStatusPage />;
           } else {
             navigate('/support');
             return <Support />;
           }
         case '/ai-usage':
-          if (isAdmin) {
+          if (isPlatformAdmin) {
             return <AiUsage />;
           } else {
             navigate('/support');
@@ -702,21 +709,21 @@ const Index = () => {
         case '/support':
           return <Support />;
         case '/admin':
-          if (isAdmin) {
+          if (isPlatformAdmin) {
             return <SupportAdmin />;
           } else {
             navigate('/support');
             return <Support />;
           }
         case '/status':
-          if (isAdmin) {
+          if (isPlatformAdmin) {
             return <RealtimeStatusPage />;
           } else {
             navigate('/support');
             return <Support />;
           }
         case '/ai-usage':
-          if (isAdmin) {
+          if (isPlatformAdmin) {
             return <AiUsage />;
           } else {
             navigate('/support');
@@ -732,7 +739,7 @@ const Index = () => {
       <EmployerLayout
         developerView={developerView}
         onViewChange={setDeveloperView}
-        isOrgAdmin={isAdmin}
+        isOrgAdmin={isOrgAdmin}
         overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}
       >
         <KeepAlive

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo, useMemo, startTransition } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
+import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
@@ -137,7 +137,7 @@ export function EmployerSidebar() {
   // On mobile, always show labels (the sidebar slides in full-width)
   const collapsed = isMobile ? false : state === 'collapsed';
   const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates } = useAuth();
-  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
+  const { isPlatformAdmin } = useIsPlatformAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
@@ -502,7 +502,7 @@ export function EmployerSidebar() {
         <SidebarSeparator className="bg-white/20 mx-4" />
 
         {/* Admin Panel - Only for specific user */}
-        {isOrgAdmin && (
+        {isPlatformAdmin && (
           <>
             <SidebarGroup>
               <SidebarGroupContent>

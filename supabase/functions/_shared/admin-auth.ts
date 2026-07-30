@@ -23,6 +23,7 @@ export async function requireAdmin(req: Request, corsHeaders: Record<string, str
     .select("id")
     .eq("user_id", caller.userId)
     .eq("role", "admin")
+    .is("organization_id", null)
     .eq("is_active", true)
     .maybeSingle();
   if (error || !data) {

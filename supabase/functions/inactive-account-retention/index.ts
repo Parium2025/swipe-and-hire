@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
         } catch (e) {
           // Skicket misslyckades → släpp reservationen så att nästa körning
           // kan försöka igen. Endast det aktuella steget återställs.
-          console.warn(`reminder ${threshold}d failed for ${notice.email}:`, (e as Error).message)
+          console.warn(`reminder ${threshold}d failed:`, { noticeId: notice.id, message: (e as Error).message })
           await admin
             .from('account_inactivity_notices')
             .update({ [field]: null })
@@ -279,7 +279,7 @@ Deno.serve(async (req) => {
               },
             })
           } catch (e) {
-            console.warn(`warning email failed for ${email}:`, (e as Error).message)
+            console.warn('warning email failed:', { userId: profile.user_id, message: (e as Error).message })
           }
         }
       }

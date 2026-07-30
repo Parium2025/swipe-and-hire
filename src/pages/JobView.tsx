@@ -574,11 +574,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           job_title: job?.title || 'Tjänst',
           company_name: job?.workplace_name || 'Företag',
         };
-        console.log('📧 Sending application confirmation email:', { to: emailPayload.applicant_email, job: emailPayload.job_title });
+        console.log('📧 Sending application confirmation email', { hasEmail: true, hasJob: !!emailPayload.job_title });
         supabase.functions.invoke('send-application-confirmation', { body: emailPayload })
           .then(({ data, error }) => {
             if (error) console.error('❌ Confirmation email failed:', error);
-            else console.log('✅ Confirmation email sent:', data);
+            else console.log('✅ Confirmation email sent', { queued: !!data });
           });
       }
 

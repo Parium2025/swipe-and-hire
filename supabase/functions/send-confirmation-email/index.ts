@@ -2,8 +2,13 @@
 // Ersätter tidigare Resend-baserad implementation. Callers behöver inte ändras.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireServiceRole } from "../_shared/service-auth.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 interface ConfirmationEmailRequest {
   email: string;
@@ -64,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Confirmation email queued via Lovable Emails for ${email} (${role})`);
+    console.log("Confirmation email queued via Lovable Emails", { role });
     return new Response(
       JSON.stringify({ success: true, data }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },

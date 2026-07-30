@@ -54,6 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
           .select('id')
           .eq('user_id', caller.userId)
           .eq('role', 'admin')
+          .is('organization_id', null)
           .eq('is_active', true)
           .maybeSingle();
         isAdmin = !!roleRow;
@@ -86,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (error) throw error;
-    console.log("Support notification enqueued:", data);
+    console.log("Support notification enqueued");
 
     return new Response(JSON.stringify({ success: true, ...data }), {
       status: 200,

@@ -2,7 +2,13 @@
 // Ersätter tidigare Resend-baserad implementation. Callers (useAuth) behöver inte ändras.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { enforceRateLimit, normalizeEmail, requestIp } from "../_shared/rate-limit.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -20,21 +26,33 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { email } = (await req.json()) as ResendRequest;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email) {
+    if (!normalizedEmail) {
       return new Response(
         JSON.stringify({ error: "Email krävs" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    console.log(`Resending confirmation for email: ${email}`);
+    const rateLimitResponse = await enforceRateLimit(
+      supabaseAdmin,
+      "resend-confirmation",
+      [
+        { scope: "email", identifier: normalizedEmail, limit: 3, windowSeconds: 60 * 60 },
+        { scope: "ip", identifier: requestIp(req), limit: 10, windowSeconds: 60 * 60 },
+      ],
+      corsHeaders,
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
+    console.log("Resending confirmation", { hasEmail: true });
 
     // 1) Hitta användaren via admin-API.
     const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers();
     if (listError) throw listError;
 
-    const user = listData?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    const user = listData?.users?.find((u) => u.email?.toLowerCase() === normalizedEmail);
     if (!user) {
       // Ge generisk framgång för att inte avslöja huruvida adressen finns.
       return new Response(
@@ -91,7 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data, error } = await supabaseAdmin.functions.invoke("send-transactional-email", {
       body: {
         templateName: "account-confirmation",
-        recipientEmail: email,
+        recipientEmail: normalizedEmail,
         idempotencyKey,
         templateData: {
           first_name: firstName,
@@ -110,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Resend confirmation queued via Lovable Emails for ${email}`);
+    console.log("Resend confirmation queued via Lovable Emails");
     return new Response(
       JSON.stringify({ success: true, message: "Ny bekräftelselänk skickad!", data }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },

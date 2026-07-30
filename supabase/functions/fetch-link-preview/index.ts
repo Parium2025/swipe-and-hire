@@ -88,25 +88,144 @@ function extractMetaTags(html: string, baseUrl: string): Partial<LinkPreview> {
   };
 }
 
-// Block SSRF: private/loopback/link-local/cloud-metadata addresses
-function isPrivateHostname(hostname: string): boolean {
-  const h = hostname.toLowerCase();
-  if (h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local') || h.endsWith('.internal')) return true;
-  // IPv4 numeric ranges
-  const v4 = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (v4) {
-    const [a, b] = [parseInt(v4[1]), parseInt(v4[2])];
-    if (a === 10) return true;
-    if (a === 127) return true;
-    if (a === 0) return true;
-    if (a === 169 && b === 254) return true; // link-local + AWS metadata (169.254.169.254)
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
-  }
-  // IPv6 loopback / link-local / ULA
-  if (h === '::1' || h === '[::1]' || h.startsWith('fe80:') || h.startsWith('[fe80:') || h.startsWith('fc') || h.startsWith('fd') || h.startsWith('[fc') || h.startsWith('[fd')) return true;
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+function rawHostname(input: string): string | null {
+  const match = input.match(/^[a-z][a-z0-9+.-]*:\/\/([^/?#]+)/i);
+  if (!match) return null;
+  let host = match[1].split('@').pop() ?? '';
+  if (host.startsWith('[')) return host.slice(1, host.indexOf(']'));
+  return host.split(':')[0] || null;
+}
+
+function cleanHostname(hostname: string): string {
+  return hostname.toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+}
+
+function parseDottedIPv4(hostname: string): number[] | null {
+  const parts = hostname.split('.');
+  if (parts.length !== 4 || parts.some((part) => part.length === 0)) return null;
+  const nums = parts.map((part) => {
+    if (!/^\d+$/.test(part)) return NaN;
+    const n = Number(part);
+    return Number.isInteger(n) && n >= 0 && n <= 255 ? n : NaN;
+  });
+  return nums.every(Number.isFinite) ? nums : null;
+}
+
+function isPrivateIPv4(parts: number[]): boolean {
+  const [a, b] = parts;
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true;
   return false;
+}
+
+function isPrivateIPv6(hostname: string): boolean {
+  const h = cleanHostname(hostname);
+  if (h === '::1') return true;
+  if (h.startsWith('fe80:') || h.startsWith('fc') || h.startsWith('fd')) return true;
+  const mapped = h.match(/::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/);
+  if (mapped) {
+    const parts = parseDottedIPv4(mapped[1]);
+    return !parts || isPrivateIPv4(parts);
+  }
+  return false;
+}
+
+function isSuspiciousNumericHost(hostname: string): boolean {
+  const h = cleanHostname(hostname);
+  if (/^\d+$/.test(h)) return true;
+  if (/^0x[0-9a-f]+$/i.test(h)) return true;
+  if (/^[0-9a-fx.]+$/i.test(h) && h.includes('x')) return true;
+  if (/^0\d+/.test(h) || h.split('.').some((part) => /^0\d+/.test(part))) return true;
+  return false;
+}
+
+async function isBlockedHostname(hostname: string): Promise<boolean> {
+  const h = cleanHostname(hostname);
+  if (!h) return true;
+  if (h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local') || h.endsWith('.internal')) return true;
+  if (isSuspiciousNumericHost(h)) return true;
+
+  const directIPv4 = parseDottedIPv4(h);
+  if (directIPv4) return isPrivateIPv4(directIPv4);
+  if (h.includes(':')) return isPrivateIPv6(h);
+
+  try {
+    const [aRecords, aaaaRecords] = await Promise.all([
+      Deno.resolveDns(h, 'A').catch(() => [] as string[]),
+      Deno.resolveDns(h, 'AAAA').catch(() => [] as string[]),
+    ]);
+    const resolved = [...aRecords, ...aaaaRecords];
+    if (resolved.length === 0) return true;
+    return resolved.some((address) => {
+      const v4 = parseDottedIPv4(address);
+      if (v4) return isPrivateIPv4(v4);
+      return isPrivateIPv6(address);
+    });
+  } catch {
+    return true;
+  }
+}
+
+async function validatePublicHttpUrl(input: string): Promise<URL | Response> {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(input);
+  } catch {
+    return jsonResponse({ success: false, error: 'Invalid URL' }, 400);
+  }
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    return jsonResponse({ success: false, error: 'Only http/https URLs allowed' }, 400);
+  }
+  const rawHost = rawHostname(input);
+  if (!rawHost || await isBlockedHostname(rawHost) || await isBlockedHostname(parsedUrl.hostname)) {
+    return jsonResponse({ success: false, error: 'Private/internal addresses not allowed' }, 400);
+  }
+  return parsedUrl;
+}
+
+async function fetchHtmlWithSafeRedirects(startUrl: URL): Promise<{ html: string; finalUrl: URL }> {
+  let currentUrl = startUrl;
+  for (let redirects = 0; redirects <= 3; redirects += 1) {
+    const validation = await validatePublicHttpUrl(currentUrl.href);
+    if (validation instanceof Response) throw new Error('Blocked URL');
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await fetch(currentUrl.href, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; LinkPreviewBot/1.0)',
+          'Accept': 'text/html,application/xhtml+xml',
+        },
+        redirect: 'manual',
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers.get('location');
+        if (!location) throw new Error(`HTTP ${response.status}`);
+        currentUrl = new URL(location, currentUrl.href);
+        continue;
+      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return { html: await response.text(), finalUrl: currentUrl };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
+    }
+  }
+  throw new Error('Too many redirects');
 }
 
 Deno.serve(async (req) => {
@@ -118,10 +237,7 @@ Deno.serve(async (req) => {
     // === AUTH: require valid JWT ===
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
     }
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
@@ -130,43 +246,19 @@ Deno.serve(async (req) => {
     });
     const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(authHeader.replace('Bearer ', ''));
     if (claimsError || !claimsData?.claims?.sub) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Invalid authentication' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Invalid authentication' }, 401);
     }
 
     const { url } = await req.json();
 
     if (!url) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'URL is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'URL is required' }, 400);
     }
 
-    // Validate URL — only http/https, block private/internal hosts
-    let parsedUrl: URL;
-    try {
-      parsedUrl = new URL(url);
-    } catch {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Invalid URL' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Only http/https URLs allowed' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    if (isPrivateHostname(parsedUrl.hostname)) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Private/internal addresses not allowed' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Validate URL — only http/https, block private/internal hosts, odd numeric encodings and unsafe redirects.
+    const validation = await validatePublicHttpUrl(url);
+    if (validation instanceof Response) return validation;
+    const parsedUrl = validation;
 
 
     const supabase = createClient(
@@ -186,7 +278,7 @@ Deno.serve(async (req) => {
       const fetchedAt = new Date(cached.fetched_at);
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       if (fetchedAt > weekAgo) {
-        console.log('Returning cached preview for:', url);
+        console.log('Returning cached preview');
         return new Response(
           JSON.stringify({ success: true, data: cached }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -194,44 +286,27 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Fetching preview for:', url);
-
-    // Fetch the URL
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    console.log('Fetching preview');
 
     let html: string;
+    let finalUrl = parsedUrl;
     try {
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; LinkPreviewBot/1.0)',
-          'Accept': 'text/html,application/xhtml+xml',
-        },
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      html = await response.text();
+      const fetched = await fetchHtmlWithSafeRedirects(parsedUrl);
+      html = fetched.html;
+      finalUrl = fetched.finalUrl;
     } catch (fetchError) {
       console.error('Failed to fetch URL:', fetchError);
-      return new Response(
-        JSON.stringify({ success: false, error: 'Failed to fetch URL' }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Failed to fetch URL' }, 502);
     }
 
     // Extract metadata
-    const metadata = extractMetaTags(html, parsedUrl.origin);
+    const metadata = extractMetaTags(html, finalUrl.origin);
     const preview: LinkPreview = {
       url,
       title: metadata.title || null,
       description: metadata.description || null,
       image_url: metadata.image_url || null,
-      site_name: metadata.site_name || parsedUrl.hostname,
+      site_name: metadata.site_name || finalUrl.hostname,
       favicon_url: metadata.favicon_url || null,
     };
 
@@ -247,7 +322,7 @@ Deno.serve(async (req) => {
       console.error('Failed to cache preview:', upsertError);
     }
 
-    console.log('Preview fetched successfully:', preview.title);
+    console.log('Preview fetched successfully', { hasTitle: !!preview.title });
     return new Response(
       JSON.stringify({ success: true, data: preview }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
