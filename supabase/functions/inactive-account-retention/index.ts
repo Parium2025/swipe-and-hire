@@ -12,6 +12,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { requireServiceRoleOrCronSecret } from '../_shared/service-auth.ts'
 import { purgeUserData } from '../_shared/user-purge.ts'
+import { forEachAuthUser } from '../_shared/find-user.ts'
 
 
 const corsHeaders = {
