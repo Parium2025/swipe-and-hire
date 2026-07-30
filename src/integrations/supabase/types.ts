@@ -3815,6 +3815,7 @@ export type Database = {
         Returns: boolean
       }
       trigger_career_tips_fetch: { Args: never; Returns: undefined }
+      trigger_cron_health_watchdog: { Args: never; Returns: undefined }
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
       trigger_inactive_account_retention: { Args: never; Returns: undefined }
       trigger_news_health_watchdog: { Args: never; Returns: undefined }
