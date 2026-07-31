@@ -367,8 +367,11 @@
                 // Preload måste vara exakt samma URL, annars hämtar browsern en
                 // oanvänd MP4 parallellt med den källa som faktiskt spelas.
                 var isAndroid = /Android/i.test(ua);
+                var safe60Ok = isWin && probe.canPlayType && probe.canPlayType('video/mp4; codecs="avc1.42C020"') !== '';
                 var showcaseHref = isWin
-                  ? '/__l5e/assets-v1/da1664a7-196a-40a9-9b48-691d2e7d44e0/showcase-jobseeker-windows-safe60.mp4'
+                  ? (safe60Ok
+                    ? '/__l5e/assets-v1/da1664a7-196a-40a9-9b48-691d2e7d44e0/showcase-jobseeker-windows-safe60.mp4'
+                    : '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4')
                   : isAndroid
                     ? '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4'
                     : rung;

@@ -314,8 +314,12 @@ const PinnedHorizontalGallery = () => {
      * producerar extremt fina subpixel-värden; även 1/dpr-snappning kan då läsas
      * som små steg/hack i kortstrippen. Touch kör därför exakt fri subpixel.
      */
-    const dpr = Math.min(Math.max(window.devicePixelRatio || 1, 1), 3);
-    const snapToDevicePixel = (v: number) => Math.round(v * dpr) / dpr;
+    const snapToDevicePixel = (v: number) => {
+      // DPR kan ändras när ett Windows-fönster flyttas mellan laptopskärm och
+      // extern skärm. Läs aktuellt värde per frame i stället för vid mount.
+      const currentDpr = Math.min(Math.max(window.devicePixelRatio || 1, 1), 3);
+      return Math.round(v * currentDpr) / currentDpr;
+    };
 
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));

@@ -84,6 +84,12 @@ const LADDER = [
   { w: 810, url: hiCrispAsset.url },
 ] as const;
 
+const supportsWindowsSafe60 = () => {
+  if (typeof document === 'undefined') return false;
+  const probe = document.createElement('video');
+  return probe.canPlayType('video/mp4; codecs="avc1.42C020"') !== '';
+};
+
 /** Uppskattad CSS-bredd på telefonen innan första målningen (matchar max-w-stegen). */
 const estimateCssWidth = (widthPx?: number) => {
   if (widthPx) return widthPx;
@@ -150,10 +156,11 @@ const getSources = (widthPx?: number) =>
             // och undviker frame-reordering vid kallstart. windowsLite är 30 fps,
             // Main profile och har B-frames, så den gav precis det ryckiga förlopp
             // som kommentaren ovan sade att Windows-källan skulle undvika.
-            // Generisk MP4-typ är avsiktlig. Chromium-versioner skiljer sig i hur
-            // Constrained Baseline signaleras av canPlayType; en explicit avc1-
-            // sträng kunde ge NETWORK_NO_SOURCE trots att samma fil spelas fint.
-            { src: windowsSafe60Asset.url, type: 'video/mp4' },
+            // Välj bara 60-fps-mastern när browsern själv accepterar dess exakta
+            // codecprofil. Annars används den brett kompatibla 30-fps-filen.
+            supportsWindowsSafe60()
+              ? { src: windowsSafe60Asset.url, type: 'video/mp4; codecs="avc1.42C020"' }
+              : { src: windowsLiteAsset.url, type: 'video/mp4' },
           ]
         : isAndroidDevice()
           ? [
