@@ -149,14 +149,14 @@ const getSources = (widthPx?: number) =>
             // H.264 först: Chrome/Edge kan hårdvaruavkoda den på i princip all
             // Windows-hårdvara. VP9 kunde väljas trots saknad GPU-decode och
             // konkurrerade dessutom med en separat MP4-preload.
-            { src: windowsLiteAsset.url, type: 'video/mp4; codecs="avc1.4D401F"' },
+            { src: windowsLiteAsset.url, type: 'video/mp4' },
             { src: chromiumWebmAsset.url, type: 'video/webm; codecs="vp9"' },
           ]
         : isAndroidDevice()
           ? [
               // Androids H.264-hårdvaruväg är jämnare mellan olika GPU:er än
               // VP9. WebM finns kvar enbart som codec-fallback.
-              { src: windowsLiteAsset.url, type: 'video/mp4; codecs="avc1.4D401F"' },
+              { src: windowsLiteAsset.url, type: 'video/mp4' },
               { src: chromiumWebmAsset.url, type: 'video/webm; codecs="vp9"' },
             ]
           : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
