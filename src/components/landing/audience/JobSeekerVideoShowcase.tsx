@@ -51,9 +51,9 @@ const prefersHevc = () => {
  * vid kallstart. Därför är Windows-filen kodad utan B-frames, med kort GOP och
  * `fastdecode`, så varje bildruta kan avkodas i ordning utan omkastningsbuffert.
  */
-// VIKTIGT: kallstartsspärren är ENBART till för Windows. Apple/iOS ska starta
-// native och direkt — ingen buffertväntan, ingen svart ruta före första bilden.
-const usesBufferedStart = () => isWindowsDevice();
+// Native muted autoplay är stabilare än en egen buffertspärr i Chrome/Edge.
+// Apple/iOS hade redan den här vägen och lämnas därmed helt oförändrat.
+const usesBufferedStart = () => false;
 
 /**
  * Windows/Chromium kan droppa frames när en <video>-overlay börjar spela medan
@@ -61,7 +61,7 @@ const usesBufferedStart = () => isWindowsDevice();
  * första rendern hackar, men efter att användaren scrollat bort och tillbaka är
  * telefonens geometri redan stabil och videon flyter perfekt.
  */
-const usesStableGeometryStart = () => isWindowsDevice();
+const usesStableGeometryStart = () => false;
 
 /**
  * Upplösningsstege — vald efter FAKTISKA enhetspixlar, inte efter operativsystem.
@@ -210,9 +210,9 @@ const JobSeekerVideoShowcase = ({
   const geometryGateRef = useRef<boolean | null>(null);
   if (geometryGateRef.current === null) geometryGateRef.current = usesStableGeometryStart();
   const geometryGate = geometryGateRef.current;
-  const keepAliveRef = useRef<boolean | null>(null);
-  if (keepAliveRef.current === null) keepAliveRef.current = isWindowsDevice();
-  const keepAliveWhenHidden = keepAliveRef.current;
+  // Frigör alltid telefonvideons decoder när hero-zonen lämnar viewporten.
+  // Windows behöver den budgeten till galleriet längre ned på sidan.
+  const keepAliveWhenHidden = false;
   const warmRef = useRef(false);
 
 
@@ -508,7 +508,7 @@ const JobSeekerVideoShowcase = ({
             )}
             <video
               ref={videoRef}
-              autoPlay={!coldGate}
+              autoPlay
               loop
               muted
               playsInline
