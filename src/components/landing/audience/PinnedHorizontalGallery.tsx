@@ -557,7 +557,9 @@ const PinnedHorizontalGallery = () => {
       hasEnteredOnce = true;
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
-      warmVideos();
+      // Warmup sköts efter kortens intro nedan. Att samtidigt köra både den
+      // sekventiella kön och playback-koordinatorn gav dubbla play/load-anrop
+      // på Windows och kunde lämna samtliga videos pausade.
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
       const header = headerRef.current;
       if (gsapInstance) {
@@ -581,9 +583,7 @@ const PinnedHorizontalGallery = () => {
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
       if (playTimer) window.clearTimeout(playTimer);
       playTimer = window.setTimeout(() => {
-        const maxConcurrent = getMaxConcurrent();
-        videos.slice(0, maxConcurrent).forEach(playSafe);
-        if (!prefersLightweightVideo()) window.setTimeout(() => videos.slice(maxConcurrent).forEach(playSafe), 600);
+        warmVideos();
         scheduleEvaluate();
       }, 800);
     };
