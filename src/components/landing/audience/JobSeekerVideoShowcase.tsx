@@ -150,7 +150,10 @@ const getSources = (widthPx?: number) =>
             // och undviker frame-reordering vid kallstart. windowsLite är 30 fps,
             // Main profile och har B-frames, så den gav precis det ryckiga förlopp
             // som kommentaren ovan sade att Windows-källan skulle undvika.
-            { src: windowsSafe60Asset.url, type: 'video/mp4; codecs="avc1.42C020"' },
+            // Generisk MP4-typ är avsiktlig. Chromium-versioner skiljer sig i hur
+            // Constrained Baseline signaleras av canPlayType; en explicit avc1-
+            // sträng kunde ge NETWORK_NO_SOURCE trots att samma fil spelas fint.
+            { src: windowsSafe60Asset.url, type: 'video/mp4' },
           ]
         : isAndroidDevice()
           ? [
