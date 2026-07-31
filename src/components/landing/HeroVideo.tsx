@@ -12,9 +12,25 @@ const shouldSkipVideo = () => {
   return false;
 };
 
+// Välj EXAKT en källa. `media` på <source> inuti <video> respekteras inte
+// tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
+// spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
+const pickHeroSrc = () => {
+  if (typeof window === 'undefined') return '/hero-video-720.mp4';
+  const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
+  // Windows/Android (och sparläge) får den lätta 720p-mastern även på desktop:
+  // 6,3 MB + mjukvaruavkodning är exakt det som gör hero-videon hackig där.
+  const ua = typeof navigator === 'undefined' ? '' : navigator.userAgent;
+  const lightweight = /Windows NT|Android/i.test(ua);
+  return desktop && !lightweight ? '/hero-video.mp4' : '/hero-video-720.mp4';
+};
+
+
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
+  const [heroSrc] = useState<string>(pickHeroSrc);
+
 
   useEffect(() => {
     const video = videoRef.current;
@@ -172,17 +188,17 @@ const HeroVideo = () => {
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
+          poster="/hero-video-poster.jpg"
+
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
           {!skipVideo && (
-            <>
-              {/* Browserns preload-scanner ser rätt källa direkt — ingen JS-väntan.
-                  H.264: desktop först, mobil (720p) som fallback. */}
-              <source src="/hero-video.mp4" type="video/mp4" media="(min-width: 1024px)" />
-              <source src="/hero-video-720.mp4" type="video/mp4" />
-            </>
+            /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
+               så browsern återanvänder samma fetch istället för att ladda två filer. */
+            <source src={heroSrc} type="video/mp4" />
           )}
+
         </video>
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
