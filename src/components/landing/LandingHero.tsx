@@ -147,10 +147,11 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
   // Helt idempotent — om användaren hovrar/klickar tidigare körs det bara en gång.
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    // Windows/Android och svaga enheter: hero-videon delar decode- och
-    // nätverksbudget med Spline-runtime + scenen. Att warma upp dem här gjorde
-    // startsidan hackig. Där sker uppvärmningen först vid hover/tap på korten.
-    if (prefersLightweightVideo() || isLowPowerDevice()) return;
+    // ENDAST Windows/Android: hero-videon delar decode- och nätverksbudget med
+    // Spline-runtime + scenen, vilket gjorde startsidan hackig där. På Apple
+    // (macOS/iOS/iPadOS) är beteendet oförändrat — uppvärmningen sker direkt
+    // i idle precis som tidigare.
+    const heavyPlatform = isWindowsDevice() || isAndroidDevice();
     const idle = (cb: () => void) => {
       const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number };
       if (typeof w.requestIdleCallback === 'function') {
@@ -159,13 +160,19 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         window.setTimeout(cb, 5000);
       }
     };
-    // Vänta tills hero-videon fått en ostörd start innan tunga chunks hämtas.
-    const timer = window.setTimeout(() => idle(() => {
+    const warm = () => idle(() => {
       preloadAudienceAssets('job_seeker');
       preloadAudienceAssets('employer');
-    }), 4000);
+    });
+    if (!heavyPlatform) {
+      warm();
+      return;
+    }
+    // Windows/Android: vänta tills hero-videon fått en ostörd start.
+    const timer = window.setTimeout(warm, 4000);
     return () => window.clearTimeout(timer);
   }, []);
+
 
 
 
