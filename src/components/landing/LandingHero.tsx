@@ -4,7 +4,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
-import { isLowPowerDevice, prefersLightweightVideo } from '@/lib/videoPlatform';
+import { isAndroidDevice, isWindowsDevice } from '@/lib/videoPlatform';
 
 
 
