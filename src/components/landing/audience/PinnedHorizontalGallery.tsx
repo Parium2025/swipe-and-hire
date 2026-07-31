@@ -131,7 +131,11 @@ const evaluateAll = () => {
     el.playsInline = true;
     try {
       el.preload = 'auto';
-      if (el.readyState < 2) el.load();
+      // På Windows/Android avbryter load() en redan pågående range-request.
+      // Scroll-koordinatorn kör ofta; upprepade load() skapade därför en loop av
+      // ERR_ABORTED-hämtningar. Apple behåller exakt sin tidigare väg.
+      if (isAppleDevice() && el.readyState < 2) el.load();
+      else if (!isAppleDevice() && el.networkState === HTMLMediaElement.NETWORK_EMPTY) el.load();
     } catch {
       // Best-effort only — playback coordinator must never throw during scroll.
     }
@@ -531,7 +535,8 @@ const PinnedHorizontalGallery = () => {
         warmTimers.push(window.setTimeout(next, 2500));
         try {
           v.preload = 'auto';
-          if (v.readyState < 2) v.load();
+          if (isAppleDevice() && v.readyState < 2) v.load();
+          else if (!isAppleDevice() && v.networkState === HTMLMediaElement.NETWORK_EMPTY) v.load();
         } catch {
           // Video warmup is best-effort only.
         }
