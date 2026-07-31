@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import { keepElementAnchored } from '@/lib/keepElementAnchored';
 
 
 import WaveDivider from '@/components/landing/WaveDivider';
@@ -103,14 +102,9 @@ function PlanFeatures({
   onToggle?: () => void;
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const isControlled = openProp !== undefined;
   const open = isControlled ? openProp : internalOpen;
   const handleToggle = () => {
-    // Håll det klickade kortet stilla i viewporten medan andra kort
-    // ovanför/under expanderar eller fälls ihop.
-    const card = buttonRef.current?.closest('.landing-feature-card') as HTMLElement | null;
-    keepElementAnchored(card ?? buttonRef.current, 800);
     if (isControlled) {
       onToggle?.();
     } else {
@@ -120,7 +114,6 @@ function PlanFeatures({
   return (
     <div className="mt-6 border-t border-white/10 pt-5">
       <button
-        ref={buttonRef}
         type="button"
         aria-expanded={open}
         onClick={handleToggle}
@@ -1400,8 +1393,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium' | 'growth' | 'pro'>(
     audience === 'employer' ? 'pro' : 'premium',
   );
-  const [employerFeaturesOpen, setEmployerFeaturesOpen] = useState(false);
-  const [seekerFeaturesOpen, setSeekerFeaturesOpen] = useState(false);
+  const [openEmployerPlan, setOpenEmployerPlan] = useState<'start' | 'growth' | 'pro' | null>(null);
+  const [openSeekerPlan, setOpenSeekerPlan] = useState<'start' | 'premium' | null>(null);
 
 
   const commonEmployerFeatures = [
@@ -1991,8 +1984,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         <PlanFeatures
                           features={plan.features}
                           isActive={isActive}
-                          open={seekerFeaturesOpen}
-                          onToggle={() => setSeekerFeaturesOpen((v) => !v)}
+                          open={openSeekerPlan === plan.id}
+                          onToggle={() => setOpenSeekerPlan((current) => current === plan.id ? null : plan.id)}
                         />
                         <button
                           type="button"
@@ -2057,8 +2050,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                             <PlanFeatures
                               features={plan.features}
                               isActive={isActive}
-                              open={employerFeaturesOpen}
-                              onToggle={() => setEmployerFeaturesOpen((v) => !v)}
+                              open={openEmployerPlan === plan.id}
+                              onToggle={() => setOpenEmployerPlan((current) => current === plan.id ? null : plan.id)}
                             />
                           </motion.div>
                         </motion.div>
