@@ -145,19 +145,26 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
   // Helt idempotent — om användaren hovrar/klickar tidigare körs det bara en gång.
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // Windows/Android och svaga enheter: hero-videon delar decode- och
+    // nätverksbudget med Spline-runtime + scenen. Att warma upp dem här gjorde
+    // startsidan hackig. Där sker uppvärmningen först vid hover/tap på korten.
+    if (prefersLightweightVideo() || isLowPowerDevice()) return;
     const idle = (cb: () => void) => {
       const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number };
       if (typeof w.requestIdleCallback === 'function') {
-        w.requestIdleCallback(cb, { timeout: 2500 });
+        w.requestIdleCallback(cb, { timeout: 6000 });
       } else {
-        window.setTimeout(cb, 1800);
+        window.setTimeout(cb, 5000);
       }
     };
-    idle(() => {
+    // Vänta tills hero-videon fått en ostörd start innan tunga chunks hämtas.
+    const timer = window.setTimeout(() => idle(() => {
       preloadAudienceAssets('job_seeker');
       preloadAudienceAssets('employer');
-    });
+    }), 4000);
+    return () => window.clearTimeout(timer);
   }, []);
+
 
 
   const handleChoice = (role: AudienceRole) => {
