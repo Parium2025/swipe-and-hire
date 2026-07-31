@@ -7,6 +7,7 @@ import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsSafeAsset from '@/assets/showcase-jobseeker-windows-safe60.mp4.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
+import chromiumWebmAsset from '@/assets/showcase-jobseeker-chromium.webm.asset.json';
 import { isAndroidDevice, isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -144,9 +145,15 @@ const getSources = (widthPx?: number) =>
     : prefersReducedData()
       ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : isWindowsDevice()
-        ? [{ src: windowsSafeAsset.url, type: 'video/mp4' }]
+        ? [
+            { src: chromiumWebmAsset.url, type: 'video/webm; codecs="vp9"' },
+            { src: windowsSafeAsset.url, type: 'video/mp4; codecs="avc1.42C020"' },
+          ]
         : isAndroidDevice()
-          ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
+          ? [
+              { src: chromiumWebmAsset.url, type: 'video/webm; codecs="vp9"' },
+              { src: windowsLiteAsset.url, type: 'video/mp4' },
+            ]
           : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
 
 
