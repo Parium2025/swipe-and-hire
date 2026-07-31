@@ -463,13 +463,6 @@ const PinnedHorizontalGallery = () => {
       if (!disposed) gsapInstance = gsap;
     });
 
-    const playSafe = (v: HTMLVideoElement) => {
-      v.muted = true;
-      v.playsInline = true;
-      const p = v.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-    };
-
     // Adaptiv warmup: på data-saver eller långsamma nät (2G/3G) warm:ar vi
     // bara de första 4 videorna direkt — resten warm:as först när användaren
     // faktiskt scrollar nära dem. Sparar 50% bandbredd på mobil/sparsam data
