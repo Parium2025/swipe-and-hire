@@ -362,11 +362,12 @@
                   : target <= 672
                     ? '/__l5e/assets-v1/824c9bad-ed77-41f5-9941-3e99d6249a0b/showcase-jobseeker-win-crisp.mp4'
                     : '/__l5e/assets-v1/fcdc9ff9-d4c5-4224-b75a-b28c76ad5934/showcase-jobseeker-hi-crisp.mp4';
-                // Windows-komponenten använder alltid safe60-mastern. Preloada
-                // samma fil; den gamla stegen hämtade annars en oanvänd fil på
-                // 2,8–6,1 MB innan rätt Windows-video ens började laddas.
-                var showcaseHref = isWin
-                  ? '/__l5e/assets-v1/da1664a7-196a-40a9-9b48-691d2e7d44e0/showcase-jobseeker-windows-safe60.mp4'
+                // Windows/Android använder den lätta H.264 30fps-mastern först.
+                // Preload måste vara exakt samma URL, annars hämtar browsern en
+                // oanvänd MP4 parallellt med den källa som faktiskt spelas.
+                var isAndroid = /Android/i.test(ua);
+                var showcaseHref = (isWin || isAndroid)
+                  ? '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4'
                   : rung;
                 add(hevcOk
                   ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
