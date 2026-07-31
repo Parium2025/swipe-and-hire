@@ -4,10 +4,8 @@ import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
-import windowsSafeAsset from '@/assets/showcase-jobseeker-windows-safe60.mp4.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
-import chromiumWebmAsset from '@/assets/showcase-jobseeker-chromium.webm.asset.json';
 import { isAndroidDevice, isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -146,12 +144,14 @@ const getSources = (widthPx?: number) =>
       ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : isWindowsDevice()
         ? [
-            { src: chromiumWebmAsset.url, type: 'video/webm; codecs="vp9"' },
-            { src: windowsSafeAsset.url, type: 'video/mp4; codecs="avc1.42C020"' },
+            // H.264 först: Chrome/Edge kan hårdvaruavkoda den på i princip all
+            // Windows-hårdvara. VP9-fallbacken är avsiktligt borttagen eftersom
+            // den kunde väljas på datorer utan GPU-decode och då hacka kraftigt.
+            { src: windowsLiteAsset.url, type: 'video/mp4' },
           ]
         : isAndroidDevice()
           ? [
-              { src: chromiumWebmAsset.url, type: 'video/webm; codecs="vp9"' },
+              // Androids H.264-hårdvaruväg är jämnare mellan olika GPU:er än VP9.
               { src: windowsLiteAsset.url, type: 'video/mp4' },
             ]
           : [{ src: pickLadder(widthPx), type: 'video/mp4' }];

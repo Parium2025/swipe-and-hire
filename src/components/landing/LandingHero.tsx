@@ -39,20 +39,31 @@ const preloadAudienceAssets = (role: AudienceRole) => {
   if (typeof window === 'undefined') return;
   if (preloadedRoles.has(role)) return;
   preloadedRoles.add(role);
-  // Spline-scenen (samma url för båda rollerna)
-  try {
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
-    link.as = 'fetch';
-    link.href = '/spline/parium-phone-scene.splinecode';
-    link.crossOrigin = 'anonymous';
-    document.head.appendChild(link);
-  } catch { /* no-op */ }
-  // Warm up spline-runtime + audience-data
-  Promise.all([
-    import('@splinetool/runtime').catch(() => null),
-    import('@/components/landing/audience/content').catch(() => null),
-  ]).catch(() => undefined);
+  const load = () => {
+    // Spline-scenen (samma url för båda rollerna)
+    try {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.as = 'fetch';
+      link.href = '/spline/parium-phone-scene.splinecode';
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    } catch { /* no-op */ }
+    // Warm up spline-runtime + audience-data
+    Promise.all([
+      import('@splinetool/runtime').catch(() => null),
+      import('@/components/landing/audience/content').catch(() => null),
+    ]).catch(() => undefined);
+  };
+
+  // Hover/touch fick tidigare kringgå Windows/Android-spärren och startade
+  // WebGL-runtime + scenhämtning mitt under hero-videons kallstart. Apple
+  // behåller sin omedelbara preload helt oförändrad.
+  if (isWindowsDevice() || isAndroidDevice()) {
+    window.setTimeout(load, 4000);
+    return;
+  }
+  load();
 };
 
 const AudienceCard = ({

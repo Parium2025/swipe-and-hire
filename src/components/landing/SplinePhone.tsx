@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Application as SplineApplication } from '@splinetool/runtime';
+import { isAndroidDevice, isWindowsDevice } from '@/lib/videoPlatform';
 
 interface SplinePhoneProps {
   className?: string;
@@ -173,6 +174,12 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         const ssaa = () => {
           const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
           const dpr = window.devicePixelRatio || 1;
+          // Windows/Android: 3x SSAA håller en kontinuerlig WebGL-renderloop på
+          // ~0,6 MP/frame och konkurrerar direkt med videodecode, särskilt på
+          // integrerad GPU och extern skärm. Apple behåller exakt tidigare 3x.
+          if (isWindowsDevice() || isAndroidDevice()) {
+            return Math.min(1.5, Math.max(1, dpr));
+          }
           // Mobil: 2.5 räcker och håller GPU-budgeten nere bredvid videon.
           // Desktop: 3x, oavsett att skärmen bara har 1x/1.25x.
           return isCoarse ? Math.min(3, Math.max(dpr, 2.5)) : Math.min(3, Math.max(dpr, 3));
