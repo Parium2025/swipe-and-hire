@@ -64,16 +64,17 @@ export const prefersLightweightVideo = () => {
 /**
  * Antal videor som får spela samtidigt i galleriet.
  *
- * Windows kör de små gallerifilerna i 5 samtidiga strömmar. Tidigare 3 gjorde
- * att sista helt synliga kortet (Vård) ofta hamnade utanför playback-budgeten
- * på breda Windows-vyer. Telefonvideon har nu en separat lätt Windows-källa,
- * så fem små 520px-kort ryms utan att konkurrera med hero-videon.
+ * Windows och Android hålls till högst två samtidiga strömmar. Det lämnar en
+ * hårdvarudecoder ledig åt telefonvideon och håller scroll-kompositorn mjuk.
+ * Apple behåller sin tidigare budget på tre.
  */
 export const getMaxConcurrentVideos = () => {
   if (prefersReducedData()) return 1;
   switch (getVideoPlatform()) {
     case 'windows':
-      return isLowPowerDevice() ? 4 : 5;
+      // Två samtidiga 520px-strömmar lämnar decode-budget åt telefonvideon och
+      // undviker att Chrome/Edge faller tillbaka på mjukvaruavkodning.
+      return isLowPowerDevice() ? 1 : 2;
     case 'android':
       return isLowPowerDevice() ? 1 : 2;
     case 'apple':
