@@ -187,13 +187,11 @@ const HeroVideo = () => {
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
           {!skipVideo && (
-            <>
-              {/* Browserns preload-scanner ser rätt källa direkt — ingen JS-väntan.
-                  H.264: desktop först, mobil (720p) som fallback. */}
-              <source src="/hero-video.mp4" type="video/mp4" media="(min-width: 1024px)" />
-              <source src="/hero-video-720.mp4" type="video/mp4" />
-            </>
+            /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
+               så browsern återanvänder samma fetch istället för att ladda två filer. */
+            <source src={heroSrc} type="video/mp4" />
           )}
+
         </video>
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
