@@ -505,7 +505,13 @@ const PinnedHorizontalGallery = () => {
         : profile === 'slim'
           ? videos.slice(0, 3)
           : videos.slice(0, 4);
-      const queue = [...priority, ...videos.filter((v) => !priority.includes(v))];
+      // Windows/Android: värm bara de strömmar som faktiskt får spela samtidigt.
+      // evaluateAll() laddar nästa synliga kort vid behov. Att ändå köa alla åtta
+      // fyllde nätverk/dekodrar i bakgrunden och motverkade hela concurrency-taket.
+      // Apple/övriga plattformar behåller den befintliga fulla kön.
+      const queue = prefersLightweightVideo()
+        ? priority
+        : [...priority, ...videos.filter((v) => !priority.includes(v))];
 
       let index = 0;
       const step = () => {
@@ -558,9 +564,17 @@ const PinnedHorizontalGallery = () => {
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
         if (shouldAnimateIn) {
-          gsapInstance.fromTo(cards, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out', force3D: true });
+            gsapInstance.fromTo(cards, { y: 44, opacity: 0 }, {
+              y: 0,
+              opacity: 1,
+              duration: 0.62,
+              stagger: 0.08,
+              ease: 'power2.out',
+              force3D: isAppleDevice(),
+              clearProps: isAppleDevice() ? undefined : 'transform',
+            });
         } else {
-          gsapInstance.set(cards, { y: 0, opacity: 1, force3D: true });
+            gsapInstance.set(cards, { y: 0, opacity: 1, force3D: isAppleDevice(), clearProps: isAppleDevice() ? undefined : 'transform' });
         }
         if (header) {
           gsapInstance.killTweensOf(header);
@@ -592,7 +606,7 @@ const PinnedHorizontalGallery = () => {
       const header = headerRef.current;
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
-        gsapInstance.set(cards, { y: 0, opacity: 1, force3D: true });
+        gsapInstance.set(cards, { y: 0, opacity: 1, force3D: isAppleDevice(), clearProps: isAppleDevice() ? undefined : 'transform' });
         if (header) {
           gsapInstance.killTweensOf(header);
           gsapInstance.set(header, { y: 0, opacity: 1, force3D: true });

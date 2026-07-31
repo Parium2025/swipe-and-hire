@@ -5,6 +5,7 @@ import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
+import windowsSafe60Asset from '@/assets/showcase-jobseeker-windows-safe60.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { isAndroidDevice, isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
 
@@ -144,10 +145,12 @@ const getSources = (widthPx?: number) =>
       ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : isWindowsDevice()
         ? [
-            // H.264 först: Chrome/Edge kan hårdvaruavkoda den på i princip all
-            // Windows-hårdvara. VP9-fallbacken är avsiktligt borttagen eftersom
-            // den kunde väljas på datorer utan GPU-decode och då hacka kraftigt.
-            { src: windowsLiteAsset.url, type: 'video/mp4' },
+            // Den dedikerade Windows-mastern är 60 fps, Constrained Baseline,
+            // yuv420p och saknar B-frames. Det matchar originalets bildfrekvens
+            // och undviker frame-reordering vid kallstart. windowsLite är 30 fps,
+            // Main profile och har B-frames, så den gav precis det ryckiga förlopp
+            // som kommentaren ovan sade att Windows-källan skulle undvika.
+            { src: windowsSafe60Asset.url, type: 'video/mp4; codecs="avc1.42C020"' },
           ]
         : isAndroidDevice()
           ? [
