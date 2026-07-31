@@ -749,10 +749,9 @@ const PinnedHorizontalGallery = () => {
             rgba(0,0,0,0.4);
           box-shadow: none;
           transition: box-shadow 0.6s ease;
-          /* Ingen will-change per kort: 8 permanenta kompositlager äter
-             GPU-minne och tvingar Windows-browsers till software-komposit.
+          /* Ingen lagerpromotion per kort: 8 permanenta kompositlager äter
+             GPU-minne och kan tvinga Windows-browsers till software-komposit.
              Strippen (som faktiskt animeras) har will-change kvar. */
-          transform: translateZ(0);
           /* Premium perf: låt browsern skippa layout/paint för kort som är utanför viewport.
              contain-intrinsic-size håller scroll-höjden stabil så inget hoppar. */
           content-visibility: auto;
