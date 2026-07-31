@@ -106,7 +106,10 @@ export const getGalleryPreload = (): 'none' | 'metadata' => {
   const platform = getVideoPlatform();
   if (prefersReducedData()) return 'none';
   if (platform === 'android') return 'none';
-  if (platform === 'windows') return isLowPowerDevice() ? 'none' : 'metadata';
+  // Windows-korten uppgraderas till `auto` först när koordinatorn väljer dem.
+  // Att ge alla åtta `metadata` vid mount initierade åtta demuxers samtidigt
+  // och motverkade concurrency-taket på två aktiva strömmar.
+  if (platform === 'windows') return 'none';
   return 'metadata';
 };
 

@@ -16,6 +16,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
+  const galleryActiveRef = useRef(false);
   const zoomRef = useRef(zoom);
 
   const [isReady, setIsReady] = useState(false);
@@ -29,12 +30,35 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     activeRef.current = active;
     const app = appRef.current;
     if (!app) return;
-    if (active) {
+    if (active && !galleryActiveRef.current) {
       if (app.isStopped) app.play();
     } else if (!app.isStopped) {
       app.stop();
     }
   }, [active, isReady]);
+
+  // På Windows/Android delar WebGL och videodecode samma knappa GPU-budget.
+  // Stoppa Spline-renderloopen medan galleriet är aktivt; Apple lämnas exakt
+  // oförändrat och fortsätter rendera med sin tidigare livscykel.
+  useEffect(() => {
+    if (!isWindowsDevice() && !isAndroidDevice()) return;
+    const onGalleryEnter = () => {
+      galleryActiveRef.current = true;
+      const app = appRef.current;
+      if (app && !app.isStopped) app.stop();
+    };
+    const onGalleryLeave = () => {
+      galleryActiveRef.current = false;
+      const app = appRef.current;
+      if (app && activeRef.current && app.isStopped && !document.hidden) app.play();
+    };
+    window.addEventListener('parium:gallery-enter', onGalleryEnter);
+    window.addEventListener('parium:gallery-leave', onGalleryLeave);
+    return () => {
+      window.removeEventListener('parium:gallery-enter', onGalleryEnter);
+      window.removeEventListener('parium:gallery-leave', onGalleryLeave);
+    };
+  }, []);
 
   // Pausa renderloopen när fliken är dold — annars fortsätter WebGL tugga GPU
   // i bakgrunden och konkurrerar med videoavkodningen när man kommer tillbaka.
@@ -44,7 +68,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
       if (!app) return;
       if (document.hidden) {
         if (!app.isStopped) app.stop();
-      } else if (activeRef.current && app.isStopped) {
+      } else if (activeRef.current && !galleryActiveRef.current && app.isStopped) {
         app.play();
       }
     };
