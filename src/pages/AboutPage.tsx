@@ -302,7 +302,7 @@ const AboutPage = () => {
       </section>
 
       {/* CTA */}
-      <section className="relative px-5 pb-24 pt-12 sm:px-8 md:px-12">
+      <section className="relative px-5 pb-24 pt-6 sm:px-8 sm:pt-8 md:px-12">
         <motion.div
           className="relative mx-auto max-w-3xl overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-14"
           variants={fadeUp}
