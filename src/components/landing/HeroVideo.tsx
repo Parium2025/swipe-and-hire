@@ -12,9 +12,20 @@ const shouldSkipVideo = () => {
   return false;
 };
 
+// Välj EXAKT en källa. `media` på <source> inuti <video> respekteras inte
+// tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
+// spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
+const pickHeroSrc = () => {
+  if (typeof window === 'undefined') return '/hero-video-720.mp4';
+  const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
+  return desktop ? '/hero-video.mp4' : '/hero-video-720.mp4';
+};
+
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
+  const [heroSrc] = useState<string>(pickHeroSrc);
+
 
   useEffect(() => {
     const video = videoRef.current;
