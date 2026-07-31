@@ -101,9 +101,14 @@ function PlanFeatures({
   onToggle?: () => void;
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const isControlled = openProp !== undefined;
   const open = isControlled ? openProp : internalOpen;
   const handleToggle = () => {
+    // Håll det klickade kortet stilla i viewporten medan andra kort
+    // ovanför/under expanderar eller fälls ihop.
+    const card = buttonRef.current?.closest('.landing-feature-card') as HTMLElement | null;
+    keepElementAnchored(card ?? buttonRef.current, 800);
     if (isControlled) {
       onToggle?.();
     } else {
@@ -113,11 +118,13 @@ function PlanFeatures({
   return (
     <div className="mt-6 border-t border-white/10 pt-5">
       <button
+        ref={buttonRef}
         type="button"
         aria-expanded={open}
         onClick={handleToggle}
         className="flex w-full min-h-[44px] cursor-pointer items-center justify-between text-sm font-semibold text-white"
       >
+
         <span>Se alla funktioner</span>
         <motion.span
           className="ml-4 text-secondary"
