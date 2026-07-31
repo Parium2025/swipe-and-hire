@@ -237,7 +237,10 @@ const CardItem = ({ item, index }: CardItemProps) => {
           onCanPlay={scheduleEvaluate}
           onLoadedData={scheduleEvaluate}
           onError={() => {
-            if (src !== item.src) {
+            // Apple behåller sin befintliga fallback. På Windows/Android ska
+            // ett codec-/decodefel inte följas av ett försök med en ännu tyngre
+            // desktopfil, eftersom det förvärrar decoder- och nätverkstrycket.
+            if (isAppleDevice() && src !== item.src) {
               setSrc(item.src);
               return;
             }
