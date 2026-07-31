@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
+import { keepElementAnchored } from '@/lib/keepElementAnchored';
+
 
 import WaveDivider from '@/components/landing/WaveDivider';
 import SplitHeadline from '@/components/landing/audience/SplitHeadline';
