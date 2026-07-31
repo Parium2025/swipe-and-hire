@@ -242,7 +242,9 @@ const AboutPage = () => {
 
       {/* BOLAGET + KONTAKT — sida vid sida på desktop */}
       <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
+      <section className="relative px-5 pb-0 pt-16 sm:px-8 sm:pt-20 md:px-12">
         <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 md:gap-8">
+
           {/* Bolaget */}
           <motion.div
             className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 text-center backdrop-blur sm:p-12"
