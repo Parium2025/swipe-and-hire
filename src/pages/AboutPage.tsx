@@ -241,8 +241,10 @@ const AboutPage = () => {
 
 
       {/* BOLAGET + KONTAKT — sida vid sida på desktop */}
-      <section className="relative px-5 py-16 sm:px-8 sm:py-20 md:px-12">
+      <section className="relative px-5 pb-0 pt-16 sm:px-8 sm:pt-20 md:px-12">
+
         <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 md:gap-8">
+
           {/* Bolaget */}
           <motion.div
             className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 text-center backdrop-blur sm:p-12"
@@ -300,7 +302,7 @@ const AboutPage = () => {
       </section>
 
       {/* CTA */}
-      <section className="relative px-5 pb-24 pt-12 sm:px-8 md:px-12">
+      <section className="relative px-5 pb-24 pt-6 sm:px-8 sm:pt-8 md:px-12">
         <motion.div
           className="relative mx-auto max-w-3xl overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.08] p-10 text-center shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-14"
           variants={fadeUp}
