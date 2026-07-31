@@ -18,8 +18,13 @@ const shouldSkipVideo = () => {
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return '/hero-video-720.mp4';
   const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
-  return desktop ? '/hero-video.mp4' : '/hero-video-720.mp4';
+  // Windows/Android (och sparläge) får den lätta 720p-mastern även på desktop:
+  // 6,3 MB + mjukvaruavkodning är exakt det som gör hero-videon hackig där.
+  const ua = typeof navigator === 'undefined' ? '' : navigator.userAgent;
+  const lightweight = /Windows NT|Android/i.test(ua);
+  return desktop && !lightweight ? '/hero-video.mp4' : '/hero-video-720.mp4';
 };
+
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
