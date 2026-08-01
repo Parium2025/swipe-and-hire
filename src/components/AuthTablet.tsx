@@ -717,6 +717,7 @@ const AuthTablet = ({
                               size="sm"
                               onClick={handleResetPasswordEmail}
                               disabled={resetLoading}
+                              onMouseDown={(e) => e.preventDefault()}
                             >
                               {resetLoading ? "Skickar..." : "Återställ lösenord"}
                             </Button>
@@ -735,6 +736,7 @@ const AuthTablet = ({
                                size="sm"
                                onClick={handleResetPasswordEmail}
                                disabled={resetLoading}
+                               onMouseDown={(e) => e.preventDefault()}
                              >
                                {resetLoading ? "Skickar..." : "Skicka igen"}
                              </Button>
@@ -1206,6 +1208,7 @@ const AuthTablet = ({
                       size="sm"
                       onClick={handleResendConfirmation}
                       disabled={resendLoading}
+                      onMouseDown={(e) => e.preventDefault()}
                     >
                       {resendLoading ? "Skickar..." : "Skicka igen"}
                     </Button>

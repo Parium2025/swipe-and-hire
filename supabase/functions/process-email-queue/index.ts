@@ -290,26 +290,75 @@ Deno.serve(async (req) => {
       }
 
       try {
-        await sendLovableEmail(
-          {
-            run_id: payload.run_id,
-            to: payload.to,
-            from: payload.from,
-            sender_domain: payload.sender_domain,
-            subject: payload.subject,
-            html: payload.html,
-            text: payload.text,
-            purpose: payload.purpose,
-            label: payload.label,
-            idempotency_key: payload.idempotency_key,
-            unsubscribe_token: payload.unsubscribe_token,
-            message_id: payload.message_id,
-          },
-          // sendUrl is optional — when LOVABLE_SEND_URL is not set, the library
-          // falls back to the default Lovable API endpoint (https://api.lovable.dev).
-          // Set LOVABLE_SEND_URL as a Supabase secret to override (e.g. for local dev).
-          { apiKey, sendUrl: Deno.env.get('LOVABLE_SEND_URL') }
-        )
+        // Varje försök måste ha en unik idempotency-nyckel — API:t svarar 409
+        // ("This email send already failed") om samma nyckel återanvänds efter ett fel.
+        const attemptIdempotencyKey = payload.idempotency_key
+          ? `${payload.idempotency_key}:${failedAttempts}`
+          : undefined
+
+        const buildBody = (unsubscribeToken?: string) => ({
+          run_id: payload.run_id,
+          to: payload.to,
+          from: payload.from,
+          sender_domain: payload.sender_domain,
+          subject: payload.subject,
+          html: payload.html,
+          text: payload.text,
+          purpose: payload.purpose,
+          label: payload.label,
+          idempotency_key: attemptIdempotencyKey ?? payload.idempotency_key,
+          unsubscribe_token: unsubscribeToken ?? payload.unsubscribe_token,
+          message_id: payload.message_id,
+        })
+
+        // sendUrl is optional — when LOVABLE_SEND_URL is not set, the library
+        // falls back to the default Lovable API endpoint (https://api.lovable.dev).
+        const sendOptions = {
+          apiKey,
+          sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
+          ...(attemptIdempotencyKey ? { idempotencyKey: attemptIdempotencyKey } : {}),
+        }
+
+        try {
+          await sendLovableEmail(buildBody(), sendOptions)
+        } catch (sendError) {
+          // Säkerhetsnät: om API:t kräver unsubscribe-token skickar vi om med token
+          // i stället för att tappa mejlet (t.ex. lösenordsåterställning).
+          const code =
+            sendError && typeof sendError === 'object' && 'code' in sendError
+              ? (sendError as { code: string | null }).code
+              : null
+          const msgText = sendError instanceof Error ? sendError.message : String(sendError)
+          const needsToken = code === 'missing_unsubscribe' || msgText.includes('missing_unsubscribe')
+          if (!needsToken || payload.unsubscribe_token) throw sendError
+
+          const { data: tokenRow } = await supabase
+            .from('email_unsubscribe_tokens')
+            .select('token')
+            .eq('email', String(payload.to).trim().toLowerCase())
+            .maybeSingle()
+
+          let token = tokenRow?.token as string | undefined
+          if (!token) {
+            const bytes = new Uint8Array(32)
+            crypto.getRandomValues(bytes)
+            token = Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
+            await supabase
+              .from('email_unsubscribe_tokens')
+              .upsert({ token, email: String(payload.to).trim().toLowerCase() }, { onConflict: 'email' })
+          }
+
+          console.warn('Retrying send with unsubscribe token', { queue, msg_id: msg.msg_id })
+          // API:t betraktar den misslyckade sändningen som en "run" — nytt run/idempotency
+          // krävs, annars svarar den 409 run_failed.
+          const retryKey = `${attemptIdempotencyKey ?? payload.message_id ?? crypto.randomUUID()}:unsub`
+          await sendLovableEmail(
+            { ...buildBody(token), run_id: crypto.randomUUID(), idempotency_key: retryKey },
+            { ...sendOptions, idempotencyKey: retryKey }
+          )
+
+        }
+
 
         // Log success
         await supabase.from('email_send_log').insert({

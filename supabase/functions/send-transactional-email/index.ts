@@ -341,12 +341,12 @@ Deno.serve(async (req) => {
       purpose: 'transactional',
       label: templateName,
       idempotency_key: idempotencyKey,
-      // Endast icke-nödvändiga utskick (t.ex. arbetsgivarutskick) får
-      // avprenumerationsfot. Kontobekräftelser, lösenordsåterställning och
-      // liknande servicemejl är avtalsnödvändiga och ska aldrig ha den.
-      ...(ESSENTIAL_TEMPLATES.has(templateName)
-        ? {}
-        : { unsubscribe_token: unsubscribeToken }),
+      // E-post-API:t kräver en unsubscribe-token för alla transaktionsmejl
+      // (utan den avvisas sändningen med 400 missing_unsubscribe). Tokenen är
+      // alltid med — foten är obligatorisk för denna sändningsväg.
+      unsubscribe_token: unsubscribeToken,
+
+
       queued_at: new Date().toISOString(),
     },
   })
