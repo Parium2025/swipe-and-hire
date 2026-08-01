@@ -850,11 +850,11 @@ const AuthTablet = ({
                                     value={jobSeekerData.phone}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
                                     className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
-                                    placeholder="070-123 45 67"
+                                    placeholder="T.ex. 070-123 45 67"
                                     required
                                   />
                                  {jobSeekerData.phoneError && (
-                                   <p className="text-destructive text-sm mt-1">{jobSeekerData.phoneError}</p>
+                                   <p className="text-white text-sm mt-1">{jobSeekerData.phoneError}</p>
                                  )}
                               </div>
                            )}
