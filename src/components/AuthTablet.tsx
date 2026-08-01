@@ -468,6 +468,7 @@ const AuthTablet = ({
         } else {
           setShowResend(true);
           setHasRegistered(true);
+          setIsLogin(true);
         }
       }
     } catch (error) {
