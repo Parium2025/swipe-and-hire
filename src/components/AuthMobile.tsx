@@ -794,6 +794,7 @@ const AuthMobile = ({
                               size="sm"
                               onClick={handleResetPasswordEmail}
                               disabled={resetLoading}
+                              onMouseDown={(e) => e.preventDefault()}
                             >
                               {resetLoading ? "Skickar..." : "Återställ lösenord"}
                             </Button>
@@ -812,6 +813,7 @@ const AuthMobile = ({
                                size="sm"
                                onClick={handleResetPasswordEmail}
                                disabled={resetLoading}
+                               onMouseDown={(e) => e.preventDefault()}
                              >
                                {resetLoading ? "Skickar..." : "Skicka igen"}
                              </Button>
@@ -1284,6 +1286,7 @@ const AuthMobile = ({
                       size="sm"
                       onClick={handleResendConfirmation}
                       disabled={resendLoading}
+                      onMouseDown={(e) => e.preventDefault()}
                       className="min-h-[44px]"
                     >
                       {resendLoading ? "Skickar..." : "Skicka igen"}
