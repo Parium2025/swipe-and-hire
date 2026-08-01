@@ -108,6 +108,19 @@ const Auth = () => {
       // Parsa hash tidigt så vi kan använda det för token-verifiering
       const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
       const hashParams = new URLSearchParams(hash);
+
+      // Avprenumerationslänkar pekar (av historiska skäl) på /auth?token=<64 hex>.
+      // Det är inte en återställningstoken — slussa vidare till rätt sida.
+      const rawToken = searchParams.get('token') || '';
+      if (
+        !isReset &&
+        !searchParams.get('type') &&
+        !searchParams.get('token_hash') &&
+        /^[a-f0-9]{64}$/i.test(rawToken)
+      ) {
+        window.location.replace(`/unsubscribe?token=${encodeURIComponent(rawToken)}`);
+        return;
+      }
       
       if (AUTH_DEBUG) {
         console.log('🔍 AUTH FLOW DEBUG:', {
