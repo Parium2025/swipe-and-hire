@@ -1123,7 +1123,50 @@ const AuthDesktop = ({
                             </p>
                           </div>
                         )}
-                      </div>
+                       </div>
+
+                      {(role === 'job_seeker' ? jobSeekerData.password : employerData.password) && (
+                        <div>
+                          <Label htmlFor="confirmPassword" className="text-white">
+                            <Key className="h-4 w-4 inline mr-2" />
+                            Bekräfta lösenord <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) && (role === 'job_seeker' ? jobSeekerData.password === jobSeekerData.confirmPassword : employerData.password === employerData.confirmPassword)} />
+                          </Label>
+                          <div className="relative mt-1">
+                            <Input
+                              id="confirmPassword"
+                              type={showPassword ? 'text' : 'password'}
+                              value={role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword}
+                              onPaste={(e) => e.preventDefault()}
+                              onCopy={(e) => e.preventDefault()}
+                              onChange={(e) => {
+                                if (role === 'job_seeker') {
+                                  setJobSeekerData(prev => ({ ...prev, confirmPassword: e.target.value }));
+                                } else {
+                                  setEmployerData(prev => ({ ...prev, confirmPassword: e.target.value }));
+                                }
+                              }}
+                              required
+                              name={`confirm-password-${role}`}
+                              autoComplete={`${role}-new-password`}
+                              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                            />
+                            <button
+                              type="button"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
+                          {(role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) &&
+                           (role === 'job_seeker' ? jobSeekerData.password : employerData.password) !==
+                           (role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) && (
+                            <p className="text-sm text-destructive mt-1">Lösenorden matchar inte</p>
+                          )}
+                        </div>
+                      )}
+
+                      
                       
                       <SignupConsent
                         role={role}
