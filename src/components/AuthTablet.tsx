@@ -466,8 +466,9 @@ const AuthTablet = ({
             }, 3000);
           }
         } else {
-          setShowResend(true);
-          setHasRegistered(true);
+          // Registreringen lyckades – gå direkt till Logga in, ingen resend-ruta behövs
+          setShowResend(false);
+          setHasRegistered(false);
           setIsLogin(true);
         }
       }
