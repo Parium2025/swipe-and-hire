@@ -466,9 +466,9 @@ const AuthTablet = ({
             }, 3000);
           }
         } else {
-          // Registreringen lyckades – gå direkt till Logga in, ingen resend-ruta behövs
-          setShowResend(false);
-          setHasRegistered(false);
+          // Registreringen lyckades – gå till Logga in-fliken, men behåll mejlrutan så användaren kan skicka om bekräftelsen
+          setHasRegistered(true);
+          setShowResend(true);
           setIsLogin(true);
         }
       }
