@@ -1134,7 +1134,7 @@ const AuthTablet = ({
                         <div>
                           <Label htmlFor="confirmPassword" className="text-white">
                             <Key className="h-4 w-4 inline mr-2" />
-                            Bekräfta lösenord <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword)} />
+                            Bekräfta lösenord <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) && (role === 'job_seeker' ? jobSeekerData.password === jobSeekerData.confirmPassword : employerData.password === employerData.confirmPassword)} />
                           </Label>
                           <div className="relative mt-1">
                             <Input
