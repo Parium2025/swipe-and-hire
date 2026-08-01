@@ -17,6 +17,19 @@ const SENDER_DOMAIN = "notify.parium.se"
 const FROM_DOMAIN = "parium.se"
 const FROM_LOCAL_PART = "no-reply"
 
+// Servicemejl som krävs för att leverera tjänsten — dessa får aldrig
+// någon "Unsubscribe"-fot (de är inte marknadsföring).
+const ESSENTIAL_TEMPLATES = new Set([
+  'account-confirmation',
+  'password-reset',
+  'application-confirmation',
+  'interview-invitation',
+  'job-expiration',
+  'support-ticket-alert',
+  'admin-alert',
+  'account-inactivity-warning',
+])
+
 // Generate a cryptographically random 32-byte hex token
 function generateToken(): string {
   const bytes = new Uint8Array(32)
