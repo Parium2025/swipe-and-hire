@@ -328,7 +328,12 @@ Deno.serve(async (req) => {
       purpose: 'transactional',
       label: templateName,
       idempotency_key: idempotencyKey,
-      unsubscribe_token: unsubscribeToken,
+      // Endast icke-nödvändiga utskick (t.ex. arbetsgivarutskick) får
+      // avprenumerationsfot. Kontobekräftelser, lösenordsåterställning och
+      // liknande servicemejl är avtalsnödvändiga och ska aldrig ha den.
+      ...(ESSENTIAL_TEMPLATES.has(templateName)
+        ? {}
+        : { unsubscribe_token: unsubscribeToken }),
       queued_at: new Date().toISOString(),
     },
   })
