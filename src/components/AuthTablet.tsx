@@ -18,6 +18,7 @@ import { Eye, EyeOff, User, Building2, Mail, Key, Phone, Globe, MapPin, Users, C
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
+import { RequiredMark } from '@/components/wizard/RequiredMark';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -783,7 +784,7 @@ const AuthTablet = ({
 
                          <div className="grid grid-cols-2 gap-2">
                              <div>
-                               <Label htmlFor="firstName" className="text-white">Förnamn *</Label>
+                               <Label htmlFor="firstName" className="text-white">Förnamn <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName).trim()} /></Label>
                               <Input
                                 id="firstName"
                                 value={role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName}
@@ -799,7 +800,7 @@ const AuthTablet = ({
                               />
                             </div>
                              <div>
-                               <Label htmlFor="lastName" className="text-white">Efternamn *</Label>
+                               <Label htmlFor="lastName" className="text-white">Efternamn <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName).trim()} /></Label>
                               <Input
                                 id="lastName"
                                 value={role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName}
@@ -819,7 +820,7 @@ const AuthTablet = ({
                          <div className="relative">
                             <Label htmlFor="email" className="text-white">
                               <Mail className="h-4 w-4 inline mr-2" />
-                              E-post *
+                              E-post <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.email : employerData.email).trim()} />
                             </Label>
                            <Input
                              id="email"
@@ -841,7 +842,7 @@ const AuthTablet = ({
                              <div>
                                 <Label htmlFor="phone" className="text-white">
                                   <Phone className="h-4 w-4 inline mr-2" />
-                                  Telefon *
+                                  Telefon <RequiredMark filled={!!jobSeekerData.phone.trim() && !jobSeekerData.phoneError} />
                                 </Label>
                                   <Input
                                     id="phone"
@@ -869,7 +870,7 @@ const AuthTablet = ({
                              </div>
                              
                               <div>
-                                <Label htmlFor="companyName" className="text-white">Företagsnamn *</Label>
+                                <Label htmlFor="companyName" className="text-white">Företagsnamn <RequiredMark filled={!!employerData.companyName.trim()} /></Label>
                                  <Input
                                    id="companyName"
                                    value={employerData.companyName}
@@ -881,7 +882,7 @@ const AuthTablet = ({
                               </div>
 
                               <div>
-                                <Label htmlFor="industry" className="text-white">Bransch *</Label>
+                                <Label htmlFor="industry" className="text-white">Bransch <RequiredMark filled={!!employerData.industry.trim()} /></Label>
                                 <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
                                    <DropdownMenuTrigger asChild>
                                     <Button
@@ -979,7 +980,7 @@ const AuthTablet = ({
                               </div>
 
                               <div>
-                                <Label htmlFor="employeeCount" className="text-white">Anställda *</Label>
+                                <Label htmlFor="employeeCount" className="text-white">Anställda <RequiredMark filled={!!employerData.employeeCount} /></Label>
                                 <DropdownMenu modal={false} open={employeeMenuOpen} onOpenChange={setEmployeeMenuOpen}>
                                    <DropdownMenuTrigger asChild>
                                     <Button
@@ -1028,7 +1029,7 @@ const AuthTablet = ({
                               <div>
                                 <Label htmlFor="address" className="text-white">
                                   <MapPin className="h-4 w-4 inline mr-2" />
-                                  Adress *
+                                  Adress <RequiredMark filled={!!employerData.address.trim()} />
                                 </Label>
                                  <Input
                                    id="address"
@@ -1044,7 +1045,7 @@ const AuthTablet = ({
                                <div>
                                 <Label htmlFor="website" className="text-white">
                                   <Globe className="h-4 w-4 inline mr-2" />
-                                  Webbplats *
+                                  Webbplats <RequiredMark filled={!!employerData.website.trim()} />
                                 </Label>
                                  <Input
                                    id="website"
@@ -1073,7 +1074,7 @@ const AuthTablet = ({
                       <div>
                          <Label htmlFor="password" className="text-white">
                            <Key className="h-4 w-4 inline mr-2" />
-                           Lösenord *
+                           Lösenord <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.password : employerData.password)} />
                          </Label>
                         <div className="relative mt-1">
                           <Input
@@ -1133,7 +1134,7 @@ const AuthTablet = ({
                         <div>
                           <Label htmlFor="confirmPassword" className="text-white">
                             <Key className="h-4 w-4 inline mr-2" />
-                            Bekräfta lösenord *
+                            Bekräfta lösenord <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword)} />
                           </Label>
                           <div className="relative mt-1">
                             <Input
