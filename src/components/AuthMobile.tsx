@@ -517,6 +517,7 @@ const AuthMobile = ({
         } else {
           setShowResend(true);
           setHasRegistered(true);
+          setIsLogin(true);
         }
       }
     } catch (error) {

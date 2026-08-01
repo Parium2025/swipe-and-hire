@@ -468,6 +468,7 @@ const AuthDesktop = ({
         } else {
           setShowResend(true);
           setHasRegistered(true);
+          setIsLogin(true);
         }
       }
     } catch (error) {
