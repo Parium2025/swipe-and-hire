@@ -184,7 +184,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
           <Bot className="h-4 w-4 text-white" />
           <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
         </div>
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 text-white/70 text-sm">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 text-white text-sm">
           <p>Ingen AI-analys tillgänglig ännu. Spara din profil så analyseras ditt CV automatiskt.</p>
         </div>
       </div>
@@ -219,7 +219,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
         
         {/* Summary text */}
         {summary.summary_text ? (
-          <div className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap">
+          <div className="text-white text-sm leading-relaxed whitespace-pre-wrap">
             {summary.summary_text}
           </div>
         ) : (
@@ -233,7 +233,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
       </div>
       
       {isStale && (
-        <p className="text-white/50 text-xs">
+        <p className="text-white text-xs">
           💡 Spara din profil igen för att uppdatera AI-analysen med ditt nya CV.
         </p>
       )}
