@@ -184,7 +184,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
     if (uploadType === 'document') {
       return 'PDF, Word dokument';
     }
-    return 'PDF, Word dokument, bilder och videor';
+    // Härled texten från de faktiskt tillåtna filtyperna så att den aldrig
+    // lovar mer än vad uppladdningen accepterar.
+    const labels: string[] = [];
+    const has = (needle: string) => acceptedFileTypes.some((t) => t.includes(needle));
+    if (has('pdf')) labels.push('PDF');
+    if (has('msword') || has('wordprocessingml')) labels.push('Word');
+    if (has('image/')) labels.push('bilder');
+    if (has('video/')) labels.push('videor');
+    if (labels.length === 0) return 'Filer';
+    if (labels.length === 1) return labels[0];
+    return `${labels.slice(0, -1).join(', ')} eller ${labels[labels.length - 1]}`;
   };
 
   if (currentFile) {
