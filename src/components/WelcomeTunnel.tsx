@@ -366,7 +366,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const handleInputChange = (field: string, value: string | string[] | boolean) => {
     if (field === 'bio' && typeof value === 'string') {
       const wordCount = countWords(value);
-      if (wordCount <= 100) {
+      if (wordCount <= 250) {
         setFormData(prev => ({ ...prev, [field]: value }));
       }
       return;
@@ -1603,7 +1603,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 />
                 <div className="flex justify-end mt-1">
                   <span className="text-sm text-white">
-                    {countWords(formData.bio)}/100 ord
+                    {countWords(formData.bio)}/250 ord
                   </span>
                 </div>
               </div>
