@@ -4,9 +4,21 @@
  * som klar i sessionStorage så att man kan använda appen resten av sessionen.
  * Vid nästa inloggning (ny session) visas tunneln igen.
  */
-const TUNNEL_REPLAY_EMAILS = [
+const TUNNEL_REPLAY_EMAILS: string[] = [];
+
+/**
+ * Testkonton som alltid ska landa på välkomstkortet vid varje inloggning.
+ * Profilen sparas helt normalt (som vilken kandidat som helst) – enbart
+ * välkomstkortet visas om och om igen.
+ */
+const WELCOME_CARD_REPLAY_EMAILS = [
   'axelanderssonparium@gmail.com',
 ];
+
+export function isWelcomeCardReplayAccount(email?: string | null): boolean {
+  if (!email) return false;
+  return WELCOME_CARD_REPLAY_EMAILS.includes(email.trim().toLowerCase());
+}
 
 const SESSION_KEY = 'tunnel_replay_done';
 
