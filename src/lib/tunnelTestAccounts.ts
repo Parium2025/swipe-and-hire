@@ -11,9 +11,8 @@ const TUNNEL_REPLAY_EMAILS: string[] = [];
  * Profilen sparas helt normalt (som vilken kandidat som helst) – enbart
  * välkomstkortet visas om och om igen.
  */
-const WELCOME_CARD_REPLAY_EMAILS = [
-  'axelanderssonparium@gmail.com',
-];
+const WELCOME_CARD_REPLAY_EMAILS: string[] = [];
+
 
 export function isWelcomeCardReplayAccount(email?: string | null): boolean {
   if (!email) return false;

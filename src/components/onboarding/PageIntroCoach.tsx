@@ -6,6 +6,8 @@ import {
   CreditCard, HelpCircle, ArrowRight,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
+import { loadCoachState, saveCoachState, type CoachState } from '@/lib/onboardingState';
+
 
 /**
  * 🎓 PAGE INTRO COACH
@@ -38,6 +40,42 @@ const TOUR_PATHS = [
 /** Event som öppnar tipset för nuvarande sida igen. */
 export const PAGE_COACH_REPLAY_EVENT = 'parium:page-coach-replay';
 
+/** Läser av nuvarande status ur localStorage (snabb cache). */
+function readLocalCoachState(): CoachState {
+  const seen: Record<string, boolean> = {};
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith(STORAGE_PREFIX))
+      .forEach((k) => {
+        if (localStorage.getItem(k) === '1') seen[k.slice(STORAGE_PREFIX.length)] = true;
+      });
+    return { seen, disabled: localStorage.getItem(COACH_DISABLED_KEY) === '1' };
+  } catch {
+    return { seen, disabled: false };
+  }
+}
+
+/** Skriver molnstatus till localStorage (cachen). */
+function writeLocalCoachState(state: CoachState) {
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith(STORAGE_PREFIX))
+      .forEach((k) => localStorage.removeItem(k));
+    Object.entries(state.seen ?? {}).forEach(([key, value]) => {
+      if (value) localStorage.setItem(STORAGE_PREFIX + key, '1');
+    });
+    if (state.disabled) localStorage.setItem(COACH_DISABLED_KEY, '1');
+    else localStorage.removeItem(COACH_DISABLED_KEY);
+  } catch {
+    /* ignorera */
+  }
+}
+
+/** Speglar aktuell lokal status till kontot så den följer med mellan enheter. */
+function syncCoachStateToCloud() {
+  void saveCoachState(readLocalCoachState());
+}
+
 export function resetPageCoachMarks() {
   try {
     Object.keys(localStorage)
@@ -47,6 +85,7 @@ export function resetPageCoachMarks() {
   } catch {
     /* ignorera */
   }
+  syncCoachStateToCloud();
 }
 
 /** Är guiden avstängd? Hårdstopp som gäller alla sidor. */
@@ -67,6 +106,7 @@ export function markAllPageCoachesSeen() {
   } catch {
     /* ignorera */
   }
+  syncCoachStateToCloud();
 }
 
 /** Starta den sammanhängande guiden från den valda sidan. */
@@ -84,6 +124,7 @@ export function replayPageCoach() {
   resetPageCoachMarks();
   window.dispatchEvent(new CustomEvent(PAGE_COACH_REPLAY_EVENT));
 }
+
 
 
 
@@ -208,6 +249,34 @@ const PageIntroCoach = () => {
   const isTouch = device !== 'desktop';
   const [replayToken, setReplayToken] = useState(0);
   const [visible, setVisible] = useState(false);
+  /** Vänta tills kontots status hämtats – annars kan fel person få guiden på delad dator. */
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const cloud = await loadCoachState();
+        if (cancelled) return;
+        if (cloud && (cloud.savedAt || cloud.disabled || cloud.seen)) {
+          writeLocalCoachState(cloud);
+        } else {
+          // Första gången på kontot: spegla upp det lokala läget.
+          syncCoachStateToCloud();
+        }
+      } catch {
+        /* offline – kör på lokal cache */
+      } finally {
+        if (!cancelled) {
+          setHydrated(true);
+          setReplayToken((t) => t + 1);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const config = useMemo(() => CONFIGS[location.pathname], [location.pathname]);
   const activeTourPath = useMemo(() => {
@@ -222,6 +291,7 @@ const PageIntroCoach = () => {
 
   const alreadySeen = useMemo(() => {
     if (!config) return true;
+    if (!hydrated) return true;
     if (isCoachDisabled()) return true;
     try {
       return !isGuidedTour && localStorage.getItem(STORAGE_PREFIX + config.key) === '1';
@@ -229,13 +299,14 @@ const PageIntroCoach = () => {
       return false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, replayToken, isGuidedTour]);
+  }, [config, replayToken, isGuidedTour, hydrated]);
 
   useEffect(() => {
     const onReplay = () => setReplayToken((t) => t + 1);
     window.addEventListener(PAGE_COACH_REPLAY_EVENT, onReplay);
     return () => window.removeEventListener(PAGE_COACH_REPLAY_EVENT, onReplay);
   }, []);
+
 
   useEffect(() => {
     if (!config || alreadySeen) {
@@ -251,6 +322,8 @@ const PageIntroCoach = () => {
       if (!config) return;
       try {
         localStorage.setItem(STORAGE_PREFIX + config.key, '1');
+        syncCoachStateToCloud();
+
       } catch {
         /* ignorera */
       }
@@ -331,10 +404,11 @@ const PageIntroCoach = () => {
       />
 
       <div
-        className={`relative w-full max-w-[420px] rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 backdrop-blur-xl shadow-2xl p-5 pt-6 sm:p-6 sm:pt-7 text-center transition-transform duration-300 ${
+        className={`relative w-full max-w-[420px] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 backdrop-blur-xl shadow-2xl p-5 pt-6 sm:p-6 sm:pt-7 text-center transition-transform duration-300 ${
           visible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-2'
         }`}
       >
+
         <button
           type="button"
           onClick={backToOverview}

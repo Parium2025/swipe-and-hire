@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { debounce, loadTunnelDraft, saveTunnelDraft, clearTunnelDraft, type TunnelDraft } from '@/lib/onboardingState';
+
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -174,7 +176,33 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
   }, [profile]);
   
-  // Save form data to localStorage for persistence across page refreshes
+  // ☁️ Utkastet sparas både lokalt (snabbt) och i molnet (följer med mellan enheter).
+  // Skrivningarna debounce:as så vi inte skriver vid varje tangenttryck.
+  const draftHydratedRef = useRef(false);
+  const cloudSaveRef = useRef(
+    debounce((draft: TunnelDraft) => {
+      void saveTunnelDraft(draft);
+    }, 1200)
+  );
+
+  const applyDraft = (parsed: TunnelDraft | null) => {
+    if (!parsed) return;
+    if (parsed.formData) {
+      setFormData(prev => ({
+        ...prev,
+        ...(parsed.formData as Record<string, unknown>),
+        // Don't override media URLs from profile
+        profileImageUrl: prev.profileImageUrl || (parsed.formData as any).profileImageUrl,
+      }));
+    }
+    if (parsed.postalCode) setPostalCode(parsed.postalCode);
+    if (parsed.userLocation) setUserLocation(parsed.userLocation);
+    // Återgå till samma steg som användaren var på (aldrig klar-steget)
+    if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 1 && parsed.currentStep <= 5) {
+      setCurrentStep(parsed.currentStep);
+    }
+  };
+
   useEffect(() => {
     // Check if there's meaningful content to save
     const hasContent = formData.firstName.trim() || formData.lastName.trim() || 
@@ -182,66 +210,81 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                        formData.employmentStatus || formData.workingHours ||
                        formData.availability || formData.birthDate ||
                        postalCode;
-    
-    if (hasContent) {
-      try {
-        localStorage.setItem(WELCOME_DRAFT_KEY, JSON.stringify({
-          formData,
-          postalCode,
-          userLocation,
-          currentStep,
-          savedAt: Date.now()
-        }));
-      } catch (e) {
-        console.warn('Failed to save welcome tunnel draft');
-      }
+
+    if (!hasContent || !draftHydratedRef.current) return;
+
+    const draft: TunnelDraft = {
+      formData,
+      postalCode,
+      userLocation,
+      currentStep,
+      savedAt: Date.now(),
+    };
+    try {
+      localStorage.setItem(WELCOME_DRAFT_KEY, JSON.stringify(draft));
+    } catch (e) {
+      console.warn('Failed to save welcome tunnel draft');
     }
+    cloudSaveRef.current(draft);
   }, [formData, postalCode, userLocation, currentStep]);
   
-  // Restore draft from localStorage on mount
+  // Restore draft: lokalt först (direkt), därefter molnet om det är nyare.
   useEffect(() => {
+    let cancelled = false;
+    const MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+    let localSavedAt = 0;
+
     try {
       // Städa bort gamla, icke scopade nycklar (kunde delas mellan konton på samma enhet)
       localStorage.removeItem('parium_draft_welcome-tunnel');
       sessionStorage.removeItem('parium_welcome_local_media');
       const savedDraft = localStorage.getItem(WELCOME_DRAFT_KEY);
       if (savedDraft) {
-        const parsed = JSON.parse(savedDraft);
-        // Only restore if saved recently (within 7 days)
-        if (parsed.savedAt && Date.now() - parsed.savedAt < 7 * 24 * 60 * 60 * 1000) {
-          if (parsed.formData) {
-            setFormData(prev => ({
-              ...prev,
-              ...parsed.formData,
-              // Don't override media URLs from profile
-              profileImageUrl: prev.profileImageUrl || parsed.formData.profileImageUrl,
-            }));
-          }
-          if (parsed.postalCode) setPostalCode(parsed.postalCode);
-          if (parsed.userLocation) setUserLocation(parsed.userLocation);
-          // Återgå till samma steg som användaren var på (aldrig klar-steget)
-          if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 1 && parsed.currentStep <= 5) {
-            setCurrentStep(parsed.currentStep);
-          }
+        const parsed = JSON.parse(savedDraft) as TunnelDraft;
+        if (parsed.savedAt && Date.now() - parsed.savedAt < MAX_AGE) {
+          localSavedAt = parsed.savedAt;
+          applyDraft(parsed);
         } else {
-          // Clear old draft
           localStorage.removeItem(WELCOME_DRAFT_KEY);
         }
       }
     } catch (e) {
       console.warn('Failed to restore welcome tunnel draft');
     }
+
+    (async () => {
+      try {
+        const cloud = await loadTunnelDraft();
+        if (cancelled) return;
+        if (
+          cloud?.savedAt &&
+          Date.now() - cloud.savedAt < MAX_AGE &&
+          cloud.savedAt > localSavedAt
+        ) {
+          applyDraft(cloud);
+        }
+      } catch {
+        /* offline eller utloggad – lokalt utkast räcker */
+      } finally {
+        if (!cancelled) draftHydratedRef.current = true;
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []); // Run only on mount
   
   // Clear draft helper
   const clearWelcomeDraft = () => {
     try {
       localStorage.removeItem(WELCOME_DRAFT_KEY);
-      console.log('🗑️ Welcome tunnel draft cleared');
     } catch (e) {
       console.warn('Failed to clear welcome draft');
     }
+    void clearTunnelDraft();
   };
+
  
   // Use mediaUrl hooks for signed URLs
   const signedProfileImageUrl = useMediaUrl(
@@ -1030,11 +1073,27 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       }, 2000);
     } catch (error) {
       console.error('Error in handleSubmit:', error);
+      const message = error instanceof Error ? error.message : String(error ?? '');
+      const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      const networkIssue =
+        offline ||
+        /failed to fetch|networkerror|network request failed|timeout|load failed/i.test(message);
+      const authIssue = /jwt|not authenticated|session|permission|row-level/i.test(message);
+
       toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte skapa profilen. Försök igen.",
+        title: networkIssue
+          ? "Ingen internetanslutning"
+          : authIssue
+            ? "Du behöver logga in igen"
+            : "Kunde inte spara profilen",
+        description: networkIssue
+          ? "Vi når inte servern just nu. Dina uppgifter finns kvar sparade — försök igen när du har täckning."
+          : authIssue
+            ? "Din inloggning har gått ut. Logga in igen så finns dina uppgifter kvar."
+            : "Något gick fel när profilen sparades. Dina uppgifter finns kvar — försök igen om en stund.",
         variant: "destructive"
       });
+
     } finally {
       setIsSubmitting(false);
     }

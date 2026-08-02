@@ -3005,6 +3005,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_onboarding_state: {
+        Row: {
+          coach_state: Json
+          created_at: string
+          tunnel_draft: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coach_state?: Json
+          created_at?: string
+          tunnel_draft?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coach_state?: Json
+          created_at?: string
+          tunnel_draft?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
