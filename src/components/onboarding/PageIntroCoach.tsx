@@ -43,8 +43,18 @@ export function resetPageCoachMarks() {
     Object.keys(localStorage)
       .filter((k) => k.startsWith(STORAGE_PREFIX))
       .forEach((k) => localStorage.removeItem(k));
+    localStorage.removeItem(COACH_DISABLED_KEY);
   } catch {
     /* ignorera */
+  }
+}
+
+/** Är guiden avstängd? Hårdstopp som gäller alla sidor. */
+function isCoachDisabled(): boolean {
+  try {
+    return localStorage.getItem(COACH_DISABLED_KEY) === '1';
+  } catch {
+    return false;
   }
 }
 
@@ -52,6 +62,7 @@ export function resetPageCoachMarks() {
 export function markAllPageCoachesSeen() {
   try {
     Object.values(CONFIGS).forEach((c) => localStorage.setItem(STORAGE_PREFIX + c.key, '1'));
+    localStorage.setItem(COACH_DISABLED_KEY, '1');
     localStorage.removeItem(ACTIVE_TOUR_KEY);
   } catch {
     /* ignorera */
@@ -73,6 +84,7 @@ export function replayPageCoach() {
   resetPageCoachMarks();
   window.dispatchEvent(new CustomEvent(PAGE_COACH_REPLAY_EVENT));
 }
+
 
 
 interface CoachConfig {
