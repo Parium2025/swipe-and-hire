@@ -125,6 +125,7 @@ const USER_SCOPED: { table: string; column: string }[] = [
   { table: 'saved_searches', column: 'user_id' },
   { table: 'job_views', column: 'user_id' },
   { table: 'jobseeker_notes', column: 'user_id' },
+  { table: 'user_onboarding_state', column: 'user_id' },
   { table: 'profile_cv_summaries', column: 'user_id' },
   { table: 'user_data_consents', column: 'user_id' },
   // OBS: consent_records raderas INTE här. Raden pseudonymiseras i steg 8
