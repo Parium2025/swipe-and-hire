@@ -25,8 +25,19 @@ serve(async (req) => {
 
   try {
     console.log('Starting CV queue processing...');
-    
+
+    // Självläkning: lägg tillbaka CV som saknar analys (t.ex. om AI-tjänsten varit nere)
+    // och ge misslyckade försök en ny chans. Kostar inget när allt redan är analyserat.
+    const { data: requeued, error: requeueError } = await supabase
+      .rpc('requeue_missing_cv_analyses', { p_limit: 25 });
+    if (requeueError) {
+      console.error('Requeue of missing CV analyses failed:', requeueError.message);
+    } else if ((requeued ?? 0) > 0) {
+      console.log(`Requeued ${requeued} CVs missing analysis`);
+    }
+
     // Get next batch of CVs to process
+
     const { data: batch, error: batchError } = await supabase
       .rpc('get_cv_queue_batch', { p_batch_size: BATCH_SIZE });
     
