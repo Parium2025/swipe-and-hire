@@ -1201,39 +1201,39 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
             </div>
             
             <div className="space-y-4 max-w-md mx-auto">
-               <div>
-                 <Label htmlFor="firstName" className="text-white">Förnamn</Label>
+               <div className="space-y-2">
+                 <Label htmlFor="firstName" className="text-white font-medium text-sm">Förnamn<RequiredMark filled={!!formData.firstName.trim()} /></Label>
                  <Input 
                    id="firstName" 
                    value={formData.firstName} 
                    onChange={(e) => handleInputChange('firstName', e.target.value)} 
                    placeholder="Ditt förnamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
+                   className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                  />
                </div>
-               <div>
-                 <Label htmlFor="lastName" className="text-white">Efternamn</Label>
+               <div className="space-y-2">
+                 <Label htmlFor="lastName" className="text-white font-medium text-sm">Efternamn<RequiredMark filled={!!formData.lastName.trim()} /></Label>
                  <Input 
                    id="lastName" 
                    value={formData.lastName} 
                    onChange={(e) => handleInputChange('lastName', e.target.value)} 
                    placeholder="Ditt efternamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
+                   className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                  />
                </div>
-               <div>
-                 <Label htmlFor="email" className="text-white">E-post</Label>
+               <div className="space-y-2">
+                 <Label htmlFor="email" className="text-white font-medium text-sm">E-post<RequiredMark filled={!!formData.email.trim()} /></Label>
                  <Input 
                    id="email" 
                    type="email"
                    value={formData.email} 
                    onChange={(e) => handleInputChange('email', e.target.value)} 
                    placeholder="Din e-postadress" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
+                   className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                  />
                </div>
-                 <div>
-                  <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
+                 <div className="space-y-2">
+                  <Label htmlFor="birthDate" className="text-white font-medium text-sm">Födelsedatum<RequiredMark filled={!!formData.birthDate.trim()} /></Label>
                   <BirthDatePicker
                     value={formData.birthDate}
                     onChange={(date) => handleInputChange('birthDate', date)}
@@ -1249,10 +1249,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     </p>
                   )}
                 </div>
-               <div>
-                 <Label htmlFor="phone" className="text-white">
+               <div className="space-y-2">
+                 <Label htmlFor="phone" className="text-white font-medium text-sm">
                    <Phone className="h-4 w-4 inline mr-2" />
-                   Telefonnummer *
+                   Telefonnummer<RequiredMark filled={!!formData.phone.trim() && validatePhoneNumber(formData.phone).isValid} />
                  </Label>
                   <Input 
                     id="phone" 
@@ -1260,13 +1260,14 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     required
                     value={formData.phone} 
                     onChange={(e) => handlePhoneChange(e.target.value)} 
-                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
-                    placeholder="070-123 45 67" 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
+                    placeholder="T.ex. 070-123 45 67" 
                   />
                   {phoneError && (
-                    <p className="text-destructive text-sm mt-1">{phoneError}</p>
+                    <p className="text-white text-sm mt-1">{phoneError}</p>
                   )}
                 </div>
+
                <WorkplacePostalCodeSelector
                  postalCodeValue={postalCode}
                  cityValue={userLocation}
