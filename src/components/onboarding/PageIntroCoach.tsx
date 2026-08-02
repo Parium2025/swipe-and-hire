@@ -322,6 +322,8 @@ const PageIntroCoach = () => {
       if (!config) return;
       try {
         localStorage.setItem(STORAGE_PREFIX + config.key, '1');
+        syncCoachStateToCloud();
+
       } catch {
         /* ignorera */
       }
