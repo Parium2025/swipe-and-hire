@@ -29,10 +29,13 @@ import {
   LogOut,
   ChevronDown,
   Briefcase,
-  Bell
+  Bell,
+  Lightbulb
 } from "lucide-react";
 import { PariumLogoButton } from "@/components/PariumLogoButton";
 import NotificationCenter from "@/components/NotificationCenter";
+import { replayPageCoach } from "@/components/onboarding/PageIntroCoach";
+
 
 // Jobb dropdown items
 const jobItems = [
