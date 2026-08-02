@@ -11,7 +11,9 @@ interface Props {
 
 const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
   <Html lang="sv" dir="ltr">
-    <Head />
+    <Head>
+      <meta charSet="utf-8" />
+    </Head>
     <Preview>Återställ ditt Parium-lösenord – länken gäller i 1 timme</Preview>
     <Body style={main}>
       <Container style={container}>
@@ -44,7 +46,7 @@ const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
         <Section style={fallbackCard}>
           <Text style={fallbackTitle}>Fungerar inte knappen?</Text>
           <Text style={fallbackBody}>
-            <Link href={reset_url} style={fallbackLink}>Öppna din säkra återställningslänk</Link>
+            <Link href={reset_url} style={fallbackLink}>Klicka här för att återställa</Link>
           </Text>
           <Text style={fallbackHint}>
             Länken öppnar parium.se och är personlig – dela den inte med någon.
@@ -53,8 +55,7 @@ const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
 
         <Text style={footer}>
           Parium AB · Stockholm<br />
-          Du får detta mail för att du begärde en lösenordsåterställning i{' '}
-          <Link href="https://parium.se" style={link}>Parium-appen</Link>.
+          Du får detta mail för att du begärde en lösenordsåterställning.
         </Text>
         <Text style={noReply}>
           Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
