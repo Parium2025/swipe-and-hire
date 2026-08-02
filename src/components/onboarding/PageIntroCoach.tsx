@@ -256,14 +256,21 @@ const PageIntroCoach = () => {
     let cancelled = false;
     (async () => {
       try {
+        const local = readLocalCoachState();
         const cloud = await loadCoachState();
         if (cancelled) return;
-        if (cloud && (cloud.savedAt || cloud.disabled || cloud.seen)) {
-          writeLocalCoachState(cloud);
-        } else {
-          // Första gången på kontot: spegla upp det lokala läget.
-          syncCoachStateToCloud();
+        // Slå ihop lokalt och moln — ett tips som setts på någon enhet visas aldrig igen.
+        const merged: CoachState = {
+          seen: { ...(local.seen ?? {}), ...(cloud?.seen ?? {}) },
+          disabled: Boolean(local.disabled || cloud?.disabled),
+        };
+        writeLocalCoachState(merged);
+        const cloudSeenCount = Object.keys(cloud?.seen ?? {}).length;
+        const mergedSeenCount = Object.keys(merged.seen ?? {}).length;
+        if (!cloud || cloudSeenCount !== mergedSeenCount || cloud.disabled !== merged.disabled) {
+          void saveCoachState(merged);
         }
+
       } catch {
         /* offline – kör på lokal cache */
       } finally {
