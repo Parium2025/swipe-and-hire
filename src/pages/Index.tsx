@@ -384,6 +384,14 @@ const Index = () => {
     resetPageCoachMarks();
     setShowIntroTutorial(true);
   }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
+
+  // Support → "Hjälp & tips" öppnar hela välkomstkortet igen.
+  useEffect(() => {
+    const onReplay = () => setShowIntroTutorial(true);
+    window.addEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
+    return () => window.removeEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
+  }, []);
+
   const [isInitializing, setIsInitializing] = useState(false);
   const [uiReady, setUiReady] = useState(false);
   const [showAuthCTA, setShowAuthCTA] = useState(false);
