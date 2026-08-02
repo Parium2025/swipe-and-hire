@@ -841,12 +841,12 @@ const AuthDesktop = ({
                              className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                            />
                            {emailAvailability.taken && (
-                             <p className="mt-1.5 text-xs font-medium text-red-400">
+                             <p className="mt-1.5 text-xs font-medium text-white">
                                {emailTakenMessage(emailAvailability.existingRole)}{' '}
                                <button
                                  type="button"
                                  onClick={() => handleTabChange('login')}
-                                 className="underline underline-offset-2 text-red-400 hover:text-red-300"
+                                 className="underline underline-offset-2 text-white hover:text-white/80"
                                >
                                  Logga in
                                </button>
