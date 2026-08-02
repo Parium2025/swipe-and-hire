@@ -56,6 +56,32 @@ async function idsOf(
   return ((data ?? []) as unknown as Record<string, string>[]).map((r) => r.id).filter(Boolean);
 }
 
+/**
+ * criterion_results hänger på candidate_evaluations via evaluation_id och har
+ * ingen FK-cascade. Utan detta ligger AI:ns motivering om kandidaten kvar som
+ * föräldralösa rader efter en "fullständig" radering.
+ */
+async function purgeCriterionResults(
+  admin: SupabaseClient,
+  column: 'applicant_id' | 'application_id',
+  values: string[],
+): Promise<void> {
+  if (values.length === 0) return;
+  const evalIds: string[] = [];
+  for (const chunk of chunked(values)) {
+    const { data, error } = await admin
+      .from('candidate_evaluations')
+      .select('id')
+      .in(column, chunk);
+    if (error) {
+      console.warn('⚠️ list candidate_evaluations:', error.message);
+      continue;
+    }
+    evalIds.push(...((data ?? []) as { id: string }[]).map((r) => r.id));
+  }
+  if (evalIds.length > 0) await delIn(admin, 'criterion_results', 'evaluation_id', evalIds);
+}
+
 /** Tabeller kopplade till ett jobb (job_id) — inga FK-cascades finns. */
 const JOB_SCOPED: string[] = [
   'ai_usage_log',
