@@ -23,6 +23,7 @@ import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { RequiredMark } from '@/components/wizard/RequiredMark';
+import TunnelSelectField from '@/components/tunnel/TunnelSelectField';
 import WizardFooter from '@/components/wizard/WizardFooter';
 
 
