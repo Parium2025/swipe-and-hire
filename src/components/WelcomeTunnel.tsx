@@ -1667,8 +1667,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       case 6:
         return (
           <div className="text-center space-y-8">
-            <div className="bg-white/20 backdrop-blur-sm p-6 rounded-full w-fit mx-auto mb-6">
-              <Check className="h-12 w-12 text-white" />
+            <div className="bg-green-500/20 backdrop-blur-sm p-6 rounded-full w-fit mx-auto mb-6">
+              <Check className="h-12 w-12 text-green-400" />
             </div>
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Profilen är klar</h2>
@@ -1678,7 +1678,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-12 py-6 bg-primary hover:bg-primary/90 hover:scale-105 transition-all duration-300 text-white font-bold text-xl rounded-2xl shadow-2xl"
+                className="rounded-full px-10 py-6 bg-green-600 text-white hover:bg-green-600/90 md:hover:bg-green-600/90 hover:text-white font-semibold text-lg shadow-2xl transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 {isSubmitting ? (
                   <>
@@ -1686,18 +1686,19 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     Laddar...
                   </>
                 ) : (
-                  'Börja swipa'
+                  'Börja söka jobb'
                 )}
               </Button>
               <Button
                 variant="outlineNeutral"
                 onClick={handlePrevious}
-                className="px-8 py-3 bg-white/10 border border-white/20 text-white text-sm md:hover:text-white md:hover:bg-white/10 md:hover:border-white/20 hover:scale-105 transition-all duration-300"
+                className="rounded-full px-8 py-3 bg-white/10 border border-white/20 text-white text-sm md:hover:text-white md:hover:bg-white/10 md:hover:border-white/20 transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
               </Button>
             </div>
+
           </div>
         );
 
