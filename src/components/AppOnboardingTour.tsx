@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   Building, User, FileText, Heart, ArrowRight, Check, MessageCircle,
-  CreditCard, HelpCircle, Briefcase, ChevronLeft,
+  CreditCard, HelpCircle, Briefcase, ChevronLeft, Eye,
 } from 'lucide-react';
 
 interface AppOnboardingTourProps {
@@ -27,10 +27,10 @@ const shortcuts: Shortcut[] = [
     path: '/search-jobs',
   },
   {
-    icon: User,
-    title: 'Min profil',
-    description: 'Uppdatera CV, bild, video och dina uppgifter när du vill.',
-    path: '/profile',
+    icon: Heart,
+    title: 'Sparade jobb',
+    description: 'Jobb du sparat med hjärtat ligger kvar här tills annonsen stänger.',
+    path: '/saved-jobs',
   },
   {
     icon: FileText,
@@ -38,7 +38,38 @@ const shortcuts: Shortcut[] = [
     description: 'Följ status på allt du sökt, samlat på ett ställe.',
     path: '/my-applications',
   },
+  {
+    icon: MessageCircle,
+    title: 'Chattar',
+    description: 'Arbetsgivaren startar chatten här efter din ansökan — du får en notis.',
+    path: '/messages',
+  },
+  {
+    icon: User,
+    title: 'Min profil',
+    description: 'Uppdatera CV, bild, video och dina uppgifter när du vill.',
+    path: '/profile',
+  },
+  {
+    icon: Eye,
+    title: 'Förhandsgranska profil',
+    description: 'Se exakt hur arbetsgivaren möts av din profil.',
+    path: '/profile-preview',
+  },
+  {
+    icon: CreditCard,
+    title: 'Ekonomi',
+    description: 'Din plan och dina kvitton. Att söka jobb är alltid gratis.',
+    path: '/subscription',
+  },
+  {
+    icon: HelpCircle,
+    title: 'Support',
+    description: 'Guider, vanliga frågor och kontakt med oss — svar på svenska.',
+    path: '/support',
+  },
 ];
+
 
 /**
  * Välkomstkort i två steg som visas en gång efter att profilen är klar.
