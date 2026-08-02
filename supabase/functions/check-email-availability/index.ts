@@ -48,19 +48,17 @@ serve(async (req: Request): Promise<Response> => {
     // Vid rate limit: svara neutralt istället för fel — UI ska inte störa användaren.
     if (limited) return json({ exists: false, checked: false });
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("user_id, role")
-      .ilike("email", normalizedEmail)
-      .limit(1)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc("auth_email_registered", {
+      _email: normalizedEmail,
+    });
 
     if (error) {
       console.error("check-email-availability query failed", error.message);
       return json({ exists: false, checked: false });
     }
 
-    return json({ exists: !!data, checked: true, role: data?.role ?? null });
+    const row = Array.isArray(data) ? data[0] : null;
+    return json({ exists: !!row?.exists_flag, checked: true, role: row?.user_role ?? null });
   } catch (e) {
     console.error("check-email-availability error", e);
     return json({ exists: false, checked: false });
