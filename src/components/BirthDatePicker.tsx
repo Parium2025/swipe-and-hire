@@ -127,7 +127,7 @@ export function BirthDatePicker({
           ref={triggerRef}
           variant="outline"
           className={cn(
-            "w-full h-11 !min-h-0 pl-3 pr-3 text-left text-sm font-normal bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 justify-start",
+            "w-full h-11 !min-h-0 pl-3 pr-3 text-left text-sm font-normal bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 justify-start focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
             !selectedDate && "placeholder:text-white",
             className
           )}
@@ -140,7 +140,7 @@ export function BirthDatePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 glass-panel rounded-xl shadow-xl z-50" align={popoverAlign ?? "center"} alignOffset={(computedOffset ?? (popoverAlignOffset ?? -150))} side="bottom" sideOffset={8} avoidCollisions={false}>
+      <PopoverContent onOpenAutoFocus={(e) => e.preventDefault()} onCloseAutoFocus={(e) => e.preventDefault()} className="w-auto p-0 glass-panel rounded-xl shadow-xl z-50" align={popoverAlign ?? "center"} alignOffset={(computedOffset ?? (popoverAlignOffset ?? -150))} side="bottom" sideOffset={8} avoidCollisions={false}>
         <div className="p-3 space-y-3">
           {/* Year and Month Selectors */}
           <div className="flex gap-2">
@@ -149,7 +149,7 @@ export function BirthDatePicker({
                 <Button
                   ref={yearRef}
                   variant="outlineNeutral"
-                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 justify-between transition-colors"
+                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 justify-between transition-colors focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   <span>
                     {selectedDate ? selectedDate.getFullYear() : "År"}
@@ -159,6 +159,7 @@ export function BirthDatePicker({
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 className="w-32 max-h-60 overflow-y-auto glass-panel z-50 rounded-md text-white"
+                onCloseAutoFocus={(e) => e.preventDefault()}
                 side="bottom"
                 align="center"
                 sideOffset={6}
@@ -180,7 +181,7 @@ export function BirthDatePicker({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outlineNeutral"
-                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 justify-between transition-colors"
+                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 justify-between transition-colors focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   <span>
                     {selectedDate ? months[selectedDate.getMonth()].label : "Månad"}
@@ -190,6 +191,7 @@ export function BirthDatePicker({
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 className="w-40 max-h-60 overflow-y-auto glass-panel z-50 rounded-md text-white"
+                onCloseAutoFocus={(e) => e.preventDefault()}
                 side="bottom"
                 align="center"
                 sideOffset={6}

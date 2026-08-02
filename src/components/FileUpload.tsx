@@ -197,7 +197,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             {getFileIcon(currentFile.name)}
             <a
               href="#"
-              className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
+              className="text-sm font-medium truncate max-w-[200px] text-white hover:text-white underline cursor-pointer"
               onClick={async (e) => {
                 e.preventDefault();
                 if (isPdf) return; // Inline viewer below
@@ -223,7 +223,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleRemoveFile}
-            className="h-7 w-7 p-0 !min-h-0 !min-w-0 overflow-hidden rounded-full text-white transition-all duration-300 md:hover:bg-white/10"
+            className="h-7 w-7 p-0 !min-h-0 !min-w-0 overflow-hidden rounded-full text-white hover:bg-transparent hover:text-white transition-none"
           >
             <X className="h-3.5 w-3.5" />
           </Button>
@@ -231,7 +231,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
         {isPdf && (
           <div className="pt-1">
-            <CvViewer src={currentFile.url} fileName={currentFile.name} height="70vh" />
+            <CvViewer src={currentFile.url} fileName={currentFile.name} height="70vh" showDownload={false} />
           </div>
         )}
       </div>
