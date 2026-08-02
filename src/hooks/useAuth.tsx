@@ -1054,6 +1054,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Registrering lyckades
+      // 💾 Kom ihåg rollen direkt vid registrering, så taglinen är korrekt
+      // redan vid första inloggningen (innan någon profil hunnit hämtas).
+      try {
+        cacheAuthRoleForEmail(email, userData.role as string);
+        const normalizedSignupRole = normalizeAuthSplashRole(userData.role as string);
+        if (normalizedSignupRole) {
+          localStorage.setItem('parium-last-role', normalizedSignupRole);
+        }
+      } catch { /* localStorage kan vara blockerad */ }
+
       toast({
         title: "Registrering lyckad!",
         description: "Kontrollera din e-post för att aktivera ditt konto",
