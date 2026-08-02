@@ -215,6 +215,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
           }
           if (parsed.postalCode) setPostalCode(parsed.postalCode);
           if (parsed.userLocation) setUserLocation(parsed.userLocation);
+          // Återgå till samma steg som användaren var på (aldrig klar-steget)
+          if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 1 && parsed.currentStep <= 5) {
+            setCurrentStep(parsed.currentStep);
+          }
         } else {
           // Clear old draft
           localStorage.removeItem(WELCOME_DRAFT_KEY);
