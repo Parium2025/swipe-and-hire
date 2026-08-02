@@ -54,9 +54,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const uploadFile = async (file: File) => {
+    if (!navigator.onLine) {
+      setLastFailedFile(file);
+      setUploadError('Ingen internetanslutning. Filen laddas inte upp – anslut igen och försök på nytt.');
+      return;
+    }
     setUploading(true);
     setUploadProgress(0);
+    setUploadError(null);
     try {
+
       const { data } = await supabase.auth.getUser();
       if (!data.user) {
         throw new Error('Du måste vara inloggad för att ladda upp filer');
