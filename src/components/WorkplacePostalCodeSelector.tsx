@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode, PostalCodeResponse } from '@/lib/postalCodeAPI';
 import { MapPin, Check, Loader2 } from 'lucide-react';
+import { RequiredMark } from '@/components/wizard/RequiredMark';
 
 interface WorkplacePostalCodeSelectorProps {
   postalCodeValue: string;
@@ -199,7 +200,7 @@ const WorkplacePostalCodeSelector = ({
 
       {/* Ort input */}
       <div className="space-y-2 md:space-y-1.5">
-        <Label className="text-white text-sm">Ort *</Label>
+        <Label className="text-white text-sm">Ort<RequiredMark filled={!!cityValue.trim()} /></Label>
         <Input
           value={cityValue}
           onChange={handleCityChange}
