@@ -709,7 +709,7 @@ const Index = () => {
           enterDelayMs={routeEnterDelayMs}
         />
         {showTourOverlay ? (
-          <AppOnboardingTour onComplete={finishIntroTour} firstName={(profile as any)?.first_name} />
+          <AppOnboardingTour onComplete={finishIntroTour} firstName={(profile as any)?.first_name} initialStep={introTourStep} />
         ) : (
           <PageIntroCoach />
         )}
