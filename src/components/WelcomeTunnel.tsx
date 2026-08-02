@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
-import { BirthDatePicker } from '@/components/BirthDatePicker';
+import TunnelBirthDateField from '@/components/tunnel/TunnelBirthDateField';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
@@ -366,7 +366,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const handleInputChange = (field: string, value: string | string[] | boolean) => {
     if (field === 'bio' && typeof value === 'string') {
       const wordCount = countWords(value);
-      if (wordCount <= 100) {
+      if (wordCount <= 250) {
         setFormData(prev => ({ ...prev, [field]: value }));
       }
       return;
@@ -1240,23 +1240,20 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                  />
                </div>
-                 <div className="space-y-2">
-                  <Label htmlFor="birthDate" className="text-white font-medium text-sm">Födelsedatum<RequiredMark filled={!!formData.birthDate.trim()} /></Label>
-                  <BirthDatePicker
-                    value={formData.birthDate}
-                    onChange={(date) => handleInputChange('birthDate', date)}
-                    placeholder="Välj födelsedatum"
-                    className="w-full"
-                    popoverAlign="center"
-                    popoverAlignOffset={-240}
-                    alignToIcon={true}
-                  />
-                  {formData.birthDate && calculateAge(formData.birthDate) !== null && (
-                    <p className="text-sm text-white mt-1">
-                      {calculateAge(formData.birthDate)} år gammal
-                    </p>
-                  )}
-                </div>
+                  <div className="space-y-2">
+                   <TunnelBirthDateField
+                     id="birthDate"
+                     label="Födelsedatum"
+                     value={formData.birthDate}
+                     onChange={(date) => handleInputChange('birthDate', date)}
+                   />
+                   {formData.birthDate && calculateAge(formData.birthDate) !== null && (
+                     <p className="text-sm text-white mt-1">
+                       {calculateAge(formData.birthDate)} år gammal
+                     </p>
+                   )}
+                 </div>
+
                <div className="space-y-2">
                  <Label htmlFor="phone" className="text-white font-medium text-sm">
                    <Phone className="h-4 w-4 inline mr-2" />
@@ -1606,7 +1603,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 />
                 <div className="flex justify-end mt-1">
                   <span className="text-sm text-white">
-                    {countWords(formData.bio)}/100 ord
+                    {countWords(formData.bio)}/250 ord
                   </span>
                 </div>
               </div>
@@ -1629,21 +1626,34 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 <h3 className="text-white font-semibold mb-3">Detta kommer att delas med arbetsgivare:</h3>
                 <div className="space-y-2 text-sm text-white">
                   <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                    <span>Namn och profilbild</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                     <span>Din ålder</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                     <span>Postnummer (för jobb nära dig)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                     <span>Telefonnummer och e-post</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                    <span>Ditt CV och din presentationsvideo</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                    <span>Din beskrivning om dig själv</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                     <span>Kommun/stad (inte fullständig adress)</span>
                   </div>
+
                 </div>
               </div>
 
@@ -1657,8 +1667,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       case 6:
         return (
           <div className="text-center space-y-8">
-            <div className="bg-white/20 backdrop-blur-sm p-6 rounded-full w-fit mx-auto mb-6">
-              <Check className="h-12 w-12 text-white" />
+            <div className="bg-green-500/20 backdrop-blur-sm p-6 rounded-full w-fit mx-auto mb-6">
+              <Check className="h-12 w-12 text-green-400" />
             </div>
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Profilen är klar</h2>
@@ -1668,7 +1678,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-12 py-6 bg-primary hover:bg-primary/90 hover:scale-105 transition-all duration-300 text-white font-bold text-xl rounded-2xl shadow-2xl"
+                className="rounded-full px-10 py-6 bg-green-600 text-white hover:bg-green-600/90 md:hover:bg-green-600/90 hover:text-white font-semibold text-lg shadow-2xl transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 {isSubmitting ? (
                   <>
@@ -1676,18 +1686,19 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     Laddar...
                   </>
                 ) : (
-                  'Börja swipa'
+                  'Börja söka jobb'
                 )}
               </Button>
               <Button
                 variant="outlineNeutral"
                 onClick={handlePrevious}
-                className="px-8 py-3 bg-white/10 border border-white/20 text-white text-sm md:hover:text-white md:hover:bg-white/10 md:hover:border-white/20 hover:scale-105 transition-all duration-300"
+                className="rounded-full px-8 py-3 bg-white/10 border border-white/20 text-white text-sm md:hover:text-white md:hover:bg-white/10 md:hover:border-white/20 transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
               </Button>
             </div>
+
           </div>
         );
 
