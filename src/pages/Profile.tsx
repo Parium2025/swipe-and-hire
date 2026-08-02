@@ -119,6 +119,8 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
   const [loading, setLoading] = useState(false);
   const [isStale, setIsStale] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
   const triggeredRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -156,6 +158,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
         if (needsAnalysis && triggeredRef.current !== cvUrl) {
           triggeredRef.current = cvUrl!;
           setAnalyzing(true);
+          setFailed(false);
           try {
             await supabase.rpc('queue_cv_analysis', {
               p_applicant_id: userId,
@@ -167,18 +170,23 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
             console.warn('Kunde inte köa CV-analys:', err);
           }
 
-          // Poll a few times while the queue processes
-          for (let i = 0; i < 10 && !cancelled; i++) {
+          // Poll while the queue processes (upp till ~60 sek)
+          let done = false;
+          for (let i = 0; i < 20 && !cancelled; i++) {
             await new Promise((r) => setTimeout(r, 3000));
             const fresh = await fetchSummary();
             if (cancelled) return;
             if (fresh && fresh.cv_url === cvUrl) {
               setSummary(fresh);
               setIsStale(false);
+              done = true;
               break;
             }
           }
-          if (!cancelled) setAnalyzing(false);
+          if (!cancelled) {
+            setAnalyzing(false);
+            if (!done) setFailed(true);
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -189,7 +197,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
     return () => {
       cancelled = true;
     };
-  }, [userId, cvUrl, refreshKey]);
+  }, [userId, cvUrl, refreshKey, retryTick]);
 
   if (!cvUrl) {
     return null;
@@ -210,6 +218,36 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
     );
   }
 
+  if (failed && !summary) {
+    return (
+      <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
+        <div className="flex items-center gap-2 mb-4">
+          <Bot className="h-4 w-4 text-white" />
+          <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
+        </div>
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 text-white text-sm space-y-3">
+          <p className="text-white">
+            Vår AI-tjänst är tillfälligt otillgänglig. Ditt CV är sparat och syns för arbetsgivare —
+            analysen görs automatiskt så snart tjänsten är tillbaka.
+          </p>
+          <Button
+            type="button"
+            variant="outlineNeutral"
+            size="sm"
+            className="rounded-full"
+            onClick={() => {
+              triggeredRef.current = null;
+              setFailed(false);
+              setRetryTick((t) => t + 1);
+            }}
+          >
+            Försök igen
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!summary) {
     return (
       <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
@@ -223,6 +261,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
       </div>
     );
   }
+
 
 
   return (

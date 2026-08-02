@@ -355,14 +355,21 @@ let contentType = '';
     // The summary should be based PURELY on the uploaded document
 
     if (!userContent) {
+      // Distinguish "no CV at all" from "CV exists but could not be downloaded/read",
+      // so the UI can tell the user to retry instead of claiming no file is uploaded.
+      const noFile = !finalCvUrl;
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'Inget dokument uppladdat för denna kandidat',
+          code: noFile ? 'no_document' : 'document_unreadable',
+          error: noFile
+            ? 'Inget dokument uppladdat för denna kandidat'
+            : 'Dokumentet kunde inte läsas just nu. Försök igen om en stund.',
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: noFile ? 200 : 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
 
     // Call AI to generate summary
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -543,6 +550,18 @@ VIKTIGT:
     const summaryText = summary.is_valid_cv === false
       ? (summary.summary_text?.trim() || rejectionReason)
       : (summary.summary_text || '');
+
+    // Never persist an empty analysis — an unparsable/blank AI answer must be retried,
+    // not cached as "klar" (which would freeze the profile in an empty state forever).
+    if (!summaryText.trim()) {
+      console.error('AI returned an empty summary — not saving, will retry on next run');
+      return new Response(
+        JSON.stringify({ error: 'AI-tjänsten svarade ofullständigt. Försök igen.', code: 'ai_empty_response' }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+
 
 
     // ALWAYS save to profile_cv_summaries for proactive analysis (background pre-analysis)
