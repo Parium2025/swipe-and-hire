@@ -1466,7 +1466,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                   
                   {isUploadingMedia && (
                     <div className="flex flex-col items-center gap-2">
-                      <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
+                      <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-full px-3 py-1.5">
                         {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
                       </Badge>
                       {uploadingMediaType === 'video' && (
@@ -1479,20 +1479,19 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                   
                   {formData.profileImageUrl && !isUploadingMedia && (
                     <div className="flex flex-col items-center gap-2">
-                      <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
+                      <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                         {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
                       </Badge>
-                      
+
                       {/* Anpassa knapp - endast för bilder */}
                       {formData.profileMediaType === 'image' && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
+                        <button
+                          type="button"
                           onClick={handleEditExistingProfile}
-                          className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                          className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-none focus-visible:outline-none focus:ring-0"
                         >
                           Anpassa din bild
-                        </Button>
+                        </button>
                       )}
                     </div>
                   )}
@@ -1501,47 +1500,57 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 {/* Cover image upload - show when video exists */}
                 {formData.profileMediaType === 'video' && formData.profileImageUrl && (
                   <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
-                    <div className="flex items-center gap-2 w-full justify-center">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          if (formData.coverImageUrl) {
-                            handleEditExistingCover();
-                          } else {
-                            document.getElementById('coverImage')?.click();
-                          }
-                        }}
-                        disabled={isUploadingCover}
-                        className="bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
-                      >
-                        {formData.coverImageUrl ? 'Anpassa din bild' : 'Lägg till cover-bild'}
-                      </Button>
-                      
+                    <div className="flex flex-col items-center gap-2">
+                      {/* Första raden: anpassa befintlig cover */}
                       {formData.coverImageUrl && (
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteCoverImage();
-                          }}
-                          className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                          type="button"
+                          onClick={handleEditExistingCover}
+                          className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px] focus:outline-none focus-visible:outline-none focus:ring-0"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          Anpassa din bild
                         </button>
                       )}
-                      
-                      {deletedCoverImage && !formData.coverImageUrl && (
+
+                      {/* Andra raden: byt/lägg till cover + papperskorg */}
+                      <div className="relative flex items-center justify-center w-[180px]">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            restoreCoverImage();
-                          }}
-                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg"
-                          title="Ångra borttagning"
+                          type="button"
+                          onClick={() => document.getElementById('coverImage')?.click()}
+                          disabled={isUploadingCover}
+                          className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-full focus:outline-none focus-visible:outline-none focus:ring-0"
                         >
-                          <RotateCcw className="h-4 w-4" />
+                          {formData.coverImageUrl ? 'Byt cover-bild' : 'Lägg till cover-bild'}
                         </button>
-                      )}
+
+                        {formData.coverImageUrl && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteCoverImage();
+                            }}
+                            className="absolute -right-12 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus-visible:outline-none focus:ring-0"
+                            title="Ta bort cover-bild"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+
+                        {deletedCoverImage && !formData.coverImageUrl && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              restoreCoverImage();
+                            }}
+                            className="absolute -right-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors focus:outline-none focus-visible:outline-none focus:ring-0"
+                            title="Återställ cover-bild"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <Input 
                       type="file" 
@@ -1554,7 +1563,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     
                     {isUploadingCover && (
                       <div className="flex flex-col items-center w-full">
-                        <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-sm animate-pulse">
+                        <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-sm animate-pulse rounded-full">
                           <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
                           Laddar upp cover-bild...
                         </Badge>
@@ -1562,12 +1571,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     )}
                     
                     {formData.coverImageUrl && !isUploadingCover && (
-                      <div className="flex flex-col items-center space-y-2 w-full">
-                         <div className="flex items-center justify-center">
-                           <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md">
-                              Cover-bild uppladdad!
-                            </Badge>
-                         </div>
+                      <div className="flex items-center justify-center">
+                        <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
+                          Cover-bild uppladdad!
+                        </Badge>
                       </div>
                     )}
                   </div>
