@@ -12,7 +12,7 @@ interface Props {
 const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
   <Html lang="sv" dir="ltr">
     <Head />
-    <Preview>Återställ ditt Parium-lösenord</Preview>
+    <Preview>Återställ ditt Parium-lösenord – länken gäller i 1 timme</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={brandSection}>
@@ -29,20 +29,26 @@ const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
           Klicka på knappen nedan för att skapa ett nytt lösenord.
         </Text>
 
-        <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
+        <Section style={{ textAlign: 'center' as const, margin: '32px 0 20px' }}>
           <Button style={button} href={reset_url}>Återställ lösenord</Button>
+          <Text style={validityNote}>Länken gäller i 1 timme och kan användas en gång.</Text>
         </Section>
 
         <Section style={securityCard}>
           <Text style={securityTitle}>🔒 Säkerhetsnotis</Text>
           <Text style={securityBody}>
-            Denna länk är tidsbegränsad. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande – ditt konto förblir säkert.
+            Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande – ditt lösenord förblir oförändrat och ditt konto säkert.
           </Text>
         </Section>
 
         <Section style={fallbackCard}>
-          <Text style={fallbackTitle}>Fungerar inte knappen? Kopiera länken:</Text>
-          <Text style={fallbackUrl}>{reset_url}</Text>
+          <Text style={fallbackTitle}>Fungerar inte knappen?</Text>
+          <Text style={fallbackBody}>
+            <Link href={reset_url} style={fallbackLink}>Öppna din säkra återställningslänk</Link>
+          </Text>
+          <Text style={fallbackHint}>
+            Länken öppnar parium.se och är personlig – dela den inte med någon.
+          </Text>
         </Section>
 
         <Text style={footer}>
