@@ -774,9 +774,6 @@ const Index = () => {
           keepKeys={EMPLOYER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
         />
-        {showTourOverlay && (
-          <AppOnboardingTour onComplete={finishIntroTour} />
-        )}
       </EmployerLayout>
     );
   }
