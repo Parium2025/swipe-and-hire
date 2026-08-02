@@ -685,7 +685,7 @@ const Index = () => {
           enterDelayMs={routeEnterDelayMs}
         />
         {showTourOverlay && (
-          <AppOnboardingTour onComplete={finishIntroTour} />
+          <AppOnboardingTour onComplete={finishIntroTour} firstName={(profile as any)?.first_name} />
         )}
       </JobSeekerLayout>
     );
