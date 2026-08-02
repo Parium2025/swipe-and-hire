@@ -13,7 +13,7 @@ interface ProfileVideoProps {
   userInitials?: string;
   showCountdown?: boolean; // Show countdown timer (default: true for employer view)
   showProgressBar?: boolean; // Show progress/scrubbing bar on hover (default: true)
-  countdownVariant?: 'default' | 'compact' | 'preview'; // 'compact' for Min Profil, 'preview' for Förhandsgranska Profil, 'default' elsewhere
+  countdownVariant?: 'default' | 'compact' | 'preview' | 'circle'; // 'compact' for Min Profil, 'preview' for Förhandsgranska Profil, 'circle' for round avatars, 'default' elsewhere
   onPlayingChange?: (isPlaying: boolean) => void; // Callback when playing state changes
   onRemainingChange?: (remaining: number | null) => void; // Callback with remaining seconds
   onClick?: (e: React.MouseEvent) => void; // Custom click handler (bypasses default play behavior)
