@@ -735,10 +735,6 @@ const Profile = () => {
     if (!phone.trim()) newErrors.phone = 'Telefonnummer är obligatoriskt.';
     else if (!isValidSwedishPhone(phone)) newErrors.phone = 'Ange ett giltigt svenskt nummer (+46 eller 0).';
     if (!birthDate) newErrors.birthDate = 'Födelsedatum är obligatoriskt.';
-    else {
-      const a = calculateAge(birthDate);
-      if (a !== null && a < 16) newErrors.birthDate = 'Du måste vara minst 16 år.';
-    }
     if (!isEmployer && !employmentStatus) newErrors.employmentStatus = 'Anställningsstatus är obligatorisk.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
