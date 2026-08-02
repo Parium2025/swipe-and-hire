@@ -111,13 +111,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
         URL.revokeObjectURL(previewFile.url);
         setPreviewFile(null);
       }
+      setLastFailedFile(null);
     } catch (error) {
       console.error('Upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: error instanceof Error ? error.message : "Kunde inte ladda upp filen.",
-        variant: "destructive"
-      });
+      const offline = !navigator.onLine;
+      const message = offline
+        ? 'Ingen internetanslutning. Anslut igen och försök på nytt.'
+        : error instanceof Error
+          ? error.message
+          : 'Något gick fel när filen skulle laddas upp.';
+      setLastFailedFile(file);
+      setUploadError(message);
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -128,6 +132,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     
     const file = acceptedFiles[0];
     if (file) {
+
       // Check if it's a video file for preview
       const isVideo = file.type.startsWith('video/');
       if (isVideo) {
