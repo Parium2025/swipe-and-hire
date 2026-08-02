@@ -352,7 +352,43 @@ const FileUpload: React.FC<FileUploadProps> = ({
           )}
         </div>
       </div>
+
+      {uploadError && (
+        <div
+          role="alert"
+          className="mt-3 flex items-start gap-3 rounded-2xl border border-red-400/40 bg-red-500/10 backdrop-blur-sm px-3.5 py-3 animate-fade-in"
+        >
+          <div className="mt-0.5 shrink-0 rounded-full bg-red-500/20 p-1.5">
+            {navigator.onLine ? (
+              <AlertCircle className="h-4 w-4 text-red-200" />
+            ) : (
+              <WifiOff className="h-4 w-4 text-red-200" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-white break-words">Uppladdningen misslyckades</p>
+            <p className="text-xs text-white/90 break-words leading-relaxed mt-0.5">{uploadError}</p>
+          </div>
+          {lastFailedFile && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={uploading}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (lastFailedFile) uploadFile(lastFailedFile);
+              }}
+              className="shrink-0 h-8 rounded-full px-3 text-xs font-medium text-white bg-white/10 hover:bg-white/20 focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+              Försök igen
+            </Button>
+          )}
+        </div>
+      )}
     </>
+
   );
 };
 
