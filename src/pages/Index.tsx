@@ -564,6 +564,10 @@ const Index = () => {
 
   // Show app intro tutorial after onboarding
   const showTourOverlay = showIntroTutorial;
+  const finishIntroTour = () => {
+    try { localStorage.setItem('parium_intro_tour_done', '1'); } catch { /* ignorera */ }
+    setShowIntroTutorial(false);
+  };
   
   // Resolve role from profile first to avoid flicker
   const role = (profile as any)?.role || (userRole?.role as string) || '';
