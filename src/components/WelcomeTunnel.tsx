@@ -356,7 +356,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   }, [profile]);
 
   const totalSteps = 9; // Introduktion + 6 profil steg + samtycke + submit + slutskärm
-  const progress = currentStep / (totalSteps - 1) * 100;
+  const progress = Math.min(100, Math.max(0, currentStep / 6 * 100)); // 6 synliga steg
 
   const countWords = (text: string) => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
@@ -1201,7 +1201,11 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 <User className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Låt oss lära känna dig</h2>
+              <p className="text-sm text-white max-w-sm mx-auto">
+                Välkommen till Parium — vi börjar med dina uppgifter. Det tar ungefär en minut.
+              </p>
             </div>
+
             
             <div className="space-y-4 max-w-md mx-auto">
                <div className="space-y-2">
