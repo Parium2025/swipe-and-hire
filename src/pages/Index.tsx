@@ -542,10 +542,15 @@ const Index = () => {
   if (needsOnboarding && (profile as any)?.role === 'employer') {
     return <EmployerWelcomeTunnel onComplete={async () => {
       // Mark onboarding as completed in background
-      supabase
-        .from('profiles')
-        .update({ onboarding_completed: true })
-        .eq('id', user.id);
+      if (tunnelReplay) {
+        markTunnelCompletedThisSession();
+      } else {
+        supabase
+          .from('profiles')
+          .update({ onboarding_completed: true })
+          .eq('id', user.id);
+      }
+
       
       // Navigate to home
       navigate('/home');
