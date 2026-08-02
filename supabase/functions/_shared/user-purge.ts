@@ -277,6 +277,7 @@ export async function purgeUserData(
         if (row.job_id) perJob.set(row.job_id, (perJob.get(row.job_id) ?? 0) + 1);
       }
     }
+    await purgeCriterionResults(admin, 'application_id', appIds);
     for (const table of APPLICATION_SCOPED) {
       await delIn(admin, table, 'application_id', appIds);
     }
