@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  X, Sparkles, ArrowRight, Search, FileText, User, Heart, MessageCircle,
+  X, Check, ArrowRight, Building, FileText, User, Heart, MessageCircle,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
@@ -30,7 +30,7 @@ export function resetPageCoachMarks() {
 
 interface CoachConfig {
   key: string;
-  icon: typeof Search;
+  icon: typeof Building;
   title: string;
   lines: (isTouch: boolean) => string[];
   cta?: { label: string; path: string };
@@ -39,10 +39,11 @@ interface CoachConfig {
 const CONFIGS: Record<string, CoachConfig> = {
   '/search-jobs': {
     key: 'search-jobs',
-    icon: Search,
+    icon: Building,
     title: 'Så hittar du rätt jobb',
     lines: (isTouch) => [
-      'Sök på yrke, företag eller ort — eller använd filtren för arbetstid och avstånd.',
+      'Sök på yrke, företag eller ort — eller filtrera på plats, yrkesområde, anställning och lön.',
+      'Knapparna 12 tim, 24 tim, 3 dagar och 7 dagar visar hur nyligen jobben publicerades.',
       isTouch
         ? 'Swipa åt höger för att spara ett jobb, åt vänster för att hoppa vidare.'
         : 'Klicka på ett kort för att öppna hela annonsen. Hjärtat sparar jobbet till senare.',
@@ -170,7 +171,7 @@ const PageIntroCoach = () => {
             <ul className="mt-2 space-y-1.5">
               {config.lines(isTouch).map((line) => (
                 <li key={line} className="flex items-start gap-2">
-                  <Sparkles className="mt-[3px] h-3.5 w-3.5 shrink-0 text-green-400" />
+                  <Check className="mt-[3px] h-3.5 w-3.5 shrink-0 text-green-400" strokeWidth={2.5} />
                   <span className="text-[13px] leading-snug text-white break-words">{line}</span>
                 </li>
               ))}
@@ -191,7 +192,7 @@ const PageIntroCoach = () => {
                 onClick={() => dismiss()}
                 className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
-                Uppfattat
+                Uppfattat, stäng
               </button>
             </div>
           </div>

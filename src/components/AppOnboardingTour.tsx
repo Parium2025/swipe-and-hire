@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, User, FileText, Heart, ArrowRight, Check, MessageCircle,
-  CreditCard, LifeBuoy, Briefcase, Hand, MousePointerClick, ChevronLeft,
+  Building, User, FileText, Heart, ArrowRight, Check, MessageCircle,
+  CreditCard, HelpCircle, Briefcase, ChevronLeft,
 } from 'lucide-react';
-import { useDevice } from '@/hooks/use-device';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
@@ -14,7 +13,7 @@ interface AppOnboardingTourProps {
 }
 
 interface Shortcut {
-  icon: typeof Search;
+  icon: typeof Building;
   title: string;
   description: string;
   path: string;
@@ -22,9 +21,9 @@ interface Shortcut {
 
 const shortcuts: Shortcut[] = [
   {
-    icon: Search,
+    icon: Building,
     title: 'Sök jobb',
-    description: 'Filtrera på yrke, ort och arbetstid — hitta jobben nära dig.',
+    description: 'Sök på yrke, företag eller ort — och filtrera fram rätt jobb.',
     path: '/search-jobs',
   },
   {
@@ -53,8 +52,6 @@ const shortcuts: Shortcut[] = [
  */
 const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) => {
   const navigate = useNavigate();
-  const device = useDevice();
-  const isTouch = device !== 'desktop';
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<0 | 1>(0);
 
@@ -110,7 +107,7 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
           'Din plan och dina kvitton. Att söka jobb är gratis — Premium är helt frivilligt.',
       },
       {
-        icon: LifeBuoy,
+        icon: HelpCircle,
         title: 'Support',
         description:
           'Frågor, guider och kontakt med oss. Vi svarar på svenska, alla vardagar.',
@@ -190,29 +187,6 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                 })}
               </div>
 
-              {/* Enhetsanpassad navigeringstips */}
-              <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5">
-                {isTouch ? (
-                  <Hand className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
-                ) : (
-                  <MousePointerClick className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
-                )}
-                <p className="text-[13px] leading-snug text-white break-words">
-                  {isTouch ? (
-                    <>
-                      <span className="font-semibold">På mobil:</span> tryck på Parium-loggan uppe
-                      till vänster för menyn. I Sök jobb kan du swipa åt höger för att spara ett
-                      jobb och åt vänster för att hoppa vidare — eller bläddra i listan som vanligt.
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-semibold">På dator:</span> menyn ligger alltid längst
-                      upp. I Sök jobb bläddrar du i listan och öppnar ett jobb med ett klick —
-                      swipe-läget finns i mobilappen när du är på språng.
-                    </>
-                  )}
-                </p>
-              </div>
 
               <div className="mt-6 flex flex-col-reverse sm:flex-row items-center justify-center gap-3">
                 <button
