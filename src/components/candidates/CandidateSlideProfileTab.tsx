@@ -75,6 +75,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
               userInitials={initials}
               className="w-full h-full"
               showCountdown={true}
+              countdownVariant="circle"
               showProgressBar={false}
             />
           </div>

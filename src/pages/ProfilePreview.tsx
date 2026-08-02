@@ -214,7 +214,7 @@ export default function ProfilePreview() {
                    userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                    alt="Profilbild"
                    className="w-full h-full rounded-full"
-                   countdownVariant="preview"
+                   countdownVariant="circle"
                    showCountdown={true}
                     disablePlayback={false}
                  />
@@ -532,18 +532,13 @@ export default function ProfilePreview() {
             userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
             alt="Profilbild"
             className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
-            countdownVariant="preview"
-            showCountdown={false}
+            countdownVariant="circle"
+            showCountdown={true}
             disablePlayback={false}
             forceTouchMode={true}
             onPlayingChange={setIsVideoPlaying}
             onRemainingChange={setCountdown}
           />
-          {isVideoPlaying && countdown !== null && (
-            <div className="absolute top-[1.1rem] right-[1.1rem] px-1 py-0.5 text-sm font-bold text-white video-text-shadow">
-              {countdown}s
-            </div>
-          )}
         </div>
       );
     };
