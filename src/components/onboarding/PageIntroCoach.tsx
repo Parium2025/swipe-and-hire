@@ -38,6 +38,42 @@ const TOUR_PATHS = [
 /** Event som öppnar tipset för nuvarande sida igen. */
 export const PAGE_COACH_REPLAY_EVENT = 'parium:page-coach-replay';
 
+/** Läser av nuvarande status ur localStorage (snabb cache). */
+function readLocalCoachState(): CoachState {
+  const seen: Record<string, boolean> = {};
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith(STORAGE_PREFIX))
+      .forEach((k) => {
+        if (localStorage.getItem(k) === '1') seen[k.slice(STORAGE_PREFIX.length)] = true;
+      });
+    return { seen, disabled: localStorage.getItem(COACH_DISABLED_KEY) === '1' };
+  } catch {
+    return { seen, disabled: false };
+  }
+}
+
+/** Skriver molnstatus till localStorage (cachen). */
+function writeLocalCoachState(state: CoachState) {
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith(STORAGE_PREFIX))
+      .forEach((k) => localStorage.removeItem(k));
+    Object.entries(state.seen ?? {}).forEach(([key, value]) => {
+      if (value) localStorage.setItem(STORAGE_PREFIX + key, '1');
+    });
+    if (state.disabled) localStorage.setItem(COACH_DISABLED_KEY, '1');
+    else localStorage.removeItem(COACH_DISABLED_KEY);
+  } catch {
+    /* ignorera */
+  }
+}
+
+/** Speglar aktuell lokal status till kontot så den följer med mellan enheter. */
+function syncCoachStateToCloud() {
+  void saveCoachState(readLocalCoachState());
+}
+
 export function resetPageCoachMarks() {
   try {
     Object.keys(localStorage)
@@ -47,6 +83,7 @@ export function resetPageCoachMarks() {
   } catch {
     /* ignorera */
   }
+  syncCoachStateToCloud();
 }
 
 /** Är guiden avstängd? Hårdstopp som gäller alla sidor. */
@@ -67,6 +104,7 @@ export function markAllPageCoachesSeen() {
   } catch {
     /* ignorera */
   }
+  syncCoachStateToCloud();
 }
 
 /** Starta den sammanhängande guiden från den valda sidan. */
@@ -84,6 +122,7 @@ export function replayPageCoach() {
   resetPageCoachMarks();
   window.dispatchEvent(new CustomEvent(PAGE_COACH_REPLAY_EVENT));
 }
+
 
 
 
