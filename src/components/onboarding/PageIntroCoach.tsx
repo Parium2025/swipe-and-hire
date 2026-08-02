@@ -192,11 +192,10 @@ const CONFIGS: Record<string, CoachConfig> = {
   '/profile': {
     key: 'profile',
     icon: User,
-    title: 'Det här ser arbetsgivaren',
+    title: 'Din profil',
     lines: () => [
       'Bild, presentation, CV och video — allt kan ändras eller raderas när du vill.',
       'Profiler med bild och en kort presentation får betydligt fler svar.',
-      'Din profil delas med en arbetsgivare först när du själv skickar en ansökan — aldrig innan.',
     ],
     cta: { label: 'Gå till Sök jobb', path: '/search-jobs' },
   },
