@@ -192,7 +192,7 @@ const PageIntroCoach = () => {
                 onClick={() => dismiss()}
                 className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
-                Uppfattat
+                Uppfattat, stäng
               </button>
             </div>
           </div>
