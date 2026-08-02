@@ -130,12 +130,13 @@ serve(async (req) => {
     if (isProactiveAnalysis && cvUrl) {
       const { data: existingSummary } = await supabase
         .from('profile_cv_summaries')
-        .select('cv_url')
+        .select('cv_url, summary_text')
         .eq('user_id', applicant_id)
-        .single();
-      
-      // Skip if CV hasn't changed
-      if (existingSummary?.cv_url === cvUrl) {
+        .maybeSingle();
+
+      // Skip only if the CV is unchanged AND the stored analysis actually succeeded.
+      // (A previous failed run can leave a row with an empty summary — that must be retried.)
+      if (existingSummary?.cv_url === cvUrl && (existingSummary?.summary_text || '').trim().length > 0) {
         console.log('CV unchanged, skipping proactive analysis');
         return new Response(
           JSON.stringify({ success: true, skipped: true, reason: 'CV unchanged' }),
