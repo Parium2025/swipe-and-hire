@@ -6,6 +6,8 @@ import {
   CreditCard, HelpCircle, ArrowRight,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
+import { loadCoachState, saveCoachState, type CoachState } from '@/lib/onboardingState';
+
 
 /**
  * 🎓 PAGE INTRO COACH
