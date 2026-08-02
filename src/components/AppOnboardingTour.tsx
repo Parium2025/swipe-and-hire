@@ -5,6 +5,7 @@ import {
   Building, User, FileText, Heart, ArrowRight, Check, MessageCircle,
   CreditCard, HelpCircle, Briefcase, ChevronLeft, Eye,
 } from 'lucide-react';
+import { startPageCoachTour } from '@/components/onboarding/PageIntroCoach';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
@@ -114,6 +115,11 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
       onComplete();
       if (path) navigate(path);
     }, 180);
+  };
+
+  const startGuide = (path: string) => {
+    startPageCoachTour(path);
+    close(path);
   };
 
   // Escape stänger
@@ -265,7 +271,7 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                     <button
                       key={item.path}
                       type="button"
-                      onClick={() => close(item.path)}
+                      onClick={() => startGuide(item.path)}
                       className="group flex w-full items-center gap-3.5 rounded-2xl border border-white/12 bg-white/[0.06] p-4 text-left transition-colors duration-150 hover:bg-white/[0.12] active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                       <span className="w-5 shrink-0 text-[13px] font-semibold tabular-nums text-white">

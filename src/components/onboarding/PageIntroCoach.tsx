@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   X, Check, Building, FileText, User, Heart, MessageCircle, Eye, Home,
+  CreditCard, HelpCircle,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
@@ -17,6 +18,18 @@ import { useDevice } from '@/hooks/use-device';
  */
 
 const STORAGE_PREFIX = 'parium_page_coach_v1_';
+const ACTIVE_TOUR_KEY = 'parium_page_coach_active';
+
+const TOUR_PATHS = [
+  '/search-jobs',
+  '/saved-jobs',
+  '/my-applications',
+  '/messages',
+  '/profile',
+  '/profile-preview',
+  '/subscription',
+  '/support',
+] as const;
 
 /** Event som öppnar tipset för nuvarande sida igen. */
 export const PAGE_COACH_REPLAY_EVENT = 'parium:page-coach-replay';
@@ -26,6 +39,16 @@ export function resetPageCoachMarks() {
     Object.keys(localStorage)
       .filter((k) => k.startsWith(STORAGE_PREFIX))
       .forEach((k) => localStorage.removeItem(k));
+  } catch {
+    /* ignorera */
+  }
+}
+
+/** Starta den sammanhängande guiden från den valda sidan. */
+export function startPageCoachTour(path: string) {
+  resetPageCoachMarks();
+  try {
+    localStorage.setItem(ACTIVE_TOUR_KEY, path);
   } catch {
     /* ignorera */
   }
@@ -126,6 +149,24 @@ const CONFIGS: Record<string, CoachConfig> = {
     ],
     cta: { label: 'Se dina ansökningar', path: '/my-applications' },
   },
+  '/subscription': {
+    key: 'subscription',
+    icon: CreditCard,
+    title: 'Din ekonomi',
+    lines: () => [
+      'Här ser du din plan och dina kvitton samlade på ett ställe.',
+      'Att söka jobb är alltid gratis. Premium är frivilligt och kan avslutas när du vill.',
+    ],
+  },
+  '/support': {
+    key: 'support',
+    icon: HelpCircle,
+    title: 'Hjälp när du behöver den',
+    lines: () => [
+      'Här hittar du guider, vanliga frågor och kontakt med kundtjänst.',
+      'Under Hjälp & tips kan du alltid starta om hela den här genomgången från början.',
+    ],
+  },
 };
 
 const PageIntroCoach = () => {
@@ -137,16 +178,25 @@ const PageIntroCoach = () => {
   const [visible, setVisible] = useState(false);
 
   const config = useMemo(() => CONFIGS[location.pathname], [location.pathname]);
+  const activeTourPath = useMemo(() => {
+    try {
+      return localStorage.getItem(ACTIVE_TOUR_KEY);
+    } catch {
+      return null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, replayToken]);
+  const isGuidedTour = activeTourPath === location.pathname;
 
   const alreadySeen = useMemo(() => {
     if (!config) return true;
     try {
-      return localStorage.getItem(STORAGE_PREFIX + config.key) === '1';
+      return !isGuidedTour && localStorage.getItem(STORAGE_PREFIX + config.key) === '1';
     } catch {
       return false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, replayToken]);
+  }, [config, replayToken, isGuidedTour]);
 
   useEffect(() => {
     const onReplay = () => setReplayToken((t) => t + 1);
@@ -164,10 +214,19 @@ const PageIntroCoach = () => {
   }, [config, alreadySeen]);
 
   const dismiss = useCallback(
-    (path?: string) => {
+    (path?: string, continueTour = false) => {
       if (!config) return;
       try {
         localStorage.setItem(STORAGE_PREFIX + config.key, '1');
+      } catch {
+        /* ignorera */
+      }
+      try {
+        if (continueTour && path) {
+          localStorage.setItem(ACTIVE_TOUR_KEY, path);
+        } else {
+          localStorage.removeItem(ACTIVE_TOUR_KEY);
+        }
       } catch {
         /* ignorera */
       }
@@ -192,6 +251,14 @@ const PageIntroCoach = () => {
   if (!config || alreadySeen) return null;
 
   const Icon = config.icon;
+  const currentTourIndex = TOUR_PATHS.indexOf(location.pathname as (typeof TOUR_PATHS)[number]);
+  const nextTourPath = currentTourIndex >= 0 ? TOUR_PATHS[currentTourIndex + 1] : undefined;
+  const primaryPath = isGuidedTour ? nextTourPath : config.cta?.path;
+  const primaryLabel = isGuidedTour
+    ? nextTourPath
+      ? 'Nästa steg'
+      : 'Klart, stäng'
+    : config.cta?.label;
 
   return createPortal(
     <div
@@ -244,14 +311,25 @@ const PageIntroCoach = () => {
             <p className="mt-4 text-[12px] leading-snug text-white break-words">
               Vill du se tipsen igen? De ligger kvar under Support → Hjälp &amp; tips.
             </p>
-            <div className="mt-4 flex items-center justify-center">
-              <button
-                type="button"
-                onClick={() => dismiss()}
-                className="rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-              >
-                Uppfattat, stäng
-              </button>
+            <div className="mt-4 flex flex-col items-center justify-center gap-2.5">
+              {primaryLabel && (
+                <button
+                  type="button"
+                  onClick={() => dismiss(primaryPath, isGuidedTour && Boolean(primaryPath))}
+                  className="inline-flex min-w-36 items-center justify-center rounded-full bg-green-500 px-6 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                >
+                  {primaryLabel}
+                </button>
+              )}
+              {primaryPath && (
+                <button
+                  type="button"
+                  onClick={() => dismiss()}
+                  className="rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                >
+                  Avsluta guiden
+                </button>
+              )}
             </div>
 
           </div>
