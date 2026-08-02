@@ -386,8 +386,13 @@ const Index = () => {
   }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
 
   // Support → "Hjälp & tips" öppnar hela välkomstkortet igen.
+  const [introTourStep, setIntroTourStep] = useState<0 | 1>(0);
   useEffect(() => {
-    const onReplay = () => setShowIntroTutorial(true);
+    const onReplay = (e: Event) => {
+      const step = (e as CustomEvent<{ step?: 0 | 1 }>).detail?.step ?? 0;
+      setIntroTourStep(step);
+      setShowIntroTutorial(true);
+    };
     window.addEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
     return () => window.removeEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
   }, []);
