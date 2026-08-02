@@ -26,6 +26,7 @@ import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelComplet
 import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour from '@/components/AppOnboardingTour';
+import PageIntroCoach, { resetPageCoachMarks } from '@/components/onboarding/PageIntroCoach';
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
