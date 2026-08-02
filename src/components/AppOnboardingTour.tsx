@@ -204,8 +204,8 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                   {firstName ? `Välkommen, ${firstName}!` : 'Välkommen till Parium!'}
                 </h2>
                 <p className="mt-2 text-sm sm:text-base text-white leading-relaxed max-w-md">
-                  Din profil är klar. Här är hela appen på 30 sekunder — sen väljer du själv var
-                  du vill börja.
+                  Din profil är klar. Här är hela appen i olika steg — välj själv var du vill
+                  börja.
                 </p>
               </div>
 
