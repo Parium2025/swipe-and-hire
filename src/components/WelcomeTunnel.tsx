@@ -356,7 +356,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   }, [profile]);
 
   const totalSteps = 9; // Introduktion + 6 profil steg + samtycke + submit + slutskärm
-  const progress = currentStep / (totalSteps - 1) * 100;
+  const progress = Math.min(100, Math.max(0, currentStep / 6 * 100)); // 6 synliga steg
 
   const countWords = (text: string) => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
