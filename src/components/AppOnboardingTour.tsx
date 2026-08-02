@@ -5,7 +5,7 @@ import {
   Building, User, FileText, Heart, ArrowRight, Check, MessageCircle,
   CreditCard, HelpCircle, Briefcase, ChevronLeft, Eye,
 } from 'lucide-react';
-import { startPageCoachTour } from '@/components/onboarding/PageIntroCoach';
+import { startPageCoachTour, markAllPageCoachesSeen } from '@/components/onboarding/PageIntroCoach';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
@@ -110,6 +110,8 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
   }, []);
 
   const close = (path?: string) => {
+    // Stänger man utan att välja en guide ska inga sidtips dyka upp senare.
+    if (!path) markAllPageCoachesSeen();
     setVisible(false);
     window.setTimeout(() => {
       onComplete();
