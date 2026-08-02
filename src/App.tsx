@@ -33,7 +33,6 @@ import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 import ValjPlan from "./pages/ValjPlan";
 import Unsubscribe from "./pages/Unsubscribe";
-import Index from "./pages/Index";
 
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
 // imported module" errors from freezing the app on a dark Suspense fallback.
@@ -102,6 +101,7 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
 }
 
 // Heavy pages that can still be lazy-loaded safely
+const Index = lazyWithRetry(() => import("./pages/Index"));
 const JobApplication = lazyWithRetry(() => import("./pages/JobApplication"));
 const JobView = lazyWithRetry(() => import("./pages/JobView"));
 const CvTunnel = lazyWithRetry(() => import("./pages/CvTunnel"));
