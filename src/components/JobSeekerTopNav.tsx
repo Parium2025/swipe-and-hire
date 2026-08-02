@@ -304,6 +304,14 @@ function JobSeekerTopNav() {
                   </DropdownMenuItem>
                 );
               })}
+              <DropdownMenuItem
+                onClick={() => { replayPageCoach(); setSupportOpen(false); }}
+                className={dropdownItemClass}
+              >
+                <Lightbulb className="h-4 w-4" />
+                Hjälp &amp; tips
+              </DropdownMenuItem>
+
               {isPlatformAdmin && (
                 <>
                   <DropdownMenuSeparator className="bg-white/20" />
