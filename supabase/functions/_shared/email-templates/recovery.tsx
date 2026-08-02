@@ -34,12 +34,13 @@ export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
           Vi fick en förfrågan om att återställa lösenordet till ditt Parium-konto.
           Klicka på knappen nedan för att välja ett nytt lösenord.
         </Text>
-        <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
+        <Section style={{ textAlign: 'center' as const, margin: '32px 0 20px' }}>
           <Button style={button} href={confirmationUrl}>Välj nytt lösenord</Button>
+          <Text style={smallText}>Länken gäller i 1 timme och kan användas en gång.</Text>
         </Section>
         <Text style={smallText}>
-          Fungerar inte knappen? Kopiera länken:{' '}
-          <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
+          Fungerar inte knappen?{' '}
+          <Link href={confirmationUrl} style={link}>Öppna din säkra återställningslänk</Link>
         </Text>
         <Text style={footer}>
           Om du inte begärde en återställning kan du ignorera detta mail – ditt lösenord förblir oförändrat.
