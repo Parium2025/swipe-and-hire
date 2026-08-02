@@ -1395,8 +1395,11 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                       coverImageUrl={signedCoverUrl || ''}
                       userInitials=""
                       alt="Profile video"
+                      countdownVariant="circle"
+                      showProgressBar={false}
                       className="w-32 h-32 border-4 border-white/10 transition-all rounded-full overflow-hidden"
                     />
+
                   ) : (
                     <div 
                       className="cursor-pointer" 
