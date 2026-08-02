@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  X, Check, Building, FileText, User, Heart, MessageCircle, Eye, Home,
+  X, Check, Building, FileText, User, Heart, MessageCircle, Eye,
   CreditCard, HelpCircle, ArrowRight,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
