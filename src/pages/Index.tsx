@@ -502,10 +502,15 @@ const Index = () => {
   if (needsOnboarding && (profile as any)?.role === 'job_seeker') {
     return <WelcomeTunnel onComplete={async () => {
       // Mark onboarding as completed in background
-      supabase
-        .from('profiles')
-        .update({ onboarding_completed: true })
-        .eq('id', user.id);
+      if (tunnelReplay) {
+        markTunnelCompletedThisSession();
+      } else {
+        supabase
+          .from('profiles')
+          .update({ onboarding_completed: true })
+          .eq('id', user.id);
+      }
+
 
       // 1) Jobb-intent (kom från /annons/:id som utloggad → "Ansök") går först
       try {
