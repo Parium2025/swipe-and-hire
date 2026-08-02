@@ -175,7 +175,7 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                       className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/[0.05] p-3.5"
                     >
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
-                        <Icon className="h-4.5 w-4.5 h-[18px] w-[18px] text-white" />
+                        <Icon className="h-[18px] w-[18px] text-white" />
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-[15px] font-semibold text-white">
