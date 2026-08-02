@@ -1790,7 +1790,14 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   };
 
   return (
-    <div className="h-[100dvh] bg-gradient-parium flex flex-col relative overflow-x-hidden">
+    <div
+      className="h-[100dvh] bg-gradient-parium flex flex-col relative overflow-x-hidden"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+      }}
+    >
       {/* Static animated background - identical to AuthMobile */}
       <div className="fixed inset-0 pointer-events-none z-0">
         
