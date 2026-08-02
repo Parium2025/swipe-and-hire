@@ -34,7 +34,8 @@ import {
 } from "lucide-react";
 import { PariumLogoButton } from "@/components/PariumLogoButton";
 import NotificationCenter from "@/components/NotificationCenter";
-import { replayPageCoach } from "@/components/onboarding/PageIntroCoach";
+import { resetPageCoachMarks } from "@/components/onboarding/PageIntroCoach";
+import { replayWelcomeCard } from "@/components/AppOnboardingTour";
 
 
 // Jobb dropdown items
@@ -305,7 +306,7 @@ function JobSeekerTopNav() {
                 );
               })}
               <DropdownMenuItem
-                onClick={() => { replayPageCoach(); setSupportOpen(false); }}
+                onClick={() => { resetPageCoachMarks(); replayWelcomeCard(); setSupportOpen(false); }}
                 className={dropdownItemClass}
               >
                 <Lightbulb className="h-4 w-4" />

@@ -36,7 +36,8 @@ import {
   Home,
   Lightbulb
 } from "lucide-react";
-import { replayPageCoach } from "@/components/onboarding/PageIntroCoach";
+import { resetPageCoachMarks } from "@/components/onboarding/PageIntroCoach";
+import { replayWelcomeCard } from "@/components/AppOnboardingTour";
 
 
 const profileItems = [
@@ -427,7 +428,8 @@ export function AppSidebar() {
                  >
                    <button
                      onClick={(e) => {
-                       replayPageCoach();
+                       resetPageCoachMarks();
+                       replayWelcomeCard();
                        (e.currentTarget as HTMLButtonElement).blur();
                        if (isMobile) setOpenMobile(false);
                      }}
