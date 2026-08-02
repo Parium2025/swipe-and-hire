@@ -16,6 +16,14 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { consumePendingJobPath } from '@/lib/pendingJobIntent';
 import { applyIntentToSearchFilters } from '@/lib/savedSearchIntent';
 
+// Delad bakgrund för hela /auth (inklusive status- och felsidor)
+const AUTH_BACKDROP_STYLE = {
+  backgroundColor: 'hsl(215 100% 12%)',
+  backgroundImage:
+    'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
+};
+
+
 
 // Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
@@ -528,8 +536,15 @@ const Auth = () => {
     }
     
     return (
-      <div className="min-h-dvh bg-gradient-parium flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
+      <div
+        className="relative min-h-dvh flex items-center justify-center p-4 smooth-scroll touch-pan overflow-hidden"
+        style={{ WebkitOverflowScrolling: 'touch', ...AUTH_BACKDROP_STYLE }}
+      >
+        {/* Dekorativa bubblor — samma bakgrund som inloggningssidan */}
+        <div className="fixed inset-0 z-[5] pointer-events-none">
+          <AnimatedBackground showGlow={false} variant="viewport" />
+        </div>
+        <Card className="relative z-10 w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center space-y-4">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
             <h2 className="text-2xl font-bold text-primary-foreground">{title}</h2>
@@ -567,8 +582,14 @@ const Auth = () => {
   // Visa bekräftelsestatus om det finns en
   if (confirmationStatus !== 'none') {
     return (
-      <div className="min-h-dvh bg-gradient-parium flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
+      <div
+        className="relative min-h-dvh flex items-center justify-center p-4 smooth-scroll touch-pan overflow-hidden"
+        style={{ WebkitOverflowScrolling: 'touch', ...AUTH_BACKDROP_STYLE }}
+      >
+        <div className="fixed inset-0 z-[5] pointer-events-none">
+          <AnimatedBackground showGlow={false} variant="viewport" />
+        </div>
+        <Card className="relative z-10 w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center">
             {confirmationStatus === 'success' && (
               <>
@@ -705,11 +726,8 @@ const Auth = () => {
 
 
   // Använd rätt komponent baserat på skärmstorlek
-  const authBackdropStyle = {
-    backgroundColor: 'hsl(215 100% 12%)',
-    backgroundImage:
-      'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
-  };
+  const authBackdropStyle = AUTH_BACKDROP_STYLE;
+
 
   const AuthBackdrop = () => (
     <div
