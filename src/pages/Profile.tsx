@@ -118,60 +118,93 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
   const [summary, setSummary] = useState<CvSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [isStale, setIsStale] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const triggeredRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const fetchSummary = async () => {
+    let cancelled = false;
+
+    const fetchSummary = async (): Promise<CvSummary | null> => {
+      if (!userId) return null;
+      const { data, error } = await supabase
+        .from('profile_cv_summaries')
+        .select('summary_text, is_valid_cv, document_type, key_points, analyzed_at, cv_url')
+        .eq('user_id', userId)
+        .order('analyzed_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching CV summary:', error);
+        return null;
+      }
+      return (data as CvSummary) || null;
+    };
+
+    const run = async () => {
       if (!userId) return;
-      
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('profile_cv_summaries')
-          .select('summary_text, is_valid_cv, document_type, key_points, analyzed_at, cv_url')
-          .eq('user_id', userId)
-          .order('analyzed_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        
-        if (error) {
-          console.error('Error fetching CV summary:', error);
-          return;
-        }
-        
-        if (data) {
-          setSummary(data as CvSummary);
-          // Check if summary is for a different CV (stale)
-          if (cvUrl && data.cv_url !== cvUrl) {
-            setIsStale(true);
-          } else {
-            setIsStale(false);
+        const data = await fetchSummary();
+        if (cancelled) return;
+
+        setSummary(data);
+        setIsStale(!!(data && cvUrl && data.cv_url !== cvUrl));
+
+        // Saknas analys för det aktuella CV:t? Köa den automatiskt.
+        const needsAnalysis = !!cvUrl && (!data || data.cv_url !== cvUrl);
+        if (needsAnalysis && triggeredRef.current !== cvUrl) {
+          triggeredRef.current = cvUrl!;
+          setAnalyzing(true);
+          try {
+            await supabase.rpc('queue_cv_analysis', {
+              p_applicant_id: userId,
+              p_cv_url: cvUrl!,
+              p_priority: 10,
+            });
+            await supabase.functions.invoke('process-cv-queue').catch(() => {});
+          } catch (err) {
+            console.warn('Kunde inte köa CV-analys:', err);
           }
-        } else {
-          setSummary(null);
-          setIsStale(false);
+
+          // Poll a few times while the queue processes
+          for (let i = 0; i < 10 && !cancelled; i++) {
+            await new Promise((r) => setTimeout(r, 3000));
+            const fresh = await fetchSummary();
+            if (cancelled) return;
+            if (fresh && fresh.cv_url === cvUrl) {
+              setSummary(fresh);
+              setIsStale(false);
+              break;
+            }
+          }
+          if (!cancelled) setAnalyzing(false);
         }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-    
-    fetchSummary();
+
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [userId, cvUrl, refreshKey]);
 
   if (!cvUrl) {
     return null;
   }
 
-  if (loading) {
+  if (loading || (analyzing && !summary)) {
     return (
       <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
         <div className="flex items-center gap-2 mb-4">
           <Bot className="h-4 w-4 text-white" />
           <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
         </div>
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 flex items-center gap-2 text-white/70">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 flex items-center gap-2 text-white">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm">Laddar sammanfattning...</span>
+          <span className="text-sm">{analyzing ? 'Analyserar ditt dokument…' : 'Laddar sammanfattning…'}</span>
         </div>
       </div>
     );
@@ -185,11 +218,12 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
           <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
         </div>
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 text-white text-sm">
-          <p>Ingen AI-analys tillgänglig ännu. Spara din profil så analyseras ditt CV automatiskt.</p>
+          <p>Analysen är på väg. Den dyker upp här inom någon minut — du behöver inte göra något.</p>
         </div>
       </div>
     );
   }
+
 
   return (
     <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
