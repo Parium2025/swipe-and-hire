@@ -352,9 +352,12 @@ const PageIntroCoach = () => {
 
           <ul className="mt-3 w-full space-y-2">
             {config.lines(isTouch).map((line) => (
-              <li key={line} className="flex items-start justify-center gap-2">
+              <li
+                key={line}
+                className="grid w-full grid-cols-[18px_1fr] items-start gap-2 text-left"
+              >
                 <Check className="mt-[3px] h-3.5 w-3.5 shrink-0 text-white" strokeWidth={2.5} />
-                <span className="text-[13px] leading-snug text-white break-words text-center">
+                <span className="text-[13px] leading-snug text-white break-words">
                   {line}
                 </span>
               </li>
@@ -370,9 +373,10 @@ const PageIntroCoach = () => {
               <button
                 type="button"
                 onClick={() => dismiss(primaryPath, isGuidedTour && Boolean(primaryPath))}
-                className="inline-flex min-w-36 max-w-full items-center justify-center rounded-full bg-green-500 px-6 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                className="inline-flex min-w-36 max-w-full items-center justify-center gap-2 rounded-full bg-green-500 px-6 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
-                {primaryLabel}
+                <span className="truncate">{primaryLabel}</span>
+                {primaryPath && <ArrowRight className="h-4 w-4 shrink-0" />}
               </button>
             )}
             {primaryPath && (
