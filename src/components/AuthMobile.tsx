@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
 import { RequiredMark } from '@/components/wizard/RequiredMark';
+import { useEmailAvailability, emailTakenMessage } from '@/hooks/useEmailAvailability';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -175,6 +176,8 @@ const AuthMobile = ({
       setTimeout(deferClear, 0);
     }
   };
+  const signupEmail = (role === 'job_seeker' ? jobSeekerData.email : employerData.email);
+  const emailAvailability = useEmailAvailability(signupEmail, !isLogin);
   // Popular email domains for suggestions (Swedish and international)
   const popularDomains = [
     '@gmail.com', '@gmail.se', '@hotmail.com', '@hotmail.se', '@outlook.com', '@outlook.se',
@@ -916,7 +919,18 @@ const AuthMobile = ({
                              autoCapitalize="none"
                              className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
                            />
-                           {/* email suggestions removed for simpler UX */}
+                           {emailAvailability.taken && (
+                             <p className="mt-1.5 text-xs font-medium text-red-400">
+                               {emailTakenMessage(emailAvailability.existingRole)}{' '}
+                               <button
+                                 type="button"
+                                 onClick={() => handleTabChange('login')}
+                                 className="underline underline-offset-2 text-red-400 hover:text-red-300"
+                               >
+                                 Logga in
+                               </button>
+                             </p>
+                           )}
                          </div>
                          
                            {role === 'job_seeker' && (
