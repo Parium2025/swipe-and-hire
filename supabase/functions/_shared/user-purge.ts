@@ -56,6 +56,32 @@ async function idsOf(
   return ((data ?? []) as unknown as Record<string, string>[]).map((r) => r.id).filter(Boolean);
 }
 
+/**
+ * criterion_results hänger på candidate_evaluations via evaluation_id och har
+ * ingen FK-cascade. Utan detta ligger AI:ns motivering om kandidaten kvar som
+ * föräldralösa rader efter en "fullständig" radering.
+ */
+async function purgeCriterionResults(
+  admin: SupabaseClient,
+  column: 'applicant_id' | 'application_id',
+  values: string[],
+): Promise<void> {
+  if (values.length === 0) return;
+  const evalIds: string[] = [];
+  for (const chunk of chunked(values)) {
+    const { data, error } = await admin
+      .from('candidate_evaluations')
+      .select('id')
+      .in(column, chunk);
+    if (error) {
+      console.warn('⚠️ list candidate_evaluations:', error.message);
+      continue;
+    }
+    evalIds.push(...((data ?? []) as { id: string }[]).map((r) => r.id));
+  }
+  if (evalIds.length > 0) await delIn(admin, 'criterion_results', 'evaluation_id', evalIds);
+}
+
 /** Tabeller kopplade till ett jobb (job_id) — inga FK-cascades finns. */
 const JOB_SCOPED: string[] = [
   'ai_usage_log',
@@ -99,6 +125,7 @@ const USER_SCOPED: { table: string; column: string }[] = [
   { table: 'saved_searches', column: 'user_id' },
   { table: 'job_views', column: 'user_id' },
   { table: 'jobseeker_notes', column: 'user_id' },
+  { table: 'user_onboarding_state', column: 'user_id' },
   { table: 'profile_cv_summaries', column: 'user_id' },
   { table: 'user_data_consents', column: 'user_id' },
   // OBS: consent_records raderas INTE här. Raden pseudonymiseras i steg 8
@@ -197,6 +224,7 @@ export async function purgeUserData(
       const { data } = await admin.from('job_applications').select('id').in('job_id', chunk);
       appIdsOnJobs.push(...(data ?? []).map((r: { id: string }) => r.id));
     }
+    await purgeCriterionResults(admin, 'application_id', appIdsOnJobs);
     for (const table of APPLICATION_SCOPED) {
       if (appIdsOnJobs.length > 0) await delIn(admin, table, 'application_id', appIdsOnJobs);
     }
@@ -251,6 +279,7 @@ export async function purgeUserData(
         if (row.job_id) perJob.set(row.job_id, (perJob.get(row.job_id) ?? 0) + 1);
       }
     }
+    await purgeCriterionResults(admin, 'application_id', appIds);
     for (const table of APPLICATION_SCOPED) {
       await delIn(admin, table, 'application_id', appIds);
     }
@@ -304,7 +333,10 @@ export async function purgeUserData(
   await del(admin, 'conversation_message_reactions', 'user_id', userId);
   await del(admin, 'conversation_members', 'user_id', userId);
 
-  // 5. Alla användarscopade tabeller (verifierade kolumnnamn)
+  // 5. Kvarvarande AI-bedömningar om användaren (kan finnas utan ansökan kvar)
+  await purgeCriterionResults(admin, 'applicant_id', [userId]);
+
+  // 5b. Alla användarscopade tabeller (verifierade kolumnnamn)
   for (const { table, column } of USER_SCOPED) {
     await del(admin, table, column, userId);
   }
