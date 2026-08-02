@@ -102,13 +102,13 @@ export async function processStatusAlerts(summaries: PerformanceSummary[], owner
       warnings: alert.warnings,
     };
 
-    await supabase.from('notifications').insert({
-      user_id: ownerUserId,
-      type: 'system_performance_alert',
-      title: alert.title,
-      body: alert.body,
-      metadata,
-    });
+    // Systemlarm skapas via en skyddad databasfunktion (endast plattformsadmin).
+    // Klienten får inte längre skriva notiser av typen system_performance_alert direkt.
+    await supabase.rpc('create_system_performance_alert' as never, {
+      _title: alert.title,
+      _body: alert.body,
+      _metadata: metadata,
+    } as never);
 
     try {
       await supabase.functions.invoke('send-push-notification', {
