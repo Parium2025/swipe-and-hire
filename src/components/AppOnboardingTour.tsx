@@ -234,6 +234,14 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                 })}
               </div>
 
+              <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5">
+                <p className="text-[13px] leading-snug text-white break-words text-center">
+                  <span className="font-semibold">Tips:</span> Parium-loggan längst upp till
+                  vänster är din hem-knapp — tryck på den när du vill tillbaka till startsidan.
+                </p>
+              </div>
+
+
 
               <div className="mt-6 flex flex-col-reverse sm:flex-row items-center justify-center gap-3">
                 <button
