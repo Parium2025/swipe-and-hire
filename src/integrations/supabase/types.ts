@@ -3292,6 +3292,10 @@ export type Database = {
         }
         Returns: number
       }
+      create_system_performance_alert: {
+        Args: { _body: string; _metadata?: Json; _title: string }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
