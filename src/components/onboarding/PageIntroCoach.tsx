@@ -254,14 +254,31 @@ const PageIntroCoach = () => {
     [config, navigate]
   );
 
+  /** Avsluta helt: inga tips dyker upp igen förrän man startar om via Support. */
+  const endGuide = useCallback(() => {
+    markAllPageCoachesSeen();
+    setVisible(false);
+    window.setTimeout(() => setReplayToken((t) => t + 1), 200);
+  }, []);
+
+  /** Kryss: stäng tipset och gå tillbaka till översiktslistan. */
+  const backToOverview = useCallback(() => {
+    markAllPageCoachesSeen();
+    setVisible(false);
+    window.setTimeout(() => {
+      setReplayToken((t) => t + 1);
+      window.dispatchEvent(new CustomEvent(WELCOME_CARD_REPLAY_EVENT_NAME));
+    }, 200);
+  }, []);
+
   useEffect(() => {
     if (!visible) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') dismiss();
+      if (e.key === 'Escape') endGuide();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [visible, dismiss]);
+  }, [visible, endGuide]);
 
   if (!config || alreadySeen) return null;
 
@@ -271,7 +288,7 @@ const PageIntroCoach = () => {
   const primaryPath = isGuidedTour ? nextTourPath : config.cta?.path;
   const primaryLabel = isGuidedTour
     ? nextTourPath
-      ? 'Nästa steg'
+      ? CONFIGS[nextTourPath]?.title ?? 'Nästa steg'
       : 'Klart, stäng'
     : config.cta?.label;
 
@@ -288,65 +305,66 @@ const PageIntroCoach = () => {
       <button
         type="button"
         aria-label="Stäng tipset"
-        onClick={() => dismiss()}
+        onClick={endGuide}
         className="absolute inset-0 bg-black/45 backdrop-blur-[2px] focus:outline-none"
       />
 
       <div
-        className={`relative w-full max-w-[420px] rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 backdrop-blur-xl shadow-2xl p-5 sm:p-6 transition-transform duration-300 ${
+        className={`relative w-full max-w-[420px] rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 backdrop-blur-xl shadow-2xl p-5 pt-6 sm:p-6 sm:pt-7 text-center transition-transform duration-300 ${
           visible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-2'
         }`}
       >
-        <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
-            <Icon className="h-[18px] w-[18px] text-white" />
+        <button
+          type="button"
+          onClick={backToOverview}
+          aria-label="Stäng tipset och visa översikten"
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="flex flex-col items-center">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+            <Icon className="h-4 w-4 text-white" />
           </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="text-[16px] font-semibold text-white leading-snug break-words">
-                {config.title}
-              </h3>
+          <h3 className="mt-3 px-6 text-[16px] font-semibold text-white leading-snug break-words">
+            {config.title}
+          </h3>
+
+          <ul className="mt-3 w-full space-y-2">
+            {config.lines(isTouch).map((line) => (
+              <li key={line} className="flex items-start justify-center gap-2">
+                <Check className="mt-[3px] h-3.5 w-3.5 shrink-0 text-white" strokeWidth={2.5} />
+                <span className="text-[13px] leading-snug text-white break-words text-center">
+                  {line}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-4 text-[12px] leading-snug text-white break-words">
+            Vill du se tipsen igen? De ligger kvar under Support → Hjälp &amp; tips.
+          </p>
+
+          <div className="mt-4 flex w-full flex-col items-center justify-center gap-2.5">
+            {primaryLabel && (
               <button
                 type="button"
-                onClick={() => dismiss()}
-                aria-label="Stäng tipset"
-                className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                onClick={() => dismiss(primaryPath, isGuidedTour && Boolean(primaryPath))}
+                className="inline-flex min-w-36 max-w-full items-center justify-center rounded-full bg-green-500 px-6 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
-                <X className="h-4 w-4" />
+                {primaryLabel}
               </button>
-            </div>
-            <ul className="mt-3 space-y-2">
-              {config.lines(isTouch).map((line) => (
-                <li key={line} className="flex items-start gap-2">
-                  <Check className="mt-[3px] h-3.5 w-3.5 shrink-0 text-white" strokeWidth={2.5} />
-                  <span className="text-[13px] leading-snug text-white break-words">{line}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 text-[12px] leading-snug text-white break-words">
-              Vill du se tipsen igen? De ligger kvar under Support → Hjälp &amp; tips.
-            </p>
-            <div className="mt-4 flex flex-col items-center justify-center gap-2.5">
-              {primaryLabel && (
-                <button
-                  type="button"
-                  onClick={() => dismiss(primaryPath, isGuidedTour && Boolean(primaryPath))}
-                  className="inline-flex min-w-36 items-center justify-center rounded-full bg-green-500 px-6 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-                >
-                  {primaryLabel}
-                </button>
-              )}
-              {primaryPath && (
-                <button
-                  type="button"
-                  onClick={() => dismiss()}
-                  className="rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-                >
-                  Avsluta guiden
-                </button>
-              )}
-            </div>
-
+            )}
+            {primaryPath && (
+              <button
+                type="button"
+                onClick={endGuide}
+                className="rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              >
+                Avsluta guiden
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -354,5 +372,6 @@ const PageIntroCoach = () => {
     document.body
   );
 };
+
 
 export default PageIntroCoach;
