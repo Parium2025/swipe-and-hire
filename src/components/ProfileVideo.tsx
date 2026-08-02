@@ -13,7 +13,7 @@ interface ProfileVideoProps {
   userInitials?: string;
   showCountdown?: boolean; // Show countdown timer (default: true for employer view)
   showProgressBar?: boolean; // Show progress/scrubbing bar on hover (default: true)
-  countdownVariant?: 'default' | 'compact' | 'preview'; // 'compact' for Min Profil, 'preview' for Förhandsgranska Profil, 'default' elsewhere
+  countdownVariant?: 'default' | 'compact' | 'preview' | 'circle'; // 'compact' for Min Profil, 'preview' for Förhandsgranska Profil, 'circle' for round avatars, 'default' elsewhere
   onPlayingChange?: (isPlaying: boolean) => void; // Callback when playing state changes
   onRemainingChange?: (remaining: number | null) => void; // Callback with remaining seconds
   onClick?: (e: React.MouseEvent) => void; // Custom click handler (bypasses default play behavior)
@@ -316,18 +316,27 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
 
       {/* Countdown timer when video is playing */}
       {showCountdown && isPlaying && remainingSeconds !== null && (
-        <div 
-          className={`absolute font-bold text-white video-text-shadow ${
-            countdownVariant === 'compact'
-              ? 'top-2 right-[1.375rem] px-1 py-0.5 text-xs'
-              : countdownVariant === 'preview'
-                ? 'top-5 right-5 md:top-3 md:right-7 px-1.5 py-0.5 text-sm md:text-sm'
-                : 'top-3 right-3 md:top-3 md:right-6 px-2 py-1 text-sm md:text-base'
-          }`}
-        >
-          {remainingSeconds}s
-        </div>
+        countdownVariant === 'circle' ? (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2 py-[3px] rounded-full bg-black/45 backdrop-blur-md border border-white/15 shadow-lg">
+            <span className="text-[11px] font-semibold leading-none text-white tabular-nums tracking-tight">
+              {remainingSeconds}s
+            </span>
+          </div>
+        ) : (
+          <div 
+            className={`absolute font-bold text-white video-text-shadow ${
+              countdownVariant === 'compact'
+                ? 'top-2 right-[1.375rem] px-1 py-0.5 text-xs'
+                : countdownVariant === 'preview'
+                  ? 'top-5 right-5 md:top-3 md:right-7 px-1.5 py-0.5 text-sm md:text-sm'
+                  : 'top-3 right-3 md:top-3 md:right-6 px-2 py-1 text-sm md:text-base'
+            }`}
+          >
+            {remainingSeconds}s
+          </div>
+        )
       )}
+
 
 
       {/* Video progress bar */}

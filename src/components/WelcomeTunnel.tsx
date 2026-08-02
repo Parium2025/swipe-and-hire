@@ -1395,8 +1395,11 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                       coverImageUrl={signedCoverUrl || ''}
                       userInitials=""
                       alt="Profile video"
+                      countdownVariant="circle"
+                      showProgressBar={false}
                       className="w-32 h-32 border-4 border-white/10 transition-all rounded-full overflow-hidden"
                     />
+
                   ) : (
                     <div 
                       className="cursor-pointer" 
@@ -1632,41 +1635,29 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
                 <h3 className="text-white font-semibold mb-3">Detta kommer att delas med arbetsgivare:</h3>
                 <div className="space-y-2 text-sm text-white">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                    <span>Namn och profilbild</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                    <span>Din ålder</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                    <span>Postnummer (för jobb nära dig)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                    <span>Telefonnummer och e-post</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                    <span>Ditt CV och din presentationsvideo</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                    <span>Din beskrivning om dig själv</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                    <span>Kommun/stad (inte fullständig adress)</span>
-                  </div>
-
+                  {[
+                    'Namn och profilbild/profilvideo',
+                    'Din ålder',
+                    'Postnummer',
+                    'Kommun/stad',
+                    'Telefonnummer och e-post',
+                    'Ditt CV',
+                    'Din beskrivning om dig själv',
+                    'Din nuvarande situation, arbetstid och tillgänglighet',
+                    'Dina svar på arbetsgivarens frågor i ansökan',
+                  ].map((item) => (
+                    <div key={item} className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
+                      <span className="break-words">{item}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               <p className="text-sm text-white">
-                Ovanstående information visas för en arbetsgivare först när du själv söker ett av deras jobb. Du kan när som helst ändra dina uppgifter, ta tillbaka en ansökan eller radera ditt konto under Min profil.
+                Informationen visas för en arbetsgivare först när du själv söker ett av deras jobb. Du kan när som helst ändra dina uppgifter eller radera ditt konto under Min profil.
               </p>
+
             </div>
           </div>
         );
