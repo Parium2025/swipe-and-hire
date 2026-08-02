@@ -1,262 +1,168 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Heart, PanelLeft, User, Crown, ArrowRight } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
+import { Search, User, FileText, Heart, ArrowRight, Check } from 'lucide-react';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
+  /** Förnamn för en personlig hälsning (valfritt) */
+  firstName?: string;
 }
 
-const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  
+interface Shortcut {
+  icon: typeof Search;
+  title: string;
+  description: string;
+  path: string;
+}
+
+const shortcuts: Shortcut[] = [
+  {
+    icon: Search,
+    title: 'Sök jobb',
+    description: 'Filtrera på yrke, ort och arbetstid — eller swipa dig igenom.',
+    path: '/search-jobs',
+  },
+  {
+    icon: User,
+    title: 'Min profil',
+    description: 'Uppdatera CV, bild, video och dina uppgifter när du vill.',
+    path: '/profile',
+  },
+  {
+    icon: FileText,
+    title: 'Mina ansökningar',
+    description: 'Följ status på allt du sökt, samlat på ett ställe.',
+    path: '/my-applications',
+  },
+];
+
+/**
+ * Välkomstkort som visas en gång efter att profilen är klar.
+ * Ingen tvingande rundtur: användaren väljer själv vart hen vill,
+ * eller stänger kortet och utforskar fritt.
+ */
+const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) => {
   const navigate = useNavigate();
+  const [visible, setVisible] = useState(false);
 
-  const steps = [
-    {
-      icon: Heart,
-      title: "Här söker du jobb",
-      description: "Fyll i fälten, sedan swipa höger på jobb du är intresserad av och vänster på jobb du vill passa",
-      page: "/search-jobs",
-      allowedElement: null // Bara nästa-knappen tillåten
-    },
-    {
-      icon: PanelLeft,
-      title: "Använd sidomenyn",
-      description: "Tryck på menyknappen för att öppna och se fler funktioner.",
-      page: "/search-jobs",
-      allowedElement: "[data-sidebar='trigger']" // Bara sidebar trigger tillåten
-    },
-    {
-      icon: User,
-      title: "Tryck på Min Profil",
-      description: "Tryck på 'Min Profil' i sidomenyn.",
-      page: null,
-      allowedElement: "[data-onboarding='min-profil']" // Endast 'Min Profil' tillåten
-    },
-    {
-      icon: User,
-      title: "Redigera din profil",
-      description: "Här kan du redigera CV, bilder, video, dina uppgifter etc.",
-      page: "/profile",
-      allowedElement: null // Bara nästa-knappen tillåten
-    },
-    {
-      icon: Crown,
-      title: "Uppgradera till Premium",
-      description: "Psst, glöm inte att du kan uppgradera till fler förmånliga funktioner när du uppgraderar till Premium",
-      page: "/search-jobs",
-      allowedElement: null // Bara nästa-knappen tillåten
-    }
-  ];
-
-
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      const nextStep = currentStep + 1;
-      const nextStepData = steps[nextStep];
-      
-      // Navigate to the next page if needed (only if different)
-      if (nextStepData.page && nextStepData.page !== location.pathname) {
-        navigate(nextStepData.page);
-      }
-      setCurrentStep(nextStep);
-    } else {
-      onComplete();
-    }
-  };
-
-  // Blockera klick på alla element utom tillåtna
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as Element;
-      const step = steps[currentStep];
-      
-      // Tillåt alltid klick på onboarding-kortet
-      if ((target as HTMLElement).closest('.onboarding-tour')) return;
-      
-      if (step.allowedElement) {
-        const isAllowed = (target as HTMLElement).closest(step.allowedElement);
-        if (isAllowed) {
-          if (currentStep === 1) {
-            setTimeout(() => handleNext(), 300);
-          } else if (currentStep === 2 && step.allowedElement === "[data-onboarding='min-profil']") {
-            // När användaren klickar på "Min Profil", navigera till profil först
-            setTimeout(() => {
-              navigate('/profile');
-            }, 100);
-          }
-          return;
-        }
-      }
-      
-      // Blockera alla andra klick
-      e.preventDefault();
-      e.stopPropagation();
-    };
+    const id = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Blockera alla tangenttryckningar utom Escape (för att inte hindra utvecklare)
-      if (e.key !== 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    // Fånga alla klick och tangenttryckningar
-    document.addEventListener('click', handleClick, true);
-    document.addEventListener('mousedown', handleClick, true);
-    document.addEventListener('touchstart', handleClick, true);
-    document.addEventListener('keydown', handleKeyDown, true);
-    
+  // Lås bakgrundsscroll medan kortet visas
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.removeEventListener('click', handleClick, true);
-      document.removeEventListener('mousedown', handleClick, true);
-      document.removeEventListener('touchstart', handleClick, true);
-      document.removeEventListener('keydown', handleKeyDown, true);
+      document.body.style.overflow = previous;
     };
-  }, [currentStep]);
+  }, []);
 
-  const currentStepData = steps[currentStep];
-  const Icon = currentStepData.icon;
-
-  const location = useLocation();
-  // Gå vidare när användaren har navigerat till /profile via sidomenyn
-  useEffect(() => {
-    if (currentStep === 2 && location.pathname === '/profile') {
-      setCurrentStep(3);
-    }
-  }, [currentStep, location.pathname]);
-
-  // Positionera första steget under Sök-rubriken, föredra hjälprubriken
-  const [cardPos, setCardPos] = useState<{ top: number; left: number } | null>(null);
-  useEffect(() => {
-    const update = () => {
-      if (currentStep === 0 && location.pathname === '/search-jobs') {
-        const hero = document.querySelector("[data-onboarding='search-hero']") as HTMLElement | null;
-        const label = document.querySelector("[data-onboarding='search-label']") as HTMLElement | null;
-        const anchor = hero || label;
-        if (anchor) {
-          const rect = anchor.getBoundingClientRect();
-          setCardPos({ top: rect.bottom - 20, left: rect.left + rect.width / 2 });
-          return;
-        }
-      }
-      setCardPos(null);
-    };
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, [currentStep, location.pathname]);
-
-  // Om vi är på sista steget (Premium) säkerställ att vi är på /search-jobs
-  useEffect(() => {
-    if (currentStep === 4 && location.pathname !== '/search-jobs') {
-      navigate('/search-jobs');
-    }
-  }, [currentStep, location.pathname, navigate]);
-
-  // Highlight för tillåtna element
-  const renderHighlight = () => {
-    if (currentStepData.allowedElement) {
-      return (
-        <div className="fixed inset-0 z-40 pointer-events-none">
-          <style>
-            {`
-              ${currentStepData.allowedElement} {
-                position: relative !important;
-                z-index: 60 !important;
-                animation: pulse-glow 2s infinite !important;
-                pointer-events: auto !important;
-              }
-              
-              @keyframes pulse-glow {
-                0%, 100% {
-                  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
-                }
-                50% {
-                  box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-                }
-              }
-            `}
-          </style>
-        </div>
-      );
-    }
-    return null;
+  const close = (path?: string) => {
+    setVisible(false);
+    window.setTimeout(() => {
+      onComplete();
+      if (path) navigate(path);
+    }, 180);
   };
 
-  return (
-    <>
-      {/* Fullscreen overlay that blocks all interactions */}
-      <div className="fixed inset-0 bg-black/10 z-30 backdrop-blur-0 pointer-events-auto" />
-      
-      {/* Highlight för tillåtna element */}
-      {renderHighlight()}
-      
-      {/* Onboarding tour card */}
-      <div className={`fixed z-50 onboarding-tour ${cardPos ? '' : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform'}`} style={cardPos ? { top: cardPos.top, left: cardPos.left, transform: 'translateX(-50%)' } : undefined}>
-        <Card className="w-64 bg-[hsl(var(--surface-blue))]/90 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
-          <CardContent className="p-4">
-            {/* Progress indicator */}
-            <div className="flex justify-center mb-3">
-              <div className="flex space-x-1.5">
-                {steps.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentStep 
-                        ? 'bg-white w-4' 
-                        : index < currentStep 
-                          ? 'bg-white/60' 
-                          : 'bg-white/30'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
+  // Escape stänger
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
-            {/* Icon */}
-            <div className="flex justify-center mb-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Icon className="h-6 w-6 text-white" />
-              </div>
-            </div>
+  return createPortal(
+    <div
+      className={`fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6 transition-opacity duration-200 ${
+        visible ? 'opacity-100' : 'opacity-0'
+      }`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Välkommen till Parium"
+    >
+      {/* Bakgrund */}
+      <button
+        type="button"
+        aria-label="Stäng"
+        onClick={() => close()}
+        className="absolute inset-0 bg-black/55 backdrop-blur-[2px] focus:outline-none"
+      />
 
-            {/* Content */}
-            <div className="text-center">
-              <h3 className="text-lg font-bold text-white mb-2">
-                {currentStepData.title}
-              </h3>
-              
-              <Badge variant="outline" className="mb-3 border-white/20 text-white bg-white/20 text-sm">
-                {currentStep + 1} av {steps.length}
-              </Badge>
-              
-              <p className="text-white text-sm leading-relaxed mb-4">
-                {currentStepData.description}
-              </p>
-              
-              {/* Navigation button - dold för steg 2 eftersom användaren måste klicka på sidebar */}
-              {currentStep !== 1 && (
-                <div className="flex justify-center">
-                  <Button 
-                    onClick={handleNext}
-                    size="sm"
-                    className="min-w-[80px] text-sm px-3 py-1 h-8"
-                  >
-                    {currentStep === steps.length - 1 ? 'Nu kör vi!' : 'Nästa'}
-                    {currentStep !== steps.length - 1 && <ArrowRight className="h-3 w-3 ml-1" />}
-                  </Button>
-                </div>
-              )}
+      {/* Kort */}
+      <div
+        className={`relative w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl transition-all duration-300 ${
+          visible ? 'translate-y-0 scale-100' : 'translate-y-6 sm:translate-y-0 sm:scale-95'
+        }`}
+      >
+        <div className="p-6 sm:p-8">
+          {/* Header */}
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15 ring-1 ring-green-400/40">
+              <Check className="h-6 w-6 text-green-400" strokeWidth={2.5} />
             </div>
-          </CardContent>
-        </Card>
+            <h2 className="text-2xl sm:text-[26px] font-bold text-white leading-tight">
+              {firstName ? `Välkommen, ${firstName}!` : 'Välkommen till Parium!'}
+            </h2>
+            <p className="mt-2 text-sm sm:text-base text-white leading-relaxed max-w-md">
+              Din profil är klar. Här är de tre ställen du kommer använda mest — välj var du vill börja.
+            </p>
+          </div>
+
+          {/* Genvägar */}
+          <div className="mt-6 space-y-3">
+            {shortcuts.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.path}
+                  type="button"
+                  onClick={() => close(item.path)}
+                  className="group flex w-full items-center gap-4 rounded-2xl border border-white/12 bg-white/[0.06] p-4 text-left transition-colors duration-150 hover:bg-white/[0.12] active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10">
+                    <Icon className="h-5 w-5 text-white" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[15px] font-semibold text-white">{item.title}</span>
+                    <span className="block text-[13px] leading-snug text-white/90 break-words">
+                      {item.description}
+                    </span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-white/70 transition-transform duration-150 group-hover:translate-x-0.5" />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Trygghetsrad */}
+          <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5">
+            <Heart className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
+            <p className="text-[13px] leading-snug text-white">
+              Dina uppgifter visas för en arbetsgivare först när du själv söker ett jobb. Du kan ändra
+              eller radera allt när som helst under Min profil.
+            </p>
+          </div>
+
+          {/* Stäng */}
+          <div className="mt-6 flex justify-center">
+            <button
+              type="button"
+              onClick={() => close()}
+              className="rounded-full border border-white/20 bg-white/10 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+            >
+              Jag utforskar själv
+            </button>
+          </div>
+        </div>
       </div>
-    </>
+    </div>,
+    document.body
   );
 };
 
