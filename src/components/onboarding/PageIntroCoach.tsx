@@ -249,6 +249,34 @@ const PageIntroCoach = () => {
   const isTouch = device !== 'desktop';
   const [replayToken, setReplayToken] = useState(0);
   const [visible, setVisible] = useState(false);
+  /** Vänta tills kontots status hämtats – annars kan fel person få guiden på delad dator. */
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const cloud = await loadCoachState();
+        if (cancelled) return;
+        if (cloud && (cloud.savedAt || cloud.disabled || cloud.seen)) {
+          writeLocalCoachState(cloud);
+        } else {
+          // Första gången på kontot: spegla upp det lokala läget.
+          syncCoachStateToCloud();
+        }
+      } catch {
+        /* offline – kör på lokal cache */
+      } finally {
+        if (!cancelled) {
+          setHydrated(true);
+          setReplayToken((t) => t + 1);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const config = useMemo(() => CONFIGS[location.pathname], [location.pathname]);
   const activeTourPath = useMemo(() => {
@@ -263,6 +291,7 @@ const PageIntroCoach = () => {
 
   const alreadySeen = useMemo(() => {
     if (!config) return true;
+    if (!hydrated) return true;
     if (isCoachDisabled()) return true;
     try {
       return !isGuidedTour && localStorage.getItem(STORAGE_PREFIX + config.key) === '1';
@@ -270,13 +299,14 @@ const PageIntroCoach = () => {
       return false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, replayToken, isGuidedTour]);
+  }, [config, replayToken, isGuidedTour, hydrated]);
 
   useEffect(() => {
     const onReplay = () => setReplayToken((t) => t + 1);
     window.addEventListener(PAGE_COACH_REPLAY_EVENT, onReplay);
     return () => window.removeEventListener(PAGE_COACH_REPLAY_EVENT, onReplay);
   }, []);
+
 
   useEffect(() => {
     if (!config || alreadySeen) {
