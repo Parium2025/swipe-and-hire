@@ -693,8 +693,10 @@ const Index = () => {
           keepKeys={JOB_SEEKER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
         />
-        {showTourOverlay && (
+        {showTourOverlay ? (
           <AppOnboardingTour onComplete={finishIntroTour} firstName={(profile as any)?.first_name} />
+        ) : (
+          <PageIntroCoach />
         )}
       </JobSeekerLayout>
     );
