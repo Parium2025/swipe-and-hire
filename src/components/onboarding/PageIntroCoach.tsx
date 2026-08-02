@@ -404,10 +404,11 @@ const PageIntroCoach = () => {
       />
 
       <div
-        className={`relative w-full max-w-[420px] rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 backdrop-blur-xl shadow-2xl p-5 pt-6 sm:p-6 sm:pt-7 text-center transition-transform duration-300 ${
+        className={`relative w-full max-w-[420px] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 backdrop-blur-xl shadow-2xl p-5 pt-6 sm:p-6 sm:pt-7 text-center transition-transform duration-300 ${
           visible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-2'
         }`}
       >
+
         <button
           type="button"
           onClick={backToOverview}
