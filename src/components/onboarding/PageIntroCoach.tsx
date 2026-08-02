@@ -101,8 +101,10 @@ const CONFIGS: Record<string, CoachConfig> = {
       isTouch
         ? 'Tryck på ett kort för att öppna hela annonsen. Hjärtat sparar jobbet till senare.'
         : 'Klicka på ett kort för att öppna hela annonsen. Hjärtat sparar jobbet till senare.',
-      'När du trycker "Ansök" fylls dina uppgifter i automatiskt. Vissa arbetsgivare har egna frågor i ansökan — svara på dem, de väger tungt.',
-      'När du skickar ansökan delas din profil med arbetsgivaren: namn, kontaktuppgifter, bild, presentation, CV och video om du laddat upp det. Inget delas innan du själv ansöker.',
+      isTouch
+        ? 'Högst upp finns Swipe-läget: svep höger för att spara ett jobb och vänster för att hoppa över det.'
+        : 'På mobil och surfplatta finns även ett Swipe-läge högst upp — svep höger för att spara, vänster för att hoppa över.',
+      'När du trycker "Ansök" skickas din profil till arbetsgivaren: namn, kontaktuppgifter, bild, presentation, CV och video om du laddat upp det. Har arbetsgivaren egna frågor behöver du svara på dem för att kunna skicka in. Inget delas innan du själv ansöker.',
     ],
     cta: { label: 'Visa sparade jobb', path: '/saved-jobs' },
   },
@@ -123,10 +125,12 @@ const CONFIGS: Record<string, CoachConfig> = {
     title: 'Dina sparade jobb',
     lines: () => [
       'Allt du sparat samlas här tills annonsen stänger.',
+      'Fliken Skippade visar jobb du svept förbi i Swipe-läget — ångrar du dig hittar du dem där.',
       'Öppna ett jobb när du har tid och skicka in ansökan i lugn och ro.',
     ],
     cta: { label: 'Tillbaka till Sök jobb', path: '/search-jobs' },
   },
+
   '/profile': {
     key: 'profile',
     icon: User,
