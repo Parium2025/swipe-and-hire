@@ -386,9 +386,11 @@ let contentType = '';
     }
 
     // ROBUST CV classification prompt - handles ALL languages and document types
-    const systemPrompt = `Du är en expert på dokumentklassificering för rekrytering.
+    const systemPrompt = `Du är en expert på dokumentanalys och rekrytering.
 
-PRIMÄR UPPGIFT: Avgör om dokumentet är ett CV/resume eller något annat.
+UPPGIFT (två delar):
+1. Beskriv ALLTID vad dokumentet faktiskt innehåller — även om det inte är ett CV.
+2. Avgör om dokumentet är ett CV/resume.
 
 ETT CV INNEHÅLLER TYPISKT:
 - Personens namn och kontaktuppgifter
@@ -397,36 +399,36 @@ ETT CV INNEHÅLLER TYPISKT:
 - Färdigheter eller kompetenser
 - Eventuellt: certifikat, språkkunskaper, referenser
 
-DESSA ÄR INTE CV:n (returnera is_valid_cv: false):
-- Foton på personer, barn, familj, husdjur
-- Skärmdumpar från appar eller webbsidor
-- Fakturor, kvitton, räkningar
-- Skattebesked, deklarationer, kontrolluppgifter från Skatteverket
-- Anställningsavtal, anställningsintyg
-- Lönespecifikationer
-- Betyg från skolor (utan CV-kontext)
-- ID-handlingar: pass, körkort, ID-kort
-- Diplom eller certifikat (ensamma, utan CV)
-- Brev, meddelanden, chatloggar
-- Tomma dokument eller oläsbara filer
-- Slumpmässiga bilder eller memes
-- Videofiler (kan inte analyseras)
-- Dokument på språk du inte kan läsa (markera som "oläsbart dokument")
+DESSA ÄR INTE CV:n (is_valid_cv: false):
+foton på personer/barn/djur/hus/bilar/natur, skärmdumpar, fakturor, kvitton,
+skattebesked, anställningsavtal, lönespecifikationer, skolbetyg, ID-handlingar
+(pass, körkort), enstaka diplom/certifikat, brev, chatloggar, listor,
+menyer, ritningar, tomma eller oläsbara dokument, memes.
+
+NÄR DET INTE ÄR ETT CV:
+Beskriv innehållet konkret och sakligt i 1–2 meningar, så att en arbetsgivare
+direkt förstår vad filen är utan att öppna den. Exempel:
+- "Det här är ett foto av en gul villa med trädgård, taget utomhus i dagsljus."
+- "Det här är en faktura från Telia på 499 kr med förfallodatum 2026-02-01."
+- "Det här är en skärmdump från en chattkonversation i Messenger."
+Nämn INTE namn på privatpersoner som syns på foton, och gissa aldrig om saknad
+information. Om dokumentet är helt oläsbart, skriv det rakt ut.
+Sätt key_points till 2–3 korta punkter som beskriver innehållet
+(t.ex. "Innehåll: foto på byggnad", "Text i bilden: ingen", "Rekommendation: ladda upp ditt CV").
 
 FLERSPRÅKIGT STÖD:
-- CV kan vara på ALLA språk: svenska, engelska, kinesiska, arabiska, ryska, etc.
-- Om du kan identifiera struktur som liknar ett CV (jobb + utbildning), godkänn det
-- Om du inte kan läsa språket alls, markera som "oläsbart dokument"
+- CV kan vara på ALLA språk. Kan du se struktur som liknar ett CV (jobb + utbildning), godkänn det.
+- Kan du inte läsa språket alls, sätt document_type till "oläsbart dokument" och beskriv vad du ändå ser.
 
 SVARSFORMAT (ALLTID JSON):
 
 Om det INTE är ett CV:
 {
   "is_valid_cv": false,
-  "document_type": "[specifik typ, t.ex. 'foto', 'faktura', 'anställningsintyg', 'oläsbart dokument']",
-  "rejection_reason": "[kort förklaring för användaren]",
-  "summary_text": "",
-  "key_points": []
+  "document_type": "[specifik typ, t.ex. 'foto på byggnad', 'faktura', 'skärmdump', 'anställningsintyg', 'oläsbart dokument']",
+  "rejection_reason": "[konkret beskrivning av vad dokumentet innehåller, 1-2 meningar]",
+  "summary_text": "[samma konkreta beskrivning av innehållet]",
+  "key_points": ["Innehåll: ...", "Detaljer: ...", "Rekommendation: ladda upp ditt CV för en full analys"]
 }
 
 Om det ÄR ett CV:
@@ -444,8 +446,10 @@ Om det ÄR ett CV:
 
 VIKTIGT:
 - Svara ENDAST med JSON, ingen annan text
-- Om osäker, luta åt att markera som icke-CV (bättre att be om rätt dokument än att analysera fel)
-- Skriv rejection_reason på svenska, professionellt och hjälpsamt`;
+- summary_text får ALDRIG vara tom — beskriv alltid vad du ser
+- Om osäker på om det är ett CV, luta åt is_valid_cv: false men beskriv ändå innehållet
+- Skriv allt på svenska, professionellt och hjälpsamt`;
+
 
     const aiController = new AbortController();
     const aiTimeoutId = setTimeout(() => aiController.abort(), 60000); // 60s timeout for AI
