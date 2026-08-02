@@ -381,6 +381,7 @@ const Index = () => {
     if (!isWelcomeCardReplayAccount(user.email)) return;
     if ((profile as any)?.role !== 'job_seeker') return;
     if (!(profile as any)?.onboarding_completed) return;
+    resetPageCoachMarks();
     setShowIntroTutorial(true);
   }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
   const [isInitializing, setIsInitializing] = useState(false);
