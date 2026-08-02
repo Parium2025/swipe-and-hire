@@ -210,6 +210,9 @@ Deno.serve(async (req) => {
       support_tickets: supportTickets,
       support_messages: supportMessages,
       company_reviews: reviews,
+      personal_notes: personalNotes,
+      employer_notes: employerNotes,
+      uploaded_files: files,
 
       // Uppgifter som arbetsgivare registrerat om dig. Vem hos arbetsgivaren
       // som skrivit posten är utelämnat — det är den personens personuppgift.
