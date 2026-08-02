@@ -1466,7 +1466,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                   
                   {isUploadingMedia && (
                     <div className="flex flex-col items-center gap-2">
-                      <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
+                      <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-full px-3 py-1.5">
                         {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
                       </Badge>
                       {uploadingMediaType === 'video' && (
