@@ -1077,10 +1077,11 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
   };
 
-  // Render SwipeIntro fullscreen
+  // SwipeIntro borttagen – tunneln startar direkt på steg 1 (dina uppgifter)
   if (currentStep === -1) {
     return <SwipeIntro onComplete={() => setCurrentStep(1)} />;
   }
+
 
   function renderCvStep() {
     return (
