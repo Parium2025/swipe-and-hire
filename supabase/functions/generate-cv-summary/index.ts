@@ -550,10 +550,11 @@ VIKTIGT:
           .filter((p: any) => typeof p?.text === 'string' && p.text.trim().length > 0)
       : [];
 
-    // User-friendly message for non-CV documents
+    // User-friendly message for non-CV documents (prefer the AI's concrete description)
     const summaryText = summary.is_valid_cv === false
-      ? rejectionReason
+      ? (summary.summary_text?.trim() || rejectionReason)
       : (summary.summary_text || '');
+
 
     // ALWAYS save to profile_cv_summaries for proactive analysis (background pre-analysis)
     if (isProactiveAnalysis && finalCvUrl) {
