@@ -154,6 +154,26 @@ Deno.serve(async (req) => {
       .eq('sender_id', userId)
       .limit(10000);
 
+    // Egna anteckningar (jobbsökare/arbetsgivare)
+    const [personalNotes, employerNotes] = await Promise.all([
+      grab('jobseeker_notes', 'user_id'),
+      grab('employer_notes', 'employer_id'),
+    ]);
+
+    // Uppladdade filer (CV, bilder, video, bilagor) — art. 20 gäller även
+    // filerna, inte bara databasraderna. Länkarna är tidsbegränsade (1 timme).
+    const files: { bucket: string; path: string; download_url: string | null }[] = [];
+    for (const bucket of ['job-applications', 'company-logos', 'job-images', 'message-attachments']) {
+      const { data: items } = await admin.storage.from(bucket).list(userId, { limit: 1000 });
+      for (const item of items ?? []) {
+        if (item.id === null) continue; // mapp
+        const path = `${userId}/${item.name}`;
+        const { data: signed } = await admin.storage.from(bucket).createSignedUrl(path, 3600);
+        files.push({ bucket, path, download_url: signed?.signedUrl ?? null });
+      }
+    }
+
+
     const payload = {
       export_metadata: {
         generated_at: new Date().toISOString(),
