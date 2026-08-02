@@ -164,7 +164,7 @@ const WorkplacePostalCodeSelector = ({
     <div className={`grid grid-cols-2 gap-3 ${className}`}>
       {/* Postnummer input */}
       <div className="space-y-2 md:space-y-1.5">
-        <Label className="text-white text-sm">Postnummer *</Label>
+        <Label className="text-white text-sm">Postnummer<RequiredMark filled={postalCodeValue.replace(/\D/g, '').length === 5} /></Label>
         <div className="relative">
           <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />
           <Input
