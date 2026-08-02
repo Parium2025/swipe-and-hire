@@ -1344,7 +1344,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               {/* Visa arbetstid-frågan endast om användaren har valt något OCH det inte är arbetssökande */}
               {formData.employmentStatus && formData.employmentStatus !== 'arbetssokande' && (
                   <div>
-                    <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
+                    <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?<RequiredMark filled={!!formData.workingHours} /></Label>
                     <DropdownMenu modal={false} open={workingHoursOpen} onOpenChange={setWorkingHoursOpen}>
                         <DropdownMenuTrigger asChild>
                          <Button
