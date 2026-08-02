@@ -458,7 +458,12 @@ const Index = () => {
   }
 
   // Check if user needs to complete onboarding
-  const needsOnboarding = !profile?.onboarding_completed;
+  // Testkonton (t.ex. axelanderssonparium@gmail.com) kör tunneln på nytt varje inloggning.
+  const tunnelReplay = isTunnelReplayAccount(user?.email);
+  const needsOnboarding = tunnelReplay
+    ? !hasCompletedTunnelThisSession()
+    : !profile?.onboarding_completed;
+
   
   // Developer overrides for admin users (database-based check)
   if (isPlatformAdmin) {
