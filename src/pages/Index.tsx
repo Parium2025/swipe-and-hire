@@ -373,6 +373,15 @@ const Index = () => {
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
+
+  // Testkonto: landa alltid på välkomstkortet (profilen sparas helt normalt).
+  useEffect(() => {
+    if (!user?.email) return;
+    if (!isWelcomeCardReplayAccount(user.email)) return;
+    if ((profile as any)?.role !== 'job_seeker') return;
+    if (!(profile as any)?.onboarding_completed) return;
+    setShowIntroTutorial(true);
+  }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
   const [isInitializing, setIsInitializing] = useState(false);
   const [uiReady, setUiReady] = useState(false);
   const [showAuthCTA, setShowAuthCTA] = useState(false);
