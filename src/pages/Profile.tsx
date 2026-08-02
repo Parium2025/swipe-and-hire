@@ -243,11 +243,12 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
           <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
             <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-yellow-200">
-              <p className="font-medium">Dokumentet verkar inte vara ett CV</p>
+              <p className="font-medium">Det här ser inte ut som ett CV</p>
               {summary.document_type && (
-                <p className="text-yellow-300/80 mt-1">Upptäckt typ: {summary.document_type}</p>
+                <p className="text-yellow-100 mt-1">Vi tolkar filen som: {summary.document_type}</p>
               )}
             </div>
+
           </div>
         )}
         
