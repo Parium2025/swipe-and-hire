@@ -297,7 +297,7 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center justify-start">
+              <div className="mt-6 flex items-center justify-center">
                 <button
                   type="button"
                   onClick={() => setStep(0)}

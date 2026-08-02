@@ -244,25 +244,16 @@ const PageIntroCoach = () => {
             <p className="mt-4 text-[12px] leading-snug text-white break-words">
               Vill du se tipsen igen? De ligger kvar under Support → Hjälp &amp; tips.
             </p>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              {config.cta && (
-                <button
-                  type="button"
-                  onClick={() => dismiss(config.cta!.path)}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-green-500 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-                >
-                  {config.cta.label}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              )}
+            <div className="mt-4 flex items-center justify-center">
               <button
                 type="button"
                 onClick={() => dismiss()}
-                className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                className="rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
                 Uppfattat, stäng
               </button>
             </div>
+
           </div>
         </div>
       </div>
