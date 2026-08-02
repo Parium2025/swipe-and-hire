@@ -1387,7 +1387,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               {/* Visa tillgänglighet-frågan endast om användaren har valt något i employment status */}
               {formData.employmentStatus && (
                   <div>
-                    <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
+                    <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?<RequiredMark filled={!!formData.availability} /></Label>
                     <DropdownMenu modal={false} open={availabilityOpen} onOpenChange={setAvailabilityOpen}>
                         <DropdownMenuTrigger asChild>
                          <Button
