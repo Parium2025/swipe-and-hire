@@ -24,38 +24,42 @@ export const JobSeekerNotificationSettings = () => {
         </div>
 
         {/* Column headers */}
-        <div className="flex items-center justify-end gap-6 pr-1 pb-1 border-b border-white/10">
-          <div className="flex items-center gap-1 text-xs text-white">
+        <div className="flex items-center justify-end gap-4 pb-1 border-b border-white/10">
+          <div className="flex w-11 items-center justify-center gap-1 text-xs text-white">
             <Smartphone className="h-3 w-3" />
             <span>Push</span>
           </div>
-          <div className="flex items-center gap-1 text-xs text-white">
+          <div className="flex w-11 items-center justify-center gap-1 text-xs text-white">
             <Mail className="h-3 w-3" />
             <span>Mejl</span>
           </div>
         </div>
 
         {JOBSEEKER_NOTIFICATION_TYPES.map(({ type, label, description, hasEmail }) => (
-          <div key={type} className="flex items-center justify-between">
+          <div key={type} className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
               <Label className="text-sm text-white">{label}</Label>
               <p className="text-sm text-white">{description}</p>
             </div>
-            <div className="flex items-center gap-6 ml-3">
-              <Switch
-                checked={isEnabled(type, 'push')}
-                onCheckedChange={(checked) => toggle(type, checked, 'push')}
-                disabled={isLoading}
-              />
-              {hasEmail ? (
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="flex w-11 justify-center">
                 <Switch
-                  checked={isEnabled(type, 'email')}
-                  onCheckedChange={(checked) => toggle(type, checked, 'email')}
+                  checked={isEnabled(type, 'push')}
+                  onCheckedChange={(checked) => toggle(type, checked, 'push')}
                   disabled={isLoading}
+                  aria-label={`Push: ${label}`}
                 />
-              ) : (
-                <div className="w-[36px]" />
-              )}
+              </div>
+              <div className="flex w-11 justify-center">
+                {hasEmail && (
+                  <Switch
+                    checked={isEnabled(type, 'email')}
+                    onCheckedChange={(checked) => toggle(type, checked, 'email')}
+                    disabled={isLoading}
+                    aria-label={`Mejl: ${label}`}
+                  />
+                )}
+              </div>
             </div>
           </div>
         ))}
