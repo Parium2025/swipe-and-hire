@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import RequiredMark from '@/components/ui/RequiredMark';
+import { RequiredMark } from '@/components/wizard/RequiredMark';
 
 export interface TunnelSelectOption {
   value: string;
