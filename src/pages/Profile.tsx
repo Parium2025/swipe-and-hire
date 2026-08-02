@@ -1778,7 +1778,7 @@ const Profile = () => {
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
                   className="w-32 h-32 border-4 border-white/10 rounded-full overflow-hidden"
-                  countdownVariant="compact"
+                  countdownVariant="circle"
                 />
               ) : (
                 <div 
