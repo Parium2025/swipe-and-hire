@@ -23,6 +23,7 @@ import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { RequiredMark } from '@/components/wizard/RequiredMark';
+import TunnelSelectField from '@/components/tunnel/TunnelSelectField';
 import WizardFooter from '@/components/wizard/WizardFooter';
 
 
@@ -1285,163 +1286,55 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                  }}
                  onValidationChange={setHasValidLocation}
                />
-                  <div>
-                   <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?<RequiredMark filled={!!formData.employmentStatus} /></Label>
-                   <DropdownMenu modal={false} open={employmentStatusOpen} onOpenChange={setEmploymentStatusOpen}>
-                       <DropdownMenuTrigger asChild>
-                         <Button
-                           variant="outlineNeutral"
-                           className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                         >
-                         <span className="truncate">
-                           {formData.employmentStatus ? (
-                             ({
-                               tillsvidareanställning: 'Fast anställning',
-                               visstidsanställning: 'Visstidsanställning',
-                               provanställning: 'Provanställning',
-                               interim: 'Interim anställning',
-                               bemanningsanställning: 'Bemanningsanställning',
-                               egenforetagare: 'Egenföretagare / Frilans',
-                               arbetssokande: 'Arbetssökande',
-                               annat: 'Annat',
-                             } as Record<string, string>)[formData.employmentStatus]
-                           ) : 'Välj din nuvarande situation'}
-                         </span>
-                         <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-300 ${employmentStatusOpen ? 'rotate-180' : ''}`} />
-                       </Button>
-                     </DropdownMenuTrigger>
-                     <DropdownMenuContent 
-                       className="w-72 glass-panel z-50 rounded-md text-white overflow-visible"
-                       side="top"
-                       align="center"
-                       alignOffset={0}
-                       sideOffset={6}
-                       avoidCollisions={false}
-                    >
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'tillsvidareanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                        Fast anställning
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'visstidsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                        Visstidsanställning
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'provanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                        Provanställning
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'interim')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                        Interim anställning
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'bemanningsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                        Bemanningsanställning
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'egenforetagare')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                        Egenföretagare / Frilans
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'arbetssokande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                        Arbetssökande
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'annat')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                        Annat
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+              <TunnelSelectField
+                id="employmentStatus"
+                label="Vad gör du i dagsläget?"
+                placeholder="Välj din nuvarande situation"
+                value={formData.employmentStatus}
+                onChange={(v) => handleInputChange('employmentStatus', v)}
+                options={[
+                  { value: 'tillsvidareanställning', label: 'Fast anställning' },
+                  { value: 'visstidsanställning', label: 'Visstidsanställning' },
+                  { value: 'provanställning', label: 'Provanställning' },
+                  { value: 'interim', label: 'Interim anställning' },
+                  { value: 'bemanningsanställning', label: 'Bemanningsanställning' },
+                  { value: 'egenforetagare', label: 'Egenföretagare / Frilans' },
+                  { value: 'arbetssokande', label: 'Arbetssökande' },
+                  { value: 'annat', label: 'Annat' },
+                ]}
+              />
               {/* Visa arbetstid-frågan endast om användaren har valt något OCH det inte är arbetssökande */}
               {formData.employmentStatus && formData.employmentStatus !== 'arbetssokande' && (
-                  <div>
-                    <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?<RequiredMark filled={!!formData.workingHours} /></Label>
-                    <DropdownMenu modal={false} open={workingHoursOpen} onOpenChange={setWorkingHoursOpen}>
-                        <DropdownMenuTrigger asChild>
-                         <Button
-                           variant="outline"
-                           className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                         >
-                          <span className="truncate">
-                            {formData.workingHours ? (
-                              ({
-                                heltid: 'Heltid',
-                                deltid: 'Deltid',
-                                varierande: 'Varierande / Flexibelt',
-                              } as Record<string, string>)[formData.workingHours]
-                            ) : 'Välj arbetstid/omfattning'}
-                          </span>
-                          <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-300 ${workingHoursOpen ? 'rotate-180' : ''}`} />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent 
-                        className="w-72 max-h-80 overflow-y-auto glass-panel z-50 rounded-md text-white"
-                       side="top"
-                       align="center"
-                       alignOffset={0}
-                       sideOffset={6}
-                       avoidCollisions={false}
-                     >
-                        <DropdownMenuItem onClick={() => handleInputChange('workingHours', 'heltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                          Heltid
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleInputChange('workingHours', 'deltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                          Deltid
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleInputChange('workingHours', 'varierande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                          Varierande / Flexibelt
-                        </DropdownMenuItem>
-                     </DropdownMenuContent>
-                   </DropdownMenu>
-                 </div>
+                <TunnelSelectField
+                  id="workingHours"
+                  label="Hur mycket jobbar du idag?"
+                  placeholder="Välj arbetstid/omfattning"
+                  value={formData.workingHours}
+                  onChange={(v) => handleInputChange('workingHours', v)}
+                  options={[
+                    { value: 'heltid', label: 'Heltid' },
+                    { value: 'deltid', label: 'Deltid' },
+                    { value: 'varierande', label: 'Varierande / Flexibelt' },
+                  ]}
+                />
               )}
               {/* Visa tillgänglighet-frågan endast om användaren har valt något i employment status */}
               {formData.employmentStatus && (
-                  <div>
-                    <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?<RequiredMark filled={!!formData.availability} /></Label>
-                    <DropdownMenu modal={false} open={availabilityOpen} onOpenChange={setAvailabilityOpen}>
-                        <DropdownMenuTrigger asChild>
-                         <Button
-                           variant="outline"
-                           className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                         >
-                          <span className="truncate">
-                            {formData.availability ? (
-                              ({
-                                omgaende: 'Omgående',
-                                'inom-1-manad': 'Inom 1 månad',
-                                'inom-3-manader': 'Inom 3 månader',
-                                'inom-6-manader': 'Inom 6 månader',
-                                'ej-aktuellt': 'Inte aktuellt just nu',
-                                osaker: 'Osäker',
-                              } as Record<string, string>)[formData.availability]
-                            ) : 'Välj din tillgänglighet'}
-                          </span>
-                          <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-300 ${availabilityOpen ? 'rotate-180' : ''}`} />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent 
-                        className="w-72 glass-panel z-50 rounded-md text-white overflow-visible"
-                       side="top"
-                       align="center"
-                       alignOffset={0}
-                       sideOffset={6}
-                       avoidCollisions={false}
-                     >
-                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'omgaende')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                          Omgående
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'inom-1-manad')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                          Inom 1 månad
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'inom-3-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                          Inom 3 månader
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'inom-6-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                          Inom 6 månader
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'ej-aktuellt')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                          Inte aktuellt just nu
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'osaker')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                          Osäker
-                        </DropdownMenuItem>
-                     </DropdownMenuContent>
-                   </DropdownMenu>
-                 </div>
+                <TunnelSelectField
+                  id="availability"
+                  label="När kan du börja nytt jobb?"
+                  placeholder="Välj din tillgänglighet"
+                  value={formData.availability}
+                  onChange={(v) => handleInputChange('availability', v)}
+                  options={[
+                    { value: 'omgaende', label: 'Omgående' },
+                    { value: 'inom-1-manad', label: 'Inom 1 månad' },
+                    { value: 'inom-3-manader', label: 'Inom 3 månader' },
+                    { value: 'inom-6-manader', label: 'Inom 6 månader' },
+                    { value: 'ej-aktuellt', label: 'Inte aktuellt just nu' },
+                    { value: 'osaker', label: 'Osäker' },
+                  ]}
+                />
               )}
             </div>
           </div>
