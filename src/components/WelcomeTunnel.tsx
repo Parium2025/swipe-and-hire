@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { debounce, loadTunnelDraft, saveTunnelDraft, clearTunnelDraft, type TunnelDraft } from '@/lib/onboardingState';
+
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
