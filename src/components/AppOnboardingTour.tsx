@@ -189,29 +189,6 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                 })}
               </div>
 
-              {/* Enhetsanpassad navigeringstips */}
-              <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5">
-                {isTouch ? (
-                  <Hand className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
-                ) : (
-                  <MousePointerClick className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
-                )}
-                <p className="text-[13px] leading-snug text-white break-words">
-                  {isTouch ? (
-                    <>
-                      <span className="font-semibold">På mobil:</span> tryck på Parium-loggan uppe
-                      till vänster för menyn. I Sök jobb kan du swipa åt höger för att spara ett
-                      jobb och åt vänster för att hoppa vidare — eller bläddra i listan som vanligt.
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-semibold">På dator:</span> menyn ligger alltid längst
-                      upp. I Sök jobb bläddrar du i listan och öppnar ett jobb med ett klick —
-                      swipe-läget finns i mobilappen när du är på språng.
-                    </>
-                  )}
-                </p>
-              </div>
 
               <div className="mt-6 flex flex-col-reverse sm:flex-row items-center justify-center gap-3">
                 <button
