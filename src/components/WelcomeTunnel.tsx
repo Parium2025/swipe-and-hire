@@ -1597,29 +1597,50 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Briefcase className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Din profil</h2>
-              <p className="text-sm text-white">Ge en kortare beskrivning om dig själv?</p>
+              <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Din presentation</h2>
+              <p className="text-sm text-white">Några rader om dig gör att arbetsgivare kommer ihåg dig</p>
             </div>
 
             <div className="space-y-4 max-w-md mx-auto">
               <div>
-                <Label htmlFor="bio" className="text-white">Frivilligt</Label>
+                <Label htmlFor="bio" className="text-white">Om mig <span className="text-white/70 font-normal">(frivilligt)</span></Label>
                 <Textarea
                   id="bio"
-                  className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white" 
+                  rows={6}
+                  className="mt-1.5 min-h-[140px] text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/70 resize-none"
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
-                  placeholder="Berätta kort om dig själv..."
+                  placeholder="Ex: Jag är 24 år, serviceinriktad och van vid högt tempo. Har jobbat två år inom butik och trivs bäst i team. Söker nu ett deltidsjobb i Stockholm."
                 />
-                <div className="flex justify-end mt-1">
-                  <span className="text-sm text-white">
+                <div className="flex items-center justify-between mt-1.5 gap-3">
+                  <span className="text-xs text-white/80 break-words">
+                    Du kan alltid ändra texten senare under Min profil
+                  </span>
+                  <span className={`text-sm shrink-0 ${countWords(formData.bio) > 250 ? 'text-red-300' : 'text-white'}`}>
                     {countWords(formData.bio)}/250 ord
                   </span>
                 </div>
               </div>
+
+              <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4">
+                <p className="text-sm font-medium text-white mb-2.5">Tips på vad du kan nämna</p>
+                <ul className="space-y-2">
+                  {[
+                    'Vem du är och vad du gör i dag',
+                    'Din erfarenhet eller utbildning',
+                    'Vad du är bra på – och vad du söker',
+                  ].map((tip) => (
+                    <li key={tip} className="flex items-start gap-2.5">
+                      <Check className="h-4 w-4 text-white mt-0.5 shrink-0" />
+                      <span className="text-sm text-white leading-relaxed break-words">{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         );
+
 
       case 5:
         return (

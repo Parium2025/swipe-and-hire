@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, File, Video, FileText, Check, WifiOff } from 'lucide-react';
+import { Upload, X, File, Video, FileText, Check, WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,8 +36,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [previewFile, setPreviewFile] = useState<{ file: File; url: string } | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [lastFailedFile, setLastFailedFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { isOnline, showOfflineToast } = useOnline();
+
 
   const getFileIcon = (fileName: string) => {
     const extension = fileName.toLowerCase().split('.').pop();
@@ -51,9 +54,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const uploadFile = async (file: File) => {
+    if (!navigator.onLine) {
+      setLastFailedFile(file);
+      setUploadError('Ingen internetanslutning. Filen laddas inte upp – anslut igen och försök på nytt.');
+      return;
+    }
     setUploading(true);
     setUploadProgress(0);
+    setUploadError(null);
     try {
+
       const { data } = await supabase.auth.getUser();
       if (!data.user) {
         throw new Error('Du måste vara inloggad för att ladda upp filer');
@@ -101,13 +111,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
         URL.revokeObjectURL(previewFile.url);
         setPreviewFile(null);
       }
+      setLastFailedFile(null);
     } catch (error) {
       console.error('Upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: error instanceof Error ? error.message : "Kunde inte ladda upp filen.",
-        variant: "destructive"
-      });
+      const offline = !navigator.onLine;
+      const message = offline
+        ? 'Ingen internetanslutning. Anslut igen och försök på nytt.'
+        : error instanceof Error
+          ? error.message
+          : 'Något gick fel när filen skulle laddas upp.';
+      setLastFailedFile(file);
+      setUploadError(message);
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -118,6 +132,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     
     const file = acceptedFiles[0];
     if (file) {
+
       // Check if it's a video file for preview
       const isVideo = file.type.startsWith('video/');
       if (isVideo) {
@@ -149,12 +164,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
         message = "Filtypen stöds inte.";
       }
       
-      toast({
-        title: "Fel vid filuppladdning",
-        description: message,
-        variant: "destructive"
-      });
+      setLastFailedFile(null);
+      setUploadError(message);
     }
+
   });
 
   const handleRemoveFile = () => {
@@ -339,7 +352,43 @@ const FileUpload: React.FC<FileUploadProps> = ({
           )}
         </div>
       </div>
+
+      {uploadError && (
+        <div
+          role="alert"
+          className="mt-3 flex items-start gap-3 rounded-2xl border border-red-400/40 bg-red-500/10 backdrop-blur-sm px-3.5 py-3 animate-fade-in"
+        >
+          <div className="mt-0.5 shrink-0 rounded-full bg-red-500/20 p-1.5">
+            {navigator.onLine ? (
+              <AlertCircle className="h-4 w-4 text-red-200" />
+            ) : (
+              <WifiOff className="h-4 w-4 text-red-200" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-white break-words">Uppladdningen misslyckades</p>
+            <p className="text-xs text-white/90 break-words leading-relaxed mt-0.5">{uploadError}</p>
+          </div>
+          {lastFailedFile && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={uploading}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (lastFailedFile) uploadFile(lastFailedFile);
+              }}
+              className="shrink-0 h-8 rounded-full px-3 text-xs font-medium text-white bg-white/10 hover:bg-white/20 focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+              Försök igen
+            </Button>
+          )}
+        </div>
+      )}
     </>
+
   );
 };
 
