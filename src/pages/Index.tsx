@@ -532,7 +532,12 @@ const Index = () => {
         }
       } catch { /* fortsätt */ }
 
-      // 3) Standard: gå till sök
+      // 3) Standard: gå till sök + visa introrundturen första gången
+      try {
+        if (!localStorage.getItem('parium_intro_tour_done')) {
+          setShowIntroTutorial(true);
+        }
+      } catch { /* ignorera */ }
       navigate('/search-jobs');
     }} />;
   }
@@ -559,6 +564,10 @@ const Index = () => {
 
   // Show app intro tutorial after onboarding
   const showTourOverlay = showIntroTutorial;
+  const finishIntroTour = () => {
+    try { localStorage.setItem('parium_intro_tour_done', '1'); } catch { /* ignorera */ }
+    setShowIntroTutorial(false);
+  };
   
   // Resolve role from profile first to avoid flicker
   const role = (profile as any)?.role || (userRole?.role as string) || '';
@@ -676,7 +685,7 @@ const Index = () => {
           enterDelayMs={routeEnterDelayMs}
         />
         {showTourOverlay && (
-          <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
+          <AppOnboardingTour onComplete={finishIntroTour} />
         )}
       </JobSeekerLayout>
     );
@@ -766,7 +775,7 @@ const Index = () => {
           enterDelayMs={routeEnterDelayMs}
         />
         {showTourOverlay && (
-          <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
+          <AppOnboardingTour onComplete={finishIntroTour} />
         )}
       </EmployerLayout>
     );
