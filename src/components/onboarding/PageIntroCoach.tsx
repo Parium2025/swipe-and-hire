@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   X, Check, Building, FileText, User, Heart, MessageCircle, Eye, Home,
-  CreditCard, HelpCircle,
+  CreditCard, HelpCircle, ArrowRight,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
@@ -19,6 +19,8 @@ import { useDevice } from '@/hooks/use-device';
 
 const STORAGE_PREFIX = 'parium_page_coach_v1_';
 const ACTIVE_TOUR_KEY = 'parium_page_coach_active';
+/** Hårdstopp: när guiden avslutats visas INGA sidtips förrän man startar om den. */
+const COACH_DISABLED_KEY = 'parium_page_coach_disabled';
 /** Speglar WELCOME_CARD_REPLAY_EVENT i AppOnboardingTour (undviker cirkulär import). */
 const WELCOME_CARD_REPLAY_EVENT_NAME = 'parium:welcome-card-replay';
 
@@ -41,8 +43,18 @@ export function resetPageCoachMarks() {
     Object.keys(localStorage)
       .filter((k) => k.startsWith(STORAGE_PREFIX))
       .forEach((k) => localStorage.removeItem(k));
+    localStorage.removeItem(COACH_DISABLED_KEY);
   } catch {
     /* ignorera */
+  }
+}
+
+/** Är guiden avstängd? Hårdstopp som gäller alla sidor. */
+function isCoachDisabled(): boolean {
+  try {
+    return localStorage.getItem(COACH_DISABLED_KEY) === '1';
+  } catch {
+    return false;
   }
 }
 
@@ -50,6 +62,7 @@ export function resetPageCoachMarks() {
 export function markAllPageCoachesSeen() {
   try {
     Object.values(CONFIGS).forEach((c) => localStorage.setItem(STORAGE_PREFIX + c.key, '1'));
+    localStorage.setItem(COACH_DISABLED_KEY, '1');
     localStorage.removeItem(ACTIVE_TOUR_KEY);
   } catch {
     /* ignorera */
@@ -71,6 +84,7 @@ export function replayPageCoach() {
   resetPageCoachMarks();
   window.dispatchEvent(new CustomEvent(PAGE_COACH_REPLAY_EVENT));
 }
+
 
 
 interface CoachConfig {
@@ -106,6 +120,7 @@ const CONFIGS: Record<string, CoachConfig> = {
       isTouch
         ? 'Högst upp finns Swipe-läget: svep höger för att spara ett jobb och vänster för att hoppa över det.'
         : 'På mobil och surfplatta finns även ett Swipe-läge högst upp — svep höger för att spara, vänster för att hoppa över.',
+      'I annonsen kan du trycka på företagsnamnet för att se företagsprofilen med info och recensioner från andra.',
       'När du trycker "Ansök" skickas din profil till arbetsgivaren: namn, kontaktuppgifter, bild, presentation, CV och video om du laddat upp det. Har arbetsgivaren egna frågor behöver du svara på dem för att kunna skicka in. Inget delas innan du själv ansöker.',
     ],
     cta: { label: 'Visa sparade jobb', path: '/saved-jobs' },
@@ -207,6 +222,7 @@ const PageIntroCoach = () => {
 
   const alreadySeen = useMemo(() => {
     if (!config) return true;
+    if (isCoachDisabled()) return true;
     try {
       return !isGuidedTour && localStorage.getItem(STORAGE_PREFIX + config.key) === '1';
     } catch {
@@ -238,14 +254,15 @@ const PageIntroCoach = () => {
       } catch {
         /* ignorera */
       }
-      try {
-        if (continueTour && path) {
+      if (continueTour && path) {
+        try {
           localStorage.setItem(ACTIVE_TOUR_KEY, path);
-        } else {
-          localStorage.removeItem(ACTIVE_TOUR_KEY);
+        } catch {
+          /* ignorera */
         }
-      } catch {
-        /* ignorera */
+      } else {
+        // Sista steget eller fristående tips: stäng av allt tills guiden startas om.
+        markAllPageCoachesSeen();
       }
       setVisible(false);
       window.setTimeout(() => {
@@ -290,7 +307,7 @@ const PageIntroCoach = () => {
   const primaryPath = isGuidedTour ? nextTourPath : config.cta?.path;
   const primaryLabel = isGuidedTour
     ? nextTourPath
-      ? CONFIGS[nextTourPath]?.title ?? 'Nästa steg'
+      ? `Nästa: ${CONFIGS[nextTourPath]?.title ?? 'Nästa steg'}`
       : 'Klart, stäng'
     : config.cta?.label;
 
@@ -335,9 +352,12 @@ const PageIntroCoach = () => {
 
           <ul className="mt-3 w-full space-y-2">
             {config.lines(isTouch).map((line) => (
-              <li key={line} className="flex items-start justify-center gap-2">
+              <li
+                key={line}
+                className="grid w-full grid-cols-[18px_1fr] items-start gap-2 text-left"
+              >
                 <Check className="mt-[3px] h-3.5 w-3.5 shrink-0 text-white" strokeWidth={2.5} />
-                <span className="text-[13px] leading-snug text-white break-words text-center">
+                <span className="text-[13px] leading-snug text-white break-words">
                   {line}
                 </span>
               </li>
@@ -353,9 +373,10 @@ const PageIntroCoach = () => {
               <button
                 type="button"
                 onClick={() => dismiss(primaryPath, isGuidedTour && Boolean(primaryPath))}
-                className="inline-flex min-w-36 max-w-full items-center justify-center rounded-full bg-green-500 px-6 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                className="inline-flex min-w-36 max-w-full items-center justify-center gap-2 rounded-full bg-green-500 px-6 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
-                {primaryLabel}
+                <span className="truncate">{primaryLabel}</span>
+                {primaryPath && <ArrowRight className="h-4 w-4 shrink-0" />}
               </button>
             )}
             {primaryPath && (
