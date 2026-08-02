@@ -544,6 +544,18 @@ VIKTIGT:
       ? (summary.summary_text?.trim() || rejectionReason)
       : (summary.summary_text || '');
 
+    // Never persist an empty analysis — an unparsable/blank AI answer must be retried,
+    // not cached as "klar" (which would freeze the profile in an empty state forever).
+    if (!summaryText.trim()) {
+      console.error('AI returned an empty summary — not saving, will retry on next run');
+      return new Response(
+        JSON.stringify({ error: 'AI-tjänsten svarade ofullständigt. Försök igen.', code: 'ai_empty_response' }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+
+
 
     // ALWAYS save to profile_cv_summaries for proactive analysis (background pre-analysis)
     if (isProactiveAnalysis && finalCvUrl) {
