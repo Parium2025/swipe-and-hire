@@ -5,7 +5,7 @@ import {
   Building, User, FileText, Heart, ArrowRight, Check, MessageCircle,
   CreditCard, HelpCircle, Briefcase, ChevronLeft, Eye,
 } from 'lucide-react';
-import { startPageCoachTour } from '@/components/onboarding/PageIntroCoach';
+import { startPageCoachTour, markAllPageCoachesSeen } from '@/components/onboarding/PageIntroCoach';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
