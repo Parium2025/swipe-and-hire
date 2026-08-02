@@ -21,6 +21,8 @@ import JobSeekerHome from '@/components/JobSeekerHome';
 // ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
+import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelCompletedThisSession } from '@/lib/tunnelTestAccounts';
+
 import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour from '@/components/AppOnboardingTour';
@@ -458,7 +460,12 @@ const Index = () => {
   }
 
   // Check if user needs to complete onboarding
-  const needsOnboarding = !profile?.onboarding_completed;
+  // Testkonton (t.ex. axelanderssonparium@gmail.com) kör tunneln på nytt varje inloggning.
+  const tunnelReplay = isTunnelReplayAccount(user?.email);
+  const needsOnboarding = tunnelReplay
+    ? !hasCompletedTunnelThisSession()
+    : !profile?.onboarding_completed;
+
   
   // Developer overrides for admin users (database-based check)
   if (isPlatformAdmin) {
@@ -495,10 +502,15 @@ const Index = () => {
   if (needsOnboarding && (profile as any)?.role === 'job_seeker') {
     return <WelcomeTunnel onComplete={async () => {
       // Mark onboarding as completed in background
-      supabase
-        .from('profiles')
-        .update({ onboarding_completed: true })
-        .eq('id', user.id);
+      if (tunnelReplay) {
+        markTunnelCompletedThisSession();
+      } else {
+        supabase
+          .from('profiles')
+          .update({ onboarding_completed: true })
+          .eq('id', user.id);
+      }
+
 
       // 1) Jobb-intent (kom från /annons/:id som utloggad → "Ansök") går först
       try {
@@ -530,10 +542,15 @@ const Index = () => {
   if (needsOnboarding && (profile as any)?.role === 'employer') {
     return <EmployerWelcomeTunnel onComplete={async () => {
       // Mark onboarding as completed in background
-      supabase
-        .from('profiles')
-        .update({ onboarding_completed: true })
-        .eq('id', user.id);
+      if (tunnelReplay) {
+        markTunnelCompletedThisSession();
+      } else {
+        supabase
+          .from('profiles')
+          .update({ onboarding_completed: true })
+          .eq('id', user.id);
+      }
+
       
       // Navigate to home
       navigate('/home');
