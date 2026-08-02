@@ -125,9 +125,9 @@ export function BirthDatePicker({
       <PopoverTrigger asChild>
         <Button
           ref={triggerRef}
-          variant="outline"
+          variant="outlineNeutral"
           className={cn(
-            "w-full h-11 !min-h-0 pl-3 pr-3 text-left text-sm font-normal bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 justify-start focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+            "w-full h-11 !min-h-0 pl-3 pr-3 text-left text-sm font-normal rounded-md bg-white/5 backdrop-blur-sm border border-white/10 !text-white md:hover:!bg-white/10 md:hover:!text-white md:hover:!border-white/50 active:!scale-100 active:!bg-white/5 focus:!bg-white/5 focus-visible:!bg-white/5 data-[state=open]:!bg-white/5 justify-start focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
             !selectedDate && "placeholder:text-white",
             className
           )}
