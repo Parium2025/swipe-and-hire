@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
-import { BirthDatePicker } from '@/components/BirthDatePicker';
+import TunnelBirthDateField from '@/components/tunnel/TunnelBirthDateField';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
