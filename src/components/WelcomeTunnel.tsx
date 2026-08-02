@@ -1603,17 +1603,17 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
 
             <div className="space-y-4 max-w-md mx-auto">
               <div>
-                <Label htmlFor="bio" className="text-white">Om mig <span className="text-white/70 font-normal">(frivilligt)</span></Label>
+                <Label htmlFor="bio" className="text-white">Om mig <span className="text-white font-normal">(frivilligt)</span></Label>
                 <Textarea
                   id="bio"
                   rows={6}
                   className="mt-1.5 min-h-[140px] text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/70 resize-none"
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
-                  placeholder="Ex: Jag är 24 år, serviceinriktad och van vid högt tempo. Har jobbat två år inom butik och trivs bäst i team. Söker nu ett deltidsjobb i Stockholm."
+                  placeholder="Till exempel: Jag är 24 år, serviceinriktad och van vid högt tempo. Har jobbat två år inom butik och trivs bäst i team. Söker nu ett deltidsjobb i Stockholm."
                 />
                 <div className="flex items-center justify-between mt-1.5 gap-3">
-                  <span className="text-xs text-white/80 break-words">
+                  <span className="text-xs text-white break-words">
                     Du kan alltid ändra texten senare under Min profil
                   </span>
                   <span className={`text-sm shrink-0 ${countWords(formData.bio) > 250 ? 'text-red-300' : 'text-white'}`}>
@@ -1623,7 +1623,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               </div>
 
               <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4">
-                <p className="text-sm font-medium text-white mb-2.5">Tips på vad du kan nämna</p>
+                <p className="text-sm font-medium text-white mb-2.5">Tips på vad du kan nämna:</p>
                 <ul className="space-y-2">
                   {[
                     'Vem du är och vad du gör i dag',
@@ -1631,7 +1631,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     'Vad du är bra på – och vad du söker',
                   ].map((tip) => (
                     <li key={tip} className="flex items-start gap-2.5">
-                      <Check className="h-4 w-4 text-white mt-0.5 shrink-0" />
+                      <Check className="h-4 w-4 text-green-400 mt-0.5 shrink-0" />
+
                       <span className="text-sm text-white leading-relaxed break-words">{tip}</span>
                     </li>
                   ))}
