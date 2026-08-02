@@ -685,7 +685,7 @@ const Index = () => {
           enterDelayMs={routeEnterDelayMs}
         />
         {showTourOverlay && (
-          <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
+          <AppOnboardingTour onComplete={finishIntroTour} />
         )}
       </JobSeekerLayout>
     );
@@ -775,7 +775,7 @@ const Index = () => {
           enterDelayMs={routeEnterDelayMs}
         />
         {showTourOverlay && (
-          <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
+          <AppOnboardingTour onComplete={finishIntroTour} />
         )}
       </EmployerLayout>
     );
