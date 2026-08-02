@@ -52,9 +52,11 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const [cvPreloaded, setCvPreloaded] = useState(false);
   
   // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
-  const WELCOME_LOCAL_MEDIA_KEY = 'parium_welcome_local_media';
-  // localStorage key for form data persistence across page refreshes
-  const WELCOME_DRAFT_KEY = 'parium_draft_welcome-tunnel';
+  // 🔐 Nycklarna scopas per användare — annars kan ett utkast med personuppgifter
+  // (namn, telefon, födelsedatum) läcka till nästa person som loggar in på samma enhet.
+  const storageScope = user?.id ?? 'anon';
+  const WELCOME_LOCAL_MEDIA_KEY = `parium_welcome_local_media_${storageScope}`;
+  const WELCOME_DRAFT_KEY = `parium_draft_welcome-tunnel_${storageScope}`;
   
   interface WelcomeLocalMediaState {
     profileImageUrl: string;
@@ -199,13 +201,15 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // Restore draft from localStorage on mount
   useEffect(() => {
     try {
+      // Städa bort gamla, icke scopade nycklar (kunde delas mellan konton på samma enhet)
+      localStorage.removeItem('parium_draft_welcome-tunnel');
+      sessionStorage.removeItem('parium_welcome_local_media');
       const savedDraft = localStorage.getItem(WELCOME_DRAFT_KEY);
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft);
         // Only restore if saved recently (within 7 days)
         if (parsed.savedAt && Date.now() - parsed.savedAt < 7 * 24 * 60 * 60 * 1000) {
           if (parsed.formData) {
-            console.log('📝 Restoring welcome tunnel draft from localStorage');
             setFormData(prev => ({
               ...prev,
               ...parsed.formData,
@@ -967,24 +971,6 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         return;
       }
 
-      console.log('Starting profile update with data:', {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        bio: formData.bio,
-        location: formData.location,
-        postal_code: postalCode,
-        phone: formData.phone,
-        birth_date: formData.birthDate || null,
-        employment_type: formData.employmentStatus, // Fixed: employment_type
-        work_schedule: formData.workingHours, // Fixed: work_schedule
-        availability: formData.availability,
-        cv_url: formData.cvUrl,
-        cv_filename: formData.cvFileName,
-        profile_image_url: formData.profileMediaType === 'video' ? null : formData.profileImageUrl,
-        video_url: formData.profileMediaType === 'video' ? formData.profileImageUrl : null,
-        cover_image_url: formData.coverImageUrl || null,
-        onboarding_completed: true
-      });
 
       // First, save consent
       if (formData.consentGiven) {
@@ -1025,8 +1011,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         onboarding_completed: true // Mark onboarding as completed
       } as any);
       
-      console.log('Profile update result:', result);
-      
+
       if (result?.error) {
         console.error('Profile update failed:', result.error);
         throw new Error('Profile update failed: ' + result.error);
