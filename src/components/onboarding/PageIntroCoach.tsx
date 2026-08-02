@@ -137,17 +137,6 @@ interface CoachConfig {
 }
 
 const CONFIGS: Record<string, CoachConfig> = {
-  '/home': {
-    key: 'home',
-    icon: Home,
-    title: 'Det här är din startsida',
-    lines: () => [
-      'Här ser du nyheter, din statistik, dina anteckningar och bokade intervjuer — en snabb överblick varje gång du loggar in.',
-      'Menyn längst upp tar dig vidare: Jobb, Chattar, Ekonomi, Support och Min profil.',
-      'Parium-loggan längst upp till vänster är en knapp — tryck på den när du vill tillbaka hit.',
-    ],
-    cta: { label: 'Gå till Sök jobb', path: '/search-jobs' },
-  },
   '/search-jobs': {
     key: 'search-jobs',
     icon: Building,
