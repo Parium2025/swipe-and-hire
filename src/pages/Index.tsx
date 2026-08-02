@@ -26,6 +26,7 @@ import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelComplet
 import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour from '@/components/AppOnboardingTour';
+import PageIntroCoach, { resetPageCoachMarks } from '@/components/onboarding/PageIntroCoach';
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
@@ -380,6 +381,7 @@ const Index = () => {
     if (!isWelcomeCardReplayAccount(user.email)) return;
     if ((profile as any)?.role !== 'job_seeker') return;
     if (!(profile as any)?.onboarding_completed) return;
+    resetPageCoachMarks();
     setShowIntroTutorial(true);
   }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
   const [isInitializing, setIsInitializing] = useState(false);
@@ -693,8 +695,10 @@ const Index = () => {
           keepKeys={JOB_SEEKER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
         />
-        {showTourOverlay && (
+        {showTourOverlay ? (
           <AppOnboardingTour onComplete={finishIntroTour} firstName={(profile as any)?.first_name} />
+        ) : (
+          <PageIntroCoach />
         )}
       </JobSeekerLayout>
     );
