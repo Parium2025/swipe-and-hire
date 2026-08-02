@@ -30,7 +30,7 @@ export function resetPageCoachMarks() {
 
 interface CoachConfig {
   key: string;
-  icon: typeof Search;
+  icon: typeof Building;
   title: string;
   lines: (isTouch: boolean) => string[];
   cta?: { label: string; path: string };
@@ -39,10 +39,11 @@ interface CoachConfig {
 const CONFIGS: Record<string, CoachConfig> = {
   '/search-jobs': {
     key: 'search-jobs',
-    icon: Search,
+    icon: Building,
     title: 'Så hittar du rätt jobb',
     lines: (isTouch) => [
-      'Sök på yrke, företag eller ort — eller använd filtren för arbetstid och avstånd.',
+      'Sök på yrke, företag eller ort — eller filtrera på plats, yrkesområde, anställning och lön.',
+      'Knapparna 12 tim, 24 tim, 3 dagar och 7 dagar visar hur nyligen jobben publicerades.',
       isTouch
         ? 'Swipa åt höger för att spara ett jobb, åt vänster för att hoppa vidare.'
         : 'Klicka på ett kort för att öppna hela annonsen. Hjärtat sparar jobbet till senare.',
