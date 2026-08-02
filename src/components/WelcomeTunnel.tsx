@@ -1073,11 +1073,27 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       }, 2000);
     } catch (error) {
       console.error('Error in handleSubmit:', error);
+      const message = error instanceof Error ? error.message : String(error ?? '');
+      const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      const networkIssue =
+        offline ||
+        /failed to fetch|networkerror|network request failed|timeout|load failed/i.test(message);
+      const authIssue = /jwt|not authenticated|session|permission|row-level/i.test(message);
+
       toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte skapa profilen. Försök igen.",
+        title: networkIssue
+          ? "Ingen internetanslutning"
+          : authIssue
+            ? "Du behöver logga in igen"
+            : "Kunde inte spara profilen",
+        description: networkIssue
+          ? "Vi når inte servern just nu. Dina uppgifter finns kvar sparade — försök igen när du har täckning."
+          : authIssue
+            ? "Din inloggning har gått ut. Logga in igen så finns dina uppgifter kvar."
+            : "Något gick fel när profilen sparades. Dina uppgifter finns kvar — försök igen om en stund.",
         variant: "destructive"
       });
+
     } finally {
       setIsSubmitting(false);
     }
