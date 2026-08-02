@@ -120,6 +120,7 @@ const CONFIGS: Record<string, CoachConfig> = {
       isTouch
         ? 'Högst upp finns Swipe-läget: svep höger för att spara ett jobb och vänster för att hoppa över det.'
         : 'På mobil och surfplatta finns även ett Swipe-läge högst upp — svep höger för att spara, vänster för att hoppa över.',
+      'I annonsen kan du trycka på företagsnamnet för att se företagsprofilen med info och recensioner från andra.',
       'När du trycker "Ansök" skickas din profil till arbetsgivaren: namn, kontaktuppgifter, bild, presentation, CV och video om du laddat upp det. Har arbetsgivaren egna frågor behöver du svara på dem för att kunna skicka in. Inget delas innan du själv ansöker.',
     ],
     cta: { label: 'Visa sparade jobb', path: '/saved-jobs' },
