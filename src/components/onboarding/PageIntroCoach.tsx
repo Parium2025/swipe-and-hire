@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   X, Check, Building, FileText, User, Heart, MessageCircle, Eye, Home,
-  CreditCard, HelpCircle,
+  CreditCard, HelpCircle, ArrowRight,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
