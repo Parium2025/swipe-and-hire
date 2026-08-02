@@ -33,8 +33,11 @@ import {
   Eye,
   Heart,
   FileText,
-  Home
+  Home,
+  Lightbulb
 } from "lucide-react";
+import { replayPageCoach } from "@/components/onboarding/PageIntroCoach";
+
 
 const profileItems = [
   { title: 'Min Profil', url: '/profile', icon: User },
