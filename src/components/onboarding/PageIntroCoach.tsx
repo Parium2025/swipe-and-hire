@@ -160,7 +160,7 @@ const CONFIGS: Record<string, CoachConfig> = {
     lines: () => [
       'När en arbetsgivare svarar på din ansökan hamnar chatten här.',
       'Du får en notis direkt — inget viktigt försvinner.',
-      'Tomt nu? Chattar startas av arbetsgivaren efter att du har sökt ett jobb.',
+      'Tomt nu? Chattar kan startas av arbetsgivaren efter att du har sökt ett jobb.',
     ],
     cta: { label: 'Se dina ansökningar', path: '/my-applications' },
   },
