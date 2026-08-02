@@ -3235,6 +3235,13 @@ export type Database = {
       }
     }
     Functions: {
+      auth_email_registered: {
+        Args: { _email: string }
+        Returns: {
+          exists_flag: boolean
+          user_role: string
+        }[]
+      }
       can_employer_read_application_file: {
         Args: { p_name: string }
         Returns: boolean

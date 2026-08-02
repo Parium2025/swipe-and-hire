@@ -5,6 +5,8 @@ project_id = "jrjaegapuujushsiofoi"
     verify_jwt = false
   [functions.auth-email-hook]
     verify_jwt = false
+  [functions.check-email-availability]
+    verify_jwt = false
   [functions.check-saved-searches]
     schedule = "*/5 * * * *"
     verify_jwt = false
