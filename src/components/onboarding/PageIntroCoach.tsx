@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  X, Check, Building, FileText, User, Heart, MessageCircle, Eye, Home,
+  X, Check, Building, FileText, User, Heart, MessageCircle, Eye,
   CreditCard, HelpCircle, ArrowRight,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
@@ -137,17 +137,6 @@ interface CoachConfig {
 }
 
 const CONFIGS: Record<string, CoachConfig> = {
-  '/home': {
-    key: 'home',
-    icon: Home,
-    title: 'Det här är din startsida',
-    lines: () => [
-      'Här ser du nyheter, din statistik, dina anteckningar och bokade intervjuer — en snabb överblick varje gång du loggar in.',
-      'Menyn längst upp tar dig vidare: Jobb, Chattar, Ekonomi, Support och Min profil.',
-      'Parium-loggan längst upp till vänster är en knapp — tryck på den när du vill tillbaka hit.',
-    ],
-    cta: { label: 'Gå till Sök jobb', path: '/search-jobs' },
-  },
   '/search-jobs': {
     key: 'search-jobs',
     icon: Building,
@@ -192,11 +181,10 @@ const CONFIGS: Record<string, CoachConfig> = {
   '/profile': {
     key: 'profile',
     icon: User,
-    title: 'Det här ser arbetsgivaren',
+    title: 'Din profil',
     lines: () => [
       'Bild, presentation, CV och video — allt kan ändras eller raderas när du vill.',
       'Profiler med bild och en kort presentation får betydligt fler svar.',
-      'Din profil delas med en arbetsgivare först när du själv skickar en ansökan — aldrig innan.',
     ],
     cta: { label: 'Gå till Sök jobb', path: '/search-jobs' },
   },
