@@ -1240,23 +1240,20 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                  />
                </div>
-                 <div className="space-y-2">
-                  <Label htmlFor="birthDate" className="text-white font-medium text-sm">Födelsedatum<RequiredMark filled={!!formData.birthDate.trim()} /></Label>
-                  <BirthDatePicker
-                    value={formData.birthDate}
-                    onChange={(date) => handleInputChange('birthDate', date)}
-                    placeholder="Välj födelsedatum"
-                    className="w-full"
-                    popoverAlign="center"
-                    popoverAlignOffset={-240}
-                    alignToIcon={true}
-                  />
-                  {formData.birthDate && calculateAge(formData.birthDate) !== null && (
-                    <p className="text-sm text-white mt-1">
-                      {calculateAge(formData.birthDate)} år gammal
-                    </p>
-                  )}
-                </div>
+                  <div className="space-y-2">
+                   <TunnelBirthDateField
+                     id="birthDate"
+                     label="Födelsedatum"
+                     value={formData.birthDate}
+                     onChange={(date) => handleInputChange('birthDate', date)}
+                   />
+                   {formData.birthDate && calculateAge(formData.birthDate) !== null && (
+                     <p className="text-sm text-white mt-1">
+                       {calculateAge(formData.birthDate)} år gammal
+                     </p>
+                   )}
+                 </div>
+
                <div className="space-y-2">
                  <Label htmlFor="phone" className="text-white font-medium text-sm">
                    <Phone className="h-4 w-4 inline mr-2" />
