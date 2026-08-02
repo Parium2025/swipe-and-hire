@@ -223,6 +223,7 @@ export async function purgeUserData(
       const { data } = await admin.from('job_applications').select('id').in('job_id', chunk);
       appIdsOnJobs.push(...(data ?? []).map((r: { id: string }) => r.id));
     }
+    await purgeCriterionResults(admin, 'application_id', appIdsOnJobs);
     for (const table of APPLICATION_SCOPED) {
       if (appIdsOnJobs.length > 0) await delIn(admin, table, 'application_id', appIdsOnJobs);
     }
