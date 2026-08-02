@@ -127,6 +127,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
           PDF och en JSON-fil som kan tas med till en annan tjänst.
         </p>
 
+        <div className="flex justify-center">
         <Button
           variant="glass"
           onClick={handleDownload}
@@ -140,19 +141,22 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
           )}
           {downloading ? 'Hämtar dina uppgifter…' : 'Ladda ner mina uppgifter'}
         </Button>
+        </div>
         <div className="pt-1 border-t border-white/10 space-y-3">
           <p className="text-xs text-white">
             Vill du radera ditt konto raderas allt permanent — profil, ansökningar, CV,
             bilder och meddelanden. Det går inte att ångra.
           </p>
-          <Button
-            variant="glass"
-            onClick={() => { setConfirmText(''); setDeleteOpen(true); }}
-            className="h-10 rounded-full px-5 text-sm text-red-300 hover:text-red-200 border-red-400/40"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Radera mitt konto
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              variant="glass"
+              onClick={() => { setConfirmText(''); setDeleteOpen(true); }}
+              className="h-10 rounded-full px-5 text-sm text-red-300 hover:text-red-200 border-red-400/40"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Radera mitt konto
+            </Button>
+          </div>
         </div>
 
         <p className="text-xs text-white">
