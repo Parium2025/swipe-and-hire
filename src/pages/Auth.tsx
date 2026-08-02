@@ -582,8 +582,14 @@ const Auth = () => {
   // Visa bekräftelsestatus om det finns en
   if (confirmationStatus !== 'none') {
     return (
-      <div className="min-h-dvh bg-gradient-parium flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
+      <div
+        className="relative min-h-dvh flex items-center justify-center p-4 smooth-scroll touch-pan overflow-hidden"
+        style={{ WebkitOverflowScrolling: 'touch', ...AUTH_BACKDROP_STYLE }}
+      >
+        <div className="fixed inset-0 z-[5] pointer-events-none">
+          <AnimatedBackground showGlow={false} variant="viewport" />
+        </div>
+        <Card className="relative z-10 w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center">
             {confirmationStatus === 'success' && (
               <>
