@@ -86,6 +86,24 @@ export function AuthSplashScreen() {
     setDotsFading(false);
     setImageLoaded(true);
   }, [isTriggered]);
+
+  // Rollen är låst under cykeln för att undvika textbyte mitt i animationen.
+  // ENDA undantaget: om vi startade utan känd roll (t.ex. första inloggningen
+  // på en ny enhet) får vi uppgradera från default till verklig roll så att en
+  // arbetsgivare aldrig fastnar i jobbsökar-taglinen.
+  useEffect(() => {
+    if (!isTriggered || lockedRole) return;
+    const onRole = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail === 'employer' || detail === 'job_seeker') {
+        setLockedRole(detail);
+      }
+    };
+    window.addEventListener('parium-auth-splash-role', onRole as EventListener);
+    return () => window.removeEventListener('parium-auth-splash-role', onRole as EventListener);
+  }, [isTriggered, lockedRole]);
+  
+
   
   // Trigger content fade-in when image is loaded. The shell background itself is
   // opaque immediately so protected/outside pages never flash during logout.
