@@ -22,7 +22,9 @@ interface RecoveryEmailProps {
 
 export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
   <Html lang="sv" dir="ltr">
-    <Head />
+    <Head>
+      <meta charSet="utf-8" />
+    </Head>
     <Preview>Återställ ditt lösenord på Parium</Preview>
     <Body style={main}>
       <Container style={container}>
@@ -40,7 +42,7 @@ export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
         </Section>
         <Text style={smallText}>
           Fungerar inte knappen?{' '}
-          <Link href={confirmationUrl} style={link}>Öppna din säkra återställningslänk</Link>
+          <Link href={confirmationUrl} style={link}>Klicka här för att återställa</Link>
         </Text>
         <Text style={footer}>
           Om du inte begärde en återställning kan du ignorera detta mail – ditt lösenord förblir oförändrat.
