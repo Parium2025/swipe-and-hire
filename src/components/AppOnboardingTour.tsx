@@ -70,6 +70,14 @@ const shortcuts: Shortcut[] = [
   },
 ];
 
+/** Event som öppnar hela välkomstkortet igen (Support → Hjälp & tips). */
+export const WELCOME_CARD_REPLAY_EVENT = 'parium:welcome-card-replay';
+
+/** Visa hela välkomstkortet igen, precis som första gången. */
+export function replayWelcomeCard() {
+  window.dispatchEvent(new CustomEvent(WELCOME_CARD_REPLAY_EVENT));
+}
+
 
 /**
  * Välkomstkort i två steg som visas en gång efter att profilen är klar.
@@ -289,7 +297,7 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center justify-start">
+              <div className="mt-6 flex items-center justify-center">
                 <button
                   type="button"
                   onClick={() => setStep(0)}

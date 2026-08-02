@@ -25,7 +25,7 @@ import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelComplet
 
 import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
-import AppOnboardingTour from '@/components/AppOnboardingTour';
+import AppOnboardingTour, { WELCOME_CARD_REPLAY_EVENT } from '@/components/AppOnboardingTour';
 import PageIntroCoach, { resetPageCoachMarks } from '@/components/onboarding/PageIntroCoach';
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
@@ -384,6 +384,14 @@ const Index = () => {
     resetPageCoachMarks();
     setShowIntroTutorial(true);
   }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
+
+  // Support → "Hjälp & tips" öppnar hela välkomstkortet igen.
+  useEffect(() => {
+    const onReplay = () => setShowIntroTutorial(true);
+    window.addEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
+    return () => window.removeEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
+  }, []);
+
   const [isInitializing, setIsInitializing] = useState(false);
   const [uiReady, setUiReady] = useState(false);
   const [showAuthCTA, setShowAuthCTA] = useState(false);
