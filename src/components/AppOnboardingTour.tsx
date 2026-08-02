@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, User, FileText, Heart, ArrowRight, Check, MessageCircle,
-  CreditCard, LifeBuoy, Briefcase, Hand, MousePointerClick, ChevronLeft,
+  Building, User, FileText, Heart, ArrowRight, Check, MessageCircle,
+  CreditCard, HelpCircle, Briefcase, ChevronLeft,
 } from 'lucide-react';
-import { useDevice } from '@/hooks/use-device';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
