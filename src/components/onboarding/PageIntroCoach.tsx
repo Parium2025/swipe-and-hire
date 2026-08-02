@@ -147,7 +147,7 @@ const CONFIGS: Record<string, CoachConfig> = {
     icon: Eye,
     title: 'Så ser arbetsgivaren dig',
     lines: () => [
-      'Det här är exakt den vy arbetsgivaren möts av när du har sökt ett jobb.',
+      'Det här är den vy arbetsgivaren möts av när du har sökt ett jobb.',
       'Växla mellan Mobilvy och Datorvy för att se båda varianterna.',
       'Saknas något? Gå till Min profil och komplettera bild, presentation, CV eller video.',
     ],
