@@ -44,6 +44,16 @@ export function resetPageCoachMarks() {
   }
 }
 
+/** Markera samtliga sidtips som sedda — används när guiden avslutas. */
+export function markAllPageCoachesSeen() {
+  try {
+    Object.values(CONFIGS).forEach((c) => localStorage.setItem(STORAGE_PREFIX + c.key, '1'));
+    localStorage.removeItem(ACTIVE_TOUR_KEY);
+  } catch {
+    /* ignorera */
+  }
+}
+
 /** Starta den sammanhängande guiden från den valda sidan. */
 export function startPageCoachTour(path: string) {
   resetPageCoachMarks();
@@ -59,6 +69,7 @@ export function replayPageCoach() {
   resetPageCoachMarks();
   window.dispatchEvent(new CustomEvent(PAGE_COACH_REPLAY_EVENT));
 }
+
 
 interface CoachConfig {
   key: string;
