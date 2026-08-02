@@ -34,7 +34,8 @@ serve(async (req) => {
     }
 
     // proactive=true means this is a background pre-analysis when user uploads CV to their profile
-    const isProactiveAnalysis = proactive === true;
+    // Any call without a specific application/job is a profile-level (proactive) analysis.
+    const isProactiveAnalysis = proactive === true || (!application_id && !job_id);
     console.log(`Generating CV summary for applicant ${applicant_id}${isProactiveAnalysis ? ' (PROACTIVE)' : ''}`);
 
     // Initialize Supabase clients
@@ -217,6 +218,7 @@ serve(async (req) => {
 let contentType = '';
     let userContent: string | any[] | null = null;
     let rawExtractedText: string | null = null; // Store raw text for evaluate-candidate
+    let needsVisionModel = false; // true when we send an image/scanned PDF instead of plain text
 
     if (finalCvUrl) {
       console.log('CV URL found', { hasCvUrl: !!finalCvUrl });
@@ -247,63 +249,47 @@ let contentType = '';
               
               try {
                 const buffer = await docResponse.arrayBuffer();
-                const pdfData = await pdfParse(Buffer.from(buffer));
-                const extractedText = pdfData.text?.trim();
-                
-                if (!extractedText || extractedText.length < 50) {
-                  console.log('PDF text extraction failed or too short, might be scanned/image-based');
-                  // Fall through to return placeholder for image-based PDFs
-                  const pdfKeyPoints = [
-                    { text: 'Dokumenttyp: Skannad PDF (bildbaserad)', type: 'neutral', meta: { source_cv_url: finalCvUrl, content_type: contentType, analyzed_at: new Date().toISOString() } },
-                    { text: 'Status: Uppladdad men kunde inte läsas', type: 'negative' },
-                    { text: 'Tips: Ladda upp ett textbaserat PDF eller bild av ditt CV', type: 'neutral' }
-                  ];
-                  const pdfSummaryText = 'PDF:en verkar vara skannad/bildbaserad och kunde inte läsas. Ladda upp ett textbaserat PDF eller en bild av ditt CV.';
-
-                  const saveJobId = job_id || application?.job_id;
-                  if (saveJobId) {
-                    await supabase.from('candidate_summaries').upsert({
-                      job_id: saveJobId,
-                      applicant_id,
-                      application_id: application?.id || application_id,
-                      summary_text: pdfSummaryText,
-                      key_points: pdfKeyPoints,
-                      generated_at: new Date().toISOString(),
-                      updated_at: new Date().toISOString(),
-                    }, { onConflict: 'job_id,applicant_id' });
-                  }
-
-                  if (isProactiveAnalysis) {
-                    await supabase.from('profile_cv_summaries').upsert({
-                      user_id: applicant_id,
-                      cv_url: finalCvUrl,
-                      is_valid_cv: false,
-                      document_type: 'Skannad PDF',
-                      summary_text: pdfSummaryText,
-                      key_points: pdfKeyPoints,
-                      analyzed_at: new Date().toISOString(),
-                      updated_at: new Date().toISOString(),
-                    }, { onConflict: 'user_id' });
-                  }
-
-                  return new Response(
-                    JSON.stringify({
-                      success: true,
-                      is_valid_cv: false,
-                      document_type: 'Skannad PDF',
-                      summary: { summary_text: pdfSummaryText, key_points: pdfKeyPoints },
-                    }),
-                    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                  );
+                let extractedText = '';
+                try {
+                  const pdfData = await pdfParse(Buffer.from(buffer));
+                  extractedText = pdfData.text?.trim() || '';
+                } catch (parseErr) {
+                  console.warn('pdf-parse failed, will use vision fallback:', parseErr);
                 }
-                
-                console.log(`PDF text extracted successfully: ${extractedText.length} chars`);
-                rawExtractedText = extractedText; // Save full raw text
-                // Truncate if too long (AI has token limits)
-                const maxChars = 15000;
-                userContent = extractedText.length > maxChars 
-                  ? extractedText.substring(0, maxChars) + '\n\n[Text trunkerad på grund av längd]'
-                  : extractedText;
+
+                if (!extractedText || extractedText.length < 50) {
+                  // Scanned/image-based PDF: let the model read the document directly.
+                  console.log('PDF text too short — sending PDF to AI as document (vision fallback)');
+                  const bytes = new Uint8Array(buffer);
+                  let binary = '';
+                  const chunkSize = 0x8000;
+                  for (let i = 0; i < bytes.length; i += chunkSize) {
+                    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+                  }
+                  const base64Pdf = btoa(binary);
+                  needsVisionModel = true;
+                  userContent = [
+                    {
+                      type: 'text',
+                      text: 'Analysera dokumentet enligt instruktionerna och returnera ENDAST JSON.',
+                    },
+                    {
+                      type: 'file',
+                      file: {
+                        filename: 'dokument.pdf',
+                        file_data: `data:application/pdf;base64,${base64Pdf}`,
+                      },
+                    },
+                  ];
+                } else {
+                  console.log(`PDF text extracted successfully: ${extractedText.length} chars`);
+                  rawExtractedText = extractedText; // Save full raw text
+                  // Truncate if too long (AI has token limits)
+                  const maxChars = 15000;
+                  userContent = extractedText.length > maxChars
+                    ? extractedText.substring(0, maxChars) + '\n\n[Text trunkerad på grund av längd]'
+                    : extractedText;
+                }
                   
               } catch (pdfError) {
                 console.error('PDF parsing error:', pdfError);
@@ -336,6 +322,7 @@ let contentType = '';
                 binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
               }
               const base64Doc = btoa(binary);
+              needsVisionModel = true;
 
               userContent = [
                 {
@@ -460,7 +447,8 @@ VIKTIGT:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3.5-flash',
+        // Cost control: cheap model for plain text, stronger multimodal model only for images/scanned PDFs
+        model: needsVisionModel ? 'google/gemini-3.5-flash' : 'google/gemini-3.1-flash-lite',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userContent },
