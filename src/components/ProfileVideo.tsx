@@ -317,8 +317,8 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       {/* Countdown timer when video is playing */}
       {showCountdown && isPlaying && remainingSeconds !== null && (
         countdownVariant === 'circle' ? (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2 py-[3px] rounded-full bg-black/45 backdrop-blur-md border border-white/15 shadow-lg">
-            <span className="text-[11px] font-semibold leading-none text-white tabular-nums tracking-tight">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
+            <span className="text-[11px] font-semibold leading-none text-white tabular-nums tracking-tight video-text-shadow">
               {remainingSeconds}s
             </span>
           </div>
