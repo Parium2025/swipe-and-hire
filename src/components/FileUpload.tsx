@@ -164,12 +164,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
         message = "Filtypen stöds inte.";
       }
       
-      toast({
-        title: "Fel vid filuppladdning",
-        description: message,
-        variant: "destructive"
-      });
+      setLastFailedFile(null);
+      setUploadError(message);
     }
+
   });
 
   const handleRemoveFile = () => {
