@@ -40,13 +40,22 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
   return lazy(() => {
     let timeout: ReturnType<typeof setTimeout> | undefined;
     const importPromise = factory();
+
+    // I dev/preview kompilerar Vite moduler on-demand — det kan ta långt över 12s
+    // för tunga sidor. Ingen timeout där; bara i produktion (byggda chunks).
+    if (import.meta.env.DEV) {
+      return importPromise;
+    }
+
+    const TIMEOUT_MS = 25000;
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeout = setTimeout(() => {
-        reject(new Error('Lazy import timed out after 12s'));
-      }, 12000);
+        reject(new Error(`Lazy import timed out after ${TIMEOUT_MS / 1000}s`));
+      }, TIMEOUT_MS);
     });
 
     return Promise.race([importPromise, timeoutPromise])
+
       .finally(() => {
         if (timeout) clearTimeout(timeout);
       })
