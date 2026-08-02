@@ -171,7 +171,7 @@ const PageIntroCoach = () => {
             <ul className="mt-2 space-y-1.5">
               {config.lines(isTouch).map((line) => (
                 <li key={line} className="flex items-start gap-2">
-                  <Sparkles className="mt-[3px] h-3.5 w-3.5 shrink-0 text-green-400" />
+                  <Check className="mt-[3px] h-3.5 w-3.5 shrink-0 text-green-400" strokeWidth={2.5} />
                   <span className="text-[13px] leading-snug text-white break-words">{line}</span>
                 </li>
               ))}
