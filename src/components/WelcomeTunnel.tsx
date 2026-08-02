@@ -134,7 +134,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     cvUrl: '',
     cvFileName: '',
     interests: [] as string[],
-    consentGiven: false // New field for data sharing consent
+    consentGiven: true // Samtycke lämnas redan vid kontoskapandet
   });
   
   // Update form data when profile/user loads (for pre-filled registration data)
@@ -1066,7 +1066,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       case 2: return true; // Profile image is optional
       case 3: return !!formData.cvUrl.trim(); // CV is now required
       case 4: return true; // Bio is optional
-      case 5: return formData.consentGiven; // Consent is required
+      case 5: return true; // Samtycke godkänt redan vid registrering
       case 6: return true; // Submit step
       default: return false;
     }
@@ -1647,21 +1647,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 </div>
               </div>
 
-
-              <div className="space-y-4">
-                <label className="flex items-start gap-3 cursor-pointer bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={formData.consentGiven}
-                    onChange={(e) => handleInputChange('consentGiven', e.target.checked)}
-                    className="mt-1 rounded border-white/30 bg-white/10 text-primary focus:ring-primary focus:ring-offset-0"
-                  />
-                  <div className="text-sm text-white">
-                    <p className="font-medium mb-1">Jag förstår hur mina uppgifter delas</p>
-                    <p className="text-white">Ovanstående information visas för en arbetsgivare först när du själv söker ett av deras jobb. Du kan när som helst ändra dina uppgifter, ta tillbaka en ansökan eller radera ditt konto under Min profil.</p>
-                  </div>
-                </label>
-              </div>
+              <p className="text-sm text-white">
+                Ovanstående information visas för en arbetsgivare först när du själv söker ett av deras jobb. Du kan när som helst ändra dina uppgifter, ta tillbaka en ansökan eller radera ditt konto under Min profil.
+              </p>
             </div>
           </div>
         );

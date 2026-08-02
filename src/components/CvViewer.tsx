@@ -3,7 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 // @ts-ignore - import worker file as URL string for Vite
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Plus, Minus } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl as any;
@@ -17,9 +17,10 @@ interface CvViewerProps {
   fileName?: string;
   height?: number | string; // e.g. 600 or '70vh'
   onClose?: () => void;
+  showDownload?: boolean;
 }
 
-export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }: CvViewerProps) {
+export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, showDownload = true }: CvViewerProps) {
   const device = useDevice();
   const isMobile = device === 'mobile';
   
@@ -379,8 +380,9 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           type="button"
           onClick={() => setZoomLevel(z => Math.max(0.5, z - 0.5))} 
           className="h-8 w-8 md:h-6 md:w-6 min-h-0 min-w-0 aspect-square p-0 leading-none rounded-full border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:duration-75 flex items-center justify-center touch-manipulation"
+          aria-label="Zooma ut"
         >
-          -
+          <Minus className="h-3.5 w-3.5 md:h-3 md:w-3" />
         </button>
         <span className="text-[10px] text-white min-w-[36px] text-center">
           {Math.round(zoomLevel * 100)}%
@@ -389,8 +391,9 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           type="button"
           onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
           className="h-8 w-8 md:h-6 md:w-6 min-h-0 min-w-0 aspect-square p-0 leading-none rounded-full border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:duration-75 flex items-center justify-center touch-manipulation"
+          aria-label="Zooma in"
         >
-          +
+          <Plus className="h-3.5 w-3.5 md:h-3 md:w-3" />
         </button>
         <button
           type="button"
@@ -400,7 +403,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           <RotateCcw className="h-3 w-3" />
         </button>
         <div className="ml-auto flex items-center gap-1">
-          {resolvedUrl && (
+          {showDownload && resolvedUrl && (
             <button
               type="button"
               onClick={async () => {
