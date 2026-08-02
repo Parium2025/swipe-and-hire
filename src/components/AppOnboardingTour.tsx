@@ -11,6 +11,8 @@ interface AppOnboardingTourProps {
   onComplete: () => void;
   /** Förnamn för en personlig hälsning (valfritt) */
   firstName?: string;
+  /** 0 = översikt, 1 = "Var vill du börja?" */
+  initialStep?: 0 | 1;
 }
 
 interface Shortcut {
