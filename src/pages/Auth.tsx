@@ -16,6 +16,14 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { consumePendingJobPath } from '@/lib/pendingJobIntent';
 import { applyIntentToSearchFilters } from '@/lib/savedSearchIntent';
 
+// Delad bakgrund för hela /auth (inklusive status- och felsidor)
+const AUTH_BACKDROP_STYLE = {
+  backgroundColor: 'hsl(215 100% 12%)',
+  backgroundImage:
+    'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
+};
+
+
 
 // Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
