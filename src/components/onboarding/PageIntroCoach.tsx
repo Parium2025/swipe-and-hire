@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  X, Sparkles, ArrowRight, Search, FileText, User, Heart, MessageCircle,
+  X, Check, ArrowRight, Building, FileText, User, Heart, MessageCircle,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
