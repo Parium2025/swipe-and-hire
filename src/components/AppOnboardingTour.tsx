@@ -13,7 +13,7 @@ interface AppOnboardingTourProps {
 }
 
 interface Shortcut {
-  icon: typeof Search;
+  icon: typeof Building;
   title: string;
   description: string;
   path: string;
@@ -21,9 +21,9 @@ interface Shortcut {
 
 const shortcuts: Shortcut[] = [
   {
-    icon: Search,
+    icon: Building,
     title: 'Sök jobb',
-    description: 'Filtrera på yrke, ort och arbetstid — hitta jobben nära dig.',
+    description: 'Sök på yrke, företag eller ort — och filtrera fram rätt jobb.',
     path: '/search-jobs',
   },
   {
