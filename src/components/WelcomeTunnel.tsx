@@ -35,8 +35,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const { profile, updateProfile, user, signOut } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(
-    typeof initialStep === 'number' ? initialStep : -1
-  ); // Start with SwipeIntro (-1) unless dev override provided
+    typeof initialStep === 'number' ? initialStep : 1
+  ); // Intro/SwipeIntro borttagen – vi startar direkt på uppgifterna
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
