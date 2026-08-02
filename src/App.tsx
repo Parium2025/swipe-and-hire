@@ -39,12 +39,49 @@ import Unsubscribe from "./pages/Unsubscribe";
 function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
   return lazy(() => {
     let timeout: ReturnType<typeof setTimeout> | undefined;
-    const importPromise = factory();
+    const importWithTransientRetry = async () => {
+      let lastError: unknown;
+
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          return await factory();
+        } catch (error) {
+          lastError = error;
+          if (attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+          }
+        }
+      }
+
+      throw lastError;
+    };
+
+    const importPromise = importWithTransientRetry();
+
+    const recoverFromFailedImport = (err: unknown) => {
+      const key = 'parium-chunk-reload-once';
+      const alreadyRetried = sessionStorage.getItem(key);
+
+      if (!alreadyRetried && typeof window !== 'undefined') {
+        sessionStorage.setItem(key, '1');
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('_v', Date.now().toString());
+          window.location.replace(url.toString());
+          return new Promise<never>(() => {});
+        } catch {
+          // fall through to surfaced error state
+        }
+      }
+
+      throw err;
+    };
 
     // I dev/preview kompilerar Vite moduler on-demand — det kan ta långt över 12s
-    // för tunga sidor. Ingen timeout där; bara i produktion (byggda chunks).
+    // för tunga sidor. Ingen timeout där, men nätverksfel ska fortfarande
+    // försöka igen och återhämta sidan automatiskt.
     if (import.meta.env.DEV) {
-      return importPromise;
+      return importPromise.catch(recoverFromFailedImport);
     }
 
     const TIMEOUT_MS = 25000;
@@ -59,24 +96,7 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
       .finally(() => {
         if (timeout) clearTimeout(timeout);
       })
-      .catch((err) => {
-        const key = 'parium-chunk-reload-once';
-        const alreadyRetried = sessionStorage.getItem(key);
-
-        if (!alreadyRetried && typeof window !== 'undefined') {
-          sessionStorage.setItem(key, '1');
-          try {
-            const url = new URL(window.location.href);
-            url.searchParams.set('_v', Date.now().toString());
-            window.location.replace(url.toString());
-            return new Promise<never>(() => {});
-          } catch {
-            // fall through to surfaced error state
-          }
-        }
-
-        throw err;
-      });
+      .catch(recoverFromFailedImport);
   });
 }
 
