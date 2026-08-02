@@ -253,14 +253,15 @@ const PageIntroCoach = () => {
       } catch {
         /* ignorera */
       }
-      try {
-        if (continueTour && path) {
+      if (continueTour && path) {
+        try {
           localStorage.setItem(ACTIVE_TOUR_KEY, path);
-        } else {
-          localStorage.removeItem(ACTIVE_TOUR_KEY);
+        } catch {
+          /* ignorera */
         }
-      } catch {
-        /* ignorera */
+      } else {
+        // Sista steget eller fristående tips: stäng av allt tills guiden startas om.
+        markAllPageCoachesSeen();
       }
       setVisible(false);
       window.setTimeout(() => {
