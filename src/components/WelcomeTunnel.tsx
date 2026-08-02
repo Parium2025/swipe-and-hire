@@ -1649,9 +1649,11 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                     <span>Din beskrivning om dig själv</span>
                   </div>
-
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                     <span>Kommun/stad (inte fullständig adress)</span>
                   </div>
+
                 </div>
               </div>
 
