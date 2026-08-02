@@ -178,6 +178,7 @@ const AuthMobile = ({
   };
   const signupEmail = (role === 'job_seeker' ? jobSeekerData.email : employerData.email);
   const emailAvailability = useEmailAvailability(signupEmail, !isLogin);
+  const [emailBlurred, setEmailBlurred] = useState(false);
   // Popular email domains for suggestions (Swedish and international)
   const popularDomains = [
     '@gmail.com', '@gmail.se', '@hotmail.com', '@hotmail.se', '@outlook.com', '@outlook.se',
@@ -718,7 +719,8 @@ const AuthMobile = ({
                           id="login-email"
                           type="email"
                           value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
-                          onChange={(e) => handleEmailChange(e.target.value)}
+                          onChange={(e) => { setEmailBlurred(false); handleEmailChange(e.target.value); }}
+                             onBlur={() => setEmailBlurred(true)}
                           required
                           name="auth-email"
                           autoComplete="email"
@@ -910,7 +912,8 @@ const AuthMobile = ({
                              id="email"
                              type="email"
                              value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
-                             onChange={(e) => handleEmailChange(e.target.value)}
+                             onChange={(e) => { setEmailBlurred(false); handleEmailChange(e.target.value); }}
+                             onBlur={() => setEmailBlurred(true)}
                              required
                              name="email"
                              autoComplete="email"
@@ -919,7 +922,7 @@ const AuthMobile = ({
                              autoCapitalize="none"
                              className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
                            />
-                           {emailAvailability.taken && (
+                           {emailBlurred && emailAvailability.taken && (
                              <p className="mt-1.5 text-xs font-medium text-white">
                                {emailTakenMessage(emailAvailability.existingRole)}{' '}
                                <button
