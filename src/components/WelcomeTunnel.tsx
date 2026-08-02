@@ -1626,19 +1626,30 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 <h3 className="text-white font-semibold mb-3">Detta kommer att delas med arbetsgivare:</h3>
                 <div className="space-y-2 text-sm text-white">
                   <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                    <span>Namn och profilbild</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                     <span>Din ålder</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                     <span>Postnummer (för jobb nära dig)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                     <span>Telefonnummer och e-post</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                    <span>Ditt CV och din presentationsvideo</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                    <span>Din beskrivning om dig själv</span>
+                  </div>
+
                     <span>Kommun/stad (inte fullständig adress)</span>
                   </div>
                 </div>
