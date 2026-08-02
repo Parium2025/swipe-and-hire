@@ -244,21 +244,25 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                   Var vill du börja?
                 </h2>
                 <p className="mt-2 text-sm sm:text-base text-white leading-relaxed max-w-md">
-                  Välj en väg in. Du kan alltid byta via menyn längst upp — inget låser sig.
+                  Gå igenom dem i ordning, ett steg i taget — eller hoppa direkt till det du är
+                  nyfiken på. Du kan alltid byta via menyn längst upp.
                 </p>
               </div>
 
-              {/* Genvägar */}
+              {/* Genvägar i ordning */}
               <div className="mt-6 space-y-3">
-                {shortcuts.map((item) => {
+                {shortcuts.map((item, index) => {
                   const Icon = item.icon;
                   return (
                     <button
                       key={item.path}
                       type="button"
                       onClick={() => close(item.path)}
-                      className="group flex w-full items-center gap-4 rounded-2xl border border-white/12 bg-white/[0.06] p-4 text-left transition-colors duration-150 hover:bg-white/[0.12] active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className="group flex w-full items-center gap-3.5 rounded-2xl border border-white/12 bg-white/[0.06] p-4 text-left transition-colors duration-150 hover:bg-white/[0.12] active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
+                      <span className="w-5 shrink-0 text-[13px] font-semibold tabular-nums text-white">
+                        {index + 1}
+                      </span>
                       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10">
                         <Icon className="h-5 w-5 text-white" />
                       </span>
@@ -275,18 +279,17 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
               </div>
 
               {/* Trygghetsrad */}
-              <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5">
-                <Heart className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+              <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5">
                 <p className="text-[13px] leading-snug text-white break-words">
-                  Först när du själv skickar en ansökan delas din profil med arbetsgivaren — namn,
-                  kontaktuppgifter, bild, presentation, CV och video om du laddat upp det. Vissa
-                  arbetsgivare har egna frågor i ansökan; svara på dem, de väger tungt. Du kan ändra
-                  eller radera allt när som helst under Min profil.
+                  <span className="font-semibold">Tips:</span> Först när du själv skickar en ansökan
+                  delas din profil med arbetsgivaren — namn, kontaktuppgifter, bild, presentation,
+                  CV och video om du laddat upp det. Vissa arbetsgivare har egna frågor i ansökan;
+                  svara på dem, de väger tungt. Du kan ändra eller radera allt när som helst under
+                  Min profil.
                 </p>
-
               </div>
 
-              <div className="mt-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
+              <div className="mt-6 flex items-center justify-start">
                 <button
                   type="button"
                   onClick={() => setStep(0)}
@@ -295,14 +298,8 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
                   <ChevronLeft className="h-4 w-4" />
                   Tillbaka
                 </button>
-                <button
-                  type="button"
-                  onClick={() => close()}
-                  className="rounded-full border border-white/20 bg-white/10 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-                >
-                  Jag utforskar själv
-                </button>
               </div>
+
             </>
           )}
 
