@@ -21,6 +21,8 @@ import JobSeekerHome from '@/components/JobSeekerHome';
 // ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
+import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelCompletedThisSession } from '@/lib/tunnelTestAccounts';
+
 import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour from '@/components/AppOnboardingTour';
