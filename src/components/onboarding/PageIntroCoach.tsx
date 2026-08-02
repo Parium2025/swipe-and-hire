@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  X, Check, ArrowRight, Building, FileText, User, Heart, MessageCircle,
+  X, Check, ArrowRight, Building, FileText, User, Heart, MessageCircle, Eye, Home,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
@@ -11,12 +11,15 @@ import { useDevice } from '@/hooks/use-device';
  *
  * Diskret, premium "första gången här"-kort som förklarar vad sidan gör och
  * vad nästa naturliga steg är. Visas en gång per sida (sparas lokalt), kan
- * alltid stängas, blockerar aldrig klick i appen.
+ * alltid stängas och kan alltid tas fram igen via Support → "Hjälp & tips".
  *
- * Texten anpassas efter enhet (touch/swipe på mobil, klick på dator).
+ * Kortet är alltid centrerat på skärmen — samma placering överallt.
  */
 
 const STORAGE_PREFIX = 'parium_page_coach_v1_';
+
+/** Event som öppnar tipset för nuvarande sida igen. */
+export const PAGE_COACH_REPLAY_EVENT = 'parium:page-coach-replay';
 
 export function resetPageCoachMarks() {
   try {
@@ -28,6 +31,12 @@ export function resetPageCoachMarks() {
   }
 }
 
+/** Nollställ och visa tipset för sidan man står på just nu. */
+export function replayPageCoach() {
+  resetPageCoachMarks();
+  window.dispatchEvent(new CustomEvent(PAGE_COACH_REPLAY_EVENT));
+}
+
 interface CoachConfig {
   key: string;
   icon: typeof Building;
@@ -37,6 +46,17 @@ interface CoachConfig {
 }
 
 const CONFIGS: Record<string, CoachConfig> = {
+  '/home': {
+    key: 'home',
+    icon: Home,
+    title: 'Det här är din startsida',
+    lines: () => [
+      'Här ser du nyheter, din statistik, dina anteckningar och bokade intervjuer — en snabb överblick varje gång du loggar in.',
+      'Menyn längst upp tar dig vidare: Jobb, Chattar, Ekonomi, Support och Min profil.',
+      'Parium-loggan längst upp till vänster är en knapp — tryck på den när du vill tillbaka hit.',
+    ],
+    cta: { label: 'Gå till Sök jobb', path: '/search-jobs' },
+  },
   '/search-jobs': {
     key: 'search-jobs',
     icon: Building,
@@ -45,9 +65,10 @@ const CONFIGS: Record<string, CoachConfig> = {
       'Sök på yrke, företag eller ort — eller filtrera på plats, yrkesområde, anställning och lön.',
       'Knapparna 12 tim, 24 tim, 3 dagar och 7 dagar visar hur nyligen jobben publicerades.',
       isTouch
-        ? 'Swipa åt höger för att spara ett jobb, åt vänster för att hoppa vidare.'
+        ? 'Tryck på ett kort för att öppna hela annonsen. Hjärtat sparar jobbet till senare.'
         : 'Klicka på ett kort för att öppna hela annonsen. Hjärtat sparar jobbet till senare.',
-      'Hittar du något? Tryck "Ansök" — dina uppgifter fylls i automatiskt.',
+      'När du trycker "Ansök" fylls dina uppgifter i automatiskt. Vissa arbetsgivare har egna frågor i ansökan — svara på dem, de väger tungt.',
+      'När du skickar ansökan delas din profil med arbetsgivaren: namn, kontaktuppgifter, bild, presentation, CV och video om du laddat upp det. Inget delas innan du själv ansöker.',
     ],
     cta: { label: 'Visa sparade jobb', path: '/saved-jobs' },
   },
@@ -70,7 +91,7 @@ const CONFIGS: Record<string, CoachConfig> = {
       'Allt du sparat samlas här tills annonsen stänger.',
       'Öppna ett jobb när du har tid och skicka in ansökan i lugn och ro.',
     ],
-    cta: { label: 'Tillbaka till sök', path: '/search-jobs' },
+    cta: { label: 'Tillbaka till Sök jobb', path: '/search-jobs' },
   },
   '/profile': {
     key: 'profile',
@@ -79,17 +100,29 @@ const CONFIGS: Record<string, CoachConfig> = {
     lines: () => [
       'Bild, presentation, CV och video — allt kan ändras eller raderas när du vill.',
       'Profiler med bild och en kort presentation får betydligt fler svar.',
-      'Inget delas förrän du själv skickar en ansökan.',
+      'Din profil delas med en arbetsgivare först när du själv skickar en ansökan — aldrig innan.',
     ],
-    cta: { label: 'Sök jobb nu', path: '/search-jobs' },
+    cta: { label: 'Gå till Sök jobb', path: '/search-jobs' },
+  },
+  '/profile-preview': {
+    key: 'profile-preview',
+    icon: Eye,
+    title: 'Så ser arbetsgivaren dig',
+    lines: () => [
+      'Det här är exakt den vy arbetsgivaren möts av när du har sökt ett jobb.',
+      'Växla mellan Mobilvy och Datorvy för att se båda varianterna.',
+      'Saknas något? Gå till Min profil och komplettera bild, presentation, CV eller video.',
+    ],
+    cta: { label: 'Redigera Min profil', path: '/profile' },
   },
   '/messages': {
     key: 'messages',
     icon: MessageCircle,
-    title: 'Dina samtal',
+    title: 'Dina chattar',
     lines: () => [
       'När en arbetsgivare svarar på din ansökan hamnar chatten här.',
       'Du får en notis direkt — inget viktigt försvinner.',
+      'Tomt nu? Chattar startas av arbetsgivaren efter att du har sökt ett jobb.',
     ],
     cta: { label: 'Se dina ansökningar', path: '/my-applications' },
   },
@@ -100,7 +133,7 @@ const PageIntroCoach = () => {
   const navigate = useNavigate();
   const device = useDevice();
   const isTouch = device !== 'desktop';
-  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
+  const [replayToken, setReplayToken] = useState(0);
   const [visible, setVisible] = useState(false);
 
   const config = useMemo(() => CONFIGS[location.pathname], [location.pathname]);
@@ -112,70 +145,105 @@ const PageIntroCoach = () => {
     } catch {
       return false;
     }
-  }, [config, dismissedKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, replayToken]);
+
+  useEffect(() => {
+    const onReplay = () => setReplayToken((t) => t + 1);
+    window.addEventListener(PAGE_COACH_REPLAY_EVENT, onReplay);
+    return () => window.removeEventListener(PAGE_COACH_REPLAY_EVENT, onReplay);
+  }, []);
 
   useEffect(() => {
     if (!config || alreadySeen) {
       setVisible(false);
       return;
     }
-    const id = window.setTimeout(() => setVisible(true), 450);
+    const id = window.setTimeout(() => setVisible(true), 400);
     return () => window.clearTimeout(id);
   }, [config, alreadySeen]);
 
-  if (!config || alreadySeen) return null;
+  const dismiss = useCallback(
+    (path?: string) => {
+      if (!config) return;
+      try {
+        localStorage.setItem(STORAGE_PREFIX + config.key, '1');
+      } catch {
+        /* ignorera */
+      }
+      setVisible(false);
+      window.setTimeout(() => {
+        setReplayToken((t) => t + 1);
+        if (path) navigate(path);
+      }, 200);
+    },
+    [config, navigate]
+  );
 
-  const dismiss = (path?: string) => {
-    try {
-      localStorage.setItem(STORAGE_PREFIX + config.key, '1');
-    } catch {
-      /* ignorera */
-    }
-    setVisible(false);
-    window.setTimeout(() => {
-      setDismissedKey(config.key);
-      if (path) navigate(path);
-    }, 200);
-  };
+  useEffect(() => {
+    if (!visible) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') dismiss();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [visible, dismiss]);
+
+  if (!config || alreadySeen) return null;
 
   const Icon = config.icon;
 
   return createPortal(
     <div
-      className={`fixed z-[60] left-3 right-3 bottom-3 sm:left-auto sm:right-6 sm:bottom-6 sm:w-[380px] transition-all duration-300 ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3 pointer-events-none'
+      className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ${
+        visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
-      style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
-      role="status"
-      aria-live="polite"
+      role="dialog"
+      aria-modal="false"
+      aria-label={config.title}
     >
-      <div className="rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 backdrop-blur-xl shadow-2xl p-4 sm:p-5">
+      {/* Diskret bakgrund — klick stänger */}
+      <button
+        type="button"
+        aria-label="Stäng tipset"
+        onClick={() => dismiss()}
+        className="absolute inset-0 bg-black/45 backdrop-blur-[2px] focus:outline-none"
+      />
+
+      <div
+        className={`relative w-full max-w-[420px] rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 backdrop-blur-xl shadow-2xl p-5 sm:p-6 transition-transform duration-300 ${
+          visible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-2'
+        }`}
+      >
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/15 ring-1 ring-green-400/30">
-            <Icon className="h-[18px] w-[18px] text-green-400" />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+            <Icon className="h-[18px] w-[18px] text-white" />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="text-[15px] font-semibold text-white leading-snug break-words">
+              <h3 className="text-[16px] font-semibold text-white leading-snug break-words">
                 {config.title}
               </h3>
               <button
                 type="button"
                 onClick={() => dismiss()}
                 aria-label="Stäng tipset"
-                className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <ul className="mt-2 space-y-1.5">
+            <ul className="mt-3 space-y-2">
               {config.lines(isTouch).map((line) => (
                 <li key={line} className="flex items-start gap-2">
-                  <Check className="mt-[3px] h-3.5 w-3.5 shrink-0 text-green-400" strokeWidth={2.5} />
+                  <Check className="mt-[3px] h-3.5 w-3.5 shrink-0 text-white" strokeWidth={2.5} />
                   <span className="text-[13px] leading-snug text-white break-words">{line}</span>
                 </li>
               ))}
             </ul>
+            <p className="mt-4 text-[12px] leading-snug text-white break-words">
+              Vill du se tipsen igen? De ligger kvar under Support → Hjälp &amp; tips.
+            </p>
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {config.cta && (
                 <button

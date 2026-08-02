@@ -245,11 +245,14 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
 
               {/* Trygghetsrad */}
               <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5">
-                <Heart className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
+                <Heart className="mt-0.5 h-4 w-4 shrink-0 text-white" />
                 <p className="text-[13px] leading-snug text-white break-words">
-                  Dina uppgifter visas för en arbetsgivare först när du själv söker ett jobb. Du kan
-                  ändra eller radera allt när som helst under Min profil.
+                  Först när du själv skickar en ansökan delas din profil med arbetsgivaren — namn,
+                  kontaktuppgifter, bild, presentation, CV och video om du laddat upp det. Vissa
+                  arbetsgivare har egna frågor i ansökan; svara på dem, de väger tungt. Du kan ändra
+                  eller radera allt när som helst under Min profil.
                 </p>
+
               </div>
 
               <div className="mt-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
