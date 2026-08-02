@@ -307,7 +307,7 @@ const PageIntroCoach = () => {
   const primaryPath = isGuidedTour ? nextTourPath : config.cta?.path;
   const primaryLabel = isGuidedTour
     ? nextTourPath
-      ? CONFIGS[nextTourPath]?.title ?? 'Nästa steg'
+      ? `Nästa: ${CONFIGS[nextTourPath]?.title ?? 'Nästa steg'}`
       : 'Klart, stäng'
     : config.cta?.label;
 
