@@ -72,13 +72,11 @@ export function useEmailAvailability(email: string, enabled: boolean): EmailAvai
   return state;
 }
 
-/** Textvarning som visas under e-postfältet. */
-export function emailTakenMessage(existingRole: 'job_seeker' | 'employer' | null): string {
-  if (existingRole === 'employer') {
-    return 'Det här kontot finns redan registrerat som arbetsgivare. Logga in istället.';
-  }
-  if (existingRole === 'job_seeker') {
-    return 'Det här kontot finns redan registrerat som jobbsökande. Logga in istället.';
-  }
-  return 'Det här kontot finns redan registrerat. Logga in istället.';
+/**
+ * Textvarning som visas under e-postfältet.
+ * Rollen avslöjas medvetet INTE — annars kan vem som helst ta reda på om en
+ * adress tillhör en arbetsgivare eller en jobbsökande.
+ */
+export function emailTakenMessage(_existingRole?: 'job_seeker' | 'employer' | null): string {
+  return 'Den här e-postadressen är redan registrerad. Logga in istället.';
 }
