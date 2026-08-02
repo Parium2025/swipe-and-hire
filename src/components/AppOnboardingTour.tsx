@@ -52,8 +52,6 @@ const shortcuts: Shortcut[] = [
  */
 const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) => {
   const navigate = useNavigate();
-  const device = useDevice();
-  const isTouch = device !== 'desktop';
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<0 | 1>(0);
 
