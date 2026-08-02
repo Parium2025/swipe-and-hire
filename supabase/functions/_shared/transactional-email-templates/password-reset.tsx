@@ -12,7 +12,7 @@ interface Props {
 const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
   <Html lang="sv" dir="ltr">
     <Head />
-    <Preview>Återställ ditt Parium-lösenord</Preview>
+    <Preview>Återställ ditt Parium-lösenord – länken gäller i 1 timme</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={brandSection}>
@@ -29,20 +29,26 @@ const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
           Klicka på knappen nedan för att skapa ett nytt lösenord.
         </Text>
 
-        <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
+        <Section style={{ textAlign: 'center' as const, margin: '32px 0 20px' }}>
           <Button style={button} href={reset_url}>Återställ lösenord</Button>
+          <Text style={validityNote}>Länken gäller i 1 timme och kan användas en gång.</Text>
         </Section>
 
         <Section style={securityCard}>
           <Text style={securityTitle}>🔒 Säkerhetsnotis</Text>
           <Text style={securityBody}>
-            Denna länk är tidsbegränsad. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande – ditt konto förblir säkert.
+            Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande – ditt lösenord förblir oförändrat och ditt konto säkert.
           </Text>
         </Section>
 
         <Section style={fallbackCard}>
-          <Text style={fallbackTitle}>Fungerar inte knappen? Kopiera länken:</Text>
-          <Text style={fallbackUrl}>{reset_url}</Text>
+          <Text style={fallbackTitle}>Fungerar inte knappen?</Text>
+          <Text style={fallbackBody}>
+            <Link href={reset_url} style={fallbackLink}>Öppna din säkra återställningslänk</Link>
+          </Text>
+          <Text style={fallbackHint}>
+            Länken öppnar parium.se och är personlig – dela den inte med någon.
+          </Text>
         </Section>
 
         <Text style={footer}>
@@ -85,9 +91,12 @@ const button = {
 const securityCard = { backgroundColor: '#F0F9FF', borderLeft: '4px solid #001F3D', padding: '16px 20px', borderRadius: '0 8px 8px 0', margin: '24px 0' }
 const securityTitle = { margin: 0, fontSize: '14px', color: '#001F3D', fontWeight: 600 as const }
 const securityBody = { margin: '6px 0 0', fontSize: '14px', color: '#475569', lineHeight: '1.5' }
-const fallbackCard = { backgroundColor: '#F9FAFB', padding: '16px 20px', borderRadius: '8px', margin: '24px 0' }
-const fallbackTitle = { fontSize: '13px', color: '#6B7280', margin: '0 0 8px' }
-const fallbackUrl = { fontSize: '12px', color: '#001F3D', margin: 0, wordBreak: 'break-all' as const }
+const validityNote = { fontSize: '13px', color: '#64748b', margin: '14px 0 0' }
+const fallbackCard = { backgroundColor: '#F9FAFB', padding: '18px 20px', borderRadius: '10px', margin: '24px 0', textAlign: 'center' as const }
+const fallbackTitle = { fontSize: '13px', color: '#6B7280', margin: '0 0 6px' }
+const fallbackBody = { fontSize: '14px', margin: 0 }
+const fallbackLink = { color: '#001F3D', fontWeight: 600 as const, textDecoration: 'underline' }
+const fallbackHint = { fontSize: '12px', color: '#94a3b8', margin: '8px 0 0' }
 const link = { color: '#001F3D', textDecoration: 'underline' }
 const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', borderTop: '1px solid #e2e8f0', paddingTop: '20px', textAlign: 'center' as const }
 const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const, fontStyle: 'italic' as const }
