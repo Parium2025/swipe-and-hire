@@ -22,6 +22,9 @@ import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { RequiredMark } from '@/components/wizard/RequiredMark';
+import WizardFooter from '@/components/wizard/WizardFooter';
+
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -35,8 +38,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const { profile, updateProfile, user, signOut } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(
-    typeof initialStep === 'number' ? initialStep : -1
-  ); // Start with SwipeIntro (-1) unless dev override provided
+    typeof initialStep === 'number' ? initialStep : 1
+  ); // Intro/SwipeIntro borttagen – vi startar direkt på uppgifterna
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
@@ -1076,10 +1080,11 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
   };
 
-  // Render SwipeIntro fullscreen
+  // SwipeIntro borttagen – tunneln startar direkt på steg 1 (dina uppgifter)
   if (currentStep === -1) {
     return <SwipeIntro onComplete={() => setCurrentStep(1)} />;
   }
+
 
   function renderCvStep() {
     return (
@@ -1199,39 +1204,39 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
             </div>
             
             <div className="space-y-4 max-w-md mx-auto">
-               <div>
-                 <Label htmlFor="firstName" className="text-white">Förnamn</Label>
+               <div className="space-y-2">
+                 <Label htmlFor="firstName" className="text-white font-medium text-sm">Förnamn<RequiredMark filled={!!formData.firstName.trim()} /></Label>
                  <Input 
                    id="firstName" 
                    value={formData.firstName} 
                    onChange={(e) => handleInputChange('firstName', e.target.value)} 
                    placeholder="Ditt förnamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
+                   className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                  />
                </div>
-               <div>
-                 <Label htmlFor="lastName" className="text-white">Efternamn</Label>
+               <div className="space-y-2">
+                 <Label htmlFor="lastName" className="text-white font-medium text-sm">Efternamn<RequiredMark filled={!!formData.lastName.trim()} /></Label>
                  <Input 
                    id="lastName" 
                    value={formData.lastName} 
                    onChange={(e) => handleInputChange('lastName', e.target.value)} 
                    placeholder="Ditt efternamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
+                   className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                  />
                </div>
-               <div>
-                 <Label htmlFor="email" className="text-white">E-post</Label>
+               <div className="space-y-2">
+                 <Label htmlFor="email" className="text-white font-medium text-sm">E-post<RequiredMark filled={!!formData.email.trim()} /></Label>
                  <Input 
                    id="email" 
                    type="email"
                    value={formData.email} 
                    onChange={(e) => handleInputChange('email', e.target.value)} 
                    placeholder="Din e-postadress" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
+                   className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                  />
                </div>
-                 <div>
-                  <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
+                 <div className="space-y-2">
+                  <Label htmlFor="birthDate" className="text-white font-medium text-sm">Födelsedatum<RequiredMark filled={!!formData.birthDate.trim()} /></Label>
                   <BirthDatePicker
                     value={formData.birthDate}
                     onChange={(date) => handleInputChange('birthDate', date)}
@@ -1247,10 +1252,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     </p>
                   )}
                 </div>
-               <div>
-                 <Label htmlFor="phone" className="text-white">
+               <div className="space-y-2">
+                 <Label htmlFor="phone" className="text-white font-medium text-sm">
                    <Phone className="h-4 w-4 inline mr-2" />
-                   Telefonnummer *
+                   Telefonnummer<RequiredMark filled={!!formData.phone.trim() && validatePhoneNumber(formData.phone).isValid} />
                  </Label>
                   <Input 
                     id="phone" 
@@ -1258,13 +1263,14 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                     required
                     value={formData.phone} 
                     onChange={(e) => handlePhoneChange(e.target.value)} 
-                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
-                    placeholder="070-123 45 67" 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
+                    placeholder="T.ex. 070-123 45 67" 
                   />
                   {phoneError && (
-                    <p className="text-destructive text-sm mt-1">{phoneError}</p>
+                    <p className="text-white text-sm mt-1">{phoneError}</p>
                   )}
                 </div>
+
                <WorkplacePostalCodeSelector
                  postalCodeValue={postalCode}
                  cityValue={userLocation}
@@ -1276,7 +1282,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                  onValidationChange={setHasValidLocation}
                />
                   <div>
-                   <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget? <span className="text-white">*</span></Label>
+                   <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?<RequiredMark filled={!!formData.employmentStatus} /></Label>
                    <DropdownMenu modal={false} open={employmentStatusOpen} onOpenChange={setEmploymentStatusOpen}>
                        <DropdownMenuTrigger asChild>
                          <Button
@@ -1338,7 +1344,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               {/* Visa arbetstid-frågan endast om användaren har valt något OCH det inte är arbetssökande */}
               {formData.employmentStatus && formData.employmentStatus !== 'arbetssokande' && (
                   <div>
-                    <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
+                    <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?<RequiredMark filled={!!formData.workingHours} /></Label>
                     <DropdownMenu modal={false} open={workingHoursOpen} onOpenChange={setWorkingHoursOpen}>
                         <DropdownMenuTrigger asChild>
                          <Button
@@ -1381,7 +1387,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               {/* Visa tillgänglighet-frågan endast om användaren har valt något i employment status */}
               {formData.employmentStatus && (
                   <div>
-                    <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
+                    <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?<RequiredMark filled={!!formData.availability} /></Label>
                     <DropdownMenu modal={false} open={availabilityOpen} onOpenChange={setAvailabilityOpen}>
                         <DropdownMenuTrigger asChild>
                          <Button
@@ -1820,7 +1826,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   };
 
   return (
-    <div className="min-h-screen bg-gradient-parium flex flex-col relative overflow-x-hidden">
+    <div className="h-[100dvh] bg-gradient-parium flex flex-col relative overflow-x-hidden">
       {/* Static animated background - identical to AuthMobile */}
       <div className="fixed inset-0 pointer-events-none z-0">
         
@@ -1848,10 +1854,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         </div>
       </div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 flex-1 flex flex-col min-h-0">
         {/* Progress indicator */}
       {currentStep > 0 && currentStep < totalSteps - 1 && (
-        <div className="w-full max-w-md mx-auto pt-8 px-6">
+        <div className="w-full max-w-md mx-auto pt-8 px-6 flex-shrink-0">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 3}</span>
             <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
@@ -1865,9 +1871,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         </div>
       )}
 
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-8 relative z-10">
-        <div className="w-full max-w-2xl">
+      {/* Main content – egen scroll-container (body är fixed globalt) */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-8 relative z-10">
+        <div className="w-full max-w-2xl mx-auto">
           <div className={currentStep === 3 ? 'block' : 'hidden'}>
             {renderCvStep()}
           </div>
@@ -1875,46 +1881,21 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         </div>
       </div>
 
-      {/* Navigation buttons */}
+      {/* Navigation buttons – samma komponent/stil som jobbguiden */}
       {currentStep < totalSteps - 1 && currentStep < 6 && (
-        <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
-          <div className="flex gap-4">
-            {currentStep > 0 && (
-              <Button
-                variant="outlineNeutral"
-                onClick={handlePrevious}
-                className="py-3 bg-white/5 border border-white/10 !text-white text-sm px-4"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2 text-white" />
-                Tillbaka
-              </Button>
-            )}
-            
-            {currentStep === 5 ? (
-              <Button
-                onClick={handleNext}
-                disabled={!isStepValid()}
-                variant="glass"
-                className="flex-1 py-4 font-semibold text-lg"
-              >
-                Nästa
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : currentStep < 5 ? (
-              <Button
-                onClick={handleNext}
-                disabled={!isStepValid()}
-                variant="glass"
-                className="flex-1 py-4 font-semibold text-lg"
-              >
-                {currentStep === 0 ? 'Kom igång' : 'Nästa'}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : null}
-          </div>
+        <div className="pb-[env(safe-area-inset-bottom)] flex-shrink-0">
+          <WizardFooter
+            currentStep={currentStep - 1}
+            isLastStep={false}
+            onBack={handlePrevious}
+            onNext={handleNext}
+            onSubmit={handleNext}
+            disabled={!isStepValid()}
+          />
         </div>
       )}
       </div>
+
       
       {/* Image Editors */}
       <ImageEditor
