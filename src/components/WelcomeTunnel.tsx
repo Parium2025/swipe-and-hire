@@ -1282,7 +1282,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                  onValidationChange={setHasValidLocation}
                />
                   <div>
-                   <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget? <span className="text-white">*</span></Label>
+                   <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?<RequiredMark filled={!!formData.employmentStatus} /></Label>
                    <DropdownMenu modal={false} open={employmentStatusOpen} onOpenChange={setEmploymentStatusOpen}>
                        <DropdownMenuTrigger asChild>
                          <Button
