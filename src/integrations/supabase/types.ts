@@ -3743,6 +3743,10 @@ export type Database = {
         Args: { _days?: number; _job_id: string }
         Returns: string
       }
+      requeue_missing_cv_analyses: {
+        Args: { p_limit?: number }
+        Returns: number
+      }
       reregister_session: {
         Args: {
           p_device_label: string
