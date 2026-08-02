@@ -107,7 +107,7 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
           'Din plan och dina kvitton. Att söka jobb är gratis — Premium är helt frivilligt.',
       },
       {
-        icon: LifeBuoy,
+        icon: HelpCircle,
         title: 'Support',
         description:
           'Frågor, guider och kontakt med oss. Vi svarar på svenska, alla vardagar.',
