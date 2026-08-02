@@ -1854,10 +1854,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         </div>
       </div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 flex-1 flex flex-col min-h-0">
         {/* Progress indicator */}
       {currentStep > 0 && currentStep < totalSteps - 1 && (
-        <div className="w-full max-w-md mx-auto pt-8 px-6">
+        <div className="w-full max-w-md mx-auto pt-8 px-6 flex-shrink-0">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 3}</span>
             <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
@@ -1871,9 +1871,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         </div>
       )}
 
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-8 relative z-10">
-        <div className="w-full max-w-2xl">
+      {/* Main content – egen scroll-container (body är fixed globalt) */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-8 relative z-10">
+        <div className="w-full max-w-2xl mx-auto">
           <div className={currentStep === 3 ? 'block' : 'hidden'}>
             {renderCvStep()}
           </div>
@@ -1881,46 +1881,21 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         </div>
       </div>
 
-      {/* Navigation buttons */}
+      {/* Navigation buttons – samma komponent/stil som jobbguiden */}
       {currentStep < totalSteps - 1 && currentStep < 6 && (
-        <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
-          <div className="flex gap-4">
-            {currentStep > 0 && (
-              <Button
-                variant="outlineNeutral"
-                onClick={handlePrevious}
-                className="py-3 bg-white/5 border border-white/10 !text-white text-sm px-4"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2 text-white" />
-                Tillbaka
-              </Button>
-            )}
-            
-            {currentStep === 5 ? (
-              <Button
-                onClick={handleNext}
-                disabled={!isStepValid()}
-                variant="glass"
-                className="flex-1 py-4 font-semibold text-lg"
-              >
-                Nästa
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : currentStep < 5 ? (
-              <Button
-                onClick={handleNext}
-                disabled={!isStepValid()}
-                variant="glass"
-                className="flex-1 py-4 font-semibold text-lg"
-              >
-                {currentStep === 0 ? 'Kom igång' : 'Nästa'}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : null}
-          </div>
+        <div className="pb-[env(safe-area-inset-bottom)] flex-shrink-0">
+          <WizardFooter
+            currentStep={currentStep - 1}
+            isLastStep={false}
+            onBack={handlePrevious}
+            onNext={handleNext}
+            onSubmit={handleNext}
+            disabled={!isStepValid()}
+          />
         </div>
       )}
       </div>
+
       
       {/* Image Editors */}
       <ImageEditor
