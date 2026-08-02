@@ -11,6 +11,8 @@ interface AppOnboardingTourProps {
   onComplete: () => void;
   /** Förnamn för en personlig hälsning (valfritt) */
   firstName?: string;
+  /** 0 = översikt, 1 = "Var vill du börja?" */
+  initialStep?: 0 | 1;
 }
 
 interface Shortcut {
@@ -75,8 +77,8 @@ const shortcuts: Shortcut[] = [
 export const WELCOME_CARD_REPLAY_EVENT = 'parium:welcome-card-replay';
 
 /** Visa hela välkomstkortet igen, precis som första gången. */
-export function replayWelcomeCard() {
-  window.dispatchEvent(new CustomEvent(WELCOME_CARD_REPLAY_EVENT));
+export function replayWelcomeCard(step: 0 | 1 = 0) {
+  window.dispatchEvent(new CustomEvent(WELCOME_CARD_REPLAY_EVENT, { detail: { step } }));
 }
 
 
@@ -90,10 +92,14 @@ export function replayWelcomeCard() {
  *
  * Ingen tvingande rundtur: användaren kan stänga när som helst.
  */
-const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) => {
+const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboardingTourProps) => {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
-  const [step, setStep] = useState<0 | 1>(0);
+  const [step, setStep] = useState<0 | 1>(initialStep);
+
+  useEffect(() => {
+    setStep(initialStep);
+  }, [initialStep]);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setVisible(true));
@@ -236,8 +242,10 @@ const AppOnboardingTour = ({ onComplete, firstName }: AppOnboardingTourProps) =>
 
               <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5">
                 <p className="text-[13px] leading-snug text-white break-words text-center">
-                  <span className="font-semibold">Tips:</span> Parium-loggan längst upp till
-                  vänster är din hem-knapp — tryck på den när du vill tillbaka till startsidan.
+                  <span className="font-semibold">Tips:</span> Parium-loggan längst upp till vänster är
+                  din hem-knapp. På mobil och surfplatta öppnar du hela menyn med ikonen bredvid
+                  loggan — där finns Sök jobb, Sparade jobb, Ansökningar, Chattar, Ekonomi,
+                  Support och Min profil. På dator ligger samma menyer i raden längst upp.
                 </p>
               </div>
 

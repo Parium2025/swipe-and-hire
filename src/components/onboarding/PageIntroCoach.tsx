@@ -286,7 +286,9 @@ const PageIntroCoach = () => {
     setVisible(false);
     window.setTimeout(() => {
       setReplayToken((t) => t + 1);
-      window.dispatchEvent(new CustomEvent(WELCOME_CARD_REPLAY_EVENT_NAME));
+      window.dispatchEvent(
+        new CustomEvent(WELCOME_CARD_REPLAY_EVENT_NAME, { detail: { step: 1 } })
+      );
     }, 200);
   }, []);
 
