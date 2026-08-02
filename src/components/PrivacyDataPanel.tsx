@@ -143,7 +143,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
         </Button>
         </div>
         <div className="pt-1 border-t border-white/10 space-y-3">
-          <p className="text-xs text-white">
+          <p className="text-xs text-white text-center">
             Vill du radera ditt konto raderas allt permanent — profil, ansökningar, CV,
             bilder och meddelanden. Det går inte att ångra.
           </p>
@@ -159,7 +159,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
           </div>
         </div>
 
-        <p className="text-xs text-white">
+        <p className="text-xs text-white text-center">
           Läs mer i{' '}
           <Link to="/integritetspolicy" className="underline underline-offset-2">
             integritetspolicyn
