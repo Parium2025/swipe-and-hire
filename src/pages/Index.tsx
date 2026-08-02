@@ -532,7 +532,12 @@ const Index = () => {
         }
       } catch { /* fortsätt */ }
 
-      // 3) Standard: gå till sök
+      // 3) Standard: gå till sök + visa introrundturen första gången
+      try {
+        if (!localStorage.getItem('parium_intro_tour_done')) {
+          setShowIntroTutorial(true);
+        }
+      } catch { /* ignorera */ }
       navigate('/search-jobs');
     }} />;
   }
