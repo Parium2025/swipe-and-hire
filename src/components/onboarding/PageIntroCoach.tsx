@@ -19,6 +19,8 @@ import { useDevice } from '@/hooks/use-device';
 
 const STORAGE_PREFIX = 'parium_page_coach_v1_';
 const ACTIVE_TOUR_KEY = 'parium_page_coach_active';
+/** Speglar WELCOME_CARD_REPLAY_EVENT i AppOnboardingTour (undviker cirkulär import). */
+const WELCOME_CARD_REPLAY_EVENT_NAME = 'parium:welcome-card-replay';
 
 const TOUR_PATHS = [
   '/search-jobs',
