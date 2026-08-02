@@ -420,6 +420,25 @@ export function AppSidebar() {
                    </SidebarMenuButton>
                  </SidebarMenuItem>
                ))}
+               <SidebarMenuItem>
+                 <SidebarMenuButton
+                   asChild
+                   className="mx-2 rounded-lg transition-all duration-200 active:!bg-transparent text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white"
+                 >
+                   <button
+                     onClick={(e) => {
+                       replayPageCoach();
+                       (e.currentTarget as HTMLButtonElement).blur();
+                       if (isMobile) setOpenMobile(false);
+                     }}
+                     className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                   >
+                     <Lightbulb className="h-4 w-4" />
+                     {!collapsed && <span className="font-medium">Hjälp &amp; tips</span>}
+                   </button>
+                 </SidebarMenuButton>
+               </SidebarMenuItem>
+
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
