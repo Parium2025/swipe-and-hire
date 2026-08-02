@@ -134,7 +134,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     cvUrl: '',
     cvFileName: '',
     interests: [] as string[],
-    consentGiven: false // New field for data sharing consent
+    consentGiven: true // Samtycke lämnas redan vid kontoskapandet
   });
   
   // Update form data when profile/user loads (for pre-filled registration data)
@@ -1066,7 +1066,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       case 2: return true; // Profile image is optional
       case 3: return !!formData.cvUrl.trim(); // CV is now required
       case 4: return true; // Bio is optional
-      case 5: return formData.consentGiven; // Consent is required
+      case 5: return true; // Samtycke godkänt redan vid registrering
       case 6: return true; // Submit step
       default: return false;
     }
