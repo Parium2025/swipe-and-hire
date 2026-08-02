@@ -2044,7 +2044,7 @@ const Profile = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                   <div className="space-y-2 md:space-y-1.5">
-                    <Label htmlFor="birthDate" className="text-white">
+                    <Label htmlFor="birthDate" className="text-white text-sm">
                       Födelsedatum <span className="text-white">*</span>
                     </Label>
                     <BirthDatePicker
@@ -2119,7 +2119,7 @@ const Profile = () => {
 
               {/* Bio */}
               <div className="space-y-2 md:space-y-1.5 pt-4 md:pt-3 border-t border-white/10">
-                <Label htmlFor="bio" className="text-white">Presentation / Om mig</Label>
+                <Label htmlFor="bio" className="text-white text-sm">Presentation / Om mig</Label>
                 <Textarea
                   id="bio"
                   placeholder={isEmployer ? "Berätta om ditt företag..." : "Berätta kort om dig själv..."}
@@ -2146,7 +2146,7 @@ const Profile = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                       <div className="space-y-2 md:space-y-1.5">
-                        <Label htmlFor="employmentStatus" className="text-white">
+                        <Label htmlFor="employmentStatus" className="text-white text-sm">
                           Anställningsstatus? <span className="text-white">*</span>
                         </Label>
                         <DropdownMenu modal={false}>
@@ -2212,7 +2212,7 @@ const Profile = () => {
                       {/* Visa arbetstid endast om användaren har valt något OCH det inte är arbetssökande */}
                       {employmentStatus && employmentStatus !== 'arbetssokande' && (
                         <div className="space-y-2 md:space-y-1.5">
-                          <Label htmlFor="workingHours" className="text-white">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
+                          <Label htmlFor="workingHours" className="text-white text-sm">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
                           <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -2259,7 +2259,7 @@ const Profile = () => {
                     {/* Visa tillgänglighet endast om användaren har valt något i anställningsstatus */}
                     {employmentStatus && (
                       <div className="space-y-2 md:space-y-1.5">
-                        <Label htmlFor="availability" className="text-white">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
+                        <Label htmlFor="availability" className="text-white text-sm">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -2396,7 +2396,7 @@ const Profile = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                     <div className="space-y-2 md:space-y-1.5">
-                      <Label htmlFor="companyName" className="text-white">Företagsnamn</Label>
+                      <Label htmlFor="companyName" className="text-white text-sm">Företagsnamn</Label>
                       <Input
                         id="companyName"
                         placeholder="Mitt Företag AB"
@@ -2407,7 +2407,7 @@ const Profile = () => {
                     </div>
 
                     <div className="space-y-2 md:space-y-1.5">
-                      <Label htmlFor="orgNumber" className="text-white">Organisationsnummer</Label>
+                      <Label htmlFor="orgNumber" className="text-white text-sm">Organisationsnummer</Label>
                       <Input
                         id="orgNumber"
                         placeholder="556123-4567"
