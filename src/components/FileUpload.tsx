@@ -36,8 +36,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [previewFile, setPreviewFile] = useState<{ file: File; url: string } | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [lastFailedFile, setLastFailedFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { isOnline, showOfflineToast } = useOnline();
+
 
   const getFileIcon = (fileName: string) => {
     const extension = fileName.toLowerCase().split('.').pop();
