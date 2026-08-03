@@ -373,7 +373,9 @@ export async function purgeUserData(
     const lower = email.toLowerCase();
     await del(admin, 'email_unsubscribe_tokens', 'email', lower);
     await del(admin, 'email_send_log', 'recipient_email', lower);
+    await del(admin, 'outreach_dispatch_logs', 'recipient_email', lower);
   }
+
 
   // 10. Suppression — förhindra oavsiktlig återkontakt
   if (email) {
