@@ -79,7 +79,7 @@ const evaluateAll = () => {
   const centerX = vw / 2;
   const hidden = document.hidden;
 
-  const candidates: { el: HTMLVideoElement; dist: number; playing: boolean; covered: number }[] = [];
+  const candidates: { el: HTMLVideoElement; dist: number; playing: boolean; covered: number; left: number }[] = [];
   registry.forEach((el) => {
     const rect = el.getBoundingClientRect();
     const inView =
@@ -100,7 +100,9 @@ const evaluateAll = () => {
         dist: Math.abs((rect.left + rect.right) / 2 - centerX),
         playing: !el.paused,
         covered,
+        left: rect.left,
       });
+
     } else if (!el.paused) {
       el.pause();
     }
@@ -144,13 +146,37 @@ const evaluateAll = () => {
       if (p && typeof p.catch === 'function') p.catch(() => {});
     }
   };
-  candidates.forEach(({ el }, i) => {
-    if (i < maxConcurrent) {
+  /**
+   * Urval av vilka kort som får spela.
+   *
+   * Rangordningen ovan (synlighet → avstånd till mitten) valde i praktiken
+   * alltid kort i mitten av strippen. På Windows, där budgeten är låg, innebar
+   * det att strippens YTTERKANTER — första kortet vid p=0 och sista kortet vid
+   * p=1 — aldrig fick spela. De stod kvar på posterbilden.
+   *
+   * Därför reserveras två platser: det vänstraste och det högraste kortet som
+   * är i princip helt synligt. Resten av budgeten fylls på som förut, med
+   * kortet närmast viewportens mitt först.
+   */
+  const picks = new Set<HTMLVideoElement>();
+  const fullyVisible = candidates.filter((c) => c.covered >= 0.85);
+  if (fullyVisible.length > 0 && maxConcurrent > 1) {
+    const byLeft = [...fullyVisible].sort((a, b) => a.left - b.left);
+    picks.add(byLeft[0].el);
+    if (byLeft.length > 1) picks.add(byLeft[byLeft.length - 1].el);
+  }
+  for (const c of candidates) {
+    if (picks.size >= maxConcurrent) break;
+    picks.add(c.el);
+  }
+  candidates.forEach(({ el }) => {
+    if (picks.has(el)) {
       playVisible(el);
     } else if (!el.paused) {
       el.pause();
     }
   });
+
 
 
 };

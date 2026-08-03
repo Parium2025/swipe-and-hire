@@ -290,10 +290,14 @@ const JobSeekerVideoShowcase = ({
       return 0;
     };
 
-    // Kallstart: vänta in en riktig buffert innan första play(). Max 4 s, sedan
+    // Kallstart: vänta in en riktig buffert innan första play(). Max 6,5 s, sedan
     // startar vi ändå så att telefonen aldrig blir stående på posterbilden.
-    const COLD_TARGET_SECONDS = 2;
-    const COLD_MAX_WAIT_MS = 4000;
+    // 3 s buffert (istället för 2) är det som skiljer en kall första laddning
+    // från en varm: vid 2 s hann bufferten ta slut direkt efter start och de
+    // första sekunderna blev en serie mikro-stopp på Windows.
+    const COLD_TARGET_SECONDS = 3;
+    const COLD_MAX_WAIT_MS = 6500;
+
     let coldTimer: number | null = null;
     let geometryFrame: number | null = null;
     const clearCold = () => {
@@ -363,13 +367,32 @@ const JobSeekerVideoShowcase = ({
       }, 150);
     };
 
-    /** Startpunkt: kallstartsspärr på Windows, direkt play överallt annars. */
+    /**
+     * Startpunkt: kallstartsspärr på Windows, direkt play överallt annars.
+     *
+     * På Windows väntar vi dessutom in `load`-eventet innan första play().
+     * Vid en kall laddning pågår då fortfarande hydrering, bilddekodning och
+     * hero-animationen — startar videodecodern mitt i den bursten hackar de
+     * första sekunderna även när filen redan är hämtad. Vid en varm sidvisning
+     * har `load` redan hänt, så den vägen ändras inte alls.
+     */
+    let loadWaitArmed = false;
+    const startAfterLoad = (then: () => void) => {
+      if (!coldGate || document.readyState === 'complete') { then(); return; }
+      if (loadWaitArmed) return;
+      loadWaitArmed = true;
+      window.addEventListener('load', () => { loadWaitArmed = false; then(); }, { once: true });
+    };
+
     const kick = () => {
-      waitForStableGeometry(() => {
-        if (coldGate && !warmRef.current) startWhenBuffered();
-        else attempt();
+      startAfterLoad(() => {
+        waitForStableGeometry(() => {
+          if (coldGate && !warmRef.current) startWhenBuffered();
+          else attempt();
+        });
       });
     };
+
 
     // Apple/touch: starta omedelbart, redan innan events hinner trigga.
     if (!coldGate && !geometryGate && (active || keepAliveWhenHidden)) attempt();
