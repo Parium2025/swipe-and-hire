@@ -83,18 +83,29 @@ const HeroVideo = () => {
     let watchdog: number | null = null;
     let lastTime = -1;
     let stuckCount = 0;
+    let healthyTicks = 0;
+
+    const stopWatchdog = () => {
+      if (watchdog !== null) {
+        window.clearInterval(watchdog);
+        watchdog = null;
+      }
+    };
 
     const startWatchdog = () => {
       if (watchdog !== null) return;
       lastTime = video.currentTime;
       stuckCount = 0;
+      healthyTicks = 0;
       watchdog = window.setInterval(() => {
         if (!video) return;
         if (video.paused || video.ended) {
+          healthyTicks = 0;
           tryPlay();
           return;
         }
         if (video.currentTime === lastTime) {
+          healthyTicks = 0;
           stuckCount++;
           if (stuckCount >= 2) {
             stuckCount = 0;
@@ -103,6 +114,10 @@ const HeroVideo = () => {
         } else {
           stuckCount = 0;
           lastTime = video.currentTime;
+          healthyTicks++;
+          // Efter ~5 s felfri uppspelning behövs ingen pollning längre.
+          // Events (pause/stalled/waiting/playing) startar om den vid behov.
+          if (healthyTicks >= 10) stopWatchdog();
         }
       }, 500);
     };
@@ -111,6 +126,7 @@ const HeroVideo = () => {
       startWatchdog();
     };
     const handleStalled = () => {
+      startWatchdog();
       tryPlay();
     };
     const handleError = () => {
