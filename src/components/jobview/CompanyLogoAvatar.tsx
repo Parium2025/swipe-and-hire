@@ -19,12 +19,18 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
   const [loaded, setLoaded] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setLoaded(false);
     setAttempt(0);
     setFailed(false);
   }, [logoUrl]);
+
+  // Städa upp eventuell väntande återförsökstimer vid unmount.
+  useEffect(() => () => {
+    if (retryTimer.current) clearTimeout(retryTimer.current);
+  }, []);
 
   // Nätverket tillbaka / flik i fokus → försök igen tyst.
   useEffect(() => {
