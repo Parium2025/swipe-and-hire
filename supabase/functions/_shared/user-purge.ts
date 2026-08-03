@@ -379,12 +379,17 @@ export async function purgeUserData(
   }
 
 
-  // 10. Suppression — förhindra oavsiktlig återkontakt
+  // 10. VIKTIGT: adressen läggs INTE på suppressionslistan vid radering.
+  // All data som kan generera utskick är borta i steg 1–9, och en spärr här
+  // skulle blockera bekräftelsemejlet om personen registrerar sig på nytt
+  // med samma adress (rätten att återkomma). Eventuell gammal spärr från
+  // tidigare version rensas i custom-signup.
   if (email) {
-    await admin.from('suppressed_emails').upsert(
-      { email: email.toLowerCase(), reason: 'account_deleted' },
-      { onConflict: 'email' },
-    );
+    await admin
+      .from('suppressed_emails')
+      .delete()
+      .eq('email', email.toLowerCase())
+      .eq('reason', 'account_deleted');
   }
 
   return stats;
