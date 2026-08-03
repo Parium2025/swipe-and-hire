@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { fetchPriority } from '@/lib/fetchPriority';
 
