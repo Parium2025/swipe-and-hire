@@ -44,8 +44,10 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
 
       toast({
         title: 'Ditt konto är raderat',
-        description: 'All din data har tagits bort. Tack för den här tiden.',
+        description:
+          'Kontot är stängt och all din data tas bort nu. Tack för den här tiden.',
       });
+
       await supabase.auth.signOut();
       window.location.href = '/';
     } catch (e) {
