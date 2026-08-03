@@ -63,7 +63,7 @@ async function idsOf(
  */
 async function purgeCriterionResults(
   admin: SupabaseClient,
-  column: 'applicant_id' | 'application_id',
+  column: 'applicant_id' | 'application_id' | 'evaluated_by',
   values: string[],
 ): Promise<void> {
   if (values.length === 0) return;
