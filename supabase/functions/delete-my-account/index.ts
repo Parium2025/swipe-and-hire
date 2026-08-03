@@ -105,9 +105,15 @@ Deno.serve(async (req) => {
     const runPurge = async () => {
       try {
         const stats = await purgeUserData(admin, userId, email);
+        // Nolla e-posten i kön — raden är ett revisionsspår, inte PII-lagring.
         await admin
           .from('account_deletion_queue')
-          .update({ status: 'completed', completed_at: new Date().toISOString(), last_error: null })
+          .update({
+            status: 'completed',
+            completed_at: new Date().toISOString(),
+            last_error: null,
+            email: null,
+          })
           .eq('user_id', userId);
         console.log(`✅ Account ${userId} fully deleted`, stats);
       } catch (err) {
