@@ -52,7 +52,12 @@ Deno.serve(async (req) => {
       const stats = await purgeUserData(admin, row.user_id, row.email);
       await admin
         .from('account_deletion_queue')
-        .update({ status: 'completed', completed_at: new Date().toISOString(), last_error: null })
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          last_error: null,
+          email: null,
+        })
         .eq('user_id', row.user_id);
       completed++;
       console.log(`✅ queued deletion done ${row.user_id}`, stats);
