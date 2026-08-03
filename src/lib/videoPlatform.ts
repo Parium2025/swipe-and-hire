@@ -72,11 +72,13 @@ export const getMaxConcurrentVideos = () => {
   if (prefersReducedData()) return 1;
   switch (getVideoPlatform()) {
     case 'windows':
-      // Två samtidiga 520px-strömmar lämnar decode-budget åt telefonvideon och
-      // undviker att Chrome/Edge faller tillbaka på mjukvaruavkodning.
-      return isLowPowerDevice() ? 1 : 2;
+      // Tre samtidiga 520px-strömmar: två platser går till strippens ytterkanter
+      // (annars spelas aldrig första/sista kortet) och en till kortet i mitten.
+      // Källorna är den lätta Windows-mastern, så decode-trycket är litet.
+      return isLowPowerDevice() ? 2 : 3;
     case 'android':
       return isLowPowerDevice() ? 1 : 2;
+
     case 'apple':
       return 3;
     default:
