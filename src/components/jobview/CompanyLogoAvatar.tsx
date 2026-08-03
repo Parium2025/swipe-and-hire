@@ -82,7 +82,7 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
           onError={() => {
             if (attempt < 2) {
               const delays = [600, 1800];
-              setTimeout(() => setAttempt((a) => a + 1), delays[attempt]);
+              retryTimer.current = setTimeout(() => setAttempt((a) => a + 1), delays[attempt]);
             } else {
               setFailed(true);
             }
