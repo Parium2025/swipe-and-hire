@@ -69,11 +69,15 @@ Deno.serve(async (req) => {
         try {
           await admin.functions.invoke('send-admin-alert', {
             body: {
-              type: 'account_deletion_failed',
-              title: 'Kontoradering misslyckades 5 gånger',
-              message: `user_id ${row.user_id}: ${message}`,
+              type: 'system_critical',
+              error_message: message,
+              details: {
+                message: 'Kontoradering misslyckades 5 gånger',
+                user_id: row.user_id,
+              },
             },
           });
+
         } catch (_) {
           // larmet får inte fälla körningen
         }
