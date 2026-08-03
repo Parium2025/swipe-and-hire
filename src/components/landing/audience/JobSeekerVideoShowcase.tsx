@@ -472,8 +472,12 @@ const JobSeekerVideoShowcase = ({
     const onPlaying = () => clearStall();
     const onFirstStablePlay = () => {
       window.dispatchEvent(new CustomEvent('parium:jobseeker-video-stable'));
+      // Filen finns nu i HTTP-cachen: nästa sidvisning i samma session får
+      // starta nästan direkt istället för att vänta in hela kallstartsspärren.
+      try { sessionStorage.setItem('parium:jobseeker-video-warm', '1'); } catch { /* noop */ }
       v.removeEventListener('playing', onFirstStablePlay);
     };
+
 
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
