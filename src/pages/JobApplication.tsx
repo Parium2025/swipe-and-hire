@@ -58,7 +58,7 @@ interface JobQuestion {
 const JobApplication = () => {
   const { jobId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { setHasUnsavedChanges } = useUnsavedChanges();
@@ -182,10 +182,14 @@ const JobApplication = () => {
   }, [draftRestored, initialFormData, formData]);
 
   useEffect(() => {
-    if (jobId) {
-      fetchJobAndQuestions();
+    if (!jobId || authLoading) return;
+    // Ansökan kräver inloggning — vänta in sessionen innan vi hämtar annonsen.
+    if (!user) {
+      navigate('/auth', { replace: true });
+      return;
     }
-  }, [jobId]);
+    fetchJobAndQuestions();
+  }, [jobId, authLoading, user?.id]);
 
   const fetchJobAndQuestions = async () => {
     try {
