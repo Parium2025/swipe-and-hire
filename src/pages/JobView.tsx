@@ -596,16 +596,22 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         description: 'Din ansökan har skickats till arbetsgivaren',
       });
 
+      setJustApplied(true);
       setHasAlreadyApplied(true);
       setApplicationStatusChecked(true);
       try { localStorage.removeItem(`job-answers-draft-${jobId}`); } catch {}
       setTimeout(() => { navigate('/search-jobs'); }, 1500);
     } catch (error: any) {
+      const raw = String(error?.message || '');
+      const isQuota = raw.includes('application_quota_exceeded');
       toast({
-        title: 'Ett fel uppstod',
-        description: error.message || 'Kunde inte skicka ansökan',
+        title: isQuota ? 'Ansökningsgränsen är nådd' : 'Ett fel uppstod',
+        description: isQuota
+          ? 'Du kan skicka 3 ansökningar per 7 dagar på gratisplanen. Uppgradera till Premium för obegränsat antal ansökningar.'
+          : (raw || 'Kunde inte skicka ansökan'),
         variant: 'destructive',
       });
+
     } finally {
       setApplying(false);
     }
