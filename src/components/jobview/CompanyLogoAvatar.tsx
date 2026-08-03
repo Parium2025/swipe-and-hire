@@ -15,14 +15,18 @@ interface CompanyLogoAvatarProps {
  * laddad — och försvinner igen om den fallerar. Ingen "Bilden kunde inte
  * laddas"-text får någonsin klämmas in i den lilla cirkeln.
  */
+const loadedLogoUrls = new Set<string>();
+
 export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLogoAvatarProps) {
-  const [loaded, setLoaded] = useState(false);
+  // Om loggan redan laddats någon gång i sessionen ska den visas direkt —
+  // ingen intoning, ingen "laddning" varje gång man går in i ett jobb.
+  const [loaded, setLoaded] = useState(() => !!logoUrl && loadedLogoUrls.has(logoUrl));
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setLoaded(false);
+    setLoaded(!!logoUrl && loadedLogoUrls.has(logoUrl));
     setAttempt(0);
     setFailed(false);
   }, [logoUrl]);
