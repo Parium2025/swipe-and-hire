@@ -21,6 +21,7 @@ import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWiz
 import { TruncatedText } from '@/components/TruncatedText';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
 import { JobViewSkeleton } from '@/components/jobview/JobViewSkeleton';
+import { CompanyLogoAvatar } from '@/components/jobview/CompanyLogoAvatar';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
@@ -885,24 +886,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 className="flex flex-col items-center gap-2 w-full cursor-pointer hover:bg-white/10 active:bg-white/15 p-2 rounded-xl transition-all"
                 aria-label="Visa företagsprofil"
               >
-                <div className="h-14 w-14 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform">
-                  {companyLogoUrl ? (
-                    <ResilientImage
-                      src={companyLogoUrl}
-                      alt={getDisplayCompanyName(job)}
-                      className="w-full h-full object-cover"
-                      loading="eager"
-                      {...fetchPriority('high')}
-                      decoding="sync"
-                      draggable={false}
-                      fallbackClassName="w-full h-full"
-                    />
-                  ) : (
-                    <span className="text-white font-semibold text-sm">
-                      {getCompanyInitials(getDisplayCompanyName(job))}
-                    </span>
-                  )}
-                </div>
+                <CompanyLogoAvatar
+                  logoUrl={companyLogoUrl}
+                  companyName={getDisplayCompanyName(job)}
+                />
                 <div className="min-w-0 w-full overflow-hidden text-center flex flex-col items-center">
                   <TruncatedText
                     text={getDisplayCompanyName(job)}
