@@ -18,6 +18,8 @@ interface ApplicationQuestionsWizardProps {
   isSubmitting: boolean;
   canSubmit: boolean;
   hasAlreadyApplied: boolean;
+  /** Sant direkt efter en lyckad submit i samma vy → visar "Nyss sökt" istället för "Redan sökt" */
+  justApplied?: boolean;
   /** Preview mode: allows navigation but disables inputs and hides submit */
   previewMode?: boolean;
 }
@@ -30,6 +32,7 @@ export function ApplicationQuestionsWizard({
   isSubmitting,
   canSubmit,
   hasAlreadyApplied,
+  justApplied = false,
   previewMode = false,
 }: ApplicationQuestionsWizardProps) {
   // If already applied, start directly on the review step
