@@ -410,8 +410,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       const rawLogo = typeof (data as any).company_logo_url === 'string'
         ? (data as any).company_logo_url.trim().split('?')[0]
         : null;
+      console.log('DEBUG company_logo_url:', rawLogo);
       if (rawLogo) {
         const resolvedLogo = resolveCompanyLogoUrl(rawLogo) || rawLogo;
+        console.log('DEBUG resolved logo:', resolvedLogo);
         const cachedLogoBlob = imageCache.getCachedUrl(resolvedLogo);
         // Only set src if not yet rendered — prevents the logo from flashing/re-fetching on revisit
         setCompanyLogoUrl(prev => prev || cachedLogoBlob || resolvedLogo);
