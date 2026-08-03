@@ -139,10 +139,11 @@ const evaluateAll = () => {
   if (visibleIdx.length > 0) {
     const lastCardIndex = all.length - 1;
     const reachedEnd = visibleIdx[visibleIdx.length - 1] === lastCardIndex;
-    const window = reachedEnd
+    const slots = reachedEnd
       ? visibleIdx.slice(Math.max(0, visibleIdx.length - maxConcurrent))
       : visibleIdx.slice(0, maxConcurrent);
-    window.forEach((i) => picks.add(all[i].el));
+    slots.forEach((i) => picks.add(all[i].el));
+
   }
 
   const candidates = all.filter((e) => e.inView);
