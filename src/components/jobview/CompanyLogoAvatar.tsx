@@ -54,7 +54,7 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
     <div
       className={
         className ??
-        'relative h-14 w-14 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform'
+        'relative h-14 w-14 shrink-0 rounded-full overflow-hidden bg-white/20 ring-2 ring-white/20 flex items-center justify-center active:scale-95 transition-transform'
       }
     >
       <span className="text-white font-semibold text-sm select-none">
