@@ -63,7 +63,7 @@ async function idsOf(
  */
 async function purgeCriterionResults(
   admin: SupabaseClient,
-  column: 'applicant_id' | 'application_id',
+  column: 'applicant_id' | 'application_id' | 'evaluated_by',
   values: string[],
 ): Promise<void> {
   if (values.length === 0) return;
@@ -166,6 +166,8 @@ const USER_SCOPED: { table: string; column: string }[] = [
   { table: 'candidate_activities', column: 'applicant_id' },
   { table: 'candidate_activities', column: 'user_id' },
   { table: 'candidate_evaluations', column: 'applicant_id' },
+  { table: 'candidate_evaluations', column: 'evaluated_by' },
+
   { table: 'candidate_summaries', column: 'applicant_id' },
   { table: 'criterion_feedback', column: 'applicant_id' },
   { table: 'criterion_feedback', column: 'recruiter_id' },
@@ -333,8 +335,10 @@ export async function purgeUserData(
   await del(admin, 'conversation_message_reactions', 'user_id', userId);
   await del(admin, 'conversation_members', 'user_id', userId);
 
-  // 5. Kvarvarande AI-bedömningar om användaren (kan finnas utan ansökan kvar)
+  // 5. Kvarvarande AI-bedömningar om/av användaren (kan finnas utan ansökan kvar)
   await purgeCriterionResults(admin, 'applicant_id', [userId]);
+  await purgeCriterionResults(admin, 'evaluated_by', [userId]);
+
 
   // 5b. Alla användarscopade tabeller (verifierade kolumnnamn)
   for (const { table, column } of USER_SCOPED) {
@@ -371,7 +375,9 @@ export async function purgeUserData(
     const lower = email.toLowerCase();
     await del(admin, 'email_unsubscribe_tokens', 'email', lower);
     await del(admin, 'email_send_log', 'recipient_email', lower);
+    await del(admin, 'outreach_dispatch_logs', 'recipient_email', lower);
   }
+
 
   // 10. Suppression — förhindra oavsiktlig återkontakt
   if (email) {

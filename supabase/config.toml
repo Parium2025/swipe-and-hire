@@ -44,8 +44,11 @@ project_id = "jrjaegapuujushsiofoi"
   [functions.outreach-dispatch]
     schedule = "* * * * *"
     verify_jwt = false
+  [functions.process-account-deletions]
+    verify_jwt = false
   [functions.process-cv-queue]
     verify_jwt = false
+
   [functions.process-email-queue]
     verify_jwt = true
   [functions.send-transactional-email]

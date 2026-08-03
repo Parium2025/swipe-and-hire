@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_queue: {
+        Row: {
+          attempts: number
+          completed_at: string | null
+          email: string | null
+          last_error: string | null
+          requested_at: string
+          started_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string | null
+          email?: string | null
+          last_error?: string | null
+          requested_at?: string
+          started_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string | null
+          email?: string | null
+          last_error?: string | null
+          requested_at?: string
+          started_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       account_inactivity_notices: {
         Row: {
           cancelled_at: string | null
@@ -3251,6 +3284,25 @@ export type Database = {
         Returns: boolean
       }
       can_view_job_application: { Args: { p_job_id: string }; Returns: boolean }
+      claim_account_deletions: {
+        Args: { _limit?: number }
+        Returns: {
+          attempts: number
+          completed_at: string | null
+          email: string | null
+          last_error: string | null
+          requested_at: string
+          started_at: string | null
+          status: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "account_deletion_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       claim_admin_alert: {
         Args: { _alert_key: string; _cooldown_minutes?: number }
         Returns: boolean
