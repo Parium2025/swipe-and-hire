@@ -67,10 +67,16 @@ export const CandidateNotesPanel = ({
         />
         <div className="flex justify-center">
           <Button
-            onClick={onSaveNote}
+            onMouseDown={(e) => {
+              e.currentTarget.blur();
+              const activeEl = document.activeElement as HTMLElement | null;
+              activeEl?.blur?.();
+            }}
+            onMouseUp={(e) => e.currentTarget.blur()}
+            onClick={(e) => { e.currentTarget.blur(); onSaveNote(); }}
             disabled={!newNote.trim() || savingNote}
             size="sm"
-            className="w-auto rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-4"
+            className="w-auto rounded-full bg-white/10 hover:bg-white/10 active:bg-white/10 border border-white/20 text-xs px-4 transition-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
             <Send className="h-3 w-3 mr-1.5" />
             Lägg till
