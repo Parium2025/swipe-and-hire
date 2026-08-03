@@ -58,7 +58,7 @@ interface JobQuestion {
 const JobApplication = () => {
   const { jobId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { setHasUnsavedChanges } = useUnsavedChanges();
