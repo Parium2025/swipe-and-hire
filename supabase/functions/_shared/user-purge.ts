@@ -335,8 +335,10 @@ export async function purgeUserData(
   await del(admin, 'conversation_message_reactions', 'user_id', userId);
   await del(admin, 'conversation_members', 'user_id', userId);
 
-  // 5. Kvarvarande AI-bedömningar om användaren (kan finnas utan ansökan kvar)
+  // 5. Kvarvarande AI-bedömningar om/av användaren (kan finnas utan ansökan kvar)
   await purgeCriterionResults(admin, 'applicant_id', [userId]);
+  await purgeCriterionResults(admin, 'evaluated_by', [userId]);
+
 
   // 5b. Alla användarscopade tabeller (verifierade kolumnnamn)
   for (const { table, column } of USER_SCOPED) {
