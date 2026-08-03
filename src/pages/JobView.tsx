@@ -21,6 +21,7 @@ import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWiz
 import { TruncatedText } from '@/components/TruncatedText';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
 import { JobViewSkeleton } from '@/components/jobview/JobViewSkeleton';
+import { CompanyLogoAvatar } from '@/components/jobview/CompanyLogoAvatar';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
