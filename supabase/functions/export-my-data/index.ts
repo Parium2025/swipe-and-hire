@@ -156,11 +156,25 @@ Deno.serve(async (req) => {
       .eq('sender_id', userId)
       .limit(10000);
 
-    // Egna anteckningar (jobbsökare/arbetsgivare)
-    const [personalNotes, employerNotes] = await Promise.all([
+    // Egna anteckningar (jobbsökare/arbetsgivare) + övriga egna spår som
+    // också är personuppgifter enligt art. 15 (visningshistorik, samtycken,
+    // egna kolumninställningar och utskickade inaktivitetsvarningar).
+    const [
+      personalNotes,
+      employerNotes,
+      jobViews,
+      dataConsents,
+      stageSettings,
+      inactivityNotices,
+    ] = await Promise.all([
       grab('jobseeker_notes', 'user_id'),
       grab('employer_notes', 'employer_id'),
+      grab('job_views', 'user_id'),
+      grab('user_data_consents', 'user_id'),
+      grab('user_stage_settings', 'user_id'),
+      grab('account_inactivity_notices', 'user_id'),
     ]);
+
 
     // Uppladdade filer (CV, bilder, video, bilagor) — art. 20 gäller även
     // filerna, inte bara databasraderna. Länkarna är tidsbegränsade (1 timme).
@@ -215,7 +229,12 @@ Deno.serve(async (req) => {
       company_reviews: reviews,
       personal_notes: personalNotes,
       employer_notes: employerNotes,
+      job_views: jobViews,
+      data_consents: dataConsents,
+      stage_settings: stageSettings,
+      inactivity_notices: inactivityNotices,
       uploaded_files: files,
+
 
       // Uppgifter som arbetsgivare registrerat om dig. Vem hos arbetsgivaren
       // som skrivit posten är utelämnat — det är den personens personuppgift.

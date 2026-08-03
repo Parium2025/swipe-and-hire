@@ -355,11 +355,13 @@ export async function purgeUserData(
   if (authErr) throw new Error(`Kunde inte radera auth-konto: ${authErr.message}`);
   stats.auth_user_deleted = true;
 
-  // 8. Anonymisera kvarvarande revisionsspår (får ej innehålla personuppgifter)
+  // 8. Inaktivitetsnotiser saknar FK-cascade → raden blir kvar som en
+  //    föräldralös post med user_id + e-post. Ta bort den helt.
   await admin
     .from('account_inactivity_notices')
-    .update({ email: null })
+    .delete()
     .eq('user_id', userId);
+
 
   // Samtyckesbevis pseudonymiseras istället för att raderas: e-post och roll
   // nollas, kvar blir enbart vilken version som accepterades och när.
