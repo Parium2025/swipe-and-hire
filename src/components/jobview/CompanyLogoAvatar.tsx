@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { fetchPriority } from '@/lib/fetchPriority';
 
@@ -19,12 +19,18 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
   const [loaded, setLoaded] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setLoaded(false);
     setAttempt(0);
     setFailed(false);
   }, [logoUrl]);
+
+  // Städa upp eventuell väntande återförsökstimer vid unmount.
+  useEffect(() => () => {
+    if (retryTimer.current) clearTimeout(retryTimer.current);
+  }, []);
 
   // Nätverket tillbaka / flik i fokus → försök igen tyst.
   useEffect(() => {
@@ -76,7 +82,7 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
           onError={() => {
             if (attempt < 2) {
               const delays = [600, 1800];
-              setTimeout(() => setAttempt((a) => a + 1), delays[attempt]);
+              retryTimer.current = setTimeout(() => setAttempt((a) => a + 1), delays[attempt]);
             } else {
               setFailed(true);
             }
