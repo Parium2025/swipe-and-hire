@@ -75,14 +75,17 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
         <img
           src={src}
           alt={`${companyName} logotyp`}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${
-            loaded ? 'opacity-100' : 'opacity-0'
+          className={`absolute inset-0 w-full h-full object-cover ${
+            loaded ? 'opacity-100' : 'opacity-0 transition-opacity duration-200'
           }`}
           loading="eager"
           {...fetchPriority('high')}
           decoding="async"
           draggable={false}
-          onLoad={() => setLoaded(true)}
+          onLoad={() => {
+            if (logoUrl) loadedLogoUrls.add(logoUrl);
+            setLoaded(true);
+          }}
           onError={() => {
             if (attempt < 2) {
               const delays = [600, 1800];
