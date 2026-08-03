@@ -300,10 +300,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
       {/* Content */}
        <div className="job-card-mobile-body space-y-2.5">
-        {/* Logo circle — always shown, matches employer card */}
+        {/* Logo badge — always shown, matches employer card */}
         <div className="flex justify-center pt-1">
           <div
-            className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg shrink-0 touch-manipulation select-none"
+            className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg shrink-0 touch-manipulation select-none"
             role={canOpenCompanyProfile ? 'button' : undefined}
             aria-label={canOpenCompanyProfile ? `Visa företagsprofil för ${companyName}` : undefined}
             tabIndex={canOpenCompanyProfile ? 0 : undefined}
@@ -313,12 +313,13 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             style={canOpenCompanyProfile ? { cursor: 'pointer' } : undefined}
           >
             {logoUrl ? (
-              <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover rounded-full" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
+              <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-contain p-1" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
             ) : (
               <span className="text-base font-bold text-white/80 tracking-wide">{initials}</span>
             )}
           </div>
         </div>
+
 
         {/* Title */}
         <div>
