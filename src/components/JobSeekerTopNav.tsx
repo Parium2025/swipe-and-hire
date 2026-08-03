@@ -124,7 +124,7 @@ function JobSeekerTopNav() {
     // Jobbannons-vyer hör till Jobb-menyn — rutan ska ligga kvar hela vägen
     // in i annonsen och tillbaka, utan att blinka bort under navigeringen.
     if (items === jobItems) {
-      return /^\/(job|jobb-annons|job-application)\//.test(location.pathname);
+      return /^\/(job|job-view|job-details|job-application)\//.test(location.pathname);
     }
     return false;
   };
