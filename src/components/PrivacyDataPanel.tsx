@@ -48,8 +48,14 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
           'Kontot är stängt och all din data tas bort nu. Tack för den här tiden.',
       });
 
-      await supabase.auth.signOut();
+      // Sessionen är redan ogiltig på servern — fel här får inte blockera utloggningen
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        /* ignoreras */
+      }
       window.location.href = '/';
+
     } catch (e) {
       toast({
         title: 'Kunde inte radera kontot',
