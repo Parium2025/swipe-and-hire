@@ -79,7 +79,8 @@ const evaluateAll = () => {
   const centerX = vw / 2;
   const hidden = document.hidden;
 
-  const candidates: { el: HTMLVideoElement; dist: number; playing: boolean; covered: number; left: number }[] = [];
+  type Entry = { el: HTMLVideoElement; covered: number; left: number; inView: boolean };
+  const all: Entry[] = [];
   registry.forEach((el) => {
     const rect = el.getBoundingClientRect();
     const inView =
@@ -88,41 +89,14 @@ const evaluateAll = () => {
       rect.top < vh &&
       rect.right > 0 &&
       rect.left < vw;
-    if (inView) {
-      // Hur stor del av kortets BREDD som faktiskt syns. Kort längst ut i
-      // strippen (t.ex. Vård) är ofta helt synliga men långt från mitten —
-      // utan detta mått förlorade de alltid mot kort närmare centrum och
-      // spelade därför aldrig upp.
-      const visibleW = Math.max(0, Math.min(rect.right, vw) - Math.max(rect.left, 0));
-      const covered = rect.width > 0 ? visibleW / rect.width : 0;
-      candidates.push({
-        el,
-        dist: Math.abs((rect.left + rect.right) / 2 - centerX),
-        playing: !el.paused,
-        covered,
-        left: rect.left,
-      });
-
-    } else if (!el.paused) {
-      el.pause();
-    }
+    // Hur stor del av kortets BREDD som faktiskt syns.
+    const visibleW = Math.max(0, Math.min(rect.right, vw) - Math.max(rect.left, 0));
+    const covered = rect.width > 0 ? visibleW / rect.width : 0;
+    all.push({ el, covered, left: rect.left, inView });
   });
 
-  // Rangordning — enkel och förutsägbar: VÄNSTER TILL HÖGER.
-  //
-  // Tidigare rankade vi på avstånd till viewportens mitt plus reserverade
-  // ytterkantsplatser. Resultatet blev ett hoppigt urval (1, 3, 4 → 2, 3, 5 …)
-  // som ser ut som en bugg för användaren. Nu spelar helt enkelt de N första
-  // synliga korten räknat från vänster: 1, 2, 3 → 2, 3, 4 → 3, 4, 5.
-  //
-  //  1. Kort som är (nästan) helt synliga går före avklippta kort.
-  //  2. Inom varje grupp: vänster till höger.
-  candidates.sort((a, b) => {
-    const va = a.covered >= 0.85 ? 1 : 0;
-    const vb = b.covered >= 0.85 ? 1 : 0;
-    if (va !== vb) return vb - va;
-    return a.left - b.left;
-  });
+  // Kortens ordning i strippen = deras x-position (1 … 8), oavsett om de syns.
+  all.sort((a, b) => a.left - b.left);
 
   const maxConcurrent = getMaxConcurrent();
   const playVisible = (el: HTMLVideoElement) => {
@@ -143,15 +117,39 @@ const evaluateAll = () => {
       if (p && typeof p.catch === 'function') p.catch(() => {});
     }
   };
+
   /**
-   * Urval: de N första korten i den sorterade ordningen ovan, dvs. de N
-   * vänstraste synliga korten. Inga hopp, ingen reservation — 1, 2, 3.
+   * Urval — ett SAMMANHÄNGANDE fönster som glider vänster→höger:
+   * 1,2,3 → 2,3,4 → … → 6,7,8.
+   *
+   * Vi tar de N vänstraste synliga korten. Undantag i strippens slut: när det
+   * sista kortet syns finns inga kort kvar till höger, så fönstret ankras i
+   * stället mot höger (de N sista synliga). Utan detta hamnade kort 8 alltid
+   * utanför budgeten och stod kvar på posterbilden — samma sak för kort 1 vid
+   * strippens början, som ankras mot vänster.
    */
+  const visibleIdx: number[] = [];
+  all.forEach((e, i) => {
+    if (e.inView && e.covered >= 0.5) visibleIdx.push(i);
+  });
+  // Om inget kort är halvt synligt (extremt smala vyer) → fall tillbaka på allt i vy.
+  if (visibleIdx.length === 0) all.forEach((e, i) => { if (e.inView) visibleIdx.push(i); });
+
   const picks = new Set<HTMLVideoElement>();
-  for (const c of candidates) {
-    if (picks.size >= maxConcurrent) break;
-    picks.add(c.el);
+  if (visibleIdx.length > 0) {
+    const lastCardIndex = all.length - 1;
+    const reachedEnd = visibleIdx[visibleIdx.length - 1] === lastCardIndex;
+    const window = reachedEnd
+      ? visibleIdx.slice(Math.max(0, visibleIdx.length - maxConcurrent))
+      : visibleIdx.slice(0, maxConcurrent);
+    window.forEach((i) => picks.add(all[i].el));
   }
+
+  const candidates = all.filter((e) => e.inView);
+  all.forEach(({ el, inView }) => {
+    if (!inView && !el.paused) el.pause();
+  });
+
 
   candidates.forEach(({ el }) => {
     if (picks.has(el)) {
