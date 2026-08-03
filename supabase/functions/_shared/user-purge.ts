@@ -166,6 +166,8 @@ const USER_SCOPED: { table: string; column: string }[] = [
   { table: 'candidate_activities', column: 'applicant_id' },
   { table: 'candidate_activities', column: 'user_id' },
   { table: 'candidate_evaluations', column: 'applicant_id' },
+  { table: 'candidate_evaluations', column: 'evaluated_by' },
+
   { table: 'candidate_summaries', column: 'applicant_id' },
   { table: 'criterion_feedback', column: 'applicant_id' },
   { table: 'criterion_feedback', column: 'recruiter_id' },
