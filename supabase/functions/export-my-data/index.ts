@@ -229,7 +229,12 @@ Deno.serve(async (req) => {
       company_reviews: reviews,
       personal_notes: personalNotes,
       employer_notes: employerNotes,
+      job_views: jobViews,
+      data_consents: dataConsents,
+      stage_settings: stageSettings,
+      inactivity_notices: inactivityNotices,
       uploaded_files: files,
+
 
       // Uppgifter som arbetsgivare registrerat om dig. Vem hos arbetsgivaren
       // som skrivit posten är utelämnat — det är den personens personuppgift.
