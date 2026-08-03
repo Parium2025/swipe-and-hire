@@ -100,7 +100,9 @@ const evaluateAll = () => {
         dist: Math.abs((rect.left + rect.right) / 2 - centerX),
         playing: !el.paused,
         covered,
+        left: rect.left,
       });
+
     } else if (!el.paused) {
       el.pause();
     }
