@@ -367,13 +367,32 @@ const JobSeekerVideoShowcase = ({
       }, 150);
     };
 
-    /** Startpunkt: kallstartsspärr på Windows, direkt play överallt annars. */
+    /**
+     * Startpunkt: kallstartsspärr på Windows, direkt play överallt annars.
+     *
+     * På Windows väntar vi dessutom in `load`-eventet innan första play().
+     * Vid en kall laddning pågår då fortfarande hydrering, bilddekodning och
+     * hero-animationen — startar videodecodern mitt i den bursten hackar de
+     * första sekunderna även när filen redan är hämtad. Vid en varm sidvisning
+     * har `load` redan hänt, så den vägen ändras inte alls.
+     */
+    let loadWaitArmed = false;
+    const startAfterLoad = (then: () => void) => {
+      if (!coldGate || document.readyState === 'complete') { then(); return; }
+      if (loadWaitArmed) return;
+      loadWaitArmed = true;
+      window.addEventListener('load', () => { loadWaitArmed = false; then(); }, { once: true });
+    };
+
     const kick = () => {
-      waitForStableGeometry(() => {
-        if (coldGate && !warmRef.current) startWhenBuffered();
-        else attempt();
+      startAfterLoad(() => {
+        waitForStableGeometry(() => {
+          if (coldGate && !warmRef.current) startWhenBuffered();
+          else attempt();
+        });
       });
     };
+
 
     // Apple/touch: starta omedelbart, redan innan events hinner trigga.
     if (!coldGate && !geometryGate && (active || keepAliveWhenHidden)) attempt();
