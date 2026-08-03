@@ -292,11 +292,19 @@ const JobSeekerVideoShowcase = ({
 
     // Kallstart: vänta in en riktig buffert innan första play(). Max 6,5 s, sedan
     // startar vi ändå så att telefonen aldrig blir stående på posterbilden.
-    // 3 s buffert (istället för 2) är det som skiljer en kall första laddning
-    // från en varm: vid 2 s hann bufferten ta slut direkt efter start och de
-    // första sekunderna blev en serie mikro-stopp på Windows.
+    // Målet är ADAPTIVT: 3 s är rätt på ett trögt nät, men på ett snabbt nät
+    // (eller när filen redan ligger i HTTP-cachen) är det ren väntetid. Vi mäter
+    // därför hur snabbt bufferten växer och sänker målet när nätet håller undan.
     const COLD_TARGET_SECONDS = 3;
+    const COLD_FAST_TARGET_SECONDS = 1.2;
+    const COLD_WARM_TARGET_SECONDS = 0.8;
     const COLD_MAX_WAIT_MS = 6500;
+    // Har filen redan spelat stabilt i den här sessionen ligger den i cachen —
+    // då är en lång buffringsspärr bara fördröjning.
+    const warmSessionKey = 'parium:jobseeker-video-warm';
+    let sessionWarm = false;
+    try { sessionWarm = sessionStorage.getItem(warmSessionKey) === '1'; } catch { /* noop */ }
+
 
     let coldTimer: number | null = null;
     let geometryFrame: number | null = null;
@@ -356,15 +364,29 @@ const JobSeekerVideoShowcase = ({
       try { v.preload = 'auto'; } catch { /* noop */ }
       if (v.readyState < 2) { try { v.load(); } catch { /* noop */ } }
       const startedAt = Date.now();
+      let lastAhead = aheadOf(v);
+      let lastAt = startedAt;
       coldTimer = window.setInterval(() => {
         if (!active && !keepAliveWhenHidden) { clearCold(); return; }
-        const ready = v.readyState >= 4 || aheadOf(v) >= COLD_TARGET_SECONDS;
-        if (ready || Date.now() - startedAt >= COLD_MAX_WAIT_MS) {
+        const now = Date.now();
+        const ahead = aheadOf(v);
+        // Buffertens tillväxt i "sekunder video per sekund realtid". > 2 betyder
+        // att nätet levererar dubbelt så fort som videon konsumeras → helt säkert
+        // att starta tidigt, bufferten fortsätter växa medan den spelar.
+        const growth = now > lastAt ? ((ahead - lastAhead) / ((now - lastAt) / 1000)) : 0;
+        lastAhead = ahead;
+        lastAt = now;
+
+        const target = sessionWarm
+          ? COLD_WARM_TARGET_SECONDS
+          : growth >= 2 ? COLD_FAST_TARGET_SECONDS : COLD_TARGET_SECONDS;
+
+        if (v.readyState >= 4 || ahead >= target || now - startedAt >= COLD_MAX_WAIT_MS) {
           clearCold();
           warmRef.current = true;
           attempt();
         }
-      }, 150);
+      }, 100);
     };
 
     /**
@@ -375,14 +397,22 @@ const JobSeekerVideoShowcase = ({
      * hero-animationen — startar videodecodern mitt i den bursten hackar de
      * första sekunderna även när filen redan är hämtad. Vid en varm sidvisning
      * har `load` redan hänt, så den vägen ändras inte alls.
+     *
+     * Undantag: är filen redan cachad (varm session) eller helt buffrad finns
+     * ingen burst att skydda sig mot — då är väntan på `load` bara död tid.
      */
     let loadWaitArmed = false;
     const startAfterLoad = (then: () => void) => {
-      if (!coldGate || document.readyState === 'complete') { then(); return; }
+      if (!coldGate || document.readyState === 'complete' || sessionWarm || v.readyState >= 4) { then(); return; }
       if (loadWaitArmed) return;
       loadWaitArmed = true;
-      window.addEventListener('load', () => { loadWaitArmed = false; then(); }, { once: true });
+      // Vänta inte i evighet på `load` — tunga tredjepartsresurser kan dra ut på
+      // det långt efter att videon är spelklar.
+      const proceed = () => { loadWaitArmed = false; then(); };
+      window.addEventListener('load', proceed, { once: true });
+      window.setTimeout(() => { if (loadWaitArmed) proceed(); }, 1800);
     };
+
 
     const kick = () => {
       startAfterLoad(() => {
@@ -442,8 +472,12 @@ const JobSeekerVideoShowcase = ({
     const onPlaying = () => clearStall();
     const onFirstStablePlay = () => {
       window.dispatchEvent(new CustomEvent('parium:jobseeker-video-stable'));
+      // Filen finns nu i HTTP-cachen: nästa sidvisning i samma session får
+      // starta nästan direkt istället för att vänta in hela kallstartsspärren.
+      try { sessionStorage.setItem('parium:jobseeker-video-warm', '1'); } catch { /* noop */ }
       v.removeEventListener('playing', onFirstStablePlay);
     };
+
 
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
