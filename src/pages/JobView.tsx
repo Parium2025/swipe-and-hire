@@ -993,6 +993,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       isSubmitting={applying}
                       canSubmit={canSubmitApplication}
                       hasAlreadyApplied={alreadyAppliedForUi}
+                      justApplied={justApplied}
                     />
                   </div>
                 )}
