@@ -420,6 +420,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           imageCache.loadImage(resolvedLogo).catch(() => {});
         }
       }
+
     } catch (error: any) {
       console.error('JobView fetch error:', error);
       // Retry once on network/auth errors
@@ -885,12 +886,12 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 className="flex flex-col items-center gap-2 w-full cursor-pointer hover:bg-white/10 active:bg-white/15 p-2 rounded-xl transition-all"
                 aria-label="Visa företagsprofil"
               >
-                <div className="h-14 w-14 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform">
+                <div className="h-14 w-14 shrink-0 rounded-2xl overflow-hidden bg-white/20 flex items-center justify-center active:scale-95 transition-transform">
                   {companyLogoUrl ? (
                     <ResilientImage
                       src={companyLogoUrl}
                       alt={getDisplayCompanyName(job)}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain p-1"
                       loading="eager"
                       {...fetchPriority('high')}
                       decoding="sync"
@@ -903,6 +904,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                     </span>
                   )}
                 </div>
+
                 <div className="min-w-0 w-full overflow-hidden text-center flex flex-col items-center">
                   <TruncatedText
                     text={getDisplayCompanyName(job)}
