@@ -1011,7 +1011,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                           className="px-8 rounded-full bg-green-500 text-white cursor-not-allowed"
                         >
                           <CheckCircle className="mr-1.5 h-4 w-4" />
-                          Redan sökt
+                          {justApplied ? 'Nyss sökt' : 'Redan sökt'}
                         </Button>
                       ) : (
                         <Button
