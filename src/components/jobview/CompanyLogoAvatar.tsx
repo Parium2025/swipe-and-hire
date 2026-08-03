@@ -15,14 +15,18 @@ interface CompanyLogoAvatarProps {
  * laddad — och försvinner igen om den fallerar. Ingen "Bilden kunde inte
  * laddas"-text får någonsin klämmas in i den lilla cirkeln.
  */
+const loadedLogoUrls = new Set<string>();
+
 export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLogoAvatarProps) {
-  const [loaded, setLoaded] = useState(false);
+  // Om loggan redan laddats någon gång i sessionen ska den visas direkt —
+  // ingen intoning, ingen "laddning" varje gång man går in i ett jobb.
+  const [loaded, setLoaded] = useState(() => !!logoUrl && loadedLogoUrls.has(logoUrl));
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setLoaded(false);
+    setLoaded(!!logoUrl && loadedLogoUrls.has(logoUrl));
     setAttempt(0);
     setFailed(false);
   }, [logoUrl]);
@@ -71,14 +75,17 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
         <img
           src={src}
           alt={`${companyName} logotyp`}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${
-            loaded ? 'opacity-100' : 'opacity-0'
+          className={`absolute inset-0 w-full h-full object-cover ${
+            loaded ? 'opacity-100' : 'opacity-0 transition-opacity duration-200'
           }`}
           loading="eager"
           {...fetchPriority('high')}
           decoding="async"
           draggable={false}
-          onLoad={() => setLoaded(true)}
+          onLoad={() => {
+            if (logoUrl) loadedLogoUrls.add(logoUrl);
+            setLoaded(true);
+          }}
           onError={() => {
             if (attempt < 2) {
               const delays = [600, 1800];

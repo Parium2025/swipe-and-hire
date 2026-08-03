@@ -141,17 +141,39 @@ function JobSeekerTopNav() {
     return 'Jobbsökare';
   };
 
+  // Räknarna kommer från en asynkron preload och kan vara null en kort stund vid
+  // navigering tillbaka. Vi minns senast kända värde så att "Jobb (9)"-rutan aldrig
+  // hoppar i bredd eller försvinner mellan sidbyten.
+  const stickyCount = (key: string, value: number | null | undefined): number => {
+    const storageKey = `parium_nav_count_${key}`;
+    if (typeof value === 'number' && value > 0) {
+      try { localStorage.setItem(storageKey, String(value)); } catch {}
+      return value;
+    }
+    if (typeof value === 'number') return value;
+    try {
+      const cached = Number(localStorage.getItem(storageKey));
+      return Number.isFinite(cached) ? cached : 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  const totalJobsCount = stickyCount('total_jobs', preloadedTotalJobs);
+  const savedJobsCount = stickyCount('saved_jobs', preloadedSavedJobs);
+  const myApplicationsCount = stickyCount('my_applications', preloadedMyApplications);
+
   const getJobCount = (url: string) => {
     switch (url) {
-      case '/search-jobs': return preloadedTotalJobs ?? 0;
-      case '/saved-jobs': return preloadedSavedJobs ?? 0;
-      case '/my-applications': return preloadedMyApplications ?? 0;
+      case '/search-jobs': return totalJobsCount;
+      case '/saved-jobs': return savedJobsCount;
+      case '/my-applications': return myApplicationsCount;
       default: return null;
     }
   };
 
   const getTotalJobsCount = () => {
-    const total = (preloadedTotalJobs || 0) + (preloadedSavedJobs || 0) + (preloadedMyApplications || 0);
+    const total = totalJobsCount + savedJobsCount + myApplicationsCount;
     return total > 0 ? total : null;
   };
 

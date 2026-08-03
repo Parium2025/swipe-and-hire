@@ -231,6 +231,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
   });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? navigationImageState.hasApplied === true);
+  // Sant endast direkt efter en lyckad submit i den här vyn → knappen visar "Nyss sökt".
+  const [justApplied, setJustApplied] = useState(false);
   const [applicationStatusChecked, setApplicationStatusChecked] = useState(Boolean(cached) || navigationImageState.hasApplied === true);
   const { data: appliedJobIds = new Set<string>(), isFetched: appliedJobIdsFetched } = useAppliedJobIds();
   const alreadyAppliedForUi = hasAlreadyApplied || navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
@@ -594,16 +596,22 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         description: 'Din ansökan har skickats till arbetsgivaren',
       });
 
+      setJustApplied(true);
       setHasAlreadyApplied(true);
       setApplicationStatusChecked(true);
       try { localStorage.removeItem(`job-answers-draft-${jobId}`); } catch {}
       setTimeout(() => { navigate('/search-jobs'); }, 1500);
     } catch (error: any) {
+      const raw = String(error?.message || '');
+      const isQuota = raw.includes('application_quota_exceeded');
       toast({
-        title: 'Ett fel uppstod',
-        description: error.message || 'Kunde inte skicka ansökan',
+        title: isQuota ? 'Ansökningsgränsen är nådd' : 'Ett fel uppstod',
+        description: isQuota
+          ? 'Du kan skicka 3 ansökningar per 7 dagar på gratisplanen. Uppgradera till Premium för obegränsat antal ansökningar.'
+          : (raw || 'Kunde inte skicka ansökan'),
         variant: 'destructive',
       });
+
     } finally {
       setApplying(false);
     }
@@ -985,6 +993,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       isSubmitting={applying}
                       canSubmit={canSubmitApplication}
                       hasAlreadyApplied={alreadyAppliedForUi}
+                      justApplied={justApplied}
                     />
                   </div>
                 )}
@@ -1002,7 +1011,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                           className="px-8 rounded-full bg-green-500 text-white cursor-not-allowed"
                         >
                           <CheckCircle className="mr-1.5 h-4 w-4" />
-                          Redan sökt
+                          {justApplied ? 'Nyss sökt' : 'Redan sökt'}
                         </Button>
                       ) : (
                         <Button
