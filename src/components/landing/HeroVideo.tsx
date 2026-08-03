@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 // Datasparläge eller 2G → hoppa över videoladdning helt och visa bara poster.
 // Sparar 2,4–13 MB för användare i dåligt nät utan att förändra UX synbart.
@@ -18,11 +19,10 @@ const shouldSkipVideo = () => {
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return '/hero-video-720.mp4';
   const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
-  // Windows/Android (och sparläge) får den lätta 720p-mastern även på desktop:
-  // 6,3 MB + mjukvaruavkodning är exakt det som gör hero-videon hackig där.
-  const ua = typeof navigator === 'undefined' ? '' : navigator.userAgent;
-  const lightweight = /Windows NT|Android/i.test(ua);
-  return desktop && !lightweight ? '/hero-video.mp4' : '/hero-video-720.mp4';
+  // Windows/Android (och sparläge/svagt nät) får den lätta 720p-mastern även på
+  // desktop: 6,3 MB + mjukvaruavkodning är exakt det som gör hero-videon hackig
+  // där. Villkoret delas nu med galleriet via videoPlatform.ts så de inte glider isär.
+  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? '/hero-video.mp4' : '/hero-video-720.mp4';
 };
 
 
