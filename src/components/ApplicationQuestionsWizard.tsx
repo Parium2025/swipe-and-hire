@@ -521,7 +521,7 @@ export function ApplicationQuestionsWizard({
           }
         >
           <CheckCircle className="mr-1.5 h-4 w-4" />
-          Redan sökt
+          {justApplied ? 'Nyss sökt' : 'Redan sökt'}
         </button>
 
         {/* Skicka ansökan button - only visible on submit step when not already applied */}
