@@ -1006,10 +1006,17 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                         </Button>
                       ) : (
                         <Button
-                          onClick={handleApplicationSubmit}
+                          onMouseDown={(e) => {
+                            e.currentTarget.blur();
+                            const activeEl = document.activeElement as HTMLElement | null;
+                            activeEl?.blur?.();
+                          }}
+                          onMouseUp={(e) => e.currentTarget.blur()}
+                          onClick={(e) => { e.currentTarget.blur(); handleApplicationSubmit(); }}
                           disabled={applying || !canSubmitApplication}
-                          className={`px-8 rounded-full bg-green-500 text-white shadow-lg shadow-green-500/30 transition-all active:scale-[0.97] ${!canSubmitApplication ? 'opacity-50' : ''}`}
+                          className={`px-8 rounded-full bg-green-500 hover:bg-green-500 active:bg-green-500 text-white shadow-lg shadow-green-500/30 transition-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${!canSubmitApplication ? 'opacity-50' : ''}`}
                         >
+
                           {applying ? 'Skickar...' : (
                             <>
                               <Send className="mr-1.5 h-3.5 w-3.5" />
