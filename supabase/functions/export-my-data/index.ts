@@ -4,6 +4,8 @@
 // hårt till den inloggade användarens egen data.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { listAllFilesRecursive, USER_STORAGE_BUCKETS } from '../_shared/storage-cleanup.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -162,16 +164,17 @@ Deno.serve(async (req) => {
 
     // Uppladdade filer (CV, bilder, video, bilagor) — art. 20 gäller även
     // filerna, inte bara databasraderna. Länkarna är tidsbegränsade (1 timme).
+    // Samma rekursiva + paginerade listning som raderingen använder, annars
+    // missas filer i undermappar (userId/cv/fil.pdf) och konton med >1000 filer.
     const files: { bucket: string; path: string; download_url: string | null }[] = [];
-    for (const bucket of ['job-applications', 'company-logos', 'job-images', 'message-attachments']) {
-      const { data: items } = await admin.storage.from(bucket).list(userId, { limit: 1000 });
-      for (const item of items ?? []) {
-        if (item.id === null) continue; // mapp
-        const path = `${userId}/${item.name}`;
+    for (const bucket of USER_STORAGE_BUCKETS) {
+      const paths = await listAllFilesRecursive(admin, bucket, userId);
+      for (const path of paths) {
         const { data: signed } = await admin.storage.from(bucket).createSignedUrl(path, 3600);
         files.push({ bucket, path, download_url: signed?.signedUrl ?? null });
       }
     }
+
 
 
     const payload = {
