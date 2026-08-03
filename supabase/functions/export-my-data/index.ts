@@ -4,6 +4,8 @@
 // hårt till den inloggade användarens egen data.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { listAllFilesRecursive, USER_STORAGE_BUCKETS } from '../_shared/storage-cleanup.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
