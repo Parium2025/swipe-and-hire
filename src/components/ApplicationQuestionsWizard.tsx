@@ -323,7 +323,7 @@ export function ApplicationQuestionsWizard({
     'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-6 py-2 text-sm touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
   const submitButtonClasses = 
-    'rounded-full bg-green-500 hover:bg-green-600 md:hover:bg-green-600 text-white px-6 py-2 text-sm shadow-lg shadow-green-500/30 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
+    'rounded-full bg-green-500 hover:bg-green-500 md:hover:bg-green-500 active:bg-green-500 text-white px-6 py-2 text-sm shadow-lg shadow-green-500/30 transition-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
 
   const navRef = useRef<HTMLDivElement>(null);
   const wizardMinHeightClass = isSubmitStep ? 'min-h-0' : 'min-h-[320px] sm:min-h-[360px]';
