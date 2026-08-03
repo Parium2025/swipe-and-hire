@@ -79,7 +79,7 @@ const evaluateAll = () => {
   const centerX = vw / 2;
   const hidden = document.hidden;
 
-  const candidates: { el: HTMLVideoElement; dist: number; playing: boolean; covered: number }[] = [];
+  const candidates: { el: HTMLVideoElement; dist: number; playing: boolean; covered: number; left: number }[] = [];
   registry.forEach((el) => {
     const rect = el.getBoundingClientRect();
     const inView =
