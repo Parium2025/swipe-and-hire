@@ -186,18 +186,57 @@ export function ApplicationQuestionsWizard({
         );
 
       case 'number':
+        const numValue = parseInt(answer, 10) || 0;
+        const minValue = question.min_value ?? 0;
+        const maxValue = question.max_value ?? 999;
         return (
           <div className="flex justify-center">
-            <Input
-              type="number"
-              value={answer || ''}
-              onChange={(e) => !isLocked && onAnswerChange(question.id, e.target.value)}
-              readOnly={isLocked}
-              min={question.min_value}
-              max={question.max_value}
-              placeholder={question.placeholder_text || 'Ange ett nummer'}
-              className={'bg-white/10 border-white/20 text-white text-center text-sm max-w-[160px] h-10 placeholder:text-white/50' + (isLocked ? ' opacity-70 cursor-default' : '')}
-            />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (isLocked) return;
+                  const next = Math.max(minValue, numValue - 1);
+                  onAnswerChange(question.id, next === 0 ? '' : next.toString());
+                }}
+                disabled={isLocked || numValue <= minValue}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="h-11 w-11 min-w-[2.75rem] flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 disabled:opacity-40 disabled:cursor-default active:scale-[0.97]"
+                aria-label="Minska"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={answer || ''}
+                onChange={(e) => {
+                  if (isLocked) return;
+                  const raw = e.target.value.replace(/[^0-9]/g, '');
+                  onAnswerChange(question.id, raw);
+                }}
+                readOnly={isLocked}
+                placeholder={question.placeholder_text || 'Ange ett nummer'}
+                className={'bg-white/10 border-white/20 text-white text-center text-sm h-11 w-44 sm:w-48 placeholder:text-white/50 focus:border-white/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none' + (isLocked ? ' opacity-70 cursor-default' : '')}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (isLocked) return;
+                  const next = Math.min(maxValue, numValue + 1);
+                  onAnswerChange(question.id, next.toString());
+                }}
+                disabled={isLocked || numValue >= maxValue}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="h-11 w-11 min-w-[2.75rem] flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 disabled:opacity-40 disabled:cursor-default active:scale-[0.97]"
+                aria-label="Öka"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         );
 
