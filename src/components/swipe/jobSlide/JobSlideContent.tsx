@@ -52,23 +52,22 @@ export const JobSlideContent = memo(function JobSlideContent({
             {...(interactive ? { 'data-company-tap-zone': '' } : {})}
           >
             {logoUrl ? (
-              <div className="w-14 h-14 rounded-2xl bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg active:scale-95 transition-transform">
+              <div className="w-14 h-14 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg active:scale-95 transition-transform">
                 <img
                   src={logoUrl}
                   alt={interactive ? displayCompanyName : ''}
-                  className="w-full h-full object-contain p-1"
+                  className="w-full h-full object-cover"
                   draggable={false}
                   onError={onLogoError}
                 />
               </div>
             ) : (
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center active:scale-95 transition-transform">
+              <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center active:scale-95 transition-transform">
                 <span className="text-xl font-bold text-white/40 tracking-wide select-none">
                   {getCompanyInitials(displayCompanyName)}
                 </span>
               </div>
             )}
-
           </div>
         )}
 
