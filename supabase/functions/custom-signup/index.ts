@@ -96,6 +96,18 @@ const handler = async (req: Request): Promise<Response> => {
       console.error('Cleanup error (continuing anyway):', cleanupError);
     }
 
+    // Rensa ev. gammal spärr från en tidigare kontoradering — annars blockeras
+    // bekräftelsemejlet och personen kan aldrig verifiera sitt nya konto.
+    try {
+      await supabase
+        .from('suppressed_emails')
+        .delete()
+        .eq('email', normalizedEmail)
+        .eq('reason', 'account_deleted');
+    } catch (e) {
+      console.warn('suppression cleanup failed (continuing):', (e as Error).message);
+    }
+
     // 2. Skapa användare utan automatisk bekräftelse
     const { data: user, error: signupError } = await supabase.auth.admin.createUser({
       email: normalizedEmail,
