@@ -11,11 +11,13 @@ export interface ApplicationQuota {
   reset_at: string | null;
 }
 
+// Kvoten är pausad (se enforce_application_quota i databasen) — klienten
+// utgår från obegränsat så att inga spärrar visas medan RPC:n laddar.
 const DEFAULT_QUOTA: ApplicationQuota = {
   allowed: true,
   used: 0,
-  limit: 3,
-  is_premium: false,
+  limit: Number.MAX_SAFE_INTEGER,
+  is_premium: true,
   reset_at: null,
 };
 

@@ -120,7 +120,13 @@ function JobSeekerTopNav() {
   };
 
   const isDropdownActive = (items: typeof jobItems) => {
-    return items.some(item => location.pathname === item.url);
+    if (items.some(item => location.pathname === item.url)) return true;
+    // Jobbannons-vyer hör till Jobb-menyn — rutan ska ligga kvar hela vägen
+    // in i annonsen och tillbaka, utan att blinka bort under navigeringen.
+    if (items === jobItems) {
+      return /^\/(job|job-view|job-details|job-application)\//.test(location.pathname);
+    }
+    return false;
   };
 
   const getUserInitials = () => {
