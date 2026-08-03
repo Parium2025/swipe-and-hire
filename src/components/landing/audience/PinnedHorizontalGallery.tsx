@@ -108,25 +108,22 @@ const evaluateAll = () => {
     }
   });
 
-  // Rangordning:
-  //  1. Kort som är mest synliga går före kort som råkar ligga närmare mitten.
-  //     Det är avgörande för sista kortet (Vård): när det syns tydligt vid
-  //     högerkanten ska det spela, även om ett avklippt kort till vänster har
-  //     kortare avstånd till viewportens mitt.
-  //  2. Därefter avstånd till viewportens mitt.
-  //  3. Hysteres: redan spelande kort får en distans-bonus så att små
-  //     scroll-rörelser inte kastar om kön (blinkande start/stopp).
-  const HYSTERESIS_PX = 200;
-  const rank = (c: { dist: number; playing: boolean; covered: number }) => ({
-    visibility: Math.round(c.covered * 10),
-    score: c.dist - (c.playing ? HYSTERESIS_PX : 0),
-  });
+  // Rangordning — enkel och förutsägbar: VÄNSTER TILL HÖGER.
+  //
+  // Tidigare rankade vi på avstånd till viewportens mitt plus reserverade
+  // ytterkantsplatser. Resultatet blev ett hoppigt urval (1, 3, 4 → 2, 3, 5 …)
+  // som ser ut som en bugg för användaren. Nu spelar helt enkelt de N första
+  // synliga korten räknat från vänster: 1, 2, 3 → 2, 3, 4 → 3, 4, 5.
+  //
+  //  1. Kort som är (nästan) helt synliga går före avklippta kort.
+  //  2. Inom varje grupp: vänster till höger.
   candidates.sort((a, b) => {
-    const ra = rank(a);
-    const rb = rank(b);
-    if (ra.visibility !== rb.visibility) return rb.visibility - ra.visibility;
-    return ra.score - rb.score;
+    const va = a.covered >= 0.85 ? 1 : 0;
+    const vb = b.covered >= 0.85 ? 1 : 0;
+    if (va !== vb) return vb - va;
+    return a.left - b.left;
   });
+
   const maxConcurrent = getMaxConcurrent();
   const playVisible = (el: HTMLVideoElement) => {
     el.muted = true;
@@ -147,28 +144,15 @@ const evaluateAll = () => {
     }
   };
   /**
-   * Urval av vilka kort som får spela.
-   *
-   * Rangordningen ovan (synlighet → avstånd till mitten) valde i praktiken
-   * alltid kort i mitten av strippen. På Windows, där budgeten är låg, innebar
-   * det att strippens YTTERKANTER — första kortet vid p=0 och sista kortet vid
-   * p=1 — aldrig fick spela. De stod kvar på posterbilden.
-   *
-   * Därför reserveras två platser: det vänstraste och det högraste kortet som
-   * är i princip helt synligt. Resten av budgeten fylls på som förut, med
-   * kortet närmast viewportens mitt först.
+   * Urval: de N första korten i den sorterade ordningen ovan, dvs. de N
+   * vänstraste synliga korten. Inga hopp, ingen reservation — 1, 2, 3.
    */
   const picks = new Set<HTMLVideoElement>();
-  const fullyVisible = candidates.filter((c) => c.covered >= 0.85);
-  if (fullyVisible.length > 0 && maxConcurrent > 1) {
-    const byLeft = [...fullyVisible].sort((a, b) => a.left - b.left);
-    picks.add(byLeft[0].el);
-    if (byLeft.length > 1) picks.add(byLeft[byLeft.length - 1].el);
-  }
   for (const c of candidates) {
     if (picks.size >= maxConcurrent) break;
     picks.add(c.el);
   }
+
   candidates.forEach(({ el }) => {
     if (picks.has(el)) {
       playVisible(el);
