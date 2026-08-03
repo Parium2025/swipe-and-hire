@@ -351,9 +351,20 @@ export async function purgeUserData(
   else stats.profile_deleted = true;
 
   // 7. Auth-kontot
+  // Idempotent: om ett tidigare försök redan hann radera auth-kontot innan
+  // runtimen dog ska återförsöket INTE fastna här — då skulle steg 8–10
+  // (inaktivitetsnotiser, samtycken, e-postspår) aldrig köras.
   const { error: authErr } = await admin.auth.admin.deleteUser(userId);
-  if (authErr) throw new Error(`Kunde inte radera auth-konto: ${authErr.message}`);
+  if (authErr) {
+    const msg = (authErr.message ?? '').toLowerCase();
+    const alreadyGone =
+      msg.includes('not found') || msg.includes('does not exist') ||
+      (authErr as { status?: number }).status === 404;
+    if (!alreadyGone) throw new Error(`Kunde inte radera auth-konto: ${authErr.message}`);
+    console.warn('ℹ️ auth-konto redan raderat, fortsätter med resterande städning');
+  }
   stats.auth_user_deleted = true;
+
 
   // 8. Inaktivitetsnotiser saknar FK-cascade → raden blir kvar som en
   //    föräldralös post med user_id + e-post. Ta bort den helt.
