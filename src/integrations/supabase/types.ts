@@ -3713,6 +3713,7 @@ export type Database = {
       }
       normalize_job_text: { Args: { t: string }; Returns: string }
       parium_norm: { Args: { t: string }; Returns: string }
+      purge_old_email_dlq: { Args: never; Returns: number }
       purge_soft_deleted_jobs: {
         Args: never
         Returns: {
