@@ -204,26 +204,27 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder="RADERA"
             autoComplete="off"
-            className="text-base text-white bg-[hsl(215_100%_20%)] border-white/20 placeholder:text-white focus:border-white/40"
+            className="w-full h-11 !min-h-0 rounded-md bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm placeholder:text-white/60 focus:border-white/40 focus-visible:ring-0 focus-visible:ring-offset-0"
             disabled={deleting}
           />
 
           <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-center">
             <AlertDialogCancel
               disabled={deleting}
-              className="w-full sm:w-auto rounded-full !bg-[hsl(215_100%_25%)] !text-white !border-white/20 !transition-none hover:!bg-[hsl(215_100%_25%)] hover:!text-white active:!scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="w-full sm:w-auto h-10 px-5 rounded-full text-sm !bg-white/5 !text-white !border-white/10 backdrop-blur-sm !transition-none hover:!bg-white/10 hover:!text-white active:!scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); handleDeleteAccount(); }}
               disabled={deleting || confirmText.trim().toUpperCase() !== 'RADERA'}
-              className="w-full sm:w-auto rounded-full !bg-[hsl(215_100%_25%)] !text-white !border-white/20 !transition-none hover:!bg-[hsl(215_100%_25%)] hover:!text-white active:!scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="w-full sm:w-auto h-10 px-5 rounded-full text-sm border-0 !bg-red-500/80 !text-white !transition-none hover:!bg-red-500/80 hover:!text-white md:hover:!bg-red-500/80 md:hover:!text-white active:!bg-red-500/80 active:!text-white active:!scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               {deleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {deleting ? 'Raderar…' : 'Radera permanent'}
             </AlertDialogAction>
           </AlertDialogFooter>
+
         </AlertDialogContent>
       </AlertDialog>
     </div>
