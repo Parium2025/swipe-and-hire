@@ -62,26 +62,33 @@ RemovedApplicantsInfo.displayName = 'RemovedApplicantsInfo';
  * men synlig för alla kollegor som öppnar annonsen.
  */
 export const RemovedApplicantsBadge = memo(({ count }: RemovedApplicantsInfoProps) => {
+  const [open, setOpen] = useState(false);
+
   if (!count || count <= 0) return null;
 
-  const stop = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
-          onClick={stop}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((v) => !v);
+          }}
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
           aria-label="Varför har antalet ansökningar minskat?"
           className="ml-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-white/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 md:hover:text-white"
         >
           <Info className="h-3.5 w-3.5" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="center" className="w-[270px] text-sm leading-relaxed" onClick={stop}>
+      <PopoverContent
+        align="center"
+        className="w-[270px] text-sm leading-relaxed"
+        onClick={(e) => e.stopPropagation()}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <p className="font-medium text-foreground">Kandidat borttagen</p>
         <p className="mt-1.5 text-foreground/90">
           {count === 1
@@ -95,5 +102,6 @@ export const RemovedApplicantsBadge = memo(({ count }: RemovedApplicantsInfoProp
     </Popover>
   );
 });
+
 
 RemovedApplicantsBadge.displayName = 'RemovedApplicantsBadge';
