@@ -138,9 +138,9 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
         <div className="flex justify-center">
         <Button
           variant="glass"
-          onClick={handleDownload}
+          onClick={(e) => { e.currentTarget.blur(); handleDownload(); }}
           disabled={downloading}
-          className="h-10 rounded-full px-5 text-sm text-white"
+          className="h-10 rounded-full px-5 text-sm text-white transition-none hover:bg-white/10 hover:text-white active:scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
         >
           {downloading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -157,15 +157,15 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
           </p>
           <div className="flex justify-center">
             <Button
-              variant="glass"
-              onClick={() => { setConfirmText(''); setDeleteOpen(true); }}
-              className="h-10 rounded-full px-5 text-sm text-red-300 hover:text-red-200 border-red-400/40"
+              onClick={(e) => { e.currentTarget.blur(); setConfirmText(''); setDeleteOpen(true); }}
+              className="h-10 rounded-full px-5 text-sm border-0 bg-red-600 text-white transition-none hover:bg-red-600 hover:text-white active:scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Radera mitt konto
             </Button>
           </div>
         </div>
+
 
         <p className="text-xs text-white text-center">
           Läs mer i{' '}
