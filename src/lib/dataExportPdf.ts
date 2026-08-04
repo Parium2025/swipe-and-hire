@@ -18,6 +18,27 @@ const SECTION_LABELS: Record<string, string> = {
   notification_preferences: 'Notisinställningar',
   cv_analyses: 'CV-sammanfattningar',
   subscriptions: 'Abonnemang',
+  purchases: 'Köp',
+  push_devices: 'Enheter för pushnotiser',
+  support_tickets: 'Supportärenden',
+  support_messages: 'Supportmeddelanden',
+  company_reviews: 'Omdömen du lämnat',
+  personal_notes: 'Dina egna anteckningar',
+  employer_notes: 'Anteckningar du skrivit som arbetsgivare',
+  job_views: 'Jobb du tittat på',
+  data_consents: 'Dina val om datadelning',
+  stage_settings: 'Egna kolumninställningar',
+  inactivity_notices: 'Påminnelser om inaktivitet',
+  uploaded_files: 'Uppladdade filer',
+  employer_records_about_me: 'Uppgifter arbetsgivare registrerat om dig',
+  notes: 'Anteckningar',
+  ratings: 'Betyg',
+  evaluations: 'Utvärderingar',
+  ai_summaries: 'AI-sammanfattningar',
+  criterion_feedback: 'Kommentarer per kriterium',
+  activity_log: 'Aktivitetslogg',
+  pipeline_entries: 'Kandidatlistor',
+  profile_views: 'Visningar av din profil',
 };
 
 /** Läsbara etiketter för vanliga fältnamn. */
@@ -165,9 +186,18 @@ export function buildDataExportPdf(payload: Record<string, unknown>, accountEmai
     y += 8;
   };
 
-  Object.entries(payload).forEach(([sectionKey, sectionValue]) => {
-    if (sectionKey === 'export_metadata') return;
+  /** True när värdet är ett objekt vars fält i sin tur är listor (t.ex. arbetsgivarmaterial). */
+  const isGroup = (value: unknown) =>
+    !!value &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Object.values(value as Record<string, unknown>).every((v) => Array.isArray(v));
 
+  const renderSection = (
+    sectionKey: string,
+    sectionValue: unknown,
+    level: 'main' | 'sub',
+  ) => {
     const heading = SECTION_LABELS[sectionKey] ?? label(sectionKey);
     const isArray = Array.isArray(sectionValue);
     const rows = isArray
@@ -177,10 +207,27 @@ export function buildDataExportPdf(payload: Record<string, unknown>, accountEmai
         : [];
 
     ensureSpace(40);
-    doc.setDrawColor(200);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 16;
-    writeLines(`${heading}${isArray ? ` (${rows.length})` : ''}`, 14, 'bold', 6);
+    if (level === 'main') {
+      doc.setDrawColor(200);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 16;
+    }
+    writeLines(
+      `${heading}${isArray ? ` (${rows.length})` : ''}`,
+      level === 'main' ? 14 : 11,
+      'bold',
+      6,
+    );
+
+    if (sectionKey === 'uploaded_files' && rows.length > 0) {
+      writeLines(
+        'Nedladdningslänkarna nedan är säkerhetsskäl giltiga i en timme från att exporten ' +
+          'skapades. Gör en ny export om du behöver hämta filerna senare.',
+        9,
+        'normal',
+      );
+      y += 4;
+    }
 
     if (rows.length === 0) {
       writeLines('Inga uppgifter sparade.', 10, 'normal');
@@ -189,6 +236,24 @@ export function buildDataExportPdf(payload: Record<string, unknown>, accountEmai
     }
 
     rows.forEach((row, i) => renderRecord(row, isArray && rows.length > 1 ? i : undefined));
+  };
+
+  Object.entries(payload).forEach(([sectionKey, sectionValue]) => {
+    if (sectionKey === 'export_metadata') return;
+
+    if (isGroup(sectionValue)) {
+      ensureSpace(40);
+      doc.setDrawColor(200);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 16;
+      writeLines(SECTION_LABELS[sectionKey] ?? label(sectionKey), 14, 'bold', 6);
+      Object.entries(sectionValue as Record<string, unknown>).forEach(([subKey, subValue]) =>
+        renderSection(subKey, subValue, 'sub'),
+      );
+      return;
+    }
+
+    renderSection(sectionKey, sectionValue, 'main');
   });
 
   // Sidnumrering
