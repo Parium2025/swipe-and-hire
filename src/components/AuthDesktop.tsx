@@ -92,6 +92,13 @@ const AuthDesktop = ({
   const [resetLoading, setResetLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [pendingVerification, setPendingVerification] = useState<boolean>(() => hasPendingVerification());
+
+  // Låt användaren registrera sig igen när hen byter till Registrera-fliken
+  useEffect(() => {
+    if (!isLogin) {
+      setHasRegistered(false);
+    }
+  }, [isLogin]);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
