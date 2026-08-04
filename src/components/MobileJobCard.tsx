@@ -14,7 +14,6 @@ import { useCompactWidth } from '@/hooks/useCompactWidth';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getCompanyInitials } from '@/lib/companyInitials';
-import { RemovedApplicantsInfo } from '@/components/dashboard/RemovedApplicantsInfo';
 
 
 interface MobileJobCardProps {
@@ -233,7 +232,6 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                     {job.applications_count || 0}
                   </span>
                 </div>
-                <RemovedApplicantsInfo count={job.removed_applicants_count} />
 
                 <div className="flex items-center justify-between">
                   <span className="text-sm leading-snug text-white">Status:</span>
