@@ -121,6 +121,9 @@ export function SavedSearchesDropdown({
         <PopoverContent 
           className="w-[min(calc(100vw-2rem),360px)] p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
           align="center"
+          side="bottom"
+          sideOffset={8}
+          avoidCollisions={false}
         >
           <div className="p-4 border-b border-white/10">
             <h4 className="text-base font-medium text-white">Sparade sökningar</h4>
