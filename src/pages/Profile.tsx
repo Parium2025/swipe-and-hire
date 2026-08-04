@@ -2432,10 +2432,7 @@ const Profile = () => {
                                 p_priority: 10, // High priority for direct uploads
                               }).then(({ error }) => {
                                 if (error) console.warn('Failed to queue CV for analysis:', error);
-                                else {
-                                  // Trigger queue processor
-                                  supabase.functions.invoke('process-cv-queue').catch(() => {});
-                                }
+                                // Cron-jobbet plockar upp kön inom en minut.
                               });
                             }
                           }}
