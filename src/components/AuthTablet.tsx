@@ -24,6 +24,7 @@ import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
+import { hasPendingVerification, markPendingVerification, clearPendingVerification } from '@/lib/pendingVerification';
 import { AuthLogoInline } from '@/assets/authLogoInline';
 
 interface AuthTabletProps {
@@ -90,6 +91,14 @@ const AuthTablet = ({
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState<boolean>(() => hasPendingVerification());
+
+  // Låt användaren registrera sig igen när hen byter till Registrera-fliken
+  useEffect(() => {
+    if (!isLogin) {
+      setHasRegistered(false);
+    }
+  }, [isLogin]);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -275,9 +284,15 @@ const AuthTablet = ({
          if (result?.error) {
            if (result.error.code === 'email_not_confirmed') {
              setShowResend(true);
+             markPendingVerification(currentEmail);
+             setPendingVerification(true);
            } else if (result.error.showResetPassword) {
              setShowResetPassword(true);
            }
+         }
+         else {
+           clearPendingVerification();
+           setPendingVerification(false);
          }
          // Vid lyckad inloggning: splash förblir synlig tills redirect sker i Auth.tsx
        } else {
@@ -473,6 +488,8 @@ const AuthTablet = ({
           // Registreringen lyckades – gå till Logga in-fliken, men behåll mejlrutan så användaren kan skicka om bekräftelsen
           setHasRegistered(true);
           setShowResend(true);
+          markPendingVerification(fallbackEmail);
+          setPendingVerification(true);
           setIsLogin(true);
         }
       }
@@ -715,15 +732,17 @@ const AuthTablet = ({
                           </button>
                         </div>
 
-                        <div className="text-center mt-2">
-                          <button
-                            type="button"
-                            onClick={() => setShowResend(true)}
-                            className="text-sm text-white/80 no-underline hover:text-white"
-                          >
-                            Fick du inte bekräftelsemejlet?
-                          </button>
-                        </div>
+                        {pendingVerification && (
+                          <div className="text-center mt-2">
+                            <button
+                              type="button"
+                              onClick={() => setShowResend(true)}
+                              className="text-sm text-white/80 no-underline hover:text-white"
+                            >
+                              Fick du inte bekräftelsemejlet?
+                            </button>
+                          </div>
+                        )}
                        
                         {showResetPassword && !resetPasswordSent && (
                          <div className="mt-4 p-3 rounded-lg text-center">
