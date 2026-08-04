@@ -281,12 +281,45 @@ export async function purgeUserData(
         if (row.job_id) perJob.set(row.job_id, (perJob.get(row.job_id) ?? 0) + 1);
       }
     }
+
+    // Hämta jobbinfo innan ansökningar raderas så arbetsgivaren kan få en
+    // notifikation om att kandidaten försvunnit (GDPR-anonym, inga personuppgifter).
+    const jobIds = [...perJob.keys()];
+    const { data: jobInfo } = await admin
+      .from('job_postings')
+      .select('id, employer_id, title')
+      .in('id', jobIds);
+
     await purgeCriterionResults(admin, 'application_id', appIds);
     for (const table of APPLICATION_SCOPED) {
       await delIn(admin, table, 'application_id', appIds);
     }
     await delIn(admin, 'conversations', 'application_id', appIds);
     await del(admin, 'job_applications', 'applicant_id', userId);
+
+    // Notifiera berörda arbetsgivare om att kandidaten försvunnit.
+    // Ingen personlig data om kandidaten inkluderas — endast räknare och jobb.
+    if (jobInfo && jobInfo.length > 0) {
+      const now = new Date().toISOString();
+      const notifications = jobInfo.map((job) => {
+        const count = perJob.get(job.id) ?? 1;
+        return {
+          user_id: job.employer_id,
+          type: 'candidate_deleted',
+          title: 'Kandidat borttagen',
+          body:
+            count === 1
+              ? `En kandidat har raderat sitt konto. En ansökan har tagits bort från ${job.title || 'din annons'}.`
+              : `${count} kandidater har raderat sina konton. ${count} ansökningar har tagits bort från ${job.title || 'din annons'}.`,
+          metadata: { job_id: job.id, route: '/my-jobs' },
+          is_read: false,
+          created_at: now,
+        };
+      });
+      const { error: notifErr } = await admin.from('notifications').insert(notifications);
+      if (notifErr) console.warn('⚠️ insert candidate_deleted notifications:', notifErr.message);
+    }
+
     if (perJob.size > 0) {
       const { error: rpcErr } = await admin.rpc('increment_removed_applicants', {
         _job_ids: [...perJob.keys()],
@@ -295,6 +328,7 @@ export async function purgeUserData(
       if (rpcErr) console.warn('⚠️ increment_removed_applicants:', rpcErr.message);
     }
   }
+
 
 
   // 4. Konversationer & meddelanden
