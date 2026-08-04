@@ -146,6 +146,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
             <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
             <span className="text-white text-xs font-medium truncate">{job.applications_count}</span>
             <span className="text-white text-xs truncate">Ans.</span>
+            <RemovedApplicantsBadge count={job.removed_applicants_count} />
           </div>
 
           {job.employer_profile ? (
