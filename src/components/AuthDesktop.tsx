@@ -1211,8 +1211,15 @@ const AuthDesktop = ({
 
                 {showResend && (
                   <div className="mt-4 p-4 bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-lg text-center">
-                    <p className="text-sm mb-3 text-white font-medium">Kolla din e-post för bekräftelselänk</p>
-                    <div className="text-sm text-primary-foreground/80 bg-primary/10 p-2 rounded border-l-4 border-primary mb-3">
+                    <p className="text-sm mb-1 text-white font-semibold">
+                      {isLogin ? "Verifiera din e-post innan du kan logga in" : "Kolla din e-post för bekräftelselänk"}
+                    </p>
+                    {isLogin && (
+                      <p className="text-sm mb-3 text-white">
+                        Ditt konto är skapat men inte bekräftat. Klicka på länken i bekräftelsemailet, sedan kan du logga in.
+                      </p>
+                    )}
+                    <div className="text-sm text-primary-foreground/80 bg-primary/10 p-2 rounded border-l-4 border-primary mb-3 mt-3">
                       <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                     </div>
                     <Button
