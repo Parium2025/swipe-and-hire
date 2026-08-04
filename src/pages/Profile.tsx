@@ -165,7 +165,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
               p_cv_url: cvUrl!,
               p_priority: 10,
             });
-            await supabase.functions.invoke('process-cv-queue').catch(() => {});
+            // Kön processas av cron (varje minut) — klienten triggar inte AI-jobbet.
           } catch (err) {
             console.warn('Kunde inte köa CV-analys:', err);
           }
@@ -2432,10 +2432,7 @@ const Profile = () => {
                                 p_priority: 10, // High priority for direct uploads
                               }).then(({ error }) => {
                                 if (error) console.warn('Failed to queue CV for analysis:', error);
-                                else {
-                                  // Trigger queue processor
-                                  supabase.functions.invoke('process-cv-queue').catch(() => {});
-                                }
+                                // Cron-jobbet plockar upp kön inom en minut.
                               });
                             }
                           }}
