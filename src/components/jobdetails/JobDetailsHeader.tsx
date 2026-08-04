@@ -19,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import JobQrCodeButton from '@/components/JobQrCode';
 import { JobStatusBadge } from './JobStatusBadge';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
+import { RemovedApplicantsBadge } from '@/components/dashboard/RemovedApplicantsInfo';
 
 interface JobDetailsHeaderProps {
   jobId: string;
@@ -29,6 +30,7 @@ interface JobDetailsHeaderProps {
     expires_at: string | null;
     views_count: number | null;
     applications_count: number | null;
+    removed_applicants_count?: number | null;
     employer_id?: string;
     employer_profile?: {
       first_name: string | null;
@@ -146,6 +148,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
             <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
             <span className="text-white text-xs font-medium truncate">{job.applications_count}</span>
             <span className="text-white text-xs truncate">Ans.</span>
+            <RemovedApplicantsBadge count={job.removed_applicants_count} />
           </div>
 
           {job.employer_profile ? (
