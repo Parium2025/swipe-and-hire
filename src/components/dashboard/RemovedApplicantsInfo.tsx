@@ -1,4 +1,4 @@
-import { memo, type MouseEvent } from 'react';
+import { memo, useState, type MouseEvent } from 'react';
 import { Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
