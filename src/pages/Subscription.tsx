@@ -315,7 +315,7 @@ const Subscription = () => {
             <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/15 hover:text-white">
               Behåll Premium
             </AlertDialogCancel>
-            <AlertDialogAction className="bg-red-500/90 text-white hover:bg-red-500 border-0">
+            <AlertDialogAction className="bg-red-500/80 text-white hover:bg-red-500/80 hover:text-white border-0">
               Avbryt prenumeration
             </AlertDialogAction>
           </AlertDialogFooter>

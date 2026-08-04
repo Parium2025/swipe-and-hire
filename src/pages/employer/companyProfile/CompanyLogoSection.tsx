@@ -63,7 +63,7 @@ export const CompanyLogoSection = ({
                 e.stopPropagation();
                 onLogoDelete();
               }}
-              className="absolute -top-3 -right-3 z-20 pointer-events-auto rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+              className="absolute -top-3 -right-3 z-20 pointer-events-auto rounded-full border-0 bg-red-500/80 p-2 text-white shadow-lg md:hover:!bg-red-500/80 md:hover:!text-white"
             >
               <Trash2 className="h-4 w-4" />
             </button>
