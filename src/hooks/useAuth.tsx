@@ -1186,10 +1186,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             description: "Fel e-postadress eller lösenord. Kontrollera dina uppgifter och försök igen.",
             variant: "destructive"
           });
-        } else if (error.message === 'Email not confirmed') {
+        } else if (
+          error.message === 'Email not confirmed' ||
+          (error as any).code === 'email_not_confirmed' ||
+          /not\s*confirmed/i.test(error.message || '')
+        ) {
           toast({
-            title: "Kontot är inte bekräftat",
-            description: "Du behöver bekräfta din e-post först. Kolla din inkorg eller begär en ny bekräftelselänk.",
+            title: "Verifiera din e-post",
+            description: "Du behöver bekräfta din e-post innan du kan logga in. Klicka på länken i bekräftelsemailet – kolla även skräpposten.",
             variant: "default",
             duration: 8000
           });
