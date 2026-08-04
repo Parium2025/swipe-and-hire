@@ -1,7 +1,7 @@
 // HR News Fetcher - Multi-source RSS with smart filtering, retry logic, and health tracking
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { requireAuthenticated } from "../_shared/service-auth.ts";
+import { verifyCaller } from "../_shared/service-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -595,9 +595,11 @@ async function getHealthSummary(supabase: any): Promise<any> {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  // Block anonymous callers — either service_role (cron) or an authenticated user
-  const authErr = await requireAuthenticated(req, corsHeaders);
-  if (authErr) return authErr;
+  // Only cron/service-role may force an expensive refresh. Signed-in users may
+  // trigger a normal (cooldown-protected) run, never AI generation or force.
+  const caller = await verifyCaller(req, corsHeaders);
+  if (caller instanceof Response) return caller;
+  const isPrivileged = caller.isServiceRole;
 
   try {
 
@@ -606,8 +608,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
     const body = await req.json().catch(() => ({}));
-    const force = body.force === true;
-    const mode = typeof body.mode === 'string' ? body.mode : 'auto';
+    const force = isPrivileged && body.force === true;
+    const mode = isPrivileged && typeof body.mode === 'string' ? body.mode : 'auto';
 
     // Explicit AI mode - for testing only
     if (mode === 'ai') {
