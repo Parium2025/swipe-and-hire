@@ -281,88 +281,78 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         </AnimatePresence>
 
 
-        <AnimatePresence initial={false}>
-          {(!collapsible || expanded) && (!hideActions || !isDraft) && (
-            <motion.div
-              key="actions"
-              initial={collapsible ? { height: 0, opacity: 0 } : false}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="h-px bg-white/10 mx-2" />
-              <div ref={actionsRef} className={`flex gap-2 px-2 py-1.5 ${compactActions ? 'justify-center' : ''}`}>
-                {!hideActions && !isExpired && (
+        {!(hideActions && isDraft) && (
+          <div className={(collapsible && !expanded) ? 'hidden' : ''}>
+            <div className="h-px bg-white/10 mx-2" />
+            <div ref={actionsRef} className={`flex gap-2 px-2 py-1.5 ${compactActions ? 'justify-center' : ''}`}>
+              {!hideActions && !isExpired && (
 
-                  <Button
-                    variant="glass"
-                    size="sm"
-                    aria-label="Redigera annons"
-                    title="Redigera annons"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isDraft && onEditDraft) {
-                        onEditDraft(job);
-                      } else {
-                        onEdit(job);
-                      }
-                    }}
-                    className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11 text-sm'} transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40`}
-                  >
-                    <Edit className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
-                    {!compactActions && <span className="truncate">Redigera</span>}
-                  </Button>
-                )}
-                {!hideActions && isExpired && onRepublish && (
-                  <Button
-                    size="sm"
-                    aria-label="Återpublicera annons"
-                    title="Återpublicera annons"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRepublish(job);
-                    }}
-                    className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]`}
-                  >
-                    <RotateCcw className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
-                    {!compactActions && <span className="truncate">Återpublicera</span>}
-                  </Button>
-                )}
-                {!isDraft && (
-                  <Button
-                    variant="glass"
-                    size="sm"
-                    aria-label="Förhandsgranska annons"
-                    title="Förhandsgranska annons"
-                    onClick={handlePreviewClick}
-                    className={`${hideActions && !compactActions ? 'flex-1 min-w-0 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
-                  >
-                    <Eye className="h-4 w-4" />
-                    {hideActions && !compactActions && <span className="text-sm truncate">Visa annons</span>}
-                  </Button>
-                )}
-                {!hideActions && (
-                  <Button
-                    variant="glass"
-                    size="sm"
-                    aria-label="Ta bort annons"
-                    title="Ta bort annons"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(job);
-                    }}
-                    className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 bg-red-500/80 text-white transition-[transform] duration-150 hover:bg-red-500/80 hover:text-white active:scale-[0.97]`}
-                  >
-                    <Trash2 className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
-                    {!compactActions && <span className="truncate">Ta bort</span>}
-                  </Button>
-                )}
-              </div>
-
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <Button
+                  variant="glass"
+                  size="sm"
+                  aria-label="Redigera annons"
+                  title="Redigera annons"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isDraft && onEditDraft) {
+                      onEditDraft(job);
+                    } else {
+                      onEdit(job);
+                    }
+                  }}
+                  className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11 text-sm'} transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40`}
+                >
+                  <Edit className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
+                  {!compactActions && <span className="truncate">Redigera</span>}
+                </Button>
+              )}
+              {!hideActions && isExpired && onRepublish && (
+                <Button
+                  size="sm"
+                  aria-label="Återpublicera annons"
+                  title="Återpublicera annons"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRepublish(job);
+                  }}
+                  className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]`}
+                >
+                  <RotateCcw className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
+                  {!compactActions && <span className="truncate">Återpublicera</span>}
+                </Button>
+              )}
+              {!isDraft && (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  aria-label="Förhandsgranska annons"
+                  title="Förhandsgranska annons"
+                  onClick={handlePreviewClick}
+                  className={`${hideActions && !compactActions ? 'flex-1 min-w-0 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
+                >
+                  <Eye className="h-4 w-4" />
+                  {hideActions && !compactActions && <span className="text-sm truncate">Visa annons</span>}
+                </Button>
+              )}
+              {!hideActions && (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  aria-label="Ta bort annons"
+                  title="Ta bort annons"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(job);
+                  }}
+                  className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 bg-red-500/80 text-white transition-[transform] duration-150 hover:bg-red-500/80 hover:text-white active:scale-[0.97]`}
+                >
+                  <Trash2 className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
+                  {!compactActions && <span className="truncate">Ta bort</span>}
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
 
       </div>
     </Card>
