@@ -661,6 +661,7 @@ export function ChatView({
           </div>
         ) : (
           <div className="space-y-4">
+            <ChatRetentionNotice createdAt={conversation.created_at} />
             {/* Load older messages button */}
             {hasMore && !isLoading && messages.length >= MESSAGES_PAGE_SIZE && (
               <div className="flex justify-center py-2">
