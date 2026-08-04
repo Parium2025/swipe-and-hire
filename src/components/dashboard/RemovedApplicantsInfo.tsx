@@ -1,6 +1,7 @@
 import { memo, useState, type MouseEvent } from 'react';
 import { Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface RemovedApplicantsInfoProps {
   count?: number | null;
@@ -67,41 +68,41 @@ export const RemovedApplicantsBadge = memo(({ count }: RemovedApplicantsInfoProp
   if (!count || count <= 0) return null;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <Tooltip open={open} onOpenChange={setOpen} delayDuration={0}>
+      <TooltipTrigger asChild>
         <button
           type="button"
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             setOpen((v) => !v);
           }}
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
           aria-label="Varför har antalet ansökningar minskat?"
           className="ml-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-white/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 md:hover:text-white"
         >
           <Info className="h-3.5 w-3.5" />
         </button>
-      </PopoverTrigger>
-      <PopoverContent
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
         align="center"
-        className="w-[270px] text-sm leading-relaxed"
+        className="max-w-[270px] px-3 py-2 leading-relaxed"
         onClick={(e) => e.stopPropagation()}
-        onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <p className="font-medium text-foreground">Kandidat borttagen</p>
-        <p className="mt-1.5 text-foreground/90">
+        <p className="font-medium">Kandidat borttagen</p>
+        <p className="mt-1">
           {count === 1
             ? 'En kandidat har raderat sitt konto, eller fått det automatiskt raderat efter lång inaktivitet. En ansökan har tagits bort från den här annonsen.'
             : `${count} kandidater har raderat sina konton, eller fått dem automatiskt raderade efter lång inaktivitet. ${count} ansökningar har tagits bort från den här annonsen.`}
         </p>
-        <p className="mt-2 text-foreground/70">
+        <p className="mt-1.5">
           Informationen är helt anonym och syns för alla som har tillgång till annonsen.
         </p>
-      </PopoverContent>
-    </Popover>
+      </TooltipContent>
+    </Tooltip>
   );
 });
+
 
 
 RemovedApplicantsBadge.displayName = 'RemovedApplicantsBadge';
