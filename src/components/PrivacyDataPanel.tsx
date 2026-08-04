@@ -215,7 +215,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); handleDeleteAccount(); }}
               disabled={deleting || confirmText.trim().toUpperCase() !== 'RADERA'}
-              className="w-full sm:w-auto border-0 bg-red-500/80 text-white transition-none hover:bg-red-500/80 hover:text-white"
+              className="w-full sm:w-auto border-0 !bg-red-500/80 !text-white transition-none hover:!bg-red-500/80 hover:!text-white md:hover:!bg-red-500/80 md:hover:!text-white active:!bg-red-500/80 active:!text-white"
             >
               {deleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {deleting ? 'Raderar…' : 'Radera permanent'}
