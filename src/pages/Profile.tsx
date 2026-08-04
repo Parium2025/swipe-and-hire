@@ -165,7 +165,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
               p_cv_url: cvUrl!,
               p_priority: 10,
             });
-            await supabase.functions.invoke('process-cv-queue').catch(() => {});
+            // Kön processas av cron (varje minut) — klienten triggar inte AI-jobbet.
           } catch (err) {
             console.warn('Kunde inte köa CV-analys:', err);
           }
