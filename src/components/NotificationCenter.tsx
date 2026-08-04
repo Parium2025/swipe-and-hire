@@ -1,7 +1,7 @@
 import { memo, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX } from 'lucide-react';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,7 +14,9 @@ const typeIcons: Record<string, typeof Bell> = {
   message: MessageCircle,
   job_expired: Briefcase,
   saved_search_match: Bell,
+  candidate_deleted: UserX,
 };
+
 
 const typeColors: Record<string, string> = {
   new_application: 'text-white',
