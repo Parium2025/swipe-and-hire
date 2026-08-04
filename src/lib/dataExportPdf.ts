@@ -74,6 +74,10 @@ const FIELD_LABELS: Record<string, string> = {
   body: 'Text',
   summary_text: 'Sammanfattning',
   name: 'Namn',
+  note: 'Anteckning',
+  rating: 'Betyg',
+  comment: 'Kommentar',
+  applicant_id: 'Kandidat-ID',
 };
 
 /** Fält som aldrig är intressanta för en människa att läsa. */
