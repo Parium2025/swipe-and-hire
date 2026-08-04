@@ -25,7 +25,7 @@ import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
-import { hasPendingVerification, markPendingVerification, clearPendingVerification } from '@/lib/pendingVerification';
+import { hasPendingVerification, markPendingVerification, clearPendingVerification, getPendingVerificationEmail } from '@/lib/pendingVerification';
 import { AuthLogoInline } from '@/assets/authLogoInline';
 
 interface AuthMobileProps {
@@ -813,7 +813,12 @@ const AuthMobile = ({
                           <div className="text-center mt-2">
                             <button
                               type="button"
-                              onClick={() => setShowResend(true)}
+                              onClick={() => {
+                                const saved = getPendingVerificationEmail();
+                                const current = role === 'job_seeker' ? jobSeekerData.email : employerData.email;
+                                if (saved && !current.trim()) handleEmailChange(saved);
+                                setShowResend(true);
+                              }}
                               className="text-sm text-white/80 no-underline hover:text-white"
                             >
                               Fick du inte bekräftelsemejlet?
