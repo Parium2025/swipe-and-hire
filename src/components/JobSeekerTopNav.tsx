@@ -375,18 +375,18 @@ function JobSeekerTopNav() {
                 />
                 {/* Trigger always shows cover image (no play icon) - video playback is only in dropdown */}
                 {(hasVideo && (coverUrl || avatarUrl)) || avatarUrl ? (
-                  <Avatar className="h-7 w-7 ring-2 ring-white/20 relative z-10">
+                  <Avatar className="h-6 w-6 ring-2 ring-white/20 relative z-10">
                     <AvatarImage src={coverUrl || avatarUrl || ''} alt={getUserDisplayName()} />
                     <AvatarFallback className="bg-white/20 text-white text-xs font-semibold" delayMs={150}>
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
                 ) : profile ? (
-                  <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20 relative z-10">
+                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20 relative z-10">
                     {getUserInitials()}
                   </div>
                 ) : (
-                  <div className="h-7 w-7 rounded-full bg-white/10 animate-pulse ring-2 ring-white/20 relative z-10" />
+                  <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse ring-2 ring-white/20 relative z-10" />
                 )}
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
