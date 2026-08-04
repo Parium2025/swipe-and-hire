@@ -791,6 +791,16 @@ const AuthMobile = ({
                             Glömt lösenordet?
                           </button>
                         </div>
+
+                        <div className="text-center mt-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowResend(true)}
+                            className="text-sm text-white/80 no-underline hover:text-white"
+                          >
+                            Fick du inte bekräftelsemejlet?
+                          </button>
+                        </div>
                        
                          {showResetPassword && !resetPasswordSent && (
                           <div ref={resetSectionRef} className="mt-4 p-3 rounded-lg text-center">
