@@ -1305,25 +1305,51 @@ const AuthMobile = ({
                 {showResend && (
                   <div className="mt-4 p-4 bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-lg text-center">
                     <p className="text-sm mb-1 text-white font-semibold">
-                      {isLogin ? "Verifiera din e-post innan du kan logga in" : "Kolla din e-post för bekräftelselänk"}
+                      {isLogin ? "Fick du inte bekräftelsemejlet?" : "Kolla din e-post för bekräftelselänk"}
                     </p>
                     {isLogin && (
                       <p className="text-sm mb-3 text-white">
-                        Ditt konto är skapat men inte bekräftat. Klicka på länken i bekräftelsemailet, sedan kan du logga in.
+                        Du behöver inte registrera dig igen. Ange din e-postadress så skickar vi en ny bekräftelselänk.
                       </p>
                     )}
-                    <div className="text-sm text-primary-foreground/80 bg-primary/10 p-2 rounded border-l-4 border-primary mb-3 mt-3">
+                    <div className="text-left mb-3">
+                      <Label htmlFor="resend-email" className="text-white text-sm">
+                        <Mail className="h-4 w-4 inline mr-2" />
+                        E-post
+                      </Label>
+                      <Input
+                        id="resend-email"
+                        type="email"
+                        value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
+                        onChange={(e) => handleEmailChange(e.target.value)}
+                        required
+                        placeholder="din@epost.se"
+                        className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
+                      />
+                    </div>
+                    <div className="text-sm text-primary-foreground/80 bg-primary/10 p-2 rounded border-l-4 border-primary mb-3">
                       <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                     </div>
                     <Button
                       variant="glass"
                       size="sm"
-                      onClick={handleResendConfirmation}
+                      onClick={() => {
+                        const email = role === 'job_seeker' ? jobSeekerData.email : employerData.email;
+                        if (!email.trim()) {
+                          toast({
+                            title: "E-post saknas",
+                            description: "Ange din e-postadress för att skicka ett nytt bekräftelsemejl.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        handleResendConfirmation();
+                      }}
                       disabled={resendLoading}
                       onMouseDown={(e) => e.preventDefault()}
                       className="min-h-[44px]"
                     >
-                      {resendLoading ? "Skickar..." : "Skicka igen"}
+                      {resendLoading ? "Skickar..." : "Skicka nytt bekräftelsemejl"}
                     </Button>
                   </div>
                 )}
