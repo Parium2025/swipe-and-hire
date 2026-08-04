@@ -25,7 +25,9 @@ const typeColors: Record<string, string> = {
   message: 'text-white',
   job_expired: 'text-white',
   saved_search_match: 'text-white',
+  candidate_deleted: 'text-white',
 };
+
 
 function NotificationItem({ 
   notification, 
