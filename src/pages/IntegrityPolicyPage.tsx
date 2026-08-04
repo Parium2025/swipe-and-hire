@@ -354,6 +354,13 @@ export default function IntegrityPolicyPage() {
                   automatiskt 24 månader efter att ansökan skickades.
                 </li>
                 <li>
+                  <strong>Jobbannonser:</strong> sparas så länge arbetsgivarens konto
+                  är aktivt, även efter att annonsen gått ut. En raderad annons tas
+                  bort permanent 90 dagar efter raderingen. Avslutas arbetsgivarens
+                  konto raderas alla annonser direkt.
+                </li>
+
+                <li>
                   <strong>Notiser:</strong> 6 månader.{' '}
                   <strong>Visningsstatistik</strong> (vem som sett en annons eller
                   profil): 12 månader.

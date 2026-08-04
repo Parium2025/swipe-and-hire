@@ -89,15 +89,13 @@ export const RemovedApplicantsBadge = memo(({ count }: RemovedApplicantsInfoProp
         className="max-w-[270px] px-3 py-2 leading-relaxed"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="font-medium">Kandidat borttagen</p>
+        <p className="font-medium">Kandidat borttagen:</p>
         <p className="mt-1">
           {count === 1
-            ? 'En kandidat har raderat sitt konto, eller fått det automatiskt raderat efter lång inaktivitet. En ansökan har tagits bort från den här annonsen.'
-            : `${count} kandidater har raderat sina konton, eller fått dem automatiskt raderade efter lång inaktivitet. ${count} ansökningar har tagits bort från den här annonsen.`}
+            ? 'En kandidat har raderat sitt konto, eller fått det automatiskt raderat efter lång inaktivitet. En kandidat har tagits bort från den här annonsen.'
+            : `${count} kandidater har raderat sina konton, eller fått dem automatiskt raderade efter lång inaktivitet. ${count} kandidater har tagits bort från den här annonsen.`}
         </p>
-        <p className="mt-1.5">
-          Informationen är helt anonym och syns för alla som har tillgång till annonsen.
-        </p>
+
       </TooltipContent>
     </Tooltip>
   );
