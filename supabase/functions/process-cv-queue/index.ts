@@ -15,7 +15,8 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-  const authResp = await requireAuthenticated(req, corsHeaders);
+  // Internt batchjobb: endast pg_cron / service-role får trigga AI-kostnader.
+  const authResp = await requireServiceRoleOrCronSecret(req, corsHeaders);
   if (authResp) return authResp;
 
 
