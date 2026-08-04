@@ -33,7 +33,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
   const [deleting, setDeleting] = useState(false);
 
   const handleDeleteAccount = async () => {
-    if (confirmText.trim().toUpperCase() !== 'RADERA') return;
+    if (confirmText !== 'RADERA') return;
     setDeleting(true);
     try {
       const { data, error } = await supabase.functions.invoke('delete-my-account', {
@@ -201,7 +201,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
 
           <Input
             value={confirmText}
-            onChange={(e) => setConfirmText(e.target.value)}
+            onChange={(e) => setConfirmText(e.target.value.replace(/\s/g, ''))}
             placeholder="RADERA"
             autoComplete="off"
             className="w-full h-11 !min-h-0 rounded-md bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm placeholder:text-white/60 focus:border-white/40 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -217,7 +217,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); handleDeleteAccount(); }}
-              disabled={deleting || confirmText.trim().toUpperCase() !== 'RADERA'}
+              disabled={deleting || confirmText !== 'RADERA'}
               className="w-full sm:w-auto h-10 px-5 rounded-full text-sm border-0 !bg-red-500/80 !text-white !transition-none hover:!bg-red-500/80 hover:!text-white md:hover:!bg-red-500/80 md:hover:!text-white active:!bg-red-500/80 active:!text-white active:!scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               {deleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
