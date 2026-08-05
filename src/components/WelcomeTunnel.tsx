@@ -207,6 +207,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // OBS: körs om när användar-id blir känt, eftersom nyckeln är scopad per användare
   // (annars hittades aldrig det sparade utkastet efter en omladdning).
   const appliedSavedAtRef = useRef(0);
+  const latestDraftRef = useRef<TunnelDraft | null>(null);
   useEffect(() => {
     let cancelled = false;
     const MAX_AGE = 7 * 24 * 60 * 60 * 1000;
