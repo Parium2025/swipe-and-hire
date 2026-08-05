@@ -1,1 +1,0 @@
-delete from public.rate_limits where bucket_key ilike '%resend-confirmation%';
