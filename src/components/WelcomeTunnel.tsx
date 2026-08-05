@@ -117,26 +117,64 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
 
+  // 🔒 Textfält sparas i sessionStorage (samma flik = överlever refresh, rensas när fliken stängs)
+  const WELCOME_TEXT_KEY = 'parium_welcome_text_draft';
+
+  const getTextDraft = (): Record<string, any> | null => {
+    try {
+      const stored = sessionStorage.getItem(WELCOME_TEXT_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const clearTextDraft = () => {
+    try {
+      sessionStorage.removeItem(WELCOME_TEXT_KEY);
+    } catch {
+      /* noop */
+    }
+  };
+
   // Form data
-  const [formData, setFormData] = useState({
-    firstName: profile?.first_name || '',
-    lastName: profile?.last_name || '',
-    email: user?.email || '',
-    bio: profile?.bio || '',
-    location: profile?.location || '',
-    phone: profile?.phone || '',
-    birthDate: profile?.birth_date || '',
-    employmentStatus: (profile as any)?.employment_type || '', // Fixed: employment_type not employment_status
-    workingHours: (profile as any)?.work_schedule || '', // Fixed: work_schedule not working_hours
-    availability: (profile as any)?.availability || '', // Tillgänglighet
-    profileImageUrl: profile?.profile_image_url || '',
-    profileMediaType: 'image', // 'image' or 'video'
-    coverImageUrl: '', // Cover image for videos
-    cvUrl: '',
-    cvFileName: '',
-    interests: [] as string[],
-    consentGiven: true // Samtycke lämnas redan vid kontoskapandet
+  const [formData, setFormData] = useState(() => {
+    const draft = getTextDraft();
+    const base = {
+      firstName: profile?.first_name || '',
+      lastName: profile?.last_name || '',
+      email: user?.email || '',
+      bio: profile?.bio || '',
+      location: profile?.location || '',
+      phone: profile?.phone || '',
+      birthDate: profile?.birth_date || '',
+      employmentStatus: (profile as any)?.employment_type || '', // Fixed: employment_type not employment_status
+      workingHours: (profile as any)?.work_schedule || '', // Fixed: work_schedule not working_hours
+      availability: (profile as any)?.availability || '', // Tillgänglighet
+      profileImageUrl: profile?.profile_image_url || '',
+      profileMediaType: 'image', // 'image' or 'video'
+      coverImageUrl: '', // Cover image for videos
+      cvUrl: '',
+      cvFileName: '',
+      interests: [] as string[],
+      consentGiven: true // Samtycke lämnas redan vid kontoskapandet
+    };
+    if (!draft) return base;
+    return {
+      ...base,
+      firstName: draft.firstName ?? base.firstName,
+      lastName: draft.lastName ?? base.lastName,
+      bio: draft.bio ?? base.bio,
+      location: draft.location ?? base.location,
+      phone: draft.phone ?? base.phone,
+      birthDate: draft.birthDate ?? base.birthDate,
+      employmentStatus: draft.employmentStatus ?? base.employmentStatus,
+      workingHours: draft.workingHours ?? base.workingHours,
+      availability: draft.availability ?? base.availability,
+      interests: Array.isArray(draft.interests) ? draft.interests : base.interests,
+    };
   });
+
   // Update form data when profile/user loads (for pre-filled registration data)
   useEffect(() => {
     if (profile || user) {
