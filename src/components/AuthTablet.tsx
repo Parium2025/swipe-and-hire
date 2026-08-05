@@ -257,7 +257,7 @@ const AuthTablet = ({
     e.preventDefault();
     
     // Förhindra submit om användaren redan har registrerat sig
-    if (hasRegistered) {
+    if (hasRegistered && !isLogin) {
       return;
     }
     
@@ -719,7 +719,7 @@ const AuthTablet = ({
                       </label>
                       
                        <Button type="submit" variant="glass" className="w-full" disabled={loading} onMouseDown={(e) => e.preventDefault()}>
-                         Logga in
+                         {loading ? "Loggar in..." : "Logga in"}
                        </Button>
                        
                         <div className="text-center mt-3">

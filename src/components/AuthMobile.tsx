@@ -306,7 +306,7 @@ const AuthMobile = ({
     e.preventDefault();
     
     // Förhindra submit om användaren redan har registrerat sig
-    if (hasRegistered) {
+    if (hasRegistered && !isLogin) {
       return;
     }
     
@@ -796,7 +796,7 @@ const AuthMobile = ({
                       </label>
                       
                        <Button type="submit" variant="glass" className="w-full min-h-[44px]" disabled={loading} onMouseDown={(e) => e.preventDefault()}>
-                         Logga in
+                         {loading ? "Loggar in..." : "Logga in"}
                        </Button>
                        
                         <div className="text-center mt-3">
