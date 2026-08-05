@@ -66,6 +66,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
   }, [currentStep]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redirectState, setRedirectState] = useState<'idle' | 'checking' | 'already_completed'>('idle');
+
+
   // 🔒 Säkerhetsventil: om profilen redan är färdigställd på annan enhet/flik,
   // omdirigera med tydlig UI så gammal flik inte skriver över eller konkurrerar med ny data.
   const isRedirectingRef = useRef(false);
