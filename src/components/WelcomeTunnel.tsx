@@ -179,6 +179,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // ☁️ Utkastet sparas både lokalt (snabbt) och i molnet (följer med mellan enheter).
   // Skrivningarna debounce:as så vi inte skriver vid varje tangenttryck.
   const draftHydratedRef = useRef(false);
+  const [hydratedScope, setHydratedScope] = useState<string | null>(null);
   const cloudSaveRef = useRef(
     debounce((draft: TunnelDraft) => {
       void saveTunnelDraft(draft);
@@ -212,6 +213,19 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     let cancelled = false;
     const MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
+    // Vänta på den riktiga auth-identiteten. Annars hinner de förifyllda
+    // registreringsfälten skapa ett nytt "anon"-utkast som är nyare än och
+    // skriver över användarens riktiga utkast vid en refresh.
+    if (!user?.id) {
+      draftHydratedRef.current = false;
+      setHydratedScope(null);
+      return;
+    }
+
+    draftHydratedRef.current = false;
+    setHydratedScope(null);
+    appliedSavedAtRef.current = 0;
+
     try {
       // Städa bort gamla, icke scopade nycklar (kunde delas mellan konton på samma enhet)
       localStorage.removeItem('parium_draft_welcome-tunnel');
@@ -236,6 +250,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     // VIKTIGT: markera utkastet som hydrerat direkt efter lokal återställning
     // så att användarens fortsatta ifyllning sparas omedelbart, även innan molnet svarar.
     draftHydratedRef.current = true;
+    setHydratedScope(storageScope);
 
     (async () => {
       try {
@@ -257,7 +272,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     return () => {
       cancelled = true;
     };
-  }, [storageScope, WELCOME_DRAFT_KEY]);
+  }, [user?.id, storageScope, WELCOME_DRAFT_KEY]);
 
 
   // Flytta eventuellt användar-id-löst ("anon") utkast till användarens riktiga nyckel
@@ -300,7 +315,12 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                        formData.availability || formData.birthDate ||
                        postalCode;
 
-    if (!hasContent || !draftHydratedRef.current) return;
+    if (
+      !user?.id ||
+      !hasContent ||
+      !draftHydratedRef.current ||
+      hydratedScope !== storageScope
+    ) return;
 
     const draft: TunnelDraft = {
       formData,
@@ -320,7 +340,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
 
     cloudSaveRef.current(draft);
-  }, [formData, postalCode, userLocation, currentStep]);
+  }, [user?.id, hydratedScope, storageScope, WELCOME_DRAFT_KEY, formData, postalCode, userLocation, currentStep]);
 
   // ⏱️ Sista sekunden: om fliken stängs/döljs innan debouncen hunnit köra
   // skickas utkastet direkt till molnet, så att en annan enhet får med allt.
