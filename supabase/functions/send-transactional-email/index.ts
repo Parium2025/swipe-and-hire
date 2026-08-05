@@ -303,6 +303,8 @@ Deno.serve(async (req) => {
       }
     )
   }
+  }
+
 
   // 4. Render React Email template to HTML and plain text
   const html = await renderAsync(
