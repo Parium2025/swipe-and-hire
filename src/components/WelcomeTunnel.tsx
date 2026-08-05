@@ -66,6 +66,53 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
   }, [currentStep]);
 
+  // 🔒 Säkerhetsventil: om profilen redan är färdigställd på annan enhet/flik,
+  // omdirigera direkt så gammal flik inte skriver över eller konkurrerar med ny data.
+  const isRedirectingRef = useRef(false);
+  const redirectIfCompleted = useCallback((reason: string) => {
+    if (isRedirectingRef.current) return;
+    isRedirectingRef.current = true;
+    try {
+      setLocalMediaState(null);
+      clearTextDraft();
+      sessionStorage.removeItem(WELCOME_STEP_KEY);
+    } catch {
+      /* noop */
+    }
+    toast({
+      title: "Profil redan färdig",
+      description: "Du har redan slutfört din profil. Vi dirigerar om dig."
+    });
+    console.log(`[WelcomeTunnel] redirectIfCompleted: ${reason}`);
+    onComplete();
+  }, [onComplete, toast]);
+
+  // Kontrollera direkt vid mount och när profilen laddas
+  useEffect(() => {
+    if (profile?.onboarding_completed) {
+      redirectIfCompleted('onboarding_completed on mount/profile load');
+    }
+  }, [profile?.onboarding_completed, redirectIfCompleted]);
+
+  // Kontrollera när fliken blir synlig igen (t.ex. användare gick till mobil och tillbaka)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && currentStep >= 1 && currentStep <= 6) {
+        refreshProfile().then(() => {
+          if (profile?.onboarding_completed) {
+            redirectIfCompleted('tab became visible, profile already completed');
+          }
+        }).catch((err) => {
+          console.warn('refreshProfile on visibility change failed:', err);
+        });
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [currentStep, refreshProfile, profile?.onboarding_completed, redirectIfCompleted]);
+
+
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
