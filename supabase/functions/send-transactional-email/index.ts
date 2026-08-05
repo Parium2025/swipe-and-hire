@@ -342,9 +342,10 @@ Deno.serve(async (req) => {
       subject: resolvedSubject,
       html,
       text: plainText,
-      // Servicemejl skickas som 'auth' — då kräver e-post-API:t ingen
-      // unsubscribe-token och lägger inte till någon avprenumerationsfot.
+      // Servicemejl skickas som 'auth' — då läggs ingen avprenumerationsfot till.
+      // OBS: auth-mejl kräver alltid ett run_id hos e-post-API:t.
       purpose: isEssential ? 'auth' : 'transactional',
+      ...(isEssential ? { run_id: crypto.randomUUID() } : {}),
       label: templateName,
       idempotency_key: idempotencyKey,
       ...(unsubscribeToken ? { unsubscribe_token: unsubscribeToken } : {}),
