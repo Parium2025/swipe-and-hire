@@ -218,6 +218,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // (annars hittades aldrig det sparade utkastet efter en omladdning).
   const appliedSavedAtRef = useRef(0);
   const latestDraftRef = useRef<TunnelDraft | null>(null);
+  const restoredDraftRef = useRef<TunnelDraft | null>(null);
   useEffect(() => {
     let cancelled = false;
     const MAX_AGE = 7 * 24 * 60 * 60 * 1000;
@@ -234,6 +235,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     draftHydratedRef.current = false;
     setHydratedScope(null);
     appliedSavedAtRef.current = 0;
+    restoredDraftRef.current = null;
 
     try {
       // Städa bort gamla, icke scopade nycklar (kunde delas mellan konton på samma enhet)
@@ -246,6 +248,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         if (savedAt && Date.now() - savedAt < MAX_AGE) {
           if (savedAt > appliedSavedAtRef.current) {
             appliedSavedAtRef.current = savedAt;
+            restoredDraftRef.current = parsed;
+            latestDraftRef.current = parsed;
             applyDraft(parsed);
           }
         } else {
@@ -271,6 +275,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
           cloud.savedAt > appliedSavedAtRef.current
         ) {
           appliedSavedAtRef.current = cloud.savedAt;
+          restoredDraftRef.current = cloud;
+          latestDraftRef.current = cloud;
           applyDraft(cloud);
         }
       } catch {
@@ -310,6 +316,23 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       !draftHydratedRef.current ||
       hydratedScope !== storageScope
     ) return;
+
+    // Vid hydrering uppdateras flera React-state samtidigt. Skydda mot en
+    // mellanrender där bara delar av det återställda utkastet hunnit slå igenom;
+    // en sådan render får aldrig skriva ett nyare men ofullständigt utkast som
+    // vinner vid nästa omladdning.
+    const restored = restoredDraftRef.current;
+    if (restored) {
+      const restoredForm = restored.formData ?? {};
+      const stateMatchesRestored = Object.entries(restoredForm).every(([key, value]) =>
+        (formData as Record<string, unknown>)[key] === value
+      ) &&
+        (restored.postalCode === undefined || restored.postalCode === postalCode) &&
+        (restored.userLocation === undefined || restored.userLocation === userLocation);
+
+      if (!stateMatchesRestored) return;
+      restoredDraftRef.current = null;
+    }
 
     const draft: TunnelDraft = {
       formData,
