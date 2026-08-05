@@ -1939,7 +1939,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
             {renderCvStep()}
           </div>
           {currentStep !== 3 && renderStep()}
+          {/* Extra scrollutrymme så dropdowns nära botten får plats */}
+          <div aria-hidden className="h-40 md:h-56" />
         </div>
+
       </div>
 
       {/* Navigation buttons – samma komponent/stil som jobbguiden */}
