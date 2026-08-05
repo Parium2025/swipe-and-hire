@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { debounce, loadTunnelDraft, saveTunnelDraft, clearTunnelDraft, type TunnelDraft } from '@/lib/onboardingState';
+import { useState, useEffect } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -54,11 +53,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const [cvPreloaded, setCvPreloaded] = useState(false);
   
   // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
-  // 🔐 Nycklarna scopas per användare — annars kan ett utkast med personuppgifter
-  // (namn, telefon, födelsedatum) läcka till nästa person som loggar in på samma enhet.
+  // Uppladdad media behålls inom den aktuella fliken tills profilen slutförs.
   const storageScope = user?.id ?? 'anon';
   const WELCOME_LOCAL_MEDIA_KEY = `parium_welcome_local_media_${storageScope}`;
-  const WELCOME_DRAFT_KEY = `parium_draft_welcome-tunnel_${storageScope}`;
   
   interface WelcomeLocalMediaState {
     profileImageUrl: string;
@@ -140,13 +137,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     interests: [] as string[],
     consentGiven: true // Samtycke lämnas redan vid kontoskapandet
   });
-  // När ett lokalt/molnsparat utkast finns ska senare profiluppdateringar aldrig
-  // skriva över det. Profilen är bara en initial grund när inget utkast finns.
-  const hasActiveDraftRef = useRef(false);
-  
   // Update form data when profile/user loads (for pre-filled registration data)
   useEffect(() => {
-    if (hasActiveDraftRef.current) return;
     if (profile || user) {
       setFormData(prev => ({
         ...prev,
@@ -171,7 +163,6 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   
   // Update postal code and location when profile loads
   useEffect(() => {
-    if (hasActiveDraftRef.current) return;
     if (profile) {
       if ((profile as any)?.postal_code) {
         setPostalCode(prev => prev || (profile as any).postal_code);
@@ -182,251 +173,6 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
   }, [profile]);
   
-  // ☁️ Utkastet sparas både lokalt (snabbt) och i molnet (följer med mellan enheter).
-  // Skrivningarna debounce:as så vi inte skriver vid varje tangenttryck.
-  const draftHydratedRef = useRef(false);
-  const [hydratedScope, setHydratedScope] = useState<string | null>(null);
-  const draftPersistenceEnabledRef = useRef(true);
-  const cloudSaveRef = useRef(
-    debounce(({ draft, ownerId }: { draft: TunnelDraft; ownerId: string }) => {
-      if (!draftPersistenceEnabledRef.current) return;
-      void saveTunnelDraft(draft, ownerId);
-    }, 1200)
-  );
-
-  const applyDraft = (parsed: TunnelDraft | null) => {
-    if (!parsed) return;
-    hasActiveDraftRef.current = true;
-    if (parsed.formData) {
-      setFormData(prev => ({
-        ...prev,
-        ...(parsed.formData as Record<string, unknown>),
-        // Don't override media URLs from profile
-        profileImageUrl: prev.profileImageUrl || (parsed.formData as any).profileImageUrl,
-      }));
-    }
-    if (typeof parsed.postalCode === 'string') setPostalCode(parsed.postalCode);
-    if (typeof parsed.userLocation === 'string') setUserLocation(parsed.userLocation);
-    // Återgå till samma steg som användaren var på (aldrig klar-steget)
-    if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 1 && parsed.currentStep <= 5) {
-      setCurrentStep(parsed.currentStep);
-    }
-  };
-
-  // Restore draft: lokalt först (direkt), därefter molnet om det är nyare.
-  // OBS: körs om när användar-id blir känt, eftersom nyckeln är scopad per användare
-  // (annars hittades aldrig det sparade utkastet efter en omladdning).
-  const appliedSavedAtRef = useRef(0);
-  const latestDraftRef = useRef<TunnelDraft | null>(null);
-  const restoredDraftRef = useRef<TunnelDraft | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    const MAX_AGE = 7 * 24 * 60 * 60 * 1000;
-
-    // Vänta på den riktiga auth-identiteten. Annars hinner de förifyllda
-    // registreringsfälten skapa ett nytt "anon"-utkast som är nyare än och
-    // skriver över användarens riktiga utkast vid en refresh.
-    if (!user?.id) {
-      draftHydratedRef.current = false;
-      setHydratedScope(null);
-      return;
-    }
-
-    draftHydratedRef.current = false;
-    setHydratedScope(null);
-    appliedSavedAtRef.current = 0;
-    restoredDraftRef.current = null;
-
-    try {
-      // Städa bort gamla, icke scopade nycklar (kunde delas mellan konton på samma enhet)
-      localStorage.removeItem('parium_draft_welcome-tunnel');
-      sessionStorage.removeItem('parium_welcome_local_media');
-      const savedDraft = localStorage.getItem(WELCOME_DRAFT_KEY);
-      if (savedDraft) {
-        const parsed = JSON.parse(savedDraft) as TunnelDraft;
-        const savedAt = parsed.savedAt ?? 0;
-        if (savedAt && Date.now() - savedAt < MAX_AGE) {
-          if (savedAt > appliedSavedAtRef.current) {
-            appliedSavedAtRef.current = savedAt;
-            restoredDraftRef.current = parsed;
-            latestDraftRef.current = parsed;
-            applyDraft(parsed);
-          }
-        } else {
-          localStorage.removeItem(WELCOME_DRAFT_KEY);
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to restore welcome tunnel draft');
-    }
-
-    // VIKTIGT: markera utkastet som hydrerat direkt efter lokal återställning
-    // så att användarens fortsatta ifyllning sparas omedelbart, även innan molnet svarar.
-    draftHydratedRef.current = true;
-    setHydratedScope(storageScope);
-
-    (async () => {
-      try {
-        const cloud = await loadTunnelDraft(user.id);
-        if (cancelled) return;
-        if (
-          cloud?.savedAt &&
-          Date.now() - cloud.savedAt < MAX_AGE &&
-          cloud.savedAt > appliedSavedAtRef.current
-        ) {
-          appliedSavedAtRef.current = cloud.savedAt;
-          restoredDraftRef.current = cloud;
-          latestDraftRef.current = cloud;
-          applyDraft(cloud);
-        }
-      } catch {
-        /* offline eller utloggad – lokalt utkast räcker */
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.id, storageScope, WELCOME_DRAFT_KEY]);
-
-
-  // Tunneln visas bara för inloggade användare. Ett äldre anonymt utkast får därför
-  // aldrig migreras över ett kontos eget utkast (det var orsaken till att tomma
-  // registreringsvärden kunde vinna efter refresh).
-  useEffect(() => {
-    if (!user?.id) return;
-    try {
-      localStorage.removeItem('parium_draft_welcome-tunnel_anon');
-    } catch {
-      /* localStorage kan vara blockerat */
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
-    // Check if there's meaningful content to save
-    const hasContent = formData.firstName.trim() || formData.lastName.trim() || 
-                       formData.bio.trim() || formData.phone.trim() ||
-                       formData.employmentStatus || formData.workingHours ||
-                       formData.availability || formData.birthDate ||
-                       postalCode;
-
-    if (
-      !user?.id ||
-      !hasContent ||
-      !draftHydratedRef.current ||
-      hydratedScope !== storageScope
-    ) return;
-
-    // Vid hydrering uppdateras flera React-state samtidigt. Skydda mot en
-    // mellanrender där bara delar av det återställda utkastet hunnit slå igenom;
-    // en sådan render får aldrig skriva ett nyare men ofullständigt utkast som
-    // vinner vid nästa omladdning.
-    const restored = restoredDraftRef.current;
-    if (restored) {
-      const restoredForm = restored.formData ?? {};
-      const mediaFields = new Set(['profileImageUrl', 'profileMediaType', 'coverImageUrl', 'cvUrl', 'cvFileName']);
-      const stateMatchesRestored = Object.entries(restoredForm).every(([key, value]) =>
-        mediaFields.has(key) ||
-        (formData as Record<string, unknown>)[key] === value
-      ) &&
-        (restored.postalCode === undefined || restored.postalCode === postalCode) &&
-        (restored.userLocation === undefined || restored.userLocation === userLocation) &&
-        (restored.currentStep === undefined || restored.currentStep === currentStep);
-
-      if (!stateMatchesRestored) return;
-      restoredDraftRef.current = null;
-      // Detta var bara en återställning, inte en användarändring. Behåll originalets
-      // tidsstämpel och skriv inte om lokal-/molnutkastet förrän något faktiskt ändras.
-      return;
-    }
-
-    const draft: TunnelDraft = {
-      formData,
-      postalCode,
-      userLocation,
-      currentStep,
-      savedAt: Date.now(),
-    };
-    hasActiveDraftRef.current = true;
-    // Markera senaste sparade tidsstämpel så att en senare återställning
-    // (t.ex. när användar-id blir känt) aldrig skriver över färsk ifyllning.
-    appliedSavedAtRef.current = draft.savedAt;
-    latestDraftRef.current = draft;
-    try {
-      localStorage.setItem(WELCOME_DRAFT_KEY, JSON.stringify(draft));
-    } catch (e) {
-      console.warn('Failed to save welcome tunnel draft');
-    }
-
-    cloudSaveRef.current({ draft, ownerId: user.id });
-  }, [user?.id, hydratedScope, storageScope, WELCOME_DRAFT_KEY, formData, postalCode, userLocation, currentStep]);
-
-  // ⏱️ Sista sekunden: om fliken stängs/döljs innan debouncen hunnit köra
-  // skickas utkastet direkt till molnet, så att en annan enhet får med allt.
-  useEffect(() => {
-    const flush = () => {
-      if (!draftPersistenceEnabledRef.current) return;
-      const draft = latestDraftRef.current;
-      if (!draft || !user?.id) return;
-      void saveTunnelDraft(draft, user.id);
-    };
-    const onVisibility = () => {
-      if (document.visibilityState === 'hidden') flush();
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('pagehide', flush);
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('pagehide', flush);
-    };
-  }, [user?.id]);
-
-  
-  // Clear draft helper
-  const clearWelcomeDraft = () => {
-    // Stoppa både väntande debounce och pagehide-flush från att återskapa ett
-    // utkast efter att profilen har sparats färdigt.
-    draftPersistenceEnabledRef.current = false;
-    latestDraftRef.current = null;
-    try {
-      localStorage.removeItem(WELCOME_DRAFT_KEY);
-    } catch (e) {
-      console.warn('Failed to clear welcome draft');
-    }
-    void clearTunnelDraft(user?.id);
-  };
-
-  // 🔁 Enhetsbyte: om tunneln slutfördes på en annan enhet ska den här fliken
-  // upptäcka det när den återfår fokus – annars kan gammal data skrivas över profilen.
-  useEffect(() => {
-    if (previewMode) return;
-    const check = () => {
-      if (document.visibilityState !== 'visible') return;
-      void refreshProfile();
-    };
-    window.addEventListener('focus', check);
-    document.addEventListener('visibilitychange', check);
-    return () => {
-      window.removeEventListener('focus', check);
-      document.removeEventListener('visibilitychange', check);
-    };
-  }, [previewMode, refreshProfile]);
-
-  // Om profilen nu är markerad som klar (t.ex. slutförd på mobilen) – släng
-  // det lokala utkastet så att det aldrig kan återuppstå på den här enheten.
-  useEffect(() => {
-    if (previewMode) return;
-    if (!(profile as any)?.onboarding_completed) return;
-    draftPersistenceEnabledRef.current = false;
-    latestDraftRef.current = null;
-    try {
-      localStorage.removeItem(WELCOME_DRAFT_KEY);
-      sessionStorage.removeItem(WELCOME_LOCAL_MEDIA_KEY);
-    } catch { /* ignorera */ }
-  }, [previewMode, (profile as any)?.onboarding_completed, WELCOME_DRAFT_KEY, WELCOME_LOCAL_MEDIA_KEY]);
-
-
- 
   // Use mediaUrl hooks for signed URLs
   const signedProfileImageUrl = useMediaUrl(
     formData.profileImageUrl, 
@@ -1155,13 +901,16 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         return;
       }
 
+      if (!user?.id) {
+        throw new Error('Not authenticated');
+      }
 
       // First, save consent
       if (formData.consentGiven) {
         const { error: consentError } = await supabase
           .from('user_data_consents')
           .upsert({
-            user_id: user?.id,
+            user_id: user.id,
             consent_given: true,
             consent_date: new Date().toISOString(),
           }, {
@@ -1203,7 +952,6 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       
       setCurrentStep(totalSteps - 1); // Go to completion step
       setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
-      clearWelcomeDraft(); // Clear localStorage draft after successful save
 
       setTimeout(() => {
         toast({
