@@ -308,11 +308,15 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       currentStep,
       savedAt: Date.now(),
     };
+    // Markera senaste sparade tidsstämpel så att en senare återställning
+    // (t.ex. när användar-id blir känt) aldrig skriver över färsk ifyllning.
+    appliedSavedAtRef.current = draft.savedAt;
     try {
       localStorage.setItem(WELCOME_DRAFT_KEY, JSON.stringify(draft));
     } catch (e) {
       console.warn('Failed to save welcome tunnel draft');
     }
+
     cloudSaveRef.current(draft);
   }, [formData, postalCode, userLocation, currentStep]);
   
