@@ -1059,6 +1059,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       setCurrentStep(totalSteps - 1); // Go to completion step
       setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
       clearTextDraft(); // 🔒 Rensa textutkastet efter lyckad sparning
+      try { sessionStorage.removeItem(WELCOME_STEP_KEY); } catch { /* noop */ }
+
 
 
       setTimeout(() => {
