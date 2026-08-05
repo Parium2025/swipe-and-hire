@@ -330,10 +330,14 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         (formData as Record<string, unknown>)[key] === value
       ) &&
         (restored.postalCode === undefined || restored.postalCode === postalCode) &&
-        (restored.userLocation === undefined || restored.userLocation === userLocation);
+        (restored.userLocation === undefined || restored.userLocation === userLocation) &&
+        (restored.currentStep === undefined || restored.currentStep === currentStep);
 
       if (!stateMatchesRestored) return;
       restoredDraftRef.current = null;
+      // Detta var bara en återställning, inte en användarändring. Behåll originalets
+      // tidsstämpel och skriv inte om lokal-/molnutkastet förrän något faktiskt ändras.
+      return;
     }
 
     const draft: TunnelDraft = {
