@@ -43,8 +43,8 @@ async function currentUserId(): Promise<string | null> {
   }
 }
 
-async function fetchRow(): Promise<OnboardingRow | null> {
-  const userId = await currentUserId();
+async function fetchRow(expectedUserId?: string): Promise<OnboardingRow | null> {
+  const userId = expectedUserId ?? await currentUserId();
   if (!userId) return null;
   const { data, error } = await supabase
     .from('user_onboarding_state')
@@ -55,8 +55,8 @@ async function fetchRow(): Promise<OnboardingRow | null> {
   return (data as OnboardingRow) ?? null;
 }
 
-async function upsert(patch: Partial<OnboardingRow>): Promise<boolean> {
-  const userId = await currentUserId();
+async function upsert(patch: Partial<OnboardingRow>, expectedUserId?: string): Promise<boolean> {
+  const userId = expectedUserId ?? await currentUserId();
   if (!userId) return false;
   const { error } = await supabase
     .from('user_onboarding_state')
@@ -66,17 +66,17 @@ async function upsert(patch: Partial<OnboardingRow>): Promise<boolean> {
 
 /* ── Tunnelutkast ─────────────────────────────────────────────── */
 
-export async function loadTunnelDraft(): Promise<TunnelDraft | null> {
-  const row = await fetchRow();
+export async function loadTunnelDraft(expectedUserId?: string): Promise<TunnelDraft | null> {
+  const row = await fetchRow(expectedUserId);
   return row?.tunnel_draft ?? null;
 }
 
-export async function saveTunnelDraft(draft: TunnelDraft): Promise<boolean> {
-  return upsert({ tunnel_draft: draft });
+export async function saveTunnelDraft(draft: TunnelDraft, expectedUserId?: string): Promise<boolean> {
+  return upsert({ tunnel_draft: draft }, expectedUserId);
 }
 
-export async function clearTunnelDraft(): Promise<boolean> {
-  return upsert({ tunnel_draft: null });
+export async function clearTunnelDraft(expectedUserId?: string): Promise<boolean> {
+  return upsert({ tunnel_draft: null }, expectedUserId);
 }
 
 /* ── Sidtips ──────────────────────────────────────────────────── */

@@ -187,9 +187,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const [hydratedScope, setHydratedScope] = useState<string | null>(null);
   const draftPersistenceEnabledRef = useRef(true);
   const cloudSaveRef = useRef(
-    debounce((draft: TunnelDraft) => {
+    debounce(({ draft, ownerId }: { draft: TunnelDraft; ownerId: string }) => {
       if (!draftPersistenceEnabledRef.current) return;
-      void saveTunnelDraft(draft);
+      void saveTunnelDraft(draft, ownerId);
     }, 1200)
   );
 
@@ -262,7 +262,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
 
     (async () => {
       try {
-        const cloud = await loadTunnelDraft();
+        const cloud = await loadTunnelDraft(user.id);
         if (cancelled) return;
         if (
           cloud?.savedAt &&
@@ -328,7 +328,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       console.warn('Failed to save welcome tunnel draft');
     }
 
-    cloudSaveRef.current(draft);
+    cloudSaveRef.current({ draft, ownerId: user.id });
   }, [user?.id, hydratedScope, storageScope, WELCOME_DRAFT_KEY, formData, postalCode, userLocation, currentStep]);
 
   // ⏱️ Sista sekunden: om fliken stängs/döljs innan debouncen hunnit köra
@@ -337,8 +337,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     const flush = () => {
       if (!draftPersistenceEnabledRef.current) return;
       const draft = latestDraftRef.current;
-      if (!draft) return;
-      void saveTunnelDraft(draft);
+      if (!draft || !user?.id) return;
+      void saveTunnelDraft(draft, user.id);
     };
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') flush();
@@ -349,7 +349,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pagehide', flush);
     };
-  }, []);
+  }, [user?.id]);
 
   
   // Clear draft helper
@@ -363,7 +363,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     } catch (e) {
       console.warn('Failed to clear welcome draft');
     }
-    void clearTunnelDraft();
+    void clearTunnelDraft(user?.id);
   };
 
   // 🔁 Enhetsbyte: om tunneln slutfördes på en annan enhet ska den här fliken
