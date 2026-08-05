@@ -275,37 +275,17 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   }, [user?.id, storageScope, WELCOME_DRAFT_KEY]);
 
 
-  // Flytta eventuellt användar-id-löst ("anon") utkast till användarens riktiga nyckel
-  // så snart användar-id:t är känt. Detta hindrar att påbörjat utkast "försvinner" om
-  // komponenten renderar innan auth-sessionen är färdigladdad.
-  const migratedAnonDraftRef = useRef(false);
+  // Tunneln visas bara för inloggade användare. Ett äldre anonymt utkast får därför
+  // aldrig migreras över ett kontos eget utkast (det var orsaken till att tomma
+  // registreringsvärden kunde vinna efter refresh).
   useEffect(() => {
-    if (!user?.id || migratedAnonDraftRef.current) return;
-    if (storageScope === 'anon') return;
-
-    migratedAnonDraftRef.current = true;
-    const anonKey = 'parium_draft_welcome-tunnel_anon';
-    const userKey = WELCOME_DRAFT_KEY;
-    if (anonKey === userKey) return;
-
+    if (!user?.id) return;
     try {
-      const anonRaw = localStorage.getItem(anonKey);
-      if (!anonRaw) return;
-      const anonDraft = JSON.parse(anonRaw) as TunnelDraft;
-      const userRaw = localStorage.getItem(userKey);
-      const userDraft = userRaw ? (JSON.parse(userRaw) as TunnelDraft) : null;
-      const anonSavedAt = anonDraft.savedAt ?? 0;
-      const userSavedAt = userDraft?.savedAt ?? 0;
-
-      if (anonSavedAt > userSavedAt) {
-        localStorage.setItem(userKey, anonRaw);
-        applyDraft(anonDraft);
-      }
-      localStorage.removeItem(anonKey);
-    } catch (e) {
-      console.warn('Failed to migrate anonymous welcome draft');
+      localStorage.removeItem('parium_draft_welcome-tunnel_anon');
+    } catch {
+      /* localStorage kan vara blockerat */
     }
-  }, [user?.id, storageScope, WELCOME_DRAFT_KEY]);
+  }, [user?.id]);
 
   useEffect(() => {
     // Check if there's meaningful content to save
