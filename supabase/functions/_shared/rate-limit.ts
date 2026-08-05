@@ -7,6 +7,8 @@ interface LimitRule {
   identifier: string;
   limit: number;
   windowSeconds: number;
+  /** Klartext-meddelande som visas för användaren när gränsen nås. */
+  message?: string;
 }
 
 export function normalizeEmail(value: string | null | undefined): string {
