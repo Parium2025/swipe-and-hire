@@ -1634,7 +1634,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: { email }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Edge Functions returnerar generiskt "non-2xx"-fel – läs ut serverns riktiga meddelande.
+        let serverMessage = '';
+        try {
+          const ctx: any = (error as any).context;
+          if (ctx && typeof ctx.json === 'function') {
+            const body = await ctx.clone().json();
+            serverMessage = body?.error || body?.message || '';
+          }
+        } catch {
+          // ignorera parse-fel
+        }
+        throw new Error(serverMessage || error.message);
+      }
+
+      // Kontot är redan bekräftat – inget mejl skickas.
+      if (data && data.alreadyConfirmed) {
+        toast({
+          title: "Kontot är redan bekräftat",
+          description: "Du kan logga in direkt med din e-post och ditt lösenord.",
+          duration: 8000
+        });
+        return { success: true, alreadyConfirmed: true };
+      }
 
       toast({
         title: "Ny bekräftelselänk skickad!",
@@ -1648,8 +1671,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       let errorMessage = error.message || "Ett fel inträffade. Försök igen.";
       
-      if (errorMessage.includes("Email rate limit")) {
-        errorMessage = "För många e-postförfrågningar. Vänta en stund innan du försöker igen.";
+      if (errorMessage.includes("Email rate limit") || errorMessage.includes("För många")) {
+        errorMessage = "För många försök. Vänta en stund innan du försöker igen.";
       } else if (errorMessage.includes("User not found")) {
         errorMessage = "Ingen användare hittades med denna e-postadress.";
       }
@@ -1663,6 +1686,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error };
     }
   };
+
 
   const resetPassword = async (email: string) => {
     try {
