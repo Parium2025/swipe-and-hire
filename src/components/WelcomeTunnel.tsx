@@ -38,7 +38,7 @@ interface WelcomeTunnelProps {
 }
 
 const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: WelcomeTunnelProps) => {
-  const { profile, updateProfile, user, signOut } = useAuth();
+  const { profile, updateProfile, user, signOut, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(
     typeof initialStep === 'number' ? initialStep : 1
