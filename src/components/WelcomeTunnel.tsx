@@ -36,12 +36,36 @@ interface WelcomeTunnelProps {
   previewMode?: boolean;
 }
 
+const WELCOME_STEP_KEY = 'parium_welcome_step';
+
 const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: WelcomeTunnelProps) => {
   const { profile, updateProfile, user, signOut } = useAuth();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(
-    typeof initialStep === 'number' ? initialStep : 1
-  ); // Intro/SwipeIntro borttagen – vi startar direkt på uppgifterna
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (typeof initialStep === 'number') return initialStep;
+    try {
+      const stored = Number(sessionStorage.getItem(WELCOME_STEP_KEY));
+      // Återuppta bara på ett synligt ifyllnadssteg (1–6)
+      if (Number.isFinite(stored) && stored >= 1 && stored <= 6) return stored;
+    } catch {
+      /* noop */
+    }
+    return 1;
+  }); // Intro/SwipeIntro borttagen – vi startar direkt på uppgifterna
+
+  // 🔒 Kom ihåg vilket steg användaren är på vid refresh (samma flik)
+  useEffect(() => {
+    try {
+      if (currentStep >= 1 && currentStep <= 6) {
+        sessionStorage.setItem(WELCOME_STEP_KEY, String(currentStep));
+      } else {
+        sessionStorage.removeItem(WELCOME_STEP_KEY);
+      }
+    } catch {
+      /* noop */
+    }
+  }, [currentStep]);
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
@@ -1035,6 +1059,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       setCurrentStep(totalSteps - 1); // Go to completion step
       setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
       clearTextDraft(); // 🔒 Rensa textutkastet efter lyckad sparning
+      try { sessionStorage.removeItem(WELCOME_STEP_KEY); } catch { /* noop */ }
+
 
 
       setTimeout(() => {
