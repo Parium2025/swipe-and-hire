@@ -12,6 +12,8 @@ project_id = "jrjaegapuujushsiofoi"
     verify_jwt = false
   [functions.cleanup-all-users]
     verify_jwt = false
+  [functions.cleanup-old-job-images]
+    verify_jwt = true
   [functions.confirm-email]
     verify_jwt = false
   [functions.custom-signup]
