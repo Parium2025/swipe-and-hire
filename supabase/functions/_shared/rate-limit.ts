@@ -7,6 +7,8 @@ interface LimitRule {
   identifier: string;
   limit: number;
   windowSeconds: number;
+  /** Klartext-meddelande som visas för användaren när gränsen nås. */
+  message?: string;
 }
 
 export function normalizeEmail(value: string | null | undefined): string {
@@ -56,8 +58,12 @@ export async function enforceRateLimit(
     }
 
     if (data !== true) {
+      const minutes = Math.max(1, Math.round(rule.windowSeconds / 60));
+      const fallback =
+        `Du har gjort för många försök. Av säkerhetsskäl tillåter vi max ${rule.limit} försök per ${minutes} minuter. ` +
+        `Vänta en stund och försök igen – ditt konto är helt opåverkat.`;
       return new Response(
-        JSON.stringify({ error: "För många försök. Vänta en stund och försök igen." }),
+        JSON.stringify({ error: rule.message || fallback }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(rule.windowSeconds) } },
       );
     }
