@@ -187,10 +187,12 @@ Deno.serve(async (req) => {
     )
   }
 
-  // 3. Get or create unsubscribe token (one token per email address)
+  // 3. Unsubscribe-token — hoppas helt över för servicemejl (de får ingen fot).
+  const isEssential = ESSENTIAL_TEMPLATES.has(templateName)
   const normalizedEmail = effectiveRecipient.toLowerCase()
-  let unsubscribeToken: string
+  let unsubscribeToken: string | undefined
 
+  if (!isEssential) {
   // Check for existing token for this email
   const { data: existingToken, error: tokenLookupError } = await supabase
     .from('email_unsubscribe_tokens')
