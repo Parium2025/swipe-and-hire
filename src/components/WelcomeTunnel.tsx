@@ -324,7 +324,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     const restored = restoredDraftRef.current;
     if (restored) {
       const restoredForm = restored.formData ?? {};
+      const mediaFields = new Set(['profileImageUrl', 'profileMediaType', 'coverImageUrl', 'cvUrl', 'cvFileName']);
       const stateMatchesRestored = Object.entries(restoredForm).every(([key, value]) =>
+        mediaFields.has(key) ||
         (formData as Record<string, unknown>)[key] === value
       ) &&
         (restored.postalCode === undefined || restored.postalCode === postalCode) &&
