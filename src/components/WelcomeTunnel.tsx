@@ -115,6 +115,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
 
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redirectState, setRedirectState] = useState<'idle' | 'checking' | 'already_completed'>('idle');
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
