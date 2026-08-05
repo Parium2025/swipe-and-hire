@@ -187,10 +187,12 @@ Deno.serve(async (req) => {
     )
   }
 
-  // 3. Get or create unsubscribe token (one token per email address)
+  // 3. Unsubscribe-token — hoppas helt över för servicemejl (de får ingen fot).
+  const isEssential = ESSENTIAL_TEMPLATES.has(templateName)
   const normalizedEmail = effectiveRecipient.toLowerCase()
-  let unsubscribeToken: string
+  let unsubscribeToken: string | undefined
 
+  if (!isEssential) {
   // Check for existing token for this email
   const { data: existingToken, error: tokenLookupError } = await supabase
     .from('email_unsubscribe_tokens')
@@ -301,6 +303,8 @@ Deno.serve(async (req) => {
       }
     )
   }
+  }
+
 
   // 4. Render React Email template to HTML and plain text
   const html = await renderAsync(
@@ -338,13 +342,13 @@ Deno.serve(async (req) => {
       subject: resolvedSubject,
       html,
       text: plainText,
-      purpose: 'transactional',
+      // Servicemejl skickas som 'auth' — då kräver e-post-API:t ingen
+      // unsubscribe-token och lägger inte till någon avprenumerationsfot.
+      purpose: isEssential ? 'auth' : 'transactional',
       label: templateName,
       idempotency_key: idempotencyKey,
-      // E-post-API:t kräver en unsubscribe-token för alla transaktionsmejl
-      // (utan den avvisas sändningen med 400 missing_unsubscribe). Tokenen är
-      // alltid med — foten är obligatorisk för denna sändningsväg.
-      unsubscribe_token: unsubscribeToken,
+      ...(unsubscribeToken ? { unsubscribe_token: unsubscribeToken } : {}),
+
 
 
       queued_at: new Date().toISOString(),
