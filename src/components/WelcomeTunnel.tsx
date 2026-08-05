@@ -128,7 +128,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     bio: profile?.bio || '',
     location: profile?.location || '',
     phone: profile?.phone || '',
-    birthDate: '',
+    birthDate: profile?.birth_date || '',
     employmentStatus: (profile as any)?.employment_type || '', // Fixed: employment_type not employment_status
     workingHours: (profile as any)?.work_schedule || '', // Fixed: work_schedule not working_hours
     availability: (profile as any)?.availability || '', // Tillgänglighet
@@ -154,6 +154,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         lastName: profile?.last_name || prev.lastName,
         email: user?.email || prev.email,
         phone: profile?.phone || prev.phone,
+        birthDate: profile?.birth_date || prev.birthDate,
         bio: profile?.bio || prev.bio,
         location: profile?.location || prev.location,
         employmentStatus: (profile as any)?.employment_type || prev.employmentStatus,
@@ -173,10 +174,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     if (hasActiveDraftRef.current) return;
     if (profile) {
       if ((profile as any)?.postal_code) {
-        setPostalCode((profile as any).postal_code);
+        setPostalCode(prev => prev || (profile as any).postal_code);
       }
       if ((profile as any)?.location) {
-        setUserLocation((profile as any).location);
+        setUserLocation(prev => prev || (profile as any).location);
       }
     }
   }, [profile]);
@@ -185,9 +186,11 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // Skrivningarna debounce:as så vi inte skriver vid varje tangenttryck.
   const draftHydratedRef = useRef(false);
   const [hydratedScope, setHydratedScope] = useState<string | null>(null);
+  const draftPersistenceEnabledRef = useRef(true);
   const cloudSaveRef = useRef(
-    debounce((draft: TunnelDraft) => {
-      void saveTunnelDraft(draft);
+    debounce(({ draft, ownerId }: { draft: TunnelDraft; ownerId: string }) => {
+      if (!draftPersistenceEnabledRef.current) return;
+      void saveTunnelDraft(draft, ownerId);
     }, 1200)
   );
 
@@ -202,8 +205,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         profileImageUrl: prev.profileImageUrl || (parsed.formData as any).profileImageUrl,
       }));
     }
-    if (parsed.postalCode) setPostalCode(parsed.postalCode);
-    if (parsed.userLocation) setUserLocation(parsed.userLocation);
+    if (typeof parsed.postalCode === 'string') setPostalCode(parsed.postalCode);
+    if (typeof parsed.userLocation === 'string') setUserLocation(parsed.userLocation);
     // Återgå till samma steg som användaren var på (aldrig klar-steget)
     if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 1 && parsed.currentStep <= 5) {
       setCurrentStep(parsed.currentStep);
@@ -260,7 +263,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
 
     (async () => {
       try {
-        const cloud = await loadTunnelDraft();
+        const cloud = await loadTunnelDraft(user.id);
         if (cancelled) return;
         if (
           cloud?.savedAt &&
@@ -326,16 +329,17 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       console.warn('Failed to save welcome tunnel draft');
     }
 
-    cloudSaveRef.current(draft);
+    cloudSaveRef.current({ draft, ownerId: user.id });
   }, [user?.id, hydratedScope, storageScope, WELCOME_DRAFT_KEY, formData, postalCode, userLocation, currentStep]);
 
   // ⏱️ Sista sekunden: om fliken stängs/döljs innan debouncen hunnit köra
   // skickas utkastet direkt till molnet, så att en annan enhet får med allt.
   useEffect(() => {
     const flush = () => {
+      if (!draftPersistenceEnabledRef.current) return;
       const draft = latestDraftRef.current;
-      if (!draft) return;
-      void saveTunnelDraft(draft);
+      if (!draft || !user?.id) return;
+      void saveTunnelDraft(draft, user.id);
     };
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') flush();
@@ -346,17 +350,21 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pagehide', flush);
     };
-  }, []);
+  }, [user?.id]);
 
   
   // Clear draft helper
   const clearWelcomeDraft = () => {
+    // Stoppa både väntande debounce och pagehide-flush från att återskapa ett
+    // utkast efter att profilen har sparats färdigt.
+    draftPersistenceEnabledRef.current = false;
+    latestDraftRef.current = null;
     try {
       localStorage.removeItem(WELCOME_DRAFT_KEY);
     } catch (e) {
       console.warn('Failed to clear welcome draft');
     }
-    void clearTunnelDraft();
+    void clearTunnelDraft(user?.id);
   };
 
   // 🔁 Enhetsbyte: om tunneln slutfördes på en annan enhet ska den här fliken
@@ -380,6 +388,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   useEffect(() => {
     if (previewMode) return;
     if (!(profile as any)?.onboarding_completed) return;
+    draftPersistenceEnabledRef.current = false;
+    latestDraftRef.current = null;
     try {
       localStorage.removeItem(WELCOME_DRAFT_KEY);
       sessionStorage.removeItem(WELCOME_LOCAL_MEDIA_KEY);
@@ -509,7 +519,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     loadExistingMedia();
   }, [profile]);
 
-  const totalSteps = 9; // Introduktion + 6 profil steg + samtycke + submit + slutskärm
+  const totalSteps = 8; // Introduktion + 6 profilsteg + slutskärm
   const progress = Math.min(100, Math.max(0, currentStep / 6 * 100)); // 6 synliga steg
 
   const countWords = (text: string) => {
