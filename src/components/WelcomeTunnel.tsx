@@ -1390,18 +1390,13 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
           <div className="space-y-6">
             <div className="text-center mb-6">
               <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Profilbild/Profilvideo</h2>
-              <p className="text-sm text-white">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt</p>
+              <p className="text-sm text-white">Ladda upp en kort profilvideo/profilbild – eller båda – och gör ditt första intryck minnesvärt</p>
             </div>
 
             {/* Profile Image/Video Card - matching structure from Profile.tsx */}
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
               <div className="p-6 md:p-4 space-y-2">
-                <h3 className="text-base font-semibold text-white text-center">
-                  Profilbild/Profilvideo
-                </h3>
-                <p className="text-white text-center text-sm">
-                  Ladda upp en kort profilbild/profilvideo och gör ditt första intryck minnesvärt
-                </p>
+
                 
                 {/* Video and Camera Icons */}
                 <div className="flex items-center justify-center space-x-4">
