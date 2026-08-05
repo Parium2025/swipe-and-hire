@@ -330,6 +330,34 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     void clearTunnelDraft();
   };
 
+  // 🔁 Enhetsbyte: om tunneln slutfördes på en annan enhet ska den här fliken
+  // upptäcka det när den återfår fokus – annars kan gammal data skrivas över profilen.
+  useEffect(() => {
+    if (previewMode) return;
+    const check = () => {
+      if (document.visibilityState !== 'visible') return;
+      void refreshProfile();
+    };
+    window.addEventListener('focus', check);
+    document.addEventListener('visibilitychange', check);
+    return () => {
+      window.removeEventListener('focus', check);
+      document.removeEventListener('visibilitychange', check);
+    };
+  }, [previewMode, refreshProfile]);
+
+  // Om profilen nu är markerad som klar (t.ex. slutförd på mobilen) – släng
+  // det lokala utkastet så att det aldrig kan återuppstå på den här enheten.
+  useEffect(() => {
+    if (previewMode) return;
+    if (!(profile as any)?.onboarding_completed) return;
+    try {
+      localStorage.removeItem(WELCOME_DRAFT_KEY);
+      sessionStorage.removeItem(WELCOME_LOCAL_MEDIA_KEY);
+    } catch { /* ignorera */ }
+  }, [previewMode, (profile as any)?.onboarding_completed, WELCOME_DRAFT_KEY, WELCOME_LOCAL_MEDIA_KEY]);
+
+
  
   // Use mediaUrl hooks for signed URLs
   const signedProfileImageUrl = useMediaUrl(
