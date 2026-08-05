@@ -935,6 +935,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         employment_type: formData.employmentStatus, // Fixed: employment_type
         work_schedule: formData.workingHours, // Fixed: work_schedule
         availability: formData.availability,
+        interests: formData.interests,
         cv_url: formData.cvUrl,
         cv_filename: formData.cvFileName,
         // Fix: Properly save profile media and cover image

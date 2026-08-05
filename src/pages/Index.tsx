@@ -525,14 +525,9 @@ const Index = () => {
   // For job seekers, show WelcomeTunnel if onboarding not completed
   if (needsOnboarding && (profile as any)?.role === 'job_seeker') {
     return <WelcomeTunnel onComplete={async () => {
-      // Mark onboarding as completed in background
+      // WelcomeTunnel persists onboarding_completed before calling onComplete.
       if (tunnelReplay) {
         markTunnelCompletedThisSession();
-      } else {
-        supabase
-          .from('profiles')
-          .update({ onboarding_completed: true })
-          .eq('id', user.id);
       }
 
 
@@ -570,14 +565,9 @@ const Index = () => {
   // For employers, show EmployerWelcomeTunnel if onboarding not completed
   if (needsOnboarding && (profile as any)?.role === 'employer') {
     return <EmployerWelcomeTunnel onComplete={async () => {
-      // Mark onboarding as completed in background
+      // EmployerWelcomeTunnel persists onboarding_completed before calling onComplete.
       if (tunnelReplay) {
         markTunnelCompletedThisSession();
-      } else {
-        supabase
-          .from('profiles')
-          .update({ onboarding_completed: true })
-          .eq('id', user.id);
       }
 
       
