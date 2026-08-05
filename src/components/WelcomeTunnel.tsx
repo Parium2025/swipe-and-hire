@@ -66,10 +66,14 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
   }, [currentStep]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redirectState, setRedirectState] = useState<'idle' | 'checking' | 'already_completed'>('idle');
+
+
   // 🔒 Säkerhetsventil: om profilen redan är färdigställd på annan enhet/flik,
-  // omdirigera direkt så gammal flik inte skriver över eller konkurrerar med ny data.
+  // omdirigera med tydlig UI så gammal flik inte skriver över eller konkurrerar med ny data.
   const isRedirectingRef = useRef(false);
-  const redirectIfCompleted = useCallback((reason: string) => {
+  const redirectIfCompleted = useCallback((reason: string, delay = 2000) => {
     if (isRedirectingRef.current) return;
     isRedirectingRef.current = true;
     try {
@@ -79,42 +83,42 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     } catch {
       /* noop */
     }
-    toast({
-      title: "Profil redan färdig",
-      description: "Du har redan slutfört din profil. Vi dirigerar om dig."
-    });
+    setRedirectState('already_completed');
     console.log(`[WelcomeTunnel] redirectIfCompleted: ${reason}`);
-    onComplete();
-  }, [onComplete, toast]);
+    setTimeout(() => {
+      onComplete();
+    }, delay);
+  }, [onComplete]);
 
   // Kontrollera direkt vid mount och när profilen laddas
   useEffect(() => {
-    if (profile?.onboarding_completed) {
-      redirectIfCompleted('onboarding_completed on mount/profile load');
+    if (profile?.onboarding_completed && redirectState === 'idle') {
+      redirectIfCompleted('onboarding_completed on mount/profile load', 1500);
     }
-  }, [profile?.onboarding_completed, redirectIfCompleted]);
+  }, [profile?.onboarding_completed, redirectState, redirectIfCompleted]);
 
   // Kontrollera när fliken blir synlig igen (t.ex. användare gick till mobil och tillbaka)
   useEffect(() => {
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && currentStep >= 1 && currentStep <= 6) {
+      if (document.visibilityState === 'visible' && currentStep >= 1 && currentStep <= 6 && redirectState !== 'already_completed') {
+        setRedirectState('checking');
         refreshProfile().then(() => {
           if (profile?.onboarding_completed) {
             redirectIfCompleted('tab became visible, profile already completed');
+          } else {
+            setRedirectState('idle');
           }
         }).catch((err) => {
           console.warn('refreshProfile on visibility change failed:', err);
+          setRedirectState('idle');
         });
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [currentStep, refreshProfile, profile?.onboarding_completed, redirectIfCompleted]);
+  }, [currentStep, refreshProfile, profile?.onboarding_completed, redirectState, redirectIfCompleted]);
 
 
-
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -1846,6 +1850,37 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         paddingRight: 'env(safe-area-inset-right)',
       }}
     >
+      {/* Cross-device completion overlay */}
+      {redirectState !== 'idle' && (
+        <div className="fixed inset-0 z-50 bg-gradient-parium flex flex-col items-center justify-center px-6 text-center">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 max-w-sm w-full shadow-2xl">
+            {redirectState === 'checking' ? (
+              <>
+                <div className="mx-auto mb-5 w-12 h-12 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <h2 className="text-xl font-semibold text-white mb-2">Kontrollerar din profil…</h2>
+                <p className="text-sm text-white/80">Vi ser om du redan har slutfört den på en annan enhet.</p>
+              </>
+            ) : (
+              <>
+                <div className="mx-auto mb-5 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                  <Check className="h-8 w-8 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-white mb-2">Din profil är redo!</h2>
+                <p className="text-sm text-white/80 mb-6">
+                  Du har redan slutfört din profil på en annan enhet. Vi dirigerar om dig nu.
+                </p>
+                <Button
+                  onClick={onComplete}
+                  className="w-full rounded-full bg-white text-parium-navy hover:bg-white/90 font-semibold h-12"
+                >
+                  Fortsätt till appen
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Static animated background - identical to AuthMobile */}
       <div className="fixed inset-0 pointer-events-none z-0">
         
