@@ -1053,6 +1053,13 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         return;
       }
 
+      // 🔒 Säkerhetsventil: om profilen redan är slutförd på annan enhet/flik,
+      // skriv aldrig över den. Rensa utkast och omdirigera istället.
+      if (profile?.onboarding_completed) {
+        redirectIfCompleted('handleSubmit detected already completed profile');
+        return;
+      }
+
       if (!user?.id) {
         throw new Error('Not authenticated');
       }
