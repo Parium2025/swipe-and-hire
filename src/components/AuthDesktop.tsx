@@ -288,6 +288,10 @@ const AuthDesktop = ({
              setPendingVerification(true);
            } else if (result.error.showResetPassword) {
              setShowResetPassword(true);
+           } else {
+             // Fel lösenord kan även gälla ett konto som aldrig bekräftats.
+             // Visa resend-länken för sessionen (utan att avslöja om kontot finns).
+             setPendingVerification(true);
            }
          }
          else {
