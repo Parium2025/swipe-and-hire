@@ -203,31 +203,6 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
   };
 
-  useEffect(() => {
-    // Check if there's meaningful content to save
-    const hasContent = formData.firstName.trim() || formData.lastName.trim() || 
-                       formData.bio.trim() || formData.phone.trim() ||
-                       formData.employmentStatus || formData.workingHours ||
-                       formData.availability || formData.birthDate ||
-                       postalCode;
-
-    if (!hasContent || !draftHydratedRef.current) return;
-
-    const draft: TunnelDraft = {
-      formData,
-      postalCode,
-      userLocation,
-      currentStep,
-      savedAt: Date.now(),
-    };
-    try {
-      localStorage.setItem(WELCOME_DRAFT_KEY, JSON.stringify(draft));
-    } catch (e) {
-      console.warn('Failed to save welcome tunnel draft');
-    }
-    cloudSaveRef.current(draft);
-  }, [formData, postalCode, userLocation, currentStep]);
-  
   // Restore draft: lokalt först (direkt), därefter molnet om det är nyare.
   useEffect(() => {
     let cancelled = false;
@@ -252,6 +227,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       console.warn('Failed to restore welcome tunnel draft');
     }
 
+    // VIKTIGT: markera utkastet som hydrerat direkt efter lokal återställning
+    // så att användarens fortsatta ifyllning sparas omedelbart, även innan molnet svarar.
+    draftHydratedRef.current = true;
+
     (async () => {
       try {
         const cloud = await loadTunnelDraft();
@@ -265,8 +244,6 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         }
       } catch {
         /* offline eller utloggad – lokalt utkast räcker */
-      } finally {
-        if (!cancelled) draftHydratedRef.current = true;
       }
     })();
 
@@ -274,6 +251,63 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       cancelled = true;
     };
   }, []); // Run only on mount
+
+  // Flytta eventuellt användar-id-löst ("anon") utkast till användarens riktiga nyckel
+  // så snart användar-id:t är känt. Detta hindrar att påbörjat utkast "försvinner" om
+  // komponenten renderar innan auth-sessionen är färdigladdad.
+  const migratedAnonDraftRef = useRef(false);
+  useEffect(() => {
+    if (!user?.id || migratedAnonDraftRef.current) return;
+    if (storageScope === 'anon') return;
+
+    migratedAnonDraftRef.current = true;
+    const anonKey = 'parium_draft_welcome-tunnel_anon';
+    const userKey = WELCOME_DRAFT_KEY;
+    if (anonKey === userKey) return;
+
+    try {
+      const anonRaw = localStorage.getItem(anonKey);
+      if (!anonRaw) return;
+      const anonDraft = JSON.parse(anonRaw) as TunnelDraft;
+      const userRaw = localStorage.getItem(userKey);
+      const userDraft = userRaw ? (JSON.parse(userRaw) as TunnelDraft) : null;
+      const anonSavedAt = anonDraft.savedAt ?? 0;
+      const userSavedAt = userDraft?.savedAt ?? 0;
+
+      if (anonSavedAt > userSavedAt) {
+        localStorage.setItem(userKey, anonRaw);
+        applyDraft(anonDraft);
+      }
+      localStorage.removeItem(anonKey);
+    } catch (e) {
+      console.warn('Failed to migrate anonymous welcome draft');
+    }
+  }, [user?.id, storageScope, WELCOME_DRAFT_KEY]);
+
+  useEffect(() => {
+    // Check if there's meaningful content to save
+    const hasContent = formData.firstName.trim() || formData.lastName.trim() || 
+                       formData.bio.trim() || formData.phone.trim() ||
+                       formData.employmentStatus || formData.workingHours ||
+                       formData.availability || formData.birthDate ||
+                       postalCode;
+
+    if (!hasContent || !draftHydratedRef.current) return;
+
+    const draft: TunnelDraft = {
+      formData,
+      postalCode,
+      userLocation,
+      currentStep,
+      savedAt: Date.now(),
+    };
+    try {
+      localStorage.setItem(WELCOME_DRAFT_KEY, JSON.stringify(draft));
+    } catch (e) {
+      console.warn('Failed to save welcome tunnel draft');
+    }
+    cloudSaveRef.current(draft);
+  }, [formData, postalCode, userLocation, currentStep]);
   
   // Clear draft helper
   const clearWelcomeDraft = () => {
