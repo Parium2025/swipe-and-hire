@@ -204,10 +204,12 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   };
 
   // Restore draft: lokalt först (direkt), därefter molnet om det är nyare.
+  // OBS: körs om när användar-id blir känt, eftersom nyckeln är scopad per användare
+  // (annars hittades aldrig det sparade utkastet efter en omladdning).
+  const appliedSavedAtRef = useRef(0);
   useEffect(() => {
     let cancelled = false;
     const MAX_AGE = 7 * 24 * 60 * 60 * 1000;
-    let localSavedAt = 0;
 
     try {
       // Städa bort gamla, icke scopade nycklar (kunde delas mellan konton på samma enhet)
@@ -216,9 +218,12 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       const savedDraft = localStorage.getItem(WELCOME_DRAFT_KEY);
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft) as TunnelDraft;
-        if (parsed.savedAt && Date.now() - parsed.savedAt < MAX_AGE) {
-          localSavedAt = parsed.savedAt;
-          applyDraft(parsed);
+        const savedAt = parsed.savedAt ?? 0;
+        if (savedAt && Date.now() - savedAt < MAX_AGE) {
+          if (savedAt > appliedSavedAtRef.current) {
+            appliedSavedAtRef.current = savedAt;
+            applyDraft(parsed);
+          }
         } else {
           localStorage.removeItem(WELCOME_DRAFT_KEY);
         }
@@ -238,8 +243,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         if (
           cloud?.savedAt &&
           Date.now() - cloud.savedAt < MAX_AGE &&
-          cloud.savedAt > localSavedAt
+          cloud.savedAt > appliedSavedAtRef.current
         ) {
+          appliedSavedAtRef.current = cloud.savedAt;
           applyDraft(cloud);
         }
       } catch {
@@ -250,7 +256,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     return () => {
       cancelled = true;
     };
-  }, []); // Run only on mount
+  }, [storageScope, WELCOME_DRAFT_KEY]);
+
 
   // Flytta eventuellt användar-id-löst ("anon") utkast till användarens riktiga nyckel
   // så snart användar-id:t är känt. Detta hindrar att påbörjat utkast "försvinner" om
