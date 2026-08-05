@@ -180,24 +180,67 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     if (profile || user) {
       setFormData(prev => ({
         ...prev,
-        firstName: profile?.first_name || prev.firstName,
-        lastName: profile?.last_name || prev.lastName,
+        firstName: prev.firstName || profile?.first_name || '',
+        lastName: prev.lastName || profile?.last_name || '',
         email: user?.email || prev.email,
-        phone: profile?.phone || prev.phone,
-        birthDate: profile?.birth_date || prev.birthDate,
-        bio: profile?.bio || prev.bio,
-        location: profile?.location || prev.location,
-        employmentStatus: (profile as any)?.employment_type || prev.employmentStatus,
-        workingHours: (profile as any)?.work_schedule || prev.workingHours,
-        availability: (profile as any)?.availability || prev.availability,
+        phone: prev.phone || profile?.phone || '',
+        birthDate: prev.birthDate || profile?.birth_date || '',
+        bio: prev.bio || profile?.bio || '',
+        location: prev.location || profile?.location || '',
+        employmentStatus: prev.employmentStatus || (profile as any)?.employment_type || '',
+        workingHours: prev.workingHours || (profile as any)?.work_schedule || '',
+        availability: prev.availability || (profile as any)?.availability || '',
       }));
     }
   }, [profile, user]);
   const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
-  const [postalCode, setPostalCode] = useState((profile as any)?.postal_code || '');
-  const [userLocation, setUserLocation] = useState((profile as any)?.location || '');
+  const [postalCode, setPostalCode] = useState(
+    () => getTextDraft()?.postalCode ?? (profile as any)?.postal_code ?? ''
+  );
+  const [userLocation, setUserLocation] = useState(
+    () => getTextDraft()?.userLocation ?? (profile as any)?.location ?? ''
+  );
   const [hasValidLocation, setHasValidLocation] = useState(false);
+
+  // 🔒 Spara textfälten i sessionStorage vid varje ändring
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        WELCOME_TEXT_KEY,
+        JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          bio: formData.bio,
+          location: formData.location,
+          phone: formData.phone,
+          birthDate: formData.birthDate,
+          employmentStatus: formData.employmentStatus,
+          workingHours: formData.workingHours,
+          availability: formData.availability,
+          interests: formData.interests,
+          postalCode,
+          userLocation,
+        })
+      );
+    } catch {
+      /* noop */
+    }
+  }, [
+    formData.firstName,
+    formData.lastName,
+    formData.bio,
+    formData.location,
+    formData.phone,
+    formData.birthDate,
+    formData.employmentStatus,
+    formData.workingHours,
+    formData.availability,
+    formData.interests,
+    postalCode,
+    userLocation,
+  ]);
+
   
   // Update postal code and location when profile loads
   useEffect(() => {
