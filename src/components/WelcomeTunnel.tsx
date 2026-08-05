@@ -311,6 +311,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     // Markera senaste sparade tidsstämpel så att en senare återställning
     // (t.ex. när användar-id blir känt) aldrig skriver över färsk ifyllning.
     appliedSavedAtRef.current = draft.savedAt;
+    latestDraftRef.current = draft;
     try {
       localStorage.setItem(WELCOME_DRAFT_KEY, JSON.stringify(draft));
     } catch (e) {
@@ -319,6 +320,26 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
 
     cloudSaveRef.current(draft);
   }, [formData, postalCode, userLocation, currentStep]);
+
+  // ⏱️ Sista sekunden: om fliken stängs/döljs innan debouncen hunnit köra
+  // skickas utkastet direkt till molnet, så att en annan enhet får med allt.
+  useEffect(() => {
+    const flush = () => {
+      const draft = latestDraftRef.current;
+      if (!draft) return;
+      void saveTunnelDraft(draft);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') flush();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', flush);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', flush);
+    };
+  }, []);
+
   
   // Clear draft helper
   const clearWelcomeDraft = () => {
