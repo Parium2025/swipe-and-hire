@@ -136,6 +136,10 @@ export function cleanupOldDrafts(maxAgeMs: number = 24 * 60 * 60 * 1000): number
             keysToRemove.push(key);
           }
         } else {
+          // Välkomsttunnelns konto-skopade utkast hanteras av tunneln själv.
+          // Rensa aldrig det här bara för att ett äldre/övergångsformat saknar
+          // tidsstämpel — det kan innehålla osparade onboarding-uppgifter.
+          if (key.startsWith(`${STORAGE_PREFIX}welcome-tunnel_`)) continue;
           // No savedAt timestamp - this is an old format draft
           // Consider it stale and mark for removal
           keysToRemove.push(key);
