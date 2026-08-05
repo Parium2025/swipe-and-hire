@@ -117,49 +117,130 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
 
+  // 🔒 Textfält sparas i sessionStorage (samma flik = överlever refresh, rensas när fliken stängs)
+  const WELCOME_TEXT_KEY = 'parium_welcome_text_draft';
+
+  const getTextDraft = (): Record<string, any> | null => {
+    try {
+      const stored = sessionStorage.getItem(WELCOME_TEXT_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const clearTextDraft = () => {
+    try {
+      sessionStorage.removeItem(WELCOME_TEXT_KEY);
+    } catch {
+      /* noop */
+    }
+  };
+
   // Form data
-  const [formData, setFormData] = useState({
-    firstName: profile?.first_name || '',
-    lastName: profile?.last_name || '',
-    email: user?.email || '',
-    bio: profile?.bio || '',
-    location: profile?.location || '',
-    phone: profile?.phone || '',
-    birthDate: profile?.birth_date || '',
-    employmentStatus: (profile as any)?.employment_type || '', // Fixed: employment_type not employment_status
-    workingHours: (profile as any)?.work_schedule || '', // Fixed: work_schedule not working_hours
-    availability: (profile as any)?.availability || '', // Tillgänglighet
-    profileImageUrl: profile?.profile_image_url || '',
-    profileMediaType: 'image', // 'image' or 'video'
-    coverImageUrl: '', // Cover image for videos
-    cvUrl: '',
-    cvFileName: '',
-    interests: [] as string[],
-    consentGiven: true // Samtycke lämnas redan vid kontoskapandet
+  const [formData, setFormData] = useState(() => {
+    const draft = getTextDraft();
+    const base = {
+      firstName: profile?.first_name || '',
+      lastName: profile?.last_name || '',
+      email: user?.email || '',
+      bio: profile?.bio || '',
+      location: profile?.location || '',
+      phone: profile?.phone || '',
+      birthDate: profile?.birth_date || '',
+      employmentStatus: (profile as any)?.employment_type || '', // Fixed: employment_type not employment_status
+      workingHours: (profile as any)?.work_schedule || '', // Fixed: work_schedule not working_hours
+      availability: (profile as any)?.availability || '', // Tillgänglighet
+      profileImageUrl: profile?.profile_image_url || '',
+      profileMediaType: 'image', // 'image' or 'video'
+      coverImageUrl: '', // Cover image for videos
+      cvUrl: '',
+      cvFileName: '',
+      interests: [] as string[],
+      consentGiven: true // Samtycke lämnas redan vid kontoskapandet
+    };
+    if (!draft) return base;
+    return {
+      ...base,
+      firstName: draft.firstName ?? base.firstName,
+      lastName: draft.lastName ?? base.lastName,
+      bio: draft.bio ?? base.bio,
+      location: draft.location ?? base.location,
+      phone: draft.phone ?? base.phone,
+      birthDate: draft.birthDate ?? base.birthDate,
+      employmentStatus: draft.employmentStatus ?? base.employmentStatus,
+      workingHours: draft.workingHours ?? base.workingHours,
+      availability: draft.availability ?? base.availability,
+      interests: Array.isArray(draft.interests) ? draft.interests : base.interests,
+    };
   });
+
   // Update form data when profile/user loads (for pre-filled registration data)
   useEffect(() => {
     if (profile || user) {
       setFormData(prev => ({
         ...prev,
-        firstName: profile?.first_name || prev.firstName,
-        lastName: profile?.last_name || prev.lastName,
+        firstName: prev.firstName || profile?.first_name || '',
+        lastName: prev.lastName || profile?.last_name || '',
         email: user?.email || prev.email,
-        phone: profile?.phone || prev.phone,
-        birthDate: profile?.birth_date || prev.birthDate,
-        bio: profile?.bio || prev.bio,
-        location: profile?.location || prev.location,
-        employmentStatus: (profile as any)?.employment_type || prev.employmentStatus,
-        workingHours: (profile as any)?.work_schedule || prev.workingHours,
-        availability: (profile as any)?.availability || prev.availability,
+        phone: prev.phone || profile?.phone || '',
+        birthDate: prev.birthDate || profile?.birth_date || '',
+        bio: prev.bio || profile?.bio || '',
+        location: prev.location || profile?.location || '',
+        employmentStatus: prev.employmentStatus || (profile as any)?.employment_type || '',
+        workingHours: prev.workingHours || (profile as any)?.work_schedule || '',
+        availability: prev.availability || (profile as any)?.availability || '',
       }));
     }
   }, [profile, user]);
   const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
-  const [postalCode, setPostalCode] = useState((profile as any)?.postal_code || '');
-  const [userLocation, setUserLocation] = useState((profile as any)?.location || '');
+  const [postalCode, setPostalCode] = useState(
+    () => getTextDraft()?.postalCode ?? (profile as any)?.postal_code ?? ''
+  );
+  const [userLocation, setUserLocation] = useState(
+    () => getTextDraft()?.userLocation ?? (profile as any)?.location ?? ''
+  );
   const [hasValidLocation, setHasValidLocation] = useState(false);
+
+  // 🔒 Spara textfälten i sessionStorage vid varje ändring
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        WELCOME_TEXT_KEY,
+        JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          bio: formData.bio,
+          location: formData.location,
+          phone: formData.phone,
+          birthDate: formData.birthDate,
+          employmentStatus: formData.employmentStatus,
+          workingHours: formData.workingHours,
+          availability: formData.availability,
+          interests: formData.interests,
+          postalCode,
+          userLocation,
+        })
+      );
+    } catch {
+      /* noop */
+    }
+  }, [
+    formData.firstName,
+    formData.lastName,
+    formData.bio,
+    formData.location,
+    formData.phone,
+    formData.birthDate,
+    formData.employmentStatus,
+    formData.workingHours,
+    formData.availability,
+    formData.interests,
+    postalCode,
+    userLocation,
+  ]);
+
   
   // Update postal code and location when profile loads
   useEffect(() => {
@@ -953,6 +1034,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       
       setCurrentStep(totalSteps - 1); // Go to completion step
       setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
+      clearTextDraft(); // 🔒 Rensa textutkastet efter lyckad sparning
+
 
       setTimeout(() => {
         toast({
