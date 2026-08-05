@@ -185,8 +185,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // Skrivningarna debounce:as så vi inte skriver vid varje tangenttryck.
   const draftHydratedRef = useRef(false);
   const [hydratedScope, setHydratedScope] = useState<string | null>(null);
+  const draftPersistenceEnabledRef = useRef(true);
   const cloudSaveRef = useRef(
     debounce((draft: TunnelDraft) => {
+      if (!draftPersistenceEnabledRef.current) return;
       void saveTunnelDraft(draft);
     }, 1200)
   );
@@ -202,8 +204,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         profileImageUrl: prev.profileImageUrl || (parsed.formData as any).profileImageUrl,
       }));
     }
-    if (parsed.postalCode) setPostalCode(parsed.postalCode);
-    if (parsed.userLocation) setUserLocation(parsed.userLocation);
+    if (typeof parsed.postalCode === 'string') setPostalCode(parsed.postalCode);
+    if (typeof parsed.userLocation === 'string') setUserLocation(parsed.userLocation);
     // Återgå till samma steg som användaren var på (aldrig klar-steget)
     if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 1 && parsed.currentStep <= 5) {
       setCurrentStep(parsed.currentStep);
@@ -333,6 +335,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // skickas utkastet direkt till molnet, så att en annan enhet får med allt.
   useEffect(() => {
     const flush = () => {
+      if (!draftPersistenceEnabledRef.current) return;
       const draft = latestDraftRef.current;
       if (!draft) return;
       void saveTunnelDraft(draft);
@@ -351,6 +354,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   
   // Clear draft helper
   const clearWelcomeDraft = () => {
+    // Stoppa både väntande debounce och pagehide-flush från att återskapa ett
+    // utkast efter att profilen har sparats färdigt.
+    draftPersistenceEnabledRef.current = false;
+    latestDraftRef.current = null;
     try {
       localStorage.removeItem(WELCOME_DRAFT_KEY);
     } catch (e) {
@@ -380,6 +387,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   useEffect(() => {
     if (previewMode) return;
     if (!(profile as any)?.onboarding_completed) return;
+    draftPersistenceEnabledRef.current = false;
+    latestDraftRef.current = null;
     try {
       localStorage.removeItem(WELCOME_DRAFT_KEY);
       sessionStorage.removeItem(WELCOME_LOCAL_MEDIA_KEY);
