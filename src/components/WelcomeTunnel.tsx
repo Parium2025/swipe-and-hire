@@ -1850,6 +1850,37 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         paddingRight: 'env(safe-area-inset-right)',
       }}
     >
+      {/* Cross-device completion overlay */}
+      {redirectState !== 'idle' && (
+        <div className="fixed inset-0 z-50 bg-gradient-parium flex flex-col items-center justify-center px-6 text-center">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 max-w-sm w-full shadow-2xl">
+            {redirectState === 'checking' ? (
+              <>
+                <div className="mx-auto mb-5 w-12 h-12 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <h2 className="text-xl font-semibold text-white mb-2">Kontrollerar din profil…</h2>
+                <p className="text-sm text-white/80">Vi ser om du redan har slutfört den på en annan enhet.</p>
+              </>
+            ) : (
+              <>
+                <div className="mx-auto mb-5 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                  <Check className="h-8 w-8 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-white mb-2">Din profil är redo!</h2>
+                <p className="text-sm text-white/80 mb-6">
+                  Du har redan slutfört din profil på en annan enhet. Vi dirigerar om dig nu.
+                </p>
+                <Button
+                  onClick={onComplete}
+                  className="w-full rounded-full bg-white text-parium-navy hover:bg-white/90 font-semibold h-12"
+                >
+                  Fortsätt till appen
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Static animated background - identical to AuthMobile */}
       <div className="fixed inset-0 pointer-events-none z-0">
         
