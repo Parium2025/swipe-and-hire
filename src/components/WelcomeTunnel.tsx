@@ -67,9 +67,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   }, [currentStep]);
 
   // 🔒 Säkerhetsventil: om profilen redan är färdigställd på annan enhet/flik,
-  // omdirigera direkt så gammal flik inte skriver över eller konkurrerar med ny data.
+  // omdirigera med tydlig UI så gammal flik inte skriver över eller konkurrerar med ny data.
   const isRedirectingRef = useRef(false);
-  const redirectIfCompleted = useCallback((reason: string) => {
+  const redirectIfCompleted = useCallback((reason: string, delay = 2000) => {
     if (isRedirectingRef.current) return;
     isRedirectingRef.current = true;
     try {
@@ -79,37 +79,41 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     } catch {
       /* noop */
     }
-    toast({
-      title: "Profil redan färdig",
-      description: "Du har redan slutfört din profil. Vi dirigerar om dig."
-    });
+    setRedirectState('already_completed');
     console.log(`[WelcomeTunnel] redirectIfCompleted: ${reason}`);
-    onComplete();
-  }, [onComplete, toast]);
+    setTimeout(() => {
+      onComplete();
+    }, delay);
+  }, [onComplete]);
 
   // Kontrollera direkt vid mount och när profilen laddas
   useEffect(() => {
-    if (profile?.onboarding_completed) {
-      redirectIfCompleted('onboarding_completed on mount/profile load');
+    if (profile?.onboarding_completed && redirectState === 'idle') {
+      redirectIfCompleted('onboarding_completed on mount/profile load', 1500);
     }
-  }, [profile?.onboarding_completed, redirectIfCompleted]);
+  }, [profile?.onboarding_completed, redirectState, redirectIfCompleted]);
 
   // Kontrollera när fliken blir synlig igen (t.ex. användare gick till mobil och tillbaka)
   useEffect(() => {
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && currentStep >= 1 && currentStep <= 6) {
+      if (document.visibilityState === 'visible' && currentStep >= 1 && currentStep <= 6 && redirectState !== 'already_completed') {
+        setRedirectState('checking');
         refreshProfile().then(() => {
           if (profile?.onboarding_completed) {
             redirectIfCompleted('tab became visible, profile already completed');
+          } else {
+            setRedirectState('idle');
           }
         }).catch((err) => {
           console.warn('refreshProfile on visibility change failed:', err);
+          setRedirectState('idle');
         });
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [currentStep, refreshProfile, profile?.onboarding_completed, redirectIfCompleted]);
+  }, [currentStep, refreshProfile, profile?.onboarding_completed, redirectState, redirectIfCompleted]);
+
 
 
 
