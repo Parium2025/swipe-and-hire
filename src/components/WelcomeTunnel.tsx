@@ -204,10 +204,12 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   };
 
   // Restore draft: lokalt först (direkt), därefter molnet om det är nyare.
+  // OBS: körs om när användar-id blir känt, eftersom nyckeln är scopad per användare
+  // (annars hittades aldrig det sparade utkastet efter en omladdning).
+  const appliedSavedAtRef = useRef(0);
   useEffect(() => {
     let cancelled = false;
     const MAX_AGE = 7 * 24 * 60 * 60 * 1000;
-    let localSavedAt = 0;
 
     try {
       // Städa bort gamla, icke scopade nycklar (kunde delas mellan konton på samma enhet)
@@ -216,9 +218,12 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       const savedDraft = localStorage.getItem(WELCOME_DRAFT_KEY);
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft) as TunnelDraft;
-        if (parsed.savedAt && Date.now() - parsed.savedAt < MAX_AGE) {
-          localSavedAt = parsed.savedAt;
-          applyDraft(parsed);
+        const savedAt = parsed.savedAt ?? 0;
+        if (savedAt && Date.now() - savedAt < MAX_AGE) {
+          if (savedAt > appliedSavedAtRef.current) {
+            appliedSavedAtRef.current = savedAt;
+            applyDraft(parsed);
+          }
         } else {
           localStorage.removeItem(WELCOME_DRAFT_KEY);
         }
@@ -238,8 +243,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         if (
           cloud?.savedAt &&
           Date.now() - cloud.savedAt < MAX_AGE &&
-          cloud.savedAt > localSavedAt
+          cloud.savedAt > appliedSavedAtRef.current
         ) {
+          appliedSavedAtRef.current = cloud.savedAt;
           applyDraft(cloud);
         }
       } catch {
@@ -250,7 +256,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     return () => {
       cancelled = true;
     };
-  }, []); // Run only on mount
+  }, [storageScope, WELCOME_DRAFT_KEY]);
+
 
   // Flytta eventuellt användar-id-löst ("anon") utkast till användarens riktiga nyckel
   // så snart användar-id:t är känt. Detta hindrar att påbörjat utkast "försvinner" om
@@ -301,11 +308,15 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       currentStep,
       savedAt: Date.now(),
     };
+    // Markera senaste sparade tidsstämpel så att en senare återställning
+    // (t.ex. när användar-id blir känt) aldrig skriver över färsk ifyllning.
+    appliedSavedAtRef.current = draft.savedAt;
     try {
       localStorage.setItem(WELCOME_DRAFT_KEY, JSON.stringify(draft));
     } catch (e) {
       console.warn('Failed to save welcome tunnel draft');
     }
+
     cloudSaveRef.current(draft);
   }, [formData, postalCode, userLocation, currentStep]);
   
