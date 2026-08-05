@@ -39,7 +39,7 @@ interface WelcomeTunnelProps {
 const WELCOME_STEP_KEY = 'parium_welcome_step';
 
 const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: WelcomeTunnelProps) => {
-  const { profile, updateProfile, user, signOut } = useAuth();
+  const { profile, updateProfile, refreshProfile, user, signOut } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(() => {
     if (typeof initialStep === 'number') return initialStep;
