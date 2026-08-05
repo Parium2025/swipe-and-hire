@@ -140,9 +140,13 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     interests: [] as string[],
     consentGiven: true // Samtycke lämnas redan vid kontoskapandet
   });
+  // När ett lokalt/molnsparat utkast finns ska senare profiluppdateringar aldrig
+  // skriva över det. Profilen är bara en initial grund när inget utkast finns.
+  const hasActiveDraftRef = useRef(false);
   
   // Update form data when profile/user loads (for pre-filled registration data)
   useEffect(() => {
+    if (hasActiveDraftRef.current) return;
     if (profile || user) {
       setFormData(prev => ({
         ...prev,
@@ -166,6 +170,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   
   // Update postal code and location when profile loads
   useEffect(() => {
+    if (hasActiveDraftRef.current) return;
     if (profile) {
       if ((profile as any)?.postal_code) {
         setPostalCode((profile as any).postal_code);
@@ -179,6 +184,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // ☁️ Utkastet sparas både lokalt (snabbt) och i molnet (följer med mellan enheter).
   // Skrivningarna debounce:as så vi inte skriver vid varje tangenttryck.
   const draftHydratedRef = useRef(false);
+  const [hydratedScope, setHydratedScope] = useState<string | null>(null);
   const cloudSaveRef = useRef(
     debounce((draft: TunnelDraft) => {
       void saveTunnelDraft(draft);
@@ -187,6 +193,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
 
   const applyDraft = (parsed: TunnelDraft | null) => {
     if (!parsed) return;
+    hasActiveDraftRef.current = true;
     if (parsed.formData) {
       setFormData(prev => ({
         ...prev,
@@ -212,6 +219,19 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     let cancelled = false;
     const MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
+    // Vänta på den riktiga auth-identiteten. Annars hinner de förifyllda
+    // registreringsfälten skapa ett nytt "anon"-utkast som är nyare än och
+    // skriver över användarens riktiga utkast vid en refresh.
+    if (!user?.id) {
+      draftHydratedRef.current = false;
+      setHydratedScope(null);
+      return;
+    }
+
+    draftHydratedRef.current = false;
+    setHydratedScope(null);
+    appliedSavedAtRef.current = 0;
+
     try {
       // Städa bort gamla, icke scopade nycklar (kunde delas mellan konton på samma enhet)
       localStorage.removeItem('parium_draft_welcome-tunnel');
@@ -236,6 +256,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     // VIKTIGT: markera utkastet som hydrerat direkt efter lokal återställning
     // så att användarens fortsatta ifyllning sparas omedelbart, även innan molnet svarar.
     draftHydratedRef.current = true;
+    setHydratedScope(storageScope);
 
     (async () => {
       try {
@@ -257,40 +278,20 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     return () => {
       cancelled = true;
     };
-  }, [storageScope, WELCOME_DRAFT_KEY]);
-
-
-  // Flytta eventuellt användar-id-löst ("anon") utkast till användarens riktiga nyckel
-  // så snart användar-id:t är känt. Detta hindrar att påbörjat utkast "försvinner" om
-  // komponenten renderar innan auth-sessionen är färdigladdad.
-  const migratedAnonDraftRef = useRef(false);
-  useEffect(() => {
-    if (!user?.id || migratedAnonDraftRef.current) return;
-    if (storageScope === 'anon') return;
-
-    migratedAnonDraftRef.current = true;
-    const anonKey = 'parium_draft_welcome-tunnel_anon';
-    const userKey = WELCOME_DRAFT_KEY;
-    if (anonKey === userKey) return;
-
-    try {
-      const anonRaw = localStorage.getItem(anonKey);
-      if (!anonRaw) return;
-      const anonDraft = JSON.parse(anonRaw) as TunnelDraft;
-      const userRaw = localStorage.getItem(userKey);
-      const userDraft = userRaw ? (JSON.parse(userRaw) as TunnelDraft) : null;
-      const anonSavedAt = anonDraft.savedAt ?? 0;
-      const userSavedAt = userDraft?.savedAt ?? 0;
-
-      if (anonSavedAt > userSavedAt) {
-        localStorage.setItem(userKey, anonRaw);
-        applyDraft(anonDraft);
-      }
-      localStorage.removeItem(anonKey);
-    } catch (e) {
-      console.warn('Failed to migrate anonymous welcome draft');
-    }
   }, [user?.id, storageScope, WELCOME_DRAFT_KEY]);
+
+
+  // Tunneln visas bara för inloggade användare. Ett äldre anonymt utkast får därför
+  // aldrig migreras över ett kontos eget utkast (det var orsaken till att tomma
+  // registreringsvärden kunde vinna efter refresh).
+  useEffect(() => {
+    if (!user?.id) return;
+    try {
+      localStorage.removeItem('parium_draft_welcome-tunnel_anon');
+    } catch {
+      /* localStorage kan vara blockerat */
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     // Check if there's meaningful content to save
@@ -300,7 +301,12 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                        formData.availability || formData.birthDate ||
                        postalCode;
 
-    if (!hasContent || !draftHydratedRef.current) return;
+    if (
+      !user?.id ||
+      !hasContent ||
+      !draftHydratedRef.current ||
+      hydratedScope !== storageScope
+    ) return;
 
     const draft: TunnelDraft = {
       formData,
@@ -309,6 +315,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       currentStep,
       savedAt: Date.now(),
     };
+    hasActiveDraftRef.current = true;
     // Markera senaste sparade tidsstämpel så att en senare återställning
     // (t.ex. när användar-id blir känt) aldrig skriver över färsk ifyllning.
     appliedSavedAtRef.current = draft.savedAt;
@@ -320,7 +327,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     }
 
     cloudSaveRef.current(draft);
-  }, [formData, postalCode, userLocation, currentStep]);
+  }, [user?.id, hydratedScope, storageScope, WELCOME_DRAFT_KEY, formData, postalCode, userLocation, currentStep]);
 
   // ⏱️ Sista sekunden: om fliken stängs/döljs innan debouncen hunnit köra
   // skickas utkastet direkt till molnet, så att en annan enhet får med allt.
