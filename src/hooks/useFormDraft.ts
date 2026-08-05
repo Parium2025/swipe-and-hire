@@ -309,7 +309,14 @@ export function clearAllDrafts() {
   try {
     const keys = Object.keys(localStorage).filter((k) => k.startsWith(STORAGE_PREFIX));
     keys.forEach((k) => localStorage.removeItem(k));
-    console.log(`🗑️ Cleared ${keys.length} drafts`);
+    // Välkomstunnelns uppladdningsmetadata ligger i sessionStorage och är
+    // konto-prefixad. Den måste rensas samtidigt så samma konto aldrig får
+    // tillbaka övergiven media efter en utloggning i samma flik.
+    const mediaKeys = Object.keys(sessionStorage).filter((k) =>
+      k.startsWith('parium_welcome_local_media_')
+    );
+    mediaKeys.forEach((k) => sessionStorage.removeItem(k));
+    console.log(`🗑️ Cleared ${keys.length} drafts and ${mediaKeys.length} media drafts`);
   } catch (error) {
     console.warn('Failed to clear all drafts:', error);
   }

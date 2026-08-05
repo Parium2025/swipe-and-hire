@@ -128,7 +128,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     bio: profile?.bio || '',
     location: profile?.location || '',
     phone: profile?.phone || '',
-    birthDate: '',
+    birthDate: profile?.birth_date || '',
     employmentStatus: (profile as any)?.employment_type || '', // Fixed: employment_type not employment_status
     workingHours: (profile as any)?.work_schedule || '', // Fixed: work_schedule not working_hours
     availability: (profile as any)?.availability || '', // Tillgänglighet
@@ -154,6 +154,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
         lastName: profile?.last_name || prev.lastName,
         email: user?.email || prev.email,
         phone: profile?.phone || prev.phone,
+        birthDate: profile?.birth_date || prev.birthDate,
         bio: profile?.bio || prev.bio,
         location: profile?.location || prev.location,
         employmentStatus: (profile as any)?.employment_type || prev.employmentStatus,
@@ -173,10 +174,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     if (hasActiveDraftRef.current) return;
     if (profile) {
       if ((profile as any)?.postal_code) {
-        setPostalCode((profile as any).postal_code);
+        setPostalCode(prev => prev || (profile as any).postal_code);
       }
       if ((profile as any)?.location) {
-        setUserLocation((profile as any).location);
+        setUserLocation(prev => prev || (profile as any).location);
       }
     }
   }, [profile]);
@@ -518,7 +519,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     loadExistingMedia();
   }, [profile]);
 
-  const totalSteps = 9; // Introduktion + 6 profil steg + samtycke + submit + slutskärm
+  const totalSteps = 8; // Introduktion + 6 profilsteg + slutskärm
   const progress = Math.min(100, Math.max(0, currentStep / 6 * 100)); // 6 synliga steg
 
   const countWords = (text: string) => {
