@@ -196,10 +196,14 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
         return;
       }
 
-      await updateProfile({
+      const result = await updateProfile({
         company_logo_url: formData.companyLogoUrl,
         onboarding_completed: true
       } as any);
+
+      if (result?.error) {
+        throw result.error;
+      }
 
       // Clear draft after successful submission
       clearEmployerWelcomeDraft();
