@@ -140,9 +140,13 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     interests: [] as string[],
     consentGiven: true // Samtycke lämnas redan vid kontoskapandet
   });
+  // När ett lokalt/molnsparat utkast finns ska senare profiluppdateringar aldrig
+  // skriva över det. Profilen är bara en initial grund när inget utkast finns.
+  const hasActiveDraftRef = useRef(false);
   
   // Update form data when profile/user loads (for pre-filled registration data)
   useEffect(() => {
+    if (hasActiveDraftRef.current) return;
     if (profile || user) {
       setFormData(prev => ({
         ...prev,
@@ -166,6 +170,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   
   // Update postal code and location when profile loads
   useEffect(() => {
+    if (hasActiveDraftRef.current) return;
     if (profile) {
       if ((profile as any)?.postal_code) {
         setPostalCode((profile as any).postal_code);
@@ -188,6 +193,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
 
   const applyDraft = (parsed: TunnelDraft | null) => {
     if (!parsed) return;
+    hasActiveDraftRef.current = true;
     if (parsed.formData) {
       setFormData(prev => ({
         ...prev,
@@ -309,6 +315,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       currentStep,
       savedAt: Date.now(),
     };
+    hasActiveDraftRef.current = true;
     // Markera senaste sparade tidsstämpel så att en senare återställning
     // (t.ex. när användar-id blir känt) aldrig skriver över färsk ifyllning.
     appliedSavedAtRef.current = draft.savedAt;
