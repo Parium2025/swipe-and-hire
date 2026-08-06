@@ -526,20 +526,6 @@ VIKTIGT:
       analyzed_at: new Date().toISOString(),
     };
 
-    const documentType = summary.is_valid_cv === false 
-      ? (summary.document_type || 'okänt dokument')
-      : 'CV';
-    
-    // Professional rejection message - use AI's reason or fallback
-    const rejectionReason = summary.rejection_reason || 
-      `Det uppladdade dokumentet verkar vara ${documentType}. Ladda upp ett CV för att få en sammanfattning.`;
-    
-    const docPoint = { 
-      text: `Dokumenttyp: ${documentType}`, 
-      type: summary.is_valid_cv === false ? 'negative' : 'neutral', 
-      meta 
-    };
-
     // Postgres text-kolumner kan inte lagra NUL (\u0000) eller andra styrtecken.
     // PDF-extraktion ger ofta med sig sådana — tvätta bort dem, annars kraschar
     // insert:en (22P05) och analysen fastnar i "Analyserar…" för alltid.
@@ -548,6 +534,21 @@ VIKTIGT:
         // eslint-disable-next-line no-control-regex
         ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ' ').replace(/\uFFFD/g, '')
         : '';
+
+    const documentType = (summary.is_valid_cv === false
+      ? (clean(summary.document_type).trim() || 'okänt dokument')
+      : 'CV').slice(0, 120);
+
+    // Professional rejection message - use AI's reason or fallback
+    const rejectionReason = clean(summary.rejection_reason).trim() ||
+      `Det uppladdade dokumentet verkar vara ${documentType}. Ladda upp ett CV för att få en sammanfattning.`;
+
+    const docPoint = { 
+      text: `Dokumenttyp: ${documentType}`, 
+      type: summary.is_valid_cv === false ? 'negative' : 'neutral', 
+      meta 
+    };
+
 
     const normalizedPoints = Array.isArray(summary.key_points)
       ? summary.key_points
