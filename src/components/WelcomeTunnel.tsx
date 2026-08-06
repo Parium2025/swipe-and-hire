@@ -137,7 +137,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   useEffect(() => {
     if (previewMode || !user?.id) return;
     try { localStorage.removeItem(`parium_intro_tour_done:${user.id}`); } catch { /* ignorera */ }
+    import('@/lib/onboardingState').then(({ resetIntroTourDone }) => resetIntroTourDone().catch(() => {}));
   }, [previewMode, user?.id]);
+
 
   
   interface WelcomeLocalMediaState {
@@ -1075,6 +1077,24 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
       if (!user?.id) {
         throw new Error('Not authenticated');
       }
+
+      // 🔒 Färsk kontroll direkt mot databasen (lokalt profil-state kan vara
+      // gammalt om tunneln slutfördes på en annan enhet under tiden).
+      try {
+        const { data: liveProfile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if ((liveProfile as { onboarding_completed?: boolean } | null)?.onboarding_completed) {
+          await refreshProfile().catch(() => {});
+          redirectIfCompleted('handleSubmit: live DB check says profile already completed');
+          return;
+        }
+      } catch (err) {
+        console.warn('[WelcomeTunnel] live completion check failed:', err);
+      }
+
 
       // First, save consent
       if (formData.consentGiven) {
