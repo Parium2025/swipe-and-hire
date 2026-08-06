@@ -802,7 +802,7 @@ const AuthMobile = ({
                         <div className="text-center mt-3">
                           <button
                             type="button"
-                            onClick={() => setShowResetPassword(true)}
+                            onClick={() => { setShowResetPassword((v) => !v); setResetPasswordSent(false); }}
                              className="text-sm text-white no-underline"
                           >
                             Glömt lösenordet?
