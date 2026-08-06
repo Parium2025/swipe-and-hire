@@ -39,20 +39,20 @@ const getClientVersion = (): string | null => {
   }
 };
 
-const isLandingPage = (): boolean => {
-  try {
-    return window.location.pathname === '/' || window.location.pathname === '/index';
-  } catch {
-    return false;
-  }
-};
-
 const checkVersion = async (reason: string): Promise<void> => {
   const now = Date.now();
   if (now - lastCheckAt < MIN_CHECK_GAP_MS) {
     log('skip — too soon since last check', reason);
     return;
   }
+
+  // Offline (tunnel/hiss/flygplansläge) → ingen poll, ingen felspam
+  try {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  } catch {
+    /* noop */
+  }
+
   lastCheckAt = now;
 
   const clientVersion = getClientVersion();
@@ -60,6 +60,7 @@ const checkVersion = async (reason: string): Promise<void> => {
     log('skip — no client version (dev mode)');
     return;
   }
+
 
   try {
     const res = await fetch('/version.json', {
