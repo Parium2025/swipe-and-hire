@@ -6,7 +6,9 @@ import {
   CreditCard, HelpCircle, ArrowRight,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
+import { useAuth } from '@/hooks/useAuth';
 import { loadCoachState, saveCoachState, type CoachState } from '@/lib/onboardingState';
+
 
 
 /**
