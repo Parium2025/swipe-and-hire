@@ -181,10 +181,15 @@ const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }
             <div className="flex items-center">
               <LogoSidebarTrigger />
             </div>
-            {/* Centered brand name */}
-            <span className="absolute left-1/2 -translate-x-1/2 text-white text-base font-semibold tracking-tight select-none pointer-events-none">
+            {/* Centered brand name — acts as home button */}
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              aria-label="Gå till startsidan"
+              className="absolute left-1/2 -translate-x-1/2 text-white text-base font-semibold tracking-tight select-none rounded-full px-3 py-1 active:scale-[0.97] transition-transform touch-manipulation focus:outline-none"
+            >
               Parium
-            </span>
+            </button>
             <div className="flex items-center gap-2">
               {/* Search button - hidden on /search-jobs */}
               {location.pathname !== '/search-jobs' && (
