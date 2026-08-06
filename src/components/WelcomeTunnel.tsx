@@ -137,7 +137,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   useEffect(() => {
     if (previewMode || !user?.id) return;
     try { localStorage.removeItem(`parium_intro_tour_done:${user.id}`); } catch { /* ignorera */ }
+    import('@/lib/onboardingState').then(({ resetIntroTourDone }) => resetIntroTourDone().catch(() => {}));
   }, [previewMode, user?.id]);
+
 
   
   interface WelcomeLocalMediaState {
