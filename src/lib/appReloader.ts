@@ -156,19 +156,17 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
     /* noop */
   }
 
-  // 3. Idle fallback — om inget hänt på 30s
-  try {
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(() => setTimeout(fire, IDLE_DELAY_MS), {
-        timeout: IDLE_DELAY_MS + 5000,
-      });
-    } else {
-      setTimeout(fire, IDLE_DELAY_MS);
+  // 3. Säkerhetsnät — men ALDRIG medan användaren har sidan framför sig.
+  // (Tidigare tvingades en reload efter 30s idle även när tabben var synlig,
+  // vilket gav "sidan laddade om sig själv mitt i" och rensade ifyllda fält.)
+  const idleFallback = setInterval(() => {
+    if (document.visibilityState === 'hidden') {
+      clearInterval(idleFallback);
+      fire();
     }
-  } catch {
-    setTimeout(fire, IDLE_DELAY_MS);
-  }
+  }, IDLE_DELAY_MS);
 };
+
 
 /**
  * Begär en app-reload. Säker att anropa flera gånger — locket förhindrar dubbletter.
