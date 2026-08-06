@@ -239,6 +239,7 @@ const PageIntroCoach = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const device = useDevice();
+  const { user, loading: authLoading } = useAuth();
   const isTouch = device !== 'desktop';
   const [replayToken, setReplayToken] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -246,10 +247,32 @@ const PageIntroCoach = () => {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // 🔒 Hydrera ALDRIG innan vi vet vilket konto som är inloggat. Annars läser vi
+    // molnet utan session (returnerar tomt) och guiden dyker upp igen på en ny enhet.
+    if (authLoading) return;
+    if (!user?.id) {
+      setHydrated(false);
+      return;
+    }
+
     let cancelled = false;
+    setHydrated(false);
     (async () => {
       try {
-        const local = readLocalCoachState();
+        // Byte av konto på samma enhet: släng den förra personens cache först.
+        let owner: string | null = null;
+        try {
+          owner = localStorage.getItem(COACH_OWNER_KEY);
+        } catch { /* ignorera */ }
+        if (owner !== user.id) {
+          writeLocalCoachState({ seen: {}, disabled: false });
+          try {
+            localStorage.removeItem(ACTIVE_TOUR_KEY);
+            localStorage.setItem(COACH_OWNER_KEY, user.id);
+          } catch { /* ignorera */ }
+        }
+
+        const local = owner === user.id ? readLocalCoachState() : { seen: {}, disabled: false };
         const cloud = await loadCoachState();
         if (cancelled) return;
         // Slå ihop lokalt och moln — ett tips som setts på någon enhet visas aldrig igen.
@@ -276,7 +299,8 @@ const PageIntroCoach = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [user?.id, authLoading]);
+
 
   const config = useMemo(() => CONFIGS[location.pathname], [location.pathname]);
   const activeTourPath = useMemo(() => {
