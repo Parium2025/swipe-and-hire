@@ -113,9 +113,14 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
   log('deferred reload scheduled');
 
   let executed = false;
+  let idleFallback: ReturnType<typeof setInterval> | null = null;
   const fire = () => {
     if (executed) return;
     executed = true;
+    if (idleFallback) {
+      clearInterval(idleFallback);
+      idleFallback = null;
+    }
     if (!acquireLock()) {
       log('deferred fire skipped — lock held');
       return;
@@ -159,12 +164,12 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
   // 3. Säkerhetsnät — men ALDRIG medan användaren har sidan framför sig.
   // (Tidigare tvingades en reload efter 30s idle även när tabben var synlig,
   // vilket gav "sidan laddade om sig själv mitt i" och rensade ifyllda fält.)
-  const idleFallback = setInterval(() => {
+  idleFallback = setInterval(() => {
     if (document.visibilityState === 'hidden') {
-      clearInterval(idleFallback);
       fire();
     }
   }, IDLE_DELAY_MS);
+
 };
 
 
