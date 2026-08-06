@@ -595,6 +595,12 @@ All colors MUST be HSL.
     color: rgb(255, 255, 255) !important;
   }
 
+  /* WelcomeTunnel bio example: dim the placeholder so it reads as a hint, not typed text */
+  .welcome-tunnel-bio::placeholder {
+    color: rgba(255, 255, 255, 0.35) !important;
+  }
+
+
   /* GLOBAL: Enhanced contrast for better visibility on low-quality displays */
   .bg-white\/5 {
     background-color: rgba(255, 255, 255, 0.10) !important;

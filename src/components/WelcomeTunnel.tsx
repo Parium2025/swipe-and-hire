@@ -1797,7 +1797,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 <Textarea
                   id="bio"
                   rows={6}
-                  className="mt-1.5 min-h-[140px] text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/70 resize-none"
+                  className="welcome-tunnel-bio mt-1.5 min-h-[140px] text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 resize-none"
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Till exempel: Jag är 24 år, serviceinriktad och van vid högt tempo. Har jobbat två år inom butik och trivs bäst i team. Söker nu ett deltidsjobb i Stockholm."
