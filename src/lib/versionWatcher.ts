@@ -13,8 +13,8 @@
 
 import { requestAppReload, shortHash } from './appReloader';
 
-const HEARTBEAT_INTERVAL_MS = 60 * 1000; // tät landing-check efter publish, utan manuell Safari-rensning
-const MIN_CHECK_GAP_MS = 20 * 1000; // dubbletter-skydd
+const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // lugn puls — sparar batteri/data på mobil
+const MIN_CHECK_GAP_MS = 60 * 1000; // dubbletter-skydd (visibility+focus fyrar ofta ihop)
 
 let installed = false;
 let heartbeatId: ReturnType<typeof setInterval> | null = null;
