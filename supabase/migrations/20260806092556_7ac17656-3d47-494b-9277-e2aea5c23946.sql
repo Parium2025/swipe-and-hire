@@ -1,0 +1,2 @@
+UPDATE public.profiles SET onboarding_completed = false WHERE user_id = '4b291377-55a4-41d1-b959-b4a8588249d9';
+UPDATE public.user_onboarding_state SET coach_state = '{}'::jsonb, tunnel_draft = NULL WHERE user_id = '4b291377-55a4-41d1-b959-b4a8588249d9';
