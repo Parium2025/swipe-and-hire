@@ -179,26 +179,26 @@ const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10 [padding-top:var(--top-chrome-content-offset,0px)]">
-          <header className="relative shrink-0 z-40 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
+          <header className="relative shrink-0 z-40 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3" style={{ contain: 'layout style' }}>
             <div className="flex items-center">
               <LogoSidebarTrigger />
             </div>
             {/* Centered brand name — acts as home button */}
             <button
               type="button"
-              onPointerUp={(e) => e.currentTarget.blur()}
-              onClick={(e) => {
-                e.currentTarget.blur();
+               onClick={() => {
                 if (location.pathname === '/') {
                   const el = document.querySelector('[data-main-scroll-container="true"]') as HTMLElement | null;
-                  el?.scrollTo({ top: 0, behavior: 'smooth' });
+                   if (el && el.scrollTop > 1) {
+                     el.scrollTo({ top: 0, behavior: 'smooth' });
+                   }
                   return;
                 }
                 navigate('/');
               }}
               aria-label="Gå till startsidan"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[46%] truncate text-white text-base font-semibold tracking-tight select-none rounded-full px-3 py-1 active:opacity-80 transition-opacity duration-150 touch-manipulation outline-none focus:outline-none focus-visible:outline-none"
-              style={{ WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none', backfaceVisibility: 'hidden' }}
+               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[46%] truncate text-white text-base font-semibold tracking-tight select-none rounded-full px-3 py-1 touch-manipulation outline-none focus:outline-none focus-visible:outline-none"
+               style={{ WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none' }}
             >
               Parium
             </button>
