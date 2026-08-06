@@ -389,15 +389,18 @@ const Index = () => {
   // Första inloggningen som jobbsökande: välkomstkortet ("Hjälp & tips") ska
   // alltid dyka upp när profilen är klar — oavsett om tunneln slutfördes i den
   // här fliken, på en annan enhet, eller om sidan hann navigera/refresha.
+  // Flaggan är per konto (inte per webbläsare) så ett nytt konto på samma
+  // telefon alltid får guiden.
   useEffect(() => {
     if (!user) return;
     if ((profile as any)?.role !== 'job_seeker') return;
     if (!(profile as any)?.onboarding_completed) return;
     try {
-      if (localStorage.getItem('parium_intro_tour_done')) return;
+      if (localStorage.getItem(introTourKey(user.id))) return;
     } catch { /* ignorera */ }
     setShowIntroTutorial(true);
   }, [user, (profile as any)?.role, (profile as any)?.onboarding_completed]);
+
 
 
   // Support → "Hjälp & tips" öppnar hela välkomstkortet igen.
