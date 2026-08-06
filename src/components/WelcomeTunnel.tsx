@@ -36,15 +36,51 @@ interface WelcomeTunnelProps {
   previewMode?: boolean;
 }
 
-const WELCOME_STEP_KEY = 'parium_welcome_step';
+// 🔒 Alla utkastnycklar är kontospecifika — ett nytt konto i samma flik/enhet
+// får ALDRIG se data från ett tidigare konto.
+const STEP_KEY_PREFIX = 'parium_welcome_step';
+const TEXT_KEY_PREFIX = 'parium_welcome_text_draft';
+const MEDIA_KEY_PREFIX = 'parium_welcome_local_media';
+const WELCOME_KEY_PREFIXES = [STEP_KEY_PREFIX, TEXT_KEY_PREFIX, MEDIA_KEY_PREFIX];
+
+const scopedKey = (prefix: string, uid?: string | null) => `${prefix}:${uid ?? 'anon'}`;
+
+/** Rensar alla välkomstutkast som inte tillhör det inloggade kontot. */
+const purgeForeignWelcomeDrafts = (uid: string) => {
+  try {
+    const keep = new Set(WELCOME_KEY_PREFIXES.map((p) => scopedKey(p, uid)));
+    const toRemove: string[] = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (!key) continue;
+      if (WELCOME_KEY_PREFIXES.some((p) => key.startsWith(p)) && !keep.has(key)) {
+        toRemove.push(key);
+      }
+    }
+    toRemove.forEach((k) => sessionStorage.removeItem(k));
+  } catch {
+    /* noop */
+  }
+};
 
 const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: WelcomeTunnelProps) => {
   const { profile, updateProfile, refreshProfile, user, signOut } = useAuth();
   const { toast } = useToast();
+  const userId = user?.id ?? null;
+
+  // Rensa direkt (synkront) allt som hör till ett annat konto innan något läses in.
+  const purgedForRef = useRef<string | null>(null);
+  if (userId && purgedForRef.current !== userId) {
+    purgedForRef.current = userId;
+    purgeForeignWelcomeDrafts(userId);
+  }
+
+  const WELCOME_STEP_KEY = scopedKey(STEP_KEY_PREFIX, userId);
+
   const [currentStep, setCurrentStep] = useState(() => {
     if (typeof initialStep === 'number') return initialStep;
     try {
-      const stored = Number(sessionStorage.getItem(WELCOME_STEP_KEY));
+      const stored = Number(sessionStorage.getItem(scopedKey(STEP_KEY_PREFIX, userId)));
       // Återuppta bara på ett synligt ifyllnadssteg (1–6)
       if (Number.isFinite(stored) && stored >= 1 && stored <= 6) return stored;
     } catch {
@@ -55,6 +91,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
 
   // 🔒 Kom ihåg vilket steg användaren är på vid refresh (samma flik)
   useEffect(() => {
+    if (!userId) return;
     try {
       if (currentStep >= 1 && currentStep <= 6) {
         sessionStorage.setItem(WELCOME_STEP_KEY, String(currentStep));
@@ -64,7 +101,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     } catch {
       /* noop */
     }
-  }, [currentStep]);
+  }, [currentStep, userId, WELCOME_STEP_KEY]);
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [redirectState, setRedirectState] = useState<'idle' | 'checking' | 'already_completed'>('idle');
