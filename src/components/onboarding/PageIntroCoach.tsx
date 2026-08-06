@@ -348,6 +348,17 @@ const PageIntroCoach = () => {
     window.setTimeout(() => setReplayToken((t) => t + 1), 200);
   }, []);
 
+  /** Sista steget: starta om hela guiden från första sidan. */
+  const restartGuide = useCallback(() => {
+    startPageCoachTour(TOUR_PATHS[0]);
+    setVisible(false);
+    window.setTimeout(() => {
+      setReplayToken((t) => t + 1);
+      navigate(TOUR_PATHS[0]);
+    }, 200);
+  }, [navigate]);
+
+
   /** Kryss: stäng tipset och gå tillbaka till översiktslistan. */
   const backToOverview = useCallback(() => {
     markAllPageCoachesSeen();
@@ -440,6 +451,15 @@ const PageIntroCoach = () => {
           </p>
 
           <div className="mt-4 flex w-full flex-col items-center justify-center gap-2.5">
+            {isGuidedTour && !nextTourPath && (
+              <button
+                type="button"
+                onClick={restartGuide}
+                className="inline-flex min-w-36 max-w-full items-center justify-center rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              >
+                <span className="truncate">Börja om från början</span>
+              </button>
+            )}
             {primaryLabel && (
               <button
                 type="button"
@@ -460,6 +480,7 @@ const PageIntroCoach = () => {
               </button>
             )}
           </div>
+
         </div>
       </div>
     </div>,
