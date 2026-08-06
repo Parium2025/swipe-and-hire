@@ -84,9 +84,11 @@ const SelectContent = React.forwardRef<
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn(
-          "p-1",
+          // Viewporten ska växa exakt efter antalet alternativ — aldrig lämna
+          // tom yta under sista raden (märks mest på mobil).
+          "p-1 max-h-[min(60vh,var(--radix-select-content-available-height))]",
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+            "w-full min-w-[var(--radix-select-trigger-width)]"
         )}
       >
         {children}
