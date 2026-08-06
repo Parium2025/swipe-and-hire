@@ -153,27 +153,41 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
         setSummary(data);
         setIsStale(!!(data && cvUrl && data.cv_url !== cvUrl));
 
-        // Saknas analys för det aktuella CV:t? Köa den automatiskt.
+        // Saknas analys för det aktuella CV:t? Kör direkt — och köa som skyddsnät.
         const needsAnalysis = !!cvUrl && (!data || data.cv_url !== cvUrl);
         if (needsAnalysis && triggeredRef.current !== cvUrl) {
           triggeredRef.current = cvUrl!;
           setAnalyzing(true);
           setFailed(false);
+
+          // 1) Skyddsnät: kön (cron plockar upp den om direktanropet misslyckas).
           try {
             await supabase.rpc('queue_cv_analysis', {
               p_applicant_id: userId,
               p_cv_url: cvUrl!,
               p_priority: 10,
             });
-            // Kön processas av cron (varje minut) — klienten triggar inte AI-jobbet.
           } catch (err) {
             console.warn('Kunde inte köa CV-analys:', err);
           }
 
-          // Poll while the queue processes (upp till ~60 sek)
+          // 2) Direktanrop så att svaret kommer på sekunder, inte efter cron-minuten.
+          //    Vi väntar inte på svaret innan pollningen startar — den fångar upp
+          //    resultatet oavsett vilken väg som blir klar först.
+          const direct = supabase.functions
+            .invoke('generate-cv-summary', {
+              body: { applicant_id: userId, proactive: true },
+            })
+            .catch((err) => {
+              console.warn('Direkt CV-analys misslyckades, kön tar över:', err);
+              return null;
+            });
+
+          // 3) Poll tills analysen finns (hård gräns ~60 sek — kan aldrig fastna).
           let done = false;
-          for (let i = 0; i < 20 && !cancelled; i++) {
-            await new Promise((r) => setTimeout(r, 3000));
+          const deadline = Date.now() + 60_000;
+          while (!cancelled && Date.now() < deadline) {
+            await new Promise((r) => setTimeout(r, 2000));
             const fresh = await fetchSummary();
             if (cancelled) return;
             if (fresh && fresh.cv_url === cvUrl) {
@@ -183,11 +197,13 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
               break;
             }
           }
+          void direct;
           if (!cancelled) {
             setAnalyzing(false);
             if (!done) setFailed(true);
           }
         }
+
       } finally {
         if (!cancelled) setLoading(false);
       }
