@@ -591,7 +591,7 @@ VIKTIGT:
           document_type: documentType,
           summary_text: summaryText,
           key_points: [docPoint, ...normalizedPoints],
-          raw_text: rawExtractedText,
+          raw_text: safeRawText,
           analyzed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }, {
@@ -599,10 +599,16 @@ VIKTIGT:
         });
 
       if (profileSaveError) {
+        // Sparfel får ALDRIG rapporteras som lyckat — då tror kön att jobbet är
+        // klart medan profilen fastnar i "Analyserar…". Returnera fel så kön
+        // försöker igen.
         console.error('Error saving proactive summary:', profileSaveError);
-      } else {
-        console.log('Proactive CV summary saved successfully');
+        return new Response(
+          JSON.stringify({ error: 'Kunde inte spara analysen. Försöker igen automatiskt.', code: 'save_failed' }),
+          { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
+      console.log('Proactive CV summary saved successfully');
     }
 
     // Save to candidate_summaries if we have a job_id (job-specific analysis)
@@ -616,7 +622,7 @@ VIKTIGT:
           application_id: application?.id || application_id,
           summary_text: summaryText,
           key_points: [docPoint, ...normalizedPoints],
-          raw_text: rawExtractedText,
+          raw_text: safeRawText,
           generated_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }, {
@@ -627,6 +633,7 @@ VIKTIGT:
         console.error('Error saving job-specific summary:', saveError);
       }
     }
+
 
     console.log('CV summary generated successfully');
 
