@@ -348,6 +348,17 @@ const PageIntroCoach = () => {
     window.setTimeout(() => setReplayToken((t) => t + 1), 200);
   }, []);
 
+  /** Sista steget: starta om hela guiden från första sidan. */
+  const restartGuide = useCallback(() => {
+    startPageCoachTour(TOUR_PATHS[0]);
+    setVisible(false);
+    window.setTimeout(() => {
+      setReplayToken((t) => t + 1);
+      navigate(TOUR_PATHS[0]);
+    }, 200);
+  }, [navigate]);
+
+
   /** Kryss: stäng tipset och gå tillbaka till översiktslistan. */
   const backToOverview = useCallback(() => {
     markAllPageCoachesSeen();
