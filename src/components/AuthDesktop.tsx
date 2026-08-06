@@ -748,7 +748,7 @@ const AuthDesktop = ({
                         )}
                        
                         {showResetPassword && !resetPasswordSent && (
-                         <div className="mt-4 p-3 rounded-lg text-center">
+                         <div className="mt-2 p-2 rounded-lg text-center">
                             <Button
                               variant="glass"
                               size="sm"
