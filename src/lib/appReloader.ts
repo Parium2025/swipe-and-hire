@@ -171,6 +171,27 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
 /**
  * Begär en app-reload. Säker att anropa flera gånger — locket förhindrar dubbletter.
  */
+/**
+ * True om användaren har skrivit något i ett formulär eller står i ett fält.
+ * Då får vi ALDRIG ladda om direkt — då försvinner det som skrivits.
+ */
+const hasPendingUserInput = (): boolean => {
+  try {
+    const active = document.activeElement as HTMLElement | null;
+    if (active && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName)) return true;
+    if (active?.isContentEditable) return true;
+    const fields = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+      'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), textarea'
+    );
+    for (const field of Array.from(fields)) {
+      if (field.value && field.value.trim().length > 0) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
+
 export const requestAppReload = (reason: ReloadReason, options: ReloadOptions = {}): void => {
   log('requestAppReload', reason, options);
 
@@ -179,7 +200,7 @@ export const requestAppReload = (reason: ReloadReason, options: ReloadOptions = 
     return;
   }
 
-  if (options.defer) {
+  if (options.defer || (reason !== 'user-action' && hasPendingUserInput())) {
     scheduleDeferredReload(options);
     return;
   }
@@ -188,6 +209,7 @@ export const requestAppReload = (reason: ReloadReason, options: ReloadOptions = 
     log('skipped — could not acquire lock');
     return;
   }
+
 
   if (options.purgeCaches) {
     void purgeRuntimeCaches().finally(() => performReload(options));
