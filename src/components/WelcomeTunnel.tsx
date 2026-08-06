@@ -131,6 +131,14 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // Uppladdad media behålls inom den aktuella fliken tills profilen slutförs.
   const storageScope = user?.id ?? 'anon';
   const WELCOME_LOCAL_MEDIA_KEY = `parium_welcome_local_media_${storageScope}`;
+
+  // Om användaren går igenom välkomsttunneln ska introduktionsguiden alltid
+  // kunna visas efteråt för det kontot — även i en webbläsare som sett den förut.
+  useEffect(() => {
+    if (previewMode || !user?.id) return;
+    try { localStorage.removeItem(`parium_intro_tour_done:${user.id}`); } catch { /* ignorera */ }
+  }, [previewMode, user?.id]);
+
   
   interface WelcomeLocalMediaState {
     profileImageUrl: string;
