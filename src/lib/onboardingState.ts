@@ -87,8 +87,19 @@ export async function loadCoachState(): Promise<CoachState | null> {
 }
 
 export async function saveCoachState(state: CoachState): Promise<boolean> {
-  return upsert({ coach_state: { ...state, savedAt: Date.now() } });
+  // Slå ihop med det som redan finns i molnet — annars raderas flaggor som
+  // `introTourDone` när sidtipsen sparas, och guiden dyker upp igen på nästa enhet.
+  const row = await fetchRow();
+  const existing = (row?.coach_state ?? {}) as CoachState & Record<string, unknown>;
+  const merged = {
+    ...existing,
+    ...state,
+    seen: { ...(existing.seen ?? {}), ...(state.seen ?? {}) },
+    savedAt: Date.now(),
+  };
+  return upsert({ coach_state: merged as CoachState });
 }
+
 
 /* ── Introguiden ("Hjälp & tips") ─────────────────────────────── */
 
