@@ -169,9 +169,6 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
 
 
 /**
- * Begär en app-reload. Säker att anropa flera gånger — locket förhindrar dubbletter.
- */
-/**
  * True om användaren har skrivit något i ett formulär eller står i ett fält.
  * Då får vi ALDRIG ladda om direkt — då försvinner det som skrivits.
  */
