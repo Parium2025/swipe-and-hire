@@ -35,7 +35,9 @@ const LogoSidebarTrigger = () => {
   return (
     <button
       onClick={toggleSidebar}
-      className="flex items-center hover:opacity-80 active:scale-[0.97] transition-opacity shrink-0 touch-manipulation"
+      onPointerUp={(e) => e.currentTarget.blur()}
+      className="flex items-center hover:opacity-80 active:opacity-80 transition-opacity duration-150 shrink-0 touch-manipulation outline-none focus:outline-none"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
       aria-label="Öppna meny"
     >
       <div
