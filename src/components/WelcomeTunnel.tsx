@@ -326,8 +326,34 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   );
   const [hasValidLocation, setHasValidLocation] = useState(false);
 
+  // 🔒 Hydrera utkastet först när kontot är känt (annars kan tomma fält skriva över).
+  const hydratedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!userId || hydratedForRef.current === userId) return;
+    hydratedForRef.current = userId;
+    const draft = getTextDraft();
+    if (!draft) return;
+    setFormData(prev => ({
+      ...prev,
+      firstName: draft.firstName || prev.firstName,
+      lastName: draft.lastName || prev.lastName,
+      bio: draft.bio || prev.bio,
+      location: draft.location || prev.location,
+      phone: draft.phone || prev.phone,
+      birthDate: draft.birthDate || prev.birthDate,
+      employmentStatus: draft.employmentStatus || prev.employmentStatus,
+      workingHours: draft.workingHours || prev.workingHours,
+      availability: draft.availability || prev.availability,
+      interests: Array.isArray(draft.interests) && draft.interests.length ? draft.interests : prev.interests,
+    }));
+    if (draft.postalCode) setPostalCode(draft.postalCode);
+    if (draft.userLocation) setUserLocation(draft.userLocation);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
   // 🔒 Spara textfälten i sessionStorage vid varje ändring
   useEffect(() => {
+    if (!userId || hydratedForRef.current !== userId) return;
     try {
       sessionStorage.setItem(
         WELCOME_TEXT_KEY,
