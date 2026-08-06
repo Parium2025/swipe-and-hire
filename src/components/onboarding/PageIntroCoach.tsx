@@ -25,6 +25,9 @@ const STORAGE_PREFIX = 'parium_page_coach_v1_';
 const ACTIVE_TOUR_KEY = 'parium_page_coach_active';
 /** Hårdstopp: när guiden avslutats visas INGA sidtips förrän man startar om den. */
 const COACH_DISABLED_KEY = 'parium_page_coach_disabled';
+/** Vilket konto den lokala cachen tillhör — byts konto på enheten töms cachen. */
+const COACH_OWNER_KEY = 'parium_page_coach_owner';
+
 /** Speglar WELCOME_CARD_REPLAY_EVENT i AppOnboardingTour (undviker cirkulär import). */
 const WELCOME_CARD_REPLAY_EVENT_NAME = 'parium:welcome-card-replay';
 
