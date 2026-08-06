@@ -1,0 +1,1 @@
+UPDATE public.profiles SET onboarding_completed = false, updated_at = now() WHERE user_id = '4b291377-55a4-41d1-b959-b4a8588249d9';

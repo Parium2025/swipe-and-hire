@@ -385,19 +385,6 @@ const Index = () => {
     setShowIntroTutorial(true);
   }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
 
-  // Testlänk: ?tour=1 nollställer guiden och visar välkomstkortet direkt.
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('tour') !== '1') return;
-      localStorage.removeItem('parium_intro_tour_done');
-      resetPageCoachMarks();
-      setShowIntroTutorial(true);
-      params.delete('tour');
-      const qs = params.toString();
-      window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''));
-    } catch { /* ignorera */ }
-  }, []);
 
   // Första inloggningen som jobbsökande: välkomstkortet ("Hjälp & tips") ska
   // alltid dyka upp när profilen är klar — oavsett om tunneln slutfördes i den
