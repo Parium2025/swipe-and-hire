@@ -244,12 +244,18 @@ export const persistBuildSignature = (): void => {
   try {
     const sig = computeBuildSignature();
     if (!sig) return;
+    const previous = localStorage.getItem('parium_build_version');
     localStorage.setItem('parium_build_version', sig);
     try {
       sessionStorage.removeItem(LOCK_KEY);
+      // Appen startade helt — chunk-återhämtningen får användas igen vid en
+      // framtida deploy. Utan detta kunde en enda lyckad återhämtning i samma
+      // flik blockera nästa (användaren fastnade på felsidan istället).
+      if (previous !== sig) sessionStorage.removeItem('parium-chunk-reload-once');
     } catch {
       /* noop */
     }
+
   } catch {
     /* noop */
   }
