@@ -366,6 +366,9 @@ const CandidatesContent = () => {
   );
 };
 
+// Guiden ("Hjälp & tips") markeras som klar per konto, inte per webbläsare.
+const introTourKey = (userId: string) => `parium_intro_tour_done:${userId}`;
+
 const Index = () => {
   const { user, profile, userRole, signOut, loading, authAction, switchRole } = useAuth();
   const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
@@ -389,15 +392,18 @@ const Index = () => {
   // Första inloggningen som jobbsökande: välkomstkortet ("Hjälp & tips") ska
   // alltid dyka upp när profilen är klar — oavsett om tunneln slutfördes i den
   // här fliken, på en annan enhet, eller om sidan hann navigera/refresha.
+  // Flaggan är per konto (inte per webbläsare) så ett nytt konto på samma
+  // telefon alltid får guiden.
   useEffect(() => {
     if (!user) return;
     if ((profile as any)?.role !== 'job_seeker') return;
     if (!(profile as any)?.onboarding_completed) return;
     try {
-      if (localStorage.getItem('parium_intro_tour_done')) return;
+      if (localStorage.getItem(introTourKey(user.id))) return;
     } catch { /* ignorera */ }
     setShowIntroTutorial(true);
   }, [user, (profile as any)?.role, (profile as any)?.onboarding_completed]);
+
 
 
   // Support → "Hjälp & tips" öppnar hela välkomstkortet igen.
@@ -568,7 +574,7 @@ const Index = () => {
 
       // 3) Standard: gå till sök + visa introrundturen första gången
       try {
-        if (!localStorage.getItem('parium_intro_tour_done')) {
+        if (!localStorage.getItem(introTourKey(user.id))) {
           setShowIntroTutorial(true);
         }
       } catch { /* ignorera */ }
@@ -594,7 +600,7 @@ const Index = () => {
   // Show app intro tutorial after onboarding
   const showTourOverlay = showIntroTutorial;
   const finishIntroTour = () => {
-    try { localStorage.setItem('parium_intro_tour_done', '1'); } catch { /* ignorera */ }
+    try { localStorage.setItem(introTourKey(user.id), '1'); } catch { /* ignorera */ }
     setShowIntroTutorial(false);
   };
   
