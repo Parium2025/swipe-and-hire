@@ -393,17 +393,23 @@ const Index = () => {
   // alltid dyka upp när profilen är klar — oavsett vilken enhet tunneln
   // slutfördes på. Flaggan ligger i molnet (per konto), localStorage används
   // bara som snabb cache så kortet inte blinkar fram två gånger.
+  const introTourHandledRef = useRef(false);
   useEffect(() => {
     if (!user) return;
     if ((profile as any)?.role !== 'job_seeker') return;
-    if (!(profile as any)?.onboarding_completed) return;
+    if ((profile as any)?.onboarding_completed !== true) return;
+    if (introTourHandledRef.current) return;
     let cancelled = false;
     try {
-      if (localStorage.getItem(introTourKey(user.id))) return;
+      if (localStorage.getItem(introTourKey(user.id))) {
+        introTourHandledRef.current = true;
+        return;
+      }
     } catch { /* ignorera */ }
     import('@/lib/onboardingState').then(async ({ isIntroTourDone }) => {
       const done = await isIntroTourDone().catch(() => false);
-      if (cancelled) return;
+      if (cancelled || introTourHandledRef.current) return;
+      introTourHandledRef.current = true;
       if (done) {
         try { localStorage.setItem(introTourKey(user.id), '1'); } catch { /* ignorera */ }
         return;
@@ -412,6 +418,7 @@ const Index = () => {
     });
     return () => { cancelled = true; };
   }, [user, (profile as any)?.role, (profile as any)?.onboarding_completed]);
+
 
 
 
