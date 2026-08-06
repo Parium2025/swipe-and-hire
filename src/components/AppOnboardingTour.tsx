@@ -106,6 +106,22 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
     return () => cancelAnimationFrame(id);
   }, []);
 
+  // Ingen tyst omladdning får avbryta guiden — den skulle annars visas på nytt
+  // direkt efter välkomsttunneln.
+  useEffect(() => {
+    let release: (() => void) | undefined;
+    let cancelled = false;
+    import('@/lib/appReloader').then(({ suppressAppReload }) => {
+      if (cancelled) return;
+      release = suppressAppReload();
+    });
+    return () => {
+      cancelled = true;
+      release?.();
+    };
+  }, []);
+
+
   // Lås bakgrundsscroll medan kortet visas
   useEffect(() => {
     const previous = document.body.style.overflow;
