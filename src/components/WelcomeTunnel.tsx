@@ -388,6 +388,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     formData.interests,
     postalCode,
     userLocation,
+    userId,
   ]);
 
   
