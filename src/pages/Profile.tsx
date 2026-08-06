@@ -160,33 +160,44 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
           setAnalyzing(true);
           setFailed(false);
 
-          // 1) Skyddsnät: kön (cron plockar upp den om direktanropet misslyckas).
+          // 1) Direktanrop → svar på sekunder istället för att vänta på cron-minuten.
+          let directOk = false;
           try {
-            await supabase.rpc('queue_cv_analysis', {
-              p_applicant_id: userId,
-              p_cv_url: cvUrl!,
-              p_priority: 10,
+            const res = await supabase.functions.invoke('generate-cv-summary', {
+              body: { applicant_id: userId, proactive: true },
             });
+            directOk = !res.error;
+            if (res.error) console.warn('Direkt CV-analys misslyckades:', res.error);
           } catch (err) {
-            console.warn('Kunde inte köa CV-analys:', err);
+            console.warn('Direkt CV-analys kastade fel:', err);
           }
 
-          // 2) Direktanrop så att svaret kommer på sekunder, inte efter cron-minuten.
-          //    Vi väntar inte på svaret innan pollningen startar — den fångar upp
-          //    resultatet oavsett vilken väg som blir klar först.
-          const direct = supabase.functions
-            .invoke('generate-cv-summary', {
-              body: { applicant_id: userId, proactive: true },
-            })
-            .catch((err) => {
-              console.warn('Direkt CV-analys misslyckades, kön tar över:', err);
-              return null;
-            });
+          // 2) Skyddsnät: bara om direktanropet inte gick igenom (undviker dubbel AI-kostnad).
+          //    Kön självläker dessutom var minut via cron om fliken stängs.
+          if (!directOk) {
+            try {
+              await supabase.rpc('queue_cv_analysis', {
+                p_applicant_id: userId,
+                p_cv_url: cvUrl!,
+                p_priority: 10,
+              });
+            } catch (err) {
+              console.warn('Kunde inte köa CV-analys:', err);
+            }
+          }
 
-          // 3) Poll tills analysen finns (hård gräns ~60 sek — kan aldrig fastna).
+          // 3) Poll tills analysen finns (hård gräns 60 sek — kan aldrig fastna).
           let done = false;
           const deadline = Date.now() + 60_000;
-          while (!cancelled && Date.now() < deadline) {
+          // Kolla direkt efter direktanropet innan vi börjar vänta.
+          const immediate = await fetchSummary();
+          if (cancelled) return;
+          if (immediate && immediate.cv_url === cvUrl) {
+            setSummary(immediate);
+            setIsStale(false);
+            done = true;
+          }
+          while (!done && !cancelled && Date.now() < deadline) {
             await new Promise((r) => setTimeout(r, 2000));
             const fresh = await fetchSummary();
             if (cancelled) return;
@@ -194,10 +205,9 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
               setSummary(fresh);
               setIsStale(false);
               done = true;
-              break;
             }
           }
-          void direct;
+
           if (!cancelled) {
             setAnalyzing(false);
             if (!done) setFailed(true);
