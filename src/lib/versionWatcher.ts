@@ -13,8 +13,8 @@
 
 import { requestAppReload, shortHash } from './appReloader';
 
-const HEARTBEAT_INTERVAL_MS = 60 * 1000; // tät landing-check efter publish, utan manuell Safari-rensning
-const MIN_CHECK_GAP_MS = 20 * 1000; // dubbletter-skydd
+const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // lugn puls — sparar batteri/data på mobil
+const MIN_CHECK_GAP_MS = 60 * 1000; // dubbletter-skydd (visibility+focus fyrar ofta ihop)
 
 let installed = false;
 let heartbeatId: ReturnType<typeof setInterval> | null = null;
@@ -39,20 +39,20 @@ const getClientVersion = (): string | null => {
   }
 };
 
-const isLandingPage = (): boolean => {
-  try {
-    return window.location.pathname === '/' || window.location.pathname === '/index';
-  } catch {
-    return false;
-  }
-};
-
 const checkVersion = async (reason: string): Promise<void> => {
   const now = Date.now();
   if (now - lastCheckAt < MIN_CHECK_GAP_MS) {
     log('skip — too soon since last check', reason);
     return;
   }
+
+  // Offline (tunnel/hiss/flygplansläge) → ingen poll, ingen felspam
+  try {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  } catch {
+    /* noop */
+  }
+
   lastCheckAt = now;
 
   const clientVersion = getClientVersion();
@@ -60,6 +60,7 @@ const checkVersion = async (reason: string): Promise<void> => {
     log('skip — no client version (dev mode)');
     return;
   }
+
 
   try {
     const res = await fetch('/version.json', {
@@ -80,8 +81,11 @@ const checkVersion = async (reason: string): Promise<void> => {
       server: data.version,
     });
 
+    // ALLTID deferred — även på landningssidan. En ny build får aldrig rycka
+    // undan sidan medan användaren läser eller fyller i något; omladdningen
+    // sker vid nästa navigering eller när fliken göms.
     requestAppReload('build-version', {
-      defer: !isLandingPage(),
+      defer: true,
       purgeCaches: true,
       cacheBustParam: { key: '_v', value: shortHash(data.version) },
     });

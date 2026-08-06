@@ -113,9 +113,14 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
   log('deferred reload scheduled');
 
   let executed = false;
+  let idleFallback: ReturnType<typeof setInterval> | null = null;
   const fire = () => {
     if (executed) return;
     executed = true;
+    if (idleFallback) {
+      clearInterval(idleFallback);
+      idleFallback = null;
+    }
     if (!acquireLock()) {
       log('deferred fire skipped — lock held');
       return;
@@ -159,12 +164,12 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
   // 3. Säkerhetsnät — men ALDRIG medan användaren har sidan framför sig.
   // (Tidigare tvingades en reload efter 30s idle även när tabben var synlig,
   // vilket gav "sidan laddade om sig själv mitt i" och rensade ifyllda fält.)
-  const idleFallback = setInterval(() => {
+  idleFallback = setInterval(() => {
     if (document.visibilityState === 'hidden') {
-      clearInterval(idleFallback);
       fire();
     }
   }, IDLE_DELAY_MS);
+
 };
 
 
@@ -239,12 +244,18 @@ export const persistBuildSignature = (): void => {
   try {
     const sig = computeBuildSignature();
     if (!sig) return;
+    const previous = localStorage.getItem('parium_build_version');
     localStorage.setItem('parium_build_version', sig);
     try {
       sessionStorage.removeItem(LOCK_KEY);
+      // Appen startade helt — chunk-återhämtningen får användas igen vid en
+      // framtida deploy. Utan detta kunde en enda lyckad återhämtning i samma
+      // flik blockera nästa (användaren fastnade på felsidan istället).
+      if (previous !== sig) sessionStorage.removeItem('parium-chunk-reload-once');
     } catch {
       /* noop */
     }
+
   } catch {
     /* noop */
   }
