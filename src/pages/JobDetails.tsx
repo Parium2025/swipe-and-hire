@@ -71,7 +71,7 @@ const JobDetails = () => {
     } else if (window.history.state?.idx > 0) {
       navigate(-1);
     } else {
-      navigate('/');
+      navigate('/dashboard', { replace: true });
     }
   }, [location.state, navigate]);
 
