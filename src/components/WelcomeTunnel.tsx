@@ -167,8 +167,8 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   
   // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
   // Uppladdad media behålls inom den aktuella fliken tills profilen slutförs.
-  const storageScope = user?.id ?? 'anon';
-  const WELCOME_LOCAL_MEDIA_KEY = `parium_welcome_local_media_${storageScope}`;
+  const storageScope = userId ?? 'anon';
+  const WELCOME_LOCAL_MEDIA_KEY = scopedKey(MEDIA_KEY_PREFIX, userId);
 
   // Om användaren går igenom välkomsttunneln ska introduktionsguiden alltid
   // kunna visas efteråt för det kontot — även i en webbläsare som sett den förut.
