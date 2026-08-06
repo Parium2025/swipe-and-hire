@@ -366,6 +366,9 @@ const CandidatesContent = () => {
   );
 };
 
+// Guiden ("Hjälp & tips") markeras som klar per konto, inte per webbläsare.
+const introTourKey = (userId: string) => `parium_intro_tour_done:${userId}`;
+
 const Index = () => {
   const { user, profile, userRole, signOut, loading, authAction, switchRole } = useAuth();
   const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
