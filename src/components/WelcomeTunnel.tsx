@@ -1150,12 +1150,9 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
 
 
       setTimeout(() => {
-        toast({
-          title: "Välkommen till Parium!",
-          description: "Din profil är nu skapad och du kan börja söka jobb."
-        });
         onComplete();
       }, 2000);
+
     } catch (error) {
       console.error('Error in handleSubmit:', error);
       const message = error instanceof Error ? error.message : String(error ?? '');
