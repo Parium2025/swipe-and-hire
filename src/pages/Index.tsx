@@ -600,7 +600,7 @@ const Index = () => {
   // Show app intro tutorial after onboarding
   const showTourOverlay = showIntroTutorial;
   const finishIntroTour = () => {
-    try { localStorage.setItem('parium_intro_tour_done', '1'); } catch { /* ignorera */ }
+    try { localStorage.setItem(introTourKey(user.id), '1'); } catch { /* ignorera */ }
     setShowIntroTutorial(false);
   };
   
