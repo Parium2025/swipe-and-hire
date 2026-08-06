@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const SESSION_TOKEN_KEY = 'parium_session_token';
+const SESSION_TOKEN_COOKIE = 'parium_device_token';
 const HEARTBEAT_INTERVAL_MS = 4 * 60 * 1000; // 4 minutes — well under DB cleanup threshold (20 min)
 const VALIDITY_CHECK_INTERVAL_MS = 30 * 1000; // 30 seconds — reduced frequency to avoid false kicks on mobile
 
@@ -12,13 +13,49 @@ const VALIDITY_CHECK_INTERVAL_MS = 30 * 1000; // 30 seconds — reduced frequenc
 const SESSION_TOKEN_LOCK = 'parium-session-token-lock';
 const SESSION_TOKEN_MUTEX_KEY = 'parium_session_token_mutex';
 
+const readSharedDomainToken = (): string | null => {
+  try {
+    const prefix = `${SESSION_TOKEN_COOKIE}=`;
+    const entry = document.cookie.split('; ').find((cookie) => cookie.startsWith(prefix));
+    return entry ? decodeURIComponent(entry.slice(prefix.length)) : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeSharedDomainToken = (token: string): void => {
+  try {
+    const hostname = window.location.hostname.toLowerCase();
+    const domain = hostname === 'parium.se' || hostname.endsWith('.parium.se')
+      ? '; Domain=.parium.se'
+      : '';
+    document.cookie = `${SESSION_TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=31536000; SameSite=Lax; Secure${domain}`;
+  } catch {
+    // localStorage remains the fallback outside the production domains.
+  }
+};
+
 const readOrCreateStoredToken = (): string => {
+  // Root and www are separate localStorage origins. The first-party cookie is
+  // shared across .parium.se so the same browser cannot count twice merely by
+  // moving between parium.se and www.parium.se.
+  const shared = readSharedDomainToken();
+  if (shared) {
+    localStorage.setItem(SESSION_TOKEN_KEY, shared);
+    return shared;
+  }
+
   const existing = localStorage.getItem(SESSION_TOKEN_KEY);
-  if (existing) return existing;
+  if (existing) {
+    writeSharedDomainToken(existing);
+    return existing;
+  }
 
   const created = crypto.randomUUID();
   localStorage.setItem(SESSION_TOKEN_KEY, created);
-  return localStorage.getItem(SESSION_TOKEN_KEY) ?? created;
+  const stored = localStorage.getItem(SESSION_TOKEN_KEY) ?? created;
+  writeSharedDomainToken(stored);
+  return stored;
 };
 
 /**
