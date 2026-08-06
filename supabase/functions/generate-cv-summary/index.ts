@@ -540,16 +540,31 @@ VIKTIGT:
       meta 
     };
 
+    // Postgres text-kolumner kan inte lagra NUL (\u0000) eller andra styrtecken.
+    // PDF-extraktion ger ofta med sig sådana — tvätta bort dem, annars kraschar
+    // insert:en (22P05) och analysen fastnar i "Analyserar…" för alltid.
+    const clean = (value: unknown): string =>
+      typeof value === 'string'
+        // eslint-disable-next-line no-control-regex
+        ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ' ').replace(/\uFFFD/g, '')
+        : '';
+
     const normalizedPoints = Array.isArray(summary.key_points)
       ? summary.key_points
           .map((p: any) => (typeof p === 'string' ? { text: p, type: 'neutral' } : p))
           .filter((p: any) => typeof p?.text === 'string' && p.text.trim().length > 0)
+          .map((p: any) => ({ ...p, text: clean(p.text) }))
       : [];
 
     // User-friendly message for non-CV documents (prefer the AI's concrete description)
-    const summaryText = summary.is_valid_cv === false
-      ? (summary.summary_text?.trim() || rejectionReason)
-      : (summary.summary_text || '');
+    const summaryText = clean(
+      summary.is_valid_cv === false
+        ? (summary.summary_text?.trim() || rejectionReason)
+        : (summary.summary_text || '')
+    );
+
+    const safeRawText = rawExtractedText ? clean(rawExtractedText) : null;
+
 
     // Never persist an empty analysis — an unparsable/blank AI answer must be retried,
     // not cached as "klar" (which would freeze the profile in an empty state forever).
