@@ -153,41 +153,67 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
         setSummary(data);
         setIsStale(!!(data && cvUrl && data.cv_url !== cvUrl));
 
-        // Saknas analys för det aktuella CV:t? Köa den automatiskt.
+        // Saknas analys för det aktuella CV:t? Kör direkt — och köa som skyddsnät.
         const needsAnalysis = !!cvUrl && (!data || data.cv_url !== cvUrl);
         if (needsAnalysis && triggeredRef.current !== cvUrl) {
           triggeredRef.current = cvUrl!;
           setAnalyzing(true);
           setFailed(false);
+
+          // 1) Direktanrop → svar på sekunder istället för att vänta på cron-minuten.
+          let directOk = false;
           try {
-            await supabase.rpc('queue_cv_analysis', {
-              p_applicant_id: userId,
-              p_cv_url: cvUrl!,
-              p_priority: 10,
+            const res = await supabase.functions.invoke('generate-cv-summary', {
+              body: { applicant_id: userId, proactive: true },
             });
-            // Kön processas av cron (varje minut) — klienten triggar inte AI-jobbet.
+            directOk = !res.error;
+            if (res.error) console.warn('Direkt CV-analys misslyckades:', res.error);
           } catch (err) {
-            console.warn('Kunde inte köa CV-analys:', err);
+            console.warn('Direkt CV-analys kastade fel:', err);
           }
 
-          // Poll while the queue processes (upp till ~60 sek)
+          // 2) Skyddsnät: bara om direktanropet inte gick igenom (undviker dubbel AI-kostnad).
+          //    Kön självläker dessutom var minut via cron om fliken stängs.
+          if (!directOk) {
+            try {
+              await supabase.rpc('queue_cv_analysis', {
+                p_applicant_id: userId,
+                p_cv_url: cvUrl!,
+                p_priority: 10,
+              });
+            } catch (err) {
+              console.warn('Kunde inte köa CV-analys:', err);
+            }
+          }
+
+          // 3) Poll tills analysen finns (hård gräns 60 sek — kan aldrig fastna).
           let done = false;
-          for (let i = 0; i < 20 && !cancelled; i++) {
-            await new Promise((r) => setTimeout(r, 3000));
+          const deadline = Date.now() + 60_000;
+          // Kolla direkt efter direktanropet innan vi börjar vänta.
+          const immediate = await fetchSummary();
+          if (cancelled) return;
+          if (immediate && immediate.cv_url === cvUrl) {
+            setSummary(immediate);
+            setIsStale(false);
+            done = true;
+          }
+          while (!done && !cancelled && Date.now() < deadline) {
+            await new Promise((r) => setTimeout(r, 2000));
             const fresh = await fetchSummary();
             if (cancelled) return;
             if (fresh && fresh.cv_url === cvUrl) {
               setSummary(fresh);
               setIsStale(false);
               done = true;
-              break;
             }
           }
+
           if (!cancelled) {
             setAnalyzing(false);
             if (!done) setFailed(true);
           }
         }
+
       } finally {
         if (!cancelled) setLoading(false);
       }
