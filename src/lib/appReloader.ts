@@ -107,6 +107,23 @@ const performReload = (opts: ReloadOptions): void => {
 
 let deferredScheduled = false;
 
+/**
+ * Hårt stopp för omladdningar (t.ex. medan välkomstguiden visas).
+ * En schemalagd omladdning väntar tills spärren släpps istället för att
+ * avbryta användaren mitt i.
+ */
+let reloadSuppressCount = 0;
+export const suppressAppReload = (): (() => void) => {
+  reloadSuppressCount += 1;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    reloadSuppressCount = Math.max(0, reloadSuppressCount - 1);
+  };
+};
+const isReloadSuppressed = () => reloadSuppressCount > 0;
+
 const scheduleDeferredReload = (opts: ReloadOptions): void => {
   if (deferredScheduled) return;
   deferredScheduled = true;
@@ -116,7 +133,12 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
   let idleFallback: ReturnType<typeof setInterval> | null = null;
   const fire = () => {
     if (executed) return;
+    if (isReloadSuppressed()) {
+      log('deferred fire skipped — suppressed');
+      return;
+    }
     executed = true;
+
     if (idleFallback) {
       clearInterval(idleFallback);
       idleFallback = null;
