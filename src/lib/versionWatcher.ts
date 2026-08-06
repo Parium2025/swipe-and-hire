@@ -81,8 +81,11 @@ const checkVersion = async (reason: string): Promise<void> => {
       server: data.version,
     });
 
+    // ALLTID deferred — även på landningssidan. En ny build får aldrig rycka
+    // undan sidan medan användaren läser eller fyller i något; omladdningen
+    // sker vid nästa navigering eller när fliken göms.
     requestAppReload('build-version', {
-      defer: !isLandingPage(),
+      defer: true,
       purgeCaches: true,
       cacheBustParam: { key: '_v', value: shortHash(data.version) },
     });
