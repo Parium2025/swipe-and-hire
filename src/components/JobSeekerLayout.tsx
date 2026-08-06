@@ -35,7 +35,9 @@ const LogoSidebarTrigger = () => {
   return (
     <button
       onClick={toggleSidebar}
-      className="flex items-center hover:opacity-80 active:scale-[0.97] transition-opacity shrink-0 touch-manipulation"
+      onPointerUp={(e) => e.currentTarget.blur()}
+      className="flex items-center hover:opacity-80 active:opacity-80 transition-opacity duration-150 shrink-0 touch-manipulation outline-none focus:outline-none"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
       aria-label="Öppna meny"
     >
       <div
@@ -195,13 +197,14 @@ const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }
                 navigate('/');
               }}
               aria-label="Gå till startsidan"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-base font-semibold tracking-tight select-none rounded-full px-3 py-1 active:opacity-80 transition-opacity duration-150 touch-manipulation outline-none focus:outline-none focus-visible:outline-none"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[46%] truncate text-white text-base font-semibold tracking-tight select-none rounded-full px-3 py-1 active:opacity-80 transition-opacity duration-150 touch-manipulation outline-none focus:outline-none focus-visible:outline-none"
               style={{ WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none', backfaceVisibility: 'hidden' }}
             >
               Parium
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="relative z-10 flex items-center gap-2">
+
               {/* Search button - hidden on /search-jobs */}
               {location.pathname !== '/search-jobs' && (
                 <button
