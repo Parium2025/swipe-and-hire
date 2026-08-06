@@ -574,7 +574,7 @@ const Index = () => {
 
       // 3) Standard: gå till sök + visa introrundturen första gången
       try {
-        if (!localStorage.getItem('parium_intro_tour_done')) {
+        if (!localStorage.getItem(introTourKey(user.id))) {
           setShowIntroTutorial(true);
         }
       } catch { /* ignorera */ }
