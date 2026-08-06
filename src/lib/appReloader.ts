@@ -224,7 +224,7 @@ export const requestAppReload = (reason: ReloadReason, options: ReloadOptions = 
     return;
   }
 
-  if (options.defer || (reason !== 'user-action' && hasPendingUserInput())) {
+  if (options.defer || (reason !== 'user-action' && (isReloadSuppressed() || hasPendingUserInput()))) {
     scheduleDeferredReload(options);
     return;
   }
