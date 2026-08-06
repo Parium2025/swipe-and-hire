@@ -611,8 +611,10 @@ const Index = () => {
   const showTourOverlay = showIntroTutorial;
   const finishIntroTour = () => {
     try { localStorage.setItem(introTourKey(user.id), '1'); } catch { /* ignorera */ }
+    import('@/lib/onboardingState').then(({ markIntroTourDone }) => markIntroTourDone().catch(() => {}));
     setShowIntroTutorial(false);
   };
+
   
   // Resolve role from profile first to avoid flicker
   const role = (profile as any)?.role || (userRole?.role as string) || '';
