@@ -9,17 +9,69 @@ const VALIDITY_CHECK_INTERVAL_MS = 30 * 1000; // 30 seconds — reduced frequenc
  * Generate a unique session token per browser (persisted in localStorage).
  * Same browser = same token across tabs (so multiple tabs count as ONE session).
  */
-function getOrCreateSessionToken(): string {
+const SESSION_TOKEN_LOCK = 'parium-session-token-lock';
+const SESSION_TOKEN_MUTEX_KEY = 'parium_session_token_mutex';
+
+const readOrCreateStoredToken = (): string => {
+  const existing = localStorage.getItem(SESSION_TOKEN_KEY);
+  if (existing) return existing;
+
+  const created = crypto.randomUUID();
+  localStorage.setItem(SESSION_TOKEN_KEY, created);
+  return localStorage.getItem(SESSION_TOKEN_KEY) ?? created;
+};
+
+/**
+ * Get one stable token per browser profile, including when several new tabs
+ * open simultaneously. A plain get/set has a race where two empty tabs can
+ * each return a different UUID and therefore look like two devices.
+ */
+async function getOrCreateSessionToken(): Promise<string> {
   try {
-    let token = localStorage.getItem(SESSION_TOKEN_KEY);
-    if (!token) {
-      token = crypto.randomUUID();
-      localStorage.setItem(SESSION_TOKEN_KEY, token);
+    const lockManager = navigator.locks;
+    if (lockManager) {
+      return await lockManager.request(SESSION_TOKEN_LOCK, { mode: 'exclusive' }, () =>
+        readOrCreateStoredToken()
+      );
     }
-    return token;
+
+    // Cross-tab fallback for browsers without Web Locks.
+    const owner = crypto.randomUUID();
+    const deadline = Date.now() + 2_000;
+    while (Date.now() < deadline) {
+      const now = Date.now();
+      const raw = localStorage.getItem(SESSION_TOKEN_MUTEX_KEY);
+      const [currentOwner, expiresRaw] = raw?.split(':') ?? [];
+      const expiresAt = Number(expiresRaw ?? 0);
+
+      if (!currentOwner || !Number.isFinite(expiresAt) || expiresAt <= now) {
+        localStorage.setItem(SESSION_TOKEN_MUTEX_KEY, `${owner}:${now + 1_000}`);
+        if (localStorage.getItem(SESSION_TOKEN_MUTEX_KEY)?.startsWith(`${owner}:`)) {
+          try {
+            return readOrCreateStoredToken();
+          } finally {
+            if (localStorage.getItem(SESSION_TOKEN_MUTEX_KEY)?.startsWith(`${owner}:`)) {
+              localStorage.removeItem(SESSION_TOKEN_MUTEX_KEY);
+            }
+          }
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 20 + Math.random() * 30));
+    }
+
+    return readOrCreateStoredToken();
   } catch {
-    // Fallback for private browsing
-    return crypto.randomUUID();
+    // Private browsing fallback: stable for this tab's lifetime.
+    try {
+      const existing = sessionStorage.getItem(SESSION_TOKEN_KEY);
+      if (existing) return existing;
+      const created = crypto.randomUUID();
+      sessionStorage.setItem(SESSION_TOKEN_KEY, created);
+      return created;
+    } catch {
+      return crypto.randomUUID();
+    }
   }
 }
 
@@ -92,6 +144,7 @@ export function useSessionManager(
   const alreadyKickedRef = useRef(false); // Prevent double-kick
   const lastRegisteredAtRef = useRef<number>(0); // Track when we last registered (ms)
   const consecutiveNetworkFailsRef = useRef(0); // Track network failures to avoid false kicks
+  const registrationPromiseRef = useRef<Promise<void> | null>(null);
 
   // Ensure auth token is fresh (critical after laptop sleep / app background)
   const ensureFreshToken = useCallback(async (): Promise<boolean> => {
@@ -123,35 +176,54 @@ export function useSessionManager(
     // Skip if already registered, unless forced (e.g. on mobile foreground)
     if (registeredRef.current && !force) return;
 
-    // Ensure auth token is valid before making RPC call
-    const tokenOk = await ensureFreshToken();
-    if (!tokenOk) return;
+    // Visibility/online/auth events may fire together. One registration at a
+    // time avoids duplicate RPCs and makes tab startup deterministic.
+    if (registrationPromiseRef.current) {
+      await registrationPromiseRef.current;
+      return;
+    }
 
-    const token = getOrCreateSessionToken();
-    sessionTokenRef.current = token;
+    const registration = (async () => {
 
+      // Ensure auth token is valid before making RPC call
+      const tokenOk = await ensureFreshToken();
+      if (!tokenOk) return;
+
+      const token = await getOrCreateSessionToken();
+      sessionTokenRef.current = token;
+
+      try {
+        const { data, error } = await supabase.rpc('register_session', {
+          p_session_token: token,
+          p_device_label: getDeviceLabel(),
+          p_ip_address: null,
+          p_user_agent: navigator.userAgent.substring(0, 200),
+        });
+
+        if (error) {
+          console.warn('Session registration failed:', error.message);
+          return;
+        }
+
+        registeredRef.current = true;
+        lastRegisteredAtRef.current = Date.now();
+
+        const result = data as Record<string, unknown> | null;
+        if (result?.status === 'kicked_oldest') {
+          console.log(`📱 Kicked oldest session (${result.kicked_device || 'unknown device'}) to make room for ${result.new_device || 'this device'}`);
+        }
+      } catch (err) {
+        console.warn('Session registration error:', err);
+      }
+    })();
+
+    registrationPromiseRef.current = registration;
     try {
-      const { data, error } = await supabase.rpc('register_session', {
-        p_session_token: token,
-        p_device_label: getDeviceLabel(),
-        p_ip_address: null,
-        p_user_agent: navigator.userAgent.substring(0, 200),
-      });
-
-      if (error) {
-        console.warn('Session registration failed:', error.message);
-        return;
+      await registration;
+    } finally {
+      if (registrationPromiseRef.current === registration) {
+        registrationPromiseRef.current = null;
       }
-
-      registeredRef.current = true;
-      lastRegisteredAtRef.current = Date.now();
-
-      const result = data as Record<string, unknown> | null;
-      if (result?.status === 'kicked_oldest') {
-        console.log(`📱 Kicked oldest session (${result.kicked_device || 'unknown device'}) to make room for ${result.new_device || 'this device'}`);
-      }
-    } catch (err) {
-      console.warn('Session registration error:', err);
     }
   }, [userId, isPreviewEnv, ensureFreshToken]);
 
@@ -313,11 +385,8 @@ export function useSessionManager(
   useEffect(() => {
     if (!userId || isPreviewEnv) return;
 
-    const token = getOrCreateSessionToken();
-    sessionTokenRef.current = token;
-
     // Register on mount
-    registerSession();
+    void registerSession();
 
     // Start heartbeat (keeps session alive)
     heartbeatIntervalRef.current = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
