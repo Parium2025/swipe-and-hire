@@ -385,6 +385,19 @@ const Index = () => {
     setShowIntroTutorial(true);
   }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
 
+  // Första inloggningen som jobbsökande: välkomstkortet ("Hjälp & tips") ska
+  // alltid dyka upp när profilen är klar — oavsett om tunneln slutfördes i den
+  // här fliken, på en annan enhet, eller om sidan hann navigera/refresha.
+  useEffect(() => {
+    if (!user) return;
+    if ((profile as any)?.role !== 'job_seeker') return;
+    if (!(profile as any)?.onboarding_completed) return;
+    try {
+      if (localStorage.getItem('parium_intro_tour_done')) return;
+    } catch { /* ignorera */ }
+    setShowIntroTutorial(true);
+  }, [user, (profile as any)?.role, (profile as any)?.onboarding_completed]);
+
   // Support → "Hjälp & tips" öppnar hela välkomstkortet igen.
   const [introTourStep, setIntroTourStep] = useState<0 | 1>(0);
   useEffect(() => {
