@@ -241,7 +241,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
 
   // 🔒 Textfält sparas i sessionStorage (samma flik = överlever refresh, rensas när fliken stängs)
-  const WELCOME_TEXT_KEY = 'parium_welcome_text_draft';
+  const WELCOME_TEXT_KEY = scopedKey(TEXT_KEY_PREFIX, userId);
 
   const getTextDraft = (): Record<string, any> | null => {
     try {
