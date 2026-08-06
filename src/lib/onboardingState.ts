@@ -87,8 +87,19 @@ export async function loadCoachState(): Promise<CoachState | null> {
 }
 
 export async function saveCoachState(state: CoachState): Promise<boolean> {
-  return upsert({ coach_state: { ...state, savedAt: Date.now() } });
+  // Slå ihop med det som redan finns i molnet — annars raderas flaggor som
+  // `introTourDone` när sidtipsen sparas, och guiden dyker upp igen på nästa enhet.
+  const row = await fetchRow();
+  const existing = (row?.coach_state ?? {}) as CoachState & Record<string, unknown>;
+  const merged = {
+    ...existing,
+    ...state,
+    seen: { ...(existing.seen ?? {}), ...(state.seen ?? {}) },
+    savedAt: Date.now(),
+  };
+  return upsert({ coach_state: merged as CoachState });
 }
+
 
 /* ── Introguiden ("Hjälp & tips") ─────────────────────────────── */
 
@@ -99,8 +110,15 @@ export async function saveCoachState(state: CoachState): Promise<boolean> {
  */
 export async function isIntroTourDone(): Promise<boolean> {
   const row = await fetchRow();
-  return Boolean((row?.coach_state as CoachState & { introTourDone?: boolean } | null)?.introTourDone);
+  const coach = (row?.coach_state ?? null) as (CoachState & { introTourDone?: boolean }) | null;
+  if (!coach) return false;
+  // Har man redan avslutat sidtipsen (eller sett dem) har man passerat guiden —
+  // visa den inte igen bara för att flaggan saknas från en äldre version.
+  if (coach.introTourDone) return true;
+  if (coach.disabled) return true;
+  return Object.values(coach.seen ?? {}).some(Boolean);
 }
+
 
 export async function markIntroTourDone(): Promise<boolean> {
   const row = await fetchRow();
