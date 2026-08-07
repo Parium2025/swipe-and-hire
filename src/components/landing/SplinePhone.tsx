@@ -25,6 +25,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [staticSnapshot, setStaticSnapshot] = useState<string | null>(null);
   const [shouldBoot, setShouldBoot] = useState(() => !deferUntilActive || active);
 
   const reducedMotion =
@@ -313,7 +314,23 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
         if (!cancelled) {
           if (isWindowsDevice()) {
             staticFrameReadyRef.current = true;
+            // app.stop() stoppar inte allt internt Spline-arbete i Chromium.
+            // Kopiera därför den färdigrenderade bilden, avveckla WebGL-kontexten
+            // helt och visa exakt samma frame som en vanlig bild på Windows.
+            try {
+              const snapshotCanvas = document.createElement('canvas');
+              snapshotCanvas.width = canvas.width;
+              snapshotCanvas.height = canvas.height;
+              const context = snapshotCanvas.getContext('2d');
+              context?.drawImage(canvas, 0, 0);
+              const snapshot = snapshotCanvas.toDataURL('image/png');
+              if (snapshot && snapshot !== 'data:,') setStaticSnapshot(snapshot);
+            } catch {
+              // Om browsern nekar kopiering behålls den stoppade canvasen.
+            }
             app.stop();
+            app.dispose();
+            appRef.current = null;
           }
           setIsReady(true);
           window.dispatchEvent(new Event('parium:spline-ready'));
@@ -367,25 +384,34 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
           backgroundColor: 'transparent',
         }}
       >
-        <canvas
-          ref={canvasRef}
-          role="img"
-          aria-label="Parium 3D-telefon"
-          tabIndex={-1}
-          data-spline-phone-canvas
-          className="relative h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
-          draggable={false}
-          style={{
-            colorScheme: 'normal',
-            backgroundColor: 'transparent',
-            display: 'block',
-            opacity: 1,
-            visibility: 'inherit',
-            transition: 'none',
-            willChange: 'auto',
-            touchAction: 'none',
-          }}
-        />
+        {staticSnapshot ? (
+          <img
+            src={staticSnapshot}
+            alt=""
+            draggable={false}
+            className="relative h-full w-full select-none object-fill"
+          />
+        ) : (
+          <canvas
+            ref={canvasRef}
+            role="img"
+            aria-label="Parium 3D-telefon"
+            tabIndex={-1}
+            data-spline-phone-canvas
+            className="relative h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
+            draggable={false}
+            style={{
+              colorScheme: 'normal',
+              backgroundColor: 'transparent',
+              display: 'block',
+              opacity: 1,
+              visibility: 'inherit',
+              transition: 'none',
+              willChange: 'auto',
+              touchAction: 'none',
+            }}
+          />
+        )}
       </div>
       {!isReady && (
         <div
