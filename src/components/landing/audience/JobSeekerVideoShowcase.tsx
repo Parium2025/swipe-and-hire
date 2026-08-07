@@ -265,14 +265,24 @@ const JobSeekerVideoShowcase = ({
       if (retryTimer !== null) { window.clearTimeout(retryTimer); retryTimer = null; }
     };
 
+    // Budget för play()-försök. Utan tak kunde en video som browsern vägrar
+    // starta (t.ex. när Windows-decodern är slut) få ett nytt play()-anrop var
+    // 600:e ms i evighet — det i sig gör hela sidan hackig. Räknaren nollställs
+    // så fort uppspelningen faktiskt kommer i gång eller användaren agerar.
+    const MAX_ATTEMPTS = 12;
+    let attempts = 0;
+
     const attempt = () => {
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
       if (!v.paused && !v.ended) return;
+      if (attempts >= MAX_ATTEMPTS) return;
+      attempts += 1;
       const p = v.play();
       if (p && typeof p.catch === 'function') {
-        p.then(clearRetry).catch(() => {
+        p.then(() => { attempts = 0; clearRetry(); }).catch(() => {
           clearRetry();
-          retryTimer = window.setTimeout(attempt, 600);
+          if (attempts >= MAX_ATTEMPTS) return;
+          retryTimer = window.setTimeout(attempt, Math.min(4000, 600 * attempts));
         });
       }
     };
@@ -469,7 +479,9 @@ const JobSeekerVideoShowcase = ({
         }
       }, 250);
     };
-    const onPlaying = () => clearStall();
+    const onPlaying = () => { attempts = 0; clearStall(); };
+    // En riktig användargest är alltid ett legitimt skäl att få ny budget.
+    const onGesture = () => { attempts = 0; };
     const onFirstStablePlay = () => {
       window.dispatchEvent(new CustomEvent('parium:jobseeker-video-stable'));
       // Filen finns nu i HTTP-cachen: nästa sidvisning i samma session får
@@ -483,6 +495,8 @@ const JobSeekerVideoShowcase = ({
     const gestureOpts: AddEventListenerOptions = { passive: true };
     document.addEventListener('visibilitychange', resume);
     window.addEventListener('pageshow', resume);
+    window.addEventListener('touchstart', onGesture, gestureOpts);
+    window.addEventListener('pointerdown', onGesture, gestureOpts);
     window.addEventListener('touchstart', resume, gestureOpts);
     window.addEventListener('pointerdown', resume, gestureOpts);
     window.addEventListener('scroll', resume, gestureOpts);
@@ -503,6 +517,8 @@ const JobSeekerVideoShowcase = ({
       if (geometryFrame !== null) window.cancelAnimationFrame(geometryFrame);
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
+      window.removeEventListener('touchstart', onGesture);
+      window.removeEventListener('pointerdown', onGesture);
       window.removeEventListener('touchstart', resume);
       window.removeEventListener('pointerdown', resume);
       window.removeEventListener('scroll', resume);

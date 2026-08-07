@@ -33,11 +33,13 @@ const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
   const [heroSrc] = useState<string>(pickHeroSrc);
-
+  // Ger upp helt och visar postern om videon inte går att spela. Bättre en
+  // skarp stillbild än en sida som slåss med decodern i evighet.
+  const [gaveUp, setGaveUp] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || skipVideo) return;
+    if (!video || skipVideo || gaveUp) return;
 
     // Säkerställ autoplay-krav direkt på DOM-nivå (iOS-kritisk)
     video.muted = true;
@@ -47,48 +49,53 @@ const HeroVideo = () => {
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
     video.setAttribute('autoplay', '');
-    // disableRemotePlayback as DOM attribute (not a standard React prop)
     try { (video as any).disableRemotePlayback = true; } catch {}
 
     let cancelled = false;
     let retryTimer: number | null = null;
-    let failCount = 0;
+
+    /**
+     * ALLT här är hårt budgeterat.
+     *
+     * Bakgrund: den gamla versionen kunde hamna i självförstärkande loopar —
+     * `error` triggade `load()` som triggade `error` igen, och `suspend`
+     * (som Chrome skickar varje gång bufferten är full, alltså helt normalt)
+     * startade om en 500 ms-polling som anropade `play()` om och om igen.
+     * Så länge videon spelade perfekt märktes inget; så fort en enda
+     * range-request tog en paus — t.ex. efter några loopar — började
+     * loopen mala och stal frames från hela sidan. Därför: räknare på
+     * varje väg, och en definitiv slutstation (poster).
+     */
+    const MAX_PLAY_CALLS = 12;   // totalt antal play()-försök innan vi slutar
+    const MAX_RELOADS = 2;       // hur många gånger källan får laddas om
+    const MAX_WATCHDOG_RUNS = 4; // hur många gånger pollingen får startas
+    const WATCHDOG_MAX_MS = 8000;
+
+    let playCalls = 0;
+    let reloads = 0;
+    let watchdogRuns = 0;
+    let playedOnce = false;
 
     const tryPlay = () => {
       if (cancelled || !video) return;
       if (!video.paused && !video.ended) return;
+      if (playCalls >= MAX_PLAY_CALLS) return;
+      playCalls++;
       const p = video.play();
       if (p && typeof p.catch === 'function') {
-        p.then(() => {
-          failCount = 0;
-        }).catch(() => {
-          failCount++;
-          // Sluta hamra play() i evighet — efter 8 misslyckade försök väntar vi
-          // på en riktig användarinteraktion i stället. Annars körs en retry var
-          // 600:e ms + watchdog var 500:e ms, vilket i sig gör sidan hackig på
-          // svaga Windows-GPU:er när videon ändå inte kan starta.
-          if (failCount > 8) return;
-          // iOS Lågeffektläge kan blockera autoplay helt tills första touch.
-          // Vi döljer native play UI via CSS och försöker igen vid touch/focus.
+        p.catch(() => {
+          if (cancelled || playCalls >= MAX_PLAY_CALLS) return;
           if (retryTimer) window.clearTimeout(retryTimer);
-          retryTimer = window.setTimeout(tryPlay, 600);
+          // Växande backoff istället för fast 600 ms-hamring.
+          retryTimer = window.setTimeout(tryPlay, Math.min(4000, 500 * playCalls));
         });
       }
     };
 
-
-    // Försök spela direkt — väntar inte på canplay om vi redan har data
-    if (video.readyState >= 2) {
-      tryPlay();
-    }
-    // Lyssna alltid på loadeddata/canplay för säker första frame
-    const onCanPlay = () => tryPlay();
-    video.addEventListener('loadeddata', onCanPlay);
-    video.addEventListener('canplay', onCanPlay);
-
-    // Watchdog: starta först när videon faktiskt börjat spela för att
-    // undvika false positives vid initial buffering.
+    // Watchdog: kör bara i korta, tidsbegränsade pass när videon faktiskt
+    // fastnat. Aldrig som permanent polling.
     let watchdog: number | null = null;
+    let watchdogStartedAt = 0;
     let lastTime = -1;
     let stuckCount = 0;
     let healthyTicks = 0;
@@ -101,12 +108,18 @@ const HeroVideo = () => {
     };
 
     const startWatchdog = () => {
-      if (watchdog !== null) return;
+      if (watchdog !== null || cancelled) return;
+      if (watchdogRuns >= MAX_WATCHDOG_RUNS) return;
+      watchdogRuns++;
+      watchdogStartedAt = Date.now();
       lastTime = video.currentTime;
       stuckCount = 0;
       healthyTicks = 0;
       watchdog = window.setInterval(() => {
-        if (!video) return;
+        if (cancelled || !video) return stopWatchdog();
+        // Hård tidsgräns — pollingen får aldrig leva vidare i bakgrunden.
+        if (Date.now() - watchdogStartedAt > WATCHDOG_MAX_MS) return stopWatchdog();
+        if (document.hidden) return;
         if (video.paused || video.ended) {
           healthyTicks = 0;
           tryPlay();
@@ -117,52 +130,86 @@ const HeroVideo = () => {
           stuckCount++;
           if (stuckCount >= 2) {
             stuckCount = 0;
-            try { video.play().catch(() => {}); } catch {}
+            tryPlay();
           }
         } else {
           stuckCount = 0;
           lastTime = video.currentTime;
           healthyTicks++;
-          // Efter ~5 s felfri uppspelning behövs ingen pollning längre.
-          // Events (pause/stalled/waiting/playing) startar om den vid behov.
-          if (healthyTicks >= 10) stopWatchdog();
+          if (healthyTicks >= 3) stopWatchdog();
         }
-      }, 500);
+      }, 1000);
     };
 
+    const onCanPlay = () => tryPlay();
+
     const handlePlaying = () => {
-      startWatchdog();
+      playedOnce = true;
+      // Uppspelningen lever → nollställ budgeten. En video som rullat i gång
+      // ska inte straffas för ett tidigare hack, men varje ny hicka får
+      // återigen bara ett begränsat antal försök.
+      playCalls = 0;
+      stopWatchdog();
     };
+
+    // OBS: `suspend` lyssnas medvetet INTE på. Det eventet betyder "browsern
+    // har slutat hämta data", vilket är normaltillståndet för en färdigbuffrad
+    // video — inte ett fel.
     const handleStalled = () => {
       startWatchdog();
       tryPlay();
     };
-    const handleError = () => {
-      // Försök ladda om källan vid fel
-      try {
-        video.load();
-        tryPlay();
-      } catch {}
-    };
 
-    // Aldrig pausa på visibility — användaren vill att videon alltid rullar.
-    // När fliken kommer tillbaka kan vissa browsers ha pausat ändå, så vi
-    // återupptar. Vi nollställer ALDRIG currentTime.
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') tryPlay();
-    };
-    const handleResume = () => tryPlay();
-
-    // Första user-interaction → garantera att autoplay-block släpper
-    const handleFirstInteraction = () => {
+    const handlePause = () => {
+      // Ett enda försök att återuppta. Ingen watchdog, ingen loop.
       tryPlay();
     };
 
+    let errorTimer: number | null = null;
+    const handleError = () => {
+      if (cancelled) return;
+      if (reloads >= MAX_RELOADS) {
+        // Slutstation: visa postern i stället för att fortsätta ladda om.
+        stopWatchdog();
+        setGaveUp(true);
+        return;
+      }
+      reloads++;
+      if (errorTimer) window.clearTimeout(errorTimer);
+      errorTimer = window.setTimeout(() => {
+        if (cancelled) return;
+        try {
+          video.load();
+          playCalls = 0;
+          tryPlay();
+        } catch {
+          setGaveUp(true);
+        }
+      }, 1200 * reloads);
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        if (playedOnce) playCalls = 0;
+        tryPlay();
+      }
+    };
+    const handleResume = () => {
+      if (playedOnce) playCalls = 0;
+      tryPlay();
+    };
+    const handleFirstInteraction = () => {
+      playCalls = 0;
+      tryPlay();
+    };
+
+    if (video.readyState >= 2) tryPlay();
+    video.addEventListener('loadeddata', onCanPlay);
+    video.addEventListener('canplay', onCanPlay);
     video.addEventListener('playing', handlePlaying);
     video.addEventListener('stalled', handleStalled);
     video.addEventListener('waiting', handleStalled);
-    video.addEventListener('suspend', handleStalled);
-    video.addEventListener('pause', handleStalled); // återstarta om något pausar oss
+    video.addEventListener('pause', handlePause);
     video.addEventListener('error', handleError);
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('pageshow', handleResume);
@@ -174,14 +221,14 @@ const HeroVideo = () => {
     return () => {
       cancelled = true;
       if (retryTimer) window.clearTimeout(retryTimer);
-      if (watchdog !== null) window.clearInterval(watchdog);
+      if (errorTimer) window.clearTimeout(errorTimer);
+      stopWatchdog();
       video.removeEventListener('loadeddata', onCanPlay);
       video.removeEventListener('canplay', onCanPlay);
       video.removeEventListener('playing', handlePlaying);
       video.removeEventListener('stalled', handleStalled);
       video.removeEventListener('waiting', handleStalled);
-      video.removeEventListener('suspend', handleStalled);
-      video.removeEventListener('pause', handleStalled);
+      video.removeEventListener('pause', handlePause);
       video.removeEventListener('error', handleError);
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('pageshow', handleResume);
@@ -190,7 +237,7 @@ const HeroVideo = () => {
       window.removeEventListener('pointerdown', handleFirstInteraction);
       window.removeEventListener('click', handleFirstInteraction);
     };
-  }, []);
+  }, [skipVideo, gaveUp]);
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
@@ -217,9 +264,11 @@ const HeroVideo = () => {
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
-          {!skipVideo && (
+          {!skipVideo && !gaveUp && (
             /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
-               så browsern återanvänder samma fetch istället för att ladda två filer. */
+               så browsern återanvänder samma fetch istället för att ladda två filer.
+               Vid gaveUp tas källan bort helt: då står postern kvar och browsern
+               slutar försöka dekoda, i stället för att mala i bakgrunden. */
             <source src={heroSrc} type="video/mp4" />
           )}
 
