@@ -81,9 +81,9 @@ const registry = new Set<HTMLVideoElement>();
 let rafId = 0;
 
 const evaluateAll = () => {
-  rafId = 0;
   const vh = window.innerHeight || document.documentElement.clientHeight;
   const vw = window.innerWidth || document.documentElement.clientWidth;
+
   const centerX = vw / 2;
   const hidden = document.hidden;
 
