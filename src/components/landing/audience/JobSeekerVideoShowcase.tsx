@@ -517,6 +517,8 @@ const JobSeekerVideoShowcase = ({
       if (geometryFrame !== null) window.cancelAnimationFrame(geometryFrame);
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
+      window.removeEventListener('touchstart', onGesture);
+      window.removeEventListener('pointerdown', onGesture);
       window.removeEventListener('touchstart', resume);
       window.removeEventListener('pointerdown', resume);
       window.removeEventListener('scroll', resume);
