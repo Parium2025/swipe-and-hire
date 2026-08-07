@@ -18,6 +18,8 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
   const activeRef = useRef(active);
   const galleryActiveRef = useRef(false);
   const onScreenRef = useRef(true);
+  const scrollingRef = useRef(false);
+
   const zoomRef = useRef(zoom);
 
   const [isReady, setIsReady] = useState(false);
