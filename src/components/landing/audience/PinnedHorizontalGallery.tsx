@@ -172,10 +172,44 @@ const evaluateAll = () => {
 
 };
 
+/**
+ * Koordinatorn får INTE köra varje frame.
+ *
+ * evaluateAll() läser getBoundingClientRect() på samtliga åtta kort. Anropas
+ * det per scroll-frame (vilket det gjorde via `parium:gallery-progress`, som
+ * dispatchades i varje rAF-tick) tvingas browsern räkna om layouten 8 gånger
+ * per frame mitt under scrollen. macOS har marginal för det; Chrome/Edge på
+ * Windows tappar frames — och det växer ju längre man scrollar, vilket är
+ * precis den "börjar hacka efter en stund"-känslan.
+ *
+ * Urvalet av vilka videor som ska spela behöver inte uppdateras oftare än
+ * ~8 gånger per sekund. En avslutande körning garanterar att sluttillståndet
+ * alltid blir rätt även om scrollen stannar mitt i en throttle-period.
+ */
+const MIN_EVAL_INTERVAL_MS = 120;
+let lastEvalAt = 0;
+let trailingTimer = 0;
+
+const runEvaluate = () => {
+  rafId = 0;
+  lastEvalAt = Date.now();
+  evaluateAll();
+};
+
 const scheduleEvaluate = () => {
   if (rafId) return;
-  rafId = requestAnimationFrame(evaluateAll);
+  const since = Date.now() - lastEvalAt;
+  if (since >= MIN_EVAL_INTERVAL_MS) {
+    rafId = requestAnimationFrame(runEvaluate);
+    return;
+  }
+  if (trailingTimer) return;
+  trailingTimer = window.setTimeout(() => {
+    trailingTimer = 0;
+    scheduleEvaluate();
+  }, MIN_EVAL_INTERVAL_MS - since);
 };
+
 
 const CardItem = ({ item, index }: CardItemProps) => {
   // failed=true → byt ut <video> mot poster-bild som fallback. Triggas vid
