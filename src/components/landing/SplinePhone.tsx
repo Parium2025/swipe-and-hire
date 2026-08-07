@@ -40,7 +40,12 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     const app = appRef.current;
     if (!app) return;
     const shouldRun =
-      activeRef.current && !galleryActiveRef.current && onScreenRef.current && !document.hidden;
+      activeRef.current &&
+      !galleryActiveRef.current &&
+      onScreenRef.current &&
+      !scrollingRef.current &&
+      !document.hidden;
+
     if (shouldRun) {
       if (app.isStopped) app.play();
     } else if (!app.isStopped) {
