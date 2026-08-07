@@ -372,11 +372,28 @@ const PinnedHorizontalGallery = () => {
       return Math.round(v * currentDpr) / currentDpr;
     };
 
+    /**
+     * strip.scrollWidth är en LAYOUT-läsning. Den låg tidigare i applyProgress,
+     * som körs varje rAF-frame under hela pinnen — alltså tvingades browsern
+     * räkna om layouten en gång per frame, direkt efter att vi precis skrivit
+     * en ny transform. Det är den klassiska read-after-write-thrashen och den
+     * kostar mest exakt där det märks: Chrome/Edge på Windows.
+     *
+     * Bredden ändras bara vid resize (korten har fasta mått), så vi mäter den
+     * en gång och om om fönstret ändrar storlek.
+     */
+    let cachedStripWidth = strip.scrollWidth;
+    const remeasureStrip = () => {
+      cachedStripWidth = strip.scrollWidth;
+    };
+
+    let lastBroadcastP = -1;
+
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
       // Mät faktisk overflow så att alla kort alltid exponeras oavsett viewport.
       // Slutposition = visa sista kortet med samma marginal som första kortet får i start.
-      const stripWidth = strip.scrollWidth;
+      const stripWidth = cachedStripWidth || strip.scrollWidth;
       const viewport = window.innerWidth || document.documentElement.clientWidth;
       const startPx = viewport * 0.07; // 7vw inledande marginal (matchar gammal start)
       // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
@@ -387,14 +404,22 @@ const PinnedHorizontalGallery = () => {
       // device-pixel-snappning för Windows/fraktionell desktop-skalning.
       strip.style.setProperty('--phg-x', `${xPx.toFixed(isTouchScroll ? 2 : 3)}px`);
       section.style.setProperty('--phg-progress', `${p}`);
-      section.dataset.phgProgress = p.toFixed(4);
-      window.dispatchEvent(new CustomEvent('parium:gallery-progress', { detail: { progress: p } }));
+      // dataset-skrivning och event-dispatch är inte gratis (attributskrivning
+      // invaliderar stil, CustomEvent allokerar). Uppspelningskoordinatorn bryr
+      // sig bara om grova förflyttningar, så vi hörs av var 1 % i stället för
+      // varje frame.
+      if (lastBroadcastP < 0 || Math.abs(p - lastBroadcastP) >= 0.01 || p === 0 || p === 1) {
+        lastBroadcastP = p;
+        section.dataset.phgProgress = p.toFixed(4);
+        window.dispatchEvent(new CustomEvent('parium:gallery-progress', { detail: { progress: p } }));
+      }
       // Baren ska vara på plats redan vid första kortet (p=0) och hela vägen
       // till sista kortet (p=1). Den fade:as endast ut precis när vi börjar
       // lämna kort-sektionen nedåt, så den följer med smooth åt båda hållen.
       const fadeOut = Math.min(1, Math.max(0, (0.985 - p) / 0.025));
       section.style.setProperty('--phg-bar-opacity', String(fadeOut));
     };
+
 
     const measure = () => {
       if (frozen) return;
