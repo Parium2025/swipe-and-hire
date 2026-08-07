@@ -13,6 +13,17 @@ const pause = (video: HTMLVideoElement) => {
   if (!video.paused) video.pause();
 };
 
+const clearPendingEvaluation = () => {
+  if (frame) window.cancelAnimationFrame(frame);
+  if (trailingTimer) window.clearTimeout(trailingTimer);
+  frame = 0;
+  trailingTimer = 0;
+};
+
+const pauseAll = () => {
+  videos.forEach((_registration, video) => pause(video));
+};
+
 const evaluate = () => {
   frame = 0;
   lastRun = performance.now();
@@ -54,6 +65,15 @@ const evaluate = () => {
 };
 
 export const scheduleLandingVideoEvaluation = () => {
+  // Chromium stryper timers i bakgrundsflikar, ibland till en minut. En tidigare
+  // trailing-timer kunde därför ligga kvar som "pågående" när fliken blev synlig
+  // igen och blockera hela playback-koordinatorn. Dold sida ska aldrig köa arbete:
+  // pausa direkt och låt visibility/pageshow skapa en helt ny evaluation.
+  if (document.hidden) {
+    clearPendingEvaluation();
+    pauseAll();
+    return;
+  }
   if (frame) return;
   const elapsed = performance.now() - lastRun;
   if (elapsed >= 160) {
@@ -67,6 +87,30 @@ export const scheduleLandingVideoEvaluation = () => {
   }, 160 - elapsed);
 };
 
+const resumeImmediately = () => {
+  clearPendingEvaluation();
+  lastRun = 0;
+  if (document.hidden) {
+    pauseAll();
+    return;
+  }
+  frame = window.requestAnimationFrame(evaluate);
+};
+
+const handleVisibilityChange = () => {
+  if (document.hidden) {
+    clearPendingEvaluation();
+    pauseAll();
+    return;
+  }
+  resumeImmediately();
+};
+
+const handlePageHide = () => {
+  clearPendingEvaluation();
+  pauseAll();
+};
+
 const attachListeners = () => {
   if (listenersAttached) return;
   listenersAttached = true;
@@ -74,8 +118,9 @@ const attachListeners = () => {
   scrollRoot?.addEventListener('scroll', scheduleLandingVideoEvaluation, { passive: true });
   window.addEventListener('scroll', scheduleLandingVideoEvaluation, { passive: true });
   window.addEventListener('resize', scheduleLandingVideoEvaluation, { passive: true });
-  window.addEventListener('pageshow', scheduleLandingVideoEvaluation);
-  document.addEventListener('visibilitychange', scheduleLandingVideoEvaluation);
+  window.addEventListener('pageshow', resumeImmediately);
+  window.addEventListener('pagehide', handlePageHide);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
 };
 
 const detachListeners = () => {
@@ -85,12 +130,10 @@ const detachListeners = () => {
   scrollRoot = null;
   window.removeEventListener('scroll', scheduleLandingVideoEvaluation);
   window.removeEventListener('resize', scheduleLandingVideoEvaluation);
-  window.removeEventListener('pageshow', scheduleLandingVideoEvaluation);
-  document.removeEventListener('visibilitychange', scheduleLandingVideoEvaluation);
-  if (frame) window.cancelAnimationFrame(frame);
-  if (trailingTimer) window.clearTimeout(trailingTimer);
-  frame = 0;
-  trailingTimer = 0;
+  window.removeEventListener('pageshow', resumeImmediately);
+  window.removeEventListener('pagehide', handlePageHide);
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+  clearPendingEvaluation();
   lastRun = 0;
 };
 
