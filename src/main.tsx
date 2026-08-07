@@ -124,7 +124,8 @@ async function bootstrap() {
   // som faktiskt visar 3D-telefonen. Utan denna rad startar import först när
   // SplinePhone-komponenten mountar (efter hydration) → 300–600 ms långsammare
   // första frame. Ingen UX-ändring — exakt samma kod, bara tidigare i tiden.
-  if (currentPath === '/jobbsokare' || currentPath === '/arbetsgivare') {
+  const isWindowsJobSeeker = currentPath === '/jobbsokare' && /Windows/i.test(navigator.userAgent);
+  if ((currentPath === '/jobbsokare' || currentPath === '/arbetsgivare') && !isWindowsJobSeeker) {
     void import('@splinetool/runtime').catch(() => { /* SplinePhone har egen fallback */ });
   }
 

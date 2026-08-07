@@ -19,6 +19,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
   const activeRef = useRef(active);
   const galleryActiveRef = useRef(false);
   const onScreenRef = useRef(true);
+  const staticFrameReadyRef = useRef(false);
 
   const zoomRef = useRef(zoom);
 
@@ -40,6 +41,13 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
   const syncPlayback = () => {
     const app = appRef.current;
     if (!app) return;
+    // På Windows är telefonen dekorativ och inte interaktiv. När slutbilden väl
+    // är renderad finns inget UX-värde i att hålla Splines WebGL-loop levande.
+    // Den blockerade annars huvudtråden i flera hundra ms åt gången under scroll.
+    if (isWindowsDevice() && staticFrameReadyRef.current) {
+      if (!app.isStopped) app.stop();
+      return;
+    }
     const shouldRun =
       activeRef.current &&
       !galleryActiveRef.current &&
@@ -303,6 +311,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
         syncPlayback();
         await waitForVisualSettle();
         if (!cancelled) {
+          if (isWindowsDevice()) {
+            staticFrameReadyRef.current = true;
+            app.stop();
+          }
           setIsReady(true);
           window.dispatchEvent(new Event('parium:spline-ready'));
         }
@@ -316,6 +328,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
 
     return () => {
       cancelled = true;
+      staticFrameReadyRef.current = false;
       app?.dispose();
       appRef.current = null;
     };
