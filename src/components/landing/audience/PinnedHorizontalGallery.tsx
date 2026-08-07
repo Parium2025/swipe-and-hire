@@ -508,7 +508,9 @@ const PinnedHorizontalGallery = () => {
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
+    window.addEventListener('resize', remeasureStrip);
     window.addEventListener('resize', measure);
+
     window.addEventListener('parium:gallery-leave', freeze);
     window.addEventListener('parium:gallery-enter', thaw);
     window.addEventListener('parium:gallery-reset-start', resetToStart);
