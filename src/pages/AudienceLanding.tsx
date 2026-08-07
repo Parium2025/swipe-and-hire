@@ -966,13 +966,37 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
   const lastVisibleRef = useRef(true);
 
   useEffect(() => {
+    let frame: number | null = null;
+    // Mät aldrig synkront i en event-/mutationscallback: allt samlas till en
+    // enda rAF och skrivs bara till state om värdena faktiskt ändrats. Annars
+    // triggar varje DOM-mutation en full omrendering av landningssidan, vilket
+    // är precis det som konkurrerar med videoavkodarna på Windows.
+    const applyPhoneMetrics = () => {
+      frame = null;
+      const nextInline = getInlinePhonePlacement() !== null;
+      setIsInlinePhone((prev) => (prev === nextInline ? prev : nextInline));
+      const next = calculatePhoneMetrics();
+      setPhoneMetrics((prev) => {
+        if (
+          prev &&
+          prev.isDesktop === next.isDesktop &&
+          Math.abs(prev.top - next.top) < 0.5 &&
+          Math.abs(prev.height - next.height) < 0.5 &&
+          Math.abs(prev.zoom - next.zoom) < 0.002 &&
+          Math.abs(prev.yOffset - next.yOffset) < 0.5 &&
+          Math.abs(((prev as { canvasHeight?: number }).canvasHeight ?? 0) - ((next as { canvasHeight?: number }).canvasHeight ?? 0)) < 0.5
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    };
     const syncPhoneMetrics = () => {
-      setIsInlinePhone(getInlinePhonePlacement() !== null);
-      setPhoneMetrics(calculatePhoneMetrics());
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(applyPhoneMetrics);
     };
 
-    syncPhoneMetrics();
-    const frame = window.requestAnimationFrame(syncPhoneMetrics);
+    applyPhoneMetrics();
     const timers = [80, 180, 360, 720, 1200].map((delay) => window.setTimeout(syncPhoneMetrics, delay));
     const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
     const observer = anchor ? new ResizeObserver(syncPhoneMetrics) : null;
@@ -984,21 +1008,23 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
     const navEl = document.querySelector('nav[aria-label="Huvudnavigation"]') as HTMLElement | null;
     const navObserver = navEl ? new ResizeObserver(syncPhoneMetrics) : null;
     if (navEl) navObserver?.observe(navEl);
-    const mutationObserver = new MutationObserver(syncPhoneMetrics);
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    // Endast navbarens innehåll behöver bevakas — inte hela body.
+    const mutationObserver = navEl ? new MutationObserver(syncPhoneMetrics) : null;
+    if (navEl) mutationObserver?.observe(navEl, { childList: true, subtree: true });
     document.fonts?.ready.then(syncPhoneMetrics).catch(() => undefined);
     window.addEventListener('resize', syncPhoneMetrics, { passive: true });
     window.visualViewport?.addEventListener('resize', syncPhoneMetrics, { passive: true });
     return () => {
-      window.cancelAnimationFrame(frame);
+      if (frame !== null) window.cancelAnimationFrame(frame);
       timers.forEach((timer) => window.clearTimeout(timer));
       observer?.disconnect();
       navObserver?.disconnect();
-      mutationObserver.disconnect();
+      mutationObserver?.disconnect();
       window.removeEventListener('resize', syncPhoneMetrics);
       window.visualViewport?.removeEventListener('resize', syncPhoneMetrics);
     };
   }, []);
+
 
   const phoneWrapperRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
