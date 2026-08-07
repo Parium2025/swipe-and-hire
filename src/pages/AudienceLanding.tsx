@@ -314,9 +314,6 @@ const useWaveAwareText = () => {
     resizeObserver.observe(document.documentElement);
     if (root) resizeObserver.observe(root);
 
-    const mutationObserver = new MutationObserver(schedule);
-    mutationObserver.observe(root ?? document.body, { childList: true, subtree: true, characterData: true });
-
     schedule();
     document.fonts?.ready.then(schedule).catch(() => undefined);
     root?.addEventListener('scroll', schedule, { passive: true });
@@ -327,7 +324,6 @@ const useWaveAwareText = () => {
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       resizeObserver.disconnect();
-      mutationObserver.disconnect();
       root?.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
       window.visualViewport?.removeEventListener('resize', schedule);
