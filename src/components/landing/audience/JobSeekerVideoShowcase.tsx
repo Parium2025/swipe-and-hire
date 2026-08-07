@@ -6,6 +6,7 @@ import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
+import androidAsset from '@/assets/showcase-jobseeker-android.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { isAndroidDevice, isWindowsDevice, prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
@@ -142,8 +143,10 @@ const getSources = (widthPx?: number) =>
           ]
         : isAndroidDevice()
           ? [
-              // Androids H.264-hårdvaruväg är jämnare mellan olika GPU:er än VP9.
-              { src: windowsLiteAsset.url, type: 'video/mp4' },
+              // Egen Android-master: H.264 Constrained Baseline, 30 fps,
+              // inga B-frames och fast GOP. Det håller avkodningen i Androids
+              // bredast stödda hårdvaruväg utan att röra Apple-källorna.
+              { src: androidAsset.url, type: 'video/mp4; codecs="avc1.42C01F"' },
             ]
           : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
 
