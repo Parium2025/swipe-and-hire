@@ -230,8 +230,8 @@ const useAdaptiveGlass = () => {
 
 const useWaveAwareText = () => {
   useEffect(() => {
-    const isTouchViewport = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
-    if (isTouchViewport) {
+    const useStaticText = prefersStaticGlass() || window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
+    if (useStaticText) {
       document.querySelectorAll<HTMLElement>('[data-landing-scroll-root] .wave-text').forEach((el) => {
         if (el.dataset.waveText) delete el.dataset.waveText;
         if (el.dataset.waveBelow) delete el.dataset.waveBelow;

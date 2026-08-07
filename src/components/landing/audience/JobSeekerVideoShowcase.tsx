@@ -299,7 +299,7 @@ const JobSeekerVideoShowcase = ({
               loop
               muted
               playsInline
-              preload="auto"
+              preload={prefersLightweightVideo() ? 'metadata' : 'auto'}
               poster={posterAsset.url}
               aria-label="Demo av Parium-appen för jobbsökare"
               className="absolute inset-0 h-full w-full object-cover"
