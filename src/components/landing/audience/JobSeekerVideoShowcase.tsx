@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
+import { registerLandingVideo } from '@/lib/landingVideoCoordinator';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
@@ -195,6 +196,11 @@ const JobSeekerVideoShowcase = ({
   active?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    return registerLandingVideo(video, 40);
+  }, []);
   const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
   if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
   const sources = sourcesRef.current;
@@ -499,7 +505,6 @@ const JobSeekerVideoShowcase = ({
     window.addEventListener('pointerdown', onGesture, gestureOpts);
     window.addEventListener('touchstart', resume, gestureOpts);
     window.addEventListener('pointerdown', resume, gestureOpts);
-    window.addEventListener('scroll', resume, gestureOpts);
     v.addEventListener('canplay', resume);
     v.addEventListener('loadeddata', resume);
     v.addEventListener('waiting', onWaiting);
@@ -521,7 +526,6 @@ const JobSeekerVideoShowcase = ({
       window.removeEventListener('pointerdown', onGesture);
       window.removeEventListener('touchstart', resume);
       window.removeEventListener('pointerdown', resume);
-      window.removeEventListener('scroll', resume);
       v.removeEventListener('canplay', resume);
       v.removeEventListener('loadeddata', resume);
       v.removeEventListener('waiting', onWaiting);
