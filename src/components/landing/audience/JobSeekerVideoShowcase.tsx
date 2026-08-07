@@ -176,11 +176,16 @@ const JobSeekerVideoShowcase = ({
   active?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  // Windows har visat sig opålitligt även med separata H.264-masters, låg
+  // bitrate och en ensam decoder. Använd därför en deterministisk stillbild i
+  // telefonramen där. Android och Apple behåller sina respektive videovägar.
+  const useStaticWindowsFrame = isWindowsDevice();
   useEffect(() => {
+    if (useStaticWindowsFrame) return;
     const video = videoRef.current;
     if (!video) return;
     return registerLandingVideo(video, 40, () => active);
-  }, [active]);
+  }, [active, useStaticWindowsFrame]);
   const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
   if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
   const sources = sourcesRef.current;
@@ -297,28 +302,29 @@ const JobSeekerVideoShowcase = ({
                 className="pointer-events-none absolute inset-0 h-full w-full object-cover"
               />
             )}
-            <video
-              ref={videoRef}
-              loop
-              muted
-              playsInline
-              preload={prefersLightweightVideo() ? 'metadata' : 'auto'}
-              poster={posterAsset.url}
-              aria-label="Demo av Parium-appen för jobbsökare"
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{
-                // OBS: ingen CSS-`filter` här. En filter-property på ett
-                // <video> tvingar Chrome/Edge på Windows bort från den
-                // hårdvaruaccelererade video-overlayen och varje bildruta måste
-                // då komposit-renderas → hackig uppspelning på laptops utan
-                // dedikerad GPU.
-              }}
-            >
-              {visibleSources.map((s) => (
-                <source key={s.src} src={s.src} type={s.type} />
-              ))}
-
-            </video>
+            {!useStaticWindowsFrame && (
+              <video
+                ref={videoRef}
+                loop
+                muted
+                playsInline
+                preload={prefersLightweightVideo() ? 'metadata' : 'auto'}
+                poster={posterAsset.url}
+                aria-label="Demo av Parium-appen för jobbsökare"
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{
+                  // OBS: ingen CSS-`filter` här. En filter-property på ett
+                  // <video> tvingar Chrome/Edge på Windows bort från den
+                  // hårdvaruaccelererade video-overlayen och varje bildruta måste
+                  // då komposit-renderas → hackig uppspelning på laptops utan
+                  // dedikerad GPU.
+                }}
+              >
+                {visibleSources.map((s) => (
+                  <source key={s.src} src={s.src} type={s.type} />
+                ))}
+              </video>
+            )}
 
 
             {/* Statiskt statusfält — täcker hela inspelningens statusrad (klocka,
