@@ -17,6 +17,8 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
   const galleryActiveRef = useRef(false);
+  const onScreenRef = useRef(true);
+
   const zoomRef = useRef(zoom);
 
   const [isReady, setIsReady] = useState(false);
@@ -26,15 +28,33 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-  useEffect(() => {
-    activeRef.current = active;
+  /**
+   * EN sanning för om renderloopen ska rulla. Tidigare fanns tre separata
+   * effekter som var för sig anropade play()/stop() utifrån sin egen delmängd
+   * av villkoren — de kunde därför starta om loopen åt varandra (t.ex. kunde
+   * visibilitychange starta Spline igen mitt i galleriet). Nu räknas hela
+   * villkoret ut på ett ställe.
+   */
+  const syncPlayback = () => {
     const app = appRef.current;
     if (!app) return;
-    if (active && !galleryActiveRef.current) {
+    const shouldRun =
+      activeRef.current &&
+      !galleryActiveRef.current &&
+      onScreenRef.current &&
+      
+      !document.hidden;
+
+    if (shouldRun) {
       if (app.isStopped) app.play();
     } else if (!app.isStopped) {
       app.stop();
     }
+  };
+
+  useEffect(() => {
+    activeRef.current = active;
+    syncPlayback();
   }, [active, isReady]);
 
   // På Windows/Android delar WebGL och videodecode samma knappa GPU-budget.
@@ -44,13 +64,11 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     if (!isWindowsDevice() && !isAndroidDevice()) return;
     const onGalleryEnter = () => {
       galleryActiveRef.current = true;
-      const app = appRef.current;
-      if (app && !app.isStopped) app.stop();
+      syncPlayback();
     };
     const onGalleryLeave = () => {
       galleryActiveRef.current = false;
-      const app = appRef.current;
-      if (app && activeRef.current && app.isStopped && !document.hidden) app.play();
+      syncPlayback();
     };
     window.addEventListener('parium:gallery-enter', onGalleryEnter);
     window.addEventListener('parium:gallery-leave', onGalleryLeave);
@@ -60,21 +78,53 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     };
   }, []);
 
+  /**
+   * Windows/Android: rendera bara när telefonen faktiskt syns.
+   *
+   * Utan detta fortsatte den kontinuerliga WebGL-loopen (renderMode 'auto')
+   * rulla i bakgrunden genom hela sidan — mätning under scroll visade att
+   * Spline-runtime stod för merparten av GPU-/huvudtrådsarbetet, även när
+   * telefonen låg långt ovanför viewporten. Det är den enskilt största
+   * anledningen till att scrollen kändes tung just på Windows.
+   *
+   * Apple rörs inte: där finns hårdvarubudget för både WebGL och video, och
+   * beteendet ska vara exakt som förut.
+   */
+  useEffect(() => {
+    if (!isWindowsDevice() && !isAndroidDevice()) return;
+    const el = wrapperRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          onScreenRef.current = entry.isIntersecting;
+        }
+        syncPlayback();
+      },
+      { rootMargin: '15% 0px', threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [isReady]);
+
+  /**
+   * NOT: att pausa Spline under pågående scroll testades och gjorde det
+   * MÄTBART SÄMRE (median 16,8 ms → 57 ms, 51+ long tasks). Splines play()
+   * bygger upp renderloopen på nytt varje gång, så start/stopp fem gånger i
+   * sekunden kostar mer än de frames man sparar. Renderloopen får bara
+   * stängas av vid tillståndsbyten som varar — utanför vy, dold flik, galleri.
+   */
+
+
   // Pausa renderloopen när fliken är dold — annars fortsätter WebGL tugga GPU
   // i bakgrunden och konkurrerar med videoavkodningen när man kommer tillbaka.
   useEffect(() => {
-    const onVisibility = () => {
-      const app = appRef.current;
-      if (!app) return;
-      if (document.hidden) {
-        if (!app.isStopped) app.stop();
-      } else if (activeRef.current && !galleryActiveRef.current && app.isStopped) {
-        app.play();
-      }
-    };
+    const onVisibility = () => syncPlayback();
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
   }, []);
+
+
 
 
   useEffect(() => {
@@ -246,7 +296,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
         app.setZoom(zoomRef.current);
         requestAnimationFrame(() => app?.setZoom(zoomRef.current));
-        if (!activeRef.current) app.stop();
+        syncPlayback();
         await waitForVisualSettle();
         if (!cancelled) {
           setIsReady(true);
