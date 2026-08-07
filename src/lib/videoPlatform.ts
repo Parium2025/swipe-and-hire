@@ -76,7 +76,12 @@ export const getMaxConcurrentVideos = () => {
       // budget; fler samtidiga H.264-contexts är inte stabilt på alla iGPU:er.
       return 1;
     case 'android':
-      return isLowPowerDevice() ? 1 : 2;
+      // Hero och telefonvideon syns samtidigt i första viewporten. Två aktiva
+      // videodekoders gör att flera Android-enheter faller tillbaka till
+      // software decode; telefonvideon ser då ut att gå i slow motion. En enda
+      // plats gör att koordinatorns prioritet väljer telefonen (40) framför
+      // hero-bakgrunden (30). Apple-budgeten lämnas oförändrad.
+      return 1;
 
     case 'apple':
       return 3;
