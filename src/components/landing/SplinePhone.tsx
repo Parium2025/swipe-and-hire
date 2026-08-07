@@ -108,6 +108,42 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     return () => io.disconnect();
   }, [isReady]);
 
+  /**
+   * Windows/Android: pausa WebGL medan användaren faktiskt scrollar.
+   *
+   * Under scroll ska GPU:n ägna sig åt kompositering och videodecode. Att
+   * samtidigt rita om 3D-scenen ~60 gånger i sekunden är exakt den konkurrens
+   * som gör att scrollen känns hackig på integrerad grafik. Telefonen rör sig
+   * ändå med sidan under tiden, så en frusen bild är omöjlig att uppfatta —
+   * animationen återupptas ~180 ms efter att scrollen stannat.
+   *
+   * Apple rörs inte.
+   */
+  useEffect(() => {
+    if (!isWindowsDevice() && !isAndroidDevice()) return;
+    let idleTimer = 0;
+    const onScroll = () => {
+      if (!scrollingRef.current) {
+        scrollingRef.current = true;
+        syncPlayback();
+      }
+      if (idleTimer) window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        idleTimer = 0;
+        scrollingRef.current = false;
+        syncPlayback();
+      }, 180);
+    };
+    const root = document.querySelector('[data-landing-scroll-root]');
+    root?.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      if (idleTimer) window.clearTimeout(idleTimer);
+      root?.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
   // Pausa renderloopen när fliken är dold — annars fortsätter WebGL tugga GPU
   // i bakgrunden och konkurrerar med videoavkodningen när man kommer tillbaka.
   useEffect(() => {
@@ -115,6 +151,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
   }, []);
+
 
 
 
