@@ -1652,17 +1652,40 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
     const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     let raf = 0;
+    let lastRunAt = 0;
+    let pending = 0;
+    /**
+     * Säkerhetsnätet är just det — ett nät, inte en animation. Det körde
+     * tidigare i varje scroll-frame och gjorde då en querySelectorAll över hela
+     * landningssidan plus getBoundingClientRect per träff. På Windows innebar
+     * det ett fullt style+layout-varv per frame under hela scrollen, ovanpå
+     * galleriets egen koordinator. Här räcker det med ~4 gånger per sekund.
+     */
+    const RUN_EVERY_MS = 250;
+    const run = () => {
+      lastRunAt = Date.now();
+      forceVisibleIfStuck();
+    };
     const schedule = () => {
-      if (raf) return;
+      if (raf || pending) return;
+      const since = Date.now() - lastRunAt;
+      if (since < RUN_EVERY_MS) {
+        pending = window.setTimeout(() => {
+          pending = 0;
+          schedule();
+        }, RUN_EVERY_MS - since);
+        return;
+      }
       raf = window.requestAnimationFrame(() => {
         raf = 0;
-        forceVisibleIfStuck();
+        run();
       });
     };
 
-    const timer = window.setTimeout(forceVisibleIfStuck, 1500);
+    const timer = window.setTimeout(run, 1500);
     root?.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
+
 
     return () => {
       window.clearTimeout(timer);
