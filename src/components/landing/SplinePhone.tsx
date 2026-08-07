@@ -7,11 +7,12 @@ interface SplinePhoneProps {
   style?: CSSProperties;
   zoom?: number;
   active?: boolean;
+  deferUntilActive?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, style, zoom = 0.78, active = true, deferUntilActive = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
@@ -23,6 +24,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [shouldBoot, setShouldBoot] = useState(() => !deferUntilActive || active);
 
   const reducedMotion =
     typeof window !== 'undefined' &&
@@ -54,6 +56,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
   useEffect(() => {
     activeRef.current = active;
+    if (active) setShouldBoot(true);
     syncPlayback();
   }, [active, isReady]);
 
@@ -136,6 +139,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
   }, [zoom, isReady]);
 
   useEffect(() => {
+    if (!shouldBoot) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -315,7 +319,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
       app?.dispose();
       appRef.current = null;
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, shouldBoot]);
 
   if (hasError) {
     return (
