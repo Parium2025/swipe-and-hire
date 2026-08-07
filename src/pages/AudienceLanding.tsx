@@ -1689,10 +1689,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
     return () => {
       window.clearTimeout(timer);
+      if (pending) window.clearTimeout(pending);
       if (raf) window.cancelAnimationFrame(raf);
       root?.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
     };
+
   }, [audience]);
 
 
