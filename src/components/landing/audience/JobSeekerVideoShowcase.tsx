@@ -495,6 +495,8 @@ const JobSeekerVideoShowcase = ({
     const gestureOpts: AddEventListenerOptions = { passive: true };
     document.addEventListener('visibilitychange', resume);
     window.addEventListener('pageshow', resume);
+    window.addEventListener('touchstart', onGesture, gestureOpts);
+    window.addEventListener('pointerdown', onGesture, gestureOpts);
     window.addEventListener('touchstart', resume, gestureOpts);
     window.addEventListener('pointerdown', resume, gestureOpts);
     window.addEventListener('scroll', resume, gestureOpts);
