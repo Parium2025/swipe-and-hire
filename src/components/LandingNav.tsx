@@ -100,18 +100,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
   // Hitta faktisk scroll-container (fixed inset-0 overflow-y-auto används på audience-sidor)
   const findScroller = (): HTMLElement | Window => {
-    const candidates = Array.from(document.querySelectorAll<HTMLElement>('div'));
-    for (const el of candidates) {
-      const cs = getComputedStyle(el);
-      if (
-        (cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
-        cs.position === 'fixed' &&
-        el.scrollHeight > el.clientHeight
-      ) {
-        return el;
-      }
-    }
-    return window;
+    return document.querySelector<HTMLElement>('[data-landing-scroll-root]') ?? window;
   };
 
   useEffect(() => {
@@ -139,18 +128,26 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
       setActiveId(currentId);
     };
 
-    const onScroll = () => {
+    let frame = 0;
+    const updateScrollState = () => {
+      frame = 0;
       setScrolled(getY() > 40);
       computeActive();
-      setIsScrolling(true);
+      setIsScrolling((current) => current || true);
       if (scrollIdleTimer.current) window.clearTimeout(scrollIdleTimer.current);
       scrollIdleTimer.current = window.setTimeout(() => setIsScrolling(false), 220);
     };
 
-    onScroll();
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(updateScrollState);
+    };
+
+    updateScrollState();
     scroller.addEventListener('scroll', onScroll, { passive: true } as any);
     window.addEventListener('resize', onScroll);
     return () => {
+      if (frame) window.cancelAnimationFrame(frame);
       scroller.removeEventListener('scroll', onScroll as any);
       window.removeEventListener('resize', onScroll);
       if (scrollIdleTimer.current) window.clearTimeout(scrollIdleTimer.current);

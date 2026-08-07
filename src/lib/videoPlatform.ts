@@ -72,10 +72,9 @@ export const getMaxConcurrentVideos = () => {
   if (prefersReducedData()) return 1;
   switch (getVideoPlatform()) {
     case 'windows':
-      // Tre samtidiga 520px-strömmar: två platser går till strippens ytterkanter
-      // (annars spelas aldrig första/sista kortet) och en till kortet i mitten.
-      // Källorna är den lätta Windows-mastern, så decode-trycket är litet.
-      return isLowPowerDevice() ? 2 : 3;
+      // En global decoderplats. Telefonen, hero och galleriet delar samma
+      // budget; fler samtidiga H.264-contexts är inte stabilt på alla iGPU:er.
+      return 1;
     case 'android':
       return isLowPowerDevice() ? 1 : 2;
 

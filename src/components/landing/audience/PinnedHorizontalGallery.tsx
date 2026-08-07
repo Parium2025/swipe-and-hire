@@ -23,7 +23,8 @@ import cdnElectrician from '@/assets/landing/jobseeker-electrician.mp4.asset.jso
 import cdnFarmer from '@/assets/landing/jobseeker-farmer.mp4.asset.json';
 import cdnNurse from '@/assets/landing/jobseeker-nurse.mp4.asset.json';
 import { fetchPriority } from '@/lib/fetchPriority';
-import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
+import { getGalleryPreload, isAppleDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
+import { registerLandingVideo, scheduleLandingVideoEvaluation } from '@/lib/landingVideoCoordinator';
 
 /**
  * Apple-style "Så funkar det" sektion.
@@ -73,142 +74,10 @@ type CardItemProps = {
  * mitt), och all mätning sker i EN rAF-tick istället för per scroll-event och
  * per video (annars tvingar varje getBoundingClientRect fram en ny layout).
  */
-const getMaxConcurrent = () => getMaxConcurrentVideos();
 /** Lätt källa till Windows/Android/sparläge, full källa till Apple & desktop. */
 const getPlayableSrc = (item: MediaItem) =>
   prefersLightweightVideo() && item.windowsSrc ? item.windowsSrc : item.src;
-const registry = new Set<HTMLVideoElement>();
-let rafId = 0;
-
-const evaluateAll = () => {
-  const vh = window.innerHeight || document.documentElement.clientHeight;
-  const vw = window.innerWidth || document.documentElement.clientWidth;
-
-  const centerX = vw / 2;
-  const hidden = document.hidden;
-
-  type Entry = { el: HTMLVideoElement; covered: number; left: number; inView: boolean };
-  const all: Entry[] = [];
-  registry.forEach((el) => {
-    const rect = el.getBoundingClientRect();
-    const inView =
-      !hidden &&
-      rect.bottom > 0 &&
-      rect.top < vh &&
-      rect.right > 0 &&
-      rect.left < vw;
-    // Hur stor del av kortets BREDD som faktiskt syns.
-    const visibleW = Math.max(0, Math.min(rect.right, vw) - Math.max(rect.left, 0));
-    const covered = rect.width > 0 ? visibleW / rect.width : 0;
-    all.push({ el, covered, left: rect.left, inView });
-  });
-
-  // Kortens ordning i strippen = deras x-position (1 … 8), oavsett om de syns.
-  all.sort((a, b) => a.left - b.left);
-
-  const maxConcurrent = getMaxConcurrent();
-  const playVisible = (el: HTMLVideoElement) => {
-    el.muted = true;
-    el.playsInline = true;
-    try {
-      el.preload = 'auto';
-      // På Windows/Android avbryter load() en redan pågående range-request.
-      // Scroll-koordinatorn kör ofta; upprepade load() skapade därför en loop av
-      // ERR_ABORTED-hämtningar. Apple behåller exakt sin tidigare väg.
-      if (isAppleDevice() && el.readyState < 2) el.load();
-      else if (!isAppleDevice() && el.networkState === HTMLMediaElement.NETWORK_EMPTY) el.load();
-    } catch {
-      // Best-effort only — playback coordinator must never throw during scroll.
-    }
-    if (el.paused) {
-      const p = el.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-    }
-  };
-
-  /**
-   * Urval — ett SAMMANHÄNGANDE fönster som glider vänster→höger:
-   * 1,2,3 → 2,3,4 → … → 6,7,8.
-   *
-   * Vi tar de N vänstraste synliga korten. Undantag i strippens slut: när det
-   * sista kortet syns finns inga kort kvar till höger, så fönstret ankras i
-   * stället mot höger (de N sista synliga). Utan detta hamnade kort 8 alltid
-   * utanför budgeten och stod kvar på posterbilden — samma sak för kort 1 vid
-   * strippens början, som ankras mot vänster.
-   */
-  const visibleIdx: number[] = [];
-  all.forEach((e, i) => {
-    if (e.inView && e.covered >= 0.5) visibleIdx.push(i);
-  });
-  // Om inget kort är halvt synligt (extremt smala vyer) → fall tillbaka på allt i vy.
-  if (visibleIdx.length === 0) all.forEach((e, i) => { if (e.inView) visibleIdx.push(i); });
-
-  const picks = new Set<HTMLVideoElement>();
-  if (visibleIdx.length > 0) {
-    const lastCardIndex = all.length - 1;
-    const reachedEnd = visibleIdx[visibleIdx.length - 1] === lastCardIndex;
-    const slots = reachedEnd
-      ? visibleIdx.slice(Math.max(0, visibleIdx.length - maxConcurrent))
-      : visibleIdx.slice(0, maxConcurrent);
-    slots.forEach((i) => picks.add(all[i].el));
-
-  }
-
-  const candidates = all.filter((e) => e.inView);
-  all.forEach(({ el, inView }) => {
-    if (!inView && !el.paused) el.pause();
-  });
-
-
-  candidates.forEach(({ el }) => {
-    if (picks.has(el)) {
-      playVisible(el);
-    } else if (!el.paused) {
-      el.pause();
-    }
-  });
-
-
-
-};
-
-/**
- * Koordinatorn får INTE köra varje frame.
- *
- * evaluateAll() läser getBoundingClientRect() på samtliga åtta kort. Anropas
- * det per scroll-frame (vilket det gjorde via `parium:gallery-progress`, som
- * dispatchades i varje rAF-tick) tvingas browsern räkna om layouten 8 gånger
- * per frame mitt under scrollen. macOS har marginal för det; Chrome/Edge på
- * Windows tappar frames — och det växer ju längre man scrollar, vilket är
- * precis den "börjar hacka efter en stund"-känslan.
- *
- * Urvalet av vilka videor som ska spela behöver inte uppdateras oftare än
- * ~8 gånger per sekund. En avslutande körning garanterar att sluttillståndet
- * alltid blir rätt även om scrollen stannar mitt i en throttle-period.
- */
-const MIN_EVAL_INTERVAL_MS = 120;
-let lastEvalAt = 0;
-let trailingTimer = 0;
-
-const runEvaluate = () => {
-  rafId = 0;
-  lastEvalAt = Date.now();
-  evaluateAll();
-};
-
-const scheduleEvaluate = () => {
-  if (rafId) return;
-  const since = Date.now() - lastEvalAt;
-  if (since >= MIN_EVAL_INTERVAL_MS) {
-    rafId = requestAnimationFrame(runEvaluate);
-    return;
-  }
-  if (trailingTimer) return;
-  trailingTimer = window.setTimeout(() => {
-    trailingTimer = 0;
-    scheduleEvaluate();
-  }, MIN_EVAL_INTERVAL_MS - since);
-};
+const scheduleEvaluate = scheduleLandingVideoEvaluation;
 
 
 const CardItem = ({ item, index }: CardItemProps) => {
@@ -222,22 +91,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
   useEffect(() => {
     const v = videoRef.current;
     if (!v || item.type !== 'video' || failed) return;
-    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    registry.add(v);
-    window.addEventListener('parium:gallery-progress', scheduleEvaluate);
-    window.addEventListener('resize', scheduleEvaluate);
-    window.addEventListener('scroll', scheduleEvaluate, { passive: true });
-    root?.addEventListener('scroll', scheduleEvaluate, { passive: true });
-    document.addEventListener('visibilitychange', scheduleEvaluate);
-    scheduleEvaluate();
-    return () => {
-      registry.delete(v);
-      window.removeEventListener('parium:gallery-progress', scheduleEvaluate);
-      window.removeEventListener('resize', scheduleEvaluate);
-      window.removeEventListener('scroll', scheduleEvaluate);
-      root?.removeEventListener('scroll', scheduleEvaluate);
-      document.removeEventListener('visibilitychange', scheduleEvaluate);
-    };
+    return registerLandingVideo(v, 10);
   }, [item.type, failed]);
 
   // Starta varje kort på en egen tidsposition första gången metadata finns.
@@ -585,7 +439,7 @@ const PinnedHorizontalGallery = () => {
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
       const priority = prefersLightweightVideo()
-        ? videos.slice(0, getMaxConcurrent())
+        ? videos.slice(0, 1)
         : profile === 'slim'
           ? videos.slice(0, 3)
           : videos.slice(0, 4);

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
+import { registerLandingVideo, scheduleLandingVideoEvaluation } from '@/lib/landingVideoCoordinator';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
@@ -195,6 +196,11 @@ const JobSeekerVideoShowcase = ({
   active?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    return registerLandingVideo(video, 40, () => active);
+  }, [active]);
   const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
   if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
   const sources = sourcesRef.current;
@@ -236,11 +242,9 @@ const JobSeekerVideoShowcase = ({
   const warmRef = useRef(false);
 
 
-  const safePlay = useCallback((v: HTMLVideoElement | null) => {
-    if (!v || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
-    const p = v.play();
-    if (p && typeof p.catch === 'function') p.catch(() => {});
-  }, [active, keepAliveWhenHidden]);
+  const safePlay = useCallback((_v: HTMLVideoElement | null) => {
+    scheduleLandingVideoEvaluation();
+  }, []);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -274,17 +278,9 @@ const JobSeekerVideoShowcase = ({
 
     const attempt = () => {
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
-      if (!v.paused && !v.ended) return;
       if (attempts >= MAX_ATTEMPTS) return;
       attempts += 1;
-      const p = v.play();
-      if (p && typeof p.catch === 'function') {
-        p.then(() => { attempts = 0; clearRetry(); }).catch(() => {
-          clearRetry();
-          if (attempts >= MAX_ATTEMPTS) return;
-          retryTimer = window.setTimeout(attempt, Math.min(4000, 600 * attempts));
-        });
-      }
+      scheduleLandingVideoEvaluation();
     };
 
     /** Hur många sekunder som är buffrat framför nuvarande position. */
@@ -499,7 +495,6 @@ const JobSeekerVideoShowcase = ({
     window.addEventListener('pointerdown', onGesture, gestureOpts);
     window.addEventListener('touchstart', resume, gestureOpts);
     window.addEventListener('pointerdown', resume, gestureOpts);
-    window.addEventListener('scroll', resume, gestureOpts);
     v.addEventListener('canplay', resume);
     v.addEventListener('loadeddata', resume);
     v.addEventListener('waiting', onWaiting);
@@ -521,7 +516,6 @@ const JobSeekerVideoShowcase = ({
       window.removeEventListener('pointerdown', onGesture);
       window.removeEventListener('touchstart', resume);
       window.removeEventListener('pointerdown', resume);
-      window.removeEventListener('scroll', resume);
       v.removeEventListener('canplay', resume);
       v.removeEventListener('loadeddata', resume);
       v.removeEventListener('waiting', onWaiting);
