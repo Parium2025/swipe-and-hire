@@ -436,6 +436,13 @@ const PinnedHorizontalGallery = () => {
     const warmVideos = () => {
       if (warmed) return;
       warmed = true;
+      // Windows/Android har en enda central decoderägare. Låt koordinatorn
+      // både välja och starta exakt den synliga videon; en separat load-kö här
+      // skapade annars två konkurrerande livscykler för samma mediaelement.
+      if (prefersLightweightVideo()) {
+        scheduleEvaluate();
+        return;
+      }
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
       const priority = prefersLightweightVideo()

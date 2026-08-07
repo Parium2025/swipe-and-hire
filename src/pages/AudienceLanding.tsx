@@ -1242,7 +1242,7 @@ const IntroSplinePhone = () => {
       }`}
 
     >
-      <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} />
+      <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} deferUntilActive />
 
     </motion.div>
   );

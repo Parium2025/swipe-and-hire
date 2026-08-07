@@ -7,6 +7,7 @@ let frame = 0;
 let trailingTimer = 0;
 let lastRun = 0;
 let listenersAttached = false;
+let scrollRoot: Element | null = null;
 
 const pause = (video: HTMLVideoElement) => {
   if (!video.paused) video.pause();
@@ -69,12 +70,28 @@ export const scheduleLandingVideoEvaluation = () => {
 const attachListeners = () => {
   if (listenersAttached) return;
   listenersAttached = true;
-  const root = document.querySelector('[data-landing-scroll-root]');
-  root?.addEventListener('scroll', scheduleLandingVideoEvaluation, { passive: true });
+  scrollRoot = document.querySelector('[data-landing-scroll-root]');
+  scrollRoot?.addEventListener('scroll', scheduleLandingVideoEvaluation, { passive: true });
   window.addEventListener('scroll', scheduleLandingVideoEvaluation, { passive: true });
   window.addEventListener('resize', scheduleLandingVideoEvaluation, { passive: true });
   window.addEventListener('pageshow', scheduleLandingVideoEvaluation);
   document.addEventListener('visibilitychange', scheduleLandingVideoEvaluation);
+};
+
+const detachListeners = () => {
+  if (!listenersAttached || videos.size > 0) return;
+  listenersAttached = false;
+  scrollRoot?.removeEventListener('scroll', scheduleLandingVideoEvaluation);
+  scrollRoot = null;
+  window.removeEventListener('scroll', scheduleLandingVideoEvaluation);
+  window.removeEventListener('resize', scheduleLandingVideoEvaluation);
+  window.removeEventListener('pageshow', scheduleLandingVideoEvaluation);
+  document.removeEventListener('visibilitychange', scheduleLandingVideoEvaluation);
+  if (frame) window.cancelAnimationFrame(frame);
+  if (trailingTimer) window.clearTimeout(trailingTimer);
+  frame = 0;
+  trailingTimer = 0;
+  lastRun = 0;
 };
 
 export const registerLandingVideo = (video: HTMLVideoElement, priority = 0, isActive: () => boolean = () => true) => {
@@ -85,15 +102,14 @@ export const registerLandingVideo = (video: HTMLVideoElement, priority = 0, isAc
   const resync = () => scheduleLandingVideoEvaluation();
   video.addEventListener('canplay', resync);
   video.addEventListener('loadeddata', resync);
-  video.addEventListener('playing', resync);
   scheduleLandingVideoEvaluation();
 
   return () => {
     videos.delete(video);
     video.removeEventListener('canplay', resync);
     video.removeEventListener('loadeddata', resync);
-    video.removeEventListener('playing', resync);
     pause(video);
-    scheduleLandingVideoEvaluation();
+    if (videos.size > 0) scheduleLandingVideoEvaluation();
+    else detachListeners();
   };
 };

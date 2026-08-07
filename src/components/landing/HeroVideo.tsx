@@ -64,7 +64,6 @@ const HeroVideo = () => {
         <video
           ref={videoRef}
           muted
-          autoPlay
           loop
           playsInline
           // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,

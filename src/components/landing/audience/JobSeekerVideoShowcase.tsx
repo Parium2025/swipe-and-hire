@@ -1,6 +1,6 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { registerLandingVideo, scheduleLandingVideoEvaluation } from '@/lib/landingVideoCoordinator';
+import { registerLandingVideo } from '@/lib/landingVideoCoordinator';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
@@ -52,18 +52,6 @@ const prefersHevc = () => {
  * vid kallstart. Därför är Windows-filen kodad utan B-frames, med kort GOP och
  * `fastdecode`, så varje bildruta kan avkodas i ordning utan omkastningsbuffert.
  */
-// Native muted autoplay är stabilare än en egen buffertspärr i Chrome/Edge.
-// Apple/iOS hade redan den här vägen och lämnas därmed helt oförändrat.
-const usesBufferedStart = () => false;
-
-/**
- * Windows/Chromium kan droppa frames när en <video>-overlay börjar spela medan
- * planet samtidigt flyttas/skalats av layouten. Det matchar beteendet här:
- * första rendern hackar, men efter att användaren scrollat bort och tillbaka är
- * telefonens geometri redan stabil och videon flyter perfekt.
- */
-const usesStableGeometryStart = () => false;
-
 /**
  * Upplösningsstege — vald efter FAKTISKA enhetspixlar, inte efter operativsystem.
  *
@@ -217,35 +205,6 @@ const JobSeekerVideoShowcase = ({
   // Apple-vägen och dess HEVC/H.264-källor är helt oförändrade.
   const visibleSources = sources;
 
-  /**
-   * Kallstartsspärr (ENDAST Windows / sparläge).
-   *
-   * Problemet: browsern startar uppspelningen så fort `readyState >= 2`, dvs.
-   * när bara någon tiondels sekund är buffrad. På ett kallt nät hinner
-   * bufferten ta slut direkt och de första sekunderna blir en serie
-   * mikro-stopp — exakt det "oj vad tömtladdat" användaren ser. När filen väl
-   * ligger i HTTP-cachen (varm) startar den full och allt känns perfekt.
-   *
-   * Lösningen: håll videon pausad på posterbilden tills ~2 s faktiskt är
-   * buffrat (eller max 4 s), och starta först då. Poster = stillbild = noll
-   * hack. Apple/touch-vägen behåller native autoplay helt orörd.
-   */
-  const coldGateRef = useRef<boolean | null>(null);
-  if (coldGateRef.current === null) coldGateRef.current = usesBufferedStart();
-  const coldGate = coldGateRef.current;
-  const geometryGateRef = useRef<boolean | null>(null);
-  if (geometryGateRef.current === null) geometryGateRef.current = usesStableGeometryStart();
-  const geometryGate = geometryGateRef.current;
-  // Frigör alltid telefonvideons decoder när hero-zonen lämnar viewporten.
-  // Windows behöver den budgeten till galleriet längre ned på sidan.
-  const keepAliveWhenHidden = false;
-  const warmRef = useRef(false);
-
-
-  const safePlay = useCallback((_v: HTMLVideoElement | null) => {
-    scheduleLandingVideoEvaluation();
-  }, []);
-
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -256,228 +215,8 @@ const JobSeekerVideoShowcase = ({
     v.setAttribute('muted', '');
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
-    if (!coldGate) v.setAttribute('autoplay', '');
     v.disablePictureInPicture = true;
     try { (v as unknown as { disableRemotePlayback?: boolean }).disableRemotePlayback = true; } catch { /* noop */ }
-
-    // iOS Lågeffektläge (sparläge) blockerar autoplay helt tills sidan får en
-    // användarinteraktion. Vi försöker därför om med kort intervall och
-    // återupptar direkt vid första touch/scroll — samma mönster som hero-videon
-    // på startsidan, så telefonen aldrig står kvar på en still bild.
-    let retryTimer: number | null = null;
-    const clearRetry = () => {
-      if (retryTimer !== null) { window.clearTimeout(retryTimer); retryTimer = null; }
-    };
-
-    // Budget för play()-försök. Utan tak kunde en video som browsern vägrar
-    // starta (t.ex. när Windows-decodern är slut) få ett nytt play()-anrop var
-    // 600:e ms i evighet — det i sig gör hela sidan hackig. Räknaren nollställs
-    // så fort uppspelningen faktiskt kommer i gång eller användaren agerar.
-    const MAX_ATTEMPTS = 12;
-    let attempts = 0;
-
-    const attempt = () => {
-      if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
-      if (attempts >= MAX_ATTEMPTS) return;
-      attempts += 1;
-      scheduleLandingVideoEvaluation();
-    };
-
-    /** Hur många sekunder som är buffrat framför nuvarande position. */
-    const aheadOf = (el: HTMLVideoElement) => {
-      try {
-        const t = el.currentTime;
-        for (let i = 0; i < el.buffered.length; i += 1) {
-          if (el.buffered.start(i) <= t + 0.1 && el.buffered.end(i) > t) return el.buffered.end(i) - t;
-        }
-      } catch {
-        return Infinity;
-      }
-      return 0;
-    };
-
-    // Kallstart: vänta in en riktig buffert innan första play(). Max 6,5 s, sedan
-    // startar vi ändå så att telefonen aldrig blir stående på posterbilden.
-    // Målet är ADAPTIVT: 3 s är rätt på ett trögt nät, men på ett snabbt nät
-    // (eller när filen redan ligger i HTTP-cachen) är det ren väntetid. Vi mäter
-    // därför hur snabbt bufferten växer och sänker målet när nätet håller undan.
-    const COLD_TARGET_SECONDS = 3;
-    const COLD_FAST_TARGET_SECONDS = 1.2;
-    const COLD_WARM_TARGET_SECONDS = 0.8;
-    const COLD_MAX_WAIT_MS = 6500;
-    // Har filen redan spelat stabilt i den här sessionen ligger den i cachen —
-    // då är en lång buffringsspärr bara fördröjning.
-    const warmSessionKey = 'parium:jobseeker-video-warm';
-    let sessionWarm = false;
-    try { sessionWarm = sessionStorage.getItem(warmSessionKey) === '1'; } catch { /* noop */ }
-
-
-    let coldTimer: number | null = null;
-    let geometryFrame: number | null = null;
-    const clearCold = () => {
-      if (coldTimer !== null) { window.clearInterval(coldTimer); coldTimer = null; }
-    };
-
-    /**
-     * Windows-start: ladda/buffra direkt, men vänta med play() tills telefonens
-     * pixelbox varit stabil i några frames. Annars kan Chrome flytta video-MPO-
-     * planet samtidigt som första frames avkodas, vilket ser ut som nät-/codec-
-     * lagg fast filen egentligen är rätt.
-     */
-    let geometrySettled = !geometryGate;
-    let geometryWaitStarted = false;
-    const waitForStableGeometry = (then: () => void) => {
-      if (geometrySettled) { then(); return; }
-      if (geometryWaitStarted) return;
-      geometryWaitStarted = true;
-      const startedAt = performance.now();
-      let stableFrames = 0;
-      let last: DOMRectReadOnly | null = null;
-
-      const tick = () => {
-        if (!keepAliveWhenHidden && !active) {
-          geometryFrame = null;
-          geometryWaitStarted = false;
-          return;
-        }
-
-        const rect = v.getBoundingClientRect();
-        const stable = last
-          ? Math.abs(rect.left - last.left) < 0.25 &&
-            Math.abs(rect.top - last.top) < 0.25 &&
-            Math.abs(rect.width - last.width) < 0.25 &&
-            Math.abs(rect.height - last.height) < 0.25
-          : false;
-
-        stableFrames = stable ? stableFrames + 1 : 0;
-        last = rect;
-
-        if (stableFrames >= 10 || performance.now() - startedAt >= 2500) {
-          geometrySettled = true;
-          geometryFrame = null;
-          then();
-          return;
-        }
-
-        geometryFrame = window.requestAnimationFrame(tick);
-      };
-
-      geometryFrame = window.requestAnimationFrame(tick);
-    };
-
-    const startWhenBuffered = () => {
-      if (coldTimer !== null) return;
-      try { v.preload = 'auto'; } catch { /* noop */ }
-      if (v.readyState < 2) { try { v.load(); } catch { /* noop */ } }
-      const startedAt = Date.now();
-      let lastAhead = aheadOf(v);
-      let lastAt = startedAt;
-      coldTimer = window.setInterval(() => {
-        if (!active && !keepAliveWhenHidden) { clearCold(); return; }
-        const now = Date.now();
-        const ahead = aheadOf(v);
-        // Buffertens tillväxt i "sekunder video per sekund realtid". > 2 betyder
-        // att nätet levererar dubbelt så fort som videon konsumeras → helt säkert
-        // att starta tidigt, bufferten fortsätter växa medan den spelar.
-        const growth = now > lastAt ? ((ahead - lastAhead) / ((now - lastAt) / 1000)) : 0;
-        lastAhead = ahead;
-        lastAt = now;
-
-        const target = sessionWarm
-          ? COLD_WARM_TARGET_SECONDS
-          : growth >= 2 ? COLD_FAST_TARGET_SECONDS : COLD_TARGET_SECONDS;
-
-        if (v.readyState >= 4 || ahead >= target || now - startedAt >= COLD_MAX_WAIT_MS) {
-          clearCold();
-          warmRef.current = true;
-          attempt();
-        }
-      }, 100);
-    };
-
-    /**
-     * Startpunkt: kallstartsspärr på Windows, direkt play överallt annars.
-     *
-     * På Windows väntar vi dessutom in `load`-eventet innan första play().
-     * Vid en kall laddning pågår då fortfarande hydrering, bilddekodning och
-     * hero-animationen — startar videodecodern mitt i den bursten hackar de
-     * första sekunderna även när filen redan är hämtad. Vid en varm sidvisning
-     * har `load` redan hänt, så den vägen ändras inte alls.
-     *
-     * Undantag: är filen redan cachad (varm session) eller helt buffrad finns
-     * ingen burst att skydda sig mot — då är väntan på `load` bara död tid.
-     */
-    let loadWaitArmed = false;
-    const startAfterLoad = (then: () => void) => {
-      if (!coldGate || document.readyState === 'complete' || sessionWarm || v.readyState >= 4) { then(); return; }
-      if (loadWaitArmed) return;
-      loadWaitArmed = true;
-      // Vänta inte i evighet på `load` — tunga tredjepartsresurser kan dra ut på
-      // det långt efter att videon är spelklar.
-      const proceed = () => { loadWaitArmed = false; then(); };
-      window.addEventListener('load', proceed, { once: true });
-      window.setTimeout(() => { if (loadWaitArmed) proceed(); }, 1800);
-    };
-
-
-    const kick = () => {
-      startAfterLoad(() => {
-        waitForStableGeometry(() => {
-          if (coldGate && !warmRef.current) startWhenBuffered();
-          else attempt();
-        });
-      });
-    };
-
-
-    // Apple/touch: starta omedelbart, redan innan events hinner trigga.
-    if (!coldGate && !geometryGate && (active || keepAliveWhenHidden)) attempt();
-
-    if (active || keepAliveWhenHidden) kick();
-    else v.pause();
-
-
-    const resume = () => {
-      if (!active && !keepAliveWhenHidden) {
-        if (!v.paused) v.pause();
-        return;
-      }
-      kick();
-    };
-
-    /**
-     * Buffringsvakt under uppspelning.
-     *
-     * Kallstarten hanteras av spärren ovan. Här fångar vi bara stopp som sker
-     * mitt i loopen: vi väntar in lite ny data innan vi kickar igång igen,
-     * istället för att spamma play() mot en tom buffert (vilket är precis det
-     * som ger den hackiga känslan).
-     */
-    let stallTimer: number | null = null;
-    const clearStall = () => {
-      if (stallTimer !== null) { window.clearInterval(stallTimer); stallTimer = null; }
-    };
-    const onWaiting = () => {
-      if ((!active && !keepAliveWhenHidden) || stallTimer !== null) return;
-      try { v.preload = 'auto'; } catch { /* noop */ }
-      // Windows behöver mer marginal innan återstart, annars stannar den igen
-      // direkt. Apple/touch behåller det tidigare, snabbare tröskelvärdet.
-      const needAhead = coldGate ? 1.5 : 0.65;
-      let ticks = 0;
-      stallTimer = window.setInterval(() => {
-        ticks += 1;
-        if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
-        const ahead = aheadOf(v);
-        const nearEnd = v.duration > 0 && v.currentTime > v.duration - 1.2;
-        if (ahead >= needAhead || nearEnd || v.readyState >= 4 || ticks >= 20) {
-          clearStall();
-          attempt();
-        }
-      }, 250);
-    };
-    const onPlaying = () => { attempts = 0; clearStall(); };
-    // En riktig användargest är alltid ett legitimt skäl att få ny budget.
-    const onGesture = () => { attempts = 0; };
     const onFirstStablePlay = () => {
       window.dispatchEvent(new CustomEvent('parium:jobseeker-video-stable'));
       // Filen finns nu i HTTP-cachen: nästa sidvisning i samma session får
@@ -488,44 +227,17 @@ const JobSeekerVideoShowcase = ({
 
 
 
-    const gestureOpts: AddEventListenerOptions = { passive: true };
-    document.addEventListener('visibilitychange', resume);
-    window.addEventListener('pageshow', resume);
-    window.addEventListener('touchstart', onGesture, gestureOpts);
-    window.addEventListener('pointerdown', onGesture, gestureOpts);
-    window.addEventListener('touchstart', resume, gestureOpts);
-    window.addEventListener('pointerdown', resume, gestureOpts);
-    v.addEventListener('canplay', resume);
-    v.addEventListener('loadeddata', resume);
-    v.addEventListener('waiting', onWaiting);
-    v.addEventListener('stalled', onWaiting);
     const markPainted = () => setFirstFramePainted(true);
-    v.addEventListener('playing', onPlaying);
     v.addEventListener('playing', onFirstStablePlay);
     v.addEventListener('playing', markPainted);
     v.addEventListener('timeupdate', markPainted);
 
     return () => {
-      clearRetry();
-      clearStall();
-      clearCold();
-      if (geometryFrame !== null) window.cancelAnimationFrame(geometryFrame);
-      document.removeEventListener('visibilitychange', resume);
-      window.removeEventListener('pageshow', resume);
-      window.removeEventListener('touchstart', onGesture);
-      window.removeEventListener('pointerdown', onGesture);
-      window.removeEventListener('touchstart', resume);
-      window.removeEventListener('pointerdown', resume);
-      v.removeEventListener('canplay', resume);
-      v.removeEventListener('loadeddata', resume);
-      v.removeEventListener('waiting', onWaiting);
-      v.removeEventListener('stalled', onWaiting);
-      v.removeEventListener('playing', onPlaying);
       v.removeEventListener('playing', onFirstStablePlay);
       v.removeEventListener('playing', markPainted);
       v.removeEventListener('timeupdate', markPainted);
     };
-  }, [active, safePlay, coldGate, geometryGate, keepAliveWhenHidden]);
+  }, []);
 
 
 
@@ -595,7 +307,6 @@ const JobSeekerVideoShowcase = ({
             )}
             <video
               ref={videoRef}
-              autoPlay
               loop
               muted
               playsInline
