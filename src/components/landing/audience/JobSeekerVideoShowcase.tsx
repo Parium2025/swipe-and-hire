@@ -479,7 +479,9 @@ const JobSeekerVideoShowcase = ({
         }
       }, 250);
     };
-    const onPlaying = () => clearStall();
+    const onPlaying = () => { attempts = 0; clearStall(); };
+    // En riktig användargest är alltid ett legitimt skäl att få ny budget.
+    const onGesture = () => { attempts = 0; };
     const onFirstStablePlay = () => {
       window.dispatchEvent(new CustomEvent('parium:jobseeker-video-stable'));
       // Filen finns nu i HTTP-cachen: nästa sidvisning i samma session får
