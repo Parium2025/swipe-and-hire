@@ -264,9 +264,11 @@ const HeroVideo = () => {
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
-          {!skipVideo && (
+          {!skipVideo && !gaveUp && (
             /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
-               så browsern återanvänder samma fetch istället för att ladda två filer. */
+               så browsern återanvänder samma fetch istället för att ladda två filer.
+               Vid gaveUp tas källan bort helt: då står postern kvar och browsern
+               slutar försöka dekoda, i stället för att mala i bakgrunden. */
             <source src={heroSrc} type="video/mp4" />
           )}
 
