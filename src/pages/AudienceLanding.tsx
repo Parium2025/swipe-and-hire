@@ -984,7 +984,7 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
           Math.abs(prev.height - next.height) < 0.5 &&
           Math.abs(prev.zoom - next.zoom) < 0.002 &&
           Math.abs(prev.yOffset - next.yOffset) < 0.5 &&
-          Math.abs((prev as { canvasHeight?: number }).canvasHeight ?? 0) - Math.abs((next as { canvasHeight?: number }).canvasHeight ?? 0) === 0
+          Math.abs(((prev as { canvasHeight?: number }).canvasHeight ?? 0) - ((next as { canvasHeight?: number }).canvasHeight ?? 0)) < 0.5
         ) {
           return prev;
         }
