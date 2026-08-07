@@ -280,7 +280,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
         app.setZoom(zoomRef.current);
         requestAnimationFrame(() => app?.setZoom(zoomRef.current));
-        if (!activeRef.current) app.stop();
+        syncPlayback();
         await waitForVisualSettle();
         if (!cancelled) {
           setIsReady(true);
