@@ -314,7 +314,7 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            add({ rel: 'preload', as: 'image', href: '/hero-video-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/d5eec2bc-5e35-4b68-a961-0e41f9dba64f/hero-video-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
@@ -325,7 +325,7 @@
               // annars laddas två filer (6,3 MB + 2,4 MB) och bara den lilla spelas.
               var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
               var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
-              var videoHref = (isDesktop && !lightUa) ? '/hero-video.mp4' : '/hero-video-720.mp4';
+              var videoHref = (isDesktop && !lightUa) ? '/__l5e/assets-v1/46500772-f54a-4dda-b256-89bfe9d52e45/hero-video.mp4' : '/__l5e/assets-v1/43903183-f9d3-4eb3-9374-993f40fb91aa/hero-video-720.mp4';
               add({ rel: 'preload', as: 'video', href: videoHref, type: 'video/mp4', fetchpriority: 'high' });
 
             }
