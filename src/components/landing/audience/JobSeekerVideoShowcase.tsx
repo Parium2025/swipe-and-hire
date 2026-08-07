@@ -265,14 +265,24 @@ const JobSeekerVideoShowcase = ({
       if (retryTimer !== null) { window.clearTimeout(retryTimer); retryTimer = null; }
     };
 
+    // Budget för play()-försök. Utan tak kunde en video som browsern vägrar
+    // starta (t.ex. när Windows-decodern är slut) få ett nytt play()-anrop var
+    // 600:e ms i evighet — det i sig gör hela sidan hackig. Räknaren nollställs
+    // så fort uppspelningen faktiskt kommer i gång eller användaren agerar.
+    const MAX_ATTEMPTS = 12;
+    let attempts = 0;
+
     const attempt = () => {
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
       if (!v.paused && !v.ended) return;
+      if (attempts >= MAX_ATTEMPTS) return;
+      attempts += 1;
       const p = v.play();
       if (p && typeof p.catch === 'function') {
-        p.then(clearRetry).catch(() => {
+        p.then(() => { attempts = 0; clearRetry(); }).catch(() => {
           clearRetry();
-          retryTimer = window.setTimeout(attempt, 600);
+          if (attempts >= MAX_ATTEMPTS) return;
+          retryTimer = window.setTimeout(attempt, Math.min(4000, 600 * attempts));
         });
       }
     };
