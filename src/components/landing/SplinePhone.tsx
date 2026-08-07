@@ -42,7 +42,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
       activeRef.current &&
       !galleryActiveRef.current &&
       onScreenRef.current &&
-      !scrollingRef.current &&
+      
       !document.hidden;
 
     if (shouldRun) {
