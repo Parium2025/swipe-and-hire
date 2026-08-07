@@ -439,7 +439,7 @@ const PinnedHorizontalGallery = () => {
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
       const priority = prefersLightweightVideo()
-        ? videos.slice(0, getMaxConcurrent())
+        ? videos.slice(0, 1)
         : profile === 'slim'
           ? videos.slice(0, 3)
           : videos.slice(0, 4);

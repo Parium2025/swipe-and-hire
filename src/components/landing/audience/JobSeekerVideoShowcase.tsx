@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
-import { registerLandingVideo } from '@/lib/landingVideoCoordinator';
+import { registerLandingVideo, scheduleLandingVideoEvaluation } from '@/lib/landingVideoCoordinator';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
@@ -242,11 +242,9 @@ const JobSeekerVideoShowcase = ({
   const warmRef = useRef(false);
 
 
-  const safePlay = useCallback((v: HTMLVideoElement | null) => {
-    if (!v || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
-    const p = v.play();
-    if (p && typeof p.catch === 'function') p.catch(() => {});
-  }, [active, keepAliveWhenHidden]);
+  const safePlay = useCallback((_v: HTMLVideoElement | null) => {
+    scheduleLandingVideoEvaluation();
+  }, []);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -280,17 +278,9 @@ const JobSeekerVideoShowcase = ({
 
     const attempt = () => {
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
-      if (!v.paused && !v.ended) return;
       if (attempts >= MAX_ATTEMPTS) return;
       attempts += 1;
-      const p = v.play();
-      if (p && typeof p.catch === 'function') {
-        p.then(() => { attempts = 0; clearRetry(); }).catch(() => {
-          clearRetry();
-          if (attempts >= MAX_ATTEMPTS) return;
-          retryTimer = window.setTimeout(attempt, Math.min(4000, 600 * attempts));
-        });
-      }
+      scheduleLandingVideoEvaluation();
     };
 
     /** Hur många sekunder som är buffrat framför nuvarande position. */
