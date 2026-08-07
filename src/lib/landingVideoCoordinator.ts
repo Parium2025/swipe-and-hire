@@ -1,6 +1,6 @@
 import { getMaxConcurrentVideos, isAppleDevice } from '@/lib/videoPlatform';
 
-type Registration = { priority: number };
+type Registration = { priority: number; isActive: () => boolean };
 
 const videos = new Map<HTMLVideoElement, Registration>();
 let frame = 0;
@@ -26,11 +26,11 @@ const evaluate = () => {
     const visibleHeight = Math.max(0, Math.min(rect.bottom, height) - Math.max(rect.top, 0));
     const visibleArea = visibleWidth * visibleHeight;
     const distance = Math.hypot(rect.left + rect.width / 2 - centerX, rect.top + rect.height / 2 - centerY);
-    return { video, registration, visibleArea, distance };
+    return { video, registration, visibleArea, distance, active: registration.isActive() };
   });
 
   const eligible = candidates
-    .filter(({ visibleArea }) => !document.hidden && visibleArea > 0)
+    .filter(({ visibleArea, active }) => !document.hidden && active && visibleArea > 0)
     .sort((a, b) => b.registration.priority - a.registration.priority || b.visibleArea - a.visibleArea || a.distance - b.distance)
     .slice(0, getMaxConcurrentVideos());
   const granted = new Set(eligible.map(({ video }) => video));
@@ -77,10 +77,10 @@ const attachListeners = () => {
   document.addEventListener('visibilitychange', scheduleLandingVideoEvaluation);
 };
 
-export const registerLandingVideo = (video: HTMLVideoElement, priority = 0) => {
+export const registerLandingVideo = (video: HTMLVideoElement, priority = 0, isActive: () => boolean = () => true) => {
   // Apple hardware handles several streams reliably; the coordinator still
   // releases off-screen decoders but preserves the existing richer playback.
-  videos.set(video, { priority: isAppleDevice() ? 0 : priority });
+  videos.set(video, { priority: isAppleDevice() ? 0 : priority, isActive });
   attachListeners();
   const resync = () => scheduleLandingVideoEvaluation();
   video.addEventListener('canplay', resync);

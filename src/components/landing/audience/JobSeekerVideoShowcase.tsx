@@ -199,8 +199,8 @@ const JobSeekerVideoShowcase = ({
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    return registerLandingVideo(video, 40);
-  }, []);
+    return registerLandingVideo(video, 40, () => active);
+  }, [active]);
   const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
   if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
   const sources = sourcesRef.current;
