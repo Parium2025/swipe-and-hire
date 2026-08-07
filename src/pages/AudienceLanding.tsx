@@ -1500,12 +1500,19 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         return rect.bottom > rootRect.top + 16 && rect.top < rootRect.top + rootHeight * 0.82;
       };
 
+      // Ett element kan bara avslöjas en gång. Tidigare mättes ALLA element
+      // med getBoundingClientRect i varje scroll-frame, även de som redan var
+      // framme — arbetet minskade alltså aldrig ju längre man scrollade.
+      let remaining = elements.slice();
       const syncVisible = () => {
-        if (cancelled) return;
-        elements.forEach((el) => {
-          if (isVisible(el)) reveal(el);
+        if (cancelled || remaining.length === 0) return;
+        remaining = remaining.filter((el) => {
+          if (!isVisible(el)) return true;
+          reveal(el);
+          return false;
         });
       };
+
 
       const schedule = () => {
         if (raf) return;
