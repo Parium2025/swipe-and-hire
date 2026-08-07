@@ -8,6 +8,7 @@ import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import androidAsset from '@/assets/showcase-jobseeker-android.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
+import windowsFrameAsset from '@/assets/showcase-jobseeker-windows.jpg.asset.json';
 import { isAndroidDevice, isWindowsDevice, prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -291,9 +292,9 @@ const JobSeekerVideoShowcase = ({
             {/* Posterlager: ritas i samma frame som layouten (till skillnad från
                 <video poster> som Safari ibland håller tillbaka) och fasas ut
                 först när videon faktiskt spelar. */}
-            {!firstFramePainted && (
+            {(!firstFramePainted || useStaticWindowsFrame) && (
               <img
-                src={posterAsset.url}
+                src={useStaticWindowsFrame ? windowsFrameAsset.url : posterAsset.url}
                 alt=""
                 aria-hidden
                 decoding="sync"
