@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
+import hero720 from '@/assets/landing/hero/hero-video-720.mp4.asset.json';
+import heroFull from '@/assets/landing/hero/hero-video.mp4.asset.json';
+import heroPoster from '@/assets/landing/hero/hero-video-poster.jpg.asset.json';
 
 // Datasparläge eller 2G → hoppa över videoladdning helt och visa bara poster.
 // Sparar 2,4–13 MB för användare i dåligt nät utan att förändra UX synbart.
@@ -17,12 +20,12 @@ const shouldSkipVideo = () => {
 // tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
 // spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
 const pickHeroSrc = () => {
-  if (typeof window === 'undefined') return '/hero-video-720.mp4';
+  if (typeof window === 'undefined') return hero720.url;
   const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
   // Windows/Android (och sparläge/svagt nät) får den lätta 720p-mastern även på
   // desktop: 6,3 MB + mjukvaruavkodning är exakt det som gör hero-videon hackig
   // där. Villkoret delas nu med galleriet via videoPlatform.ts så de inte glider isär.
-  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? '/hero-video.mp4' : '/hero-video-720.mp4';
+  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? heroFull.url : hero720.url;
 };
 
 
@@ -60,6 +63,11 @@ const HeroVideo = () => {
           failCount = 0;
         }).catch(() => {
           failCount++;
+          // Sluta hamra play() i evighet — efter 8 misslyckade försök väntar vi
+          // på en riktig användarinteraktion i stället. Annars körs en retry var
+          // 600:e ms + watchdog var 500:e ms, vilket i sig gör sidan hackig på
+          // svaga Windows-GPU:er när videon ändå inte kan starta.
+          if (failCount > 8) return;
           // iOS Lågeffektläge kan blockera autoplay helt tills första touch.
           // Vi döljer native play UI via CSS och försöker igen vid touch/focus.
           if (retryTimer) window.clearTimeout(retryTimer);
@@ -204,7 +212,7 @@ const HeroVideo = () => {
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
-          poster="/hero-video-poster.jpg"
+          poster={heroPoster.url}
 
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
