@@ -362,16 +362,14 @@
                   : target <= 672
                     ? '/__l5e/assets-v1/824c9bad-ed77-41f5-9941-3e99d6249a0b/showcase-jobseeker-win-crisp.mp4'
                     : '/__l5e/assets-v1/fcdc9ff9-d4c5-4224-b75a-b28c76ad5934/showcase-jobseeker-hi-crisp.mp4';
-                // Windows använder 60 fps Baseline-mastern utan B-frames;
-                // Android använder den lättare 30 fps-mastern.
+                // Windows och Android använder den stabila 30 fps-mastern.
+                // canPlayType() bevisar bara formatstöd, inte att den aktuella
+                // Windows-GPU:n klarar 60 fps utan software-decode.
                 // Preload måste vara exakt samma URL, annars hämtar browsern en
                 // oanvänd MP4 parallellt med den källa som faktiskt spelas.
                 var isAndroid = /Android/i.test(ua);
-                var safe60Ok = isWin && probe.canPlayType && probe.canPlayType('video/mp4; codecs="avc1.42C020"') !== '';
                 var showcaseHref = isWin
-                  ? (safe60Ok
-                    ? '/__l5e/assets-v1/da1664a7-196a-40a9-9b48-691d2e7d44e0/showcase-jobseeker-windows-safe60.mp4'
-                    : '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4')
+                  ? '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4'
                   : isAndroid
                     ? '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4'
                     : rung;

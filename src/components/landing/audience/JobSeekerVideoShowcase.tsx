@@ -6,7 +6,6 @@ import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
-import windowsSafe60Asset from '@/assets/showcase-jobseeker-windows-safe60.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { isAndroidDevice, isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
 
@@ -73,12 +72,6 @@ const LADDER = [
   { w: 810, url: hiCrispAsset.url },
 ] as const;
 
-const supportsWindowsSafe60 = () => {
-  if (typeof document === 'undefined') return false;
-  const probe = document.createElement('video');
-  return probe.canPlayType('video/mp4; codecs="avc1.42C020"') !== '';
-};
-
 /** Uppskattad CSS-bredd på telefonen innan första målningen (matchar max-w-stegen). */
 const estimateCssWidth = (widthPx?: number) => {
   if (widthPx) return widthPx;
@@ -140,16 +133,12 @@ const getSources = (widthPx?: number) =>
       ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : isWindowsDevice()
         ? [
-            // Den dedikerade Windows-mastern är 60 fps, Constrained Baseline,
-            // yuv420p och saknar B-frames. Det matchar originalets bildfrekvens
-            // och undviker frame-reordering vid kallstart. windowsLite är 30 fps,
-            // Main profile och har B-frames, så den gav precis det ryckiga förlopp
-            // som kommentaren ovan sade att Windows-källan skulle undvika.
-            // Välj bara 60-fps-mastern när browsern själv accepterar dess exakta
-            // codecprofil. Annars används den brett kompatibla 30-fps-filen.
-            supportsWindowsSafe60()
-              ? { src: windowsSafe60Asset.url, type: 'video/mp4; codecs="avc1.42C020"' }
-              : { src: windowsLiteAsset.url, type: 'video/mp4' },
+            // Windows får alltid den stabila 30-fps-mastern. canPlayType() säger
+            // bara att en codec kan öppnas — inte att den aktuella GPU:n kan
+            // avkoda 60 fps jämnt. Den tidigare kontrollen skickade därför 60 fps
+            // även till iGPU:er som föll tillbaka på software decode, vilket
+            // fungerade i preview men hackade på riktiga Windows-maskiner.
+            { src: windowsLiteAsset.url, type: 'video/mp4' },
           ]
         : isAndroidDevice()
           ? [
