@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
+import { isWindowsDevice, prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 import hero720 from '@/assets/landing/hero/hero-video-720.mp4.asset.json';
 import heroFull from '@/assets/landing/hero/hero-video.mp4.asset.json';
 import heroPoster from '@/assets/landing/hero/hero-video-poster.jpg.asset.json';
@@ -32,6 +32,7 @@ const pickHeroSrc = () => {
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [windowsDevice] = useState<boolean>(isWindowsDevice);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
   const [heroSrc] = useState<string>(pickHeroSrc);
   // Ger upp helt och visar postern om videon inte går att spela. Bättre en
@@ -56,8 +57,8 @@ const HeroVideo = () => {
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <motion.div
-        initial={{ opacity: 0, scale: 1.06 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={windowsDevice ? { opacity: 0 } : { opacity: 0, scale: 1.06 }}
+        animate={windowsDevice ? { opacity: 1 } : { opacity: 1, scale: 1 }}
         transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-0 h-full w-full"
       >
