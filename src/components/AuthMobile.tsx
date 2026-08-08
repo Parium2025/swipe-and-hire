@@ -27,6 +27,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
 import { hasPendingVerification, markPendingVerification, clearPendingVerification, getPendingVerificationEmail } from '@/lib/pendingVerification';
+import { loadAuthDraft, saveAuthDraft, clearAuthDraft, mergeDraft } from '@/lib/authFormDraft';
 import { AuthLogoInline } from '@/assets/authLogoInline';
 
 interface AuthMobileProps {
@@ -62,7 +63,8 @@ const AuthMobile = ({
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
   // Separate form data for each role
-  const [jobSeekerData, setJobSeekerData] = useState({
+  const savedDraft = useRef(loadAuthDraft()).current;
+  const [jobSeekerData, setJobSeekerData] = useState(() => mergeDraft({
     firstName: '',
     lastName: '',
     phone: '',
@@ -70,8 +72,8 @@ const AuthMobile = ({
     email: '',
     password: '',
     confirmPassword: ''
-  });
-  const [employerData, setEmployerData] = useState({
+  }, savedDraft.jobSeeker));
+  const [employerData, setEmployerData] = useState(() => mergeDraft({
     firstName: '',
     lastName: '',
     companyName: '',
@@ -84,10 +86,15 @@ const AuthMobile = ({
     email: '',
     password: '',
     confirmPassword: ''
-  });
+  }, savedDraft.employer));
   const [role, setRole] = useState<'job_seeker' | 'employer'>(
-    initialRole === 'employer' ? 'employer' : 'job_seeker'
+    initialRole === 'employer' ? 'employer' : savedDraft.role ?? 'job_seeker'
   );
+  // Spara utkast i sessionStorage (aldrig lösenord) så inget tappas vid reload
+  useEffect(() => {
+    saveAuthDraft({ role, jobSeeker: jobSeekerData, employer: employerData });
+  }, [role, jobSeekerData, employerData]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -536,6 +543,7 @@ const AuthMobile = ({
           }
         } else {
           // Registreringen lyckades – gå till Logga in-fliken, men behåll mejlrutan så användaren kan skicka om bekräftelsen
+          clearAuthDraft();
           setHasRegistered(true);
           setShowResend(true);
           markPendingVerification(fallbackEmail);
