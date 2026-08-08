@@ -218,7 +218,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       }
 
       // Clear draft after successful submission
-      clearEmployerWelcomeDraft();
+      clearEmployerWelcomeDraft(user?.id);
 
       toast({
         title: "Välkommen till Parium!",
