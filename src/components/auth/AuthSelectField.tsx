@@ -74,39 +74,39 @@ const AuthSelectField = ({
           onClick={() => setOpen((prev) => !prev)}
           placeholder={placeholder}
           readOnly
-          className={`bg-white/5 backdrop-blur-sm border-white/20 text-white placeholder:text-white pr-10 cursor-pointer md:hover:bg-white/10 md:hover:border-white/50 ${open ? 'border-white/50' : ''}`}
+          className={`bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm pr-10 cursor-pointer ${open ? 'border-white/50' : ''}`}
         />
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white opacity-50" />
+        <ChevronDown
+          className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white transition-transform duration-200 ${open ? 'rotate-180' : 'rotate-0'}`}
+        />
 
         {open && (
-          <div className="absolute top-full left-0 z-[9999] mt-2 w-full glass-panel rounded-md text-white overflow-hidden">
+          <div className="absolute top-full left-0 right-0 z-[9999] glass-dropdown overflow-hidden">
             {searchable && (
-              <div className="p-3 border-b border-white/20">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
-                  <Input
-                    placeholder={searchPlaceholder}
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-10 pr-4 h-10 text-base bg-transparent border-white/20 text-white placeholder:text-white focus:border-white/40 rounded-lg"
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                  />
-                </div>
+              <div className="relative border-b border-white/10">
+                <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
+                <input
+                  placeholder={searchPlaceholder}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full bg-transparent pl-10 pr-3 py-2.5 text-sm text-white placeholder:text-white outline-none border-0"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                />
               </div>
             )}
 
-            <div className="overflow-y-auto max-h-72 overscroll-contain">
+            <div className="max-h-72 overflow-y-auto overscroll-contain">
               {filtered.map((option) => (
                 <button
                   key={option}
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => select(option)}
-                  className="w-full cursor-pointer hover:bg-white/20 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation text-left"
+                  className="w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors hover:bg-white/20 flex items-center justify-between"
                 >
-                  <span className="flex-1 pr-2">{option}</span>
+                  <span className="font-medium flex-1 pr-2">{option}</span>
                   {value === option && <Check className="h-4 w-4 text-green-400 flex-shrink-0" />}
                 </button>
               ))}
@@ -116,14 +116,14 @@ const AuthSelectField = ({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => select(search.trim())}
-                  className="w-full cursor-pointer hover:bg-white/20 py-2 px-3 text-white border-t border-white/20 transition-colors text-left"
+                  className="w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors hover:bg-white/20"
                 >
                   Använd "{search.trim()}"
                 </button>
               )}
 
               {!allowCustom && filtered.length === 0 && (
-                <div className="py-4 px-3 text-center text-white">Inga resultat hittades</div>
+                <div className="px-3 py-4 text-center text-white text-sm">Inga resultat hittades</div>
               )}
             </div>
           </div>
