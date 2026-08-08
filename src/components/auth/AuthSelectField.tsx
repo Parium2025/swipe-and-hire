@@ -79,7 +79,7 @@ const AuthSelectField = ({
         <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white opacity-50" />
 
         {open && (
-          <div className="absolute top-full left-0 z-[9999] mt-2 w-full glass-panel rounded-md text-white overflow-hidden">
+          <div className="absolute top-full left-0 z-[9999] mt-2 w-full rounded-md border border-white/20 bg-slate-900 shadow-lg text-white overflow-hidden">
             {searchable && (
               <div className="p-3 border-b border-white/20">
                 <div className="relative">
