@@ -238,25 +238,29 @@ const CardItem = ({ item, index }: CardItemProps) => {
       if (rebuilding || document.hidden) return;
       rebuilding = true;
       const resumeAt = Number.isFinite(v.currentTime) ? v.currentTime : 0;
-      const restore = () => {
+      const release = () => {
         v.removeEventListener('loadedmetadata', restore);
+        v.removeEventListener('error', release);
+        rebuilding = false;
+      };
+      const restore = () => {
+        release();
         try {
           if (Number.isFinite(v.duration) && v.duration > 0) {
             v.currentTime = Math.min(resumeAt, Math.max(0, v.duration - 0.1));
           }
         } catch { /* best effort */ }
-        rebuilding = false;
         frozenTicks = 0;
         lastTime = v.currentTime;
         scheduleEvaluate();
       };
       v.addEventListener('loadedmetadata', restore, { once: true });
+      v.addEventListener('error', release, { once: true });
       try {
         v.pause();
         v.load();
       } catch {
-        v.removeEventListener('loadedmetadata', restore);
-        rebuilding = false;
+        release();
         scheduleEvaluate();
       }
     };
@@ -286,6 +290,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
     const timer = window.setInterval(check, 1000);
     return () => {
       window.clearInterval(timer);
+      v.removeEventListener('error', release);
     };
   }, [item.type, failed]);
 

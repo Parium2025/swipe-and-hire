@@ -498,25 +498,29 @@ const JobSeekerVideoShowcase = ({
       if (rebuilding || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
       rebuilding = true;
       const resumeAt = Number.isFinite(v.currentTime) ? v.currentTime : 0;
-      const restore = () => {
+      const release = () => {
         v.removeEventListener('loadedmetadata', restore);
+        v.removeEventListener('error', release);
+        rebuilding = false;
+      };
+      const restore = () => {
+        release();
         try {
           if (Number.isFinite(v.duration) && v.duration > 0) {
             v.currentTime = Math.min(resumeAt, Math.max(0, v.duration - 0.1));
           }
         } catch { /* best effort */ }
-        rebuilding = false;
         frozenTicks = 0;
         lastHealthTime = v.currentTime;
         attempt();
       };
       v.addEventListener('loadedmetadata', restore, { once: true });
+      v.addEventListener('error', release, { once: true });
       try {
         v.pause();
         v.load();
       } catch {
-        v.removeEventListener('loadedmetadata', restore);
-        rebuilding = false;
+        release();
         attempt();
       }
     };
@@ -593,6 +597,7 @@ const JobSeekerVideoShowcase = ({
       clearCold();
       if (healthTimer !== null) window.clearInterval(healthTimer);
       if (displayTimer !== null) window.clearTimeout(displayTimer);
+      v.removeEventListener('error', rebuildDecoder);
       if (geometryFrame !== null) window.cancelAnimationFrame(geometryFrame);
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
