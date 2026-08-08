@@ -528,7 +528,7 @@ const AuthDesktop = ({
   };
 
    const handleResetPasswordEmail = async () => {
-     const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
+     const currentData = isLogin ? loginData : (role === 'job_seeker' ? jobSeekerData : employerData);
      if (!currentData.email) {
        toast({
          title: "E-post krävs",
