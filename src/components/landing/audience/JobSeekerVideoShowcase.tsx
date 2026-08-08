@@ -597,7 +597,6 @@ const JobSeekerVideoShowcase = ({
       clearCold();
       if (healthTimer !== null) window.clearInterval(healthTimer);
       if (displayTimer !== null) window.clearTimeout(displayTimer);
-      v.removeEventListener('error', rebuildDecoder);
       if (geometryFrame !== null) window.cancelAnimationFrame(geometryFrame);
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);

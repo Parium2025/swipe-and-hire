@@ -290,7 +290,6 @@ const CardItem = ({ item, index }: CardItemProps) => {
     const timer = window.setInterval(check, 1000);
     return () => {
       window.clearInterval(timer);
-      v.removeEventListener('error', release);
     };
   }, [item.type, failed]);
 
