@@ -735,6 +735,7 @@ const JobSeekerVideoShowcase = ({
             <div
               aria-hidden
               className="absolute inset-x-0 top-0 h-[6.6%] bg-[#01182f]"
+              style={{ zIndex: 3 }}
             >
               <div className="flex h-full items-center justify-between px-[9.5%] text-[6px] font-semibold leading-none text-white sm:text-[7px] md:text-[7.5px] lg:text-[8px] xl:text-[9px]">
                 <span className="tabular-nums tracking-[-0.02em]">19:41</span>
@@ -772,6 +773,7 @@ const JobSeekerVideoShowcase = ({
             <div
               aria-hidden
               className="absolute left-1/2 top-[1.1%] h-[4.0%] w-[30%] -translate-x-1/2 rounded-full bg-black"
+              style={{ zIndex: 4 }}
             />
 
 
