@@ -14,17 +14,25 @@ import { motion } from 'framer-motion';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 
-const EMPLOYER_WELCOME_DRAFT_KEY = 'parium_draft_employer-welcome-tunnel';
+const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
+const LEGACY_EMPLOYER_WELCOME_DRAFT_KEY = 'parium_draft_employer-welcome-tunnel';
+
+/** Kontoskopad nyckel – samma modell som jobbsökarens välkomsttunnel. */
+const employerDraftKey = (uid?: string | null) =>
+  `${EMPLOYER_WELCOME_DRAFT_PREFIX}:${uid ?? 'anon'}`;
 
 // Clear draft helper (exported for use elsewhere if needed)
-export const clearEmployerWelcomeDraft = () => {
+export const clearEmployerWelcomeDraft = (uid?: string | null) => {
   try {
-    localStorage.removeItem(EMPLOYER_WELCOME_DRAFT_KEY);
+    sessionStorage.removeItem(employerDraftKey(uid));
+    // Rensa även äldre, okontoskopade utkast så inget läcker mellan konton.
+    localStorage.removeItem(LEGACY_EMPLOYER_WELCOME_DRAFT_KEY);
     console.log('💾 Employer welcome tunnel draft cleared');
   } catch (e) {
     console.warn('Failed to clear employer welcome tunnel draft');
   }
 };
+
 
 interface EmployerWelcomeTunnelProps {
   onComplete: () => void;
