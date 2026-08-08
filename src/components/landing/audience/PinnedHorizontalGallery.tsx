@@ -224,6 +224,71 @@ const CardItem = ({ item, index }: CardItemProps) => {
     };
   }, [item.type, failed, index]);
 
+  // Chromium kan lämna en video i `paused=false` med frusen currentTime efter
+  // GPU-/skärmbyte eller decoder-press. onError triggas då inte. Vakten kör bara
+  // för en video som faktiskt spelar och eskalerar från pause/play till load().
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || item.type !== 'video' || failed) return;
+    let lastTime = v.currentTime;
+    let frozenTicks = 0;
+    let rebuilding = false;
+
+    const recover = () => {
+      if (rebuilding || document.hidden) return;
+      rebuilding = true;
+      const resumeAt = Number.isFinite(v.currentTime) ? v.currentTime : 0;
+      const restore = () => {
+        v.removeEventListener('loadedmetadata', restore);
+        try {
+          if (Number.isFinite(v.duration) && v.duration > 0) {
+            v.currentTime = Math.min(resumeAt, Math.max(0, v.duration - 0.1));
+          }
+        } catch { /* best effort */ }
+        rebuilding = false;
+        frozenTicks = 0;
+        lastTime = v.currentTime;
+        scheduleEvaluate();
+      };
+      v.addEventListener('loadedmetadata', restore, { once: true });
+      try {
+        v.pause();
+        v.load();
+      } catch {
+        v.removeEventListener('loadedmetadata', restore);
+        rebuilding = false;
+        scheduleEvaluate();
+      }
+    };
+
+    const check = () => {
+      if (document.hidden || rebuilding || v.paused || v.ended || v.seeking) {
+        frozenTicks = 0;
+        lastTime = v.currentTime;
+        return;
+      }
+      if (Math.abs(v.currentTime - lastTime) < 0.04) {
+        frozenTicks += 1;
+        if (frozenTicks === 2) {
+          try {
+            v.pause();
+            scheduleEvaluate();
+          } catch { /* best effort */ }
+        } else if (frozenTicks >= 5) {
+          recover();
+        }
+      } else {
+        frozenTicks = 0;
+        lastTime = v.currentTime;
+      }
+    };
+
+    const timer = window.setInterval(check, 1000);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [item.type, failed]);
+
 
   return (
     <div

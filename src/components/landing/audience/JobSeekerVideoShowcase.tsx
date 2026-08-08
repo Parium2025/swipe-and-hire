@@ -478,6 +478,95 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('playing', onFirstStablePlay);
     };
 
+    /**
+     * Dekodervakt för skärm-/GPU-byte.
+     *
+     * Chromium kan fortsätta rapportera `paused=false` och `readyState >= 2`
+     * trots att videoplanet har frusit när ett fönster flyttas mellan skärmar.
+     * Då kommer varken `waiting`, `stalled` eller `error`, så eventbaserad
+     * återhämtning räcker inte. Vi kontrollerar därför att currentTime faktiskt
+     * går framåt. Första nivån gör bara pause/play; först efter fortsatt stopp
+     * återinitieras mediekedjan och samma tidsposition återställs.
+     */
+    let healthTimer: number | null = null;
+    let displayTimer: number | null = null;
+    let lastHealthTime = v.currentTime;
+    let frozenTicks = 0;
+    let rebuilding = false;
+
+    const rebuildDecoder = () => {
+      if (rebuilding || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
+      rebuilding = true;
+      const resumeAt = Number.isFinite(v.currentTime) ? v.currentTime : 0;
+      const restore = () => {
+        v.removeEventListener('loadedmetadata', restore);
+        try {
+          if (Number.isFinite(v.duration) && v.duration > 0) {
+            v.currentTime = Math.min(resumeAt, Math.max(0, v.duration - 0.1));
+          }
+        } catch { /* best effort */ }
+        rebuilding = false;
+        frozenTicks = 0;
+        lastHealthTime = v.currentTime;
+        attempt();
+      };
+      v.addEventListener('loadedmetadata', restore, { once: true });
+      try {
+        v.pause();
+        v.load();
+      } catch {
+        v.removeEventListener('loadedmetadata', restore);
+        rebuilding = false;
+        attempt();
+      }
+    };
+
+    const checkHealth = () => {
+      if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible' || rebuilding) {
+        frozenTicks = 0;
+        lastHealthTime = v.currentTime;
+        return;
+      }
+      if (v.paused || v.ended || v.seeking || v.readyState < 2) {
+        frozenTicks = 0;
+        lastHealthTime = v.currentTime;
+        attempt();
+        return;
+      }
+      if (Math.abs(v.currentTime - lastHealthTime) < 0.04) {
+        frozenTicks += 1;
+        if (frozenTicks === 2) {
+          try {
+            v.pause();
+            attempt();
+          } catch { /* best effort */ }
+        } else if (frozenTicks >= 5) {
+          rebuildDecoder();
+        }
+      } else {
+        frozenTicks = 0;
+        lastHealthTime = v.currentTime;
+      }
+    };
+
+    const handleDisplayChange = () => {
+      if (displayTimer !== null) window.clearTimeout(displayTimer);
+      displayTimer = window.setTimeout(() => {
+        displayTimer = null;
+        if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
+        // Ge Chromium tid att flytta videoplanet till den nya GPU-utgången och
+        // verifiera sedan utfallet via samma hälsovakt — ingen onödig reload.
+        lastHealthTime = v.currentTime;
+        frozenTicks = 1;
+        try {
+          v.pause();
+          attempt();
+        } catch { /* best effort */ }
+      }, 280);
+    };
+
+    healthTimer = window.setInterval(checkHealth, 1000);
+
 
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
@@ -486,6 +575,8 @@ const JobSeekerVideoShowcase = ({
     window.addEventListener('touchstart', resume, gestureOpts);
     window.addEventListener('pointerdown', resume, gestureOpts);
     window.addEventListener('scroll', resume, gestureOpts);
+    window.addEventListener('resize', handleDisplayChange, { passive: true });
+    window.visualViewport?.addEventListener('resize', handleDisplayChange, { passive: true });
     v.addEventListener('canplay', resume);
     v.addEventListener('loadeddata', resume);
     v.addEventListener('waiting', onWaiting);
@@ -500,12 +591,16 @@ const JobSeekerVideoShowcase = ({
       clearRetry();
       clearStall();
       clearCold();
+      if (healthTimer !== null) window.clearInterval(healthTimer);
+      if (displayTimer !== null) window.clearTimeout(displayTimer);
       if (geometryFrame !== null) window.cancelAnimationFrame(geometryFrame);
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
       window.removeEventListener('touchstart', resume);
       window.removeEventListener('pointerdown', resume);
       window.removeEventListener('scroll', resume);
+      window.removeEventListener('resize', handleDisplayChange);
+      window.visualViewport?.removeEventListener('resize', handleDisplayChange);
       v.removeEventListener('canplay', resume);
       v.removeEventListener('loadeddata', resume);
       v.removeEventListener('waiting', onWaiting);
