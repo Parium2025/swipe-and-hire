@@ -678,8 +678,9 @@ const JobSeekerVideoShowcase = ({
           >
             {/* Posterlager: ritas i samma frame som layouten (till skillnad från
                 <video poster> som Safari ibland håller tillbaka) och fasas ut
-                först när videon faktiskt spelar. */}
-            {!firstFramePainted && (
+                mjukt först när videon faktiskt spelar — det tar bort blixten
+                mellan stillbild och rörlig bild på Windows. */}
+            {posterVisible && (
               <img
                 src={posterAsset.url}
                 alt=""
@@ -687,7 +688,12 @@ const JobSeekerVideoShowcase = ({
                 decoding="sync"
                 loading="eager"
                 {...({ fetchpriority: 'high' } as Record<string, string>)}
-                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                className={cn(
+                  'pointer-events-none absolute inset-0 h-full w-full object-cover',
+                  'transition-opacity duration-300 ease-out',
+                  firstFramePainted ? 'opacity-0' : 'opacity-100'
+                )}
+                style={{ zIndex: 1 }}
               />
             )}
             <video
