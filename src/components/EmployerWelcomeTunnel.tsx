@@ -62,11 +62,15 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
     companyLogoUrl: (profile as any)?.company_logo_url || '',
   });
 
-  // Restore draft on mount
+  const draftKey = employerDraftKey(user?.id);
+
+  // Restore draft on mount (kontoskopad sessionStorage – överlever reload, dör med fliken)
   useEffect(() => {
     if (!draftRestored) {
       try {
-        const saved = localStorage.getItem(EMPLOYER_WELCOME_DRAFT_KEY);
+        // Migrera/rensa bort äldre okontoskopade utkast i localStorage
+        try { localStorage.removeItem(LEGACY_EMPLOYER_WELCOME_DRAFT_KEY); } catch { /* noop */ }
+        const saved = sessionStorage.getItem(draftKey);
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.formData) {
@@ -82,9 +86,9 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       }
       setDraftRestored(true);
     }
-  }, [draftRestored]);
+  }, [draftRestored, draftKey]);
 
-  // Auto-save draft to localStorage
+  // Auto-save draft
   useEffect(() => {
     if (!draftRestored) return;
     
@@ -93,17 +97,17 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
     
     if (hasContent) {
       try {
-        localStorage.setItem(EMPLOYER_WELCOME_DRAFT_KEY, JSON.stringify({
+        sessionStorage.setItem(draftKey, JSON.stringify({
           formData,
           currentStep,
           savedAt: Date.now()
         }));
-        console.log('💾 Employer welcome tunnel draft saved');
       } catch (e) {
         console.warn('Failed to save employer welcome tunnel draft');
       }
     }
-  }, [formData, currentStep, draftRestored]);
+  }, [formData, currentStep, draftRestored, draftKey]);
+
 
   const totalSteps = 4; // Välkomst, Logo, Instruktioner, Slutför
   const progress = (currentStep / (totalSteps - 1)) * 100;
