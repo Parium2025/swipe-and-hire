@@ -951,7 +951,7 @@ const AuthTablet = ({
                                     <Button
                                       ref={triggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-white/10 data-[state=open]:border-white/50"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left font-normal focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 active:!scale-100 active:!bg-white/5 data-[state=open]:!bg-white/5 data-[state=open]:!border-white/20"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.industry || 'Välj bransch'}
@@ -1049,7 +1049,7 @@ const AuthTablet = ({
                                     <Button
                                       ref={employeeCountTriggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-white/10 data-[state=open]:border-white/50"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left font-normal focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 active:!scale-100 active:!bg-white/5 data-[state=open]:!bg-white/5 data-[state=open]:!border-white/20"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.employeeCount || 'Antal'}
