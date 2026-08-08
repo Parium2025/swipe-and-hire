@@ -206,6 +206,13 @@ const JobSeekerVideoShowcase = ({
    */
   const [firstFramePainted, setFirstFramePainted] = useState(false);
   const [posterVisible, setPosterVisible] = useState(true);
+  // Poster-fejden behövs bara på Windows för att dölja decoder-blixten.
+  // iOS/macOS ritar videon rent direkt, så där byter vi utan transition.
+  const posterTransition = isWindowsDevice()
+    ? 'transition-opacity duration-[250ms] ease-out'
+    : isAppleDevice()
+      ? ''
+      : 'transition-opacity duration-100 ease-out';
   // Spela Windows-filen direkt från dess vanliga URL. Den tidigare Blob-vägen
   // gjorde först en full fetch och matade sedan samma bytes till <video> via en
   // object URL. Chrome/Edge kunde inte initiera MP4-demuxern från den vägen i
@@ -690,7 +697,7 @@ const JobSeekerVideoShowcase = ({
                 {...({ fetchpriority: 'high' } as Record<string, string>)}
                 className={cn(
                   'pointer-events-none absolute inset-0 h-full w-full object-cover',
-                  'transition-opacity duration-100 ease-out',
+                  posterTransition,
                   firstFramePainted ? 'opacity-0' : 'opacity-100'
                 )}
                 style={{ zIndex: 1 }}
