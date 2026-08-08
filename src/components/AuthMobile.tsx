@@ -1315,12 +1315,12 @@ const AuthMobile = ({
                        <Button 
                           type="submit" 
                           variant="glass"
-                          className={`w-full min-h-[44px] ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          disabled={loading || hasRegistered}
+                          className={`w-full min-h-[44px] ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''} ${emailAvailability.taken ? 'opacity-40 blur-[0.5px] cursor-not-allowed' : ''}`}
+                          disabled={loading || hasRegistered || emailAvailability.taken}
                           onMouseDown={(e) => e.preventDefault()}
                         >
                          {loading ? "Registrerar..." : "Registrera"}
-                       </Button>
+                        </Button>
                       </form>
                   </div>
                   </div>
