@@ -773,6 +773,7 @@ const JobSeekerVideoShowcase = ({
             <div
               aria-hidden
               className="absolute left-1/2 top-[1.1%] h-[4.0%] w-[30%] -translate-x-1/2 rounded-full bg-black"
+              style={{ zIndex: 4 }}
             />
 
 
