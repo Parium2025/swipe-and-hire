@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { SlidingTabs } from '@/components/ui/sliding-tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, User, Building2, Mail, Key, Phone, Globe, MapPin, Users, ChevronDown, Search, Check } from 'lucide-react';
+import { Eye, EyeOff, User, Building2, Mail, Info, Key, Phone, Globe, MapPin, Users, ChevronDown, Search, Check } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
@@ -879,18 +879,26 @@ const AuthTablet = ({
                              autoCapitalize="none"
                              className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                            />
-                           {emailBlurred && emailAvailability.taken && (
-                             <p className="mt-1.5 text-xs font-medium text-white">
-                               {emailTakenMessage(emailAvailability.existingRole)}{' '}
-                               <button
-                                 type="button"
-                                 onClick={() => handleTabChange('login')}
-                                 className="underline underline-offset-2 text-white hover:text-white/80"
-                               >
-                                 Logga in
-                               </button>
-                             </p>
-                           )}
+                            {role === 'employer' && (
+                              <div className="mt-1.5 flex items-start gap-2 rounded-md bg-white/5 border border-white/10 px-2.5 py-2">
+                                <Info className="h-3.5 w-3.5 text-white/70 mt-0.5 flex-shrink-0" />
+                                <p className="text-xs text-white leading-snug">
+                                  Ange företagets e-postadress. Det är den som kommer att synas för kandidaterna.
+                                </p>
+                              </div>
+                            )}
+                            {emailBlurred && emailAvailability.taken && (
+                              <p className="mt-1.5 text-xs font-medium text-white">
+                                {emailTakenMessage(emailAvailability.existingRole)}{' '}
+                                <button
+                                  type="button"
+                                  onClick={() => handleTabChange('login')}
+                                  className="underline underline-offset-2 text-white hover:text-white/80"
+                                >
+                                  Logga in
+                                </button>
+                              </p>
+                            )}
                          </div>
                          
                            {role === 'job_seeker' && (
