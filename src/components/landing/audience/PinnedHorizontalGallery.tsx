@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
 import real3 from '@/assets/landing/jobseeker-real-3.jpg';

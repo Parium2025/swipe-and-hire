@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
