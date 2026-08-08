@@ -141,12 +141,9 @@ const AuthDesktop = ({
     setHasRegistered(false);
     setShowResend(false);
 
-    const deferClear = () => startTransition(() => clearFormData());
-    if (typeof (window as any).requestIdleCallback === 'function') {
-      (window as any).requestIdleCallback(deferClear, { timeout: 500 } as any);
-    } else {
-      setTimeout(deferClear, 0);
-    }
+    // Inloggning och registrering har separata state – ingen rensning behövs,
+    // så det man skrivit finns kvar när man växlar flik.
+    setShowPassword(false);
   };
 
   const signupEmail = (role === 'job_seeker' ? jobSeekerData.email : employerData.email);
