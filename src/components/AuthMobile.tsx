@@ -956,18 +956,26 @@ const AuthMobile = ({
                              autoCapitalize="none"
                              className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
                            />
-                           {emailBlurred && emailAvailability.taken && (
-                             <p className="mt-1.5 text-xs font-medium text-white">
-                               {emailTakenMessage(emailAvailability.existingRole)}{' '}
-                               <button
-                                 type="button"
-                                 onClick={() => handleTabChange('login')}
-                                 className="underline underline-offset-2 text-white hover:text-white/80"
-                               >
-                                 Logga in
-                               </button>
-                             </p>
-                           )}
+                            {role === 'employer' && (
+                              <div className="mt-1.5 flex items-start gap-2 rounded-md bg-white/5 border border-white/10 px-2.5 py-2">
+                                <Info className="h-3.5 w-3.5 text-white/70 mt-0.5 flex-shrink-0" />
+                                <p className="text-xs text-white leading-snug">
+                                  Ange företagets e-postadress. Det är den som kommer att synas för kandidaterna.
+                                </p>
+                              </div>
+                            )}
+                            {emailBlurred && emailAvailability.taken && (
+                              <p className="mt-1.5 text-xs font-medium text-white">
+                                {emailTakenMessage(emailAvailability.existingRole)}{' '}
+                                <button
+                                  type="button"
+                                  onClick={() => handleTabChange('login')}
+                                  className="underline underline-offset-2 text-white hover:text-white/80"
+                                >
+                                  Logga in
+                                </button>
+                              </p>
+                            )}
                          </div>
                          
                            {role === 'job_seeker' && (
