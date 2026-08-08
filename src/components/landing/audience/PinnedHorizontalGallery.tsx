@@ -16,7 +16,7 @@ import winReal3 from '@/assets/landing/windows/jobseeker-real-3-windows.mp4.asse
 import winReal4 from '@/assets/landing/windows/jobseeker-real-4-windows.mp4.asset.json';
 import winRealCenter from '@/assets/landing/windows/jobseeker-real-center-windows.mp4.asset.json';
 import { fetchPriority } from '@/lib/fetchPriority';
-import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
+import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, isWindowsDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
 
 /**
  * Apple-style "Så funkar det" sektion.
