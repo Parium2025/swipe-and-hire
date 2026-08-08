@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
 import real3 from '@/assets/landing/jobseeker-real-3.jpg';
@@ -175,6 +176,10 @@ const CardItem = ({ item, index }: CardItemProps) => {
   // ska laddas. Användaren ser alltid en relevant bild istället för svart ruta.
   const [failed, setFailed] = useState(false);
   const [src, setSrc] = useState(() => getPlayableSrc(item));
+  const [frameReady, setFrameReady] = useState(false);
+  const markReady = useCallback(() => {
+    setFrameReady(true);
+  }, []);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -300,33 +305,55 @@ const CardItem = ({ item, index }: CardItemProps) => {
       style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
       {item.type === 'video' && !failed ? (
-        <video
-          ref={videoRef}
-          src={src}
-          poster={item.poster}
-          muted
-          loop
-          playsInline
-          preload={getGalleryPreload()}
-          disablePictureInPicture
-          disableRemotePlayback
-          controlsList="nodownload noplaybackrate nofullscreen"
-          onContextMenu={(e) => e.preventDefault()}
-          onCanPlay={scheduleEvaluate}
-          onLoadedData={scheduleEvaluate}
-          onError={() => {
-            // Apple behåller sin befintliga fallback. På Windows/Android ska
-            // ett codec-/decodefel inte följas av ett försök med en ännu tyngre
-            // desktopfil, eftersom det förvärrar decoder- och nätverkstrycket.
-            if (isAppleDevice() && src !== item.src) {
-              setSrc(item.src);
-              return;
-            }
-            setFailed(true);
-          }}
-          style={{ objectPosition: item.position ?? '50% 50%' }}
-          className="pointer-events-none"
-        />
+        <>
+          <video
+            ref={videoRef}
+            src={src}
+            muted
+            loop
+            playsInline
+            preload={getGalleryPreload()}
+            disablePictureInPicture
+            disableRemotePlayback
+            controlsList="nodownload noplaybackrate nofullscreen"
+            onContextMenu={(e) => e.preventDefault()}
+            onCanPlay={scheduleEvaluate}
+            onLoadedData={(e) => {
+              scheduleEvaluate();
+              markReady();
+            }}
+            onPlaying={markReady}
+            onTimeUpdate={markReady}
+            onError={() => {
+              // Apple behåller sin befintliga fallback. På Windows/Android ska
+              // ett codec-/decodefel inte följas av ett försök med en ännu tyngre
+              // desktopfil, eftersom det förvärrar decoder- och nätverkstrycket.
+              if (isAppleDevice() && src !== item.src) {
+                setSrc(item.src);
+                return;
+              }
+              setFailed(true);
+            }}
+            style={{ objectPosition: item.position ?? '50% 50%' }}
+            className={cn(
+              'pointer-events-none transition-opacity duration-300 ease-out',
+              frameReady ? 'opacity-100' : 'opacity-0'
+            )}
+          />
+          <img
+            src={item.poster}
+            alt={item.title}
+            loading={index < 3 ? 'eager' : 'lazy'}
+            decoding="async"
+            {...fetchPriority(index < 2 ? 'high' : index >= 4 ? 'low' : 'auto')}
+            draggable={false}
+            style={{ objectPosition: item.position ?? '50% 50%' }}
+            className={cn(
+              'transition-opacity duration-300 ease-out',
+              frameReady ? 'opacity-0' : 'opacity-100'
+            )}
+          />
+        </>
       ) : (
         <img
           src={item.type === 'video' ? (item.poster ?? item.src) : item.src}

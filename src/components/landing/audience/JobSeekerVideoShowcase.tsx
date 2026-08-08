@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import hevcAsset from '@/assets/showcase-jobseeker.hevc.mp4.asset.json';
 import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
@@ -204,6 +205,7 @@ const JobSeekerVideoShowcase = ({
    * ritas i samma frame som layouten och fasas ut vid första `playing`.
    */
   const [firstFramePainted, setFirstFramePainted] = useState(false);
+  const [posterVisible, setPosterVisible] = useState(true);
   // Spela Windows-filen direkt från dess vanliga URL. Den tidigare Blob-vägen
   // gjorde först en full fetch och matade sedan samma bytes till <video> via en
   // object URL. Chrome/Edge kunde inte initiera MP4-demuxern från den vägen i
@@ -234,6 +236,12 @@ const JobSeekerVideoShowcase = ({
   // Windows behöver den budgeten till galleriet längre ned på sidan.
   const keepAliveWhenHidden = false;
   const warmRef = useRef(false);
+
+  useEffect(() => {
+    if (!firstFramePainted) return;
+    const t = window.setTimeout(() => setPosterVisible(false), 350);
+    return () => window.clearTimeout(t);
+  }, [firstFramePainted]);
 
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
@@ -670,8 +678,9 @@ const JobSeekerVideoShowcase = ({
           >
             {/* Posterlager: ritas i samma frame som layouten (till skillnad från
                 <video poster> som Safari ibland håller tillbaka) och fasas ut
-                först när videon faktiskt spelar. */}
-            {!firstFramePainted && (
+                mjukt först när videon faktiskt spelar — det tar bort blixten
+                mellan stillbild och rörlig bild på Windows. */}
+            {posterVisible && (
               <img
                 src={posterAsset.url}
                 alt=""
@@ -679,7 +688,12 @@ const JobSeekerVideoShowcase = ({
                 decoding="sync"
                 loading="eager"
                 {...({ fetchpriority: 'high' } as Record<string, string>)}
-                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                className={cn(
+                  'pointer-events-none absolute inset-0 h-full w-full object-cover',
+                  'transition-opacity duration-300 ease-out',
+                  firstFramePainted ? 'opacity-0' : 'opacity-100'
+                )}
+                style={{ zIndex: 1 }}
               />
             )}
             <video
