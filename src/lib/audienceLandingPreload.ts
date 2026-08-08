@@ -76,11 +76,7 @@ export const preloadAudienceLandingAssets = () => {
     // Prefetch lazy-chunkarna i bakgrunden — på Windows fördröjs detta så hero-
     // videon inte delar CPU/GPU/network med under-fold work första sekunderna.
     const importUnderFold = () => {
-      // På /jobbsokare + svagare plattformar laddas Spline först när dess egen
-      // IntersectionObserver aktiverar introsektionen. Tidig scene-prefetch gav
-      // CPU/GPU-arbete trots att 3D-telefonen låg långt utanför viewporten.
-      const deferSplineUntilVisible = window.location.pathname === '/jobbsokare' && shouldDeferHeavyAssets();
-      if (!deferSplineUntilVisible && shouldDeferHeavyAssets()) addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
+      if (shouldDeferHeavyAssets()) addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
       import('@/components/landing/audience/PinnedHorizontalGallery').catch(() => {});
       import('@/components/landing/audience/BouncyFooter').catch(() => {});
       import('@/components/landing/SiteFooter').catch(() => {});

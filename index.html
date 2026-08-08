@@ -314,7 +314,7 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/d5eec2bc-5e35-4b68-a961-0e41f9dba64f/hero-video-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            add({ rel: 'preload', as: 'image', href: '/hero-video-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
@@ -325,7 +325,7 @@
               // annars laddas två filer (6,3 MB + 2,4 MB) och bara den lilla spelas.
               var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
               var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
-              var videoHref = (isDesktop && !lightUa) ? '/__l5e/assets-v1/46500772-f54a-4dda-b256-89bfe9d52e45/hero-video.mp4' : '/__l5e/assets-v1/43903183-f9d3-4eb3-9374-993f40fb91aa/hero-video-720.mp4';
+              var videoHref = (isDesktop && !lightUa) ? '/hero-video.mp4' : '/hero-video-720.mp4';
               add({ rel: 'preload', as: 'video', href: videoHref, type: 'video/mp4', fetchpriority: 'high' });
 
             }
@@ -362,14 +362,16 @@
                   : target <= 672
                     ? '/__l5e/assets-v1/824c9bad-ed77-41f5-9941-3e99d6249a0b/showcase-jobseeker-win-crisp.mp4'
                     : '/__l5e/assets-v1/fcdc9ff9-d4c5-4224-b75a-b28c76ad5934/showcase-jobseeker-hi-crisp.mp4';
-                // Windows och Android använder den stabila 30 fps-mastern.
-                // canPlayType() bevisar bara formatstöd, inte att den aktuella
-                // Windows-GPU:n klarar 60 fps utan software-decode.
+                // Windows använder 60 fps Baseline-mastern utan B-frames;
+                // Android använder den lättare 30 fps-mastern.
                 // Preload måste vara exakt samma URL, annars hämtar browsern en
                 // oanvänd MP4 parallellt med den källa som faktiskt spelas.
                 var isAndroid = /Android/i.test(ua);
+                var safe60Ok = isWin && probe.canPlayType && probe.canPlayType('video/mp4; codecs="avc1.42C020"') !== '';
                 var showcaseHref = isWin
-                  ? '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4'
+                  ? (safe60Ok
+                    ? '/__l5e/assets-v1/da1664a7-196a-40a9-9b48-691d2e7d44e0/showcase-jobseeker-windows-safe60.mp4'
+                    : '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4')
                   : isAndroid
                     ? '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4'
                     : rung;

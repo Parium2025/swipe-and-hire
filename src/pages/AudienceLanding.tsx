@@ -230,8 +230,8 @@ const useAdaptiveGlass = () => {
 
 const useWaveAwareText = () => {
   useEffect(() => {
-    const useStaticText = prefersStaticGlass() || window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
-    if (useStaticText) {
+    const isTouchViewport = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
+    if (isTouchViewport) {
       document.querySelectorAll<HTMLElement>('[data-landing-scroll-root] .wave-text').forEach((el) => {
         if (el.dataset.waveText) delete el.dataset.waveText;
         if (el.dataset.waveBelow) delete el.dataset.waveBelow;
@@ -314,6 +314,9 @@ const useWaveAwareText = () => {
     resizeObserver.observe(document.documentElement);
     if (root) resizeObserver.observe(root);
 
+    const mutationObserver = new MutationObserver(schedule);
+    mutationObserver.observe(root ?? document.body, { childList: true, subtree: true, characterData: true });
+
     schedule();
     document.fonts?.ready.then(schedule).catch(() => undefined);
     root?.addEventListener('scroll', schedule, { passive: true });
@@ -324,6 +327,7 @@ const useWaveAwareText = () => {
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       resizeObserver.disconnect();
+      mutationObserver.disconnect();
       root?.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
       window.visualViewport?.removeEventListener('resize', schedule);
@@ -966,37 +970,13 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
   const lastVisibleRef = useRef(true);
 
   useEffect(() => {
-    let frame: number | null = null;
-    // Mät aldrig synkront i en event-/mutationscallback: allt samlas till en
-    // enda rAF och skrivs bara till state om värdena faktiskt ändrats. Annars
-    // triggar varje DOM-mutation en full omrendering av landningssidan, vilket
-    // är precis det som konkurrerar med videoavkodarna på Windows.
-    const applyPhoneMetrics = () => {
-      frame = null;
-      const nextInline = getInlinePhonePlacement() !== null;
-      setIsInlinePhone((prev) => (prev === nextInline ? prev : nextInline));
-      const next = calculatePhoneMetrics();
-      setPhoneMetrics((prev) => {
-        if (
-          prev &&
-          prev.isDesktop === next.isDesktop &&
-          Math.abs(prev.top - next.top) < 0.5 &&
-          Math.abs(prev.height - next.height) < 0.5 &&
-          Math.abs(prev.zoom - next.zoom) < 0.002 &&
-          Math.abs(prev.yOffset - next.yOffset) < 0.5 &&
-          Math.abs(((prev as { canvasHeight?: number }).canvasHeight ?? 0) - ((next as { canvasHeight?: number }).canvasHeight ?? 0)) < 0.5
-        ) {
-          return prev;
-        }
-        return next;
-      });
-    };
     const syncPhoneMetrics = () => {
-      if (frame !== null) return;
-      frame = window.requestAnimationFrame(applyPhoneMetrics);
+      setIsInlinePhone(getInlinePhonePlacement() !== null);
+      setPhoneMetrics(calculatePhoneMetrics());
     };
 
-    applyPhoneMetrics();
+    syncPhoneMetrics();
+    const frame = window.requestAnimationFrame(syncPhoneMetrics);
     const timers = [80, 180, 360, 720, 1200].map((delay) => window.setTimeout(syncPhoneMetrics, delay));
     const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
     const observer = anchor ? new ResizeObserver(syncPhoneMetrics) : null;
@@ -1008,23 +988,21 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
     const navEl = document.querySelector('nav[aria-label="Huvudnavigation"]') as HTMLElement | null;
     const navObserver = navEl ? new ResizeObserver(syncPhoneMetrics) : null;
     if (navEl) navObserver?.observe(navEl);
-    // Endast navbarens innehåll behöver bevakas — inte hela body.
-    const mutationObserver = navEl ? new MutationObserver(syncPhoneMetrics) : null;
-    if (navEl) mutationObserver?.observe(navEl, { childList: true, subtree: true });
+    const mutationObserver = new MutationObserver(syncPhoneMetrics);
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
     document.fonts?.ready.then(syncPhoneMetrics).catch(() => undefined);
     window.addEventListener('resize', syncPhoneMetrics, { passive: true });
     window.visualViewport?.addEventListener('resize', syncPhoneMetrics, { passive: true });
     return () => {
-      if (frame !== null) window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(frame);
       timers.forEach((timer) => window.clearTimeout(timer));
       observer?.disconnect();
       navObserver?.disconnect();
-      mutationObserver?.disconnect();
+      mutationObserver.disconnect();
       window.removeEventListener('resize', syncPhoneMetrics);
       window.visualViewport?.removeEventListener('resize', syncPhoneMetrics);
     };
   }, []);
-
 
   const phoneWrapperRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -1242,7 +1220,7 @@ const IntroSplinePhone = () => {
       }`}
 
     >
-      <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} deferUntilActive />
+      <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} />
 
     </motion.div>
   );
@@ -1522,19 +1500,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         return rect.bottom > rootRect.top + 16 && rect.top < rootRect.top + rootHeight * 0.82;
       };
 
-      // Ett element kan bara avslöjas en gång. Tidigare mättes ALLA element
-      // med getBoundingClientRect i varje scroll-frame, även de som redan var
-      // framme — arbetet minskade alltså aldrig ju längre man scrollade.
-      let remaining = elements.slice();
       const syncVisible = () => {
-        if (cancelled || remaining.length === 0) return;
-        remaining = remaining.filter((el) => {
-          if (!isVisible(el)) return true;
-          reveal(el);
-          return false;
+        if (cancelled) return;
+        elements.forEach((el) => {
+          if (isVisible(el)) reveal(el);
         });
       };
-
 
       const schedule = () => {
         if (raf) return;
@@ -1681,49 +1652,24 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
     const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     let raf = 0;
-    let lastRunAt = 0;
-    let pending = 0;
-    /**
-     * Säkerhetsnätet är just det — ett nät, inte en animation. Det körde
-     * tidigare i varje scroll-frame och gjorde då en querySelectorAll över hela
-     * landningssidan plus getBoundingClientRect per träff. På Windows innebar
-     * det ett fullt style+layout-varv per frame under hela scrollen, ovanpå
-     * galleriets egen koordinator. Här räcker det med ~4 gånger per sekund.
-     */
-    const RUN_EVERY_MS = 250;
-    const run = () => {
-      lastRunAt = Date.now();
-      forceVisibleIfStuck();
-    };
     const schedule = () => {
-      if (raf || pending) return;
-      const since = Date.now() - lastRunAt;
-      if (since < RUN_EVERY_MS) {
-        pending = window.setTimeout(() => {
-          pending = 0;
-          schedule();
-        }, RUN_EVERY_MS - since);
-        return;
-      }
+      if (raf) return;
       raf = window.requestAnimationFrame(() => {
         raf = 0;
-        run();
+        forceVisibleIfStuck();
       });
     };
 
-    const timer = window.setTimeout(run, 1500);
+    const timer = window.setTimeout(forceVisibleIfStuck, 1500);
     root?.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
 
-
     return () => {
       window.clearTimeout(timer);
-      if (pending) window.clearTimeout(pending);
       if (raf) window.cancelAnimationFrame(raf);
       root?.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
     };
-
   }, [audience]);
 
 

@@ -7,66 +7,34 @@ interface SplinePhoneProps {
   style?: CSSProperties;
   zoom?: number;
   active?: boolean;
-  deferUntilActive?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, style, zoom = 0.78, active = true, deferUntilActive = false }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
   const galleryActiveRef = useRef(false);
-  const onScreenRef = useRef(true);
-  const staticFrameReadyRef = useRef(false);
-
   const zoomRef = useRef(zoom);
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [staticSnapshot, setStaticSnapshot] = useState<string | null>(null);
-  const [shouldBoot, setShouldBoot] = useState(() => !deferUntilActive || active);
 
   const reducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-  /**
-   * EN sanning för om renderloopen ska rulla. Tidigare fanns tre separata
-   * effekter som var för sig anropade play()/stop() utifrån sin egen delmängd
-   * av villkoren — de kunde därför starta om loopen åt varandra (t.ex. kunde
-   * visibilitychange starta Spline igen mitt i galleriet). Nu räknas hela
-   * villkoret ut på ett ställe.
-   */
-  const syncPlayback = () => {
+  useEffect(() => {
+    activeRef.current = active;
     const app = appRef.current;
     if (!app) return;
-    // På Windows är telefonen dekorativ och inte interaktiv. När slutbilden väl
-    // är renderad finns inget UX-värde i att hålla Splines WebGL-loop levande.
-    // Den blockerade annars huvudtråden i flera hundra ms åt gången under scroll.
-    if (isWindowsDevice() && staticFrameReadyRef.current) {
-      if (!app.isStopped) app.stop();
-      return;
-    }
-    const shouldRun =
-      activeRef.current &&
-      !galleryActiveRef.current &&
-      onScreenRef.current &&
-      
-      !document.hidden;
-
-    if (shouldRun) {
+    if (active && !galleryActiveRef.current) {
       if (app.isStopped) app.play();
     } else if (!app.isStopped) {
       app.stop();
     }
-  };
-
-  useEffect(() => {
-    activeRef.current = active;
-    if (active) setShouldBoot(true);
-    syncPlayback();
   }, [active, isReady]);
 
   // På Windows/Android delar WebGL och videodecode samma knappa GPU-budget.
@@ -76,11 +44,13 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
     if (!isWindowsDevice() && !isAndroidDevice()) return;
     const onGalleryEnter = () => {
       galleryActiveRef.current = true;
-      syncPlayback();
+      const app = appRef.current;
+      if (app && !app.isStopped) app.stop();
     };
     const onGalleryLeave = () => {
       galleryActiveRef.current = false;
-      syncPlayback();
+      const app = appRef.current;
+      if (app && activeRef.current && app.isStopped && !document.hidden) app.play();
     };
     window.addEventListener('parium:gallery-enter', onGalleryEnter);
     window.addEventListener('parium:gallery-leave', onGalleryLeave);
@@ -90,53 +60,21 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
     };
   }, []);
 
-  /**
-   * Windows/Android: rendera bara när telefonen faktiskt syns.
-   *
-   * Utan detta fortsatte den kontinuerliga WebGL-loopen (renderMode 'auto')
-   * rulla i bakgrunden genom hela sidan — mätning under scroll visade att
-   * Spline-runtime stod för merparten av GPU-/huvudtrådsarbetet, även när
-   * telefonen låg långt ovanför viewporten. Det är den enskilt största
-   * anledningen till att scrollen kändes tung just på Windows.
-   *
-   * Apple rörs inte: där finns hårdvarubudget för både WebGL och video, och
-   * beteendet ska vara exakt som förut.
-   */
-  useEffect(() => {
-    if (!isWindowsDevice() && !isAndroidDevice()) return;
-    const el = wrapperRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          onScreenRef.current = entry.isIntersecting;
-        }
-        syncPlayback();
-      },
-      { rootMargin: '15% 0px', threshold: 0 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [isReady]);
-
-  /**
-   * NOT: att pausa Spline under pågående scroll testades och gjorde det
-   * MÄTBART SÄMRE (median 16,8 ms → 57 ms, 51+ long tasks). Splines play()
-   * bygger upp renderloopen på nytt varje gång, så start/stopp fem gånger i
-   * sekunden kostar mer än de frames man sparar. Renderloopen får bara
-   * stängas av vid tillståndsbyten som varar — utanför vy, dold flik, galleri.
-   */
-
-
   // Pausa renderloopen när fliken är dold — annars fortsätter WebGL tugga GPU
   // i bakgrunden och konkurrerar med videoavkodningen när man kommer tillbaka.
   useEffect(() => {
-    const onVisibility = () => syncPlayback();
+    const onVisibility = () => {
+      const app = appRef.current;
+      if (!app) return;
+      if (document.hidden) {
+        if (!app.isStopped) app.stop();
+      } else if (activeRef.current && !galleryActiveRef.current && app.isStopped) {
+        app.play();
+      }
+    };
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
   }, []);
-
-
 
 
   useEffect(() => {
@@ -148,7 +86,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
   }, [zoom, isReady]);
 
   useEffect(() => {
-    if (!shouldBoot) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -309,29 +246,9 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
 
         app.setZoom(zoomRef.current);
         requestAnimationFrame(() => app?.setZoom(zoomRef.current));
-        syncPlayback();
+        if (!activeRef.current) app.stop();
         await waitForVisualSettle();
         if (!cancelled) {
-          if (isWindowsDevice()) {
-            staticFrameReadyRef.current = true;
-            // app.stop() stoppar inte allt internt Spline-arbete i Chromium.
-            // Kopiera därför den färdigrenderade bilden, avveckla WebGL-kontexten
-            // helt och visa exakt samma frame som en vanlig bild på Windows.
-            try {
-              const snapshotCanvas = document.createElement('canvas');
-              snapshotCanvas.width = canvas.width;
-              snapshotCanvas.height = canvas.height;
-              const context = snapshotCanvas.getContext('2d');
-              context?.drawImage(canvas, 0, 0);
-              const snapshot = snapshotCanvas.toDataURL('image/png');
-              if (snapshot && snapshot !== 'data:,') setStaticSnapshot(snapshot);
-            } catch {
-              // Om browsern nekar kopiering behålls den stoppade canvasen.
-            }
-            app.stop();
-            app.dispose();
-            appRef.current = null;
-          }
           setIsReady(true);
           window.dispatchEvent(new Event('parium:spline-ready'));
         }
@@ -345,11 +262,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
 
     return () => {
       cancelled = true;
-      staticFrameReadyRef.current = false;
       app?.dispose();
       appRef.current = null;
     };
-  }, [reducedMotion, shouldBoot]);
+  }, [reducedMotion]);
 
   if (hasError) {
     return (
@@ -384,34 +300,25 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, defe
           backgroundColor: 'transparent',
         }}
       >
-        {staticSnapshot ? (
-          <img
-            src={staticSnapshot}
-            alt=""
-            draggable={false}
-            className="relative h-full w-full select-none object-fill"
-          />
-        ) : (
-          <canvas
-            ref={canvasRef}
-            role="img"
-            aria-label="Parium 3D-telefon"
-            tabIndex={-1}
-            data-spline-phone-canvas
-            className="relative h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
-            draggable={false}
-            style={{
-              colorScheme: 'normal',
-              backgroundColor: 'transparent',
-              display: 'block',
-              opacity: 1,
-              visibility: 'inherit',
-              transition: 'none',
-              willChange: 'auto',
-              touchAction: 'none',
-            }}
-          />
-        )}
+        <canvas
+          ref={canvasRef}
+          role="img"
+          aria-label="Parium 3D-telefon"
+          tabIndex={-1}
+          data-spline-phone-canvas
+          className="relative h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
+          draggable={false}
+          style={{
+            colorScheme: 'normal',
+            backgroundColor: 'transparent',
+            display: 'block',
+            opacity: 1,
+            visibility: 'inherit',
+            transition: 'none',
+            willChange: 'auto',
+            touchAction: 'none',
+          }}
+        />
       </div>
       {!isReady && (
         <div

@@ -72,16 +72,12 @@ export const getMaxConcurrentVideos = () => {
   if (prefersReducedData()) return 1;
   switch (getVideoPlatform()) {
     case 'windows':
-      // En global decoderplats. Telefonen, hero och galleriet delar samma
-      // budget; fler samtidiga H.264-contexts är inte stabilt på alla iGPU:er.
-      return 1;
+      // Tre samtidiga 520px-strömmar: två platser går till strippens ytterkanter
+      // (annars spelas aldrig första/sista kortet) och en till kortet i mitten.
+      // Källorna är den lätta Windows-mastern, så decode-trycket är litet.
+      return isLowPowerDevice() ? 2 : 3;
     case 'android':
-      // Hero och telefonvideon syns samtidigt i första viewporten. Två aktiva
-      // videodekoders gör att flera Android-enheter faller tillbaka till
-      // software decode; telefonvideon ser då ut att gå i slow motion. En enda
-      // plats gör att koordinatorns prioritet väljer telefonen (40) framför
-      // hero-bakgrunden (30). Apple-budgeten lämnas oförändrad.
-      return 1;
+      return isLowPowerDevice() ? 1 : 2;
 
     case 'apple':
       return 3;
