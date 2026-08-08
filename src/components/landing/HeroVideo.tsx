@@ -49,7 +49,12 @@ const HeroVideo = () => {
 
     let cancelled = false;
     let retryTimer: number | null = null;
+    let errorRetryTimer: number | null = null;
+    let decoderResetTimer: number | null = null;
+    let resizeTimer: number | null = null;
     let failCount = 0;
+    let errorCount = 0;
+    let rebuilding = false;
 
     const tryPlay = () => {
       if (cancelled || !video) return;
@@ -109,7 +114,7 @@ const HeroVideo = () => {
           stuckCount++;
           if (stuckCount >= 2) {
             stuckCount = 0;
-            try { video.play().catch(() => {}); } catch {}
+            rebuildDecoder();
           }
         } else {
           stuckCount = 0;
@@ -122,6 +127,42 @@ const HeroVideo = () => {
       }, 500);
     };
 
+    // Ett GPU-/skärmbyte kan frysa Chromium-dekodern medan elementet fortfarande
+    // rapporterar paused=false. play() gör då ingenting; load() skapar en ny
+    // dekoder och vi återgår till samma position när metadata är redo.
+    const rebuildDecoder = () => {
+      if (cancelled || rebuilding || document.visibilityState !== 'visible') return;
+      rebuilding = true;
+      const resumeAt = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+      const release = () => {
+        video.removeEventListener('loadedmetadata', restore);
+        if (decoderResetTimer !== null) window.clearTimeout(decoderResetTimer);
+        decoderResetTimer = null;
+        rebuilding = false;
+      };
+      const restore = () => {
+        release();
+        try {
+          if (Number.isFinite(video.duration) && video.duration > 0) {
+            video.currentTime = Math.min(resumeAt, Math.max(0, video.duration - 0.1));
+          }
+        } catch { /* best effort */ }
+        errorCount = 0;
+        lastTime = video.currentTime;
+        tryPlay();
+        startWatchdog();
+      };
+      video.addEventListener('loadedmetadata', restore, { once: true });
+      decoderResetTimer = window.setTimeout(release, 5000);
+      try {
+        video.pause();
+        video.load();
+      } catch {
+        release();
+        tryPlay();
+      }
+    };
+
     const handlePlaying = () => {
       startWatchdog();
     };
@@ -130,11 +171,27 @@ const HeroVideo = () => {
       tryPlay();
     };
     const handleError = () => {
-      // Försök ladda om källan vid fel
-      try {
-        video.load();
-        tryPlay();
-      } catch {}
+      // Begränsad backoff förhindrar error → load-loop vid ett fladdrande GPU-byte.
+      rebuilding = false;
+      if (decoderResetTimer !== null) window.clearTimeout(decoderResetTimer);
+      decoderResetTimer = null;
+      if (errorCount >= 4 || cancelled) return;
+      errorCount += 1;
+      if (errorRetryTimer !== null) window.clearTimeout(errorRetryTimer);
+      errorRetryTimer = window.setTimeout(rebuildDecoder, Math.min(500 * errorCount, 2000));
+    };
+
+    const handleDisplayChange = () => {
+      if (resizeTimer !== null) window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        resizeTimer = null;
+        if (document.visibilityState !== 'visible') return;
+        startWatchdog();
+        try {
+          video.pause();
+          tryPlay();
+        } catch { /* best effort */ }
+      }, 350);
     };
 
     // Aldrig pausa på visibility — användaren vill att videon alltid rullar.
@@ -159,6 +216,8 @@ const HeroVideo = () => {
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('pageshow', handleResume);
     window.addEventListener('focus', handleResume);
+    window.addEventListener('resize', handleDisplayChange, { passive: true });
+    window.visualViewport?.addEventListener('resize', handleDisplayChange, { passive: true });
     window.addEventListener('touchstart', handleFirstInteraction, { passive: true, once: true });
     window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
     window.addEventListener('click', handleFirstInteraction, { once: true });
@@ -166,6 +225,9 @@ const HeroVideo = () => {
     return () => {
       cancelled = true;
       if (retryTimer) window.clearTimeout(retryTimer);
+      if (errorRetryTimer !== null) window.clearTimeout(errorRetryTimer);
+      if (decoderResetTimer !== null) window.clearTimeout(decoderResetTimer);
+      if (resizeTimer !== null) window.clearTimeout(resizeTimer);
       if (watchdog !== null) window.clearInterval(watchdog);
       video.removeEventListener('loadeddata', onCanPlay);
       video.removeEventListener('canplay', onCanPlay);
@@ -178,6 +240,8 @@ const HeroVideo = () => {
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('pageshow', handleResume);
       window.removeEventListener('focus', handleResume);
+      window.removeEventListener('resize', handleDisplayChange);
+      window.visualViewport?.removeEventListener('resize', handleDisplayChange);
       window.removeEventListener('touchstart', handleFirstInteraction);
       window.removeEventListener('pointerdown', handleFirstInteraction);
       window.removeEventListener('click', handleFirstInteraction);
