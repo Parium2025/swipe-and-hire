@@ -205,6 +205,7 @@ const JobSeekerVideoShowcase = ({
    * ritas i samma frame som layouten och fasas ut vid första `playing`.
    */
   const [firstFramePainted, setFirstFramePainted] = useState(false);
+  const [posterVisible, setPosterVisible] = useState(true);
   // Spela Windows-filen direkt från dess vanliga URL. Den tidigare Blob-vägen
   // gjorde först en full fetch och matade sedan samma bytes till <video> via en
   // object URL. Chrome/Edge kunde inte initiera MP4-demuxern från den vägen i
