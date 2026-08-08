@@ -336,7 +336,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
             }}
             style={{ objectPosition: item.position ?? '50% 50%' }}
             className={cn(
-              'pointer-events-none transition-opacity duration-300 ease-out',
+              'pointer-events-none transition-opacity duration-100 ease-out',
               frameReady ? 'opacity-100' : 'opacity-0'
             )}
           />
@@ -349,7 +349,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
             draggable={false}
             style={{ objectPosition: item.position ?? '50% 50%' }}
             className={cn(
-              'transition-opacity duration-300 ease-out',
+              'transition-opacity duration-100 ease-out',
               frameReady ? 'opacity-0' : 'opacity-100'
             )}
           />
