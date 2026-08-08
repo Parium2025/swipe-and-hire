@@ -176,6 +176,10 @@ const CardItem = ({ item, index }: CardItemProps) => {
   // ska laddas. Användaren ser alltid en relevant bild istället för svart ruta.
   const [failed, setFailed] = useState(false);
   const [src, setSrc] = useState(() => getPlayableSrc(item));
+  const [frameReady, setFrameReady] = useState(false);
+  const markReady = useCallback(() => {
+    setFrameReady(true);
+  }, []);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
