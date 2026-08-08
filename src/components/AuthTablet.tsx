@@ -63,6 +63,11 @@ const AuthTablet = ({
   const [searchTerm, setSearchTerm] = useState('');
   // Separate form data for each role
   const savedDraft = useRef(loadAuthDraft()).current;
+  // Inloggning har helt eget state – delar aldrig fält med registreringen
+  const [loginData, setLoginData] = useState(() => ({
+    email: savedDraft.login?.email ?? '',
+    password: '',
+  }));
   const [jobSeekerData, setJobSeekerData] = useState(() => mergeDraft({
     firstName: '',
     lastName: '',
@@ -91,8 +96,8 @@ const AuthTablet = ({
   );
   // Spara utkast i sessionStorage (aldrig lösenord) så inget tappas vid reload
   useEffect(() => {
-    saveAuthDraft({ role, jobSeeker: jobSeekerData, employer: employerData });
-  }, [role, jobSeekerData, employerData]);
+    saveAuthDraft({ role, jobSeeker: jobSeekerData, employer: employerData, login: loginData });
+  }, [role, jobSeekerData, employerData, loginData]);
 
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -136,12 +141,9 @@ const AuthTablet = ({
     setHasRegistered(false);
     setShowResend(false);
 
-    const deferClear = () => startTransition(() => clearFormData());
-    if (typeof (window as any).requestIdleCallback === 'function') {
-      (window as any).requestIdleCallback(deferClear, { timeout: 500 } as any);
-    } else {
-      setTimeout(deferClear, 0);
-    }
+    // Inloggning och registrering har separata state – ingen rensning behövs,
+    // så det man skrivit finns kvar när man växlar flik.
+    setShowPassword(false);
   };
 
   const signupEmail = (role === 'job_seeker' ? jobSeekerData.email : employerData.email);
@@ -164,7 +166,9 @@ const AuthTablet = ({
       setShowResend(false);
     }
     
-    if (role === 'job_seeker') {
+    if (isLogin) {
+      setLoginData(prev => ({ ...prev, email: value }));
+    } else if (role === 'job_seeker') {
       setJobSeekerData(prev => ({ ...prev, email: value }));
     } else {
       setEmployerData(prev => ({ ...prev, email: value }));
@@ -224,7 +228,9 @@ const AuthTablet = ({
   };
 
   const handlePasswordChange = (newPassword: string) => {
-    if (role === 'job_seeker') {
+    if (isLogin) {
+      setLoginData(prev => ({ ...prev, password: newPassword }));
+    } else if (role === 'job_seeker') {
       setJobSeekerData(prev => ({ ...prev, password: newPassword }));
     } else {
       setEmployerData(prev => ({ ...prev, password: newPassword }));
@@ -276,8 +282,8 @@ const AuthTablet = ({
 
     try {
       const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
-      const fallbackEmail = currentData.email.trim();
-      const fallbackPassword = currentData.password;
+      const fallbackEmail = (isLogin ? loginData.email : currentData.email).trim();
+      const fallbackPassword = isLogin ? loginData.password : currentData.password;
       const submittedForm = new FormData(e.currentTarget as HTMLFormElement);
       const submittedEmail = String(submittedForm.get('auth-email') ?? '').trim();
       const submittedPassword = String(submittedForm.get('auth-password') ?? '');
@@ -519,7 +525,7 @@ const AuthTablet = ({
   };
 
    const handleResetPasswordEmail = async () => {
-     const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
+     const currentData = isLogin ? loginData : (role === 'job_seeker' ? jobSeekerData : employerData);
      if (!currentData.email) {
        toast({
          title: "E-post krävs",
@@ -667,7 +673,7 @@ const AuthTablet = ({
                         <Input
                           id="login-email"
                           type="email"
-                          value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
+                          value={loginData.email}
                           onChange={(e) => { setEmailBlurred(false); handleEmailChange(e.target.value); }}
                              onBlur={() => setEmailBlurred(true)}
                           required
@@ -689,7 +695,7 @@ const AuthTablet = ({
                           <Input
                             id="login-password"
                             type={showPassword ? 'text' : 'password'}
-                            value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
+                            value={loginData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
                             name="auth-password"
@@ -747,7 +753,7 @@ const AuthTablet = ({
                               type="button"
                               onClick={() => {
                                 const saved = getPendingVerificationEmail();
-                                const current = role === 'job_seeker' ? jobSeekerData.email : employerData.email;
+                                const current = loginData.email;
                                 if (saved && !current.trim()) handleEmailChange(saved);
                                 setShowResend(true);
                               }}

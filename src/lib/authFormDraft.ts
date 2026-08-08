@@ -15,6 +15,7 @@ export interface AuthDraft {
   role?: 'job_seeker' | 'employer';
   jobSeeker?: Record<string, string>;
   employer?: Record<string, string>;
+  login?: Record<string, string>;
 }
 
 const SENSITIVE = new Set(['password', 'confirmPassword', 'phoneError']);
@@ -46,8 +47,9 @@ export const saveAuthDraft = (draft: AuthDraft) => {
       role: draft.role,
       jobSeeker: stripSensitive(draft.jobSeeker),
       employer: stripSensitive(draft.employer),
+      login: stripSensitive(draft.login),
     };
-    if (!payload.role && !payload.jobSeeker && !payload.employer) {
+    if (!payload.role && !payload.jobSeeker && !payload.employer && !payload.login) {
       sessionStorage.removeItem(KEY);
       return;
     }
