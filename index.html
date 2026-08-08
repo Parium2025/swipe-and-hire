@@ -321,12 +321,17 @@
             var saveData = !!(conn && conn.saveData);
             var slowNet = !!(conn && /(^|-)2g$/.test(conn.effectiveType || ''));
             if (!saveData && !slowNet) {
-              // Breakpoint + plattform MÅSTE stämma med pickHeroSrc() i HeroVideo.tsx,
-              // annars laddas två filer (6,3 MB + 2,4 MB) och bara den lilla spelas.
-              var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
-              var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
-              var videoHref = (isDesktop && !lightUa) ? '/hero-video.mp4' : '/hero-video-720.mp4';
+            // Breakpoint + plattform MÅSTE stämma med pickHeroSrc() i HeroVideo.tsx,
+            // annars laddas två filer (6,3 MB + 2,4 MB) och bara den lilla spelas.
+            var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
+            var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
+            var videoHref = (isDesktop && !lightUa) ? '/hero-video.mp4' : '/hero-video-720.mp4';
+            // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
+            // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
+            var isSafari = /Safari/.test(navigator.userAgent || '') && !/Chrome|Chromium|Edg\//.test(navigator.userAgent || '');
+            if (isSafari) {
               add({ rel: 'preload', as: 'video', href: videoHref, type: 'video/mp4', fetchpriority: 'high' });
+            }
 
             }
           } else if (path === '/jobbsokare' || path === '/arbetsgivare') {
@@ -375,9 +380,13 @@
                   : isAndroid
                     ? '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4'
                     : rung;
-                add(hevcOk
-                  ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
-                  : { rel: 'preload', as: 'video', href: showcaseHref, type: 'video/mp4', fetchpriority: 'high' });
+                // Video-preload med as="video" stöds bara i Safari. I Chrome/Edge
+                // genererar det bara en varning och ingen faktisk preloading.
+                if (appleSafari) {
+                  add(hevcOk
+                    ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
+                    : { rel: 'preload', as: 'video', href: showcaseHref, type: 'video/mp4', fetchpriority: 'high' });
+                }
 
               }
             }
