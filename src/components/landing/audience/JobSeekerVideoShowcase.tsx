@@ -239,7 +239,7 @@ const JobSeekerVideoShowcase = ({
 
   useEffect(() => {
     if (!firstFramePainted) return;
-    const t = window.setTimeout(() => setPosterVisible(false), 350);
+    const t = window.setTimeout(() => setPosterVisible(false), 120);
     return () => window.clearTimeout(t);
   }, [firstFramePainted]);
 
@@ -690,7 +690,7 @@ const JobSeekerVideoShowcase = ({
                 {...({ fetchpriority: 'high' } as Record<string, string>)}
                 className={cn(
                   'pointer-events-none absolute inset-0 h-full w-full object-cover',
-                  'transition-opacity duration-300 ease-out',
+                  'transition-opacity duration-100 ease-out',
                   firstFramePainted ? 'opacity-0' : 'opacity-100'
                 )}
                 style={{ zIndex: 1 }}
