@@ -81,7 +81,11 @@ const AuthSelectField = ({
         />
 
         {open && (
-          <div className="absolute top-full left-0 right-0 z-[9999] glass-dropdown overflow-hidden">
+          <div className="absolute top-full left-0 right-0 z-[9999] glass-dropdown overflow-hidden isolate">
+            {/* Opak botten: i jobbwizarden ligger menyn ovanpå ett solitt ark,
+                här ligger den direkt på sidan – utan detta lager lyser fälten
+                bakom igenom. */}
+            <div className="absolute inset-0 -z-10 bg-[hsl(215_50%_11%)]" aria-hidden />
             {searchable && (
               <div className="relative border-b border-white/10">
                 <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
