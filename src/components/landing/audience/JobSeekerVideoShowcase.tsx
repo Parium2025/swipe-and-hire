@@ -236,6 +236,13 @@ const JobSeekerVideoShowcase = ({
   // Windows behöver den budgeten till galleriet längre ned på sidan.
   const keepAliveWhenHidden = false;
   const warmRef = useRef(false);
+  const [posterVisible, setPosterVisible] = useState(true);
+
+  useEffect(() => {
+    if (!firstFramePainted) return;
+    const t = window.setTimeout(() => setPosterVisible(false), 350);
+    return () => window.clearTimeout(t);
+  }, [firstFramePainted]);
 
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
