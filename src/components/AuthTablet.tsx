@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Eye, EyeOff, User, Building2, Mail, Info, Key, Phone, Globe, MapPin, Users, ChevronDown, Search, Check } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import AuthSelectField from '@/components/auth/AuthSelectField';
 import { Textarea } from '@/components/ui/textarea';
 import { RequiredMark } from '@/components/wizard/RequiredMark';
 import { useEmailAvailability, emailTakenMessage } from '@/hooks/useEmailAvailability';
@@ -945,148 +946,28 @@ const AuthTablet = ({
                               </div>
 
                               <div>
-                                <Label htmlFor="industry" className="text-white">Bransch <RequiredMark filled={!!employerData.industry.trim()} /></Label>
-                                <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
-                                   <DropdownMenuTrigger asChild>
-                                    <Button
-                                      ref={triggerRef}
-                                      variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left font-normal focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 active:!scale-100 active:!bg-white/5 data-[state=open]:!bg-white/5 data-[state=open]:!border-white/20"
-                                    >
-                                       <span className="truncate text-left flex-1 px-1">
-                                         {employerData.industry || 'Välj bransch'}
-                                       </span>
-                                      <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                    <DropdownMenuContent 
-                                     className="w-80 glass-panel z-[9999] rounded-md text-white overflow-hidden max-h-96"
-                                     side="bottom"
-                                     align="center"
-                                     alignOffset={0}
-                                     sideOffset={8}
-                                     avoidCollisions={false}
-                                     onCloseAutoFocus={(e) => e.preventDefault()}
-                                   >
-                                     {/* Search input */}
-                                     <div className="p-3 border-b border-white/20 sticky top-0 bg-transparent">
-                                       <div className="relative">
-                                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
-                                           <Input
-                                            placeholder="Sök bransch..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="pl-10 pr-4 h-10 text-base bg-transparent border-white/20 text-white placeholder:text-white focus:border-white/40 rounded-lg"
-                                            autoComplete="off"
-                                            autoCapitalize="none"
-                                            autoCorrect="off"
-                                            onKeyDownCapture={(e) => e.stopPropagation()}
-                                            onKeyDown={(e) => e.stopPropagation()}
-                                          />
-                                       </div>
-                                     </div>
-                                    
-                                     {/* Industry options */}
-                                     <div className="overflow-y-auto max-h-80 overscroll-contain">
-                                         {SWEDISH_INDUSTRIES
-                                         .filter(industryOption => 
-                                              searchTerm.trim().length >= 2 ? industryOption.toLowerCase().includes(searchTerm.toLowerCase()) : true
-                                            )
-                                         .map((industryOption) => (
-                                           <DropdownMenuItem
-                                             key={industryOption}
-                                             onSelect={(e) => e.preventDefault()}
-                                               onClick={() => {
-                                                 setEmployerData(prev => ({ ...prev, industry: industryOption }));
-                                                 setSearchTerm('');
-                                                 setIndustryMenuOpen(false);
-                                               }}
-                                              className="cursor-pointer hover:bg-white/20 focus:bg-white/20 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
-                                           >
-                                             <span className="flex-1 pr-2">{industryOption}</span>
-                                             {employerData.industry === industryOption && (
-                                               <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                                             )}
-                                           </DropdownMenuItem>
-                                         ))}
-                                       
-                                        {/* Custom value option if no matches and search term exists */}
-                                         {searchTerm.trim().length >= 2 &&
-                                        !SWEDISH_INDUSTRIES.some(industryOption => 
-                                          industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                                        ) && (
-                                         <DropdownMenuItem
-                                           onSelect={(e) => e.preventDefault()}
-                                             onClick={() => {
-                                               setEmployerData(prev => ({ ...prev, industry: searchTerm }));
-                                               setSearchTerm('');
-                                               setIndustryMenuOpen(false);
-                                             }}
-                                           className="cursor-pointer hover:bg-white/20 focus:bg-white/20 py-2 px-3 text-white border-t border-white/20 transition-colors touch-manipulation"
-                                         >
-                                           <span className="flex-1">Använd "{searchTerm}"</span>
-                                         </DropdownMenuItem>
-                                       )}
-                                       
-                                        {/* Show message if no results */}
-                                        {searchTerm.trim().length >= 3 && 
-                                         SWEDISH_INDUSTRIES.filter(industryOption => 
-                                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                                         ).length === 0 && (
-                                          <div className="py-4 px-3 text-center text-white">
-                                            Inga resultat hittades för "{searchTerm}"
-                                          </div>
-                                        )}
-                                     </div>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                <AuthSelectField
+                                  id="industry"
+                                  label="Bransch"
+                                  placeholder="Välj bransch"
+                                  value={employerData.industry}
+                                  options={SWEDISH_INDUSTRIES}
+                                  onChange={(v) => setEmployerData(prev => ({ ...prev, industry: v }))}
+                                  searchable
+                                  searchPlaceholder="Sök bransch..."
+                                  allowCustom
+                                />
                               </div>
 
                               <div>
-                                <Label htmlFor="employeeCount" className="text-white">Anställda <RequiredMark filled={!!employerData.employeeCount} /></Label>
-                                <DropdownMenu modal={false} open={employeeMenuOpen} onOpenChange={setEmployeeMenuOpen}>
-                                   <DropdownMenuTrigger asChild>
-                                    <Button
-                                      ref={employeeCountTriggerRef}
-                                      variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left font-normal focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 active:!scale-100 active:!bg-white/5 data-[state=open]:!bg-white/5 data-[state=open]:!border-white/20"
-                                    >
-                                       <span className="truncate text-left flex-1 px-1">
-                                         {employerData.employeeCount || 'Antal'}
-                                       </span>
-                                      <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent 
-                                    className="w-80 glass-panel z-[9999] rounded-md text-white overflow-hidden max-h-96"
-                                    side="bottom"
-                                    align="center"
-                                    alignOffset={0}
-                                    sideOffset={8}
-                                    avoidCollisions={false}
-                                    onCloseAutoFocus={(e) => e.preventDefault()}
-                                  >
-                                    {/* Employee count options */}
-                                    <div className="overflow-y-auto max-h-80 overscroll-contain">
-                                      {EMPLOYEE_COUNT_OPTIONS.map((count) => (
-                                        <DropdownMenuItem
-                                          key={count}
-                                          onSelect={(e) => e.preventDefault()}
-                                           onClick={() => {
-                                             setEmployerData(prev => ({ ...prev, employeeCount: count }));
-                                             setEmployeeMenuOpen(false);
-                                           }}
-                                          className="cursor-pointer hover:bg-white/20 focus:bg-white/20 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
-                                        >
-                                          <span className="flex-1 pr-2">{count}</span>
-                                          {employerData.employeeCount === count && (
-                                            <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                                          )}
-                                        </DropdownMenuItem>
-                                      ))}
-                                    </div>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                <AuthSelectField
+                                  id="employeeCount"
+                                  label="Anställda"
+                                  placeholder="Antal"
+                                  value={employerData.employeeCount}
+                                  options={EMPLOYEE_COUNT_OPTIONS}
+                                  onChange={(v) => setEmployerData(prev => ({ ...prev, employeeCount: v }))}
+                                />
                               </div>
 
                               <div>
