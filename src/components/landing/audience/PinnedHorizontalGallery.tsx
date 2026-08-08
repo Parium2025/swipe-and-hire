@@ -16,7 +16,7 @@ import winReal3 from '@/assets/landing/windows/jobseeker-real-3-windows.mp4.asse
 import winReal4 from '@/assets/landing/windows/jobseeker-real-4-windows.mp4.asset.json';
 import winRealCenter from '@/assets/landing/windows/jobseeker-real-center-windows.mp4.asset.json';
 import { fetchPriority } from '@/lib/fetchPriority';
-import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
+import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, isWindowsDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
 
 /**
  * Apple-style "Så funkar det" sektion.
@@ -177,6 +177,13 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [failed, setFailed] = useState(false);
   const [src, setSrc] = useState(() => getPlayableSrc(item));
   const [frameReady, setFrameReady] = useState(false);
+  // Fejden ska dölja Windows-decoder-blixten, men på iOS/macOS är den onödig
+  // och märkbar. Windows får en mjukare 250 ms fade; Apple får ingen alls.
+  const overlayTransition = isWindowsDevice()
+    ? 'transition-opacity duration-[250ms] ease-out'
+    : isAppleDevice()
+      ? ''
+      : 'transition-opacity duration-100 ease-out';
   const markReady = useCallback(() => {
     setFrameReady(true);
   }, []);
@@ -336,7 +343,8 @@ const CardItem = ({ item, index }: CardItemProps) => {
             }}
             style={{ objectPosition: item.position ?? '50% 50%' }}
             className={cn(
-              'pointer-events-none transition-opacity duration-100 ease-out',
+              'pointer-events-none',
+              overlayTransition,
               frameReady ? 'opacity-100' : 'opacity-0'
             )}
           />
@@ -349,7 +357,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
             draggable={false}
             style={{ objectPosition: item.position ?? '50% 50%' }}
             className={cn(
-              'transition-opacity duration-100 ease-out',
+              overlayTransition,
               frameReady ? 'opacity-0' : 'opacity-100'
             )}
           />
