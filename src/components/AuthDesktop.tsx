@@ -26,6 +26,7 @@ import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
 import { hasPendingVerification, markPendingVerification, clearPendingVerification, getPendingVerificationEmail } from '@/lib/pendingVerification';
+import { AuthFieldNotice } from '@/components/auth/AuthFieldNotice';
 import { loadAuthDraft, saveAuthDraft, clearAuthDraft, mergeDraft } from '@/lib/authFormDraft';
 import { AuthLogoInline } from '@/assets/authLogoInline';
 
@@ -900,16 +901,16 @@ const AuthDesktop = ({
                              autoCapitalize="none"
                              className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                            />
-                            {role === 'employer' && (
-                              <div className="mt-1.5 flex items-start gap-2 rounded-md bg-white/5 border border-white/10 px-2.5 py-2">
+                            <AuthFieldNotice show={role === 'employer' && !!(employerData.email || '').trim()}>
+                              <div className="flex items-start gap-2 rounded-md bg-white/5 border border-white/10 px-2.5 py-2">
                                 <Info className="h-3.5 w-3.5 text-white/70 mt-0.5 flex-shrink-0" />
                                 <p className="text-xs text-white leading-snug">
                                   Ange företagets officiella e-post. Denna mail kommer att visas för jobbsökarna i annonsen under "kontakt".
                                 </p>
                               </div>
-                            )}
-                            {emailBlurred && emailAvailability.taken && (
-                              <p className="mt-1.5 text-xs font-medium text-white">
+                            </AuthFieldNotice>
+                            <AuthFieldNotice show={!!emailBlurred && !!emailAvailability.taken}>
+                              <p className="text-xs font-medium text-white">
                                 {emailTakenMessage(emailAvailability.existingRole)}{' '}
                                 <button
                                   type="button"
@@ -919,7 +920,7 @@ const AuthDesktop = ({
                                   Logga in
                                 </button>
                               </p>
-                            )}
+                            </AuthFieldNotice>
                          </div>
                          
                            {role === 'job_seeker' && (
