@@ -2,7 +2,7 @@
 //
 // Steg 1 — VARNING: konton utan aktivitet på 24 månader får ett mejl och
 //          schemaläggs för radering 365 dagar senare, med påminnelser när 180,
-//          90 respektive 7 dagar återstår.
+//          90, 7 respektive 1 dag återstår.
 // Steg 2 — RADERING: konton vars varningsperiod löpt ut och som fortfarande är
 //          inaktiva raderas permanent (profil, data, storage, auth-konto).
 // Steg 3 — ÅTERKALLNING: har personen loggat in efter varningen avbryts allt.
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
     // ── Steg 3: avbryt varningar för konton som blivit aktiva igen ──
     const { data: pending } = await admin
       .from('account_inactivity_notices')
-      .select('id, user_id, email, warned_at, scheduled_delete_at, reminder_180_sent_at, reminder_90_sent_at, reminder_7_sent_at')
+      .select('id, user_id, email, warned_at, scheduled_delete_at, reminder_180_sent_at, reminder_90_sent_at, reminder_7_sent_at, reminder_1_sent_at')
       .is('deleted_at', null)
       .is('cancelled_at', null)
 
@@ -96,6 +96,7 @@ Deno.serve(async (req) => {
         reminder_180_sent_at: string | null
         reminder_90_sent_at: string | null
         reminder_7_sent_at: string | null
+        reminder_1_sent_at: string | null
       }
 
       for (const notice of pendingList as Notice[]) {
@@ -255,6 +256,7 @@ Deno.serve(async (req) => {
             reminder_180_sent_at: null,
             reminder_90_sent_at: null,
             reminder_7_sent_at: null,
+            reminder_1_sent_at: null,
 
           },
           { onConflict: 'user_id' },
