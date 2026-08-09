@@ -171,7 +171,7 @@ export default function ValjPlan() {
 
   useEffect(() => {
     if (cancelled) {
-      toast('Betalningen avbröts', { description: 'Du kan välja plan igen när du är redo.' });
+      toast('Betalningen avbröts', { description: 'Ni kan välja plan igen när ni är redo.' });
     }
   }, [cancelled]);
 
@@ -210,14 +210,14 @@ export default function ValjPlan() {
   const headline = welcome
     ? 'Välkommen! Välj plan för att köra igång'
     : from === 'publish'
-    ? 'Välj plan för att publicera din annons'
+    ? 'Välj plan för att publicera er annons'
     : 'Välj plan som passar er rekrytering';
 
   const subline = welcome
     ? 'Ni har allt uppsatt — nu återstår bara att välja hur ni vill jobba.'
     : from === 'publish'
-    ? 'Ditt utkast är sparat. Välj plan så publicerar vi direkt efteråt.'
-    : 'Ingen bindningstid. Månadsvis debitering. Byt eller säg upp när du vill.';
+    ? 'Ert utkast är sparat. Välj plan så publicerar vi direkt efteråt.'
+    : 'Ingen bindningstid. Månadsvis debitering. Byt eller säg upp när ni vill.';
 
   // Ägare ser sidan som en helt ny kund — dölj "Nuvarande plan"-tillstånd
   // så vi kan verifiera exakt hur nya besökare upplever sidan.
@@ -247,10 +247,10 @@ export default function ValjPlan() {
           <button
             type="button"
             onClick={() => {
-              // Kom du från publiceringsflödet? Gå tillbaka till annonsen (utkastet är sparat).
-              if (from === 'publish') {
-                navigate(-1);
-              } else {
+            // Kom ni från publiceringsflödet? Gå tillbaka till annonsen (utkastet är sparat).
+            if (from === 'publish') {
+              navigate(-1);
+            } else {
                 navigate(user ? '/home' : '/', { replace: true });
               }
             }}
@@ -436,11 +436,11 @@ export default function ValjPlan() {
                 a: 'Nej. Alla månadspaket löper månadsvis utan bindningstid — ni kan byta plan eller säga upp när ni vill. Enkelannonsen är ett engångsköp helt utan abonnemang.',
               },
               {
-                q: 'Vad händer om jag inte förnyar?',
+                q: 'Vad händer om ni inte förnyar?',
                 a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
               },
               {
-                q: 'Kan jag byta plan?',
+                q: 'Kan ni byta plan?',
                 a: 'Ja, ni kan uppgradera eller nedgradera när som helst från Inställningar → Plan. Ändringen träder i kraft omedelbart och vi justerar debiteringen proportionerligt.',
               },
               {
