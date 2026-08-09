@@ -21,12 +21,15 @@ import JobSeekerHome from '@/components/JobSeekerHome';
 // ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
-import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelCompletedThisSession, isWelcomeCardReplayAccount } from '@/lib/tunnelTestAccounts';
+import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelCompletedThisSession, isWelcomeCardReplayAccount, isEmployerWelcomeCardReplayAccount } from '@/lib/tunnelTestAccounts';
 
 import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour, { WELCOME_CARD_REPLAY_EVENT } from '@/components/AppOnboardingTour';
 import PageIntroCoach, { resetPageCoachMarks } from '@/components/onboarding/PageIntroCoach';
+import EmployerOnboardingTour, { EMPLOYER_WELCOME_CARD_REPLAY_EVENT } from '@/components/EmployerOnboardingTour';
+import EmployerPageIntroCoach, { resetEmployerPageCoachMarks } from '@/components/onboarding/EmployerPageIntroCoach';
+
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
