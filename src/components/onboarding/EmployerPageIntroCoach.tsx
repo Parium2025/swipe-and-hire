@@ -284,16 +284,25 @@ const EmployerPageIntroCoach = () => {
         const local = owner === user.id ? readLocalCoachState() : { seen: {}, disabled: false };
         const cloud = await loadEmployerCoachState();
         if (cancelled) return;
-        const merged: CoachState = {
-          seen: { ...(local.seen ?? {}), ...(cloud?.seen ?? {}) },
-          disabled: Boolean(local.disabled || cloud?.disabled),
-        };
+
+        // Har guiden nyss startats om lokalt vinner den alltid över äldre molnstatus,
+        // annars kan en gammal "allt sett"-status slå tillbaka och blockera tipsen.
+        const resetAt = readLocalResetAt();
+        const cloudIsStale = resetAt > 0 && (cloud?.savedAt ?? 0) < resetAt;
+
+        const merged: CoachState = cloudIsStale
+          ? { seen: { ...(local.seen ?? {}) }, disabled: Boolean(local.disabled) }
+          : {
+              seen: { ...(local.seen ?? {}), ...(cloud?.seen ?? {}) },
+              disabled: Boolean(local.disabled || cloud?.disabled),
+            };
         writeLocalCoachState(merged);
         const cloudSeenCount = Object.keys(cloud?.seen ?? {}).length;
         const mergedSeenCount = Object.keys(merged.seen ?? {}).length;
-        if (!cloud || cloudSeenCount !== mergedSeenCount || cloud.disabled !== merged.disabled) {
+        if (cloudIsStale || !cloud || cloudSeenCount !== mergedSeenCount || cloud.disabled !== merged.disabled) {
           void saveEmployerCoachState(merged);
         }
+
       } catch {
         /* offline – kör på lokal cache */
       } finally {
