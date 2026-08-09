@@ -1,0 +1,2 @@
+update public.profiles set onboarding_completed = false where id = '672d3278-5578-4546-85e4-7ed533716c5b';
+delete from public.user_onboarding_state where user_id = '672d3278-5578-4546-85e4-7ed533716c5b';
