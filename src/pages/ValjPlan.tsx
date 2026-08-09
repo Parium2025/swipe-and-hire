@@ -436,7 +436,7 @@ export default function ValjPlan() {
                 a: 'Nej. Alla månadspaket löper månadsvis utan bindningstid — ni kan byta plan eller säga upp när ni vill. Enkelannonsen är ett engångsköp helt utan abonnemang.',
               },
               {
-                q: 'Vad händer om jag inte förnyar?',
+                q: 'Vad händer om ni inte förnyar?',
                 a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
               },
               {
