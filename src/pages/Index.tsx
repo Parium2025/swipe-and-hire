@@ -900,7 +900,17 @@ const Index = () => {
           keepKeys={EMPLOYER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
         />
+        {showEmployerTourOverlay ? (
+          <EmployerOnboardingTour
+            onComplete={finishEmployerIntroTour}
+            firstName={(profile as any)?.first_name}
+            initialStep={employerIntroTourStep}
+          />
+        ) : (
+          <EmployerPageIntroCoach />
+        )}
       </EmployerLayout>
+
     );
   }
 
