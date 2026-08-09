@@ -1182,8 +1182,8 @@ const AuthDesktop = ({
                       <Input
                         id="resend-email"
                         type="email"
-                        value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
-                        onChange={(e) => handleEmailChange(e.target.value)}
+                        value={resendEmail}
+                        onChange={(e) => setResendEmail(e.target.value)}
                         required
                         placeholder="din@epost.se"
                         className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
