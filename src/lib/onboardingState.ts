@@ -134,6 +134,60 @@ export async function resetIntroTourDone(): Promise<boolean> {
 }
 
 
+/* ── Arbetsgivarguiden ────────────────────────────────────────── */
+
+/**
+ * Arbetsgivarens guide lever i sin egen namnrymd (`coach_state.employer`) så
+ * att jobbsökarens tips aldrig kan stänga av arbetsgivarens — och tvärtom.
+ */
+export async function loadEmployerCoachState(): Promise<CoachState | null> {
+  const row = await fetchRow();
+  const coach = (row?.coach_state ?? null) as (CoachState & { employer?: CoachState }) | null;
+  return coach?.employer ?? null;
+}
+
+export async function saveEmployerCoachState(state: CoachState): Promise<boolean> {
+  const row = await fetchRow();
+  const existing = (row?.coach_state ?? {}) as CoachState & { employer?: CoachState };
+  const prev = existing.employer ?? {};
+  const merged = {
+    ...existing,
+    employer: {
+      ...prev,
+      ...state,
+      seen: { ...(prev.seen ?? {}), ...(state.seen ?? {}) },
+      savedAt: Date.now(),
+    },
+  };
+  return upsert({ coach_state: merged as CoachState });
+}
+
+export async function isEmployerIntroTourDone(): Promise<boolean> {
+  const row = await fetchRow();
+  const coach = (row?.coach_state ?? null) as
+    | (CoachState & { employerIntroTourDone?: boolean; employer?: CoachState })
+    | null;
+  if (!coach) return false;
+  if (coach.employerIntroTourDone) return true;
+  if (coach.employer?.disabled) return true;
+  return Object.values(coach.employer?.seen ?? {}).some(Boolean);
+}
+
+export async function markEmployerIntroTourDone(): Promise<boolean> {
+  const row = await fetchRow();
+  const next = { ...(row?.coach_state ?? {}), employerIntroTourDone: true, savedAt: Date.now() };
+  return upsert({ coach_state: next as CoachState });
+}
+
+/** Nollställ arbetsgivarguiden (t.ex. när tunneln körs om för kontot). */
+export async function resetEmployerIntroTourDone(): Promise<boolean> {
+  const row = await fetchRow();
+  const next = { ...(row?.coach_state ?? {}), employerIntroTourDone: false, savedAt: Date.now() };
+  return upsert({ coach_state: next as CoachState });
+}
+
+
+
 /* ── Hjälpare ─────────────────────────────────────────────────── */
 
 /** Enkel debounce som alltid kör sista anropet. */
