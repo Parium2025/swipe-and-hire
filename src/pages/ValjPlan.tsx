@@ -171,7 +171,7 @@ export default function ValjPlan() {
 
   useEffect(() => {
     if (cancelled) {
-      toast('Betalningen avbröts', { description: 'Du kan välja plan igen när du är redo.' });
+      toast('Betalningen avbröts', { description: 'Ni kan välja plan igen när ni är redo.' });
     }
   }, [cancelled]);
 
