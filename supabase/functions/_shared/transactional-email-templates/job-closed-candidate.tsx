@@ -12,44 +12,43 @@ interface Props {
 }
 
 const JobClosedCandidateEmail = ({
-  first_name = 'dar',
-  job_title = 'tjansten',
+  first_name = 'där',
+  job_title = 'tjänsten',
   company_name = 'Arbetsgivaren',
 }: Props) => (
   <Html lang="sv" dir="ltr">
     <Head />
-    <Preview>{`Annonsen "${job_title}" har utgatt`}</Preview>
+    <Preview>{`Annonsen "${job_title}" har utgått`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={brandSection}>
           <Text style={brand}>Parium</Text>
         </Section>
-        <Heading style={h1}>Annonsen har utgatt</Heading>
+        <Heading style={h1}>Annonsen har utgått</Heading>
         <Text style={text}>Hej {first_name}!</Text>
         <Text style={text}>
-          Annonsen <strong>"{job_title}"</strong> hos <strong>{company_name}</strong> har nu utgatt och
-          syns inte langre pa Parium.
+          Annonsen <strong>"{job_title}"</strong> hos <strong>{company_name}</strong> har nu utgått och
+          syns inte längre på Parium.
         </Text>
         <Text style={text}>
-          Har du inte fatt nagon aterkoppling har arbetsgivaren valt att inte ga vidare den har gangen.
-          Det sager ingenting om dig som kandidat - fortsatt soka, det finns nya jobb varje dag.
+          Har du inte fått någon återkoppling har arbetsgivaren valt att inte gå vidare den här gången.
+          Det säger ingenting om dig som kandidat — fortsätt söka, det kommer nya jobb varje dag.
         </Text>
         <Section style={tipCard}>
           <Text style={tipTitle}>Tips</Text>
           <Text style={tipText}>
-            Spara en sokning sa far du besked direkt nar nya jobb som passar dig publiceras.
+            Spara en sökning så får du besked direkt när nya jobb som passar dig publiceras.
           </Text>
         </Section>
         <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
           <Button style={button} href="https://parium.se/home">Hitta fler jobb</Button>
         </Section>
         <Text style={footer}>
-          Du far detta mejl for att du sokt eller sparat annonsen pa{' '}
-          <Link href="https://parium.se" style={link}>Parium</Link>. Du kan sla av mejl om avslutade
-          annonser under Notiser i appen.
+          Du får detta mejl för att du sökt annonsen på{' '}
+          <Link href="https://parium.se" style={link}>Parium</Link>. Du kan stänga av mejl om avslutade annonser under Notiser i appen.
         </Text>
         <Text style={noReply}>
-          Svara inte pa detta mejl - det ar skickat fran en automatisk utgaende adress.
+          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
         </Text>
       </Container>
     </Body>
@@ -58,8 +57,8 @@ const JobClosedCandidateEmail = ({
 
 export const template = {
   component: JobClosedCandidateEmail,
-  subject: (data: Props) => `Annonsen "${data.job_title || 'tjansten'}" har utgatt`,
-  displayName: 'Annons utgangen (jobbsokare)',
+  subject: (data: Props) => `Annonsen "${data.job_title || 'tjänsten'}" har utgått`,
+  displayName: 'Annons utgången (jobbsökare)',
   previewData: { first_name: 'Anna', job_title: 'Frontend-utvecklare', company_name: 'Nordic Tech AB' },
 } satisfies TemplateEntry
 
