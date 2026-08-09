@@ -433,7 +433,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
                 <Button
                   variant="outline"
                   onClick={handlePrevious}
-                  className="py-3 bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 text-sm px-4"
+                  className="py-3 rounded-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 text-sm px-4"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
