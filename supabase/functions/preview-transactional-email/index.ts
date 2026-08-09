@@ -6,6 +6,17 @@ import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 // Renders all registered templates with their previewData.
 // Gated by LOVABLE_API_KEY — only the Go API calls this.
 
+const responseHeaders = {
+  ...corsHeaders,
+  'Content-Type': 'application/json',
+  'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+  'CDN-Cache-Control': 'no-store',
+  'Pragma': 'no-cache',
+  'Expires': '0',
+  'Vary': 'Authorization',
+  'X-Email-Template-Revision': '2026-08-09T12:56:00Z',
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -17,7 +28,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: 'Server configuration error' }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: responseHeaders,
       }
     )
   }
@@ -28,7 +39,7 @@ Deno.serve(async (req) => {
   if (token !== apiKey) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: responseHeaders,
     })
   }
 
@@ -91,6 +102,6 @@ Deno.serve(async (req) => {
 
   return new Response(JSON.stringify({ templates: results }), {
     status: 200,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: responseHeaders,
   })
 })
