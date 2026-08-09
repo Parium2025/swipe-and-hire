@@ -295,6 +295,10 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
                         src={formData.companyLogoUrl} 
                         alt="Företagslogga" 
                         className="w-full h-full object-cover"
+                        loading="eager"
+                        decoding="sync"
+                        fetchPriority="high"
+                        draggable={false}
                       />
                     </div>
                   </div>
@@ -362,7 +366,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 hover:border-white/50 transition-all duration-300 hover:bg-white/15 hover:scale-105 max-w-md mx-auto">
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 max-w-md mx-auto">
               <p className="text-sm text-white">
                 <strong className="text-white">Tips:</strong> Börja med att skapa din första jobbannons för att locka kvalificerade kandidater till ditt företag.
               </p>
