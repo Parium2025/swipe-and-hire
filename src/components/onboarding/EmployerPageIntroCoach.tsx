@@ -44,6 +44,7 @@ const TOUR_PATHS = [
   '/company-profile',
   '/reports',
   '/billing',
+  '/settings',
   '/support',
 ] as const;
 
