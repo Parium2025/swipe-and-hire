@@ -32,7 +32,7 @@ export function PaymentPlaceholderDialog({
           <DialogTitle className="text-center text-xl font-semibold text-white">
             Betalning aktiveras snart
           </DialogTitle>
-          <DialogDescription className="text-center text-sm text-white/70">
+          <DialogDescription className="text-center text-sm text-white">
             Vi fixar sista biten med vår betalningsleverantör. Så fort det är klart kan du välja plan och köra igång direkt.
           </DialogDescription>
         </DialogHeader>
@@ -51,13 +51,13 @@ export function PaymentPlaceholderDialog({
               {priceSek !== undefined && (
                 <span className="text-sm text-white">
                   {priceSek.toLocaleString('sv-SE')} kr
-                  <span className="ml-1 text-xs text-white/60">
+                  <span className="ml-1 text-xs text-white">
                     {billingPeriod === 'monthly' ? '/mån' : 'engång'}
                   </span>
                 </span>
               )}
             </div>
-            <p className="mt-2 text-xs text-white/60">
+            <p className="mt-2 text-xs text-white">
               Vi meddelar dig via e-post så fort betalning är öppen.
             </p>
           </motion.div>
@@ -66,11 +66,12 @@ export function PaymentPlaceholderDialog({
         <div className="mt-2 flex flex-col gap-2">
           <Button
             onClick={() => onOpenChange(false)}
-            className="h-11 w-full bg-white text-[#0F172A] hover:bg-white/90"
+            className="h-11 w-full rounded-full bg-secondary text-white transition-none hover:bg-secondary hover:brightness-100"
           >
             Okej, jag väntar
           </Button>
         </div>
+
       </DialogContent>
     </Dialog>
   );
