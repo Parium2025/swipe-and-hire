@@ -1,16 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Upload, CheckCircle, ArrowRight, ArrowLeft, Briefcase, Users, Target, Sparkles, Trash2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2 } from 'lucide-react';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 
@@ -77,7 +72,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
             setFormData(parsed.formData);
           }
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(parsed.currentStep);
+            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 1));
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -109,7 +104,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   }, [formData, currentStep, draftRestored, draftKey]);
 
 
-  const totalSteps = 4; // Välkomst, Logo, Instruktioner, Slutför
+  const totalSteps = 2; // Logga, Slutför
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   const handleNext = () => {
@@ -242,61 +237,6 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
     switch (currentStep) {
       case 0:
         return (
-          <div className="text-center space-y-8 py-8">
-            <div className="space-y-6">
-              <div className="h-2" />
-              
-              <div className="space-y-6">
-                <h1 className="text-4xl font-bold text-white animate-fade-in leading-tight">Välkommen till Parium</h1>
-                
-                <div className="space-y-1">
-                  <p className="text-xl md:text-2xl text-white animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Låt oss sätta upp din arbetsgivarprofil</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 max-w-2xl mx-auto">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
-                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
-              >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Briefcase className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-white text-center font-semibold">Skapa och hantera jobbannonser</h3>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.4 }}
-                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
-              >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Users className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-white text-center font-semibold">Få ansökningar från kvalificerade kandidater</h3>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.6 }}
-                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
-              >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Target className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-white text-center font-semibold">Hitta rätt talang snabbt och enkelt</h3>
-              </motion.div>
-            </div>
-          </div>
-        );
-
-      case 1:
-        return (
           <div className="space-y-6">
             <div className="text-center mb-8">
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
@@ -369,62 +309,8 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
           </div>
         );
 
-      case 2:
-        return (
-          <div className="text-center space-y-8 py-8">
-            <div className="space-y-6">
-              <div className="h-2" />
-              
-              <div className="space-y-6">
-                <h1 className="text-4xl font-bold text-white animate-fade-in leading-tight">Så här fungerar Parium</h1>
-                
-                <div className="space-y-1">
-                  <p className="text-xl md:text-2xl text-white animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Här är en snabb guide för att komma igång</p>
-                </div>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 gap-6 max-w-2xl mx-auto">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
-                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
-              >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Briefcase className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-white text-center font-semibold">Skapa jobbannonser</h3>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.4 }}
-                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
-              >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Users className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-white text-center font-semibold">Ta emot ansökningar</h3>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.6 }}
-                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
-              >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Target className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-white text-center font-semibold">Hitta rätt talang</h3>
-              </motion.div>
-            </div>
-          </div>
-        );
-
-      case 3:
+      case 1:
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
@@ -451,7 +337,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="py-4 px-8 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
+                className="py-4 px-8 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
               >
                 {isSubmitting ? (
                   <>
@@ -542,7 +428,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
                 <Button
                   variant="outline"
                   onClick={handlePrevious}
-                  className="py-3 bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 text-sm px-4"
+                  className="py-3 rounded-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 text-sm px-4"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
@@ -551,9 +437,9 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
               
               <Button
                 onClick={handleNext}
-                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
+                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
               >
-                {currentStep === 0 ? 'Kom igång' : 'Nästa'}
+                Nästa
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
