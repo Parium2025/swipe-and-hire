@@ -29,7 +29,7 @@ const OutreachMessageEmail = ({
         </Section>
         <Text style={footer}>Skickat av {company_name} via Parium</Text>
         <Text style={noReply}>
-          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+          Svara inte på detta mejl. Det är skickat från en automatisk utgående adress.
         </Text>
         {tracking_url ? (
           <Img src={tracking_url} alt="" width="1" height="1" style={pixel} />
@@ -42,7 +42,7 @@ const OutreachMessageEmail = ({
 export const template = {
   component: OutreachMessageEmail,
   subject: (data: Props) => data.subject || `Meddelande från ${data.company_name || 'företaget'}`,
-  displayName: 'Outreach-meddelande',
+  displayName: 'Automatiskt mejl från arbetsgivare',
   previewData: {
     body: 'Hej! Vi såg din profil och tycker den ser intressant ut.',
     company_name: 'Parium AB',
