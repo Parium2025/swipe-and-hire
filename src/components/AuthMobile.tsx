@@ -353,6 +353,7 @@ const AuthMobile = ({
         if (result?.error) {
           if (result.error.code === 'email_not_confirmed') {
             setShowResend(true);
+            setResendEmail(currentEmail);
             markPendingVerification(currentEmail);
             setPendingVerification(true);
           } else if (result.error.showResetPassword) {
