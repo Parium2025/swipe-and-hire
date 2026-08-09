@@ -27,7 +27,7 @@ const AccountConfirmationEmail = ({
         <Container style={container}>
           <Section style={brandSection}>
             <Text style={brand}>Parium</Text>
-            <Text style={brandSub}>Framtiden börjar med ett swipe</Text>
+            <Text style={brandSub}>Framtiden börjar här</Text>
           </Section>
 
           <Heading style={h1}>Hej {first_name}! 👋</Heading>

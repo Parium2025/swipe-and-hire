@@ -144,7 +144,7 @@ function getSuccessPage(message: string, alreadyConfirmed = false): string {
           ${message}
         </div>
         <p>Du kan nu logga in i Parium och börja swipa dig fram till din nästa jobbmöjlighet.</p>
-        <p class="subtitle">Framtiden börjar med ett swipe 🚀</p>
+        <p class="subtitle">Framtiden börjar här 🚀</p>
         <a href="https://parium.se/auth" class="button">
           Logga in nu
         </a>

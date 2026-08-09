@@ -656,7 +656,7 @@ const AuthDesktop = ({
             </div>
             
             <h1 className="text-xl lg:text-2xl font-semibold text-white mb-3 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
-              Framtiden börjar med ett swipe
+              Framtiden börjar här
             </h1>
           </div>
 
