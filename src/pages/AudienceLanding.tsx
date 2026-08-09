@@ -2166,7 +2166,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Är mina uppgifter säkra?',
-                        a: 'Ja. All data lagras i EU (våra servrar ligger i Paris) och krypteras under överföring. Din fullständiga profil visas bara för arbetsgivare du aktivt visat intresse för. I inställningarna kan du när som helst ladda ner alla dina uppgifter eller radera hela ditt konto direkt — utan att kontakta oss. Har du inte loggat in på 24 månader mejlar vi en varning, påminner dig tre gånger till (180, 90 och 7 dagar kvar), och raderar kontot först ett år senare.',
+                        a: 'Ja. All data lagras i EU (våra servrar ligger i Paris) och krypteras under överföring. Din fullständiga profil visas bara för arbetsgivare du aktivt visat intresse för. I inställningarna kan du när som helst ladda ner alla dina uppgifter eller radera hela ditt konto direkt — utan att kontakta oss. Har du inte loggat in på 12 månader mejlar vi en varning, påminner dig tre gånger till (180, 90 och 7 dagar kvar), och raderar kontot först ett år senare.',
 
                       },
                       {
@@ -2230,7 +2230,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur länge sparas kandidatdata?',
-                        a: 'Vi raderar gammal data automatiskt varje natt. Ansökningar och tillhörande chattar raderas 24 månader efter ansökan (diskrimineringslagens preskriptionstid), aktivitetslogg efter 24 månader, visningsstatistik efter 12 månader och notiser efter 6 månader. Konton som inte använts på 24 månader får en varning via mejl, tre påminnelser (180, 90 och 7 dagar kvar) och raderas först ett år senare. Era annonser ligger kvar så länge ni vill — det är kandidatuppgifterna i dem som gallras. Ni kan alltid ta bort en kandidat eller annons tidigare, och kandidaten kan radera hela sitt konto själv när som helst. Hela rutinen finns i vårt personuppgiftsbiträdesavtal.',
+                        a: 'Vi raderar gammal data automatiskt varje natt. Ansökningar och tillhörande chattar raderas 24 månader efter ansökan (diskrimineringslagens preskriptionstid), aktivitetslogg efter 24 månader, visningsstatistik efter 12 månader och notiser efter 6 månader. Konton som inte använts på 12 månader får en varning via mejl, tre påminnelser (180, 90 och 7 dagar kvar) och raderas först ett år senare. Era annonser ligger kvar så länge ni vill — det är kandidatuppgifterna i dem som gallras. Ni kan alltid ta bort en kandidat eller annons tidigare, och kandidaten kan radera hela sitt konto själv när som helst. Hela rutinen finns i vårt personuppgiftsbiträdesavtal.',
                       },
                       {
                         q: 'Vilken support får vi som kund?',

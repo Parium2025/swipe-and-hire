@@ -28,7 +28,7 @@ const AccountInactivityWarningEmail = ({
         <Heading style={h1}>Ditt konto raderas om du inte loggar in</Heading>
         <Text style={text}>Hej {first_name}!</Text>
         <Text style={text}>
-          Du har inte använt Parium på 24 månader. Enligt vår integritetspolicy och GDPR
+          Du har inte använt Parium på 12 månader. Enligt vår integritetspolicy och GDPR
           sparar vi inte personuppgifter längre än nödvändigt — därför raderas ditt konto
           automatiskt <strong style={{ color: '#001F3D' }}>{delete_date}</strong>
           {' '}(om {days_left} dagar).

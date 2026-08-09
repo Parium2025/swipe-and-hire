@@ -1,8 +1,9 @@
 // GDPR: automatisk hantering av inaktiva konton.
 //
-// Steg 1 — VARNING: konton utan aktivitet på 24 månader får ett mejl och
+// Steg 1 — VARNING: konton utan aktivitet på 12 månader får ett mejl och
 //          schemaläggs för radering 365 dagar senare, med påminnelser när 180,
 //          90, 7 respektive 1 dag återstår.
+
 // Steg 2 — RADERING: konton vars varningsperiod löpt ut och som fortfarande är
 //          inaktiva raderas permanent (profil, data, storage, auth-konto).
 // Steg 3 — ÅTERKALLNING: har personen loggat in efter varningen avbryts allt.
@@ -21,7 +22,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-const INACTIVE_MONTHS = 24
+const INACTIVE_MONTHS = 12
 // 365 dagars frist — ett helt år. Kortare frister (30/90 dagar) riskerar att
 // missas vid semester, sjukdom eller föräldraledighet.
 const GRACE_DAYS = 365
