@@ -29,14 +29,14 @@ const AccountInactivityWarningEmail = ({
         <Text style={text}>Hej {first_name}!</Text>
         <Text style={text}>
           Du har inte använt Parium på 12 månader. Enligt vår integritetspolicy och GDPR
-          sparar vi inte personuppgifter längre än nödvändigt — därför raderas ditt konto
+          sparar vi inte personuppgifter längre än nödvändigt. Därför raderas ditt konto
           automatiskt <strong style={{ color: '#001F3D' }}>{delete_date}</strong>
           {' '}(om {days_left} dagar).
         </Text>
         <Section style={tipCard}>
           <Text style={tipTitle}>Vill du behålla kontot?</Text>
           <Text style={tipText}>
-            Logga bara in en gång före dess — då avbryts raderingen automatiskt.
+            Logga bara in en gång före dess. Då avbryts raderingen automatiskt.
           </Text>
         </Section>
         <Text style={text}>
@@ -51,7 +51,7 @@ const AccountInactivityWarningEmail = ({
           <Link href="https://parium.se" style={link}>Parium</Link>.
         </Text>
         <Text style={noReply}>
-          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+          Svara inte på detta mejl. Det är skickat från en automatisk utgående adress.
         </Text>
       </Container>
     </Body>
@@ -62,7 +62,7 @@ export const template = {
   component: AccountInactivityWarningEmail,
   subject: (data?: Record<string, unknown>) =>
     `Ditt Parium-konto raderas om ${(data?.days_left as string) ?? '365'} dagar`,
-  displayName: 'Inaktivt konto – varning före radering',
+  displayName: 'Inaktivt konto - varning före radering',
   previewData: { first_name: 'Anna', delete_date: '2027-07-30', days_left: '365' },
 
 } satisfies TemplateEntry
