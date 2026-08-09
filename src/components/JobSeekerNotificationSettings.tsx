@@ -9,7 +9,7 @@ const JOBSEEKER_NOTIFICATION_TYPES: { type: NotificationType; label: string; des
   { type: 'new_message', label: 'Meddelanden', description: 'När du får nya meddelanden' },
   { type: 'saved_search_match', label: 'Nya jobb i dina sökningar', description: 'När nya jobb stämmer med dina sparade sökningar' },
   { type: 'saved_job_expiring', label: 'Sparade jobb utgår', description: 'När ett sparat jobb snart går ut' },
-  { type: 'job_closed', label: 'Avslutade annonser', description: 'När en annons du sökt stängs' },
+  { type: 'job_closed', label: 'Avslutade annonser', description: 'När en annons du sökt stängs eller utgår', hasEmail: true },
 ];
 
 export const JobSeekerNotificationSettings = () => {

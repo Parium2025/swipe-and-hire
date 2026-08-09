@@ -281,8 +281,51 @@ const handler = async (req: Request): Promise<Response> => {
             console.error(`Error creating notification for ${applicant.applicant_id}:`, notifError);
           }
 
+          // Mejl till kandidaten om att annonsen utgått (om användaren inte stängt av det)
+          try {
+            const { data: pref } = await supabase
+              .from("notification_preferences")
+              .select("email_enabled")
+              .eq("user_id", applicant.applicant_id)
+              .eq("notification_type", "job_closed")
+              .maybeSingle();
+
+            if (pref?.email_enabled !== false) {
+              const { data: candidateProfile } = await supabase
+                .from("profiles")
+                .select("email, first_name")
+                .eq("user_id", applicant.applicant_id)
+                .maybeSingle();
+
+              let candidateEmail = candidateProfile?.email as string | undefined;
+              if (!candidateEmail) {
+                const { data: authUser } = await supabase.auth.admin.getUserById(applicant.applicant_id);
+                candidateEmail = authUser?.user?.email ?? undefined;
+              }
+
+              if (candidateEmail) {
+                const { error: candidateMailError } = await supabase.functions.invoke('send-transactional-email', {
+                  body: {
+                    templateName: 'job-closed-candidate',
+                    recipientEmail: candidateEmail,
+                    idempotencyKey: `job-closed-candidate-${job.id}-${applicant.applicant_id}`,
+                    templateData: {
+                      first_name: candidateProfile?.first_name || 'där',
+                      job_title: job.title,
+                      company_name: companyName,
+                    },
+                  },
+                });
+                if (candidateMailError) throw candidateMailError;
+              }
+            }
+          } catch (mailError) {
+            console.error('Failed to enqueue job-closed candidate email', { jobId: job.id, error: mailError });
+          }
+
           autoCloseMessagesSent += 1;
         }
+
 
         // Mark job as notified
         await supabase
