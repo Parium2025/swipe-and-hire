@@ -143,6 +143,10 @@ const AuthTablet = ({
 
     // Inloggning och registrering har separata state – ingen rensning behövs,
     // så det man skrivit finns kvar när man växlar flik.
+    // Lösenord ska aldrig följa med mellan flikarna.
+    setLoginData(prev => ({ ...prev, password: "" }));
+    setJobSeekerData(prev => ({ ...prev, password: "", confirmPassword: "" }));
+    setEmployerData(prev => ({ ...prev, password: "", confirmPassword: "" }));
     setShowPassword(false);
   };
 
