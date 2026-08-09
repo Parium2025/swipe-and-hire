@@ -192,7 +192,7 @@ const CONFIGS: Record<string, CoachConfig> = {
     lines: () => [
       'Det är ni som startar samtalet — kandidaten kan svara så fort ni hört av er.',
       'Kandidaten får en notis direkt, så inget viktigt hinner försvinna.',
-      'Intervjuinbjudan med tid, plats eller möteslänk skickas härifrån eller direkt från kandidatkortet.',
+      'Intervjuinbjudan skickas från kandidatkortet under Mina kandidater — här sköter ni den löpande dialogen.',
     ],
     cta: { label: 'Fyll i företagsprofilen', path: '/company-profile' },
   },
