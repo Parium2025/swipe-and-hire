@@ -664,7 +664,13 @@ const Index = () => {
         markTunnelCompletedThisSession();
       }
 
-      
+      // Visa arbetsgivarens välkomstkort direkt efter tunneln (första gången).
+      try {
+        if (!localStorage.getItem(employerIntroTourKey(user.id))) {
+          setShowEmployerIntroTutorial(true);
+        }
+      } catch { /* ignorera */ }
+
       // Navigate to home
       navigate('/home');
     }} />;
@@ -677,6 +683,14 @@ const Index = () => {
     import('@/lib/onboardingState').then(({ markIntroTourDone }) => markIntroTourDone().catch(() => {}));
     setShowIntroTutorial(false);
   };
+
+  const showEmployerTourOverlay = showEmployerIntroTutorial;
+  const finishEmployerIntroTour = () => {
+    try { localStorage.setItem(employerIntroTourKey(user.id), '1'); } catch { /* ignorera */ }
+    import('@/lib/onboardingState').then(({ markEmployerIntroTourDone }) => markEmployerIntroTourDone().catch(() => {}));
+    setShowEmployerIntroTutorial(false);
+  };
+
 
   
   // Resolve role from profile first to avoid flicker
