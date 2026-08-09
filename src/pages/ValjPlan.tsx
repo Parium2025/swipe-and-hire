@@ -216,8 +216,8 @@ export default function ValjPlan() {
   const subline = welcome
     ? 'Ni har allt uppsatt — nu återstår bara att välja hur ni vill jobba.'
     : from === 'publish'
-    ? 'Ditt utkast är sparat. Välj plan så publicerar vi direkt efteråt.'
-    : 'Ingen bindningstid. Månadsvis debitering. Byt eller säg upp när du vill.';
+    ? 'Ert utkast är sparat. Välj plan så publicerar vi direkt efteråt.'
+    : 'Ingen bindningstid. Månadsvis debitering. Byt eller säg upp när ni vill.';
 
   // Ägare ser sidan som en helt ny kund — dölj "Nuvarande plan"-tillstånd
   // så vi kan verifiera exakt hur nya besökare upplever sidan.
