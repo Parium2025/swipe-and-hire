@@ -255,7 +255,7 @@ export default function DpaPage() {
                   </thead>
                   <tbody className="divide-y divide-white/[0.06]">
                     <Sub name="Supabase (Lovable Cloud)" purpose="Databas, filer och autentisering" place="Paris, Frankrike (EU)" />
-                    <Sub name="Resend (via Lovable)" purpose="Utskick av transaktionsmejl" place="EU/USA (SCC)" />
+                    <Sub name="Lovable Emails" purpose="Utskick av transaktions- och systemmejl" place="EU/USA (SCC)" />
                     <Sub name="Lovable AI Gateway" purpose="AI-sammanfattning av CV och bedömning mot era kriterier" place="EU/USA (SCC)" />
                     <Sub name="Stripe" purpose="Betalningar och fakturering (aktiveras när betalfunktionen lanseras)" place="EU/USA (SCC)" />
 
