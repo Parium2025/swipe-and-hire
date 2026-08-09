@@ -510,6 +510,8 @@ const AuthTablet = ({
           setShowResend(true);
           markPendingVerification(fallbackEmail);
           setPendingVerification(true);
+          // Förifyll e-posten på Logga in-fliken – lösenordet fylls i efter bekräftelsemejlet
+          setLoginData(prev => ({ ...prev, email: fallbackEmail, password: "" }));
           setIsLogin(true);
         }
       }
