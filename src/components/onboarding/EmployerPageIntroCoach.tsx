@@ -88,6 +88,7 @@ export function resetEmployerPageCoachMarks() {
       .filter((k) => k.startsWith(STORAGE_PREFIX))
       .forEach((k) => localStorage.removeItem(k));
     localStorage.removeItem(COACH_DISABLED_KEY);
+    localStorage.setItem(COACH_RESET_AT_KEY, String(Date.now()));
   } catch {
     /* ignorera */
   }
@@ -108,6 +109,7 @@ export function markAllEmployerPageCoachesSeen() {
     Object.values(CONFIGS).forEach((c) => localStorage.setItem(STORAGE_PREFIX + c.key, '1'));
     localStorage.setItem(COACH_DISABLED_KEY, '1');
     localStorage.removeItem(ACTIVE_TOUR_KEY);
+    localStorage.removeItem(COACH_RESET_AT_KEY);
   } catch {
     /* ignorera */
   }
@@ -122,7 +124,13 @@ export function startEmployerPageCoachTour(path: string) {
   } catch {
     /* ignorera */
   }
+  // Se till att tipset dyker upp även när man redan står på sidan
+  // (då sker ingen ruttändring som kan trigga omvärderingen).
+  window.setTimeout(() => {
+    window.dispatchEvent(new CustomEvent(EMPLOYER_PAGE_COACH_REPLAY_EVENT));
+  }, 260);
 }
+
 
 /** Nollställ och visa tipset för sidan man står på just nu. */
 export function replayEmployerPageCoach() {
