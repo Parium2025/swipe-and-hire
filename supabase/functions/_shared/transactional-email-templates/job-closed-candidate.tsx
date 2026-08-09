@@ -31,8 +31,8 @@ const JobClosedCandidateEmail = ({
           syns inte längre på Parium.
         </Text>
         <Text style={text}>
-          Har du inte fått någon återkoppling har arbetsgivaren valt att inte gå vidare den här gången.
-          Det säger ingenting om dig som kandidat — fortsätt söka, det kommer nya jobb varje dag.
+          Har du inte fått någon återkoppling har arbetsgivaren valt att inte gå vidare med den här
+          ansökan. Du är välkommen att söka andra lediga tjänster på Parium.
         </Text>
         <Section style={tipCard}>
           <Text style={tipTitle}>Tips</Text>
