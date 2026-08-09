@@ -432,29 +432,30 @@ export default function ValjPlan() {
           <div className="mt-10 grid gap-3 md:grid-cols-2">
             {[
               {
-                q: 'Vad skiljer Start, Växa och Pro åt?',
-                a: 'Start passar ett litet rekryteringbehov med en användare och upp till 40 aktiva annonser per månad. Växa ger obegränsade annonser och plats för två användare. Pro är byggt för team — obegränsade användare, obegränsade annonser och roller så ni kan låta kollegor hantera kandidater och publicering.',
+                q: 'Finns det någon bindningstid?',
+                a: 'Nej. Alla månadspaket löper månadsvis utan bindningstid — ni kan byta plan eller säga upp när ni vill. Enkelannonsen är ett engångsköp helt utan abonnemang.',
               },
               {
-                q: 'Vad är en "enkelannons"?',
-                a: 'Enkelannonsen är ett engångsköp för dig som bara ska rekrytera en gång. Den ger en annons som ligger live i 14 dagar, utan abonnemang. Du kan när som helst aktivera ett månadspaket om behovet växer.',
+                q: 'Vad händer om jag inte förnyar?',
+                a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
               },
               {
-                q: 'När dras pengarna?',
-                a: 'Vid månadspaket dras summan automatiskt varje månad från det kort ni registrerar. Enkelannonsen betalas direkt i checkouten och aktiveras så fort betalningen är godkänd.',
+                q: 'Kan jag byta plan?',
+                a: 'Ja, ni kan uppgradera eller nedgradera när som helst från Inställningar → Plan. Ändringen träder i kraft omedelbart och vi justerar debiteringen proportionerligt.',
               },
               {
-                q: 'Vad händer om jag har fler användare än planen tillåter?',
-                a: 'Pro har obegränsat antal användare. Start och Växa har fasta användartak. Om teamet växer kan du uppgradera till Pro, eller välja Växa om ni är två. Nya användare kan inte bjudas in förrän utrymmet finns.',
+                q: 'Ingår moms?',
+                a: 'Priserna är exklusive moms. 25 % moms läggs på i checkouten och specificeras på fakturan. Momsregistrerade företag drar av den som ingående moms som vanligt.',
               },
               {
-                q: 'Kan jag fakturera istället för att betala med kort?',
-                a: 'Standardbetalningen är kortbetalning i checkouten, då det ger snabbast aktivering. För större volymer eller längre avtal kan vi ordna fakturabetalning — kontakta support@parium.se så hjälper vi er.',
+                q: 'Hur betalar vi?',
+                a: 'Med kort direkt i checkouten. Månadspaket dras automatiskt varje månad från kortet ni registrerar, enkelannonsen betalas en gång. För större volymer eller längre avtal kan vi ordna fakturabetalning — hör av er till hej@parium.se.',
               },
               {
-                q: 'Kan jag kombinera en enkelannons med ett abonnemang?',
-                a: 'Ja. Har ni ett månadspaket aktiverat och vill testa en extra annons utan att ändra planen kan ni köpa till en enkelannons. Den räknas inte mot abonnemangets annonsantal.',
+                q: 'När kan vi publicera efter att planen aktiverats?',
+                a: 'Direkt. Så fort betalningen är godkänd låses publicering upp och ni kan lägga ut er första annons på några minuter. Annonsen ligger sedan live i 14 dagar.',
               },
+
             ].map(({ q, a }, i) => (
               <motion.div
                 key={q}
