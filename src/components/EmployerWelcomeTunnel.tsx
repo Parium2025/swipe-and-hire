@@ -94,7 +94,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
     if (!draftRestored) return;
     
     // Check if there's any content to save
-    const hasContent = formData.companyLogoUrl || currentStep > 0;
+    const hasContent = formData.companyLogoUrl || formData.interviewVideoLink || currentStep > 0;
     
     if (hasContent) {
       try {
