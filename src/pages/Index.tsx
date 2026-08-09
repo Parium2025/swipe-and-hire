@@ -368,6 +368,7 @@ const CandidatesContent = () => {
 
 // Guiden ("Hjälp & tips") markeras som klar per konto, inte per webbläsare.
 const introTourKey = (userId: string) => `parium_intro_tour_done:${userId}`;
+const employerIntroTourKey = (userId: string) => `parium_emp_intro_tour_done:${userId}`;
 
 const Index = () => {
   const { user, profile, userRole, signOut, loading, authAction, switchRole } = useAuth();
@@ -377,6 +378,8 @@ const Index = () => {
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
+  const [showEmployerIntroTutorial, setShowEmployerIntroTutorial] = useState(false);
+
 
   // Testkonto: landa alltid på välkomstkortet (profilen sparas helt normalt).
   useEffect(() => {
