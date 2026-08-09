@@ -49,7 +49,7 @@ const AccountConfirmationEmail = ({
               </Text>
               <Text style={textBold}>Med Parium kan du:</Text>
               <Text style={bullet}>• Hitta jobb som verkligen passar din profil</Text>
-              <Text style={bullet}>• Swipea dig igenom alternativ och ansöka på några sekunder</Text>
+              <Text style={bullet}>• Söka jobb snabbt och enkelt – direkt i appen</Text>
               <Text style={bullet}>• Spara tid med verktyg som gör processen både enkel och effektiv</Text>
             </>
           )}
@@ -61,7 +61,9 @@ const AccountConfirmationEmail = ({
           </Section>
 
           <Text style={text}>
-            Tack för ditt förtroende.<br />Det här kan bli början på något riktigt bra!
+            {isEmployer
+              ? 'Tack för ert förtroende. Det här kan bli början på något riktigt bra!'
+              : 'Tack för ditt förtroende. Det här kan bli början på något riktigt bra!'}
           </Text>
 
           <Section style={fallbackCard}>
