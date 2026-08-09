@@ -514,7 +514,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
         {currentStep > 0 && currentStep < totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto pt-8 px-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
+              <span className="text-sm text-white font-medium">Steg {currentStep + 1} av {totalSteps - 1}</span>
               <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
             </div>
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/30">
