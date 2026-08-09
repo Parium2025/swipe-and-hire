@@ -21,12 +21,15 @@ import JobSeekerHome from '@/components/JobSeekerHome';
 // ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
-import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelCompletedThisSession, isWelcomeCardReplayAccount } from '@/lib/tunnelTestAccounts';
+import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelCompletedThisSession, isWelcomeCardReplayAccount, isEmployerWelcomeCardReplayAccount } from '@/lib/tunnelTestAccounts';
 
 import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour, { WELCOME_CARD_REPLAY_EVENT } from '@/components/AppOnboardingTour';
 import PageIntroCoach, { resetPageCoachMarks } from '@/components/onboarding/PageIntroCoach';
+import EmployerOnboardingTour, { EMPLOYER_WELCOME_CARD_REPLAY_EVENT } from '@/components/EmployerOnboardingTour';
+import EmployerPageIntroCoach, { resetEmployerPageCoachMarks } from '@/components/onboarding/EmployerPageIntroCoach';
+
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
@@ -368,6 +371,7 @@ const CandidatesContent = () => {
 
 // Guiden ("Hjälp & tips") markeras som klar per konto, inte per webbläsare.
 const introTourKey = (userId: string) => `parium_intro_tour_done:${userId}`;
+const employerIntroTourKey = (userId: string) => `parium_emp_intro_tour_done:${userId}`;
 
 const Index = () => {
   const { user, profile, userRole, signOut, loading, authAction, switchRole } = useAuth();
@@ -377,6 +381,8 @@ const Index = () => {
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
+  const [showEmployerIntroTutorial, setShowEmployerIntroTutorial] = useState(false);
+
 
   // Testkonto: landa alltid på välkomstkortet (profilen sparas helt normalt).
   useEffect(() => {
@@ -420,7 +426,45 @@ const Index = () => {
   }, [user, (profile as any)?.role, (profile as any)?.onboarding_completed]);
 
 
+  // Testkonto (arbetsgivare): landa alltid på arbetsgivarens välkomstkort.
+  useEffect(() => {
+    if (!user?.email) return;
+    if (!isEmployerWelcomeCardReplayAccount(user.email)) return;
+    if ((profile as any)?.role !== 'employer') return;
+    if (!(profile as any)?.onboarding_completed) return;
+    resetEmployerPageCoachMarks();
+    setShowEmployerIntroTutorial(true);
+  }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
 
+
+  // Första inloggningen som arbetsgivare: samma välkomstkort som på
+  // jobbsökarsidan, fast med arbetsgivarinnehåll. Flaggan ligger i molnet.
+  const employerIntroTourHandledRef = useRef(false);
+  useEffect(() => {
+    if (!user) return;
+    if ((profile as any)?.role !== 'employer') return;
+    if ((profile as any)?.onboarding_completed !== true) return;
+    if (isEmployerWelcomeCardReplayAccount(user.email)) return;
+    if (employerIntroTourHandledRef.current) return;
+    let cancelled = false;
+    try {
+      if (localStorage.getItem(employerIntroTourKey(user.id))) {
+        employerIntroTourHandledRef.current = true;
+        return;
+      }
+    } catch { /* ignorera */ }
+    import('@/lib/onboardingState').then(async ({ isEmployerIntroTourDone }) => {
+      const done = await isEmployerIntroTourDone().catch(() => false);
+      if (cancelled || employerIntroTourHandledRef.current) return;
+      employerIntroTourHandledRef.current = true;
+      if (done) {
+        try { localStorage.setItem(employerIntroTourKey(user.id), '1'); } catch { /* ignorera */ }
+        return;
+      }
+      setShowEmployerIntroTutorial(true);
+    });
+    return () => { cancelled = true; };
+  }, [user, (profile as any)?.role, (profile as any)?.onboarding_completed]);
 
 
   // Support → "Hjälp & tips" öppnar hela välkomstkortet igen.
@@ -434,6 +478,18 @@ const Index = () => {
     window.addEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
     return () => window.removeEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
   }, []);
+
+  const [employerIntroTourStep, setEmployerIntroTourStep] = useState<0 | 1>(0);
+  useEffect(() => {
+    const onReplay = (e: Event) => {
+      const step = (e as CustomEvent<{ step?: 0 | 1 }>).detail?.step ?? 0;
+      setEmployerIntroTourStep(step);
+      setShowEmployerIntroTutorial(true);
+    };
+    window.addEventListener(EMPLOYER_WELCOME_CARD_REPLAY_EVENT, onReplay);
+    return () => window.removeEventListener(EMPLOYER_WELCOME_CARD_REPLAY_EVENT, onReplay);
+  }, []);
+
 
   const [isInitializing, setIsInitializing] = useState(false);
   const [uiReady, setUiReady] = useState(false);
@@ -608,7 +664,13 @@ const Index = () => {
         markTunnelCompletedThisSession();
       }
 
-      
+      // Visa arbetsgivarens välkomstkort direkt efter tunneln (första gången).
+      try {
+        if (!localStorage.getItem(employerIntroTourKey(user.id))) {
+          setShowEmployerIntroTutorial(true);
+        }
+      } catch { /* ignorera */ }
+
       // Navigate to home
       navigate('/home');
     }} />;
@@ -621,6 +683,14 @@ const Index = () => {
     import('@/lib/onboardingState').then(({ markIntroTourDone }) => markIntroTourDone().catch(() => {}));
     setShowIntroTutorial(false);
   };
+
+  const showEmployerTourOverlay = showEmployerIntroTutorial;
+  const finishEmployerIntroTour = () => {
+    try { localStorage.setItem(employerIntroTourKey(user.id), '1'); } catch { /* ignorera */ }
+    import('@/lib/onboardingState').then(({ markEmployerIntroTourDone }) => markEmployerIntroTourDone().catch(() => {}));
+    setShowEmployerIntroTutorial(false);
+  };
+
 
   
   // Resolve role from profile first to avoid flicker
@@ -830,7 +900,17 @@ const Index = () => {
           keepKeys={EMPLOYER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
         />
+        {showEmployerTourOverlay ? (
+          <EmployerOnboardingTour
+            onComplete={finishEmployerIntroTour}
+            firstName={(profile as any)?.first_name}
+            initialStep={employerIntroTourStep}
+          />
+        ) : (
+          <EmployerPageIntroCoach />
+        )}
       </EmployerLayout>
+
     );
   }
 

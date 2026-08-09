@@ -13,11 +13,23 @@ const TUNNEL_REPLAY_EMAILS: string[] = [];
  */
 const WELCOME_CARD_REPLAY_EMAILS: string[] = [];
 
+/**
+ * Arbetsgivarkonton som alltid ska landa på arbetsgivarens välkomstkort
+ * (guiden "Hjälp & tips") vid varje inloggning — används för testning.
+ */
+const EMPLOYER_WELCOME_CARD_REPLAY_EMAILS: string[] = ['gorgeandersson@gmail.com'];
+
 
 export function isWelcomeCardReplayAccount(email?: string | null): boolean {
   if (!email) return false;
   return WELCOME_CARD_REPLAY_EMAILS.includes(email.trim().toLowerCase());
 }
+
+export function isEmployerWelcomeCardReplayAccount(email?: string | null): boolean {
+  if (!email) return false;
+  return EMPLOYER_WELCOME_CARD_REPLAY_EMAILS.includes(email.trim().toLowerCase());
+}
+
 
 const SESSION_KEY = 'tunnel_replay_done';
 

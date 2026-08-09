@@ -32,9 +32,13 @@ import {
   UserCircle,
   UserCheck,
   ChevronDown,
+  Lightbulb,
   LayoutDashboard
 } from "lucide-react";
+import { resetEmployerPageCoachMarks } from "@/components/onboarding/EmployerPageIntroCoach";
+import { replayEmployerWelcomeCard } from "@/components/EmployerOnboardingTour";
 import { PariumLogoButton } from "@/components/PariumLogoButton";
+
 import NotificationCenter from "@/components/NotificationCenter";
 import { TruncatedText } from "@/components/TruncatedText";
 
@@ -437,7 +441,15 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                   </DropdownMenuItem>
                 );
               })}
+              <DropdownMenuItem
+                onClick={() => { resetEmployerPageCoachMarks(); replayEmployerWelcomeCard(); setProfileOpen(false); }}
+                className={dropdownItemClass}
+              >
+                <Lightbulb className="h-4 w-4" />
+                Hjälp &amp; tips
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/10 my-1.5" />
+
               <DropdownMenuItem 
                 onClick={signOut} 
                 className="group/logout flex items-center gap-2 cursor-pointer rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white px-3 py-2 text-sm font-medium transition-colors hover:bg-white/10 focus:bg-white/10"
