@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -469,12 +469,6 @@ export default function ValjPlan() {
               </motion.div>
             ))}
           </div>
-          <p className="mt-8 text-center text-sm text-white">
-            Fler frågor om Parium?{' '}
-            <Link to="/arbetsgivare#faq" className="font-semibold text-secondary underline-offset-4 hover:underline">
-              Se alla vanliga frågor för arbetsgivare
-            </Link>
-          </p>
         </section>
       </div>
 
