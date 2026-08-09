@@ -3,6 +3,7 @@ import * as React from 'npm:react@18.3.1'
 import { template as applicationConfirmation } from './application-confirmation.tsx'
 import { template as interviewInvitation } from './interview-invitation.tsx'
 import { template as jobExpiration } from './job-expiration.tsx'
+import { template as jobClosedCandidate } from './job-closed-candidate.tsx'
 import { template as supportTicketAlert } from './support-ticket-alert.tsx'
 import { template as adminAlert } from './admin-alert.tsx'
 import { template as accountConfirmation } from './account-confirmation.tsx'
@@ -23,6 +24,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-confirmation': applicationConfirmation,
   'interview-invitation': interviewInvitation,
   'job-expiration': jobExpiration,
+  'job-closed-candidate': jobClosedCandidate,
   'support-ticket-alert': supportTicketAlert,
   'admin-alert': adminAlert,
   'account-confirmation': accountConfirmation,
