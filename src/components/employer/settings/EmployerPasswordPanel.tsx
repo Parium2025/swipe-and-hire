@@ -24,6 +24,7 @@ const EmployerPasswordPanel = ({ passwordData, setPasswordData, onUpdatePassword
           <Input
             id="new-password"
             type="password"
+            autoComplete="new-password"
             value={passwordData.newPassword}
             onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
             className="bg-white/5 border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm"
@@ -34,10 +35,12 @@ const EmployerPasswordPanel = ({ passwordData, setPasswordData, onUpdatePassword
           <Input
             id="confirm-password"
             type="password"
+            autoComplete="new-password"
             value={passwordData.confirmPassword}
             onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
             className="bg-white/5 border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm"
           />
+
         </div>
         <div className="flex justify-center pt-1">
           <Button onClick={onUpdatePassword} variant="glass" className="h-11 !min-h-0 px-6 text-sm">
