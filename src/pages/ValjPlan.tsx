@@ -210,7 +210,7 @@ export default function ValjPlan() {
   const headline = welcome
     ? 'Välkommen! Välj plan för att köra igång'
     : from === 'publish'
-    ? 'Välj plan för att publicera din annons'
+    ? 'Välj plan för att publicera er annons'
     : 'Välj plan som passar er rekrytering';
 
   const subline = welcome
