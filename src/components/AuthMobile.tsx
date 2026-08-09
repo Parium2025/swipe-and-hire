@@ -106,6 +106,7 @@ const AuthMobile = ({
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
+  const [resendEmail, setResendEmail] = useState('');
   const [pendingVerification, setPendingVerification] = useState<boolean>(() => hasPendingVerification());
 
   // Låt användaren registrera sig igen när hen byter till Registrera-fliken
