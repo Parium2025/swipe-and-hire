@@ -47,7 +47,7 @@ const shortcuts: Shortcut[] = [
   {
     icon: MessageCircle,
     title: 'Meddelanden',
-    description: 'Starta chatten med en kandidat och skicka intervjuinbjudan.',
+    description: 'Här sköter ni dialogen med kandidaten — snabbt och på ett ställe.',
     path: '/messages',
   },
   {
