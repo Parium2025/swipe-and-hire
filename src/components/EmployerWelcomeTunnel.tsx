@@ -239,6 +239,9 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
 
       const result = await updateProfile({
         company_logo_url: formData.companyLogoUrl,
+        interview_video_link: formData.interviewVideoLink
+          ? normalizeMeetingLink(formData.interviewVideoLink)
+          : '',
         onboarding_completed: true
       } as any);
 
