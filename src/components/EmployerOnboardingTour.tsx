@@ -321,8 +321,8 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
                 <p className="text-[13px] leading-snug text-white break-words">
                   <span className="font-semibold">Tips:</span> En annons ligger uppe i 14 dagar och
                   kan återpubliceras när som helst — kandidathistoriken följer med. Ni ser bara de
-                  kandidater som själva sökt era jobb, och kandidaten ser bara det ni själva skickar
-                  i chatten eller som intervjuinbjudan.
+                  kandidater som själva sökt era jobb, och kandidaten märker inget av era interna
+                  anteckningar eller statusflyttar.
                 </p>
               </div>
 
