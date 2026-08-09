@@ -56,6 +56,7 @@ export type Database = {
           error_message: string | null
           id: string
           last_active_at: string | null
+          reminder_1_sent_at: string | null
           reminder_180_sent_at: string | null
           reminder_30_sent_at: string | null
           reminder_7_sent_at: string | null
@@ -73,6 +74,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           last_active_at?: string | null
+          reminder_1_sent_at?: string | null
           reminder_180_sent_at?: string | null
           reminder_30_sent_at?: string | null
           reminder_7_sent_at?: string | null
@@ -90,6 +92,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           last_active_at?: string | null
+          reminder_1_sent_at?: string | null
           reminder_180_sent_at?: string | null
           reminder_30_sent_at?: string | null
           reminder_7_sent_at?: string | null
