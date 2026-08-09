@@ -193,6 +193,10 @@ const AuthMobile = ({
     // Defer heavy clearing until idle to avoid blocking frame
     // Inloggning och registrering har separata state – ingen rensning behövs,
     // så det man skrivit finns kvar när man växlar flik.
+    // Lösenord ska aldrig följa med mellan flikarna.
+    setLoginData(prev => ({ ...prev, password: "" }));
+    setJobSeekerData(prev => ({ ...prev, password: "", confirmPassword: "" }));
+    setEmployerData(prev => ({ ...prev, password: "", confirmPassword: "" }));
     setShowPassword(false);
   };
   const signupEmail = (role === 'job_seeker' ? jobSeekerData.email : employerData.email);
@@ -922,6 +926,7 @@ const AuthMobile = ({
                                <Label htmlFor="firstName" className="text-white">Förnamn <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName).trim()} /></Label>
                               <Input
                                 id="firstName"
+                                autoComplete="off"
                                 value={role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName}
                                 onChange={(e) => {
                                   if (role === 'job_seeker') {
@@ -938,6 +943,7 @@ const AuthMobile = ({
                                <Label htmlFor="lastName" className="text-white">Efternamn <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName).trim()} /></Label>
                               <Input
                                 id="lastName"
+                                autoComplete="off"
                                 value={role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName}
                                 onChange={(e) => {
                                   if (role === 'job_seeker') {
@@ -1001,6 +1007,7 @@ const AuthMobile = ({
                                 </Label>
                                   <Input
                                     id="phone"
+                                    autoComplete="off"
                                     type="tel"
                                     value={jobSeekerData.phone}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
@@ -1028,6 +1035,7 @@ const AuthMobile = ({
                                 <Label htmlFor="companyName" className="text-white">Företagsnamn <RequiredMark filled={!!employerData.companyName.trim()} /></Label>
                                  <Input
                                    id="companyName"
+                                   autoComplete="off"
                                    value={employerData.companyName}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
                                    placeholder="Mitt företag"
@@ -1121,7 +1129,7 @@ const AuthMobile = ({
                             required
                             minLength={7}
                             name={`new-password-${role}`}
-                            autoComplete={`${role}-new-password`}
+                            autoComplete="new-password"
                              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white h-11 !min-h-0"
                           />
                            <button
@@ -1188,7 +1196,7 @@ const AuthMobile = ({
                               }}
                               required
                               name={`confirm-password-${role}`}
-                              autoComplete={`${role}-new-password`}
+                              autoComplete="new-password"
                               className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white h-11 !min-h-0"
                             />
                             <button

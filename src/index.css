@@ -853,7 +853,10 @@ All colors MUST be HSL.
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active,
+  input:-internal-autofill-selected,
+  input:autofill,
   textarea:-webkit-autofill,
+  textarea:autofill,
   select:-webkit-autofill {
     -webkit-text-fill-color: white !important;
     caret-color: white !important;
