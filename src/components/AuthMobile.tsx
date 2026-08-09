@@ -559,6 +559,7 @@ const AuthMobile = ({
           setHasRegistered(true);
           setShowResend(true);
           markPendingVerification(fallbackEmail);
+          setResendEmail(fallbackEmail);
           setPendingVerification(true);
           // Förifyll e-posten på Logga in-fliken – lösenordet fylls i efter bekräftelsemejlet
           setLoginData(prev => ({ ...prev, email: fallbackEmail, password: "" }));
