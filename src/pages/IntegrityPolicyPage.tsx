@@ -341,7 +341,7 @@ export default function IntegrityPolicyPage() {
                   <strong>Aktivt konto:</strong> så länge du använder tjänsten.
                 </li>
                 <li>
-                  <strong>Inaktivt konto:</strong> efter 24 månader utan
+                  <strong>Inaktivt konto:</strong> efter 12 månader utan
                   inloggning mejlar vi dig en varning. Du har därefter ett helt år
                   på dig att logga in — vi påminner dig igen när 180 dagar, 90
                   dagar, 7 dagar och sista dygnet återstår. Loggar du inte in raderas kontot och
