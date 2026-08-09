@@ -14,7 +14,7 @@ const responseHeaders = {
   'Pragma': 'no-cache',
   'Expires': '0',
   'Vary': 'Authorization',
-  'X-Email-Template-Revision': '2026-08-09T12:56:00Z',
+  'X-Email-Template-Revision': '2026-08-09T13:02:00Z',
 }
 
 Deno.serve(async (req) => {
