@@ -51,6 +51,8 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
 
   // Form data
   const [formData, setFormData] = useState({
