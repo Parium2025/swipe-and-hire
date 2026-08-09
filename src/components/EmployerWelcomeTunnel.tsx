@@ -424,7 +424,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
           </div>
         );
 
-      case 3:
+      case 1:
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
