@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2 } from 'lucide-react';
+import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { normalizeMeetingLink } from '@/lib/meetingLink';
+import { isValidMeetingLink } from '@/pages/employer/companyProfile/meetingLinkValidation';
 
 const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
 const LEGACY_EMPLOYER_WELCOME_DRAFT_KEY = 'parium_draft_employer-welcome-tunnel';
