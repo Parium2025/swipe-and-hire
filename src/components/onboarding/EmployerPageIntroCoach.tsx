@@ -229,6 +229,17 @@ const CONFIGS: Record<string, CoachConfig> = {
     ],
     cta: { label: 'Öppna Support', path: '/support' },
   },
+  '/settings': {
+    key: 'emp-settings',
+    icon: UserPlus,
+    title: 'Bjud in teamet',
+    lines: () => [
+      'Rekryterar ni flera? Under Teammedlemmar bjuder ni in kollegor med deras e-post — de får en inbjudan direkt.',
+      'Ni som är admin styr vilka som kan skapa annonser och se kandidater.',
+      'Här finns även notiser, e-postutskick och kontoinställningar för organisationen.',
+    ],
+    cta: { label: 'Öppna Support', path: '/support' },
+  },
   '/support': {
     key: 'emp-support',
     icon: HelpCircle,
@@ -236,15 +247,6 @@ const CONFIGS: Record<string, CoachConfig> = {
     lines: () => [
       'Guider, vanliga frågor och direktkontakt med oss — vi svarar så fort vi bara kan.',
       'Under Hjälp & tips kan ni alltid starta om hela den här genomgången från början.',
-    ],
-  },
-  '/settings': {
-    key: 'emp-settings',
-    icon: Settings,
-    title: 'Inställningar',
-    lines: () => [
-      'Notiser, e-postutskick och kontoinställningar för er organisation.',
-      'Här bjuder ni också in kollegor och styr vad de får se och göra.',
     ],
   },
 };
