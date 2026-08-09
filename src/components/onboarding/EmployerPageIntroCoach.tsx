@@ -21,6 +21,17 @@ const STORAGE_PREFIX = 'parium_emp_page_coach_v1_';
 const ACTIVE_TOUR_KEY = 'parium_emp_page_coach_active';
 const COACH_DISABLED_KEY = 'parium_emp_page_coach_disabled';
 const COACH_OWNER_KEY = 'parium_emp_page_coach_owner';
+/** Tidsstämpel för senaste lokala nollställning — vinner över äldre molnstatus. */
+const COACH_RESET_AT_KEY = 'parium_emp_page_coach_reset_at';
+
+function readLocalResetAt(): number {
+  try {
+    return Number(localStorage.getItem(COACH_RESET_AT_KEY) || 0) || 0;
+  } catch {
+    return 0;
+  }
+}
+
 
 /** Speglar EMPLOYER_WELCOME_CARD_REPLAY_EVENT (undviker cirkulär import). */
 const EMPLOYER_WELCOME_CARD_REPLAY_EVENT_NAME = 'parium:employer-welcome-card-replay';
