@@ -8,96 +8,67 @@ import type { TemplateEntry } from './registry.ts'
 interface Props {
   first_name?: string
   confirmation_url?: string
-  role?: 'job_seeker' | 'employer'
-  company_name?: string
 }
 
 const AccountConfirmationEmail = ({
   first_name = 'där',
   confirmation_url = 'https://parium.se',
-  role = 'job_seeker',
-  company_name = 'ert företag',
-}: Props) => {
-  const isEmployer = role === 'employer'
-  return (
-    <Html lang="sv" dir="ltr">
-      <Head />
-      <Preview>Bekräfta ditt Parium-konto för att komma igång</Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Section style={brandSection}>
-            <Text style={brand}>Parium</Text>
-            <Text style={brandSub}>Framtiden börjar här</Text>
-          </Section>
+}: Props) => (
+  <Html lang="sv" dir="ltr">
+    <Head />
+    <Preview>Bekräfta ditt Parium-konto för att komma igång</Preview>
+    <Body style={main}>
+      <Container style={container}>
+        <Section style={brandSection}>
+          <Text style={brand}>Parium</Text>
+          <Text style={brandSub}>Framtiden börjar här</Text>
+        </Section>
 
-          <Heading style={h1}>Hej {first_name}! 👋</Heading>
+        <Heading style={h1}>Hej {first_name}! 👋</Heading>
 
-          {isEmployer ? (
-            <>
-              <Text style={text}>
-                Välkommen till Parium — plattformen där <strong>{company_name}</strong> möter framtida talanger. Vi hjälper er att rekrytera snabbare, mer effektivt och utan krångel.
-              </Text>
-              <Text style={textBold}>Med Parium kan ni:</Text>
-              <Text style={bullet}>• En smidig rekryteringsprocess från start till mål</Text>
-              <Text style={bullet}>• Direktkontakt med kandidater</Text>
-              <Text style={bullet}>• Effektiva verktyg som stödjer er rekrytering</Text>
-            </>
-          ) : (
-            <>
-              <Text style={text}>
-                Välkommen till Parium — nästa steg i ett smartare jobbsökande. Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
-              </Text>
-              <Text style={textBold}>Med Parium kan du:</Text>
-              <Text style={bullet}>• Hitta jobb som verkligen passar din profil</Text>
-              <Text style={bullet}>• Söka jobb snabbt och enkelt – direkt i appen</Text>
-              <Text style={bullet}>• Spara tid med verktyg som gör processen både enkel och effektiv</Text>
-            </>
-          )}
+        <Text style={text}>
+          Välkommen till Parium — nästa steg i ett smartare jobbsökande. Genom vår plattform får du
+          tillgång till moderna verktyg som effektiviserar varje steg i din process.
+        </Text>
+        <Text style={textBold}>Med Parium kan du:</Text>
+        <Text style={bullet}>• Hitta jobb som verkligen passar din profil</Text>
+        <Text style={bullet}>• Söka jobb snabbt och enkelt – direkt i appen</Text>
+        <Text style={bullet}>• Spara tid med verktyg som gör processen både enkel och effektiv</Text>
 
-          <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
-            <Button style={button} href={confirmation_url}>
-              {isEmployer ? 'Bekräfta företagskontot' : 'Bekräfta mitt konto'}
-            </Button>
-          </Section>
+        <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
+          <Button style={button} href={confirmation_url}>Bekräfta mitt konto</Button>
+        </Section>
 
-          <Text style={text}>
-            {isEmployer
-              ? 'Tack för ert förtroende. Det här är början på något riktigt bra!'
-              : 'Tack för ditt förtroende. Det här är början på något riktigt bra!'}
-          </Text>
+        <Text style={text}>Tack för ditt förtroende. Det här är början på något riktigt bra!</Text>
 
-          <Section style={fallbackCard}>
-            <Text style={fallbackTitle}>Fungerar inte knappen? Kopiera länken:</Text>
-            <Text style={fallbackUrl}>{confirmation_url}</Text>
-          </Section>
+        <Section style={fallbackCard}>
+          <Text style={fallbackTitle}>Fungerar inte knappen? Kopiera länken:</Text>
+          <Text style={fallbackUrl}>{confirmation_url}</Text>
+        </Section>
 
-          <Text style={footer}>
-            Parium AB · Stockholm<br />
-            Du får detta mail för att du registrerat ett konto på{' '}
-            <Link href="https://parium.se" style={link}>Parium</Link>.
-          </Text>
-          <Text style={noReply}>
-            Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
-          </Text>
-        </Container>
-      </Body>
-    </Html>
-  )
-}
+        <Text style={footer}>
+          Parium AB · Stockholm<br />
+          Du får detta mail för att du registrerat ett konto på{' '}
+          <Link href="https://parium.se" style={link}>Parium</Link>.
+        </Text>
+        <Text style={noReply}>
+          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+        </Text>
+      </Container>
+    </Body>
+  </Html>
+)
 
 export const template = {
   component: AccountConfirmationEmail,
-  subject: (data: Props) =>
-    data.role === 'employer'
-      ? 'Välkommen till Parium – Bekräfta ditt företagskonto'
-      : 'Välkommen till Parium – Bekräfta ditt konto',
-  displayName: 'Kontobekräftelse',
+  subject: 'Välkommen till Parium – Bekräfta ditt konto',
+  displayName: 'Kontobekräftelse (jobbsökare)',
   previewData: {
     first_name: 'Anna',
     confirmation_url: 'https://parium.se/email-confirm?confirm=test',
-    role: 'job_seeker',
   },
 } satisfies TemplateEntry
+
 
 const main = { backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }
 const container = { padding: '32px 28px', maxWidth: '560px' }
