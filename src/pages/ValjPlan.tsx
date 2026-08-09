@@ -440,7 +440,7 @@ export default function ValjPlan() {
                 a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
               },
               {
-                q: 'Kan jag byta plan?',
+                q: 'Kan ni byta plan?',
                 a: 'Ja, ni kan uppgradera eller nedgradera när som helst från Inställningar → Plan. Ändringen träder i kraft omedelbart och vi justerar debiteringen proportionerligt.',
               },
               {
