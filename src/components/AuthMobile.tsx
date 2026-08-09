@@ -645,6 +645,7 @@ const AuthMobile = ({
                 <Input
                   id="confirmPassword"
                   type="password"
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onPaste={(e) => e.preventDefault()}
