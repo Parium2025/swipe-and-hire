@@ -369,7 +369,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
             </div>
 
             {/* Nu kör vi knapp */}
-            <div className="pt-4">
+            <div className="pt-4 flex flex-col items-center gap-4">
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
@@ -386,6 +386,15 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </>
                 )}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={handlePrevious}
+                className="py-3 rounded-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 text-sm px-6"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Tillbaka – ändra logga
               </Button>
             </div>
           </div>
