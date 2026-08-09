@@ -1004,7 +1004,6 @@ const AuthDesktop = ({
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
                                    placeholder="Ange din adress"
                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
-                                   autoComplete="off"
                                    required
                                  />
                               </div>
