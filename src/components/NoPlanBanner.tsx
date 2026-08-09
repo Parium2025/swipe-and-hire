@@ -23,7 +23,7 @@ export function NoPlanBanner() {
         </div>
         <Link
           to="/valj-plan"
-          className="flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-white/90"
+          className="flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full bg-secondary px-3.5 py-1.5 text-xs font-semibold text-secondary-foreground shadow-[0_6px_20px_-8px_hsl(var(--secondary)/0.9)] transition hover:brightness-110"
         >
           Välj plan
           <ArrowRight className="h-3.5 w-3.5" />
