@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -447,6 +447,14 @@ export default function ValjPlan() {
                 q: 'Ingår moms?',
                 a: 'Priserna är exklusive moms. 25 % moms läggs på i checkouten och specificeras på fakturan. Momsregistrerade företag drar av den som ingående moms som vanligt.',
               },
+              {
+                q: 'Hur betalar vi?',
+                a: 'Betalning sker med kort i checkouten och kvitto samt faktura skickas till er e-post direkt. Behöver ni fakturabetalning för större volymer hör av er till support@parium.se.',
+              },
+              {
+                q: 'När kan vi publicera efter att planen aktiverats?',
+                a: 'Direkt. Så snart betalningen är genomförd låses annonspubliceringen upp och ni kan publicera på ett par minuter — allt ni redan lagt in finns kvar.',
+              },
             ].map(({ q, a }, i) => (
               <motion.div
                 key={q}
@@ -460,6 +468,12 @@ export default function ValjPlan() {
               </motion.div>
             ))}
           </div>
+          <p className="mt-8 text-center text-sm text-white">
+            Fler frågor om Parium?{' '}
+            <Link to="/arbetsgivare#faq" className="font-semibold text-secondary underline-offset-4 hover:underline">
+              Se alla vanliga frågor för arbetsgivare
+            </Link>
+          </p>
         </section>
       </div>
 
