@@ -38,8 +38,12 @@ import {
   Star,
   UserCircle,
   UserCheck,
+  Lightbulb,
   Home
 } from "lucide-react";
+import { resetEmployerPageCoachMarks } from "@/components/onboarding/EmployerPageIntroCoach";
+import { replayEmployerWelcomeCard } from "@/components/EmployerOnboardingTour";
+
 
 
 // Navigation items for employer sidebar
