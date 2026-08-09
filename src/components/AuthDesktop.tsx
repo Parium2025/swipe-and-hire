@@ -105,6 +105,7 @@ const AuthDesktop = ({
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
+  const [resendEmail, setResendEmail] = useState('');
   const [pendingVerification, setPendingVerification] = useState<boolean>(() => hasPendingVerification());
 
   // Låt användaren registrera sig igen när hen byter till Registrera-fliken
@@ -303,6 +304,7 @@ const AuthDesktop = ({
          if (result?.error) {
            if (result.error.code === 'email_not_confirmed') {
              setShowResend(true);
+             setResendEmail(currentEmail);
              markPendingVerification(currentEmail);
              setPendingVerification(true);
            } else if (result.error.showResetPassword) {
@@ -509,6 +511,7 @@ const AuthDesktop = ({
           setHasRegistered(true);
           setShowResend(true);
           markPendingVerification(fallbackEmail);
+          setResendEmail(fallbackEmail);
           setPendingVerification(true);
           // Förifyll e-posten på Logga in-fliken – lösenordet fylls i efter bekräftelsemejlet
           setLoginData(prev => ({ ...prev, email: fallbackEmail, password: "" }));
@@ -524,10 +527,9 @@ const AuthDesktop = ({
   };
 
   const handleResendConfirmation = async () => {
-    const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
-    if (!currentData.email) return;
+    if (!resendEmail.trim()) return;
     setResendLoading(true);
-    await resendConfirmation(currentData.email, role);
+    await resendConfirmation(resendEmail, role);
     setResendLoading(false);
   };
 
@@ -761,7 +763,9 @@ const AuthDesktop = ({
                               onClick={() => {
                                 const saved = getPendingVerificationEmail();
                                 const current = loginData.email;
+                                const fallback = saved || current || signupEmail;
                                 if (saved && !current.trim()) handleEmailChange(saved);
+                                setResendEmail(fallback);
                                 setShowResend(true);
                               }}
                               className="text-sm text-white/80 no-underline hover:text-white"
@@ -1178,8 +1182,8 @@ const AuthDesktop = ({
                       <Input
                         id="resend-email"
                         type="email"
-                        value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
-                        onChange={(e) => handleEmailChange(e.target.value)}
+                        value={resendEmail}
+                        onChange={(e) => setResendEmail(e.target.value)}
                         required
                         placeholder="din@epost.se"
                         className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
@@ -1192,8 +1196,7 @@ const AuthDesktop = ({
                       variant="glass"
                       size="sm"
                       onClick={() => {
-                        const email = role === 'job_seeker' ? jobSeekerData.email : employerData.email;
-                        if (!email.trim()) {
+                        if (!resendEmail.trim()) {
                           toast({
                             title: "E-post saknas",
                             description: "Ange din e-postadress för att skicka ett nytt bekräftelsemejl.",
