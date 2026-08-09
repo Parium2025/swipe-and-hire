@@ -49,10 +49,8 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
   ];
 
   const employerSteps: { step: number; label: string }[] = [
-    { step: 0, label: 'Steg 0 · Välkommen' },
-    { step: 1, label: 'Steg 1 · Företagslogga' },
-    { step: 2, label: 'Steg 2 · Instruktioner' },
-    { step: 3, label: 'Steg 3 · Slutför' },
+    { step: 0, label: 'Steg 0 · Företagslogga' },
+    { step: 1, label: 'Steg 1 · Slutför' },
   ];
 
   const jumpToTunnelStep = async (
