@@ -533,13 +533,17 @@ const EmployerDashboard = memo(() => {
       <div className="hidden md:block">
         <div ref={listTopRef} />
         {tabFilteredJobs.length === 0 ? (
-          <div className="text-center text-white py-12 font-medium text-sm">
-            {searchTerm.trim() 
-              ? 'Inga annonser stämde med din sökning' 
-              : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
-              : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
-              : 'Inga utkast.'}
-          </div>
+          searchTerm.trim() ? (
+            <div className="text-center text-white py-12 font-medium text-sm">
+              Inga annonser stämde med din sökning
+            </div>
+          ) : activeTab === 'active' ? (
+            <EmptyJobsCta />
+          ) : (
+            <div className="text-center text-white py-12 font-medium text-sm">
+              {activeTab === 'expired' ? 'Inga utgångna jobbannonser.' : 'Inga utkast.'}
+            </div>
+          )
         ) : (
           <>
             <VirtualJobGrid
