@@ -204,11 +204,13 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       });
     } catch (error) {
       console.error('Logo upload error:', error);
+      setUploadError('Kunde inte ladda upp loggan. Kontrollera din anslutning och försök igen.');
       toast({
         title: "Fel vid uppladdning",
         description: "Kunde inte ladda upp loggan.",
         variant: "destructive"
       });
+
     } finally {
       setIsUploadingLogo(false);
       setLogoProgress(0);
