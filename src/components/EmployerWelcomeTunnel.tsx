@@ -242,61 +242,6 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
     switch (currentStep) {
       case 0:
         return (
-          <div className="text-center space-y-8 py-8">
-            <div className="space-y-6">
-              <div className="h-2" />
-              
-              <div className="space-y-6">
-                <h1 className="text-4xl font-bold text-white animate-fade-in leading-tight">Välkommen till Parium</h1>
-                
-                <div className="space-y-1">
-                  <p className="text-xl md:text-2xl text-white animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Låt oss sätta upp din arbetsgivarprofil</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 max-w-2xl mx-auto">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
-                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
-              >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Briefcase className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-white text-center font-semibold">Skapa och hantera jobbannonser</h3>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.4 }}
-                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
-              >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Users className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-white text-center font-semibold">Få ansökningar från kvalificerade kandidater</h3>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.6 }}
-                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
-              >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Target className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-white text-center font-semibold">Hitta rätt talang snabbt och enkelt</h3>
-              </motion.div>
-            </div>
-          </div>
-        );
-
-      case 1:
-        return (
           <div className="space-y-6">
             <div className="text-center mb-8">
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
