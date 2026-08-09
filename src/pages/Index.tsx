@@ -426,7 +426,45 @@ const Index = () => {
   }, [user, (profile as any)?.role, (profile as any)?.onboarding_completed]);
 
 
+  // Testkonto (arbetsgivare): landa alltid på arbetsgivarens välkomstkort.
+  useEffect(() => {
+    if (!user?.email) return;
+    if (!isEmployerWelcomeCardReplayAccount(user.email)) return;
+    if ((profile as any)?.role !== 'employer') return;
+    if (!(profile as any)?.onboarding_completed) return;
+    resetEmployerPageCoachMarks();
+    setShowEmployerIntroTutorial(true);
+  }, [user?.email, (profile as any)?.role, (profile as any)?.onboarding_completed]);
 
+
+  // Första inloggningen som arbetsgivare: samma välkomstkort som på
+  // jobbsökarsidan, fast med arbetsgivarinnehåll. Flaggan ligger i molnet.
+  const employerIntroTourHandledRef = useRef(false);
+  useEffect(() => {
+    if (!user) return;
+    if ((profile as any)?.role !== 'employer') return;
+    if ((profile as any)?.onboarding_completed !== true) return;
+    if (isEmployerWelcomeCardReplayAccount(user.email)) return;
+    if (employerIntroTourHandledRef.current) return;
+    let cancelled = false;
+    try {
+      if (localStorage.getItem(employerIntroTourKey(user.id))) {
+        employerIntroTourHandledRef.current = true;
+        return;
+      }
+    } catch { /* ignorera */ }
+    import('@/lib/onboardingState').then(async ({ isEmployerIntroTourDone }) => {
+      const done = await isEmployerIntroTourDone().catch(() => false);
+      if (cancelled || employerIntroTourHandledRef.current) return;
+      employerIntroTourHandledRef.current = true;
+      if (done) {
+        try { localStorage.setItem(employerIntroTourKey(user.id), '1'); } catch { /* ignorera */ }
+        return;
+      }
+      setShowEmployerIntroTutorial(true);
+    });
+    return () => { cancelled = true; };
+  }, [user, (profile as any)?.role, (profile as any)?.onboarding_completed]);
 
 
   // Support → "Hjälp & tips" öppnar hela välkomstkortet igen.
@@ -440,6 +478,18 @@ const Index = () => {
     window.addEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
     return () => window.removeEventListener(WELCOME_CARD_REPLAY_EVENT, onReplay);
   }, []);
+
+  const [employerIntroTourStep, setEmployerIntroTourStep] = useState<0 | 1>(0);
+  useEffect(() => {
+    const onReplay = (e: Event) => {
+      const step = (e as CustomEvent<{ step?: 0 | 1 }>).detail?.step ?? 0;
+      setEmployerIntroTourStep(step);
+      setShowEmployerIntroTutorial(true);
+    };
+    window.addEventListener(EMPLOYER_WELCOME_CARD_REPLAY_EVENT, onReplay);
+    return () => window.removeEventListener(EMPLOYER_WELCOME_CARD_REPLAY_EVENT, onReplay);
+  }, []);
+
 
   const [isInitializing, setIsInitializing] = useState(false);
   const [uiReady, setUiReady] = useState(false);
