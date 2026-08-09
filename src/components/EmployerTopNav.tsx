@@ -32,9 +32,13 @@ import {
   UserCircle,
   UserCheck,
   ChevronDown,
+  Lightbulb,
   LayoutDashboard
 } from "lucide-react";
+import { resetEmployerPageCoachMarks } from "@/components/onboarding/EmployerPageIntroCoach";
+import { replayEmployerWelcomeCard } from "@/components/EmployerOnboardingTour";
 import { PariumLogoButton } from "@/components/PariumLogoButton";
+
 import NotificationCenter from "@/components/NotificationCenter";
 import { TruncatedText } from "@/components/TruncatedText";
 
