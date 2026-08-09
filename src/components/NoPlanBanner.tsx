@@ -14,7 +14,7 @@ export function NoPlanBanner() {
   if (!user || loading || hasPlan) return null;
 
   return (
-    <div className="border-b border-white/[0.06] bg-gradient-to-r from-secondary/[0.08] via-white/[0.02] to-primary/[0.08]">
+    <div className="-mr-3 border-b border-white/[0.06] bg-gradient-to-r from-secondary/[0.08] via-white/[0.02] to-primary/[0.08]">
       <div className="w-full responsive-container-wide flex items-center justify-between gap-3 py-2.5">
         <div className="flex items-center gap-2 text-sm text-white">
           <Sparkles className="h-4 w-4 shrink-0 text-secondary" />
