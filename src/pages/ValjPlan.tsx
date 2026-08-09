@@ -469,12 +469,6 @@ export default function ValjPlan() {
               </motion.div>
             ))}
           </div>
-          <p className="mt-8 text-center text-sm text-white">
-            Fler frågor om Parium?{' '}
-            <Link to="/arbetsgivare#faq" className="font-semibold text-secondary underline-offset-4 hover:underline">
-              Se alla vanliga frågor för arbetsgivare
-            </Link>
-          </p>
         </section>
       </div>
 
