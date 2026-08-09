@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   X, Check, Briefcase, Users, UserCheck, MessageCircle, Building2,
-  BarChart3, CreditCard, Settings, HelpCircle, ArrowRight,
+  BarChart3, CreditCard, HelpCircle, ArrowRight, UserPlus,
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 import { useAuth } from '@/hooks/useAuth';
@@ -44,6 +44,7 @@ const TOUR_PATHS = [
   '/company-profile',
   '/reports',
   '/billing',
+  '/settings',
   '/support',
 ] as const;
 
@@ -228,6 +229,17 @@ const CONFIGS: Record<string, CoachConfig> = {
     ],
     cta: { label: 'Öppna Support', path: '/support' },
   },
+  '/settings': {
+    key: 'emp-settings',
+    icon: UserPlus,
+    title: 'Bjud in teamet',
+    lines: () => [
+      'Rekryterar ni flera? Under Teammedlemmar bjuder ni in kollegor med deras e-post — de får en inbjudan direkt.',
+      'Ni som är admin styr vilka som kan skapa annonser och se kandidater.',
+      'Här finns även notiser, e-postutskick och kontoinställningar för organisationen.',
+    ],
+    cta: { label: 'Öppna Support', path: '/support' },
+  },
   '/support': {
     key: 'emp-support',
     icon: HelpCircle,
@@ -235,15 +247,6 @@ const CONFIGS: Record<string, CoachConfig> = {
     lines: () => [
       'Guider, vanliga frågor och direktkontakt med oss — vi svarar så fort vi bara kan.',
       'Under Hjälp & tips kan ni alltid starta om hela den här genomgången från början.',
-    ],
-  },
-  '/settings': {
-    key: 'emp-settings',
-    icon: Settings,
-    title: 'Inställningar',
-    lines: () => [
-      'Notiser, e-postutskick och kontoinställningar för er organisation.',
-      'Här bjuder ni också in kollegor och styr vad de får se och göra.',
     ],
   },
 };
@@ -461,12 +464,19 @@ const EmployerPageIntroCoach = () => {
         </button>
 
         <div className="flex flex-col items-center">
+          {currentTourIndex >= 0 && (
+            <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-white ring-1 ring-white/20">
+              {currentTourIndex + 1}
+              <span className="font-normal text-white/80">av {TOUR_PATHS.length}</span>
+            </span>
+          )}
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
             <Icon className="h-4 w-4 text-white" />
           </span>
           <h3 className="mt-3 px-6 text-[16px] font-semibold text-white leading-snug break-words">
             {config.title}
           </h3>
+
 
           <ul className="mt-3 w-full space-y-2">
             {config.lines(isTouch).map((line) => (

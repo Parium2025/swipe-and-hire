@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   Briefcase, Users, UserCheck, MessageCircle, Building2, BarChart3,
-  CreditCard, HelpCircle, ArrowRight, Check, ChevronLeft,
+  CreditCard, HelpCircle, ArrowRight, Check, ChevronLeft, UserPlus,
 } from 'lucide-react';
 import {
   startEmployerPageCoachTour,
@@ -67,6 +67,12 @@ const shortcuts: Shortcut[] = [
     title: 'Fakturering',
     description: 'Er plan, era kvitton och hur många annonser som ingår.',
     path: '/billing',
+  },
+  {
+    icon: UserPlus,
+    title: 'Bjud in teamet',
+    description: 'Som admin bjuder ni in kollegor så ni rekryterar tillsammans.',
+    path: '/settings',
   },
   {
     icon: HelpCircle,

@@ -458,6 +458,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           <Button 
             ref={triggerRef}
             variant="glass"
+            data-create-job-trigger="true"
             className={cn(triggerClassName)}
           >
             Skapa ny annons

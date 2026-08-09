@@ -33,6 +33,7 @@ import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
+import { EmptyJobsCta } from '@/components/dashboard/EmptyJobsCta';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
@@ -533,13 +534,17 @@ const EmployerDashboard = memo(() => {
       <div className="hidden md:block">
         <div ref={listTopRef} />
         {tabFilteredJobs.length === 0 ? (
-          <div className="text-center text-white py-12 font-medium text-sm">
-            {searchTerm.trim() 
-              ? 'Inga annonser stämde med din sökning' 
-              : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
-              : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
-              : 'Inga utkast.'}
-          </div>
+          searchTerm.trim() ? (
+            <div className="text-center text-white py-12 font-medium text-sm">
+              Inga annonser stämde med din sökning
+            </div>
+          ) : activeTab === 'active' ? (
+            <EmptyJobsCta />
+          ) : (
+            <div className="text-center text-white py-12 font-medium text-sm">
+              {activeTab === 'expired' ? 'Inga utgångna jobbannonser.' : 'Inga utkast.'}
+            </div>
+          )
         ) : (
           <>
             <VirtualJobGrid
@@ -593,15 +598,17 @@ const EmployerDashboard = memo(() => {
             ))}
           </div>
         ) : tabFilteredJobs.length === 0 ? (
-          <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh]  flex items-center justify-center">
-            <span>
-            {searchTerm.trim() 
-              ? 'Inga annonser stämde med din sökning' 
-              : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
-              : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
-              : 'Inga utkast.'}
-            </span>
-          </div>
+          searchTerm.trim() ? (
+            <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
+              <span>Inga annonser stämde med din sökning</span>
+            </div>
+          ) : activeTab === 'active' ? (
+            <EmptyJobsCta compact />
+          ) : (
+            <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
+              <span>{activeTab === 'expired' ? 'Inga utgångna jobbannonser.' : 'Inga utkast.'}</span>
+            </div>
+          )
         ) : (
           <>
             <div ref={listTopRef} />
