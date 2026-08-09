@@ -47,17 +47,23 @@ const handler = async (req: Request): Promise<Response> => {
     // Idempotens-nyckel: unik per (email + confirmation_url) så retries inte dubblerar.
     const idempotencyKey = `account-confirm-${email}-${confirmation_url.slice(-32)}`;
 
+    const isEmployer = role === "employer";
+
     const { data, error } = await supabaseAdmin.functions.invoke("send-transactional-email", {
       body: {
-        templateName: "account-confirmation",
+        templateName: isEmployer ? "employer-account-confirmation" : "account-confirmation",
         recipientEmail: email,
         idempotencyKey,
-        templateData: {
-          first_name: first_name || "där",
-          confirmation_url,
-          role: role === "employer" ? "employer" : "job_seeker",
-          company_name: company_name || "ert företag",
-        },
+        templateData: isEmployer
+          ? {
+              first_name: first_name || "där",
+              confirmation_url,
+              company_name: company_name || "ert företag",
+            }
+          : {
+              first_name: first_name || "där",
+              confirmation_url,
+            },
       },
     });
 
