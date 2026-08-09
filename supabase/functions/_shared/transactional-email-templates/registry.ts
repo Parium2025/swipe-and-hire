@@ -6,6 +6,7 @@ import { template as jobExpiration } from './job-expiration.tsx'
 import { template as supportTicketAlert } from './support-ticket-alert.tsx'
 import { template as adminAlert } from './admin-alert.tsx'
 import { template as accountConfirmation } from './account-confirmation.tsx'
+import { template as employerAccountConfirmation } from './employer-account-confirmation.tsx'
 import { template as passwordReset } from './password-reset.tsx'
 import { template as outreachMessage } from './outreach-message.tsx'
 import { template as accountInactivityWarning } from './account-inactivity-warning.tsx'
@@ -25,6 +26,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'support-ticket-alert': supportTicketAlert,
   'admin-alert': adminAlert,
   'account-confirmation': accountConfirmation,
+  'employer-account-confirmation': employerAccountConfirmation,
   'password-reset': passwordReset,
   'outreach-message': outreachMessage,
   'account-inactivity-warning': accountInactivityWarning,
