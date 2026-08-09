@@ -41,7 +41,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   const { profile, updateProfile, user } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(
-    typeof initialStep === 'number' ? initialStep : 0
+    typeof initialStep === 'number' ? Math.min(Math.max(initialStep, 0), 1) : 0
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
