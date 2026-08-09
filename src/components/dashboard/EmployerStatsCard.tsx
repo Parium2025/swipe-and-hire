@@ -58,9 +58,9 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       });
       if (error) return { new_applications: 0, saved_favorites: 0, unread_messages: 0 };
       const stats = data as { new_applications: number; saved_favorites: number; unread_messages: number };
-      writeEmployerCachedStat('new_applications', stats.new_applications);
-      writeEmployerCachedStat('saved_favorites', stats.saved_favorites);
-      writeEmployerCachedStat('unread_messages', stats.unread_messages);
+      writeEmployerCachedStat(user.id, 'new_applications', stats.new_applications);
+      writeEmployerCachedStat(user.id, 'saved_favorites', stats.saved_favorites);
+      writeEmployerCachedStat(user.id, 'unread_messages', stats.unread_messages);
       return stats;
     },
     enabled: !!user?.id && activeJobIds.length > 0,
