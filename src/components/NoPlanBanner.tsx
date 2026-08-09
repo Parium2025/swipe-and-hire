@@ -30,7 +30,9 @@ export function NoPlanBanner() {
           Välj plan
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
+        </div>
       </div>
     </div>
   );
 }
+
