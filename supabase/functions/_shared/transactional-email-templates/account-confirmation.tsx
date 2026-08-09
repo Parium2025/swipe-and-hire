@@ -62,8 +62,8 @@ const AccountConfirmationEmail = ({
 
           <Text style={text}>
             {isEmployer
-              ? 'Tack för ert förtroende. Det här kan bli början på något riktigt bra!'
-              : 'Tack för ditt förtroende. Det här kan bli början på något riktigt bra!'}
+              ? 'Tack för ert förtroende. Det här är början på något riktigt bra!'
+              : 'Tack för ditt förtroende. Det här är början på något riktigt bra!'}
           </Text>
 
           <Section style={fallbackCard}>
