@@ -8,15 +8,17 @@ import type { TemplateEntry } from './registry.ts'
 interface Props {
   first_name?: string
   confirmation_url?: string
+  company_name?: string
 }
 
-const AccountConfirmationEmail = ({
+const EmployerAccountConfirmationEmail = ({
   first_name = 'där',
   confirmation_url = 'https://parium.se',
+  company_name = 'ert företag',
 }: Props) => (
   <Html lang="sv" dir="ltr">
     <Head />
-    <Preview>Bekräfta ditt Parium-konto för att komma igång</Preview>
+    <Preview>Bekräfta ert företagskonto på Parium</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={brandSection}>
@@ -27,19 +29,20 @@ const AccountConfirmationEmail = ({
         <Heading style={h1}>Hej {first_name}! 👋</Heading>
 
         <Text style={text}>
-          Välkommen till Parium — nästa steg i ett smartare jobbsökande. Genom vår plattform får du
-          tillgång till moderna verktyg som effektiviserar varje steg i din process.
+          Välkommen till Parium — plattformen där <strong>{company_name}</strong> möter framtida
+          talanger. Vi hjälper er att rekrytera snabbare, mer effektivt och utan krångel.
         </Text>
-        <Text style={textBold}>Med Parium kan du:</Text>
-        <Text style={bullet}>• Hitta jobb som verkligen passar din profil</Text>
-        <Text style={bullet}>• Söka jobb snabbt och enkelt – direkt i appen</Text>
-        <Text style={bullet}>• Spara tid med verktyg som gör processen både enkel och effektiv</Text>
+
+        <Text style={textBold}>Med Parium kan ni:</Text>
+        <Text style={bullet}>• Publicera jobbannonser på några minuter</Text>
+        <Text style={bullet}>• Nå rätt kandidater för just era roller</Text>
+        <Text style={bullet}>• Hantera ansökningar och ha direktkontakt på ett ställe</Text>
 
         <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
-          <Button style={button} href={confirmation_url}>Bekräfta mitt konto</Button>
+          <Button style={button} href={confirmation_url}>Bekräfta företagskontot</Button>
         </Section>
 
-        <Text style={text}>Tack för ditt förtroende. Det här är början på något riktigt bra!</Text>
+        <Text style={text}>Tack för ert förtroende. Det här är början på något riktigt bra!</Text>
 
         <Section style={fallbackCard}>
           <Text style={fallbackTitle}>Fungerar inte knappen? Kopiera länken:</Text>
@@ -48,7 +51,7 @@ const AccountConfirmationEmail = ({
 
         <Text style={footer}>
           Parium AB · Stockholm<br />
-          Du får detta mail för att du registrerat ett konto på{' '}
+          Du får detta mail för att ett företagskonto registrerats på{' '}
           <Link href="https://parium.se" style={link}>Parium</Link>.
         </Text>
         <Text style={noReply}>
@@ -60,15 +63,15 @@ const AccountConfirmationEmail = ({
 )
 
 export const template = {
-  component: AccountConfirmationEmail,
-  subject: 'Välkommen till Parium – Bekräfta ditt konto',
-  displayName: 'Kontobekräftelse (jobbsökare)',
+  component: EmployerAccountConfirmationEmail,
+  subject: 'Välkommen till Parium – Bekräfta ditt företagskonto',
+  displayName: 'Kontobekräftelse (arbetsgivare)',
   previewData: {
     first_name: 'Anna',
+    company_name: 'Nordiska Bygg AB',
     confirmation_url: 'https://parium.se/email-confirm?confirm=test',
   },
 } satisfies TemplateEntry
-
 
 const main = { backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }
 const container = { padding: '32px 28px', maxWidth: '560px' }

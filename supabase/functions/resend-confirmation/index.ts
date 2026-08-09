@@ -112,17 +112,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 4) Skicka via Lovable Emails.
     const idempotencyKey = `resend-confirm-${user.id}-${Date.now()}`;
+    const isEmployer = role === "employer";
     const { data, error } = await supabaseAdmin.functions.invoke("send-transactional-email", {
       body: {
-        templateName: "account-confirmation",
+        templateName: isEmployer ? "employer-account-confirmation" : "account-confirmation",
         recipientEmail: normalizedEmail,
         idempotencyKey,
-        templateData: {
-          first_name: firstName,
-          confirmation_url: confirmationUrl,
-          role,
-          company_name: companyName,
-        },
+        templateData: isEmployer
+          ? {
+              first_name: firstName,
+              confirmation_url: confirmationUrl,
+              company_name: companyName,
+            }
+          : {
+              first_name: firstName,
+              confirmation_url: confirmationUrl,
+            },
       },
     });
 
