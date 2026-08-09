@@ -526,10 +526,9 @@ const AuthDesktop = ({
   };
 
   const handleResendConfirmation = async () => {
-    const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
-    if (!currentData.email) return;
+    if (!resendEmail.trim()) return;
     setResendLoading(true);
-    await resendConfirmation(currentData.email, role);
+    await resendConfirmation(resendEmail, role);
     setResendLoading(false);
   };
 
