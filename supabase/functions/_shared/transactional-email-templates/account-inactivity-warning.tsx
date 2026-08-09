@@ -29,7 +29,7 @@ const AccountInactivityWarningEmail = ({
         <Text style={text}>Hej {first_name}!</Text>
         <Text style={text}>
           Du har inte använt Parium på 12 månader. Enligt vår integritetspolicy och GDPR
-          behåller vi personuppgifter bara så länge de behövs. Ditt konto har därför
+          sparar vi personuppgifter bara så länge det krävs. Ditt konto har därför
           schemalagts för automatisk radering <strong style={{ color: '#001F3D' }}>{delete_date}</strong>
           {' '}(om {days_left} dagar).
         </Text>
