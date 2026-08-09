@@ -21,6 +21,17 @@ const STORAGE_PREFIX = 'parium_emp_page_coach_v1_';
 const ACTIVE_TOUR_KEY = 'parium_emp_page_coach_active';
 const COACH_DISABLED_KEY = 'parium_emp_page_coach_disabled';
 const COACH_OWNER_KEY = 'parium_emp_page_coach_owner';
+/** Tidsstämpel för senaste lokala nollställning — vinner över äldre molnstatus. */
+const COACH_RESET_AT_KEY = 'parium_emp_page_coach_reset_at';
+
+function readLocalResetAt(): number {
+  try {
+    return Number(localStorage.getItem(COACH_RESET_AT_KEY) || 0) || 0;
+  } catch {
+    return 0;
+  }
+}
+
 
 /** Speglar EMPLOYER_WELCOME_CARD_REPLAY_EVENT (undviker cirkulär import). */
 const EMPLOYER_WELCOME_CARD_REPLAY_EVENT_NAME = 'parium:employer-welcome-card-replay';
@@ -77,6 +88,7 @@ export function resetEmployerPageCoachMarks() {
       .filter((k) => k.startsWith(STORAGE_PREFIX))
       .forEach((k) => localStorage.removeItem(k));
     localStorage.removeItem(COACH_DISABLED_KEY);
+    localStorage.setItem(COACH_RESET_AT_KEY, String(Date.now()));
   } catch {
     /* ignorera */
   }
@@ -97,6 +109,7 @@ export function markAllEmployerPageCoachesSeen() {
     Object.values(CONFIGS).forEach((c) => localStorage.setItem(STORAGE_PREFIX + c.key, '1'));
     localStorage.setItem(COACH_DISABLED_KEY, '1');
     localStorage.removeItem(ACTIVE_TOUR_KEY);
+    localStorage.removeItem(COACH_RESET_AT_KEY);
   } catch {
     /* ignorera */
   }
@@ -111,7 +124,13 @@ export function startEmployerPageCoachTour(path: string) {
   } catch {
     /* ignorera */
   }
+  // Se till att tipset dyker upp även när man redan står på sidan
+  // (då sker ingen ruttändring som kan trigga omvärderingen).
+  window.setTimeout(() => {
+    window.dispatchEvent(new CustomEvent(EMPLOYER_PAGE_COACH_REPLAY_EVENT));
+  }, 260);
 }
+
 
 /** Nollställ och visa tipset för sidan man står på just nu. */
 export function replayEmployerPageCoach() {
@@ -265,16 +284,25 @@ const EmployerPageIntroCoach = () => {
         const local = owner === user.id ? readLocalCoachState() : { seen: {}, disabled: false };
         const cloud = await loadEmployerCoachState();
         if (cancelled) return;
-        const merged: CoachState = {
-          seen: { ...(local.seen ?? {}), ...(cloud?.seen ?? {}) },
-          disabled: Boolean(local.disabled || cloud?.disabled),
-        };
+
+        // Har guiden nyss startats om lokalt vinner den alltid över äldre molnstatus,
+        // annars kan en gammal "allt sett"-status slå tillbaka och blockera tipsen.
+        const resetAt = readLocalResetAt();
+        const cloudIsStale = resetAt > 0 && (cloud?.savedAt ?? 0) < resetAt;
+
+        const merged: CoachState = cloudIsStale
+          ? { seen: { ...(local.seen ?? {}) }, disabled: Boolean(local.disabled) }
+          : {
+              seen: { ...(local.seen ?? {}), ...(cloud?.seen ?? {}) },
+              disabled: Boolean(local.disabled || cloud?.disabled),
+            };
         writeLocalCoachState(merged);
         const cloudSeenCount = Object.keys(cloud?.seen ?? {}).length;
         const mergedSeenCount = Object.keys(merged.seen ?? {}).length;
-        if (!cloud || cloudSeenCount !== mergedSeenCount || cloud.disabled !== merged.disabled) {
+        if (cloudIsStale || !cloud || cloudSeenCount !== mergedSeenCount || cloud.disabled !== merged.disabled) {
           void saveEmployerCoachState(merged);
         }
+
       } catch {
         /* offline – kör på lokal cache */
       } finally {
@@ -303,7 +331,7 @@ const EmployerPageIntroCoach = () => {
   const alreadySeen = useMemo(() => {
     if (!config) return true;
     if (!hydrated) return true;
-    if (isCoachDisabled()) return true;
+    if (isCoachDisabled() && !isGuidedTour) return true;
     try {
       return !isGuidedTour && localStorage.getItem(STORAGE_PREFIX + config.key) === '1';
     } catch {
