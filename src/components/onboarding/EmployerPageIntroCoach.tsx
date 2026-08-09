@@ -331,7 +331,7 @@ const EmployerPageIntroCoach = () => {
   const alreadySeen = useMemo(() => {
     if (!config) return true;
     if (!hydrated) return true;
-    if (isCoachDisabled()) return true;
+    if (isCoachDisabled() && !isGuidedTour) return true;
     try {
       return !isGuidedTour && localStorage.getItem(STORAGE_PREFIX + config.key) === '1';
     } catch {
