@@ -69,6 +69,12 @@ const shortcuts: Shortcut[] = [
     path: '/billing',
   },
   {
+    icon: UserPlus,
+    title: 'Bjud in teamet',
+    description: 'Som admin bjuder ni in kollegor så ni rekryterar tillsammans.',
+    path: '/settings',
+  },
+  {
     icon: HelpCircle,
     title: 'Support',
     description: 'Guider, vanliga frågor och kontakt med oss — vi svarar så fort vi bara kan.',
