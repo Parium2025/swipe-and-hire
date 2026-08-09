@@ -60,6 +60,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   // Form data
   const [formData, setFormData] = useState({
     companyLogoUrl: (profile as any)?.company_logo_url || '',
+    interviewVideoLink: (profile as any)?.interview_video_link || '',
   });
 
   const draftKey = employerDraftKey(user?.id);
