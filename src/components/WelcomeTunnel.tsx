@@ -1355,7 +1355,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                 <h1 className="text-xl font-semibold text-white animate-fade-in leading-tight">Välkommen till Parium</h1>
                 
                 <div className="space-y-1">
-                  <p className="text-sm text-white animate-fade-in leading-relaxed">Framtiden börjar med ett swipe</p>
+                  <p className="text-sm text-white animate-fade-in leading-relaxed">Framtiden börjar här</p>
                 </div>
               </div>
             </div>

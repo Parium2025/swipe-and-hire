@@ -48,7 +48,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
   const slides = [
     {
       title: "Välkommen till Parium",
-      subtitle: "Framtiden börjar med ett swipe",
+      subtitle: "Framtiden börjar här",
       content: (
           <div className="flex flex-col items-center space-y-6">
             <div className="relative">
