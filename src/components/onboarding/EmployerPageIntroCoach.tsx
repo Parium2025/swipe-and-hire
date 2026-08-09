@@ -181,7 +181,7 @@ const CONFIGS: Record<string, CoachConfig> = {
       isTouch
         ? 'Håll in ett kort och dra det till rätt kolumn — statusen sparas direkt.'
         : 'Dra och släpp korten mellan kolumnerna — statusen sparas direkt.',
-      'Kandidaten ser bara det ni själva skickar — i chatten eller som intervjuinbjudan.',
+      'Anteckningar, betyg och statusflytt är helt interna — kandidaten märker inget förrän ni själva hör av er.',
     ],
     cta: { label: 'Öppna meddelanden', path: '/messages' },
   },
