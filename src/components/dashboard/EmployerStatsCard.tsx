@@ -98,9 +98,9 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   const activeJobsCount = activeJobIds.length;
   useEffect(() => {
     if (!jobsLoading && activeJobsCount > 0) {
-      writeEmployerCachedStat('active_jobs', activeJobsCount);
+      writeEmployerCachedStat(user?.id, 'active_jobs', activeJobsCount);
     }
-  }, [activeJobsCount, jobsLoading]);
+  }, [activeJobsCount, jobsLoading, user?.id]);
 
   const displayActiveJobs = jobsLoading ? (cachedStats['active_jobs'] ?? 0) : activeJobsCount;
 
