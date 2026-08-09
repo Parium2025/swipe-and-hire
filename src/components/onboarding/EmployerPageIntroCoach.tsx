@@ -464,12 +464,19 @@ const EmployerPageIntroCoach = () => {
         </button>
 
         <div className="flex flex-col items-center">
+          {currentTourIndex >= 0 && (
+            <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-white ring-1 ring-white/20">
+              {currentTourIndex + 1}
+              <span className="font-normal text-white/80">av {TOUR_PATHS.length}</span>
+            </span>
+          )}
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
             <Icon className="h-4 w-4 text-white" />
           </span>
           <h3 className="mt-3 px-6 text-[16px] font-semibold text-white leading-snug break-words">
             {config.title}
           </h3>
+
 
           <ul className="mt-3 w-full space-y-2">
             {config.lines(isTouch).map((line) => (
