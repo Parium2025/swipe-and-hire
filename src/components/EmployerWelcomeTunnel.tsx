@@ -272,7 +272,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Upload className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Lägg till din företagslogga</h2>
+              <h2 className="text-2xl font-bold mb-2 text-white">Lägg till er företagslogga</h2>
               <p className="text-white">
                 En logga hjälper kandidater att känna igen ditt företag och bygger förtroende.
               </p>
@@ -355,7 +355,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
               </div>
               
               <div className="space-y-4">
-                <h2 className="text-3xl font-bold text-white animate-fade-in">Allt är klart!</h2>
+                <h2 className="text-3xl font-bold text-white">Allt är klart!</h2>
                 <p className="text-xl text-white max-w-md mx-auto leading-relaxed">
                   Din arbetsgivarprofil är nu komplett. Du kan nu börja skapa jobbannonser och hitta fantastiska kandidater.
                 </p>
