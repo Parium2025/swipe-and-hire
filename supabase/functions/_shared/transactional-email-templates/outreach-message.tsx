@@ -42,11 +42,11 @@ const OutreachMessageEmail = ({
 export const template = {
   component: OutreachMessageEmail,
   subject: (data: Props) => data.subject || `Meddelande från ${data.company_name || 'företaget'}`,
-  displayName: 'Automatiskt mejl från arbetsgivare',
+  displayName: 'Mejl från arbetsgivare (arbetsgivarens egen text)',
   previewData: {
-    body: 'Hej! Vi såg din profil och tycker den ser intressant ut.',
+    body: 'Hej Anna,\n\nTack för din ansökan till Butikssäljare hos Parium AB. Vi har tagit emot din ansökan och återkommer så snart vi kan.\n\nVänliga hälsningar,\nParium AB',
     company_name: 'Parium AB',
-    subject: 'Möjlighet hos Parium AB',
+    subject: 'Vi har tagit emot din ansökan till Butikssäljare',
   },
 } satisfies TemplateEntry
 
