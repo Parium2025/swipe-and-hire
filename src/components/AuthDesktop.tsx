@@ -843,6 +843,7 @@ const AuthDesktop = ({
                                <Label htmlFor="firstName" className="text-white">Förnamn <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName).trim()} /></Label>
                               <Input
                                 id="firstName"
+                                autoComplete="off"
                                 value={role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName}
                                 onChange={(e) => {
                                   if (role === 'job_seeker') {
@@ -859,6 +860,7 @@ const AuthDesktop = ({
                                <Label htmlFor="lastName" className="text-white">Efternamn <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName).trim()} /></Label>
                               <Input
                                 id="lastName"
+                                autoComplete="off"
                                 value={role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName}
                                 onChange={(e) => {
                                   if (role === 'job_seeker') {
@@ -922,6 +924,7 @@ const AuthDesktop = ({
                                 </Label>
                                   <Input
                                     id="phone"
+                                    autoComplete="off"
                                     type="tel"
                                     value={jobSeekerData.phone}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
@@ -949,6 +952,7 @@ const AuthDesktop = ({
                                 <Label htmlFor="companyName" className="text-white">Företagsnamn <RequiredMark filled={!!employerData.companyName.trim()} /></Label>
                                  <Input
                                    id="companyName"
+                                   autoComplete="off"
                                    value={employerData.companyName}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
                                    placeholder="Mitt företag"
@@ -1040,7 +1044,7 @@ const AuthDesktop = ({
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
                             name={`new-password-${role}`}
-                            autoComplete={`${role}-new-password`}
+                            autoComplete="new-password"
                             className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                           />
                            <button
@@ -1105,7 +1109,7 @@ const AuthDesktop = ({
                               }}
                               required
                               name={`confirm-password-${role}`}
-                              autoComplete={`${role}-new-password`}
+                              autoComplete="new-password"
                               className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                             />
                             <button
