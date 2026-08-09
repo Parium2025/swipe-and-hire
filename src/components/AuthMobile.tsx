@@ -1279,8 +1279,7 @@ const AuthMobile = ({
                       variant="glass"
                       size="sm"
                       onClick={() => {
-                        const email = role === 'job_seeker' ? jobSeekerData.email : employerData.email;
-                        if (!email.trim()) {
+                        if (!resendEmail.trim()) {
                           toast({
                             title: "E-post saknas",
                             description: "Ange din e-postadress för att skicka ett nytt bekräftelsemejl.",
