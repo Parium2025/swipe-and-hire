@@ -110,7 +110,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   }, [formData, currentStep, draftRestored, draftKey]);
 
 
-  const totalSteps = 2; // Logga, Slutför
+  const totalSteps = 3; // Logga, Möteslänk, Slutför
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   const handleNext = () => {
