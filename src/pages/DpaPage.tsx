@@ -312,7 +312,7 @@ export default function DpaPage() {
                     <Row k="Aktivitets- och statusändringslogg för kandidater" v="24 månader." />
                     <Row k="Visningsstatistik för annonser och profiler" v="12 månader." />
                     <Row k="Notiser i appen" v="6 månader." />
-                    <Row k="Kandidatens egen profil och konto" v="Så länge kontot används. Efter 24 månader utan inloggning skickas en varning via e-post, och ett år senare raderas kontot — med påminnelser när 180, 90 och 7 dagar återstår, och all tillhörande data automatiskt. Kandidaten kan även radera hela kontot direkt i appen." />
+                    <Row k="Kandidatens egen profil och konto" v="Så länge kontot används. Efter 24 månader utan inloggning skickas en varning via e-post, och ett år senare raderas kontot — med påminnelser när 180, 90, 7 dagar och 1 dag återstår, och all tillhörande data automatiskt. Kandidaten kan även radera hela kontot direkt i appen." />
                     <Row k="Bokförings- och fakturaunderlag" v="7 år enligt bokföringslagen." />
                   </tbody>
                 </table>
