@@ -234,7 +234,7 @@ const CONFIGS: Record<string, CoachConfig> = {
     icon: UserPlus,
     title: 'Bjud in teamet',
     lines: () => [
-      'Rekryterar ni flera? Under Teammedlemmar bjuder ni in kollegor med deras e-post — de får en inbjudan direkt.',
+      'Ni som är admin bjuder in kollegor med deras e-post — de får en inbjudan direkt.',
       'Ni som är admin styr vilka som kan skapa annonser och se kandidater.',
       'Här finns även notiser, e-postutskick och kontoinställningar för organisationen.',
     ],
