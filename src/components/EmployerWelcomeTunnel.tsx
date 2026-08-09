@@ -51,6 +51,8 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
 
   // Form data
   const [formData, setFormData] = useState({
@@ -119,10 +121,33 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
     }
   };
 
+  const MAX_LOGO_MB = 10;
+  const ALLOWED_LOGO_TYPES = [
+    'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
+    'image/gif', 'image/heic', 'image/heif', 'image/avif',
+  ];
+
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
+    // Tillåt att samma fil väljas igen efter ett fel
+    e.target.value = '';
+    if (!file) return;
 
+    setUploadError(null);
+
+    if (!file.type.startsWith('image/') || !ALLOWED_LOGO_TYPES.includes(file.type)) {
+      setUploadError('Filformatet stöds inte. Använd PNG, JPG, WEBP, GIF eller HEIC.');
+      return;
+    }
+
+    if (file.size > MAX_LOGO_MB * 1024 * 1024) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      setUploadError(`Bilden är ${sizeMb} MB – max ${MAX_LOGO_MB} MB. Välj en mindre bild.`);
+      return;
+    }
+
+    // Städa upp ev. tidigare blob-URL innan en ny skapas
+    if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
     const imageUrl = URL.createObjectURL(file);
     setPendingImageSrc(imageUrl);
     setImageEditorOpen(true);
@@ -131,8 +156,11 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   const handleLogoSave = async (editedBlob: Blob) => {
     // Stäng dialogen direkt så användaren ser loading-state
     setImageEditorOpen(false);
+    if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
     setPendingImageSrc('');
+    setUploadError(null);
     setIsUploadingLogo(true);
+
     
     try {
       const user = await supabase.auth.getUser();
@@ -176,11 +204,13 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       });
     } catch (error) {
       console.error('Logo upload error:', error);
+      setUploadError('Kunde inte ladda upp loggan. Kontrollera din anslutning och försök igen.');
       toast({
         title: "Fel vid uppladdning",
         description: "Kunde inte ladda upp loggan.",
         variant: "destructive"
       });
+
     } finally {
       setIsUploadingLogo(false);
       setLogoProgress(0);
@@ -295,14 +325,20 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
                       </>
                     )}
                   </div>
+                  {uploadError && (
+                    <p className="text-sm text-destructive break-words" role="alert">
+                      {uploadError}
+                    </p>
+                  )}
                   <input
                     id="logo-upload"
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif,image/avif"
                     onChange={handleLogoChange}
                     className="hidden"
                     disabled={isUploadingLogo}
                   />
+
                 </div>
               )}
             </div>
