@@ -325,14 +325,20 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
                       </>
                     )}
                   </div>
+                  {uploadError && (
+                    <p className="text-sm text-destructive break-words" role="alert">
+                      {uploadError}
+                    </p>
+                  )}
                   <input
                     id="logo-upload"
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif,image/avif"
                     onChange={handleLogoChange}
                     className="hidden"
                     disabled={isUploadingLogo}
                   />
+
                 </div>
               )}
             </div>
