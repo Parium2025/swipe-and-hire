@@ -39,7 +39,7 @@ const PasswordResetEmail = ({ reset_url = 'https://parium.se' }: Props) => (
         <Section style={securityCard}>
           <Text style={securityTitle}>🔒 Säkerhetsnotis</Text>
           <Text style={securityBody}>
-            Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande – ditt lösenord förblir oförändrat och ditt konto säkert.
+            Har du inte själv begärt en lösenordsåterställning? Klicka inte på länken. Ditt lösenord är fortfarande oförändrat, men någon kan ha försökt komma åt ditt konto. Kontakta oss direkt på support@parium.se så hjälper vi dig att säkra kontot.
           </Text>
         </Section>
 

@@ -45,7 +45,7 @@ export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
           <Link href={confirmationUrl} style={link}>Klicka här för att återställa</Link>
         </Text>
         <Text style={footer}>
-          Om du inte begärde en återställning kan du ignorera detta mail – ditt lösenord förblir oförändrat.
+          Har du inte själv begärt en återställning? Klicka inte på länken. Ditt lösenord är fortfarande oförändrat, men någon kan ha försökt komma åt ditt konto. Kontakta oss direkt på support@parium.se så hjälper vi dig att säkra kontot.
         </Text>
         <Text style={noReply}>
           Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
