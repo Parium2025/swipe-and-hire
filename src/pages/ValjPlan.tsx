@@ -432,30 +432,8 @@ export default function ValjPlan() {
           <div className="mt-10 grid gap-3 md:grid-cols-2">
             {[
               {
-                q: 'Finns det någon bindningstid?',
-                a: 'Nej. Alla månadspaket löper månadsvis och ni säger upp när ni vill från era kontoinställningar. Ingen uppsägningstid, inga dolda avgifter. Betalar ni för en enkelannons gäller den i 14 dagar och avslutas automatiskt.',
-              },
-              {
-                q: 'Vad händer om jag inte förnyar?',
-                a: 'Allt sparas — kandidatbank, chattar och gamla annonser ligger kvar. Det enda som pausas är möjligheten att publicera nya annonser tills ni aktiverar en plan igen.',
-              },
-              {
-                q: 'Kan jag byta plan?',
-                a: 'Ja, ni kan uppgradera eller nedgradera när som helst från Inställningar → Plan. Ändringen träder i kraft omedelbart och vi justerar debiteringen proportionerligt.',
-              },
-              {
-                q: 'Ingår moms?',
-                a: 'Priserna är exklusive moms. 25 % moms läggs på i checkouten och specificeras på fakturan. Momsregistrerade företag drar av den som ingående moms som vanligt.',
-              },
-              {
-                q: 'Hur betalar vi?',
-                a: 'Betalning sker med kort i checkouten och kvitto samt faktura skickas till er e-post direkt. Behöver ni fakturabetalning för större volymer hör av er till support@parium.se.',
-              },
-              {
-                q: 'När kan vi publicera efter att planen aktiverats?',
-                a: 'Direkt. Så snart betalningen är genomförd låses annonspubliceringen upp och ni kan publicera på ett par minuter — allt ni redan lagt in finns kvar.',
-              },
-            ].map(({ q, a }, i) => (
+                q: 'Vad skiljer Start, Växa och Pro åt?',
+                a: 'Start passar ett litet rekryteringbehov med en användare och upp till 40 aktiva annonser per månad. Växa ger obegränsade annonser och plats för två användare. Pro är byggt för team — obegränsade användare, obegränsade annonser och roller så ni kan låta kollegor hantera kandidater och publicering.',
               <motion.div
                 key={q}
                 initial={{ opacity: 0, x: 60 }}
