@@ -181,7 +181,7 @@ const CONFIGS: Record<string, CoachConfig> = {
       isTouch
         ? 'Håll in ett kort och dra det till rätt kolumn — statusen sparas direkt.'
         : 'Dra och släpp korten mellan kolumnerna — statusen sparas direkt.',
-      'Kandidaten ser aldrig era interna anteckningar, bara det ni skickar i chatten eller som intervjuinbjudan.',
+      'Kandidaten ser bara det ni själva skickar — i chatten eller som intervjuinbjudan.',
     ],
     cta: { label: 'Öppna meddelanden', path: '/messages' },
   },
@@ -233,7 +233,7 @@ const CONFIGS: Record<string, CoachConfig> = {
     icon: HelpCircle,
     title: 'Hjälp när ni behöver den',
     lines: () => [
-      'Guider, vanliga frågor och direktkontakt med oss — vi svarar på svenska alla vardagar.',
+      'Guider, vanliga frågor och direktkontakt med oss — vi svarar så fort vi bara kan.',
       'Under Hjälp & tips kan ni alltid starta om hela den här genomgången från början.',
     ],
   },

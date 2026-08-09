@@ -182,7 +182,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
         icon: HelpCircle,
         title: 'Support',
         description:
-          'Guider, vanliga frågor och kontakt med oss. Vi svarar på svenska, alla vardagar.',
+          'Guider, vanliga frågor och kontakt med oss. Vi svarar så fort vi bara kan.',
       },
     ],
     []
