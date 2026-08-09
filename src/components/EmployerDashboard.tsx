@@ -33,6 +33,7 @@ import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
+import { EmptyJobsCta } from '@/components/dashboard/EmptyJobsCta';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
