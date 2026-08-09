@@ -357,7 +357,64 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
         );
 
 
-      case 1:
+      case 1: {
+        const link = formData.interviewVideoLink;
+        const linkValid = !!link && isValidMeetingLink(link);
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
+                <Video className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 text-white">Er möteslänk för intervjuer</h2>
+              <p className="text-white">
+                Klistra in er fasta Teams-, Zoom- eller Google Meet-länk en gång. Sedan fylls den i
+                automatiskt varje gång ni bjuder in en kandidat till videointervju.
+              </p>
+            </div>
+
+            <div className="space-y-3 max-w-md mx-auto">
+              <Label htmlFor="welcome-video-link" className="block text-sm font-medium text-white">
+                Möteslänk (valfritt)
+              </Label>
+              <Input
+                id="welcome-video-link"
+                value={link}
+                onChange={(e) => setFormData(prev => ({ ...prev, interviewVideoLink: e.target.value }))}
+                onBlur={(e) => setFormData(prev => ({ ...prev, interviewVideoLink: normalizeMeetingLink(e.target.value) }))}
+                placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/60 h-12 text-base md:hover:border-white/50"
+              />
+
+              {link && linkValid && (
+                <p className="text-sm text-green-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                  Giltig möteslänk — den fylls i automatiskt vid videointervjuer.
+                </p>
+              )}
+              {link && !linkValid && (
+                <p className="text-sm text-amber-400 flex items-start gap-1.5">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <span className="break-words">
+                    Länken ser inte ut som en möteslänk från Teams, Zoom, Google Meet, Webex,
+                    Whereby eller liknande. Ni kan spara ändå och ändra senare.
+                  </span>
+                </p>
+              )}
+
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                <p className="text-sm text-white break-words">
+                  <strong>Tips:</strong> Använd er personliga möteslänk (Teams: Kalender → Nytt möte,
+                  Google Meet: ”Skapa ett möte för senare”, Zoom: Personal Meeting ID). Ni kan alltid
+                  ändra den under Företag → Företagsprofil → Intervjuinställningar.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      case 2:
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
