@@ -842,7 +842,9 @@ const AuthMobile = ({
                               onClick={() => {
                                 const saved = getPendingVerificationEmail();
                                 const current = loginData.email;
+                                const fallback = saved || current || signupEmail;
                                 if (saved && !current.trim()) handleEmailChange(saved);
+                                setResendEmail(fallback);
                                 setShowResend(true);
                               }}
                               className="text-sm text-white/80 no-underline hover:text-white"
