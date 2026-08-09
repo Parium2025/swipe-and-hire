@@ -27,8 +27,8 @@ const AccountConfirmationEmail = ({
         <Heading style={h1}>Hej {first_name}! 👋</Heading>
 
         <Text style={text}>
-          Välkommen till Parium — nästa steg i ett smartare jobbsökande. Genom vår plattform får du
-          tillgång till moderna verktyg som effektiviserar varje steg i din process.
+          Välkommen till Parium, en enklare väg till rätt jobb. Upptäck tjänster som passar din roll.
+          Sök smidigt och ha koll på hela processen på ett ställe.
         </Text>
         <Text style={textBold}>Med Parium kan du:</Text>
         <Text style={bullet}>• Hitta jobb som verkligen passar din profil</Text>
