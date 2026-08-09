@@ -575,6 +575,7 @@ const AuthTablet = ({
                 <Input
                   id="newPassword"
                   type="password"
+                    autoComplete="new-password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
@@ -999,6 +1000,7 @@ const AuthTablet = ({
                                 </Label>
                                  <Input
                                    id="address"
+                                   autoComplete="off"
                                    value={employerData.address}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
                                    placeholder="Ange din adress"
@@ -1015,6 +1017,7 @@ const AuthTablet = ({
                                 </Label>
                                  <Input
                                    id="website"
+                                   autoComplete="off"
                                    value={employerData.website}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, website: e.target.value }))}
                                    placeholder="https://exempel.se"
