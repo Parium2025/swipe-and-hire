@@ -247,10 +247,10 @@ export default function ValjPlan() {
           <button
             type="button"
             onClick={() => {
-              // Kom du från publiceringsflödet? Gå tillbaka till annonsen (utkastet är sparat).
-              if (from === 'publish') {
-                navigate(-1);
-              } else {
+            // Kom ni från publiceringsflödet? Gå tillbaka till annonsen (utkastet är sparat).
+            if (from === 'publish') {
+              navigate(-1);
+            } else {
                 navigate(user ? '/home' : '/', { replace: true });
               }
             }}
