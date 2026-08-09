@@ -8,20 +8,25 @@ import { isJobExpiredCheck } from '@/lib/date';
 import { StatsCarousel } from './StatsCarousel';
 import type { StatData } from './StatsCarousel';
 
-const EMPLOYER_STATS_CACHE_KEY = 'parium-employer-stats';
+const EMPLOYER_STATS_CACHE_PREFIX = 'parium-employer-stats';
+/** Kontoskopad nyckel – siffror får aldrig läcka mellan arbetsgivarkonton i samma webbläsare. */
+const statsCacheKey = (uid?: string | null) => `${EMPLOYER_STATS_CACHE_PREFIX}:${uid ?? 'anon'}`;
 
-const readEmployerCachedStats = (): Record<string, number> => {
+const readEmployerCachedStats = (uid?: string | null): Record<string, number> => {
   try {
-    const raw = localStorage.getItem(EMPLOYER_STATS_CACHE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    // Rensa bort äldre, okontoskopad cache så gamla siffror inte kan visas för fel konto.
+    localStorage.removeItem(EMPLOYER_STATS_CACHE_PREFIX);
+    const raw = localStorage.getItem(statsCacheKey(uid));
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
   } catch { return {}; }
 };
 
-const writeEmployerCachedStat = (key: string, value: number) => {
+const writeEmployerCachedStat = (uid: string | null | undefined, key: string, value: number) => {
   try {
-    const current = readEmployerCachedStats();
+    const current = readEmployerCachedStats(uid);
     current[key] = value;
-    localStorage.setItem(EMPLOYER_STATS_CACHE_KEY, JSON.stringify(current));
+    localStorage.setItem(statsCacheKey(uid), JSON.stringify(current));
   } catch {}
 };
 
@@ -34,7 +39,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   const { jobs, isLoading: jobsLoading } = useJobsData({ scope: 'personal' });
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const cachedStats = useMemo(() => readEmployerCachedStats(), []);
+  const cachedStats = useMemo(() => readEmployerCachedStats(user?.id), [user?.id]);
 
   const activeJobIds = useMemo(() => {
     if (!jobs) return [];
