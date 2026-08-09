@@ -181,7 +181,7 @@ const CONFIGS: Record<string, CoachConfig> = {
       isTouch
         ? 'Håll in ett kort och dra det till rätt kolumn — statusen sparas direkt.'
         : 'Dra och släpp korten mellan kolumnerna — statusen sparas direkt.',
-      'Kandidaten ser bara det ni själva skickar — i chatten eller som intervjuinbjudan.',
+      'Anteckningar, betyg och statusflytt är helt interna — kandidaten märker inget förrän ni själva hör av er.',
     ],
     cta: { label: 'Öppna meddelanden', path: '/messages' },
   },
@@ -192,7 +192,7 @@ const CONFIGS: Record<string, CoachConfig> = {
     lines: () => [
       'Det är ni som startar samtalet — kandidaten kan svara så fort ni hört av er.',
       'Kandidaten får en notis direkt, så inget viktigt hinner försvinna.',
-      'Intervjuinbjudan med tid, plats eller möteslänk skickas härifrån eller direkt från kandidatkortet.',
+      'Intervjuinbjudan skickas från kandidatkortet under Mina kandidater — här sköter ni den löpande dialogen.',
     ],
     cta: { label: 'Fyll i företagsprofilen', path: '/company-profile' },
   },

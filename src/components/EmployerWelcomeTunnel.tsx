@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2 } from 'lucide-react';
+import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { normalizeMeetingLink } from '@/lib/meetingLink';
+import { isValidMeetingLink } from '@/pages/employer/companyProfile/meetingLinkValidation';
 
 const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
 const LEGACY_EMPLOYER_WELCOME_DRAFT_KEY = 'parium_draft_employer-welcome-tunnel';
@@ -41,7 +44,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   const { profile, updateProfile, user } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(
-    typeof initialStep === 'number' ? Math.min(Math.max(initialStep, 0), 1) : 0
+    typeof initialStep === 'number' ? Math.min(Math.max(initialStep, 0), 2) : 0
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -57,6 +60,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   // Form data
   const [formData, setFormData] = useState({
     companyLogoUrl: (profile as any)?.company_logo_url || '',
+    interviewVideoLink: (profile as any)?.interview_video_link || '',
   });
 
   const draftKey = employerDraftKey(user?.id);
@@ -71,10 +75,10 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.formData) {
-            setFormData(parsed.formData);
+            setFormData((prev) => ({ ...prev, ...parsed.formData }));
           }
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 1));
+            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 2));
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -90,7 +94,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
     if (!draftRestored) return;
     
     // Check if there's any content to save
-    const hasContent = formData.companyLogoUrl || currentStep > 0;
+    const hasContent = formData.companyLogoUrl || formData.interviewVideoLink || currentStep > 0;
     
     if (hasContent) {
       try {
@@ -106,7 +110,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   }, [formData, currentStep, draftRestored, draftKey]);
 
 
-  const totalSteps = 2; // Logga, Slutför
+  const totalSteps = 3; // Logga, Möteslänk, Slutför
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   const handleNext = () => {
@@ -235,6 +239,9 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
 
       const result = await updateProfile({
         company_logo_url: formData.companyLogoUrl,
+        interview_video_link: formData.interviewVideoLink
+          ? normalizeMeetingLink(formData.interviewVideoLink)
+          : '',
         onboarding_completed: true
       } as any);
 
@@ -350,7 +357,64 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
         );
 
 
-      case 1:
+      case 1: {
+        const link = formData.interviewVideoLink;
+        const linkValid = !!link && isValidMeetingLink(link);
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
+                <Video className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 text-white">Er möteslänk för intervjuer</h2>
+              <p className="text-white">
+                Klistra in er fasta Teams-, Zoom- eller Google Meet-länk en gång. Sedan fylls den i
+                automatiskt varje gång ni bjuder in en kandidat till videointervju.
+              </p>
+            </div>
+
+            <div className="space-y-3 max-w-md mx-auto">
+              <Label htmlFor="welcome-video-link" className="block text-sm font-medium text-white">
+                Möteslänk (valfritt)
+              </Label>
+              <Input
+                id="welcome-video-link"
+                value={link}
+                onChange={(e) => setFormData(prev => ({ ...prev, interviewVideoLink: e.target.value }))}
+                onBlur={(e) => setFormData(prev => ({ ...prev, interviewVideoLink: normalizeMeetingLink(e.target.value) }))}
+                placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/60 h-12 text-base md:hover:border-white/50"
+              />
+
+              {link && linkValid && (
+                <p className="text-sm text-green-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                  Giltig möteslänk — den fylls i automatiskt vid videointervjuer.
+                </p>
+              )}
+              {link && !linkValid && (
+                <p className="text-sm text-amber-400 flex items-start gap-1.5">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <span className="break-words">
+                    Länken ser inte ut som en möteslänk från Teams, Zoom, Google Meet, Webex,
+                    Whereby eller liknande. Ni kan spara ändå och ändra senare.
+                  </span>
+                </p>
+              )}
+
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                <p className="text-sm text-white break-words">
+                  <strong>Tips:</strong> Använd er personliga möteslänk (Teams: Kalender → Nytt möte,
+                  Google Meet: ”Skapa ett möte för senare”, Zoom: Personal Meeting ID). Ni kan alltid
+                  ändra den under Företag → Företagsprofil → Intervjuinställningar.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      case 2:
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
@@ -398,7 +462,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
                 className="py-3 rounded-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 text-sm px-6"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Tillbaka – ändra logga
+                Tillbaka – ändra möteslänk
               </Button>
             </div>
           </div>
@@ -450,7 +514,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
         {currentStep > 0 && currentStep < totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto pt-8 px-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
+              <span className="text-sm text-white font-medium">Steg {currentStep + 1} av {totalSteps - 1}</span>
               <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
             </div>
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/30">
