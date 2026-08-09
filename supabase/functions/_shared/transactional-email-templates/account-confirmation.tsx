@@ -27,13 +27,14 @@ const AccountConfirmationEmail = ({
         <Heading style={h1}>Hej {first_name}! 👋</Heading>
 
         <Text style={text}>
-          Välkommen till Parium, en enklare väg till rätt jobb. Upptäck tjänster som passar din roll.
-          Sök smidigt och ha koll på hela processen på ett ställe.
+          Välkommen till Parium, en enklare väg till rätt jobb. Upptäck tjänster som passar dig.
+          Sök smidigt, ha koll på hela processen på ett ställe.
         </Text>
         <Text style={textBold}>Med Parium kan du:</Text>
         <Text style={bullet}>• Hitta jobb som verkligen passar din profil</Text>
-        <Text style={bullet}>• Söka jobb snabbt och enkelt – direkt i appen</Text>
-        <Text style={bullet}>• Spara tid med verktyg som gör processen både enkel och effektiv</Text>
+        <Text style={bullet}>• Sök jobb snabbt och enkelt – direkt i appen eller på webben</Text>
+        <Text style={bullet}>• Få överblick över dina ansökningar och status på ett ställe</Text>
+
 
         <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
           <Button style={button} href={confirmation_url}>Bekräfta mitt konto</Button>
