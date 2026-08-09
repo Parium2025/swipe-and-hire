@@ -313,8 +313,8 @@ export default function IntegrityPolicyPage() {
                 <li>
                   <strong>Underleverantörer (personuppgiftsbiträden):</strong> Supabase
                   via Lovable Cloud (databas, filer och autentisering — servrar i
-                  Paris, Frankrike), Resend via Lovable (transaktionsmejl från
-                  notify.parium.se), Lovable AI Gateway (AI-sammanfattning och
+                  Paris, Frankrike), Lovable Emails (transaktions- och
+                  systemmejl från notify.parium.se), Lovable AI Gateway (AI-sammanfattning och
                   kriteriebedömning) samt Stripe (betalningar — aktiveras först när
                   betalfunktionen lanseras).
                 </li>
