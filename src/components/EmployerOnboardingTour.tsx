@@ -71,7 +71,7 @@ const shortcuts: Shortcut[] = [
   {
     icon: HelpCircle,
     title: 'Support',
-    description: 'Guider, vanliga frågor och kontakt med oss — svar på svenska.',
+    description: 'Guider, vanliga frågor och kontakt med oss — vi svarar så fort vi bara kan.',
     path: '/support',
   },
 ];
@@ -182,7 +182,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
         icon: HelpCircle,
         title: 'Support',
         description:
-          'Guider, vanliga frågor och kontakt med oss. Vi svarar på svenska, alla vardagar.',
+          'Guider, vanliga frågor och kontakt med oss. Vi svarar så fort vi bara kan.',
       },
     ],
     []
@@ -321,8 +321,8 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
                 <p className="text-[13px] leading-snug text-white break-words">
                   <span className="font-semibold">Tips:</span> En annons ligger uppe i 14 dagar och
                   kan återpubliceras när som helst — kandidathistoriken följer med. Ni ser bara de
-                  kandidater som själva sökt era jobb, och det ni skriver internt syns aldrig för
-                  kandidaten.
+                  kandidater som själva sökt era jobb, och kandidaten ser bara det ni själva skickar
+                  i chatten eller som intervjuinbjudan.
                 </p>
               </div>
 
