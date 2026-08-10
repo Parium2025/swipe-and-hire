@@ -1,37 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
-import hero4k from '@/assets/hero-video-v5.mp4.asset.json';
+import {
+  HERO_POSTER,
+  HERO_VIDEO_1080,
+  HERO_VIDEO_4K,
+  pickHeroSrc,
+  prefersReducedMotion,
+  shouldSkipHeroVideo,
+} from '@/lib/heroVideoSource';
 
-// Datasparläge eller 2G → hoppa över videoladdning helt och visa bara poster.
-// Sparar 2,4–13 MB för användare i dåligt nät utan att förändra UX synbart.
-const shouldSkipVideo = () => {
-  if (typeof navigator === 'undefined') return false;
-  const conn = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-  if (!conn) return false;
-  if (conn.saveData) return true;
-  if (typeof conn.effectiveType === 'string' && /(^|-)2g$/.test(conn.effectiveType)) return true;
-  return false;
-};
-
-// Välj EXAKT en källa. `media` på <source> inuti <video> respekteras inte
-// tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
-// spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
-export const HERO_VIDEO_4K = hero4k.url;
-export const HERO_VIDEO_1080 = '/hero-video-1080-v5.mp4';
-
-const pickHeroSrc = () => {
-  if (typeof window === 'undefined') return HERO_VIDEO_1080;
-  const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
-  // 4K-mastern (25 MB) bara till riktiga desktops med bra nät och hårdvaruavkodning.
-  // Windows/Android, sparläge och svagt nät får 1080p-mastern — samma villkor som förut.
-  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? HERO_VIDEO_4K : HERO_VIDEO_1080;
-};
-
+// Källval och sparlägesregler bor i src/lib/heroVideoSource.ts — samma modul som
+// index.html verifieras mot vid build. Re-exporteras här för bakåtkompatibilitet.
+export { HERO_VIDEO_4K, HERO_VIDEO_1080 };
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [skipVideo] = useState<boolean>(shouldSkipVideo);
+  // Sparläge/2G, eller användare som bett om mindre rörelse → poster, ingen film.
+  const [skipVideo] = useState<boolean>(() => shouldSkipHeroVideo() || prefersReducedMotion());
   const [heroSrc] = useState<string>(pickHeroSrc);
 
 
