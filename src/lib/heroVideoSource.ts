@@ -89,3 +89,42 @@ export const prefersReducedMotion = (): boolean =>
   typeof window !== 'undefined' &&
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/**
+ * Scenfokus för hero-mastern (v8).
+ *
+ * Videon är 16:9. På en porträttskärm täcker `object-cover` bredden och beskär
+ * höjden kraftigt — med default `center` hamnar beskärningen mitt i bilden och
+ * ansiktena i de scener där personerna står högt i bild klipps av upptill.
+ *
+ * `y` nedan är den vertikala fokuspunkten (procent av bildhöjden) för varje
+ * klipp, satt så att ansiktet hamnar i den synliga ytan på mobil.
+ * `t` är klippets starttid i sekunder i den sammanklippta mastern.
+ */
+export type HeroFocusPoint = { t: number; y: number };
+
+export const HERO_FOCUS_POINTS: HeroFocusPoint[] = [
+  { t: 0, y: 18 },     // byggarbetare — står högt i bild
+  { t: 3.75, y: 24 },  // läkare i korridor
+  { t: 7.25, y: 38 },  // lagermedarbetare — längre bort, lägre i bild
+  { t: 10.75, y: 44 }, // kontor
+  { t: 14.25, y: 30 }, // kvinna utomhus
+];
+
+/** Sekunder som fokuspunkten mjukas in över vid varje klippbyte (matchar cross-fade). */
+export const HERO_FOCUS_BLEND = 0.7;
+
+/** Interpolerad vertikal fokuspunkt vid en given tidpunkt. */
+export const heroFocusYAt = (time: number): number => {
+  const pts = HERO_FOCUS_POINTS;
+  let index = 0;
+  for (let i = 0; i < pts.length; i++) if (time >= pts[i].t) index = i;
+  const current = pts[index];
+  const next = pts[index + 1];
+  if (!next) return current.y;
+  const blendStart = next.t - HERO_FOCUS_BLEND / 2;
+  if (time <= blendStart) return current.y;
+  const p = Math.min(1, (time - blendStart) / HERO_FOCUS_BLEND);
+  const eased = p * p * (3 - 2 * p);
+  return current.y + (next.y - current.y) * eased;
+};
