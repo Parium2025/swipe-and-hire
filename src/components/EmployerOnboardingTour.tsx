@@ -363,6 +363,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
           </div>
         </div>
       </div>
+      </div>
     </div>,
     document.body
   );
