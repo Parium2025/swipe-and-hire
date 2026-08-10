@@ -17,12 +17,12 @@ const shouldSkipVideo = () => {
 // tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
 // spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
 const pickHeroSrc = () => {
-  if (typeof window === 'undefined') return '/hero-video-720-v3.mp4';
+  if (typeof window === 'undefined') return '/hero-video-720-v4.mp4';
   const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
   // Windows/Android (och sparläge/svagt nät) får den lätta 720p-mastern även på
   // desktop: 6,3 MB + mjukvaruavkodning är exakt det som gör hero-videon hackig
   // där. Villkoret delas nu med galleriet via videoPlatform.ts så de inte glider isär.
-  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? '/hero-video-v3.mp4' : '/hero-video-720-v3.mp4';
+  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? '/hero-video-v4.mp4' : '/hero-video-720-v4.mp4';
 };
 
 
@@ -268,7 +268,7 @@ const HeroVideo = () => {
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
-          poster="/hero-video-poster-v3.jpg"
+          poster="/hero-video-poster-v4.jpg"
 
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
