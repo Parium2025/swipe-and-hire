@@ -16,13 +16,15 @@ const shouldSkipVideo = () => {
 // Välj EXAKT en källa. `media` på <source> inuti <video> respekteras inte
 // tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
 // spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
+export const HERO_VIDEO_4K = hero4k.url;
+export const HERO_VIDEO_1080 = '/hero-video-1080-v5.mp4';
+
 const pickHeroSrc = () => {
-  if (typeof window === 'undefined') return '/hero-video-720-v4.mp4';
+  if (typeof window === 'undefined') return HERO_VIDEO_1080;
   const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
-  // Windows/Android (och sparläge/svagt nät) får den lätta 720p-mastern även på
-  // desktop: 6,3 MB + mjukvaruavkodning är exakt det som gör hero-videon hackig
-  // där. Villkoret delas nu med galleriet via videoPlatform.ts så de inte glider isär.
-  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? '/hero-video-v4.mp4' : '/hero-video-720-v4.mp4';
+  // 4K-mastern (25 MB) bara till riktiga desktops med bra nät och hårdvaruavkodning.
+  // Windows/Android, sparläge och svagt nät får 1080p-mastern — samma villkor som förut.
+  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? HERO_VIDEO_4K : HERO_VIDEO_1080;
 };
 
 
