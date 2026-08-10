@@ -73,25 +73,35 @@ const HeroVideo = () => {
     return () => video.removeEventListener('loadedmetadata', restore);
   }, [heroSrc, skipVideo]);
 
-  // Porträttsäkert utsnitt: 16:9-mastern beskärs hårt på höjden i en smal
-  // viewport. Med statisk `center` klipps huvuden i de klipp där personerna
-  // står högt i bild. Vi flyttar därför fokuspunkten per scen — mjukt
-  // interpolerat vid varje klippbyte så att rörelsen aldrig syns som ett hopp.
-  // På landskap/desktop rör vi ingenting (utsnittet är redan korrekt).
+  // Porträttsäkert utsnitt: 16:9-mastern beskärs hårt på BREDDEN i en smal
+  // viewport (bara ~25 % av bilden syns). Med statisk `center` kapas personer
+  // som står vid sidan i sin scen. Vi flyttar därför utsnittet per klipp, mjukt
+  // interpolerat vid varje scenbyte så rörelsen aldrig syns som ett hopp.
+  // Är ytan bredare än 16:9 sker ingen horisontell beskärning → vi rör inget.
   useEffect(() => {
     const video = videoRef.current;
     if (!video || skipVideo || typeof window === 'undefined') return;
 
-    const portraitQuery = window.matchMedia('(max-aspect-ratio: 1/1)');
     let raf: number | null = null;
     let applied = -1;
+    let ratio = 1;
+
+    const measure = () => {
+      const rect = video.getBoundingClientRect();
+      const vw = video.videoWidth || 16;
+      const vh = video.videoHeight || 9;
+      if (rect.width <= 0 || rect.height <= 0) return;
+      // object-cover: skalas efter höjden när ytan är smalare än videon.
+      ratio = (rect.height * (vw / vh)) / rect.width;
+      applied = -1;
+    };
 
     const tick = () => {
       raf = window.requestAnimationFrame(tick);
-      const y = heroFocusYAt(video.currentTime || 0);
-      if (Math.abs(y - applied) < 0.15) return;
-      applied = y;
-      video.style.objectPosition = `50% ${y.toFixed(2)}%`;
+      const value = heroObjectPositionX(heroFocusXAt(video.currentTime || 0), ratio);
+      if (Math.abs(value - applied) < 0.1) return;
+      applied = value;
+      video.style.objectPosition = `${value.toFixed(2)}% 50%`;
     };
 
     const stop = () => {
@@ -99,24 +109,25 @@ const HeroVideo = () => {
       raf = null;
     };
 
-    const sync = () => {
+    const start = () => {
+      measure();
       stop();
-      if (portraitQuery.matches) {
-        applied = -1;
-        raf = window.requestAnimationFrame(tick);
-      } else {
-        video.style.objectPosition = '';
-      }
+      raf = window.requestAnimationFrame(tick);
     };
 
-    sync();
-    portraitQuery.addEventListener?.('change', sync);
+    start();
+    video.addEventListener('loadedmetadata', start);
+    window.addEventListener('resize', measure, { passive: true });
+    window.visualViewport?.addEventListener('resize', measure, { passive: true });
     return () => {
       stop();
-      portraitQuery.removeEventListener?.('change', sync);
+      video.removeEventListener('loadedmetadata', start);
+      window.removeEventListener('resize', measure);
+      window.visualViewport?.removeEventListener('resize', measure);
       video.style.objectPosition = '';
     };
   }, [skipVideo]);
+
 
 
   useEffect(() => {
