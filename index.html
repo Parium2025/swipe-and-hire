@@ -314,7 +314,7 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            add({ rel: 'preload', as: 'image', href: '/hero-video-poster-v7.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            add({ rel: 'preload', as: 'image', href: '/hero-video-poster-v8.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
@@ -326,7 +326,16 @@
             // går de isär hämtas två filer (25 MB + 6,6 MB) och bara den ena spelas.
             var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
             var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
-            var videoHref = (isDesktop && !lightUa) ? '/__l5e/assets-v1/b8b97297-0f5e-4c9e-94ab-f7efe5ba62a0/hero-video-v7.mp4' : '/__l5e/assets-v1/625e27bd-6517-4d24-bc91-dfa64c62f598/hero-video-1080-v7.mp4';
+            var cores = navigator.hardwareConcurrency || 0;
+            var memory = navigator.deviceMemory || 0;
+            var capable1440 = cores >= 4 && memory >= 4;
+            var videoHref = !isDesktop
+              ? '/__l5e/assets-v1/84ef728f-b016-49ef-953c-0751c712f899/hero-video-1080-v8.mp4'
+              : (!lightUa
+                ? '/__l5e/assets-v1/9e86b98b-3034-4fcc-8da1-6414a554c9ea/hero-video-v8.mp4'
+                : (capable1440
+                  ? '/__l5e/assets-v1/aba3b6c4-e806-491c-afa6-15b635726828/hero-video-1440-v8.mp4'
+                  : '/__l5e/assets-v1/84ef728f-b016-49ef-953c-0751c712f899/hero-video-1080-v8.mp4'));
             // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
             // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
             var isSafari = /Safari/.test(navigator.userAgent || '') && !/Chrome|Chromium|Edg\//.test(navigator.userAgent || '');

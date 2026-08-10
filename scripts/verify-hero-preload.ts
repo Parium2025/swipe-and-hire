@@ -20,12 +20,18 @@ const pick = (re: RegExp, label: string, text: string) => {
   return m[1];
 };
 
-const assetPointerPath = 'src/assets/hero-video-v7.mp4.asset.json';
+const assetPointerPath = 'src/assets/hero-video-v8.mp4.asset.json';
 const asset = JSON.parse(read(assetPointerPath)) as { url: string };
-const asset1080Path = 'src/assets/hero-video-1080-v7.mp4.asset.json';
+const asset1080Path = 'src/assets/hero-video-1080-v8.mp4.asset.json';
 const asset1080 = JSON.parse(read(asset1080Path)) as { url: string };
 
+const asset1440Path = 'src/assets/hero-video-1440-v8.mp4.asset.json';
+const asset1440 = JSON.parse(read(asset1440Path)) as { url: string };
+
 const src1080 = asset1080.url;
+if (!/HERO_VIDEO_1440 = hero1440\.url/.test(source)) {
+  throw new Error('verify-hero-preload: HERO_VIDEO_1440 pekar inte på 1440p-pointern');
+}
 if (!/HERO_VIDEO_1080 = hero1080\.url/.test(source)) {
   throw new Error('verify-hero-preload: HERO_VIDEO_1080 pekar inte på 1080p-pointern');
 }
@@ -36,6 +42,9 @@ const errors: string[] = [];
 
 if (!html.includes(asset.url)) {
   errors.push(`index.html saknar 4K-URL:en från ${assetPointerPath} (${asset.url})`);
+}
+if (!html.includes(asset1440.url)) {
+  errors.push(`index.html saknar 1440p-källan ${asset1440.url}`);
 }
 if (!html.includes(src1080)) {
   errors.push(`index.html saknar 1080p-källan ${src1080}`);
