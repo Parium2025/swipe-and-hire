@@ -6,6 +6,7 @@ import {
   CreditCard, HelpCircle, Briefcase, ChevronLeft, Eye,
 } from 'lucide-react';
 import { startPageCoachTour, markAllPageCoachesSeen } from '@/components/onboarding/PageIntroCoach';
+import { useNativeTouchScroll, useOverlayBackgroundLock } from '@/hooks/useNativeTouchScroll';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
@@ -94,6 +95,8 @@ export function replayWelcomeCard(step: 0 | 1 = 0) {
  */
 const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboardingTourProps) => {
   const navigate = useNavigate();
+  const scrollRef = useNativeTouchScroll<HTMLDivElement>();
+  useOverlayBackgroundLock();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<0 | 1>(initialStep);
 
@@ -200,11 +203,16 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
       />
 
       {/* Kort */}
-      <div className="pointer-events-none relative flex h-full min-h-0 w-full items-start justify-center sm:items-center sm:p-6">
+      <div
+        className="relative z-10 flex h-full min-h-0 w-full items-start justify-center sm:items-center sm:p-6"
+        onClick={() => close()}
+      >
         <div
+          ref={scrollRef}
           data-onboarding-scroll="true"
+          onClick={(event) => event.stopPropagation()}
           style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-          className="no-chrome-pad pointer-events-auto relative h-[100dvh] min-h-0 w-full overflow-x-hidden overflow-y-scroll overscroll-contain rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl"
+          className="no-chrome-pad relative h-[100dvh] min-h-0 w-full overflow-x-hidden overflow-y-scroll overscroll-contain rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl"
         >
         <div
           className="p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8"
