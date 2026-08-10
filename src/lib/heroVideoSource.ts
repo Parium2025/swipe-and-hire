@@ -93,38 +93,54 @@ export const prefersReducedMotion = (): boolean =>
 /**
  * Scenfokus för hero-mastern (v8).
  *
- * Videon är 16:9. På en porträttskärm täcker `object-cover` bredden och beskär
- * höjden kraftigt — med default `center` hamnar beskärningen mitt i bilden och
- * ansiktena i de scener där personerna står högt i bild klipps av upptill.
+ * Videon är 16:9. På en porträttskärm (mobil) fyller `object-cover` höjden och
+ * beskär bredden hårt — bara ~25 % av bildbredden syns. Med default `center`
+ * hamnar utsnittet mitt i bilden, vilket kapar personer som står till vänster
+ * eller höger i sin scen (byggarbetaren och kontorskillen framför allt).
  *
- * `y` nedan är den vertikala fokuspunkten (procent av bildhöjden) för varje
- * klipp, satt så att ansiktet hamnar i den synliga ytan på mobil.
+ * `x` är motivets horisontella läge i bilden (0–1). Komponenten räknar om det
+ * till `object-position` utifrån hur hårt just den skärmen beskär, så motivet
+ * hamnar mitt i bild oavsett telefonformat.
  * `t` är klippets starttid i sekunder i den sammanklippta mastern.
  */
-export type HeroFocusPoint = { t: number; y: number };
+export type HeroFocusPoint = { t: number; x: number };
 
 export const HERO_FOCUS_POINTS: HeroFocusPoint[] = [
-  { t: 0, y: 18 },     // byggarbetare — står högt i bild
-  { t: 3.75, y: 24 },  // läkare i korridor
-  { t: 7.25, y: 38 },  // lagermedarbetare — längre bort, lägre i bild
-  { t: 10.75, y: 44 }, // kontor
-  { t: 14.25, y: 30 }, // kvinna utomhus
+  { t: 0, x: 0.25 },     // byggarbetare — står till vänster
+  { t: 3.75, x: 0.61 },  // läkare i korridor — höger om mitten
+  { t: 7.25, x: 0.55 },  // lagermedarbetarna — paret strax höger om mitten
+  { t: 10.75, x: 0.31 }, // kontor — mannen vänster om mitten
+  { t: 14.25, x: 0.5 },  // kvinna utomhus — centrerad
 ];
 
 /** Sekunder som fokuspunkten mjukas in över vid varje klippbyte (matchar cross-fade). */
 export const HERO_FOCUS_BLEND = 0.7;
 
-/** Interpolerad vertikal fokuspunkt vid en given tidpunkt. */
-export const heroFocusYAt = (time: number): number => {
+/** Interpolerat horisontellt motivläge (0–1) vid en given tidpunkt. */
+export const heroFocusXAt = (time: number): number => {
   const pts = HERO_FOCUS_POINTS;
   let index = 0;
   for (let i = 0; i < pts.length; i++) if (time >= pts[i].t) index = i;
   const current = pts[index];
   const next = pts[index + 1];
-  if (!next) return current.y;
+  if (!next) return current.x;
   const blendStart = next.t - HERO_FOCUS_BLEND / 2;
-  if (time <= blendStart) return current.y;
+  if (time <= blendStart) return current.x;
   const p = Math.min(1, (time - blendStart) / HERO_FOCUS_BLEND);
   const eased = p * p * (3 - 2 * p);
-  return current.y + (next.y - current.y) * eased;
+  return current.x + (next.x - current.x) * eased;
 };
+
+/**
+ * Räkna om motivläget till ett `object-position`-värde i procent.
+ *
+ * `ratio` = skalad videobredd / containerbredd (hur många gånger bredare bilden
+ * är än ytan efter `object-cover`). Är den ~1 sker ingen horisontell beskärning
+ * och vi låter bilden vara centrerad.
+ */
+export const heroObjectPositionX = (focusX: number, ratio: number): number => {
+  if (!Number.isFinite(ratio) || ratio <= 1.001) return 50;
+  const p = (focusX * ratio - 0.5) / (ratio - 1);
+  return Math.min(100, Math.max(0, p * 100));
+};
+
