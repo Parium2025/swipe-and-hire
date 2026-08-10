@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
+  HERO_DESKTOP_QUERY,
   HERO_POSTER,
   HERO_VIDEO_1080,
   HERO_VIDEO_4K,
@@ -17,7 +18,7 @@ const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   // Sparläge/2G, eller användare som bett om mindre rörelse → poster, ingen film.
   const [skipVideo] = useState<boolean>(() => shouldSkipHeroVideo() || prefersReducedMotion());
-  const [heroSrc] = useState<string>(pickHeroSrc);
+  const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
 
   // Dev-guard: om index.html preloadar en annan fil än den vi spelar hämtas två
   // videofiler och bara en används. Build-scriptet fångar statiska avvikelser,
@@ -29,6 +30,47 @@ const HeroVideo = () => {
       console.warn('[HeroVideo] preload i index.html matchar inte pickHeroSrc():', preloaded.href, '≠', heroSrc);
     }
   }, [heroSrc, skipVideo]);
+
+  // Breakpoint-byte (extern skärm in/ur, fönster som dras mellan skärmar) ska
+  // ge rätt master. Vi byter bara när matchMedia faktiskt ändras — aldrig på
+  // varje resize — och återupptar från samma tidpunkt så bytet inte syns.
+  useEffect(() => {
+    if (skipVideo || typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const mql = window.matchMedia(HERO_DESKTOP_QUERY);
+    const onChange = () => setHeroSrc((current) => {
+      const next = pickHeroSrc();
+      return next === current ? current : next;
+    });
+    mql.addEventListener?.('change', onChange);
+    return () => mql.removeEventListener?.('change', onChange);
+  }, [skipVideo]);
+
+  // Källbytet kräver load() — annars fortsätter elementet spela gamla filen.
+  // Vi hoppar första renderingen och behåller position + uppspelning.
+  const appliedSrc = useRef<string | null>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || skipVideo) return;
+    if (appliedSrc.current === null) {
+      appliedSrc.current = heroSrc;
+      return;
+    }
+    if (appliedSrc.current === heroSrc) return;
+    appliedSrc.current = heroSrc;
+    const resumeAt = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+    const restore = () => {
+      try {
+        if (Number.isFinite(video.duration) && video.duration > 0) {
+          video.currentTime = Math.min(resumeAt, Math.max(0, video.duration - 0.1));
+        }
+      } catch { /* best effort */ }
+      void video.play().catch(() => {});
+    };
+    video.addEventListener('loadedmetadata', restore, { once: true });
+    try { video.load(); } catch { video.removeEventListener('loadedmetadata', restore); }
+    return () => video.removeEventListener('loadedmetadata', restore);
+  }, [heroSrc, skipVideo]);
+
 
 
 
