@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
+import hero4k from '@/assets/hero-video-v5.mp4.asset.json';
 
 // Datasparläge eller 2G → hoppa över videoladdning helt och visa bara poster.
 // Sparar 2,4–13 MB för användare i dåligt nät utan att förändra UX synbart.
