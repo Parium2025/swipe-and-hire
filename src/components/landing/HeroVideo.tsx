@@ -73,8 +73,50 @@ const HeroVideo = () => {
     return () => video.removeEventListener('loadedmetadata', restore);
   }, [heroSrc, skipVideo]);
 
+  // Porträttsäkert utsnitt: 16:9-mastern beskärs hårt på höjden i en smal
+  // viewport. Med statisk `center` klipps huvuden i de klipp där personerna
+  // står högt i bild. Vi flyttar därför fokuspunkten per scen — mjukt
+  // interpolerat vid varje klippbyte så att rörelsen aldrig syns som ett hopp.
+  // På landskap/desktop rör vi ingenting (utsnittet är redan korrekt).
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || skipVideo || typeof window === 'undefined') return;
 
+    const portraitQuery = window.matchMedia('(max-aspect-ratio: 1/1)');
+    let raf: number | null = null;
+    let applied = -1;
 
+    const tick = () => {
+      raf = window.requestAnimationFrame(tick);
+      const y = heroFocusYAt(video.currentTime || 0);
+      if (Math.abs(y - applied) < 0.15) return;
+      applied = y;
+      video.style.objectPosition = `50% ${y.toFixed(2)}%`;
+    };
+
+    const stop = () => {
+      if (raf !== null) window.cancelAnimationFrame(raf);
+      raf = null;
+    };
+
+    const sync = () => {
+      stop();
+      if (portraitQuery.matches) {
+        applied = -1;
+        raf = window.requestAnimationFrame(tick);
+      } else {
+        video.style.objectPosition = '';
+      }
+    };
+
+    sync();
+    portraitQuery.addEventListener?.('change', sync);
+    return () => {
+      stop();
+      portraitQuery.removeEventListener?.('change', sync);
+      video.style.objectPosition = '';
+    };
+  }, [skipVideo]);
 
 
   useEffect(() => {
