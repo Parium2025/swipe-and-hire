@@ -5,10 +5,14 @@ import {
   HERO_POSTER,
   HERO_VIDEO_1080,
   HERO_VIDEO_4K,
+  heroFocusXAt,
+  heroObjectPositionX,
+
   pickHeroSrc,
   prefersReducedMotion,
   shouldSkipHeroVideo,
 } from '@/lib/heroVideoSource';
+
 
 // Källval och sparlägesregler bor i src/lib/heroVideoSource.ts — samma modul som
 // index.html verifieras mot vid build. Re-exporteras här för bakåtkompatibilitet.
@@ -71,7 +75,65 @@ const HeroVideo = () => {
     return () => video.removeEventListener('loadedmetadata', restore);
   }, [heroSrc, skipVideo]);
 
+  // Porträttsäkert utsnitt: 16:9-mastern beskärs hårt på BREDDEN i en smal
+  // viewport (bara ~25 % av bilden syns). Med statisk `center` kapas personer
+  // som står vid sidan i sin scen. Vi flyttar därför utsnittet per klipp, mjukt
+  // interpolerat vid varje scenbyte så rörelsen aldrig syns som ett hopp.
+  // Är ytan bredare än 16:9 sker ingen horisontell beskärning → vi rör inget.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || skipVideo || typeof window === 'undefined') return;
 
+    let raf: number | null = null;
+    let applied = -1;
+    let ratio = 1;
+
+    const measure = () => {
+      const rect = video.getBoundingClientRect();
+      const vw = video.videoWidth || 16;
+      const vh = video.videoHeight || 9;
+      if (rect.width <= 0 || rect.height <= 0) return;
+      // object-cover: skalas efter höjden när ytan är smalare än videon.
+      ratio = (rect.height * (vw / vh)) / rect.width;
+      applied = -1;
+    };
+
+    const tick = () => {
+      raf = window.requestAnimationFrame(tick);
+      // Först vid kraftig beskärning (mobil/porträtt) finns något att rädda.
+      // På desktop är utsnittet redan rätt — då rör vi inte bilden alls.
+      const value = ratio >= 1.6
+        ? heroObjectPositionX(heroFocusXAt(video.currentTime || 0), ratio)
+        : 50;
+      if (Math.abs(value - applied) < 0.1) return;
+      applied = value;
+      video.style.objectPosition = `${value.toFixed(2)}% 50%`;
+
+    };
+
+    const stop = () => {
+      if (raf !== null) window.cancelAnimationFrame(raf);
+      raf = null;
+    };
+
+    const start = () => {
+      measure();
+      stop();
+      raf = window.requestAnimationFrame(tick);
+    };
+
+    start();
+    video.addEventListener('loadedmetadata', start);
+    window.addEventListener('resize', measure, { passive: true });
+    window.visualViewport?.addEventListener('resize', measure, { passive: true });
+    return () => {
+      stop();
+      video.removeEventListener('loadedmetadata', start);
+      window.removeEventListener('resize', measure);
+      window.visualViewport?.removeEventListener('resize', measure);
+      video.style.objectPosition = '';
+    };
+  }, [skipVideo]);
 
 
 
