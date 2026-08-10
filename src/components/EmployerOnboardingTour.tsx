@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -98,6 +98,8 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<0 | 1>(initialStep);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const touchYRef = useRef<number | null>(null);
 
   useEffect(() => {
     setStep(initialStep);
@@ -204,8 +206,22 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
 
       <div className="pointer-events-none relative flex h-full min-h-0 w-full items-start justify-center sm:items-center sm:p-6">
         <div
+          ref={scrollRef}
           data-onboarding-scroll="true"
           style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+          onTouchStart={(event) => {
+            touchYRef.current = event.touches[0]?.clientY ?? null;
+          }}
+          onTouchMove={(event) => {
+            const touchY = event.touches[0]?.clientY;
+            const previousY = touchYRef.current;
+            const scrollElement = scrollRef.current;
+            if (touchY === undefined || previousY === null || !scrollElement) return;
+            scrollElement.scrollTop += previousY - touchY;
+            touchYRef.current = touchY;
+          }}
+          onTouchEnd={() => { touchYRef.current = null; }}
+          onTouchCancel={() => { touchYRef.current = null; }}
           className="no-chrome-pad pointer-events-auto relative h-[100dvh] min-h-0 w-full overflow-x-hidden overflow-y-scroll overscroll-contain rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl"
         >
         <div
