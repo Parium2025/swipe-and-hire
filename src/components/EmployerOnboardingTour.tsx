@@ -126,22 +126,13 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
     const scrollY = window.scrollY;
     const previousBody = {
       overflow: document.body.style.overflow,
-      position: document.body.style.position,
-      top: document.body.style.top,
-      width: document.body.style.width,
     };
     const previousHtmlOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
     return () => {
       document.documentElement.style.overflow = previousHtmlOverflow;
       document.body.style.overflow = previousBody.overflow;
-      document.body.style.position = previousBody.position;
-      document.body.style.top = previousBody.top;
-      document.body.style.width = previousBody.width;
       window.scrollTo(0, scrollY);
     };
   }, []);
@@ -212,7 +203,8 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[70] overflow-hidden transition-opacity duration-200 ${
+      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+      className={`no-chrome-pad fixed inset-0 z-[70] overflow-x-hidden overflow-y-auto overscroll-contain transition-opacity duration-200 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
       role="dialog"
@@ -226,15 +218,14 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
         className="absolute inset-0 touch-none bg-black/55 backdrop-blur-[2px] focus:outline-none"
       />
 
-      <div className="pointer-events-none relative flex h-full min-h-0 w-full items-end justify-center sm:items-center sm:p-6">
+      <div className="pointer-events-none relative flex min-h-full w-full items-start justify-center sm:items-center sm:p-6">
         <div
-          className={`pointer-events-auto relative flex max-h-[100dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl transition-all duration-300 sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl ${
+          className={`pointer-events-auto relative w-full rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl transition-all duration-300 sm:max-w-lg sm:rounded-3xl ${
             visible ? 'translate-y-0 scale-100' : 'translate-y-6 sm:translate-y-0 sm:scale-95'
           }`}
         >
         <div
-          style={{ WebkitOverflowScrolling: 'touch' }}
-          className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8"
+          className="p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8"
         >
           {step === 0 ? (
             <>
