@@ -204,9 +204,7 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
         <div
           data-onboarding-scroll="true"
           style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-          className={`no-chrome-pad pointer-events-auto relative max-h-[100dvh] w-full overflow-x-hidden overflow-y-auto overscroll-contain rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl transition-[opacity] duration-300 sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl ${
-            visible ? 'translate-y-0 scale-100' : 'translate-y-6 sm:translate-y-0 sm:scale-95'
-          }`}
+          className="no-chrome-pad pointer-events-auto relative h-[100dvh] min-h-0 w-full overflow-x-hidden overflow-y-scroll overscroll-contain rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl"
         >
         <div
           className="p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8"
