@@ -205,11 +205,18 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
         type="button"
         aria-label="Stäng"
         onClick={() => close()}
+        style={{ touchAction: 'none' }}
         className="absolute inset-0 bg-black/55 backdrop-blur-[2px] focus:outline-none"
       />
 
       {/* Kort */}
       <div
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
+          overscrollBehavior: 'contain',
+          maxHeight: '92dvh',
+        }}
         className={`relative w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl transition-all duration-300 ${
           visible ? 'translate-y-0 scale-100' : 'translate-y-6 sm:translate-y-0 sm:scale-95'
         }`}
