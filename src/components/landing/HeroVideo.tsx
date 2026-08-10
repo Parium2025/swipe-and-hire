@@ -105,6 +105,12 @@ const HeroVideo = () => {
       healthyTicks = 0;
       watchdog = window.setInterval(() => {
         if (!video) return;
+        // Ingen pollning i bakgrundsflik: browsern strypar ändå timers och
+        // varje tick kostar batteri utan att kunna åtgärda något.
+        if (document.visibilityState !== 'visible') {
+          stopWatchdog();
+          return;
+        }
         if (video.paused || video.ended) {
           healthyTicks = 0;
           tryPlay();
