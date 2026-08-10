@@ -5,10 +5,12 @@ import {
   HERO_POSTER,
   HERO_VIDEO_1080,
   HERO_VIDEO_4K,
+  heroFocusYAt,
   pickHeroSrc,
   prefersReducedMotion,
   shouldSkipHeroVideo,
 } from '@/lib/heroVideoSource';
+
 
 // Källval och sparlägesregler bor i src/lib/heroVideoSource.ts — samma modul som
 // index.html verifieras mot vid build. Re-exporteras här för bakåtkompatibilitet.
