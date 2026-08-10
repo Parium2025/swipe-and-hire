@@ -122,22 +122,6 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
   }, []);
 
 
-  // Lås bakgrundsscroll medan kortet visas
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    const previousBody = {
-      overflow: document.body.style.overflow,
-    };
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow;
-      document.body.style.overflow = previousBody.overflow;
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
   const close = (path?: string) => {
     // Stänger man utan att välja en guide ska inga sidtips dyka upp senare.
     if (!path) markAllPageCoachesSeen();
@@ -200,8 +184,7 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
 
   return createPortal(
     <div
-      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-      className={`no-chrome-pad fixed inset-0 z-[70] overflow-x-hidden overflow-y-auto overscroll-contain transition-opacity duration-200 ${
+      className={`fixed inset-0 z-[70] overflow-hidden transition-opacity duration-200 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
       role="dialog"
@@ -213,15 +196,15 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
         type="button"
         aria-label="Stäng"
         onClick={() => close()}
-        className="absolute inset-0 touch-none bg-black/55 backdrop-blur-[2px] focus:outline-none"
+        className="fixed inset-0 bg-black/55 backdrop-blur-[2px] focus:outline-none"
       />
 
       {/* Kort */}
-      <div className="pointer-events-none relative flex min-h-full w-full items-start justify-center sm:items-center sm:p-6">
+      <div className="pointer-events-none relative flex h-full min-h-0 w-full items-start justify-center sm:items-center sm:p-6">
         <div
-          className={`pointer-events-auto relative w-full rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl transition-all duration-300 sm:max-w-lg sm:rounded-3xl ${
-            visible ? 'translate-y-0 scale-100' : 'translate-y-6 sm:translate-y-0 sm:scale-95'
-          }`}
+          data-onboarding-scroll="true"
+          style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+          className="no-chrome-pad pointer-events-auto relative h-[100dvh] min-h-0 w-full overflow-x-hidden overflow-y-scroll overscroll-contain rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl"
         >
         <div
           className="p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8"

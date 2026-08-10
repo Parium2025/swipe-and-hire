@@ -20,12 +20,12 @@ const pick = (re: RegExp, label: string, text: string) => {
   return m[1];
 };
 
-const assetPointerPath = 'src/assets/hero-video-v8.mp4.asset.json';
+const assetPointerPath = 'src/assets/hero-video-v9.mp4.asset.json';
 const asset = JSON.parse(read(assetPointerPath)) as { url: string };
-const asset1080Path = 'src/assets/hero-video-1080-v8.mp4.asset.json';
+const asset1080Path = 'src/assets/hero-video-1080-v9.mp4.asset.json';
 const asset1080 = JSON.parse(read(asset1080Path)) as { url: string };
 
-const asset1440Path = 'src/assets/hero-video-1440-v8.mp4.asset.json';
+const asset1440Path = 'src/assets/hero-video-1440-v9.mp4.asset.json';
 const asset1440 = JSON.parse(read(asset1440Path)) as { url: string };
 
 const src1080 = asset1080.url;
