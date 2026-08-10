@@ -100,10 +100,15 @@ const HeroVideo = () => {
 
     const tick = () => {
       raf = window.requestAnimationFrame(tick);
-      const value = heroObjectPositionX(heroFocusXAt(video.currentTime || 0), ratio);
+      // Först vid kraftig beskärning (mobil/porträtt) finns något att rädda.
+      // På desktop är utsnittet redan rätt — då rör vi inte bilden alls.
+      const value = ratio >= 1.6
+        ? heroObjectPositionX(heroFocusXAt(video.currentTime || 0), ratio)
+        : 50;
       if (Math.abs(value - applied) < 0.1) return;
       applied = value;
       video.style.objectPosition = `${value.toFixed(2)}% 50%`;
+
     };
 
     const stop = () => {
