@@ -193,7 +193,12 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6 transition-opacity duration-200 ${
+      style={{
+        WebkitOverflowScrolling: 'touch',
+        touchAction: 'pan-y',
+        overscrollBehavior: 'contain',
+      }}
+      className={`fixed inset-0 z-[70] overflow-y-auto transition-opacity duration-200 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
       role="dialog"
@@ -205,19 +210,13 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
         type="button"
         aria-label="Stäng"
         onClick={() => close()}
-        style={{ touchAction: 'none' }}
-        className="absolute inset-0 bg-black/55 backdrop-blur-[2px] focus:outline-none"
+        className="fixed inset-0 bg-black/55 backdrop-blur-[2px] focus:outline-none"
       />
 
       {/* Kort */}
+      <div className="relative flex min-h-full w-full items-end justify-center p-0 sm:items-center sm:p-6">
       <div
-        style={{
-          WebkitOverflowScrolling: 'touch',
-          touchAction: 'pan-y',
-          overscrollBehavior: 'contain',
-          maxHeight: '92dvh',
-        }}
-        className={`relative w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl transition-all duration-300 ${
+        className={`relative w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl transition-all duration-300 ${
           visible ? 'translate-y-0 scale-100' : 'translate-y-6 sm:translate-y-0 sm:scale-95'
         }`}
       >
