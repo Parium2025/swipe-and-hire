@@ -9,7 +9,7 @@ import {
   startEmployerPageCoachTour,
   markAllEmployerPageCoachesSeen,
 } from '@/components/onboarding/EmployerPageIntroCoach';
-import { useNativeTouchScroll } from '@/hooks/useNativeTouchScroll';
+import { useNativeTouchScroll, useOverlayBackgroundLock } from '@/hooks/useNativeTouchScroll';
 
 interface EmployerOnboardingTourProps {
   onComplete: () => void;
@@ -98,6 +98,7 @@ export function replayEmployerWelcomeCard(step: 0 | 1 = 0) {
 const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: EmployerOnboardingTourProps) => {
   const navigate = useNavigate();
   const scrollRef = useNativeTouchScroll<HTMLDivElement>();
+  useOverlayBackgroundLock();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<0 | 1>(initialStep);
 

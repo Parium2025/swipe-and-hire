@@ -6,7 +6,7 @@ import {
   CreditCard, HelpCircle, Briefcase, ChevronLeft, Eye,
 } from 'lucide-react';
 import { startPageCoachTour, markAllPageCoachesSeen } from '@/components/onboarding/PageIntroCoach';
-import { useNativeTouchScroll } from '@/hooks/useNativeTouchScroll';
+import { useNativeTouchScroll, useOverlayBackgroundLock } from '@/hooks/useNativeTouchScroll';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
@@ -96,6 +96,7 @@ export function replayWelcomeCard(step: 0 | 1 = 0) {
 const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboardingTourProps) => {
   const navigate = useNavigate();
   const scrollRef = useNativeTouchScroll<HTMLDivElement>();
+  useOverlayBackgroundLock();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<0 | 1>(initialStep);
 

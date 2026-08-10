@@ -1,5 +1,23 @@
 import { useEffect, useRef } from 'react';
 
+/** Locks the app's real scroll surface while a body-portaled overlay is open. */
+export function useOverlayBackgroundLock() {
+  useEffect(() => {
+    const root = document.getElementById('root');
+    if (!root) return;
+
+    const previousOverflow = root.style.overflow;
+    const previousTouchAction = root.style.touchAction;
+    root.style.overflow = 'hidden';
+    root.style.touchAction = 'none';
+
+    return () => {
+      root.style.overflow = previousOverflow;
+      root.style.touchAction = previousTouchAction;
+    };
+  }, []);
+}
+
 /**
  * Native touch fallback for iOS WebKit overlays.
  * Safari can occasionally route a pan past a fixed, portal-mounted scroller.
