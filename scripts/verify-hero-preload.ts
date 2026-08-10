@@ -20,7 +20,7 @@ const pick = (re: RegExp, label: string, text: string) => {
   return m[1];
 };
 
-const assetPointerPath = 'src/assets/hero-video-v5.mp4.asset.json';
+const assetPointerPath = 'src/assets/hero-video-v6.mp4.asset.json';
 const asset = JSON.parse(read(assetPointerPath)) as { url: string };
 
 const src1080 = pick(/HERO_VIDEO_1080 = '([^']+)'/, 'HERO_VIDEO_1080', source);
