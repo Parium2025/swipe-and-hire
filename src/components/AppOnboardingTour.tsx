@@ -370,6 +370,7 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
           </div>
         </div>
       </div>
+      </div>
     </div>,
     document.body
   );
