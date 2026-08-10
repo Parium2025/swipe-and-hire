@@ -10,9 +10,9 @@
  *  - index.html speglar samma villkor i vanilla JS och verifieras vid build av
  *    `scripts/verify-hero-preload.ts`, som failar bygget vid minsta avvikelse.
  */
-import hero4k from '@/assets/hero-video-v8.mp4.asset.json';
-import hero1440 from '@/assets/hero-video-1440-v8.mp4.asset.json';
-import hero1080 from '@/assets/hero-video-1080-v8.mp4.asset.json';
+import hero4k from '@/assets/hero-video-v9.mp4.asset.json';
+import hero1440 from '@/assets/hero-video-1440-v9.mp4.asset.json';
+import hero1080 from '@/assets/hero-video-1080-v9.mp4.asset.json';
 
 /** 4K-master (CDN). Endast riktiga desktops med bra nät och hårdvaruavkodning. */
 export const HERO_VIDEO_4K = hero4k.url;
@@ -91,7 +91,7 @@ export const prefersReducedMotion = (): boolean =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Scenfokus för hero-mastern (v8).
+ * Scenfokus för hero-mastern (v9).
  *
  * Videon är 16:9. På en porträttskärm (mobil) fyller `object-cover` höjden och
  * beskär bredden hårt — bara ~25 % av bildbredden syns. Med default `center`
@@ -109,8 +109,8 @@ export const HERO_FOCUS_POINTS: HeroFocusPoint[] = [
   { t: 0, x: 0.25 },     // byggarbetare — står till vänster
   { t: 3.75, x: 0.61 },  // läkare i korridor — höger om mitten
   { t: 7.25, x: 0.55 },  // lagermedarbetarna — paret strax höger om mitten
-  { t: 10.75, x: 0.31 }, // kontor — mannen vänster om mitten
-  { t: 14.25, x: 0.5 },  // kvinna utomhus — centrerad
+  { t: 10.15, x: 0.5 },  // kontor — mannen är centrerad i den nya scenen
+  { t: 13.59, x: 0.5 },  // kvinna utomhus — centrerad
 ];
 
 /** Sekunder som fokuspunkten mjukas in över vid varje klippbyte (matchar cross-fade). */
