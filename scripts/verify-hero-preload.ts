@@ -20,10 +20,15 @@ const pick = (re: RegExp, label: string, text: string) => {
   return m[1];
 };
 
-const assetPointerPath = 'src/assets/hero-video-v6.mp4.asset.json';
+const assetPointerPath = 'src/assets/hero-video-v7.mp4.asset.json';
 const asset = JSON.parse(read(assetPointerPath)) as { url: string };
+const asset1080Path = 'src/assets/hero-video-1080-v7.mp4.asset.json';
+const asset1080 = JSON.parse(read(asset1080Path)) as { url: string };
 
-const src1080 = pick(/HERO_VIDEO_1080 = '([^']+)'/, 'HERO_VIDEO_1080', source);
+const src1080 = asset1080.url;
+if (!/HERO_VIDEO_1080 = hero1080\.url/.test(source)) {
+  throw new Error('verify-hero-preload: HERO_VIDEO_1080 pekar inte på 1080p-pointern');
+}
 const poster = pick(/HERO_POSTER = '([^']+)'/, 'HERO_POSTER', source);
 const query = pick(/HERO_DESKTOP_QUERY = '([^']+)'/, 'HERO_DESKTOP_QUERY', source);
 
@@ -41,7 +46,7 @@ if (!html.includes(poster)) {
 if (!html.includes(query)) {
   errors.push(`index.html använder inte breakpointen ${query}`);
 }
-for (const localFile of [src1080, poster]) {
+for (const localFile of [poster]) {
   if (!existsSync(resolve(root, 'public', localFile.replace(/^\//, '')))) {
     errors.push(`Filen saknas i public/: ${localFile}`);
   }

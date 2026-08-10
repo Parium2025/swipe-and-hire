@@ -10,16 +10,17 @@
  *  - index.html speglar samma villkor i vanilla JS och verifieras vid build av
  *    `scripts/verify-hero-preload.ts`, som failar bygget vid minsta avvikelse.
  */
-import hero4k from '@/assets/hero-video-v6.mp4.asset.json';
+import hero4k from '@/assets/hero-video-v7.mp4.asset.json';
+import hero1080 from '@/assets/hero-video-1080-v7.mp4.asset.json';
 
 /** 4K-master (CDN). Endast riktiga desktops med bra nät och hårdvaruavkodning. */
 export const HERO_VIDEO_4K = hero4k.url;
 
-/** 1080p-master (lokal). Windows/Android, mobil, sparläge, svagt nät. */
-export const HERO_VIDEO_1080 = '/hero-video-1080-v6.mp4';
+/** 1080p-master (CDN). Windows/Android, mobil, sparläge, svagt nät. */
+export const HERO_VIDEO_1080 = hero1080.url;
 
 /** Poster = LCP-kandidat på landningssidan. */
-export const HERO_POSTER = '/hero-video-poster-v6.jpg';
+export const HERO_POSTER = '/hero-video-poster-v7.jpg';
 
 /** Breakpointen som skiljer 4K från 1080p. Speglad i index.html. */
 export const HERO_DESKTOP_QUERY = '(min-width: 1024px)';
