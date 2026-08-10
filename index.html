@@ -314,7 +314,7 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            add({ rel: 'preload', as: 'image', href: '/hero-video-poster-v2.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            add({ rel: 'preload', as: 'image', href: '/hero-video-poster-v3.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
@@ -325,7 +325,7 @@
             // annars laddas två filer (6,3 MB + 2,4 MB) och bara den lilla spelas.
             var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
             var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
-            var videoHref = (isDesktop && !lightUa) ? '/hero-video-v2.mp4' : '/hero-video-720-v2.mp4';
+            var videoHref = (isDesktop && !lightUa) ? '/hero-video-v3.mp4' : '/hero-video-720-v3.mp4';
             // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
             // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
             var isSafari = /Safari/.test(navigator.userAgent || '') && !/Chrome|Chromium|Edg\//.test(navigator.userAgent || '');
