@@ -5,7 +5,9 @@ import {
   HERO_POSTER,
   HERO_VIDEO_1080,
   HERO_VIDEO_4K,
-  heroFocusYAt,
+  heroFocusXAt,
+  heroObjectPositionX,
+
   pickHeroSrc,
   prefersReducedMotion,
   shouldSkipHeroVideo,
