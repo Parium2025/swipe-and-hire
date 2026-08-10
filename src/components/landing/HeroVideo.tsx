@@ -19,6 +19,19 @@ const HeroVideo = () => {
   const [skipVideo] = useState<boolean>(() => shouldSkipHeroVideo() || prefersReducedMotion());
   const [heroSrc] = useState<string>(pickHeroSrc);
 
+  // Dev-guard: om index.html preloadar en annan fil än den vi spelar hämtas två
+  // videofiler och bara en används. Build-scriptet fångar statiska avvikelser,
+  // det här fångar dem som bara uppstår i en viss runtime (t.ex. sparläge).
+  useEffect(() => {
+    if (!import.meta.env.DEV || skipVideo) return;
+    const preloaded = document.querySelector<HTMLLinkElement>('link[rel="preload"][as="video"]');
+    if (preloaded && new URL(preloaded.href, location.href).pathname !== new URL(heroSrc, location.href).pathname) {
+      console.warn('[HeroVideo] preload i index.html matchar inte pickHeroSrc():', preloaded.href, '≠', heroSrc);
+    }
+  }, [heroSrc, skipVideo]);
+
+
+
 
   useEffect(() => {
     const video = videoRef.current;
