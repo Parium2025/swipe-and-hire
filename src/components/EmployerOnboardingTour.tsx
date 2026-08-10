@@ -191,30 +191,25 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[70] overflow-hidden transition-opacity duration-200 ${
+      ref={scrollRef}
+      data-onboarding-scroll="true"
+      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+      className={`fixed inset-0 z-[70] overflow-x-hidden overflow-y-auto overscroll-contain transition-opacity duration-200 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
       role="dialog"
       aria-modal="true"
       aria-label="Välkommen till Parium"
+      onClick={() => close()}
     >
-      <button
-        type="button"
-        aria-label="Stäng"
-        onClick={() => close()}
-        className="fixed inset-0 bg-black/55 backdrop-blur-[2px] focus:outline-none"
-      />
+      <div aria-hidden="true" className="fixed inset-0 bg-black/55 backdrop-blur-[2px]" />
 
       <div
-        className="relative z-10 flex h-full min-h-0 w-full items-start justify-center sm:items-center sm:p-6"
-        onClick={() => close()}
+        className="relative z-10 flex min-h-full w-full items-start justify-center sm:items-center sm:p-6"
       >
         <div
-          ref={scrollRef}
-          data-onboarding-scroll="true"
           onClick={(event) => event.stopPropagation()}
-          style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-          className="no-chrome-pad relative h-[100dvh] min-h-0 w-full overflow-x-hidden overflow-y-scroll overscroll-contain rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl"
+          className="relative min-h-[100dvh] w-full rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:min-h-0 sm:max-w-lg sm:rounded-3xl"
         >
         <div
           className="p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8"

@@ -8,12 +8,18 @@ export function useOverlayBackgroundLock() {
 
     const previousOverflow = root.style.overflow;
     const previousTouchAction = root.style.touchAction;
+    const previousPointerEvents = root.style.pointerEvents;
+    const wasInert = root.inert;
     root.style.overflow = 'hidden';
     root.style.touchAction = 'none';
+    root.style.pointerEvents = 'none';
+    root.inert = true;
 
     return () => {
       root.style.overflow = previousOverflow;
       root.style.touchAction = previousTouchAction;
+      root.style.pointerEvents = previousPointerEvents;
+      root.inert = wasInert;
     };
   }, []);
 }
