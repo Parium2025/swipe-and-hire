@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { SUBSCRIPTION_PLANS_KEY, fetchSubscriptionPlans, readPlansSnapshot } from '@/lib/subscriptionPlansQuery';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X } from 'lucide-react';
