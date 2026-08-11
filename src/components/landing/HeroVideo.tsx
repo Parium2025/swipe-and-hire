@@ -20,8 +20,11 @@ export { HERO_VIDEO_4K, HERO_VIDEO_1080 };
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  // Sparläge/2G, eller användare som bett om mindre rörelse → poster, ingen film.
-  const [skipVideo] = useState<boolean>(() => shouldSkipHeroVideo() || prefersReducedMotion());
+  // Endast uttryckligt datasparläge/2G stoppar mediahämtningen. iOS kan rapportera
+  // `prefers-reduced-motion` i preview/private mode; det ska minska UI-animationen,
+  // inte oväntat ersätta hela hero-videon med en stillbild.
+  const [skipVideo] = useState<boolean>(shouldSkipHeroVideo);
+  const [reduceMotion] = useState<boolean>(prefersReducedMotion);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
 
   // Dev-guard: om index.html preloadar en annan fil än den vi spelar hämtas två
@@ -389,9 +392,9 @@ const HeroVideo = () => {
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <motion.div
-        initial={{ opacity: 0, scale: 1.06 }}
+        initial={{ opacity: 0, scale: reduceMotion ? 1 : 1.06 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: reduceMotion ? 0.2 : 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-0 h-full w-full"
       >
         <video
