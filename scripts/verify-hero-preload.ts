@@ -28,12 +28,14 @@ const asset1080 = JSON.parse(read(asset1080Path)) as { url: string };
 const asset1440Path = 'src/assets/hero-video-1440-v9.mp4.asset.json';
 const asset1440 = JSON.parse(read(asset1440Path)) as { url: string };
 
-const assetPortraitPath = 'src/assets/hero-portrait-v11.mp4.asset.json';
+const assetPortraitPath = 'src/assets/hero-portrait-v12.mp4.asset.json';
 const assetPortrait = JSON.parse(read(assetPortraitPath)) as { url: string };
-const assetSquarePath = 'src/assets/hero-square-v11.mp4.asset.json';
+const assetSquarePath = 'src/assets/hero-square-v12.mp4.asset.json';
 const assetSquare = JSON.parse(read(assetSquarePath)) as { url: string };
-const assetSquarePosterPath = 'src/assets/hero-poster-square-v11.jpg.asset.json';
+const assetSquarePosterPath = 'src/assets/hero-poster-square-v12.jpg.asset.json';
 const assetSquarePoster = JSON.parse(read(assetSquarePosterPath)) as { url: string };
+const assetPortraitPosterPath = 'src/assets/hero-poster-portrait-v12.jpg.asset.json';
+const assetPortraitPoster = JSON.parse(read(assetPortraitPosterPath)) as { url: string };
 
 const src1080 = asset1080.url;
 if (!/HERO_VIDEO_1440 = hero1440\.url/.test(source)) {
@@ -43,7 +45,7 @@ if (!/HERO_VIDEO_1080 = hero1080\.url/.test(source)) {
   throw new Error('verify-hero-preload: HERO_VIDEO_1080 pekar inte på 1080p-pointern');
 }
 const poster = pick(/HERO_POSTER = '([^']+)'/, 'HERO_POSTER', source);
-const posterPortrait = pick(/HERO_POSTER_PORTRAIT = '([^']+)'/, 'HERO_POSTER_PORTRAIT', source);
+const posterPortrait = assetPortraitPoster.url;
 const portraitQuery = pick(/HERO_PORTRAIT_QUERY = '([^']+)'/, 'HERO_PORTRAIT_QUERY', source);
 const squareQuery = pick(/HERO_SQUARE_QUERY = '([^']+)'/, 'HERO_SQUARE_QUERY', source);
 const query = pick(/HERO_DESKTOP_QUERY = '([^']+)'/, 'HERO_DESKTOP_QUERY', source);
@@ -65,6 +67,9 @@ if (!html.includes(assetSquare.url)) {
 if (!html.includes(assetSquarePoster.url)) {
   errors.push(`index.html saknar 4:5-postern ${assetSquarePoster.url}`);
 }
+if (!html.includes(assetPortraitPoster.url)) {
+  errors.push(`index.html saknar den stående postern ${assetPortraitPoster.url}`);
+}
 if (!html.includes(posterPortrait)) {
   errors.push(`index.html saknar den stående postern ${posterPortrait}`);
 }
@@ -83,7 +88,7 @@ if (!html.includes(poster)) {
 if (!html.includes(query)) {
   errors.push(`index.html använder inte breakpointen ${query}`);
 }
-for (const localFile of [poster, posterPortrait]) {
+for (const localFile of [poster]) {
   if (!existsSync(resolve(root, 'public', localFile.replace(/^\//, '')))) {
     errors.push(`Filen saknas i public/: ${localFile}`);
   }
