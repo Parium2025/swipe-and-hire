@@ -45,7 +45,7 @@ if (!/HERO_VIDEO_1080 = hero1080\.url/.test(source)) {
   throw new Error('verify-hero-preload: HERO_VIDEO_1080 pekar inte på 1080p-pointern');
 }
 const poster = pick(/HERO_POSTER = '([^']+)'/, 'HERO_POSTER', source);
-const posterPortrait = pick(/HERO_POSTER_PORTRAIT = '([^']+)'/, 'HERO_POSTER_PORTRAIT', source);
+const posterPortrait = assetPortraitPoster.url;
 const portraitQuery = pick(/HERO_PORTRAIT_QUERY = '([^']+)'/, 'HERO_PORTRAIT_QUERY', source);
 const squareQuery = pick(/HERO_SQUARE_QUERY = '([^']+)'/, 'HERO_SQUARE_QUERY', source);
 const query = pick(/HERO_DESKTOP_QUERY = '([^']+)'/, 'HERO_DESKTOP_QUERY', source);
