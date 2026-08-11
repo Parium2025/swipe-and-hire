@@ -1741,9 +1741,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   return (
     <>
     <AudienceSEO audience={audience} />
+    {/* `no-chrome-pad`: global CSS lägger annars en TRANSPARENT ::after-spacer
+        (68px) sist i scrollytan — den lät gradient/glöd skymta under footern
+        på iPad. Vi använder en egen opak bottenplatta i stället. */}
     <div
       data-landing-scroll-root
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
+      className="no-chrome-pad fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
         // -webkit-overflow-scrolling: touch ger iOS Safari momentum-scroll
@@ -1761,10 +1764,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         backgroundColor: 'hsl(var(--primary))',
       }}
     >
-      <div className="pointer-events-none absolute inset-0 z-0">
+      {/* Dekorlagren är FIXED + clippade: som absolute kunde glöden sticka ut
+          under footern och dessutom förlänga scrollhöjden, vilket gav en synlig
+          rundad "hörna" i tomrummet längst ned på iPad. */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <AnimatedBackground showBubbles={false} showGlow={true} />
       </div>
-      <div className="pointer-events-none absolute inset-0 z-0">
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
       <FixedPhoneLayer variant={audience === 'job_seeker' ? 'video' : 'spline'} />
@@ -2331,6 +2337,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             <Suspense fallback={null}>
               <SiteFooter />
             </Suspense>
+
+            {/* Solid bottenplatta: täcker eventuellt tomrum under footern
+                (iPad/iOS: dynamisk viewport + rubber-band) så att inga
+                dekorlager eller gradienter kan skymta fram längst ned. */}
+            <div aria-hidden className="h-24 w-full bg-primary" />
+
 
 
         </div>
