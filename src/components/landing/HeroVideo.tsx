@@ -361,6 +361,20 @@ const HeroVideo = () => {
           }
           style={isPortrait ? { aspectRatio: '3 / 4' } : undefined}
         >
+          {/* Extremt breda/låga fönster: hela bildrutan visas (object-contain)
+              och sidorna fylls av en suddad kopia av postern. Full-bleed känsla
+              utan att en enda pixel av motivet kan klippas bort. */}
+          {!isPortrait && safeFit && (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 h-full w-full bg-cover bg-center"
+              style={{
+                backgroundImage: `url(${posterAsset.url})`,
+                filter: 'blur(48px) saturate(1.1)',
+                transform: 'scale(1.15)',
+              }}
+            />
+          )}
           <video
             ref={videoRef}
             muted
@@ -375,11 +389,20 @@ const HeroVideo = () => {
             controlsList="nodownload noplaybackrate nofullscreen"
             poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
             onContextMenu={(e) => e.preventDefault()}
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+            className={`pointer-events-none absolute inset-0 h-full w-full ${
+              !isPortrait && safeFit ? 'object-contain' : 'object-cover'
+            }`}
             // Ansiktena ligger i övre halvan; om blocket ändå klipps av en
             // extremt låg viewport behåller vi huvudena i bild.
-            style={{ objectPosition: isPortrait ? 'center 42%' : landscapePosition }}
+            style={{
+              objectPosition: isPortrait
+                ? 'center 42%'
+                : safeFit
+                  ? 'center center'
+                  : landscapePosition,
+            }}
           >
+
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
                  så browsern återanvänder samma fetch istället för att ladda två filer. */
