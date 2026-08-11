@@ -280,7 +280,7 @@ const HeroVideo = () => {
   }, []);
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden">
+    <div className="absolute inset-0 z-0 overflow-hidden bg-background">
       <motion.div
         initial={{ opacity: 0, scale: 1.06 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -299,10 +299,14 @@ const HeroVideo = () => {
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
-          poster={posterAsset.url}
+          poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
 
           onContextMenu={(e) => e.preventDefault()}
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+          className={
+            isPortrait
+              ? 'pointer-events-none absolute inset-x-0 top-0 h-[133.34vw] w-full object-cover'
+              : 'pointer-events-none absolute inset-0 h-full w-full object-cover'
+          }
         >
           {!skipVideo && (
             /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
@@ -312,10 +316,19 @@ const HeroVideo = () => {
 
         </video>
       </motion.div>
+      {/* Porträtt: mjuk övertoning från videons underkant ner i sidans bakgrund,
+          så att 3:4-formatet ser avsiktligt ut i stället för avklippt. */}
+      {isPortrait && (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-[93vw] h-[41vw] bg-gradient-to-b from-transparent to-background" />
+          <div className="pointer-events-none absolute inset-x-0 top-[133vw] bottom-0 bg-background" />
+        </>
+      )}
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
     </div>
   );
+
 };
 
 export default HeroVideo;
