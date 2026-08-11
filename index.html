@@ -314,8 +314,15 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            var portraitPoster = (window.innerWidth && window.innerHeight) ? (window.innerWidth / window.innerHeight) < 1.2 : false;
-            add({ rel: 'preload', as: 'image', href: portraitPoster ? '/__l5e/assets-v1/70a06777-f4df-4304-832f-efd526d9af08/hero-poster-byggarbetare-v5.jpg' : '/__l5e/assets-v1/dc7e4c88-ca7e-4dbd-8ce6-1502911b23ac/hero-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            var _r = (window.innerWidth && window.innerHeight) ? (window.innerWidth / window.innerHeight) : 1.78;
+            // Tre geometriska nivåer — matchar pickHeroSrc() i HeroVideo.tsx exakt.
+            // < 0.66 = telefon (9:16), 0.66–1.25 = surfplatta/kvadratisk (3:4), annars landskap (16:9).
+            var _tier = _r < 0.66 ? 'portrait' : (_r < 1.25 ? 'tablet' : 'landscape');
+            add({ rel: 'preload', as: 'image', href: _tier === 'portrait'
+              ? '/__l5e/assets-v1/f794aa31-dbff-42c3-b712-15f8cbc6c0b3/hero5-poster-portrait.jpg'
+              : _tier === 'tablet'
+                ? '/__l5e/assets-v1/c8512667-401c-4380-b803-5f6b3bc7c45f/hero5-poster-tablet.jpg'
+                : '/__l5e/assets-v1/af7afb98-3225-4bd0-8b23-cc59882d8b3d/hero5-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
@@ -325,15 +332,17 @@
             // Regeln MÅSTE stämma med pickHeroSrc() i HeroVideo.tsx,
             // annars laddas två filer och bara den lilla spelas.
             var vw = window.innerWidth, vh = window.innerHeight;
-            var isPortraitLayout = vw && vh ? (vw / vh) < 1.2 : false;
             var dpr = Math.min(window.devicePixelRatio || 1, 2);
             var wantsHighRes = (vw * dpr) >= 1280;
             var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
-            var videoHref = isPortraitLayout
-              ? '/__l5e/assets-v1/540c76e2-bc33-480d-9416-b6470f0235a1/hero-mobile-byggarbetare-v5.mp4'
-              : (wantsHighRes && !lightUa)
-                ? '/__l5e/assets-v1/2a4afff3-cd65-4aa1-a8ca-e146949911e4/hero-desktop.mp4'
-                : '/__l5e/assets-v1/40bb66b3-702f-4ed9-9eb1-adf72e931757/hero-mobile.mp4';
+            var videoHref = _tier === 'portrait'
+              ? '/__l5e/assets-v1/92e8c82f-4ed5-4eed-b9c3-7dff37cd2185/hero5-portrait.mp4'
+              : _tier === 'tablet'
+                ? '/__l5e/assets-v1/bf2086dc-93d1-4968-8286-7d5e3c128512/hero5-tablet.mp4'
+                : (wantsHighRes && !lightUa)
+                  ? '/__l5e/assets-v1/8f68c9fd-69a9-4579-b6d1-460d5af9e45b/hero5-desktop.mp4'
+                  : '/__l5e/assets-v1/507f0ed5-f526-4576-872c-b402efc250db/hero5-landscape-lite.mp4';
+
             // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
             // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
             var isSafari = /Safari/.test(navigator.userAgent || '') && !/Chrome|Chromium|Edg\//.test(navigator.userAgent || '');
