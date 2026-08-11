@@ -89,7 +89,7 @@ const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
-  const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitLayout);
+  const [tier, setTier] = useState<HeroTier>(getTier);
   const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
 
   // Recompute source on resize/orientation change so the video adapts when a
@@ -99,7 +99,7 @@ const HeroVideo = () => {
     if (typeof window === 'undefined') return;
     const handle = () => {
       setHeroSrc(pickHeroSrc());
-      setIsPortrait(isPortraitLayout());
+      setTier(getTier());
       setLandscapePosition(landscapeObjectPosition());
     };
     window.addEventListener('resize', handle, { passive: true });
