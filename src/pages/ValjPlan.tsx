@@ -144,6 +144,11 @@ export default function ValjPlan() {
   const [allFeaturesOpen, setAllFeaturesOpen] = useState(false);
   const [activeTier, setActiveTier] = useState<PlanTier | null>(null);
 
+  const from = searchParams.get('from');
+  const cancelled = searchParams.get('cancelled') === 'true';
+  const welcome = searchParams.get('welcome') === 'true';
+
+
   // Planer ändras extremt sällan → cachas i react-query så att sidan
   // renderas direkt (utan skelett) vid alla återbesök i samma session.
   const { data: plans = [], isLoading, error: plansError } = useQuery({
