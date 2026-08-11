@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X } from 'lucide-react';
@@ -139,8 +140,6 @@ export default function ValjPlan() {
   const { plan: activePlan } = useHasActivePlan();
   const isEmployer = userRole?.role === 'employer';
 
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [allFeaturesOpen, setAllFeaturesOpen] = useState(false);
@@ -150,24 +149,36 @@ export default function ValjPlan() {
   const cancelled = searchParams.get('cancelled') === 'true';
   const welcome = searchParams.get('welcome') === 'true';
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
+
+  // Planer ändras extremt sällan → cachas i react-query så att sidan
+  // renderas direkt (utan skelett) vid alla återbesök i samma session.
+  const { data: plans = [], isLoading, error: plansError } = useQuery({
+    queryKey: ['subscription-plans', 'active'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('subscription_plans')
         .select('*')
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
-      if (!mounted) return;
-      if (error) {
-        toast.error('Kunde inte ladda planer', { description: error.message });
-      } else {
-        setPlans((data as unknown as Plan[]) ?? []);
-      }
-      setLoading(false);
-    })();
-    return () => { mounted = false; };
-  }, []);
+      if (error) throw error;
+      return (data as unknown as Plan[]) ?? [];
+    },
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+  // Skelett visas bara när vi faktiskt saknar data — aldrig ovanpå cache.
+  const loading = isLoading && plans.length === 0;
+
+  useEffect(() => {
+    if (plansError) {
+      toast.error('Kunde inte ladda planer', {
+        description: plansError instanceof Error ? plansError.message : undefined,
+      });
+    }
+  }, [plansError]);
+
 
   useEffect(() => {
     if (cancelled) {
