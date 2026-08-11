@@ -45,11 +45,6 @@ const isPortraitLayout = () => {
 // ALL beskärning i botten. Då kan webbläsaren aldrig kapa huvudet.
 const SOURCE_RATIO = 16 / 9;
 const LANDSCAPE_TOP_BIAS = '0%';
-// Extra luft ovanför hjässan. Källans överkant tangerar håret i flera klipp, så
-// även med 0 % bias ser det trångt ut. Vi skjuter ner hela videoblocket några
-// procent; ytan som frigörs i toppen täcks av samma svarta gradient som resten
-// av hero-overlayen, så det läser som vinjett – inte som ett svart streck.
-const LANDSCAPE_HEADROOM = 3; // procent av viewporthöjden
 
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
@@ -337,13 +332,9 @@ const HeroVideo = () => {
           className={
             isPortrait
               ? 'absolute inset-x-0 top-0 w-full'
-              : 'absolute inset-x-0 bottom-0'
+              : 'absolute inset-0 h-full w-full'
           }
-          style={
-            isPortrait
-              ? { aspectRatio: '3 / 4' }
-              : { top: `${LANDSCAPE_HEADROOM}%` }
-          }
+          style={isPortrait ? { aspectRatio: '3 / 4' } : undefined}
         >
           <video
             ref={videoRef}
@@ -375,10 +366,6 @@ const HeroVideo = () => {
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-b from-transparent to-black" />
           )}
         </div>
-        {/* Landskap: mjuk svart topp som täcker headroom-remsan sömlöst. */}
-        {!isPortrait && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[14%] bg-gradient-to-b from-black via-black/70 to-transparent" />
-        )}
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
