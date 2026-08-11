@@ -76,6 +76,7 @@ const HeroVideo = () => {
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
   const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitLayout);
+  const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
 
   // Recompute source on resize/orientation change so the video adapts when a
   // phone is rotated or a tablet changes orientation. The browser handles the
@@ -85,6 +86,7 @@ const HeroVideo = () => {
     const handle = () => {
       setHeroSrc(pickHeroSrc());
       setIsPortrait(isPortraitLayout());
+      setLandscapePosition(landscapeObjectPosition());
     };
     window.addEventListener('resize', handle, { passive: true });
     window.addEventListener('orientationchange', handle, { passive: true });
