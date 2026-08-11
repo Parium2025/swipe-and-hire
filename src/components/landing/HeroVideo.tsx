@@ -352,7 +352,7 @@ const HeroVideo = () => {
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             // Ansiktena ligger i övre halvan; om blocket ändå klipps av en
             // extremt låg viewport behåller vi huvudena i bild.
-            style={{ objectPosition: isPortrait ? 'center 42%' : 'center center' }}
+            style={{ objectPosition: isPortrait ? 'center 42%' : landscapePosition }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
