@@ -39,11 +39,12 @@ const isPortraitLayout = () => {
 // Landskap: så snart viewporten är BREDARE än 16:9 (laptop med browser-chrome,
 // ultrawide, delad skärm) skalar object-cover efter bredden och kapar topp och
 // botten lika mycket. Med `center center` är det exakt huvudena som ryker.
-// object-position i procent styr FÖRDELNINGEN av bortfallet: 12 % betyder att
-// bara 12 % av det som kapas tas i toppen och 88 % i botten (där bara mark och
-// gradient ligger). Då kan huvudet aldrig klippas, oavsett skärmproportion.
+// object-position i procent styr FÖRDELNINGEN av bortfallet. För motiv där
+// håret/hjälmen når källbildens överkant räcker inte en liten toppmarginal:
+// 0 % låser källbildens absoluta överkant mot viewportens överkant och lägger
+// ALL beskärning i botten. Då kan webbläsaren aldrig kapa huvudet.
 const SOURCE_RATIO = 16 / 9;
-const LANDSCAPE_TOP_BIAS = '12%';
+const LANDSCAPE_TOP_BIAS = '0%';
 
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
