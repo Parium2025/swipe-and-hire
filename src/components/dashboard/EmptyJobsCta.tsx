@@ -23,10 +23,6 @@ export const EmptyJobsCta = ({ compact = false }: EmptyJobsCtaProps) => {
           <Briefcase className="h-6 w-6 text-white" />
         </span>
         <h3 className="text-lg font-semibold text-white">Dags för er första annons</h3>
-        <p className="mt-2 text-sm leading-snug text-white break-words">
-          Annonsguiden tar er igenom titel, plats, villkor och egna frågor — steg för steg.
-          Ni kan spara som utkast och fortsätta när ni vill.
-        </p>
 
         <ul className="mt-5 space-y-2 text-left">
           <li className="flex items-start gap-2.5">
@@ -38,10 +34,11 @@ export const EmptyJobsCta = ({ compact = false }: EmptyJobsCtaProps) => {
           <li className="flex items-start gap-2.5">
             <Clock className="mt-[2px] h-4 w-4 shrink-0 text-white" />
             <span className="text-[13px] leading-snug text-white break-words">
-              Publicerad annons ligger uppe i 14 dagar och kan återpubliceras.
+              Publicerad annons ligger uppe i 14 dagar.
             </span>
           </li>
         </ul>
+
 
         <button
           type="button"
