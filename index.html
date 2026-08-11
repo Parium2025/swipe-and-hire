@@ -314,41 +314,18 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            var isPortraitView = window.matchMedia && window.matchMedia('(max-aspect-ratio: 3/5)').matches;
-            var isSquarePosterView = window.matchMedia && window.matchMedia('(max-aspect-ratio: 13/10)').matches && !window.matchMedia('(min-width: 1024px)').matches;
-            var posterHref = isPortraitView
-              ? '/__l5e/assets-v1/062cb67a-dba0-4381-909c-6834d2f5a16d/hero-poster-portrait-v12.jpg'
-              : (isSquarePosterView
-                ? '/__l5e/assets-v1/f7c6ea85-bc88-4b99-b183-139b20ddd7ee/hero-poster-square-v12.jpg'
-                : '/hero-video-poster-v8.jpg');
-            add({ rel: 'preload', as: 'image', href: posterHref, type: 'image/jpeg', fetchpriority: 'high' });
+            add({ rel: 'preload', as: 'image', href: '/hero-video-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
             var saveData = !!(conn && conn.saveData);
             var slowNet = !!(conn && /(^|-)2g$/.test(conn.effectiveType || ''));
             if (!saveData && !slowNet) {
-            // Sanningskällan är src/lib/heroVideoSource.ts. Villkoren nedan speglar
-            // pickHeroSrc() och verifieras vid varje build av scripts/verify-hero-preload.ts —
-            // går de isär hämtas två filer (25 MB + 6,6 MB) och bara den ena spelas.
+            // Breakpoint + plattform MÅSTE stämma med pickHeroSrc() i HeroVideo.tsx,
+            // annars laddas två filer (6,3 MB + 2,4 MB) och bara den lilla spelas.
             var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
-            var isSquareView = window.matchMedia && window.matchMedia('(max-aspect-ratio: 13/10)').matches && !isDesktop;
             var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
-            var cores = navigator.hardwareConcurrency || 0;
-            var memory = navigator.deviceMemory || 0;
-            var capable1440 = cores >= 4 && memory >= 4;
-            var videoHref = isPortraitView
-              ? '/__l5e/assets-v1/b0d44546-685e-45fc-8552-9837515f7bd5/hero-portrait-v12.mp4'
-              : (isSquareView
-                ? '/__l5e/assets-v1/7153216a-a95e-4e24-8d18-4d5e47fbc89b/hero-square-v12.mp4'
-                : (!isDesktop
-                  ? '/__l5e/assets-v1/9ba460c8-9256-466a-8599-127bfa18236f/hero-video-1080-v10.mp4'
-                  : (!lightUa
-                    ? '/__l5e/assets-v1/22ebc9f8-369a-4102-ab76-cf7a3076afba/hero-video-v9.mp4'
-                    : (capable1440
-                      ? '/__l5e/assets-v1/ebbaa1e9-b0cf-4e20-8c3b-ec606b0a6730/hero-video-1440-v9.mp4'
-                      : '/__l5e/assets-v1/9ba460c8-9256-466a-8599-127bfa18236f/hero-video-1080-v10.mp4'))));
-
+            var videoHref = (isDesktop && !lightUa) ? '/hero-video.mp4' : '/hero-video-720.mp4';
             // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
             // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
             var isSafari = /Safari/.test(navigator.userAgent || '') && !/Chrome|Chromium|Edg\//.test(navigator.userAgent || '');

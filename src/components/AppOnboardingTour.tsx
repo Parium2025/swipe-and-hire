@@ -6,7 +6,6 @@ import {
   CreditCard, HelpCircle, Briefcase, ChevronLeft, Eye,
 } from 'lucide-react';
 import { startPageCoachTour, markAllPageCoachesSeen } from '@/components/onboarding/PageIntroCoach';
-import { useNativeTouchScroll, useOverlayBackgroundLock } from '@/hooks/useNativeTouchScroll';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
@@ -95,8 +94,6 @@ export function replayWelcomeCard(step: 0 | 1 = 0) {
  */
 const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboardingTourProps) => {
   const navigate = useNavigate();
-  const scrollRef = useNativeTouchScroll<HTMLDivElement>();
-  useOverlayBackgroundLock();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<0 | 1>(initialStep);
 
@@ -124,6 +121,15 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
     };
   }, []);
 
+
+  // Lås bakgrundsscroll medan kortet visas
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
 
   const close = (path?: string) => {
     // Stänger man utan att välja en guide ska inga sidtips dyka upp senare.
@@ -187,7 +193,7 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[70] overflow-hidden transition-opacity duration-200 ${
+      className={`fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6 transition-opacity duration-200 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
       role="dialog"
@@ -195,21 +201,20 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
       aria-label="Välkommen till Parium"
     >
       {/* Bakgrund */}
-      <div aria-hidden="true" className="fixed inset-0 bg-black/55 backdrop-blur-[2px]" />
+      <button
+        type="button"
+        aria-label="Stäng"
+        onClick={() => close()}
+        className="absolute inset-0 bg-black/55 backdrop-blur-[2px] focus:outline-none"
+      />
 
       {/* Kort */}
       <div
-        className="relative z-10 flex h-full w-full items-start justify-center sm:items-center sm:p-6"
+        className={`relative w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl transition-all duration-300 ${
+          visible ? 'translate-y-0 scale-100' : 'translate-y-6 sm:translate-y-0 sm:scale-95'
+        }`}
       >
-        <div
-          ref={scrollRef}
-          data-onboarding-scroll="true"
-          style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-          className="no-chrome-pad relative h-[100dvh] w-full overflow-x-hidden overflow-y-auto overscroll-contain rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl"
-        >
-        <div
-          className="p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8"
-        >
+        <div className="p-6 sm:p-8">
           {step === 0 ? (
             <>
               {/* Header */}
@@ -358,7 +363,6 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
             ))}
           </div>
         </div>
-      </div>
       </div>
     </div>,
     document.body

@@ -423,12 +423,7 @@ const PageIntroCoach = () => {
 
   return createPortal(
     <div
-      style={{
-        WebkitOverflowScrolling: 'touch',
-        touchAction: 'pan-y',
-        overscrollBehavior: 'contain',
-      }}
-      className={`fixed inset-0 z-[60] overflow-y-auto transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ${
         visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
       role="dialog"
@@ -440,12 +435,12 @@ const PageIntroCoach = () => {
         type="button"
         aria-label="Stäng tipset"
         onClick={endGuide}
-        className="fixed inset-0 bg-black/45 backdrop-blur-[2px] focus:outline-none"
+        className="absolute inset-0 bg-black/45 backdrop-blur-[2px] focus:outline-none"
       />
 
-      <div className="relative flex min-h-full w-full items-center justify-center p-4">
       <div
-        className={`relative w-full max-w-[420px] rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))] shadow-2xl p-5 pt-6 sm:p-6 sm:pt-7 text-center transition-transform duration-300 ${
+        style={{ WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)', contain: 'paint' }}
+        className={`relative w-full max-w-[420px] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-3xl border border-white/15 bg-[hsl(var(--surface-blue))] shadow-2xl p-5 pt-6 sm:p-6 sm:pt-7 text-center transition-transform duration-300 ${
           visible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-2'
         }`}
       >
@@ -517,7 +512,6 @@ const PageIntroCoach = () => {
           </div>
 
         </div>
-      </div>
       </div>
     </div>,
     document.body

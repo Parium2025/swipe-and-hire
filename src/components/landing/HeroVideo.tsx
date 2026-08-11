@@ -1,156 +1,35 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  HERO_DESKTOP_QUERY,
-  HERO_PORTRAIT_QUERY,
-  HERO_SQUARE_QUERY,
-  
-  HERO_VIDEO_1080,
-  HERO_VIDEO_4K,
-  HERO_VIDEO_PORTRAIT,
-  HERO_VIDEO_SQUARE,
-  heroFocusXAt,
-  heroObjectPositionX,
+import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
-  pickHeroPoster,
-  pickHeroSrc,
-  prefersReducedMotion,
-  shouldSkipHeroVideo,
-} from '@/lib/heroVideoSource';
+// Datasparläge eller 2G → hoppa över videoladdning helt och visa bara poster.
+// Sparar 2,4–13 MB för användare i dåligt nät utan att förändra UX synbart.
+const shouldSkipVideo = () => {
+  if (typeof navigator === 'undefined') return false;
+  const conn = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+  if (!conn) return false;
+  if (conn.saveData) return true;
+  if (typeof conn.effectiveType === 'string' && /(^|-)2g$/.test(conn.effectiveType)) return true;
+  return false;
+};
 
+// Välj EXAKT en källa. `media` på <source> inuti <video> respekteras inte
+// tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
+// spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
+const pickHeroSrc = () => {
+  if (typeof window === 'undefined') return '/hero-video-720.mp4';
+  const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
+  // Windows/Android (och sparläge/svagt nät) får den lätta 720p-mastern även på
+  // desktop: 6,3 MB + mjukvaruavkodning är exakt det som gör hero-videon hackig
+  // där. Villkoret delas nu med galleriet via videoPlatform.ts så de inte glider isär.
+  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? '/hero-video.mp4' : '/hero-video-720.mp4';
+};
 
-// Källval och sparlägesregler bor i src/lib/heroVideoSource.ts — samma modul som
-// index.html verifieras mot vid build. Re-exporteras här för bakåtkompatibilitet.
-export { HERO_VIDEO_4K, HERO_VIDEO_1080 };
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  // Endast uttryckligt datasparläge/2G stoppar mediahämtningen. iOS kan rapportera
-  // `prefers-reduced-motion` i preview/private mode; det ska minska UI-animationen,
-  // inte oväntat ersätta hela hero-videon med en stillbild.
-  const [skipVideo] = useState<boolean>(shouldSkipHeroVideo);
-  const [reduceMotion] = useState<boolean>(prefersReducedMotion);
-  const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
-  const [poster, setPoster] = useState<string>(pickHeroPoster);
-
-  // Dev-guard: om index.html preloadar en annan fil än den vi spelar hämtas två
-  // videofiler och bara en används. Build-scriptet fångar statiska avvikelser,
-  // det här fångar dem som bara uppstår i en viss runtime (t.ex. sparläge).
-  useEffect(() => {
-    if (!import.meta.env.DEV || skipVideo) return;
-    const preloaded = document.querySelector<HTMLLinkElement>('link[rel="preload"][as="video"]');
-    if (preloaded && new URL(preloaded.href, location.href).pathname !== new URL(heroSrc, location.href).pathname) {
-      console.warn('[HeroVideo] preload i index.html matchar inte pickHeroSrc():', preloaded.href, '≠', heroSrc);
-    }
-  }, [heroSrc, skipVideo]);
-
-  // Formatbyte (rotation, extern skärm, fönster som dras mellan skärmar) ska ge
-  // rätt master: stående 9:16, 4:5 eller 16:9. Vi byter bara när en matchMedia
-  // faktiskt ändras — aldrig på varje resize — och återupptar från samma
-  // tidpunkt så bytet inte syns.
-  useEffect(() => {
-    if (skipVideo || typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
-    const queries = [HERO_DESKTOP_QUERY, HERO_PORTRAIT_QUERY, HERO_SQUARE_QUERY].map((q) =>
-      window.matchMedia(q),
-    );
-    const onChange = () => {
-      setHeroSrc((current) => {
-        const next = pickHeroSrc();
-        return next === current ? current : next;
-      });
-      setPoster(pickHeroPoster());
-    };
-    queries.forEach((mql) => mql.addEventListener?.('change', onChange));
-    return () => queries.forEach((mql) => mql.removeEventListener?.('change', onChange));
-  }, [skipVideo]);
-
-
-  // Källbytet kräver load() — annars fortsätter elementet spela gamla filen.
-  // Vi hoppar första renderingen och behåller position + uppspelning.
-  const appliedSrc = useRef<string | null>(null);
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || skipVideo) return;
-    if (appliedSrc.current === null) {
-      appliedSrc.current = heroSrc;
-      return;
-    }
-    if (appliedSrc.current === heroSrc) return;
-    appliedSrc.current = heroSrc;
-    const resumeAt = Number.isFinite(video.currentTime) ? video.currentTime : 0;
-    const restore = () => {
-      try {
-        if (Number.isFinite(video.duration) && video.duration > 0) {
-          video.currentTime = Math.min(resumeAt, Math.max(0, video.duration - 0.1));
-        }
-      } catch { /* best effort */ }
-      void video.play().catch(() => {});
-    };
-    video.addEventListener('loadedmetadata', restore, { once: true });
-    try { video.load(); } catch { video.removeEventListener('loadedmetadata', restore); }
-    return () => video.removeEventListener('loadedmetadata', restore);
-  }, [heroSrc, skipVideo]);
-
-  // Porträttsäkert utsnitt: 16:9-mastern beskärs hårt på BREDDEN i en smal
-  // viewport (bara ~25 % av bilden syns). Med statisk `center` kapas personer
-  // som står vid sidan i sin scen. Vi flyttar därför utsnittet per klipp, mjukt
-  // interpolerat vid varje scenbyte så rörelsen aldrig syns som ett hopp.
-  // Är ytan bredare än 16:9 sker ingen horisontell beskärning → vi rör inget.
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || skipVideo || typeof window === 'undefined') return;
-
-    let raf: number | null = null;
-    let applied = -1;
-    let ratio = 1;
-
-    const measure = () => {
-      const rect = video.getBoundingClientRect();
-      const vw = video.videoWidth || 16;
-      const vh = video.videoHeight || 9;
-      if (rect.width <= 0 || rect.height <= 0) return;
-      // object-cover: skalas efter höjden när ytan är smalare än videon.
-      ratio = (rect.height * (vw / vh)) / rect.width;
-      applied = -1;
-    };
-
-    const tick = () => {
-      raf = window.requestAnimationFrame(tick);
-      // Först vid kraftig beskärning (mobil/porträtt) finns något att rädda.
-      // På desktop är utsnittet redan rätt — då rör vi inte bilden alls.
-      const value = ratio >= 1.6
-        ? heroObjectPositionX(heroFocusXAt(video.currentTime || 0), ratio)
-        : 50;
-      if (Math.abs(value - applied) < 0.1) return;
-      applied = value;
-      video.style.objectPosition = `${value.toFixed(2)}% 50%`;
-
-    };
-
-    const stop = () => {
-      if (raf !== null) window.cancelAnimationFrame(raf);
-      raf = null;
-    };
-
-    const start = () => {
-      measure();
-      stop();
-      raf = window.requestAnimationFrame(tick);
-    };
-
-    start();
-    video.addEventListener('loadedmetadata', start);
-    window.addEventListener('resize', measure, { passive: true });
-    window.visualViewport?.addEventListener('resize', measure, { passive: true });
-    return () => {
-      stop();
-      video.removeEventListener('loadedmetadata', start);
-      window.removeEventListener('resize', measure);
-      window.visualViewport?.removeEventListener('resize', measure);
-      video.style.objectPosition = '';
-    };
-  }, [skipVideo]);
-
+  const [skipVideo] = useState<boolean>(shouldSkipVideo);
+  const [heroSrc] = useState<string>(pickHeroSrc);
 
 
   useEffect(() => {
@@ -195,9 +74,10 @@ const HeroVideo = () => {
     };
 
 
-    // Försök alltid direkt. `play()` startar även den riktiga mediahämtningen i
-    // Safari Private Browsing, där en preload-hint inte kan förutsättas fungera.
-    tryPlay();
+    // Försök spela direkt — väntar inte på canplay om vi redan har data
+    if (video.readyState >= 2) {
+      tryPlay();
+    }
     // Lyssna alltid på loadeddata/canplay för säker första frame
     const onCanPlay = () => tryPlay();
     video.addEventListener('loadeddata', onCanPlay);
@@ -224,12 +104,6 @@ const HeroVideo = () => {
       healthyTicks = 0;
       watchdog = window.setInterval(() => {
         if (!video) return;
-        // Ingen pollning i bakgrundsflik: browsern strypar ändå timers och
-        // varje tick kostar batteri utan att kunna åtgärda något.
-        if (document.visibilityState !== 'visible') {
-          stopWatchdog();
-          return;
-        }
         if (video.paused || video.ended) {
           healthyTicks = 0;
           tryPlay();
@@ -237,18 +111,8 @@ const HeroVideo = () => {
         }
         if (video.currentTime === lastTime) {
           healthyTicks = 0;
-          // `waiting` under aktiv hämtning är normal buffring, inte en frusen
-          // dekoder. load() här skulle kasta den redan hämtade bufferten och
-          // kunna skapa en oändlig omstart på kalla/privata sessioner.
-          const buffering =
-            video.networkState === HTMLMediaElement.NETWORK_LOADING ||
-            video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA;
-          if (buffering) {
-            stuckCount = 0;
-            return;
-          }
           stuckCount++;
-          if (stuckCount >= 6) {
+          if (stuckCount >= 2) {
             stuckCount = 0;
             rebuildDecoder();
           }
@@ -303,30 +167,10 @@ const HeroVideo = () => {
       startWatchdog();
     };
     const handleStalled = () => {
-      // Låt browsern behålla och fylla sin buffer. Watchdog startas av
-      // `playing` och kan då skilja en verklig decoder-frysning från nätverk.
+      startWatchdog();
       tryPlay();
     };
     const handleError = () => {
-      // 4K/1440 H.264 High@5.1 stöds inte av alla hårdvarudekoders. Byt då en
-      // gång till vår konservativa Main@4.0-master i stället för att ladda om
-      // samma inkompatibla fil i en loop. Den stående och 4:5-mastern ÄR redan
-      // Main@4.0 — där byter vi aldrig format, det skulle ge fel beskärning.
-      const toPath = (url: string) => {
-        try { return new URL(url, window.location.href).pathname; }
-        catch { return url; }
-      };
-      const currentPath = toPath(video.currentSrc || video.src);
-      const reframed =
-        currentPath === toPath(HERO_VIDEO_PORTRAIT) || currentPath === toPath(HERO_VIDEO_SQUARE);
-      const fallbackPath = toPath(HERO_VIDEO_1080);
-      if (!reframed && currentPath !== fallbackPath) {
-        stopWatchdog();
-        errorCount = 0;
-        setHeroSrc(HERO_VIDEO_1080);
-        return;
-      }
-
       // Begränsad backoff förhindrar error → load-loop vid ett fladdrande GPU-byte.
       rebuilding = false;
       if (decoderResetTimer !== null) window.clearTimeout(decoderResetTimer);
@@ -407,9 +251,9 @@ const HeroVideo = () => {
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <motion.div
-        initial={{ opacity: 0, scale: reduceMotion ? 1 : 1.06 }}
+        initial={{ opacity: 0, scale: 1.06 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: reduceMotion ? 0.2 : 1.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-0 h-full w-full"
       >
         <video
@@ -418,19 +262,24 @@ const HeroVideo = () => {
           autoPlay
           loop
           playsInline
-          // `auto` är avsiktligt: i inkognito är mediacachen helt kall och Chrome
-          // ignorerar dessutom preload-länkar med `as="video"`. Elementet måste då
-          // själv få buffra nog för att autoplay ska starta utan interaktion.
-          preload="auto"
-          src={skipVideo ? undefined : heroSrc}
+          // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
+          // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
+          preload="metadata"
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
-          poster={poster}
+          poster="/hero-video-poster.jpg"
 
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-        />
+        >
+          {!skipVideo && (
+            /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
+               så browsern återanvänder samma fetch istället för att ladda två filer. */
+            <source src={heroSrc} type="video/mp4" />
+          )}
+
+        </video>
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />

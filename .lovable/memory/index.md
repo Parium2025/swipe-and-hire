@@ -19,7 +19,6 @@
 - [Spotify Premium UI](mem://style/unified-design-system-standard) — Visuella regler: Windows-trimning, mobil typografi, glassmorphism.
 - [Scroll Restoration](mem://architecture/scroll-restoration-logic) — Synkron snapshotting och footer-återställning.
 - [Bildprestanda & Skalning](mem://architecture/bild-prestanda-system) — Centraliserad transformering, image_updated_at-versionering.
-- [Hero-video i flera bildformat](mem://architecture/hero-video-ratios) — 9:16, 4:5 och 16:9-masters, beskärning bakad i encodern.
 - [Navigering & UX](mem://logic/navigation-snabbhet) — JobView Overlay, instant back, wizard shortcuts.
 - [SEO-sidor i projektet](mem://reference/seo-pages-list) — Tabell med alla 14 SEO-routes.
 - [Candidate-Organization Isolation](mem://architecture/candidate-org-isolation) — Fullständig dataisolering per ansökan och organisation.

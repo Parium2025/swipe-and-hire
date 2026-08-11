@@ -17,7 +17,7 @@ const WELCOME_CARD_REPLAY_EMAILS: string[] = [];
  * Arbetsgivarkonton som alltid ska landa på arbetsgivarens välkomstkort
  * (guiden "Hjälp & tips") vid varje inloggning — används för testning.
  */
-const EMPLOYER_WELCOME_CARD_REPLAY_EMAILS: string[] = [];
+const EMPLOYER_WELCOME_CARD_REPLAY_EMAILS: string[] = ['gorgeandersson@gmail.com'];
 
 
 export function isWelcomeCardReplayAccount(email?: string | null): boolean {
