@@ -321,14 +321,16 @@
             var saveData = !!(conn && conn.saveData);
             var slowNet = !!(conn && /(^|-)2g$/.test(conn.effectiveType || ''));
             if (!saveData && !slowNet) {
-            // Breakpoint + plattform + orientering MÅSTE stämma med pickHeroSrc() i HeroVideo.tsx,
+            // Regeln MÅSTE stämma med pickHeroSrc() i HeroVideo.tsx,
             // annars laddas två filer och bara den lilla spelas.
-            var isPortraitMobile = window.matchMedia && window.matchMedia('(orientation: portrait) and (max-width: 768px)').matches;
-            var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
+            var vw = window.innerWidth, vh = window.innerHeight;
+            var isPortraitLayout = vw && vh ? (vw / vh) < 1.2 : false;
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            var wantsHighRes = (vw * dpr) >= 1280;
             var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
-            var videoHref = isPortraitMobile
+            var videoHref = isPortraitLayout
               ? '/__l5e/assets-v1/d8514b94-0a36-4501-a626-fd02a30a6037/hero-mobile-portrait.mp4'
-              : (isDesktop && !lightUa)
+              : (wantsHighRes && !lightUa)
                 ? '/__l5e/assets-v1/2a4afff3-cd65-4aa1-a8ca-e146949911e4/hero-desktop.mp4'
                 : '/__l5e/assets-v1/40bb66b3-702f-4ed9-9eb1-adf72e931757/hero-mobile.mp4';
             // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.

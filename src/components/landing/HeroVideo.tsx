@@ -22,18 +22,33 @@ const shouldSkipVideo = () => {
 // Välj EXAKT en källa. `media` på <source> inuti <video> respekteras inte
 // tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
 // spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
-const isPortraitMobileView = () =>
-  typeof window !== 'undefined' &&
-  !!window.matchMedia &&
-  window.matchMedia('(orientation: portrait) and (max-width: 768px)').matches;
+//
+// Regeln är geometrisk, inte enhetsbaserad, så den täcker allt från 4"-telefon
+// till 100"-TV: så snart viewporten är smalare än 16:9 skulle en landskapsfil
+// behöva beskäras i sidled (= kapade huvuden). Då byter vi till 3:4-mastern.
+const LANDSCAPE_MIN_RATIO = 1.2; // över 1:1, under 4:3 — 4:3-skärmar räknas som landskap
+
+const isPortraitLayout = () => {
+  if (typeof window === 'undefined') return false;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (!w || !h) return false;
+  return w / h < LANDSCAPE_MIN_RATIO;
+};
 
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return mobileAsset.url;
-  // Mobil i porträtt: egen 3:4-beskärning. Fyller hela bredden med betydligt
-  // mindre inzoomning än en 9:16-beskärning, utan suddiga duplicerade kanter.
-  if (isPortraitMobileView()) return portraitAsset.url;
-  const desktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
-  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? desktopAsset.url : mobileAsset.url;
+  // Alla porträtt-/kvadratiska viewports (telefon, surfplatta, delad fönstervy)
+  // får 3:4-mastern: full bredd utan sidobeskärning och minimal inzoomning.
+  if (isPortraitLayout()) return portraitAsset.url;
+  // Landskap: skala efter faktisk renderad bredd (CSS-px × DPR, tak 2×) så att
+  // stora skärmar och TV får 1080p-mastern och små/svaga enheter den lätta.
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const renderedWidth = window.innerWidth * dpr;
+  const wantsHighRes = renderedWidth >= 1280;
+  return wantsHighRes && !prefersLightweightVideo() && !prefersReducedData()
+    ? desktopAsset.url
+    : mobileAsset.url;
 };
 
 
@@ -41,7 +56,7 @@ const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
-  const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitMobileView);
+  const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitLayout);
 
   // Recompute source on resize/orientation change so the video adapts when a
   // phone is rotated or a tablet changes orientation. The browser handles the
@@ -50,7 +65,7 @@ const HeroVideo = () => {
     if (typeof window === 'undefined') return;
     const handle = () => {
       setHeroSrc(pickHeroSrc());
-      setIsPortrait(isPortraitMobileView());
+      setIsPortrait(isPortraitLayout());
     };
     window.addEventListener('resize', handle, { passive: true });
     window.addEventListener('orientationchange', handle, { passive: true });
@@ -287,43 +302,49 @@ const HeroVideo = () => {
         transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-0 h-full w-full"
       >
-        <video
-          ref={videoRef}
-          muted
-          autoPlay
-          loop
-          playsInline
-          // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
-          // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
-          preload="metadata"
-          disablePictureInPicture
-          disableRemotePlayback
-          controlsList="nodownload noplaybackrate nofullscreen"
-          poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
-
-          onContextMenu={(e) => e.preventDefault()}
+        {/* Porträtt: blocket får exakt 3:4 av viewportens bredd och ankras i
+            toppen. Höjden följer bredden, så allt från 4"-telefon till
+            surfplatta i porträtt får samma beskärning — inga kapade huvuden.
+            Landskap: videon fyller hela ytan (källan är redan 16:9). */}
+        <div
           className={
             isPortrait
-              ? 'pointer-events-none absolute inset-x-0 top-0 h-[133.34vw] w-full object-cover'
-              : 'pointer-events-none absolute inset-0 h-full w-full object-cover'
+              ? 'absolute inset-x-0 top-0 w-full'
+              : 'absolute inset-0 h-full w-full'
           }
+          style={isPortrait ? { aspectRatio: '3 / 4' } : undefined}
         >
-          {!skipVideo && (
-            /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
-               så browsern återanvänder samma fetch istället för att ladda två filer. */
-            <source src={heroSrc} type="video/mp4" />
+          <video
+            ref={videoRef}
+            muted
+            autoPlay
+            loop
+            playsInline
+            // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
+            // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
+            preload="metadata"
+            disablePictureInPicture
+            disableRemotePlayback
+            controlsList="nodownload noplaybackrate nofullscreen"
+            poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
+            onContextMenu={(e) => e.preventDefault()}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+            // Ansiktena ligger i övre halvan; om blocket ändå klipps av en
+            // extremt låg viewport behåller vi huvudena i bild.
+            style={{ objectPosition: isPortrait ? 'center 42%' : 'center center' }}
+          >
+            {!skipVideo && (
+              /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
+                 så browsern återanvänder samma fetch istället för att ladda två filer. */
+              <source src={heroSrc} type="video/mp4" />
+            )}
+          </video>
+          {/* Mjuk övertoning i videons underkant → sidans svarta bakgrund. */}
+          {isPortrait && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-b from-transparent to-black" />
           )}
-
-        </video>
+        </div>
       </motion.div>
-      {/* Porträtt: mjuk övertoning från videons underkant ner i sidans bakgrund,
-          så att 3:4-formatet ser avsiktligt ut i stället för avklippt. */}
-      {isPortrait && (
-        <>
-          <div className="pointer-events-none absolute inset-x-0 top-[93vw] h-[41vw] bg-gradient-to-b from-transparent to-black" />
-          <div className="pointer-events-none absolute inset-x-0 top-[133vw] bottom-0 bg-black" />
-        </>
-      )}
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
     </div>
