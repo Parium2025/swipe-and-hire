@@ -4,7 +4,9 @@ import desktopAsset from '@/assets/hero-desktop.mp4.asset.json';
 import mobileAsset from '@/assets/hero-mobile.mp4.asset.json';
 import portraitAsset from '@/assets/hero-mobile-portrait.mp4.asset.json';
 import posterAsset from '@/assets/hero-poster.jpg.asset.json';
+import posterPortraitAsset from '@/assets/hero-poster-portrait.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
+
 
 // Datasparläge eller 2G → hoppa över videoladdning helt och visa bara poster.
 // Sparar 2,4–13 MB för användare i dåligt nät utan att förändra UX synbart.
