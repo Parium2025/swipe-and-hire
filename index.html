@@ -321,8 +321,8 @@
             add({ rel: 'preload', as: 'image', href: _tier === 'portrait'
               ? '/__l5e/assets-v1/f85ce438-d881-4fc4-b122-99d720db2ffe/hero6-poster-portrait.jpg'
               : _tier === 'tablet'
-                ? '/__l5e/assets-v1/7a042856-5c73-415f-aa91-33fde51e20d6/hero6-poster-tablet.jpg'
-                : '/__l5e/assets-v1/2278bc1c-8483-4b88-9329-b264757dc6a8/hero6-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+                ? '/__l5e/assets-v1/2a335bc0-485b-4998-b16c-5d94ddd7b9cc/hero7-poster-tablet.jpg'
+                : '/__l5e/assets-v1/7bd05d10-b743-49fb-921f-72b2e39690eb/hero7-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
@@ -338,10 +338,10 @@
             var videoHref = _tier === 'portrait'
               ? '/__l5e/assets-v1/bec8ca6c-b5c5-43e0-9e44-f4ca805c0b4e/hero6-portrait.mp4'
               : _tier === 'tablet'
-                ? '/__l5e/assets-v1/ad3c959a-927a-4c16-92a6-521d25ee435c/hero6-tablet.mp4'
+                ? '/__l5e/assets-v1/584e83ef-519f-44b8-b8df-c97c95b46e15/hero7-tablet.mp4'
                 : (wantsHighRes && !lightUa)
-                  ? '/__l5e/assets-v1/6beebc11-6775-4923-a10f-700efb995669/hero6-desktop.mp4'
-                  : '/__l5e/assets-v1/e96addff-73cd-48bd-bf05-a878f3071f7f/hero6-landscape-lite.mp4';
+                  ? '/__l5e/assets-v1/837ae9be-92de-4856-b75b-f7cf2253f1d6/hero7-desktop.mp4'
+                  : '/__l5e/assets-v1/e787b70d-afca-4693-b248-13884e496fdb/hero7-landscape-lite.mp4';
 
             // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
             // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
