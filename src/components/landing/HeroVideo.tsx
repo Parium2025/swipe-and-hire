@@ -373,9 +373,11 @@ const HeroVideo = () => {
           autoPlay
           loop
           playsInline
-          // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
-          // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
-          preload="metadata"
+          // `auto` är avsiktligt: i inkognito är mediacachen helt kall och Chrome
+          // ignorerar dessutom preload-länkar med `as="video"`. Elementet måste då
+          // själv få buffra nog för att autoplay ska starta utan interaktion.
+          preload="auto"
+          src={skipVideo ? undefined : heroSrc}
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
@@ -387,7 +389,6 @@ const HeroVideo = () => {
           {!skipVideo && (
             /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
                så browsern återanvänder samma fetch istället för att ladda två filer. */
-            <source src={heroSrc} type="video/mp4" />
           )}
 
         </video>
