@@ -314,7 +314,8 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/dc7e4c88-ca7e-4dbd-8ce6-1502911b23ac/hero-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            var portraitPoster = (window.innerWidth && window.innerHeight) ? (window.innerWidth / window.innerHeight) < 1.2 : false;
+            add({ rel: 'preload', as: 'image', href: portraitPoster ? '/__l5e/assets-v1/504e4759-e078-42fb-a0f6-676a8226b3a0/hero-poster-portrait-916-v2.jpg' : '/__l5e/assets-v1/dc7e4c88-ca7e-4dbd-8ce6-1502911b23ac/hero-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
