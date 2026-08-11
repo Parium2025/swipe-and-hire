@@ -119,10 +119,8 @@ const HeroVideo = () => {
   //     eller ett drag i ett desktopfönster för att trigga det flera gånger i
   //     sekunden, vilket ger svarta blinkningar. Därför: CSS direkt, källbyte
   //     debounce:at till 250 ms efter sista resize-eventet.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    let settleTimer: number | null = null;
   //     debounce:at till 250 ms efter sista resize-eventet.
+
   //
   //  3. UNDANTAG: byter NIVÅ (t.ex. telefon som roteras till liggande) måste
   //     källan bytas OMEDELBART. Annars spelas 9:16-mastern i en 16:9-viewport
