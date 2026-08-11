@@ -97,7 +97,22 @@ const HeroVideo = () => {
     };
   }, []);
 
-
+  // Att byta src på <source> gör INGENTING förrän video.load() körs — elementet
+  // hamnar i networkState=NO_SOURCE och rutan blir svart. På mobil triggar
+  // adressfältets in-/utfällning resize → källbyte → svart skärm mitt i klippet.
+  // Vi laddar därför om dekodern explicit varje gång källan faktiskt ändras.
+  const loadedSrcRef = useRef<string | null>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || skipVideo) return;
+    if (loadedSrcRef.current === heroSrc) return;
+    loadedSrcRef.current = heroSrc;
+    try {
+      video.load();
+    } catch { /* best effort */ }
+    const p = video.play();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  }, [heroSrc, skipVideo]);
 
 
   useEffect(() => {
