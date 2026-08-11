@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import desktopAsset from '@/assets/hero-desktop.mp4.asset.json';
+import mobileAsset from '@/assets/hero-mobile.mp4.asset.json';
+import portraitAsset from '@/assets/hero-mobile-portrait.mp4.asset.json';
+import posterAsset from '@/assets/hero-poster.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 // Datasparläge eller 2G → hoppa över videoladdning helt och visa bara poster.
@@ -17,12 +21,14 @@ const shouldSkipVideo = () => {
 // tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
 // spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
 const pickHeroSrc = () => {
-  if (typeof window === 'undefined') return '/hero-video-720.mp4';
-  const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
-  // Windows/Android (och sparläge/svagt nät) får den lätta 720p-mastern även på
-  // desktop: 6,3 MB + mjukvaruavkodning är exakt det som gör hero-videon hackig
-  // där. Villkoret delas nu med galleriet via videoPlatform.ts så de inte glider isär.
-  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? '/hero-video.mp4' : '/hero-video-720.mp4';
+  if (typeof window === 'undefined') return mobileAsset.url;
+  // Mobile portrait: use a dedicated 9:16 vertical crop so the subject stays
+  // centered and fills the phone screen without the heavy horizontal cropping
+  // that a 16:9 video would require.
+  const isPortraitMobile = window.matchMedia && window.matchMedia('(orientation: portrait) and (max-width: 768px)').matches;
+  if (isPortraitMobile) return portraitAsset.url;
+  const desktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
+  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? desktopAsset.url : mobileAsset.url;
 };
 
 
@@ -268,7 +274,7 @@ const HeroVideo = () => {
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
-          poster="/hero-video-poster.jpg"
+          poster={posterAsset.url}
 
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
