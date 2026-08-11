@@ -46,27 +46,6 @@ const isPortraitLayout = () => {
 const SOURCE_RATIO = 16 / 9;
 const LANDSCAPE_TOP_BIAS = '0%';
 
-// Hur stor andel av bildhöjden vi accepterar att tappa innan vi slutar beskära
-// helt. Över den gränsen (mycket breda/låga fönster) räcker inte topp-ankaret
-// som garanti — då byter vi till "ingen vertikal beskärning alls".
-const MAX_VERTICAL_CROP = 0.08;
-
-const landscapeCropFraction = () => {
-  if (typeof window === 'undefined') return 0;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  if (!w || !h) return 0;
-  if (w / h <= SOURCE_RATIO) return 0; // beskärning sker i sidled
-  const renderedHeight = w / SOURCE_RATIO;
-  return (renderedHeight - h) / renderedHeight;
-};
-
-// Sant när fönstret är så brett/lågt att object-cover skulle äta mer än
-// MAX_VERTICAL_CROP av bilden. Då visas HELA bildrutan (object-contain) och
-// sidorna fylls av en suddad kopia av postern → full-bleed känsla, men
-// matematiskt omöjligt att klippa ett huvud.
-const isSafeFitLayout = () => landscapeCropFraction() > MAX_VERTICAL_CROP;
-
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
   const w = window.innerWidth;
@@ -76,7 +55,6 @@ const landscapeObjectPosition = () => {
   if (w / h <= SOURCE_RATIO) return 'center center';
   return `center ${LANDSCAPE_TOP_BIAS}`;
 };
-
 
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return mobileAsset.url;
@@ -100,7 +78,6 @@ const HeroVideo = () => {
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
   const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitLayout);
   const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
-  const [safeFit, setSafeFit] = useState<boolean>(isSafeFitLayout);
 
   // Recompute source on resize/orientation change so the video adapts when a
   // phone is rotated or a tablet changes orientation. The browser handles the
@@ -111,9 +88,7 @@ const HeroVideo = () => {
       setHeroSrc(pickHeroSrc());
       setIsPortrait(isPortraitLayout());
       setLandscapePosition(landscapeObjectPosition());
-      setSafeFit(isSafeFitLayout());
     };
-
     window.addEventListener('resize', handle, { passive: true });
     window.addEventListener('orientationchange', handle, { passive: true });
     return () => {
@@ -361,20 +336,6 @@ const HeroVideo = () => {
           }
           style={isPortrait ? { aspectRatio: '3 / 4' } : undefined}
         >
-          {/* Extremt breda/låga fönster: hela bildrutan visas (object-contain)
-              och sidorna fylls av en suddad kopia av postern. Full-bleed känsla
-              utan att en enda pixel av motivet kan klippas bort. */}
-          {!isPortrait && safeFit && (
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 h-full w-full bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${posterAsset.url})`,
-                filter: 'blur(48px) saturate(1.1)',
-                transform: 'scale(1.15)',
-              }}
-            />
-          )}
           <video
             ref={videoRef}
             muted
@@ -389,20 +350,11 @@ const HeroVideo = () => {
             controlsList="nodownload noplaybackrate nofullscreen"
             poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
             onContextMenu={(e) => e.preventDefault()}
-            className={`pointer-events-none absolute inset-0 h-full w-full ${
-              !isPortrait && safeFit ? 'object-contain' : 'object-cover'
-            }`}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             // Ansiktena ligger i övre halvan; om blocket ändå klipps av en
             // extremt låg viewport behåller vi huvudena i bild.
-            style={{
-              objectPosition: isPortrait
-                ? 'center 42%'
-                : safeFit
-                  ? 'center center'
-                  : landscapePosition,
-            }}
+            style={{ objectPosition: isPortrait ? 'center 42%' : landscapePosition }}
           >
-
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
                  så browsern återanvänder samma fetch istället för att ladda två filer. */
