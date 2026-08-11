@@ -314,7 +314,7 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/46273c7e-26c5-4d0b-a049-86d6ea253146/hero-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/21e72ba9-5842-4664-a33a-ba7d0fb23c8a/hero-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
@@ -327,10 +327,10 @@
             var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
             var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
             var videoHref = isPortraitMobile
-              ? '/__l5e/assets-v1/bdfd4a77-3e63-498b-88fd-d16375179c6d/hero-mobile-portrait.mp4'
+              ? '/__l5e/assets-v1/7fc8dcc2-9abb-42ec-ad43-2017dbf1fc4d/hero-mobile-portrait.mp4'
               : (isDesktop && !lightUa)
-                ? '/__l5e/assets-v1/fc999329-3b9d-48b2-9fad-1105f39c3c1e/hero-desktop.mp4'
-                : '/__l5e/assets-v1/a6eb6576-78e8-4f7e-ae03-28d89c14556a/hero-mobile.mp4';
+                ? '/__l5e/assets-v1/66ac6545-cd70-4a83-9876-70be9f2963bc/hero-desktop.mp4'
+                : '/__l5e/assets-v1/c93eb91e-df18-46fb-a44f-8536938019d8/hero-mobile.mp4';
             // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
             // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
             var isSafari = /Safari/.test(navigator.userAgent || '') && !/Chrome|Chromium|Edg\//.test(navigator.userAgent || '');
