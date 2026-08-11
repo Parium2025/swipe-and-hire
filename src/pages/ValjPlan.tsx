@@ -370,9 +370,10 @@ export default function ValjPlan() {
         {/* Engångspaket — separat block, identiskt med landningen */}
         {!loading && oneTimePlan && (
           <motion.div
-            initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            transition={{ duration: 0.85, ease, delay: 0.1 }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease }}
+
             className="mt-14"
           >
             <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/5 p-8 md:flex md:items-center md:justify-between md:gap-8 [@media_(hover:hover)]:backdrop-blur-xl">
