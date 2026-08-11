@@ -56,7 +56,7 @@ const getTier = (): HeroTier => {
 // 0 % låser källbildens absoluta överkant mot viewportens överkant och lägger
 // ALL beskärning i botten. Då kan webbläsaren aldrig kapa huvudet.
 const SOURCE_RATIO = 16 / 9;
-const LANDSCAPE_TOP_BIAS = '0%';
+const LANDSCAPE_TOP_BIAS = '35%';
 
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
