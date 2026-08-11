@@ -228,6 +228,13 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             {resolvedShowDrafts && <div className={`h-9 w-24 rounded-full ${SHAPE}`} />}
           </div>
 
+          {/* Tomt konto: spegla den riktiga tomtext-raden i stället för kort. */}
+          {cardCount === 0 && (
+            <div className="flex justify-center py-12">
+              <div className={`h-4 w-64 max-w-[80%] rounded ${SHAPE}`} />
+            </div>
+          )}
+
           {/* Mobile: MobileJobCard-formade kort — hero-media (2:1), logo-cirkel
               centrerad, titel, divider, list-rader, divider, action-rad.
               Antalet styrs av senast kända tab-count via localStorage. */}
