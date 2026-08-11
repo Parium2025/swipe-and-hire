@@ -316,8 +316,10 @@
           if (path === '/' || path === '') {
             var _r = (window.innerWidth && window.innerHeight) ? (window.innerWidth / window.innerHeight) : 1.78;
             // Tre geometriska nivåer — matchar pickHeroSrc() i HeroVideo.tsx exakt.
-            // < 0.66 = telefon (9:16), 0.66–1.25 = surfplatta/kvadratisk (3:4), annars landskap (16:9).
-            var _tier = _r < 0.66 ? 'portrait' : (_r < 1.25 ? 'tablet' : 'landscape');
+            // Telefon: smal viewport (<= 820 px) i stående läge — adressfältet gör
+            // att ratio kan bli upp mot 0,8 så enbart 0,66 missade riktiga mobiler.
+            var _phone = window.innerWidth <= 820 && _r < 1;
+            var _tier = _phone ? 'portrait' : (_r < 1.25 ? 'tablet' : 'landscape');
             add({ rel: 'preload', as: 'image', href: _tier === 'portrait'
               ? '/__l5e/assets-v1/f85ce438-d881-4fc4-b122-99d720db2ffe/hero6-poster-portrait.jpg'
               : _tier === 'tablet'
