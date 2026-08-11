@@ -343,9 +343,9 @@ const HeroVideo = () => {
             poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
             onContextMenu={(e) => e.preventDefault()}
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            // Ansiktena ligger i övre halvan; om blocket ändå klipps av en
-            // extremt låg viewport behåller vi huvudena i bild.
-            style={{ objectPosition: isPortrait ? 'center 42%' : landscapePosition }}
+            // Porträttkällan är native 9:16 → centrerad crop räcker; på riktigt
+            // låga viewports (delad skärm) hålls huvudena kvar med lätt topp-bias.
+            style={{ objectPosition: isPortrait ? 'center 45%' : landscapePosition }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
@@ -353,10 +353,6 @@ const HeroVideo = () => {
               <source src={heroSrc} type="video/mp4" />
             )}
           </video>
-          {/* Mjuk övertoning i videons underkant → sidans svarta bakgrund. */}
-          {isPortrait && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-b from-transparent to-black" />
-          )}
         </div>
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
