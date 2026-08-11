@@ -308,21 +308,23 @@ const HeroVideo = () => {
     const handleError = () => {
       // 4K/1440 H.264 High@5.1 stöds inte av alla hårdvarudekoders. Byt då en
       // gång till vår konservativa Main@4.0-master i stället för att ladda om
-      // samma inkompatibla fil i en loop.
-      const currentPath = (() => {
-        try { return new URL(video.currentSrc || video.src, window.location.href).pathname; }
-        catch { return video.currentSrc || video.src; }
-      })();
-      const fallbackPath = (() => {
-        try { return new URL(HERO_VIDEO_1080, window.location.href).pathname; }
-        catch { return HERO_VIDEO_1080; }
-      })();
-      if (currentPath !== fallbackPath) {
+      // samma inkompatibla fil i en loop. Den stående och 4:5-mastern ÄR redan
+      // Main@4.0 — där byter vi aldrig format, det skulle ge fel beskärning.
+      const toPath = (url: string) => {
+        try { return new URL(url, window.location.href).pathname; }
+        catch { return url; }
+      };
+      const currentPath = toPath(video.currentSrc || video.src);
+      const reframed =
+        currentPath === toPath(HERO_VIDEO_PORTRAIT) || currentPath === toPath(HERO_VIDEO_SQUARE);
+      const fallbackPath = toPath(HERO_VIDEO_1080);
+      if (!reframed && currentPath !== fallbackPath) {
         stopWatchdog();
         errorCount = 0;
         setHeroSrc(HERO_VIDEO_1080);
         return;
       }
+
       // Begränsad backoff förhindrar error → load-loop vid ett fladdrande GPU-byte.
       rebuilding = false;
       if (decoderResetTimer !== null) window.clearTimeout(decoderResetTimer);
