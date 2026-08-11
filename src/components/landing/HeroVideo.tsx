@@ -122,12 +122,34 @@ const HeroVideo = () => {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     let settleTimer: number | null = null;
+  //     debounce:at till 250 ms efter sista resize-eventet.
+  //
+  //  3. UNDANTAG: byter NIVÅ (t.ex. telefon som roteras till liggande) måste
+  //     källan bytas OMEDELBART. Annars spelas 9:16-mastern i en 16:9-viewport
+  //     i en kvarts sekund, och object-cover hinner zooma sönder bilden /
+  //     visa fel utsnitt. Nivåbyte = direkt, upplösningsbyte = debounce:at.
+  const tierRef = useRef<HeroTier>(tier);
+  tierRef.current = tier;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let settleTimer: number | null = null;
     const handle = () => {
       setLandscapePosition(landscapeObjectPosition());
+      const nextTier = getTier();
+      if (nextTier !== tierRef.current) {
+        if (settleTimer !== null) {
+          window.clearTimeout(settleTimer);
+          settleTimer = null;
+        }
+        tierRef.current = nextTier;
+        setTier(nextTier);
+        setHeroSrc(pickHeroSrc());
+        return;
+      }
       if (settleTimer !== null) window.clearTimeout(settleTimer);
       settleTimer = window.setTimeout(() => {
         settleTimer = null;
-        setTier(getTier());
         setHeroSrc(pickHeroSrc());
       }, 250);
     };
@@ -142,6 +164,7 @@ const HeroVideo = () => {
 
   // Att byta src på <source> gör INGENTING förrän video.load() körs — elementet
   // hamnar i networkState=NO_SOURCE och rutan blir svart. Vi laddar därför om
+
   // dekodern explicit varje gång källan faktiskt ändras — men ALDRIG vid första
   // renderingen: markup:en innehåller redan rätt <source>, och ett load() där
   // hade slängt bort browserns pågående preload-hämtning och startat om den.
