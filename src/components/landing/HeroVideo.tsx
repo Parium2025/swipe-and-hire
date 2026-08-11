@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import desktopAsset from '@/assets/hero6-desktop.mp4.asset.json';
-import landscapeLiteAsset from '@/assets/hero6-landscape-lite.mp4.asset.json';
-import tabletAsset from '@/assets/hero6-tablet.mp4.asset.json';
+import desktopAsset from '@/assets/hero7-desktop.mp4.asset.json';
+import landscapeLiteAsset from '@/assets/hero7-landscape-lite.mp4.asset.json';
+import tabletAsset from '@/assets/hero7-tablet.mp4.asset.json';
 import portraitAsset from '@/assets/hero6-portrait.mp4.asset.json';
-import posterAsset from '@/assets/hero6-poster.jpg.asset.json';
-import posterTabletAsset from '@/assets/hero6-poster-tablet.jpg.asset.json';
+import posterAsset from '@/assets/hero7-poster.jpg.asset.json';
+import posterTabletAsset from '@/assets/hero7-poster-tablet.jpg.asset.json';
 import posterPortraitAsset from '@/assets/hero6-poster-portrait.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
@@ -56,7 +56,7 @@ const getTier = (): HeroTier => {
 // 0 % låser källbildens absoluta överkant mot viewportens överkant och lägger
 // ALL beskärning i botten. Då kan webbläsaren aldrig kapa huvudet.
 const SOURCE_RATIO = 16 / 9;
-const LANDSCAPE_TOP_BIAS = '0%';
+const LANDSCAPE_TOP_BIAS = '35%';
 
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
