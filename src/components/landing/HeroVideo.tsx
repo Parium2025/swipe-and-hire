@@ -324,18 +324,10 @@ const HeroVideo = () => {
         transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-0 h-full w-full"
       >
-        {/* Porträtt: blocket får exakt 3:4 av viewportens bredd och ankras i
-            toppen. Höjden följer bredden, så allt från 4"-telefon till
-            surfplatta i porträtt får samma beskärning — inga kapade huvuden.
+        {/* Porträtt: källan är native 9:16, så videon fyller hela ytan
+            full-bleed utan beskärning av huvuden och utan svart gradient.
             Landskap: videon fyller hela ytan (källan är redan 16:9). */}
-        <div
-          className={
-            isPortrait
-              ? 'absolute inset-x-0 top-0 w-full'
-              : 'absolute inset-0 h-full w-full'
-          }
-          style={isPortrait ? { aspectRatio: '3 / 4' } : undefined}
-        >
+        <div className="absolute inset-0 h-full w-full">
           <video
             ref={videoRef}
             muted
