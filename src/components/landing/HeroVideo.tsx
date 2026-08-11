@@ -36,6 +36,25 @@ const isPortraitLayout = () => {
   return w / h < LANDSCAPE_MIN_RATIO;
 };
 
+// Landskap: så snart viewporten är BREDARE än 16:9 (laptop med browser-chrome,
+// ultrawide, delad skärm) skalar object-cover efter bredden och kapar topp och
+// botten lika mycket. Med `center center` är det exakt huvudena som ryker.
+// object-position i procent styr FÖRDELNINGEN av bortfallet: 12 % betyder att
+// bara 12 % av det som kapas tas i toppen och 88 % i botten (där bara mark och
+// gradient ligger). Då kan huvudet aldrig klippas, oavsett skärmproportion.
+const SOURCE_RATIO = 16 / 9;
+const LANDSCAPE_TOP_BIAS = '12%';
+
+const landscapeObjectPosition = () => {
+  if (typeof window === 'undefined') return 'center center';
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (!w || !h) return 'center center';
+  // Smalare än källan → beskärningen sker i sidled, toppen är redan trygg.
+  if (w / h <= SOURCE_RATIO) return 'center center';
+  return `center ${LANDSCAPE_TOP_BIAS}`;
+};
+
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return mobileAsset.url;
   // Alla porträtt-/kvadratiska viewports (telefon, surfplatta, delad fönstervy)
@@ -57,6 +76,7 @@ const HeroVideo = () => {
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
   const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitLayout);
+  const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
 
   // Recompute source on resize/orientation change so the video adapts when a
   // phone is rotated or a tablet changes orientation. The browser handles the
@@ -66,6 +86,7 @@ const HeroVideo = () => {
     const handle = () => {
       setHeroSrc(pickHeroSrc());
       setIsPortrait(isPortraitLayout());
+      setLandscapePosition(landscapeObjectPosition());
     };
     window.addEventListener('resize', handle, { passive: true });
     window.addEventListener('orientationchange', handle, { passive: true });
@@ -331,7 +352,7 @@ const HeroVideo = () => {
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             // Ansiktena ligger i övre halvan; om blocket ändå klipps av en
             // extremt låg viewport behåller vi huvudena i bild.
-            style={{ objectPosition: isPortrait ? 'center 42%' : 'center center' }}
+            style={{ objectPosition: isPortrait ? 'center 42%' : landscapePosition }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
