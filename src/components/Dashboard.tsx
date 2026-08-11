@@ -18,6 +18,7 @@ import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSke
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
+import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
@@ -133,6 +134,15 @@ const Dashboard = memo(() => {
   const expiredJobs = useMemo(() => allJobs.filter(job =>
     isEmployerJobExpired(job)
   ), [allJobs]);
+
+  // Spara senast kända antal per tab så nästa kall-laddning renderar EXAKT
+  // lika många kortskelett — 0 annonser ⇒ inget kortskelett alls.
+  useEffect(() => {
+    if (isLoading) return;
+    writeCachedCount(SKELETON_COUNT_KEYS.myJobsActive, activeJobs.length);
+    writeCachedCount(SKELETON_COUNT_KEYS.myJobsExpired, expiredJobs.length);
+  }, [isLoading, activeJobs.length, expiredJobs.length]);
+
 
   const filteredStats = useMemo(() => ({
     totalJobs: activeJobs.length + expiredJobs.length,

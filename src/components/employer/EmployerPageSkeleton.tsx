@@ -15,18 +15,20 @@ function useLiveEmployerJobCount(tab: 'active' | 'expired' | 'draft', fallbackKe
   // Look for any cached ['jobs', ...] entry with data
   const entries = qc.getQueriesData<any[]>({ queryKey: ['jobs'] });
   for (const [, data] of entries) {
-    if (Array.isArray(data) && data.length >= 0) {
+    if (Array.isArray(data)) {
       const filtered = data.filter(j =>
         tab === 'active' ? isEmployerJobActive(j) :
         tab === 'expired' ? isEmployerJobExpired(j) :
         isEmployerJobDraft(j)
       );
-      // Clamp to visible range like readCachedCount does
-      return Math.min(6, Math.max(1, filtered.length || 1));
+      // 0 annonser ⇒ 0 kortskelett. Skelettet ska aldrig låtsas att det finns
+      // innehåll som inte finns — annars "blinkar" ett kort förbi på ett tomt konto.
+      return Math.min(6, filtered.length);
     }
   }
   return readCachedCount(fallbackKey, 3, 6);
 }
+
 
 /**
  * Full-screen skeleton overlays for the employer side, mirroring
@@ -225,6 +227,13 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             <div className={`h-9 w-28 rounded-full ${SHAPE}`} />
             {resolvedShowDrafts && <div className={`h-9 w-24 rounded-full ${SHAPE}`} />}
           </div>
+
+          {/* Tomt konto: spegla den riktiga tomtext-raden i stället för kort. */}
+          {cardCount === 0 && (
+            <div className="flex justify-center py-12">
+              <div className={`h-4 w-64 max-w-[80%] rounded ${SHAPE}`} />
+            </div>
+          )}
 
           {/* Mobile: MobileJobCard-formade kort — hero-media (2:1), logo-cirkel
               centrerad, titel, divider, list-rader, divider, action-rad.
