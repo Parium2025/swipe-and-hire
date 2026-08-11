@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import desktopAsset from '@/assets/hero-desktop.mp4.asset.json';
 import mobileAsset from '@/assets/hero-mobile.mp4.asset.json';
-import portraitAsset from '@/assets/hero-mobile-portrait-916.mp4.asset.json';
+import portraitAsset from '@/assets/hero-mobile-portrait-916-v2.mp4.asset.json';
 import posterAsset from '@/assets/hero-poster.jpg.asset.json';
-import posterPortraitAsset from '@/assets/hero-poster-portrait-916.jpg.asset.json';
+import posterPortraitAsset from '@/assets/hero-poster-portrait-916-v2.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 
