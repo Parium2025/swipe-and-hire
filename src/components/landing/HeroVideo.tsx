@@ -245,13 +245,13 @@ const HeroVideo = () => {
       }
     };
 
-    // Första användarinteraktionen häver blockeringen i Lågeffektläge.
+    // Scroll räknas inte som gesture på iOS, men triggar ett nytt försök.
+    // (touch/pointer/click hanteras redan av handleFirstInteraction längre ned.)
     const onUserGesture = () => tryPlay();
-    document.addEventListener('touchstart', onUserGesture, { passive: true });
-    document.addEventListener('pointerdown', onUserGesture, { passive: true });
     document.addEventListener('scroll', onUserGesture, { passive: true });
     const onPlaying = () => setAutoplayBlocked(false);
     video.addEventListener('playing', onPlaying);
+
 
 
 
