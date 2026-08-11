@@ -281,7 +281,9 @@ export default function ValjPlan() {
         {/* Prenumerationsplaner — speglar exakt landningens pricing-grid */}
         <div className="relative mt-10 grid gap-5 sm:mt-12 md:grid-cols-3">
           {loading && Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-[420px] animate-pulse rounded-3xl border border-white/5 bg-white/[0.03]" />
+            // Statisk platshållare — ingen pulse. Pulsen är det som "blixtrar"
+            // precis innan korten byts in.
+            <div key={i} className="h-[420px] rounded-3xl border border-white/5 bg-white/[0.03]" />
           ))}
           {!loading && subscriptionPlans.map((plan, i) => {
             const isRecommended = plan.tier === 'pro' && !userHasPro;
@@ -289,9 +291,10 @@ export default function ValjPlan() {
             return (
               <motion.div
                 key={plan.id}
-                initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                transition={{ duration: 0.85, ease, delay: 0.1 + i * 0.08 }}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, ease, delay: i * 0.06 }}
+
                 onPointerDownCapture={() => setActiveTier(plan.tier)}
                 onFocusCapture={() => setActiveTier(plan.tier)}
                 onClick={() => setActiveTier(plan.tier)}
