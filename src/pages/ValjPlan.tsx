@@ -150,26 +150,21 @@ export default function ValjPlan() {
   const welcome = searchParams.get('welcome') === 'true';
 
 
-  // Planer ändras extremt sällan → cachas i react-query så att sidan
-  // renderas direkt (utan skelett) vid alla återbesök i samma session.
+  // Planer ändras extremt sällan → cachas i react-query + localStorage-snapshot
+  // så att sidan renderas direkt (utan skelett) även vid kallstart.
   const { data: plans = [], isLoading, error: plansError } = useQuery({
-    queryKey: ['subscription-plans', 'active'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('subscription_plans')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-      if (error) throw error;
-      return (data as unknown as Plan[]) ?? [];
-    },
+    queryKey: SUBSCRIPTION_PLANS_KEY,
+    queryFn: () => fetchSubscriptionPlans<Plan>(),
+    initialData: () => readPlansSnapshot<Plan>(),
+    initialDataUpdatedAt: 0, // markera snapshot som stale → tyst bakgrundsuppdatering
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: 'always',
   });
   // Skelett visas bara när vi faktiskt saknar data — aldrig ovanpå cache.
   const loading = isLoading && plans.length === 0;
+
 
   useEffect(() => {
     if (plansError) {
