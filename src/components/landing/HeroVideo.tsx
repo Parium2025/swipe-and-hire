@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import desktopAsset from '@/assets/hero-desktop.mp4.asset.json';
-import mobileAsset from '@/assets/hero-mobile.mp4.asset.json';
-import portraitAsset from '@/assets/hero-mobile-byggarbetare-v5.mp4.asset.json';
-import posterAsset from '@/assets/hero-poster.jpg.asset.json';
-import posterPortraitAsset from '@/assets/hero-poster-byggarbetare-v5.jpg.asset.json';
+import desktopAsset from '@/assets/hero5-desktop.mp4.asset.json';
+import landscapeLiteAsset from '@/assets/hero5-landscape-lite.mp4.asset.json';
+import tabletAsset from '@/assets/hero5-tablet.mp4.asset.json';
+import portraitAsset from '@/assets/hero5-portrait.mp4.asset.json';
+import posterAsset from '@/assets/hero5-poster.jpg.asset.json';
+import posterTabletAsset from '@/assets/hero5-poster-tablet.jpg.asset.json';
+import posterPortraitAsset from '@/assets/hero5-poster-portrait.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 
@@ -23,17 +25,27 @@ const shouldSkipVideo = () => {
 // tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
 // spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
 //
-// Regeln är geometrisk, inte enhetsbaserad, så den täcker allt från 4"-telefon
-// till 100"-TV: så snart viewporten är smalare än 16:9 skulle en landskapsfil
-// behöva beskäras i sidled. Då byter vi till byggarbetarens mobilmaster.
-const LANDSCAPE_MIN_RATIO = 1.2; // över 1:1, under 4:3 — 4:3-skärmar räknas som landskap
+// Regeln är geometrisk, inte enhetsbaserad, och delar upp världen i tre nivåer
+// så att object-cover aldrig behöver kapa mer än några få procent — och så att
+// svarta ränder aldrig kan uppstå oavsett skärm:
+//   ratio < 0.66            → telefon        → 9:16-master (1080×1920)
+//   0.66 ≤ ratio < 1.25     → surfplatta/    → 3:4-master  (1200×1600)
+//                              delad fönstervy
+//   ratio ≥ 1.25            → laptop/TV      → 16:9-master (1920×1080 / 1280×720)
+const PORTRAIT_MAX_RATIO = 0.66;
+const TABLET_MAX_RATIO = 1.25;
 
-const isPortraitLayout = () => {
-  if (typeof window === 'undefined') return false;
+type HeroTier = 'portrait' | 'tablet' | 'landscape';
+
+const getTier = (): HeroTier => {
+  if (typeof window === 'undefined') return 'landscape';
   const w = window.innerWidth;
   const h = window.innerHeight;
-  if (!w || !h) return false;
-  return w / h < LANDSCAPE_MIN_RATIO;
+  if (!w || !h) return 'landscape';
+  const r = w / h;
+  if (r < PORTRAIT_MAX_RATIO) return 'portrait';
+  if (r < TABLET_MAX_RATIO) return 'tablet';
+  return 'landscape';
 };
 
 // Landskap: så snart viewporten är BREDARE än 16:9 (laptop med browser-chrome,
@@ -57,10 +69,10 @@ const landscapeObjectPosition = () => {
 };
 
 const pickHeroSrc = () => {
-  if (typeof window === 'undefined') return mobileAsset.url;
-  // Alla porträtt-/kvadratiska viewports (telefon, surfplatta, delad fönstervy)
-  // får den dedikerade byggarbetarvideon.
-  if (isPortraitLayout()) return portraitAsset.url;
+  if (typeof window === 'undefined') return landscapeLiteAsset.url;
+  const tier = getTier();
+  if (tier === 'portrait') return portraitAsset.url;
+  if (tier === 'tablet') return tabletAsset.url;
   // Landskap: skala efter faktisk renderad bredd (CSS-px × DPR, tak 2×) så att
   // stora skärmar och TV får 1080p-mastern och små/svaga enheter den lätta.
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -68,15 +80,16 @@ const pickHeroSrc = () => {
   const wantsHighRes = renderedWidth >= 1280;
   return wantsHighRes && !prefersLightweightVideo() && !prefersReducedData()
     ? desktopAsset.url
-    : mobileAsset.url;
+    : landscapeLiteAsset.url;
 };
+
 
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
-  const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitLayout);
+  const [tier, setTier] = useState<HeroTier>(getTier);
   const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
 
   // Recompute source on resize/orientation change so the video adapts when a
@@ -86,7 +99,7 @@ const HeroVideo = () => {
     if (typeof window === 'undefined') return;
     const handle = () => {
       setHeroSrc(pickHeroSrc());
-      setIsPortrait(isPortraitLayout());
+      setTier(getTier());
       setLandscapePosition(landscapeObjectPosition());
     };
     window.addEventListener('resize', handle, { passive: true });
@@ -352,16 +365,16 @@ const HeroVideo = () => {
             // Porträtt (mobil): Chrome/Android ignorerar
             // <link rel="preload" as="video">. Med "metadata" hann dekodern ta slut
             // på buffert → svart ruta mellan klippen. "auto" buffrar hela klippet.
-            preload={isPortrait ? 'auto' : 'metadata'}
+            preload={tier === 'landscape' ? 'metadata' : 'auto'}
             disablePictureInPicture
             disableRemotePlayback
             controlsList="nodownload noplaybackrate nofullscreen"
-            poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
+            poster={tier === 'portrait' ? posterPortraitAsset.url : tier === 'tablet' ? posterTabletAsset.url : posterAsset.url}
             onContextMenu={(e) => e.preventDefault()}
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            // Det stående motivet är centrerat i källfilen; object-cover tar bort
-            // sidofälten på mobilen utan att flytta byggarbetaren ur bild.
-            style={{ objectPosition: isPortrait ? 'center center' : landscapePosition }}
+            // Varje nivå har en master med nästan samma proportion som viewporten,
+            // så object-cover kapar bara några procent — aldrig svarta ränder.
+            style={{ objectPosition: tier === 'landscape' ? landscapePosition : 'center center' }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
