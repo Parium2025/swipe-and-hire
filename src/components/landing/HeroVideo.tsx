@@ -56,7 +56,7 @@ const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
-  const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitMobileView);
+  const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitLayout);
 
   // Recompute source on resize/orientation change so the video adapts when a
   // phone is rotated or a tablet changes orientation. The browser handles the
