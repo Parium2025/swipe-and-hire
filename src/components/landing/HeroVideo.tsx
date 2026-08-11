@@ -121,6 +121,11 @@ const HeroVideo = () => {
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
   const [tier, setTier] = useState<HeroTier>(getTier);
   const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
+  // iOS Lågeffektläge blockerar autoplay. Safari ritar då sin egen play-knapp
+  // ovanpå <video> (kan inte alltid CSS-döljas). Vi döljer hela videoelementet
+  // och visar postern som vanlig <img> — ser ut som en still, inte en trasig spelare.
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+
 
   // Recompute source on resize/orientation change so the video adapts when a
   // phone is rotated or a tablet changes orientation.
@@ -226,15 +231,28 @@ const HeroVideo = () => {
       if (p && typeof p.catch === 'function') {
         p.then(() => {
           failCount = 0;
-        }).catch(() => {
+          setAutoplayBlocked(false);
+        }).catch((err: unknown) => {
           failCount++;
-          // iOS Lågeffektläge kan blockera autoplay helt tills första touch.
-          // Vi döljer native play UI via CSS och försöker igen vid touch/focus.
+          // iOS Lågeffektläge blockerar autoplay tills användaren interagerar.
+          // Efter två misslyckade försök visar vi postern som stillbild i stället
+          // för att låta Safari rita sin play-knapp ovanpå videon.
+          const blocked = (err as { name?: string } | null)?.name === 'NotAllowedError';
+          if (blocked && failCount >= 2) setAutoplayBlocked(true);
           if (retryTimer) window.clearTimeout(retryTimer);
           retryTimer = window.setTimeout(tryPlay, 600);
         });
       }
     };
+
+    // Scroll räknas inte som gesture på iOS, men triggar ett nytt försök.
+    // (touch/pointer/click hanteras redan av handleFirstInteraction längre ned.)
+    const onUserGesture = () => tryPlay();
+    document.addEventListener('scroll', onUserGesture, { passive: true });
+    const onPlaying = () => setAutoplayBlocked(false);
+    video.addEventListener('playing', onPlaying);
+
+
 
 
     // Försök spela direkt — väntar inte på canplay om vi redan har data
@@ -392,8 +410,11 @@ const HeroVideo = () => {
       if (decoderResetTimer !== null) window.clearTimeout(decoderResetTimer);
       if (resizeTimer !== null) window.clearTimeout(resizeTimer);
       if (watchdog !== null) window.clearInterval(watchdog);
+      document.removeEventListener('scroll', onUserGesture);
+      video.removeEventListener('playing', onPlaying);
       video.removeEventListener('loadeddata', onCanPlay);
       video.removeEventListener('canplay', onCanPlay);
+
       video.removeEventListener('playing', handlePlaying);
       video.removeEventListener('stalled', handleStalled);
       video.removeEventListener('waiting', handleStalled);
@@ -423,6 +444,19 @@ const HeroVideo = () => {
             i en 16:9-fil. object-cover beskär de svarta sidofälten och behåller
             personen centrerad. Landskap använder befintlig hero-master. */}
         <div className="absolute inset-0 h-full w-full">
+          {/* Lågeffektläge / blockerad autoplay: postern som stillbild ovanpå,
+              så Safaris play-knapp aldrig syns. Byts tillbaka när videon spelar. */}
+          {(autoplayBlocked || skipVideo) && (
+            <img
+              src={tier === 'portrait' ? posterPortraitAsset.url : tier === 'tablet' ? posterTabletAsset.url : posterAsset.url}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover"
+              style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center' }}
+            />
+          )}
+
           <video
             ref={videoRef}
             aria-hidden="true"
