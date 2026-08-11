@@ -36,6 +36,30 @@ const isPortraitLayout = () => {
   return w / h < LANDSCAPE_MIN_RATIO;
 };
 
+// Landskap: så snart viewporten är BREDARE än 16:9 (laptop med browser-chrome,
+// ultrawide, delad skärm) skalar object-cover efter bredden och kapar då topp
+// och botten lika mycket. Med `center center` är det exakt huvudena som ryker.
+// Vi flyttar därför ankaret uppåt i proportion till hur mycket som faktiskt
+// kapas: ju plattare viewport, desto närmare toppen ankrar vi.
+const SOURCE_RATIO = 16 / 9;
+
+const landscapeObjectPosition = () => {
+  if (typeof window === 'undefined') return 'center center';
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (!w || !h) return 'center center';
+  const ratio = w / h;
+  if (ratio <= SOURCE_RATIO) return 'center center'; // kapar i sidled → topp är trygg
+  // Andel av källhöjden som blir kvar. 1 = inget kapat, 0.7 = 30 % bortkapat.
+  const visible = SOURCE_RATIO / ratio;
+  const cropped = 1 - visible; // total andel som kapas (topp + botten)
+  // Behåll ~12 % av bortfallet i toppen, resten tas i botten. Det ger alltid
+  // luft ovanför huvudet utan att motivet limmas i överkanten.
+  const topShare = cropped * 0.12;
+  const anchor = cropped > 0 ? (topShare / cropped) * 100 : 50;
+  return `center ${anchor.toFixed(1)}%`;
+};
+
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return mobileAsset.url;
   // Alla porträtt-/kvadratiska viewports (telefon, surfplatta, delad fönstervy)
