@@ -302,43 +302,49 @@ const HeroVideo = () => {
         transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-0 h-full w-full"
       >
-        <video
-          ref={videoRef}
-          muted
-          autoPlay
-          loop
-          playsInline
-          // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
-          // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
-          preload="metadata"
-          disablePictureInPicture
-          disableRemotePlayback
-          controlsList="nodownload noplaybackrate nofullscreen"
-          poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
-
-          onContextMenu={(e) => e.preventDefault()}
+        {/* Porträtt: blocket får exakt 3:4 av viewportens bredd och ankras i
+            toppen. Höjden följer bredden, så allt från 4"-telefon till
+            surfplatta i porträtt får samma beskärning — inga kapade huvuden.
+            Landskap: videon fyller hela ytan (källan är redan 16:9). */}
+        <div
           className={
             isPortrait
-              ? 'pointer-events-none absolute inset-x-0 top-0 h-[133.34vw] w-full object-cover'
-              : 'pointer-events-none absolute inset-0 h-full w-full object-cover'
+              ? 'absolute inset-x-0 top-0 w-full'
+              : 'absolute inset-0 h-full w-full'
           }
+          style={isPortrait ? { aspectRatio: '3 / 4' } : undefined}
         >
-          {!skipVideo && (
-            /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
-               så browsern återanvänder samma fetch istället för att ladda två filer. */
-            <source src={heroSrc} type="video/mp4" />
+          <video
+            ref={videoRef}
+            muted
+            autoPlay
+            loop
+            playsInline
+            // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
+            // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
+            preload="metadata"
+            disablePictureInPicture
+            disableRemotePlayback
+            controlsList="nodownload noplaybackrate nofullscreen"
+            poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
+            onContextMenu={(e) => e.preventDefault()}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+            // Ansiktena ligger i övre halvan; om blocket ändå klipps av en
+            // extremt låg viewport behåller vi huvudena i bild.
+            style={{ objectPosition: isPortrait ? 'center 42%' : 'center center' }}
+          >
+            {!skipVideo && (
+              /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
+                 så browsern återanvänder samma fetch istället för att ladda två filer. */
+              <source src={heroSrc} type="video/mp4" />
+            )}
+          </video>
+          {/* Mjuk övertoning i videons underkant → sidans svarta bakgrund. */}
+          {isPortrait && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-b from-transparent to-black" />
           )}
-
-        </video>
+        </div>
       </motion.div>
-      {/* Porträtt: mjuk övertoning från videons underkant ner i sidans bakgrund,
-          så att 3:4-formatet ser avsiktligt ut i stället för avklippt. */}
-      {isPortrait && (
-        <>
-          <div className="pointer-events-none absolute inset-x-0 top-[93vw] h-[41vw] bg-gradient-to-b from-transparent to-black" />
-          <div className="pointer-events-none absolute inset-x-0 top-[133vw] bottom-0 bg-black" />
-        </>
-      )}
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
     </div>
