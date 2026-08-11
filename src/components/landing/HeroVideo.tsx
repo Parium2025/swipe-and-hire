@@ -85,14 +85,18 @@ const pickHeroSrc = () => {
   if (landscapeHighResLatched) return desktopAsset.url;
   // Landskap: skala efter faktisk renderad bredd (CSS-px × DPR, tak 2×) så att
   // stora skärmar och TV får 1080p-mastern och små/svaga enheter den lätta.
+  // iPad i liggande läge (1112–1194 CSS-px, dpr 2) ska alltid ha 1080p-mastern:
+  // retina-panelen renderar ~2200 px och 720p-spåret syns som mjukt.
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const renderedWidth = window.innerWidth * dpr;
-  const wantsHighRes = renderedWidth >= 1280;
+  const isRetinaTabletOrLarger = dpr >= 2 && window.innerWidth >= 900;
+  const wantsHighRes = renderedWidth >= 1280 || isRetinaTabletOrLarger;
   if (wantsHighRes && !prefersLightweightVideo() && !prefersReducedData()) {
     landscapeHighResLatched = true;
     return desktopAsset.url;
   }
   return landscapeLiteAsset.url;
+
 };
 
 
