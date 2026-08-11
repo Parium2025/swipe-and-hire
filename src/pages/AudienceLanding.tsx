@@ -1761,10 +1761,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         backgroundColor: 'hsl(var(--primary))',
       }}
     >
-      <div className="pointer-events-none absolute inset-0 z-0">
+      {/* Dekorlagren är FIXED + clippade: som absolute kunde glöden sticka ut
+          under footern och dessutom förlänga scrollhöjden, vilket gav en synlig
+          rundad "hörna" i tomrummet längst ned på iPad. */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <AnimatedBackground showBubbles={false} showGlow={true} />
       </div>
-      <div className="pointer-events-none absolute inset-0 z-0">
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
       <FixedPhoneLayer variant={audience === 'job_seeker' ? 'video' : 'spline'} />
