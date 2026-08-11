@@ -121,6 +121,11 @@ const HeroVideo = () => {
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
   const [tier, setTier] = useState<HeroTier>(getTier);
   const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
+  // iOS Lågeffektläge blockerar autoplay. Safari ritar då sin egen play-knapp
+  // ovanpå <video> (kan inte alltid CSS-döljas). Vi döljer hela videoelementet
+  // och visar postern som vanlig <img> — ser ut som en still, inte en trasig spelare.
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+
 
   // Recompute source on resize/orientation change so the video adapts when a
   // phone is rotated or a tablet changes orientation.
