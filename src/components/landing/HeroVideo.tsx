@@ -334,9 +334,10 @@ const HeroVideo = () => {
             autoPlay
             loop
             playsInline
-            // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
-            // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
-            preload="metadata"
+            // Porträtt (mobil): filen är bara ~2 MB och Chrome/Android ignorerar
+            // <link rel="preload" as="video">. Med "metadata" hann dekodern ta slut
+            // på buffert → svart ruta mellan klippen. "auto" buffrar hela klippet.
+            preload={isPortrait ? 'auto' : 'metadata'}
             disablePictureInPicture
             disableRemotePlayback
             controlsList="nodownload noplaybackrate nofullscreen"
