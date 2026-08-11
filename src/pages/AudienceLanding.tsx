@@ -2335,6 +2335,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <SiteFooter />
             </Suspense>
 
+            {/* Solid bottenplatta: täcker eventuellt tomrum under footern
+                (iPad/iOS: dynamisk viewport + rubber-band) så att inga
+                dekorlager eller gradienter kan skymta fram längst ned. */}
+            <div aria-hidden className="h-24 w-full bg-primary" />
+
+
 
         </div>
       </div>
