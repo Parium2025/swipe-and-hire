@@ -319,10 +319,10 @@
             // < 0.66 = telefon (9:16), 0.66–1.25 = surfplatta/kvadratisk (3:4), annars landskap (16:9).
             var _tier = _r < 0.66 ? 'portrait' : (_r < 1.25 ? 'tablet' : 'landscape');
             add({ rel: 'preload', as: 'image', href: _tier === 'portrait'
-              ? '/__l5e/assets-v1/f794aa31-dbff-42c3-b712-15f8cbc6c0b3/hero5-poster-portrait.jpg'
+              ? '/__l5e/assets-v1/f85ce438-d881-4fc4-b122-99d720db2ffe/hero6-poster-portrait.jpg'
               : _tier === 'tablet'
-                ? '/__l5e/assets-v1/c8512667-401c-4380-b803-5f6b3bc7c45f/hero5-poster-tablet.jpg'
-                : '/__l5e/assets-v1/af7afb98-3225-4bd0-8b23-cc59882d8b3d/hero5-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+                ? '/__l5e/assets-v1/7a042856-5c73-415f-aa91-33fde51e20d6/hero6-poster-tablet.jpg'
+                : '/__l5e/assets-v1/2278bc1c-8483-4b88-9329-b264757dc6a8/hero6-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
@@ -336,12 +336,12 @@
             var wantsHighRes = (vw * dpr) >= 1280;
             var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
             var videoHref = _tier === 'portrait'
-              ? '/__l5e/assets-v1/92e8c82f-4ed5-4eed-b9c3-7dff37cd2185/hero5-portrait.mp4'
+              ? '/__l5e/assets-v1/bec8ca6c-b5c5-43e0-9e44-f4ca805c0b4e/hero6-portrait.mp4'
               : _tier === 'tablet'
-                ? '/__l5e/assets-v1/bf2086dc-93d1-4968-8286-7d5e3c128512/hero5-tablet.mp4'
+                ? '/__l5e/assets-v1/ad3c959a-927a-4c16-92a6-521d25ee435c/hero6-tablet.mp4'
                 : (wantsHighRes && !lightUa)
-                  ? '/__l5e/assets-v1/8f68c9fd-69a9-4579-b6d1-460d5af9e45b/hero5-desktop.mp4'
-                  : '/__l5e/assets-v1/507f0ed5-f526-4576-872c-b402efc250db/hero5-landscape-lite.mp4';
+                  ? '/__l5e/assets-v1/6beebc11-6775-4923-a10f-700efb995669/hero6-desktop.mp4'
+                  : '/__l5e/assets-v1/e96addff-73cd-48bd-bf05-a878f3071f7f/hero6-landscape-lite.mp4';
 
             // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
             // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
