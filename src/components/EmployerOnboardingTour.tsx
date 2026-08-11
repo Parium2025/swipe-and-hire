@@ -9,7 +9,7 @@ import {
   startEmployerPageCoachTour,
   markAllEmployerPageCoachesSeen,
 } from '@/components/onboarding/EmployerPageIntroCoach';
-import { useOverlayBackgroundLock } from '@/hooks/useNativeTouchScroll';
+import { useNativeTouchScroll, useOverlayBackgroundLock } from '@/hooks/useNativeTouchScroll';
 
 interface EmployerOnboardingTourProps {
   onComplete: () => void;
@@ -97,6 +97,7 @@ export function replayEmployerWelcomeCard(step: 0 | 1 = 0) {
  */
 const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: EmployerOnboardingTourProps) => {
   const navigate = useNavigate();
+  const scrollRef = useNativeTouchScroll<HTMLDivElement>();
   useOverlayBackgroundLock();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<0 | 1>(initialStep);
@@ -190,6 +191,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
 
   return createPortal(
     <div
+      ref={scrollRef}
       data-onboarding-scroll="true"
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
       className={`fixed inset-0 z-[70] h-[100dvh] w-full overflow-x-hidden overflow-y-auto transition-opacity duration-200 ${
