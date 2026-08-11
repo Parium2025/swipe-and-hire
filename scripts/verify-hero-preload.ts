@@ -32,6 +32,8 @@ const assetPortraitPath = 'src/assets/hero-portrait-v11.mp4.asset.json';
 const assetPortrait = JSON.parse(read(assetPortraitPath)) as { url: string };
 const assetSquarePath = 'src/assets/hero-square-v11.mp4.asset.json';
 const assetSquare = JSON.parse(read(assetSquarePath)) as { url: string };
+const assetSquarePosterPath = 'src/assets/hero-poster-square-v11.jpg.asset.json';
+const assetSquarePoster = JSON.parse(read(assetSquarePosterPath)) as { url: string };
 
 const src1080 = asset1080.url;
 if (!/HERO_VIDEO_1440 = hero1440\.url/.test(source)) {
@@ -59,6 +61,9 @@ if (!html.includes(assetPortrait.url)) {
 }
 if (!html.includes(assetSquare.url)) {
   errors.push(`index.html saknar 4:5-källan ${assetSquare.url}`);
+}
+if (!html.includes(assetSquarePoster.url)) {
+  errors.push(`index.html saknar 4:5-postern ${assetSquarePoster.url}`);
 }
 if (!html.includes(posterPortrait)) {
   errors.push(`index.html saknar den stående postern ${posterPortrait}`);

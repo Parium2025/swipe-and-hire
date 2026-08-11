@@ -15,6 +15,7 @@ import hero1440 from '@/assets/hero-video-1440-v9.mp4.asset.json';
 import hero1080 from '@/assets/hero-video-1080-v10.mp4.asset.json';
 import heroPortrait from '@/assets/hero-portrait-v11.mp4.asset.json';
 import heroSquare from '@/assets/hero-square-v11.mp4.asset.json';
+import heroSquarePoster from '@/assets/hero-poster-square-v11.jpg.asset.json';
 
 /** 4K-master (CDN). Endast riktiga desktops med bra nät och hårdvaruavkodning. */
 export const HERO_VIDEO_4K = hero4k.url;
@@ -39,6 +40,9 @@ export const HERO_POSTER = '/hero-video-poster-v8.jpg';
 
 /** Poster i samma utsnitt som den stående mastern. */
 export const HERO_POSTER_PORTRAIT = '/hero-poster-portrait-v11.jpg';
+
+/** Poster i samma utsnitt som 4:5-mastern. */
+export const HERO_POSTER_SQUARE = heroSquarePoster.url;
 
 /** Breakpointen som skiljer 4K från 1080p. Speglad i index.html. */
 export const HERO_DESKTOP_QUERY = '(min-width: 1024px)';
@@ -113,8 +117,12 @@ export const pickHeroAspect = (): HeroAspect => {
 };
 
 /** Postern måste ha samma utsnitt som filmen, annars hoppar bilden vid start. */
-export const pickHeroPoster = (): string =>
-  pickHeroAspect() === 'portrait' ? HERO_POSTER_PORTRAIT : HERO_POSTER;
+export const pickHeroPoster = (): string => {
+  const aspect = pickHeroAspect();
+  if (aspect === 'portrait') return HERO_POSTER_PORTRAIT;
+  if (aspect === 'square') return HERO_POSTER_SQUARE;
+  return HERO_POSTER;
+};
 
 /** Välj EXAKT en källa — aldrig flera <source> med `media`, Chrome respekterar det inte. */
 export const pickHeroSrc = (): string => {
