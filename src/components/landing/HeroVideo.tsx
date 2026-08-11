@@ -4,7 +4,9 @@ import desktopAsset from '@/assets/hero-desktop.mp4.asset.json';
 import mobileAsset from '@/assets/hero-mobile.mp4.asset.json';
 import portraitAsset from '@/assets/hero-mobile-portrait.mp4.asset.json';
 import posterAsset from '@/assets/hero-poster.jpg.asset.json';
+import posterPortraitAsset from '@/assets/hero-poster-portrait.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
+
 
 // Datasparläge eller 2G → hoppa över videoladdning helt och visa bara poster.
 // Sparar 2,4–13 MB för användare i dåligt nät utan att förändra UX synbart.
@@ -20,13 +22,16 @@ const shouldSkipVideo = () => {
 // Välj EXAKT en källa. `media` på <source> inuti <video> respekteras inte
 // tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
 // spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
+const isPortraitMobileView = () =>
+  typeof window !== 'undefined' &&
+  !!window.matchMedia &&
+  window.matchMedia('(orientation: portrait) and (max-width: 768px)').matches;
+
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return mobileAsset.url;
-  // Mobile portrait: use a dedicated 9:16 vertical crop so the subject stays
-  // centered and fills the phone screen without the heavy horizontal cropping
-  // that a 16:9 video would require.
-  const isPortraitMobile = window.matchMedia && window.matchMedia('(orientation: portrait) and (max-width: 768px)').matches;
-  if (isPortraitMobile) return portraitAsset.url;
+  // Mobil i porträtt: egen 3:4-beskärning. Fyller hela bredden med betydligt
+  // mindre inzoomning än en 9:16-beskärning, utan suddiga duplicerade kanter.
+  if (isPortraitMobileView()) return portraitAsset.url;
   const desktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
   return desktop && !prefersLightweightVideo() && !prefersReducedData() ? desktopAsset.url : mobileAsset.url;
 };
@@ -36,13 +41,17 @@ const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
+  const [isPortrait, setIsPortrait] = useState<boolean>(isPortraitMobileView);
 
   // Recompute source on resize/orientation change so the video adapts when a
   // phone is rotated or a tablet changes orientation. The browser handles the
   // source swap automatically via React re-render.
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const handle = () => setHeroSrc(pickHeroSrc());
+    const handle = () => {
+      setHeroSrc(pickHeroSrc());
+      setIsPortrait(isPortraitMobileView());
+    };
     window.addEventListener('resize', handle, { passive: true });
     window.addEventListener('orientationchange', handle, { passive: true });
     return () => {
@@ -50,6 +59,7 @@ const HeroVideo = () => {
       window.removeEventListener('orientationchange', handle);
     };
   }, []);
+
 
 
 
@@ -270,7 +280,7 @@ const HeroVideo = () => {
   }, []);
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden">
+    <div className="absolute inset-0 z-0 overflow-hidden bg-black">
       <motion.div
         initial={{ opacity: 0, scale: 1.06 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -289,10 +299,14 @@ const HeroVideo = () => {
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
-          poster={posterAsset.url}
+          poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
 
           onContextMenu={(e) => e.preventDefault()}
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+          className={
+            isPortrait
+              ? 'pointer-events-none absolute inset-x-0 top-0 h-[133.34vw] w-full object-cover'
+              : 'pointer-events-none absolute inset-0 h-full w-full object-cover'
+          }
         >
           {!skipVideo && (
             /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
@@ -302,10 +316,19 @@ const HeroVideo = () => {
 
         </video>
       </motion.div>
+      {/* Porträtt: mjuk övertoning från videons underkant ner i sidans bakgrund,
+          så att 3:4-formatet ser avsiktligt ut i stället för avklippt. */}
+      {isPortrait && (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-[93vw] h-[41vw] bg-gradient-to-b from-transparent to-black" />
+          <div className="pointer-events-none absolute inset-x-0 top-[133vw] bottom-0 bg-black" />
+        </>
+      )}
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
     </div>
   );
+
 };
 
 export default HeroVideo;
