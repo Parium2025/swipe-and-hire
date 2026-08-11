@@ -62,6 +62,14 @@ const getTier = (): HeroTier => {
 const SOURCE_RATIO = 16 / 9;
 const LANDSCAPE_TOP_BIAS = '35%';
 
+// Surfplatta stående: mastern är exakt 3:4 (1200×1600 = 0,75). En iPad i
+// porträtt är 0,75 på pappret men webbläsarens adressfält/verktygsfält gör
+// den faktiska viewporten kortare (t.ex. 820×1120 = 0,73). Då kapar
+// object-cover några procent i HÖJD — och med `center` fördelas det lika
+// mellan topp och botten, vilket är precis där huvudena ligger. 25 % lägger
+// merparten av bortfallet i botten (golv/mark) så huvudet alltid får rum.
+const TABLET_TOP_BIAS = '25%';
+
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
   const w = window.innerWidth;
