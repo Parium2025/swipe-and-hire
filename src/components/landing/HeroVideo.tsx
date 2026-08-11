@@ -34,6 +34,9 @@ const shouldSkipVideo = () => {
 //   ratio ≥ 1.25            → laptop/TV      → 16:9-master (1920×1080 / 1280×720)
 const PORTRAIT_MAX_RATIO = 0.66;
 const TABLET_MAX_RATIO = 1.25;
+// Riktiga telefoner har ofta ratio 0,66–0,80 när adressfältet är utfällt
+// (t.ex. 393×580 = 0,68). Enbart ratio-regeln skickade dem till 3:4-spåret.
+const PHONE_MAX_WIDTH = 820;
 
 type HeroTier = 'portrait' | 'tablet' | 'landscape';
 
@@ -44,6 +47,7 @@ const getTier = (): HeroTier => {
   if (!w || !h) return 'landscape';
   const r = w / h;
   if (r < PORTRAIT_MAX_RATIO) return 'portrait';
+  if (w <= PHONE_MAX_WIDTH && r < 1) return 'portrait';
   if (r < TABLET_MAX_RATIO) return 'tablet';
   return 'landscape';
 };
