@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const SESSION_TOKEN_KEY = 'parium_session_token';
 const SESSION_TOKEN_COOKIE = 'parium_device_token';
-const HEARTBEAT_INTERVAL_MS = 4 * 60 * 1000; // 4 minutes — well under DB cleanup threshold (20 min)
+const HEARTBEAT_INTERVAL_MS = 90 * 1000; // 90s — well under DB cleanup threshold (5 min)
 const VALIDITY_CHECK_INTERVAL_MS = 30 * 1000; // 30 seconds — reduced frequency to avoid false kicks on mobile
 
 /**
