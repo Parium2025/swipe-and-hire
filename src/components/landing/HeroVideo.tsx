@@ -422,7 +422,7 @@ const HeroVideo = () => {
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
-          poster={HERO_POSTER}
+          poster={poster}
 
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
