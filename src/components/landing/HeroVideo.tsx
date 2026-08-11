@@ -72,19 +72,27 @@ const landscapeObjectPosition = () => {
   return `center ${LANDSCAPE_TOP_BIAS}`;
 };
 
+// Har vi en gång hämtat 1080p-mastern ligger den i cachen. Att nedgradera till
+// lite-spåret när fönstret dras smalare vore då bara en extra nedladdning och en
+// omstart av klippet — vi behåller den bättre filen resten av sessionen.
+let landscapeHighResLatched = false;
+
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return landscapeLiteAsset.url;
   const tier = getTier();
   if (tier === 'portrait') return portraitAsset.url;
   if (tier === 'tablet') return tabletAsset.url;
+  if (landscapeHighResLatched) return desktopAsset.url;
   // Landskap: skala efter faktisk renderad bredd (CSS-px × DPR, tak 2×) så att
   // stora skärmar och TV får 1080p-mastern och små/svaga enheter den lätta.
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const renderedWidth = window.innerWidth * dpr;
   const wantsHighRes = renderedWidth >= 1280;
-  return wantsHighRes && !prefersLightweightVideo() && !prefersReducedData()
-    ? desktopAsset.url
-    : landscapeLiteAsset.url;
+  if (wantsHighRes && !prefersLightweightVideo() && !prefersReducedData()) {
+    landscapeHighResLatched = true;
+    return desktopAsset.url;
+  }
+  return landscapeLiteAsset.url;
 };
 
 
@@ -378,6 +386,8 @@ const HeroVideo = () => {
         <div className="absolute inset-0 h-full w-full">
           <video
             ref={videoRef}
+            aria-hidden="true"
+            tabIndex={-1}
             muted
             autoPlay
             loop
