@@ -65,7 +65,7 @@ const HeroVideo = () => {
     if (typeof window === 'undefined') return;
     const handle = () => {
       setHeroSrc(pickHeroSrc());
-      setIsPortrait(isPortraitMobileView());
+      setIsPortrait(isPortraitLayout());
     };
     window.addEventListener('resize', handle, { passive: true });
     window.addEventListener('orientationchange', handle, { passive: true });
