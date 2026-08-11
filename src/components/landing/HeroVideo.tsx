@@ -337,9 +337,13 @@ const HeroVideo = () => {
           className={
             isPortrait
               ? 'absolute inset-x-0 top-0 w-full'
-              : 'absolute inset-0 h-full w-full'
+              : 'absolute inset-x-0 bottom-0'
           }
-          style={isPortrait ? { aspectRatio: '3 / 4' } : undefined}
+          style={
+            isPortrait
+              ? { aspectRatio: '3 / 4' }
+              : { top: `${LANDSCAPE_HEADROOM}%` }
+          }
         >
           <video
             ref={videoRef}
@@ -371,6 +375,10 @@ const HeroVideo = () => {
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-b from-transparent to-black" />
           )}
         </div>
+        {/* Landskap: mjuk svart topp som täcker headroom-remsan sömlöst. */}
+        {!isPortrait && (
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[14%] bg-gradient-to-b from-black via-black/70 to-transparent" />
+        )}
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
