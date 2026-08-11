@@ -7,6 +7,8 @@ import {
   
   HERO_VIDEO_1080,
   HERO_VIDEO_4K,
+  HERO_VIDEO_PORTRAIT,
+  HERO_VIDEO_SQUARE,
   heroFocusXAt,
   heroObjectPositionX,
 
