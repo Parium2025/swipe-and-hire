@@ -43,8 +43,12 @@ export const HERO_POSTER_PORTRAIT = '/hero-poster-portrait-v11.jpg';
 /** Breakpointen som skiljer 4K från 1080p. Speglad i index.html. */
 export const HERO_DESKTOP_QUERY = '(min-width: 1024px)';
 
-/** Stående yta (mobil) → 9:16-mastern. Speglad i index.html. */
-export const HERO_PORTRAIT_QUERY = '(max-aspect-ratio: 7/10)';
+/**
+ * Endast verkligt höga mobilvyer får 9:16-mastern. En kort mobilvy som 393×580
+ * är 0,68 och behöver 4:5-mastern för att behålla mer luft runt personerna.
+ * Speglad i index.html.
+ */
+export const HERO_PORTRAIT_QUERY = '(max-aspect-ratio: 3/5)';
 
 /** Nästan kvadratisk yta (surfplatta/smalt fönster) → 4:5-mastern. Speglad i index.html. */
 export const HERO_SQUARE_QUERY = '(max-aspect-ratio: 13/10)';

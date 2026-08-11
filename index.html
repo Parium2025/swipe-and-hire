@@ -314,7 +314,7 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            var isPortraitView = window.matchMedia && window.matchMedia('(max-aspect-ratio: 7/10)').matches;
+            var isPortraitView = window.matchMedia && window.matchMedia('(max-aspect-ratio: 3/5)').matches;
             add({ rel: 'preload', as: 'image', href: isPortraitView ? '/hero-poster-portrait-v11.jpg' : '/hero-video-poster-v8.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
