@@ -35,7 +35,22 @@ const pickHeroSrc = () => {
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
-  const [heroSrc] = useState<string>(pickHeroSrc);
+  const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
+
+  // Recompute source on resize/orientation change so the video adapts when a
+  // phone is rotated or a tablet changes orientation. The browser handles the
+  // source swap automatically via React re-render.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handle = () => setHeroSrc(pickHeroSrc());
+    window.addEventListener('resize', handle, { passive: true });
+    window.addEventListener('orientationchange', handle, { passive: true });
+    return () => {
+      window.removeEventListener('resize', handle);
+      window.removeEventListener('orientationchange', handle);
+    };
+  }, []);
+
 
 
   useEffect(() => {
