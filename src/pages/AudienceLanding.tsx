@@ -1743,7 +1743,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     <AudienceSEO audience={audience} />
     <div
       data-landing-scroll-root
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
+      // `no-chrome-pad`: global CSS lägger annars en TRANSPARENT ::after-spacer
+      // (68px) sist i scrollytan — den lät gradient/glöd skymta under footern
+      // på iPad. Vi använder en egen opak bottenplatta i stället.
+      className="no-chrome-pad fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
         // -webkit-overflow-scrolling: touch ger iOS Safari momentum-scroll
