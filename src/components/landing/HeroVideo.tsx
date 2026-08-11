@@ -280,7 +280,7 @@ const HeroVideo = () => {
   }, []);
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-background">
+    <div className="absolute inset-0 z-0 overflow-hidden bg-black">
       <motion.div
         initial={{ opacity: 0, scale: 1.06 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -320,8 +320,8 @@ const HeroVideo = () => {
           så att 3:4-formatet ser avsiktligt ut i stället för avklippt. */}
       {isPortrait && (
         <>
-          <div className="pointer-events-none absolute inset-x-0 top-[93vw] h-[41vw] bg-gradient-to-b from-transparent to-background" />
-          <div className="pointer-events-none absolute inset-x-0 top-[133vw] bottom-0 bg-background" />
+          <div className="pointer-events-none absolute inset-x-0 top-[93vw] h-[41vw] bg-gradient-to-b from-transparent to-black" />
+          <div className="pointer-events-none absolute inset-x-0 top-[133vw] bottom-0 bg-black" />
         </>
       )}
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
