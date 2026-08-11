@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import desktopAsset from '@/assets/hero-desktop.mp4.asset.json';
 import mobileAsset from '@/assets/hero-mobile.mp4.asset.json';
-import portraitAsset from '@/assets/hero-mobile-portrait-916-v4.mp4.asset.json';
+import portraitAsset from '@/assets/hero-mobile-byggarbetare-v5.mp4.asset.json';
 import posterAsset from '@/assets/hero-poster.jpg.asset.json';
-import posterPortraitAsset from '@/assets/hero-poster-portrait-916-v4.jpg.asset.json';
+import posterPortraitAsset from '@/assets/hero-poster-byggarbetare-v5.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 
@@ -25,7 +25,7 @@ const shouldSkipVideo = () => {
 //
 // Regeln är geometrisk, inte enhetsbaserad, så den täcker allt från 4"-telefon
 // till 100"-TV: så snart viewporten är smalare än 16:9 skulle en landskapsfil
-// behöva beskäras i sidled (= kapade huvuden). Då byter vi till 3:4-mastern.
+// behöva beskäras i sidled. Då byter vi till byggarbetarens mobilmaster.
 const LANDSCAPE_MIN_RATIO = 1.2; // över 1:1, under 4:3 — 4:3-skärmar räknas som landskap
 
 const isPortraitLayout = () => {
@@ -59,7 +59,7 @@ const landscapeObjectPosition = () => {
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return mobileAsset.url;
   // Alla porträtt-/kvadratiska viewports (telefon, surfplatta, delad fönstervy)
-  // får 3:4-mastern: full bredd utan sidobeskärning och minimal inzoomning.
+  // får den dedikerade byggarbetarvideon.
   if (isPortraitLayout()) return portraitAsset.url;
   // Landskap: skala efter faktisk renderad bredd (CSS-px × DPR, tak 2×) så att
   // stora skärmar och TV får 1080p-mastern och små/svaga enheter den lätta.
@@ -339,9 +339,9 @@ const HeroVideo = () => {
         transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-0 h-full w-full"
       >
-        {/* Porträtt: källan är native 9:16, så videon fyller hela ytan
-            full-bleed utan beskärning av huvuden och utan svart gradient.
-            Landskap: videon fyller hela ytan (källan är redan 16:9). */}
+        {/* Mobil: den uppladdade byggarbetarvideon har porträttmotivet inbäddat
+            i en 16:9-fil. object-cover beskär de svarta sidofälten och behåller
+            personen centrerad. Landskap använder befintlig hero-master. */}
         <div className="absolute inset-0 h-full w-full">
           <video
             ref={videoRef}
@@ -349,7 +349,7 @@ const HeroVideo = () => {
             autoPlay
             loop
             playsInline
-            // Porträtt (mobil): filen är bara ~2 MB och Chrome/Android ignorerar
+            // Porträtt (mobil): Chrome/Android ignorerar
             // <link rel="preload" as="video">. Med "metadata" hann dekodern ta slut
             // på buffert → svart ruta mellan klippen. "auto" buffrar hela klippet.
             preload={isPortrait ? 'auto' : 'metadata'}
@@ -359,9 +359,9 @@ const HeroVideo = () => {
             poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
             onContextMenu={(e) => e.preventDefault()}
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            // Porträttkällan är native 9:16 → centrerad crop räcker; på riktigt
-            // låga viewports (delad skärm) hålls huvudena kvar med lätt topp-bias.
-            style={{ objectPosition: isPortrait ? 'center 45%' : landscapePosition }}
+            // Det stående motivet är centrerat i källfilen; object-cover tar bort
+            // sidofälten på mobilen utan att flytta byggarbetaren ur bild.
+            style={{ objectPosition: isPortrait ? 'center center' : landscapePosition }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
