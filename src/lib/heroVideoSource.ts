@@ -13,9 +13,10 @@
 import hero4k from '@/assets/hero-video-v9.mp4.asset.json';
 import hero1440 from '@/assets/hero-video-1440-v9.mp4.asset.json';
 import hero1080 from '@/assets/hero-video-1080-v10.mp4.asset.json';
-import heroPortrait from '@/assets/hero-portrait-v11.mp4.asset.json';
-import heroSquare from '@/assets/hero-square-v11.mp4.asset.json';
-import heroSquarePoster from '@/assets/hero-poster-square-v11.jpg.asset.json';
+import heroPortrait from '@/assets/hero-portrait-v12.mp4.asset.json';
+import heroSquare from '@/assets/hero-square-v12.mp4.asset.json';
+import heroPortraitPoster from '@/assets/hero-poster-portrait-v12.jpg.asset.json';
+import heroSquarePoster from '@/assets/hero-poster-square-v12.jpg.asset.json';
 
 /** 4K-master (CDN). Endast riktiga desktops med bra nät och hårdvaruavkodning. */
 export const HERO_VIDEO_4K = hero4k.url;
@@ -39,7 +40,7 @@ export const HERO_VIDEO_SQUARE = heroSquare.url;
 export const HERO_POSTER = '/hero-video-poster-v8.jpg';
 
 /** Poster i samma utsnitt som den stående mastern. */
-export const HERO_POSTER_PORTRAIT = '/hero-poster-portrait-v11.jpg';
+export const HERO_POSTER_PORTRAIT = heroPortraitPoster.url;
 
 /** Poster i samma utsnitt som 4:5-mastern. */
 export const HERO_POSTER_SQUARE = heroSquarePoster.url;

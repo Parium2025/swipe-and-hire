@@ -317,9 +317,9 @@
             var isPortraitView = window.matchMedia && window.matchMedia('(max-aspect-ratio: 3/5)').matches;
             var isSquarePosterView = window.matchMedia && window.matchMedia('(max-aspect-ratio: 13/10)').matches && !window.matchMedia('(min-width: 1024px)').matches;
             var posterHref = isPortraitView
-              ? '/hero-poster-portrait-v11.jpg'
+              ? '/__l5e/assets-v1/062cb67a-dba0-4381-909c-6834d2f5a16d/hero-poster-portrait-v12.jpg'
               : (isSquarePosterView
-                ? '/__l5e/assets-v1/dbf2236b-6f5f-4e48-a376-62264c04734a/hero-poster-square-v11.jpg'
+                ? '/__l5e/assets-v1/f7c6ea85-bc88-4b99-b183-139b20ddd7ee/hero-poster-square-v12.jpg'
                 : '/hero-video-poster-v8.jpg');
             add({ rel: 'preload', as: 'image', href: posterHref, type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
@@ -338,9 +338,9 @@
             var memory = navigator.deviceMemory || 0;
             var capable1440 = cores >= 4 && memory >= 4;
             var videoHref = isPortraitView
-              ? '/__l5e/assets-v1/c89764aa-6db2-44bc-b0b5-a4e185c81851/hero-portrait-v11.mp4'
+              ? '/__l5e/assets-v1/b0d44546-685e-45fc-8552-9837515f7bd5/hero-portrait-v12.mp4'
               : (isSquareView
-                ? '/__l5e/assets-v1/dd399b84-ea72-486f-971c-319a39ce27c1/hero-square-v11.mp4'
+                ? '/__l5e/assets-v1/7153216a-a95e-4e24-8d18-4d5e47fbc89b/hero-square-v12.mp4'
                 : (!isDesktop
                   ? '/__l5e/assets-v1/9ba460c8-9256-466a-8599-127bfa18236f/hero-video-1080-v10.mp4'
                   : (!lightUa
