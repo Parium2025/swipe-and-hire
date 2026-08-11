@@ -29,6 +29,7 @@ const HeroVideo = () => {
   const [skipVideo] = useState<boolean>(shouldSkipHeroVideo);
   const [reduceMotion] = useState<boolean>(prefersReducedMotion);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
+  const [poster, setPoster] = useState<string>(pickHeroPoster);
 
   // Dev-guard: om index.html preloadar en annan fil än den vi spelar hämtas två
   // videofiler och bara en används. Build-scriptet fångar statiska avvikelser,
