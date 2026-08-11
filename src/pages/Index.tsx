@@ -377,6 +377,14 @@ const Index = () => {
   const { user, profile, userRole, signOut, loading, authAction, switchRole } = useAuth();
   const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
   const { isPlatformAdmin, loading: platformAdminLoading } = useIsPlatformAdmin();
+
+  // Förhämta prenumerationsplanerna i bakgrunden så /valj-plan aldrig visar skelett.
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!user) return;
+    prefetchSubscriptionPlans(queryClient);
+  }, [user, queryClient]);
+
   const [switching, setSwitching] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
