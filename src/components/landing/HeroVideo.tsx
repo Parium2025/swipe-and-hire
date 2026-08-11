@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import desktopAsset from '@/assets/hero-desktop.mp4.asset.json';
 import mobileAsset from '@/assets/hero-mobile.mp4.asset.json';
-import portraitAsset from '@/assets/hero-mobile-portrait-916.mp4.asset.json';
+import portraitAsset from '@/assets/hero-mobile-portrait-916-v2.mp4.asset.json';
 import posterAsset from '@/assets/hero-poster.jpg.asset.json';
-import posterPortraitAsset from '@/assets/hero-poster-portrait-916.jpg.asset.json';
+import posterPortraitAsset from '@/assets/hero-poster-portrait-916-v2.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 
@@ -97,7 +97,22 @@ const HeroVideo = () => {
     };
   }, []);
 
-
+  // Att byta src på <source> gör INGENTING förrän video.load() körs — elementet
+  // hamnar i networkState=NO_SOURCE och rutan blir svart. På mobil triggar
+  // adressfältets in-/utfällning resize → källbyte → svart skärm mitt i klippet.
+  // Vi laddar därför om dekodern explicit varje gång källan faktiskt ändras.
+  const loadedSrcRef = useRef<string | null>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || skipVideo) return;
+    if (loadedSrcRef.current === heroSrc) return;
+    loadedSrcRef.current = heroSrc;
+    try {
+      video.load();
+    } catch { /* best effort */ }
+    const p = video.play();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  }, [heroSrc, skipVideo]);
 
 
   useEffect(() => {
@@ -334,9 +349,10 @@ const HeroVideo = () => {
             autoPlay
             loop
             playsInline
-            // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
-            // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
-            preload="metadata"
+            // Porträtt (mobil): filen är bara ~2 MB och Chrome/Android ignorerar
+            // <link rel="preload" as="video">. Med "metadata" hann dekodern ta slut
+            // på buffert → svart ruta mellan klippen. "auto" buffrar hela klippet.
+            preload={isPortrait ? 'auto' : 'metadata'}
             disablePictureInPicture
             disableRemotePlayback
             controlsList="nodownload noplaybackrate nofullscreen"
