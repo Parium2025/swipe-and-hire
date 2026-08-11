@@ -45,6 +45,11 @@ const isPortraitLayout = () => {
 // ALL beskärning i botten. Då kan webbläsaren aldrig kapa huvudet.
 const SOURCE_RATIO = 16 / 9;
 const LANDSCAPE_TOP_BIAS = '0%';
+// Extra luft ovanför hjässan. Källans överkant tangerar håret i flera klipp, så
+// även med 0 % bias ser det trångt ut. Vi skjuter ner hela videoblocket några
+// procent; ytan som frigörs i toppen täcks av samma svarta gradient som resten
+// av hero-overlayen, så det läser som vinjett – inte som ett svart streck.
+const LANDSCAPE_HEADROOM = 3; // procent av viewporthöjden
 
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
