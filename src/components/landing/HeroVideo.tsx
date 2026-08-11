@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import desktopAsset from '@/assets/hero-desktop.mp4.asset.json';
 import mobileAsset from '@/assets/hero-mobile.mp4.asset.json';
-import portraitAsset from '@/assets/hero-mobile-portrait.mp4.asset.json';
+import portraitAsset from '@/assets/hero-mobile-portrait-916.mp4.asset.json';
 import posterAsset from '@/assets/hero-poster.jpg.asset.json';
-import posterPortraitAsset from '@/assets/hero-poster-portrait.jpg.asset.json';
+import posterPortraitAsset from '@/assets/hero-poster-portrait-916.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 
@@ -324,18 +324,10 @@ const HeroVideo = () => {
         transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-0 h-full w-full"
       >
-        {/* Porträtt: blocket får exakt 3:4 av viewportens bredd och ankras i
-            toppen. Höjden följer bredden, så allt från 4"-telefon till
-            surfplatta i porträtt får samma beskärning — inga kapade huvuden.
+        {/* Porträtt: källan är native 9:16, så videon fyller hela ytan
+            full-bleed utan beskärning av huvuden och utan svart gradient.
             Landskap: videon fyller hela ytan (källan är redan 16:9). */}
-        <div
-          className={
-            isPortrait
-              ? 'absolute inset-x-0 top-0 w-full'
-              : 'absolute inset-0 h-full w-full'
-          }
-          style={isPortrait ? { aspectRatio: '3 / 4' } : undefined}
-        >
+        <div className="absolute inset-0 h-full w-full">
           <video
             ref={videoRef}
             muted
@@ -351,9 +343,9 @@ const HeroVideo = () => {
             poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
             onContextMenu={(e) => e.preventDefault()}
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            // Ansiktena ligger i övre halvan; om blocket ändå klipps av en
-            // extremt låg viewport behåller vi huvudena i bild.
-            style={{ objectPosition: isPortrait ? 'center 42%' : landscapePosition }}
+            // Porträttkällan är native 9:16 → centrerad crop räcker; på riktigt
+            // låga viewports (delad skärm) hålls huvudena kvar med lätt topp-bias.
+            style={{ objectPosition: isPortrait ? 'center 45%' : landscapePosition }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
@@ -361,10 +353,6 @@ const HeroVideo = () => {
               <source src={heroSrc} type="video/mp4" />
             )}
           </video>
-          {/* Mjuk övertoning i videons underkant → sidans svarta bakgrund. */}
-          {isPortrait && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-b from-transparent to-black" />
-          )}
         </div>
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
