@@ -20,8 +20,11 @@ export { HERO_VIDEO_4K, HERO_VIDEO_1080 };
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  // Sparläge/2G, eller användare som bett om mindre rörelse → poster, ingen film.
-  const [skipVideo] = useState<boolean>(() => shouldSkipHeroVideo() || prefersReducedMotion());
+  // Endast uttryckligt datasparläge/2G stoppar mediahämtningen. iOS kan rapportera
+  // `prefers-reduced-motion` i preview/private mode; det ska minska UI-animationen,
+  // inte oväntat ersätta hela hero-videon med en stillbild.
+  const [skipVideo] = useState<boolean>(shouldSkipHeroVideo);
+  const [reduceMotion] = useState<boolean>(prefersReducedMotion);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
 
   // Dev-guard: om index.html preloadar en annan fil än den vi spelar hämtas två
@@ -179,10 +182,9 @@ const HeroVideo = () => {
     };
 
 
-    // Försök spela direkt — väntar inte på canplay om vi redan har data
-    if (video.readyState >= 2) {
-      tryPlay();
-    }
+    // Försök alltid direkt. `play()` startar även den riktiga mediahämtningen i
+    // Safari Private Browsing, där en preload-hint inte kan förutsättas fungera.
+    tryPlay();
     // Lyssna alltid på loadeddata/canplay för säker första frame
     const onCanPlay = () => tryPlay();
     video.addEventListener('loadeddata', onCanPlay);
@@ -222,8 +224,18 @@ const HeroVideo = () => {
         }
         if (video.currentTime === lastTime) {
           healthyTicks = 0;
+          // `waiting` under aktiv hämtning är normal buffring, inte en frusen
+          // dekoder. load() här skulle kasta den redan hämtade bufferten och
+          // kunna skapa en oändlig omstart på kalla/privata sessioner.
+          const buffering =
+            video.networkState === HTMLMediaElement.NETWORK_LOADING ||
+            video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA;
+          if (buffering) {
+            stuckCount = 0;
+            return;
+          }
           stuckCount++;
-          if (stuckCount >= 2) {
+          if (stuckCount >= 6) {
             stuckCount = 0;
             rebuildDecoder();
           }
@@ -278,10 +290,28 @@ const HeroVideo = () => {
       startWatchdog();
     };
     const handleStalled = () => {
-      startWatchdog();
+      // Låt browsern behålla och fylla sin buffer. Watchdog startas av
+      // `playing` och kan då skilja en verklig decoder-frysning från nätverk.
       tryPlay();
     };
     const handleError = () => {
+      // 4K/1440 H.264 High@5.1 stöds inte av alla hårdvarudekoders. Byt då en
+      // gång till vår konservativa Main@4.0-master i stället för att ladda om
+      // samma inkompatibla fil i en loop.
+      const currentPath = (() => {
+        try { return new URL(video.currentSrc || video.src, window.location.href).pathname; }
+        catch { return video.currentSrc || video.src; }
+      })();
+      const fallbackPath = (() => {
+        try { return new URL(HERO_VIDEO_1080, window.location.href).pathname; }
+        catch { return HERO_VIDEO_1080; }
+      })();
+      if (currentPath !== fallbackPath) {
+        stopWatchdog();
+        errorCount = 0;
+        setHeroSrc(HERO_VIDEO_1080);
+        return;
+      }
       // Begränsad backoff förhindrar error → load-loop vid ett fladdrande GPU-byte.
       rebuilding = false;
       if (decoderResetTimer !== null) window.clearTimeout(decoderResetTimer);
@@ -362,9 +392,9 @@ const HeroVideo = () => {
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <motion.div
-        initial={{ opacity: 0, scale: 1.06 }}
+        initial={{ opacity: 0, scale: reduceMotion ? 1 : 1.06 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: reduceMotion ? 0.2 : 1.6, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-0 h-full w-full"
       >
         <video
