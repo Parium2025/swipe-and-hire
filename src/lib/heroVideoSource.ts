@@ -13,6 +13,8 @@
 import hero4k from '@/assets/hero-video-v9.mp4.asset.json';
 import hero1440 from '@/assets/hero-video-1440-v9.mp4.asset.json';
 import hero1080 from '@/assets/hero-video-1080-v10.mp4.asset.json';
+import heroPortrait from '@/assets/hero-portrait-v11.mp4.asset.json';
+import heroSquare from '@/assets/hero-square-v11.mp4.asset.json';
 
 /** 4K-master (CDN). Endast riktiga desktops med bra nät och hårdvaruavkodning. */
 export const HERO_VIDEO_4K = hero4k.url;
@@ -23,11 +25,30 @@ export const HERO_VIDEO_1440 = hero1440.url;
 /** 1080p-master (CDN). Svagare enheter, mobil, sparläge, svagt nät. */
 export const HERO_VIDEO_1080 = hero1080.url;
 
+/**
+ * Stående master, 1080×1920 (9:16). Varje scen är omframad i encodern så motivet
+ * står mitt i bild — ingen runtime-beskärning, inga kapade huvuden på mobil.
+ */
+export const HERO_VIDEO_PORTRAIT = heroPortrait.url;
+
+/** 4:5-master, 1200×1500. Surfplattor och smala fönster mellan mobil och desktop. */
+export const HERO_VIDEO_SQUARE = heroSquare.url;
+
 /** Poster = LCP-kandidat på landningssidan. */
 export const HERO_POSTER = '/hero-video-poster-v8.jpg';
 
+/** Poster i samma utsnitt som den stående mastern. */
+export const HERO_POSTER_PORTRAIT = '/hero-poster-portrait-v11.jpg';
+
 /** Breakpointen som skiljer 4K från 1080p. Speglad i index.html. */
 export const HERO_DESKTOP_QUERY = '(min-width: 1024px)';
+
+/** Stående yta (mobil) → 9:16-mastern. Speglad i index.html. */
+export const HERO_PORTRAIT_QUERY = '(max-aspect-ratio: 7/10)';
+
+/** Nästan kvadratisk yta (surfplatta/smalt fönster) → 4:5-mastern. Speglad i index.html. */
+export const HERO_SQUARE_QUERY = '(max-aspect-ratio: 13/10)';
+
 
 type Conn = { saveData?: boolean; effectiveType?: string } | undefined;
 
@@ -74,11 +95,30 @@ const capableForQuadHd = (): boolean => {
   return cores >= HERO_MIN_CORES && memory >= HERO_MIN_MEMORY_GB;
 };
 
+const matches = (query: string): boolean =>
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia(query).matches;
+
+/** Ytans form avgör vilket bildformat som ska hämtas. Speglad i index.html. */
+export type HeroAspect = 'portrait' | 'square' | 'landscape';
+export const pickHeroAspect = (): HeroAspect => {
+  if (matches(HERO_PORTRAIT_QUERY)) return 'portrait';
+  if (matches(HERO_SQUARE_QUERY) && !matches(HERO_DESKTOP_QUERY)) return 'square';
+  return 'landscape';
+};
+
+/** Postern måste ha samma utsnitt som filmen, annars hoppar bilden vid start. */
+export const pickHeroPoster = (): string =>
+  pickHeroAspect() === 'portrait' ? HERO_POSTER_PORTRAIT : HERO_POSTER;
+
 /** Välj EXAKT en källa — aldrig flera <source> med `media`, Chrome respekterar det inte. */
 export const pickHeroSrc = (): string => {
   if (typeof window === 'undefined') return HERO_VIDEO_1080;
-  const desktop =
-    typeof window.matchMedia === 'function' && window.matchMedia(HERO_DESKTOP_QUERY).matches;
+  const aspect = pickHeroAspect();
+  if (aspect === 'portrait') return HERO_VIDEO_PORTRAIT;
+  if (aspect === 'square') return HERO_VIDEO_SQUARE;
+  const desktop = matches(HERO_DESKTOP_QUERY);
   if (!desktop || reducedData()) return HERO_VIDEO_1080;
   if (!lightweightPlatform()) return HERO_VIDEO_4K;
   return capableForQuadHd() ? HERO_VIDEO_1440 : HERO_VIDEO_1080;
@@ -91,27 +131,25 @@ export const prefersReducedMotion = (): boolean =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Scenfokus för hero-mastern (v9).
+ * Scenfokus för LANDSKAPS-mastern (16:9).
  *
- * Videon är 16:9. På en porträttskärm (mobil) fyller `object-cover` höjden och
- * beskär bredden hårt — bara ~25 % av bildbredden syns. Med default `center`
- * hamnar utsnittet mitt i bilden, vilket kapar personer som står till vänster
- * eller höger i sin scen (byggarbetaren och kontorskillen framför allt).
+ * Stående och nästan kvadratiska ytor får numera egna masters där utsnittet är
+ * bakat i encodern — där behövs ingen runtime-justering alls. Punkterna nedan
+ * används bara om 16:9-mastern ändå hamnar i en yta som beskärs på bredden
+ * (t.ex. ett smalt desktopfönster) och är uppmätta i faktiska bildrutor.
  *
- * `x` är motivets horisontella läge i bilden (0–1). Komponenten räknar om det
- * till `object-position` utifrån hur hårt just den skärmen beskär, så motivet
- * hamnar mitt i bild oavsett telefonformat.
- * `t` är klippets starttid i sekunder i den sammanklippta mastern.
+ * `x` är motivets horisontella läge i bilden (0–1), `t` klippets starttid.
  */
 export type HeroFocusPoint = { t: number; x: number };
 
 export const HERO_FOCUS_POINTS: HeroFocusPoint[] = [
-  { t: 0, x: 0.44 },      // byggarbetare — ansiktet strax vänster om bildens mitt
-  { t: 3.75, x: 0.43 },   // läkare — ansiktet strax vänster om bildens mitt
-  { t: 7.25, x: 0.5 },    // lager — håll båda personerna jämnt centrerade
-  { t: 10.15, x: 0.41 },  // kontor — mannens ansikte till vänster om mitten
-  { t: 13.59, x: 0.4 },   // kvinna utomhus — ansiktet till vänster om mitten
+  { t: 0, x: 0.50 },      // byggarbetare — ansiktet i bildens mitt
+  { t: 3.75, x: 0.53 },   // läkare — ansiktet strax höger om mitten
+  { t: 7.25, x: 0.52 },   // lager — de två personerna jämnt centrerade
+  { t: 10.15, x: 0.50 },  // kontor — mannens ansikte i mitten
+  { t: 13.59, x: 0.49 },  // kvinna utomhus — ansiktet i mitten
 ];
+
 
 /** Sekunder som fokuspunkten mjukas in över vid varje klippbyte (matchar cross-fade). */
 export const HERO_FOCUS_BLEND = 0.7;

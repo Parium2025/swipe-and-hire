@@ -2,12 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   HERO_DESKTOP_QUERY,
-  HERO_POSTER,
+  HERO_PORTRAIT_QUERY,
+  HERO_SQUARE_QUERY,
+  
   HERO_VIDEO_1080,
   HERO_VIDEO_4K,
+  HERO_VIDEO_PORTRAIT,
+  HERO_VIDEO_SQUARE,
   heroFocusXAt,
   heroObjectPositionX,
 
+  pickHeroPoster,
   pickHeroSrc,
   prefersReducedMotion,
   shouldSkipHeroVideo,
@@ -26,6 +31,7 @@ const HeroVideo = () => {
   const [skipVideo] = useState<boolean>(shouldSkipHeroVideo);
   const [reduceMotion] = useState<boolean>(prefersReducedMotion);
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
+  const [poster, setPoster] = useState<string>(pickHeroPoster);
 
   // Dev-guard: om index.html preloadar en annan fil än den vi spelar hämtas två
   // videofiler och bara en används. Build-scriptet fångar statiska avvikelser,
@@ -38,19 +44,26 @@ const HeroVideo = () => {
     }
   }, [heroSrc, skipVideo]);
 
-  // Breakpoint-byte (extern skärm in/ur, fönster som dras mellan skärmar) ska
-  // ge rätt master. Vi byter bara när matchMedia faktiskt ändras — aldrig på
-  // varje resize — och återupptar från samma tidpunkt så bytet inte syns.
+  // Formatbyte (rotation, extern skärm, fönster som dras mellan skärmar) ska ge
+  // rätt master: stående 9:16, 4:5 eller 16:9. Vi byter bara när en matchMedia
+  // faktiskt ändras — aldrig på varje resize — och återupptar från samma
+  // tidpunkt så bytet inte syns.
   useEffect(() => {
     if (skipVideo || typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
-    const mql = window.matchMedia(HERO_DESKTOP_QUERY);
-    const onChange = () => setHeroSrc((current) => {
-      const next = pickHeroSrc();
-      return next === current ? current : next;
-    });
-    mql.addEventListener?.('change', onChange);
-    return () => mql.removeEventListener?.('change', onChange);
+    const queries = [HERO_DESKTOP_QUERY, HERO_PORTRAIT_QUERY, HERO_SQUARE_QUERY].map((q) =>
+      window.matchMedia(q),
+    );
+    const onChange = () => {
+      setHeroSrc((current) => {
+        const next = pickHeroSrc();
+        return next === current ? current : next;
+      });
+      setPoster(pickHeroPoster());
+    };
+    queries.forEach((mql) => mql.addEventListener?.('change', onChange));
+    return () => queries.forEach((mql) => mql.removeEventListener?.('change', onChange));
   }, [skipVideo]);
+
 
   // Källbytet kräver load() — annars fortsätter elementet spela gamla filen.
   // Vi hoppar första renderingen och behåller position + uppspelning.
@@ -297,21 +310,23 @@ const HeroVideo = () => {
     const handleError = () => {
       // 4K/1440 H.264 High@5.1 stöds inte av alla hårdvarudekoders. Byt då en
       // gång till vår konservativa Main@4.0-master i stället för att ladda om
-      // samma inkompatibla fil i en loop.
-      const currentPath = (() => {
-        try { return new URL(video.currentSrc || video.src, window.location.href).pathname; }
-        catch { return video.currentSrc || video.src; }
-      })();
-      const fallbackPath = (() => {
-        try { return new URL(HERO_VIDEO_1080, window.location.href).pathname; }
-        catch { return HERO_VIDEO_1080; }
-      })();
-      if (currentPath !== fallbackPath) {
+      // samma inkompatibla fil i en loop. Den stående och 4:5-mastern ÄR redan
+      // Main@4.0 — där byter vi aldrig format, det skulle ge fel beskärning.
+      const toPath = (url: string) => {
+        try { return new URL(url, window.location.href).pathname; }
+        catch { return url; }
+      };
+      const currentPath = toPath(video.currentSrc || video.src);
+      const reframed =
+        currentPath === toPath(HERO_VIDEO_PORTRAIT) || currentPath === toPath(HERO_VIDEO_SQUARE);
+      const fallbackPath = toPath(HERO_VIDEO_1080);
+      if (!reframed && currentPath !== fallbackPath) {
         stopWatchdog();
         errorCount = 0;
         setHeroSrc(HERO_VIDEO_1080);
         return;
       }
+
       // Begränsad backoff förhindrar error → load-loop vid ett fladdrande GPU-byte.
       rebuilding = false;
       if (decoderResetTimer !== null) window.clearTimeout(decoderResetTimer);
@@ -411,7 +426,7 @@ const HeroVideo = () => {
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
-          poster={HERO_POSTER}
+          poster={poster}
 
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"

@@ -314,7 +314,8 @@
             head.appendChild(l);
           };
           if (path === '/' || path === '') {
-            add({ rel: 'preload', as: 'image', href: '/hero-video-poster-v8.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            var isPortraitView = window.matchMedia && window.matchMedia('(max-aspect-ratio: 7/10)').matches;
+            add({ rel: 'preload', as: 'image', href: isPortraitView ? '/hero-poster-portrait-v11.jpg' : '/hero-video-poster-v8.jpg', type: 'image/jpeg', fetchpriority: 'high' });
             add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
             var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
@@ -325,17 +326,23 @@
             // pickHeroSrc() och verifieras vid varje build av scripts/verify-hero-preload.ts —
             // går de isär hämtas två filer (25 MB + 6,6 MB) och bara den ena spelas.
             var isDesktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
+            var isSquareView = window.matchMedia && window.matchMedia('(max-aspect-ratio: 13/10)').matches && !isDesktop;
             var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
             var cores = navigator.hardwareConcurrency || 0;
             var memory = navigator.deviceMemory || 0;
             var capable1440 = cores >= 4 && memory >= 4;
-            var videoHref = !isDesktop
-              ? '/__l5e/assets-v1/9ba460c8-9256-466a-8599-127bfa18236f/hero-video-1080-v10.mp4'
-              : (!lightUa
-                ? '/__l5e/assets-v1/22ebc9f8-369a-4102-ab76-cf7a3076afba/hero-video-v9.mp4'
-                : (capable1440
-                  ? '/__l5e/assets-v1/ebbaa1e9-b0cf-4e20-8c3b-ec606b0a6730/hero-video-1440-v9.mp4'
-                  : '/__l5e/assets-v1/9ba460c8-9256-466a-8599-127bfa18236f/hero-video-1080-v10.mp4'));
+            var videoHref = isPortraitView
+              ? '/__l5e/assets-v1/c89764aa-6db2-44bc-b0b5-a4e185c81851/hero-portrait-v11.mp4'
+              : (isSquareView
+                ? '/__l5e/assets-v1/dd399b84-ea72-486f-971c-319a39ce27c1/hero-square-v11.mp4'
+                : (!isDesktop
+                  ? '/__l5e/assets-v1/9ba460c8-9256-466a-8599-127bfa18236f/hero-video-1080-v10.mp4'
+                  : (!lightUa
+                    ? '/__l5e/assets-v1/22ebc9f8-369a-4102-ab76-cf7a3076afba/hero-video-v9.mp4'
+                    : (capable1440
+                      ? '/__l5e/assets-v1/ebbaa1e9-b0cf-4e20-8c3b-ec606b0a6730/hero-video-1440-v9.mp4'
+                      : '/__l5e/assets-v1/9ba460c8-9256-466a-8599-127bfa18236f/hero-video-1080-v10.mp4'))));
+
             // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
             // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
             var isSafari = /Safari/.test(navigator.userAgent || '') && !/Chrome|Chromium|Edg\//.test(navigator.userAgent || '');

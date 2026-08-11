@@ -28,6 +28,11 @@ const asset1080 = JSON.parse(read(asset1080Path)) as { url: string };
 const asset1440Path = 'src/assets/hero-video-1440-v9.mp4.asset.json';
 const asset1440 = JSON.parse(read(asset1440Path)) as { url: string };
 
+const assetPortraitPath = 'src/assets/hero-portrait-v11.mp4.asset.json';
+const assetPortrait = JSON.parse(read(assetPortraitPath)) as { url: string };
+const assetSquarePath = 'src/assets/hero-square-v11.mp4.asset.json';
+const assetSquare = JSON.parse(read(assetSquarePath)) as { url: string };
+
 const src1080 = asset1080.url;
 if (!/HERO_VIDEO_1440 = hero1440\.url/.test(source)) {
   throw new Error('verify-hero-preload: HERO_VIDEO_1440 pekar inte på 1440p-pointern');
@@ -36,6 +41,9 @@ if (!/HERO_VIDEO_1080 = hero1080\.url/.test(source)) {
   throw new Error('verify-hero-preload: HERO_VIDEO_1080 pekar inte på 1080p-pointern');
 }
 const poster = pick(/HERO_POSTER = '([^']+)'/, 'HERO_POSTER', source);
+const posterPortrait = pick(/HERO_POSTER_PORTRAIT = '([^']+)'/, 'HERO_POSTER_PORTRAIT', source);
+const portraitQuery = pick(/HERO_PORTRAIT_QUERY = '([^']+)'/, 'HERO_PORTRAIT_QUERY', source);
+const squareQuery = pick(/HERO_SQUARE_QUERY = '([^']+)'/, 'HERO_SQUARE_QUERY', source);
 const query = pick(/HERO_DESKTOP_QUERY = '([^']+)'/, 'HERO_DESKTOP_QUERY', source);
 
 const errors: string[] = [];
@@ -46,6 +54,21 @@ if (!html.includes(asset.url)) {
 if (!html.includes(asset1440.url)) {
   errors.push(`index.html saknar 1440p-källan ${asset1440.url}`);
 }
+if (!html.includes(assetPortrait.url)) {
+  errors.push(`index.html saknar den stående källan ${assetPortrait.url}`);
+}
+if (!html.includes(assetSquare.url)) {
+  errors.push(`index.html saknar 4:5-källan ${assetSquare.url}`);
+}
+if (!html.includes(posterPortrait)) {
+  errors.push(`index.html saknar den stående postern ${posterPortrait}`);
+}
+if (!html.includes(portraitQuery)) {
+  errors.push(`index.html använder inte ${portraitQuery}`);
+}
+if (!html.includes(squareQuery)) {
+  errors.push(`index.html använder inte ${squareQuery}`);
+}
 if (!html.includes(src1080)) {
   errors.push(`index.html saknar 1080p-källan ${src1080}`);
 }
@@ -55,7 +78,7 @@ if (!html.includes(poster)) {
 if (!html.includes(query)) {
   errors.push(`index.html använder inte breakpointen ${query}`);
 }
-for (const localFile of [poster]) {
+for (const localFile of [poster, posterPortrait]) {
   if (!existsSync(resolve(root, 'public', localFile.replace(/^\//, '')))) {
     errors.push(`Filen saknas i public/: ${localFile}`);
   }
