@@ -72,19 +72,27 @@ const landscapeObjectPosition = () => {
   return `center ${LANDSCAPE_TOP_BIAS}`;
 };
 
+// Har vi en gång hämtat 1080p-mastern ligger den i cachen. Att nedgradera till
+// lite-spåret när fönstret dras smalare vore då bara en extra nedladdning och en
+// omstart av klippet — vi behåller den bättre filen resten av sessionen.
+let landscapeHighResLatched = false;
+
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return landscapeLiteAsset.url;
   const tier = getTier();
   if (tier === 'portrait') return portraitAsset.url;
   if (tier === 'tablet') return tabletAsset.url;
+  if (landscapeHighResLatched) return desktopAsset.url;
   // Landskap: skala efter faktisk renderad bredd (CSS-px × DPR, tak 2×) så att
   // stora skärmar och TV får 1080p-mastern och små/svaga enheter den lätta.
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const renderedWidth = window.innerWidth * dpr;
   const wantsHighRes = renderedWidth >= 1280;
-  return wantsHighRes && !prefersLightweightVideo() && !prefersReducedData()
-    ? desktopAsset.url
-    : landscapeLiteAsset.url;
+  if (wantsHighRes && !prefersLightweightVideo() && !prefersReducedData()) {
+    landscapeHighResLatched = true;
+    return desktopAsset.url;
+  }
+  return landscapeLiteAsset.url;
 };
 
 
@@ -97,28 +105,43 @@ const HeroVideo = () => {
   const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
 
   // Recompute source on resize/orientation change so the video adapts when a
-  // phone is rotated or a tablet changes orientation. The browser handles the
-  // source swap automatically via React re-render.
+  // phone is rotated or a tablet changes orientation.
+  //
+  // Två saker är kritiska här:
+  //  1. object-position måste uppdateras direkt (ren CSS, ingen omladdning).
+  //  2. Själva KÄLLAN får bara bytas när nivån faktiskt ändras, och först när
+  //     användaren slutat ändra storlek. Varje källbyte kastar dekodern och
+  //     startar om klippet från 0 — på mobil räcker adressfältets in-/utfällning
+  //     eller ett drag i ett desktopfönster för att trigga det flera gånger i
+  //     sekunden, vilket ger svarta blinkningar. Därför: CSS direkt, källbyte
+  //     debounce:at till 250 ms efter sista resize-eventet.
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    let settleTimer: number | null = null;
     const handle = () => {
-      setHeroSrc(pickHeroSrc());
-      setTier(getTier());
       setLandscapePosition(landscapeObjectPosition());
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        settleTimer = null;
+        setTier(getTier());
+        setHeroSrc(pickHeroSrc());
+      }, 250);
     };
     window.addEventListener('resize', handle, { passive: true });
     window.addEventListener('orientationchange', handle, { passive: true });
     return () => {
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
       window.removeEventListener('resize', handle);
       window.removeEventListener('orientationchange', handle);
     };
   }, []);
 
   // Att byta src på <source> gör INGENTING förrän video.load() körs — elementet
-  // hamnar i networkState=NO_SOURCE och rutan blir svart. På mobil triggar
-  // adressfältets in-/utfällning resize → källbyte → svart skärm mitt i klippet.
-  // Vi laddar därför om dekodern explicit varje gång källan faktiskt ändras.
-  const loadedSrcRef = useRef<string | null>(null);
+  // hamnar i networkState=NO_SOURCE och rutan blir svart. Vi laddar därför om
+  // dekodern explicit varje gång källan faktiskt ändras — men ALDRIG vid första
+  // renderingen: markup:en innehåller redan rätt <source>, och ett load() där
+  // hade slängt bort browserns pågående preload-hämtning och startat om den.
+  const loadedSrcRef = useRef<string | null>(heroSrc);
   useEffect(() => {
     const video = videoRef.current;
     if (!video || skipVideo) return;
@@ -130,6 +153,7 @@ const HeroVideo = () => {
     const p = video.play();
     if (p && typeof p.catch === 'function') p.catch(() => {});
   }, [heroSrc, skipVideo]);
+
 
 
   useEffect(() => {
@@ -362,6 +386,8 @@ const HeroVideo = () => {
         <div className="absolute inset-0 h-full w-full">
           <video
             ref={videoRef}
+            aria-hidden="true"
+            tabIndex={-1}
             muted
             autoPlay
             loop
