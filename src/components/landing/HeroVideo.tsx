@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   HERO_DESKTOP_QUERY,
+  HERO_PORTRAIT_QUERY,
+  HERO_SQUARE_QUERY,
   HERO_POSTER,
   HERO_VIDEO_1080,
   HERO_VIDEO_4K,
   heroFocusXAt,
   heroObjectPositionX,
 
+  pickHeroPoster,
   pickHeroSrc,
   prefersReducedMotion,
   shouldSkipHeroVideo,
