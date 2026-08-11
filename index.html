@@ -324,7 +324,7 @@
             // Regeln MÅSTE stämma med pickHeroSrc() i HeroVideo.tsx,
             // annars laddas två filer och bara den lilla spelas.
             var vw = window.innerWidth, vh = window.innerHeight;
-            var isPortraitLayout = vw && vh ? (vw / vh) < 1.35 : false;
+            var isPortraitLayout = vw && vh ? (vw / vh) < 1.2 : false;
             var dpr = Math.min(window.devicePixelRatio || 1, 2);
             var wantsHighRes = (vw * dpr) >= 1280;
             var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');

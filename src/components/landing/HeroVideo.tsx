@@ -26,7 +26,7 @@ const shouldSkipVideo = () => {
 // Regeln är geometrisk, inte enhetsbaserad, så den täcker allt från 4"-telefon
 // till 100"-TV: så snart viewporten är smalare än 16:9 skulle en landskapsfil
 // behöva beskäras i sidled (= kapade huvuden). Då byter vi till 3:4-mastern.
-const LANDSCAPE_MIN_RATIO = 1.35; // strax under 3:2 — säker marginal mot 16:9-crop
+const LANDSCAPE_MIN_RATIO = 1.2; // över 1:1, under 4:3 — 4:3-skärmar räknas som landskap
 
 const isPortraitLayout = () => {
   if (typeof window === 'undefined') return false;
