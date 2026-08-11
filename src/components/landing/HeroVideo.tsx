@@ -231,15 +231,28 @@ const HeroVideo = () => {
       if (p && typeof p.catch === 'function') {
         p.then(() => {
           failCount = 0;
-        }).catch(() => {
+          setAutoplayBlocked(false);
+        }).catch((err: unknown) => {
           failCount++;
-          // iOS Lågeffektläge kan blockera autoplay helt tills första touch.
-          // Vi döljer native play UI via CSS och försöker igen vid touch/focus.
+          // iOS Lågeffektläge blockerar autoplay tills användaren interagerar.
+          // Efter två misslyckade försök visar vi postern som stillbild i stället
+          // för att låta Safari rita sin play-knapp ovanpå videon.
+          const blocked = (err as { name?: string } | null)?.name === 'NotAllowedError';
+          if (blocked && failCount >= 2) setAutoplayBlocked(true);
           if (retryTimer) window.clearTimeout(retryTimer);
           retryTimer = window.setTimeout(tryPlay, 600);
         });
       }
     };
+
+    // Första användarinteraktionen häver blockeringen i Lågeffektläge.
+    const onUserGesture = () => tryPlay();
+    document.addEventListener('touchstart', onUserGesture, { passive: true });
+    document.addEventListener('pointerdown', onUserGesture, { passive: true });
+    document.addEventListener('scroll', onUserGesture, { passive: true });
+    const onPlaying = () => setAutoplayBlocked(false);
+    video.addEventListener('playing', onPlaying);
+
 
 
     // Försök spela direkt — väntar inte på canplay om vi redan har data
