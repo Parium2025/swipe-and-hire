@@ -106,11 +106,11 @@ export const prefersReducedMotion = (): boolean =>
 export type HeroFocusPoint = { t: number; x: number };
 
 export const HERO_FOCUS_POINTS: HeroFocusPoint[] = [
-  { t: 0, x: 0.25 },     // byggarbetare — står till vänster
-  { t: 3.75, x: 0.61 },  // läkare i korridor — höger om mitten
-  { t: 7.25, x: 0.55 },  // lagermedarbetarna — paret strax höger om mitten
-  { t: 10.15, x: 0.5 },  // kontor — mannen är centrerad i den nya scenen
-  { t: 13.59, x: 0.5 },  // kvinna utomhus — centrerad
+  { t: 0, x: 0.44 },      // byggarbetare — ansiktet strax vänster om bildens mitt
+  { t: 3.75, x: 0.43 },   // läkare — ansiktet strax vänster om bildens mitt
+  { t: 7.25, x: 0.5 },    // lager — håll båda personerna jämnt centrerade
+  { t: 10.15, x: 0.41 },  // kontor — mannens ansikte till vänster om mitten
+  { t: 13.59, x: 0.4 },   // kvinna utomhus — ansiktet till vänster om mitten
 ];
 
 /** Sekunder som fokuspunkten mjukas in över vid varje klippbyte (matchar cross-fade). */
