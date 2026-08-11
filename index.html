@@ -316,9 +316,9 @@
           if (path === '/' || path === '') {
             var _r = (window.innerWidth && window.innerHeight) ? (window.innerWidth / window.innerHeight) : 1.78;
             // Tre geometriska nivåer — matchar pickHeroSrc() i HeroVideo.tsx exakt.
-            // Telefon: smal viewport (<= 820 px) i stående läge — adressfältet gör
-            // att ratio kan bli upp mot 0,8 så enbart 0,66 missade riktiga mobiler.
-            var _phone = window.innerWidth <= 820 && _r < 1;
+            // Telefon: smal viewport (<= 700 px) OCH telefonlik proportion
+            // (< 0,72). iPad i porträtt (0,73–0,75) ska till 3:4-spåret.
+            var _phone = (_r < 0.66) || (window.innerWidth <= 700 && _r < 0.72);
             var _tier = _phone ? 'portrait' : (_r < 1.25 ? 'tablet' : 'landscape');
             add({ rel: 'preload', as: 'image', href: _tier === 'portrait'
               ? '/__l5e/assets-v1/780c72d5-7179-45ab-a2fd-3bb0426fa04c/hero8-poster-portrait.jpg'

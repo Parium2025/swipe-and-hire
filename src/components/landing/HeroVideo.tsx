@@ -34,9 +34,15 @@ const shouldSkipVideo = () => {
 //   ratio ≥ 1.25            → laptop/TV      → 16:9-master (1920×1080 / 1280×720)
 const PORTRAIT_MAX_RATIO = 0.66;
 const TABLET_MAX_RATIO = 1.25;
-// Riktiga telefoner har ofta ratio 0,66–0,80 när adressfältet är utfällt
+// Riktiga telefoner har ofta ratio 0,66–0,72 när adressfältet är utfällt
 // (t.ex. 393×580 = 0,68). Enbart ratio-regeln skickade dem till 3:4-spåret.
-const PHONE_MAX_WIDTH = 820;
+// MEN: bredden fick inte vara 820 px — en iPad i porträtt (768×1024 = 0,75,
+// 820×1120 = 0,73) hamnade då i mobilspåret och fick 720×1280-mastern, som
+// både är mjuk och betydligt hårdare beskuren. Telefonundantaget kräver nu
+// BÅDE smal bredd och telefonliknande proportion, så surfplattor i porträtt
+// alltid får 3:4-mastern (1200×1600).
+const PHONE_MAX_WIDTH = 700;
+const PHONE_MAX_RATIO = 0.72;
 
 type HeroTier = 'portrait' | 'tablet' | 'landscape';
 
@@ -47,7 +53,7 @@ const getTier = (): HeroTier => {
   if (!w || !h) return 'landscape';
   const r = w / h;
   if (r < PORTRAIT_MAX_RATIO) return 'portrait';
-  if (w <= PHONE_MAX_WIDTH && r < 1) return 'portrait';
+  if (w <= PHONE_MAX_WIDTH && r < PHONE_MAX_RATIO) return 'portrait';
   if (r < TABLET_MAX_RATIO) return 'tablet';
   return 'landscape';
 };
@@ -61,6 +67,14 @@ const getTier = (): HeroTier => {
 // ALL beskärning i botten. Då kan webbläsaren aldrig kapa huvudet.
 const SOURCE_RATIO = 16 / 9;
 const LANDSCAPE_TOP_BIAS = '35%';
+
+// Surfplatta stående: mastern är exakt 3:4 (1200×1600 = 0,75). En iPad i
+// porträtt är 0,75 på pappret men webbläsarens adressfält/verktygsfält gör
+// den faktiska viewporten kortare (t.ex. 820×1120 = 0,73). Då kapar
+// object-cover några procent i HÖJD — och med `center` fördelas det lika
+// mellan topp och botten, vilket är precis där huvudena ligger. 25 % lägger
+// merparten av bortfallet i botten (golv/mark) så huvudet alltid får rum.
+const TABLET_TOP_BIAS = '25%';
 
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
@@ -429,7 +443,7 @@ const HeroVideo = () => {
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             // Varje nivå har en master med nästan samma proportion som viewporten,
             // så object-cover kapar bara några procent — aldrig svarta ränder.
-            style={{ objectPosition: tier === 'landscape' ? landscapePosition : 'center center' }}
+            style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center' }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
