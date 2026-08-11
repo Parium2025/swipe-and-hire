@@ -38,19 +38,26 @@ const HeroVideo = () => {
     }
   }, [heroSrc, skipVideo]);
 
-  // Breakpoint-byte (extern skärm in/ur, fönster som dras mellan skärmar) ska
-  // ge rätt master. Vi byter bara när matchMedia faktiskt ändras — aldrig på
-  // varje resize — och återupptar från samma tidpunkt så bytet inte syns.
+  // Formatbyte (rotation, extern skärm, fönster som dras mellan skärmar) ska ge
+  // rätt master: stående 9:16, 4:5 eller 16:9. Vi byter bara när en matchMedia
+  // faktiskt ändras — aldrig på varje resize — och återupptar från samma
+  // tidpunkt så bytet inte syns.
   useEffect(() => {
     if (skipVideo || typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
-    const mql = window.matchMedia(HERO_DESKTOP_QUERY);
-    const onChange = () => setHeroSrc((current) => {
-      const next = pickHeroSrc();
-      return next === current ? current : next;
-    });
-    mql.addEventListener?.('change', onChange);
-    return () => mql.removeEventListener?.('change', onChange);
+    const queries = [HERO_DESKTOP_QUERY, HERO_PORTRAIT_QUERY, HERO_SQUARE_QUERY].map((q) =>
+      window.matchMedia(q),
+    );
+    const onChange = () => {
+      setHeroSrc((current) => {
+        const next = pickHeroSrc();
+        return next === current ? current : next;
+      });
+      setPoster(pickHeroPoster());
+    };
+    queries.forEach((mql) => mql.addEventListener?.('change', onChange));
+    return () => queries.forEach((mql) => mql.removeEventListener?.('change', onChange));
   }, [skipVideo]);
+
 
   // Källbytet kräver load() — annars fortsätter elementet spela gamla filen.
   // Vi hoppar första renderingen och behåller position + uppspelning.
