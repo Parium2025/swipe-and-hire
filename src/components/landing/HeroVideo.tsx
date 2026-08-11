@@ -444,6 +444,19 @@ const HeroVideo = () => {
             i en 16:9-fil. object-cover beskär de svarta sidofälten och behåller
             personen centrerad. Landskap använder befintlig hero-master. */}
         <div className="absolute inset-0 h-full w-full">
+          {/* Lågeffektläge / blockerad autoplay: postern som stillbild ovanpå,
+              så Safaris play-knapp aldrig syns. Byts tillbaka när videon spelar. */}
+          {(autoplayBlocked || skipVideo) && (
+            <img
+              src={tier === 'portrait' ? posterPortraitAsset.url : tier === 'tablet' ? posterTabletAsset.url : posterAsset.url}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover"
+              style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center' }}
+            />
+          )}
+
           <video
             ref={videoRef}
             aria-hidden="true"
