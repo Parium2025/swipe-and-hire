@@ -410,8 +410,11 @@ const HeroVideo = () => {
       if (decoderResetTimer !== null) window.clearTimeout(decoderResetTimer);
       if (resizeTimer !== null) window.clearTimeout(resizeTimer);
       if (watchdog !== null) window.clearInterval(watchdog);
+      document.removeEventListener('scroll', onUserGesture);
+      video.removeEventListener('playing', onPlaying);
       video.removeEventListener('loadeddata', onCanPlay);
       video.removeEventListener('canplay', onCanPlay);
+
       video.removeEventListener('playing', handlePlaying);
       video.removeEventListener('stalled', handleStalled);
       video.removeEventListener('waiting', handleStalled);
