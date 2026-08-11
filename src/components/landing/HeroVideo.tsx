@@ -85,14 +85,18 @@ const pickHeroSrc = () => {
   if (landscapeHighResLatched) return desktopAsset.url;
   // Landskap: skala efter faktisk renderad bredd (CSS-px × DPR, tak 2×) så att
   // stora skärmar och TV får 1080p-mastern och små/svaga enheter den lätta.
+  // iPad i liggande läge (1112–1194 CSS-px, dpr 2) ska alltid ha 1080p-mastern:
+  // retina-panelen renderar ~2200 px och 720p-spåret syns som mjukt.
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const renderedWidth = window.innerWidth * dpr;
-  const wantsHighRes = renderedWidth >= 1280;
+  const isRetinaTabletOrLarger = dpr >= 2 && window.innerWidth >= 900;
+  const wantsHighRes = renderedWidth >= 1280 || isRetinaTabletOrLarger;
   if (wantsHighRes && !prefersLightweightVideo() && !prefersReducedData()) {
     landscapeHighResLatched = true;
     return desktopAsset.url;
   }
   return landscapeLiteAsset.url;
+
 };
 
 
@@ -115,15 +119,35 @@ const HeroVideo = () => {
   //     eller ett drag i ett desktopfönster för att trigga det flera gånger i
   //     sekunden, vilket ger svarta blinkningar. Därför: CSS direkt, källbyte
   //     debounce:at till 250 ms efter sista resize-eventet.
+  //     debounce:at till 250 ms efter sista resize-eventet.
+
+  //
+  //  3. UNDANTAG: byter NIVÅ (t.ex. telefon som roteras till liggande) måste
+  //     källan bytas OMEDELBART. Annars spelas 9:16-mastern i en 16:9-viewport
+  //     i en kvarts sekund, och object-cover hinner zooma sönder bilden /
+  //     visa fel utsnitt. Nivåbyte = direkt, upplösningsbyte = debounce:at.
+  const tierRef = useRef<HeroTier>(tier);
+  tierRef.current = tier;
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     let settleTimer: number | null = null;
     const handle = () => {
       setLandscapePosition(landscapeObjectPosition());
+      const nextTier = getTier();
+      if (nextTier !== tierRef.current) {
+        if (settleTimer !== null) {
+          window.clearTimeout(settleTimer);
+          settleTimer = null;
+        }
+        tierRef.current = nextTier;
+        setTier(nextTier);
+        setHeroSrc(pickHeroSrc());
+        return;
+      }
       if (settleTimer !== null) window.clearTimeout(settleTimer);
       settleTimer = window.setTimeout(() => {
         settleTimer = null;
-        setTier(getTier());
         setHeroSrc(pickHeroSrc());
       }, 250);
     };
@@ -138,6 +162,7 @@ const HeroVideo = () => {
 
   // Att byta src på <source> gör INGENTING förrän video.load() körs — elementet
   // hamnar i networkState=NO_SOURCE och rutan blir svart. Vi laddar därför om
+
   // dekodern explicit varje gång källan faktiskt ändras — men ALDRIG vid första
   // renderingen: markup:en innehåller redan rätt <source>, och ett load() där
   // hade slängt bort browserns pågående preload-hämtning och startat om den.
