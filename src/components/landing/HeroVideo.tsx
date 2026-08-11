@@ -34,9 +34,15 @@ const shouldSkipVideo = () => {
 //   ratio ≥ 1.25            → laptop/TV      → 16:9-master (1920×1080 / 1280×720)
 const PORTRAIT_MAX_RATIO = 0.66;
 const TABLET_MAX_RATIO = 1.25;
-// Riktiga telefoner har ofta ratio 0,66–0,80 när adressfältet är utfällt
+// Riktiga telefoner har ofta ratio 0,66–0,72 när adressfältet är utfällt
 // (t.ex. 393×580 = 0,68). Enbart ratio-regeln skickade dem till 3:4-spåret.
-const PHONE_MAX_WIDTH = 820;
+// MEN: bredden fick inte vara 820 px — en iPad i porträtt (768×1024 = 0,75,
+// 820×1120 = 0,73) hamnade då i mobilspåret och fick 720×1280-mastern, som
+// både är mjuk och betydligt hårdare beskuren. Telefonundantaget kräver nu
+// BÅDE smal bredd och telefonliknande proportion, så surfplattor i porträtt
+// alltid får 3:4-mastern (1200×1600).
+const PHONE_MAX_WIDTH = 700;
+const PHONE_MAX_RATIO = 0.72;
 
 type HeroTier = 'portrait' | 'tablet' | 'landscape';
 
@@ -47,7 +53,7 @@ const getTier = (): HeroTier => {
   if (!w || !h) return 'landscape';
   const r = w / h;
   if (r < PORTRAIT_MAX_RATIO) return 'portrait';
-  if (w <= PHONE_MAX_WIDTH && r < 1) return 'portrait';
+  if (w <= PHONE_MAX_WIDTH && r < PHONE_MAX_RATIO) return 'portrait';
   if (r < TABLET_MAX_RATIO) return 'tablet';
   return 'landscape';
 };
