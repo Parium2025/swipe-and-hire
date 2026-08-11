@@ -437,7 +437,7 @@ const HeroVideo = () => {
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             // Varje nivå har en master med nästan samma proportion som viewporten,
             // så object-cover kapar bara några procent — aldrig svarta ränder.
-            style={{ objectPosition: tier === 'landscape' ? landscapePosition : 'center center' }}
+            style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center' }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
