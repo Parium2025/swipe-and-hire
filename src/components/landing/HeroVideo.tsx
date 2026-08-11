@@ -365,16 +365,16 @@ const HeroVideo = () => {
             // Porträtt (mobil): Chrome/Android ignorerar
             // <link rel="preload" as="video">. Med "metadata" hann dekodern ta slut
             // på buffert → svart ruta mellan klippen. "auto" buffrar hela klippet.
-            preload={isPortrait ? 'auto' : 'metadata'}
+            preload={tier === 'landscape' ? 'metadata' : 'auto'}
             disablePictureInPicture
             disableRemotePlayback
             controlsList="nodownload noplaybackrate nofullscreen"
-            poster={isPortrait ? posterPortraitAsset.url : posterAsset.url}
+            poster={tier === 'portrait' ? posterPortraitAsset.url : tier === 'tablet' ? posterTabletAsset.url : posterAsset.url}
             onContextMenu={(e) => e.preventDefault()}
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            // Det stående motivet är centrerat i källfilen; object-cover tar bort
-            // sidofälten på mobilen utan att flytta byggarbetaren ur bild.
-            style={{ objectPosition: isPortrait ? 'center center' : landscapePosition }}
+            // Varje nivå har en master med nästan samma proportion som viewporten,
+            // så object-cover kapar bara några procent — aldrig svarta ränder.
+            style={{ objectPosition: tier === 'landscape' ? landscapePosition : 'center center' }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
