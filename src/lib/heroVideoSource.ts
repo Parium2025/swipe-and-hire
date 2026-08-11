@@ -12,7 +12,7 @@
  */
 import hero4k from '@/assets/hero-video-v9.mp4.asset.json';
 import hero1440 from '@/assets/hero-video-1440-v9.mp4.asset.json';
-import hero1080 from '@/assets/hero-video-1080-v9.mp4.asset.json';
+import hero1080 from '@/assets/hero-video-1080-v10.mp4.asset.json';
 
 /** 4K-master (CDN). Endast riktiga desktops med bra nät och hårdvaruavkodning. */
 export const HERO_VIDEO_4K = hero4k.url;

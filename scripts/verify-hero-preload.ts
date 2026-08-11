@@ -22,7 +22,7 @@ const pick = (re: RegExp, label: string, text: string) => {
 
 const assetPointerPath = 'src/assets/hero-video-v9.mp4.asset.json';
 const asset = JSON.parse(read(assetPointerPath)) as { url: string };
-const asset1080Path = 'src/assets/hero-video-1080-v9.mp4.asset.json';
+const asset1080Path = 'src/assets/hero-video-1080-v10.mp4.asset.json';
 const asset1080 = JSON.parse(read(asset1080Path)) as { url: string };
 
 const asset1440Path = 'src/assets/hero-video-1440-v9.mp4.asset.json';
