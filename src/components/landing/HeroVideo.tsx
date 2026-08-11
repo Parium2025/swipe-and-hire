@@ -22,18 +22,33 @@ const shouldSkipVideo = () => {
 // Välj EXAKT en källa. `media` på <source> inuti <video> respekteras inte
 // tillförlitligt av Chrome/Edge → desktop hämtade både 6,3 MB och 2,4 MB och
 // spelade sedan den lilla. Det åt hela nätverksbudgeten på Windows.
-const isPortraitMobileView = () =>
-  typeof window !== 'undefined' &&
-  !!window.matchMedia &&
-  window.matchMedia('(orientation: portrait) and (max-width: 768px)').matches;
+//
+// Regeln är geometrisk, inte enhetsbaserad, så den täcker allt från 4"-telefon
+// till 100"-TV: så snart viewporten är smalare än 16:9 skulle en landskapsfil
+// behöva beskäras i sidled (= kapade huvuden). Då byter vi till 3:4-mastern.
+const LANDSCAPE_MIN_RATIO = 1.35; // strax under 3:2 — säker marginal mot 16:9-crop
+
+const isPortraitLayout = () => {
+  if (typeof window === 'undefined') return false;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (!w || !h) return false;
+  return w / h < LANDSCAPE_MIN_RATIO;
+};
 
 const pickHeroSrc = () => {
   if (typeof window === 'undefined') return mobileAsset.url;
-  // Mobil i porträtt: egen 3:4-beskärning. Fyller hela bredden med betydligt
-  // mindre inzoomning än en 9:16-beskärning, utan suddiga duplicerade kanter.
-  if (isPortraitMobileView()) return portraitAsset.url;
-  const desktop = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
-  return desktop && !prefersLightweightVideo() && !prefersReducedData() ? desktopAsset.url : mobileAsset.url;
+  // Alla porträtt-/kvadratiska viewports (telefon, surfplatta, delad fönstervy)
+  // får 3:4-mastern: full bredd utan sidobeskärning och minimal inzoomning.
+  if (isPortraitLayout()) return portraitAsset.url;
+  // Landskap: skala efter faktisk renderad bredd (CSS-px × DPR, tak 2×) så att
+  // stora skärmar och TV får 1080p-mastern och små/svaga enheter den lätta.
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const renderedWidth = window.innerWidth * dpr;
+  const wantsHighRes = renderedWidth >= 1280;
+  return wantsHighRes && !prefersLightweightVideo() && !prefersReducedData()
+    ? desktopAsset.url
+    : mobileAsset.url;
 };
 
 
