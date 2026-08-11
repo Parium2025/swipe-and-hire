@@ -44,7 +44,7 @@ export const HERO_POSTER_PORTRAIT = '/hero-poster-portrait-v11.jpg';
 export const HERO_DESKTOP_QUERY = '(min-width: 1024px)';
 
 /** Stående yta (mobil) → 9:16-mastern. Speglad i index.html. */
-export const HERO_PORTRAIT_QUERY = '(max-aspect-ratio: 3/4)';
+export const HERO_PORTRAIT_QUERY = '(max-aspect-ratio: 7/10)';
 
 /** Nästan kvadratisk yta (surfplatta/smalt fönster) → 4:5-mastern. Speglad i index.html. */
 export const HERO_SQUARE_QUERY = '(max-aspect-ratio: 13/10)';
