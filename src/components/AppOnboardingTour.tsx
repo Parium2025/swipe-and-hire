@@ -187,27 +187,25 @@ const AppOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: AppOnboar
 
   return createPortal(
     <div
-      ref={scrollRef}
-      data-onboarding-scroll="true"
-      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-      className={`fixed inset-0 z-[70] overflow-x-hidden overflow-y-auto overscroll-contain transition-opacity duration-200 ${
+      className={`fixed inset-0 z-[70] overflow-hidden transition-opacity duration-200 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
       role="dialog"
       aria-modal="true"
       aria-label="Välkommen till Parium"
-      onClick={() => close()}
     >
       {/* Bakgrund */}
       <div aria-hidden="true" className="fixed inset-0 bg-black/55 backdrop-blur-[2px]" />
 
       {/* Kort */}
       <div
-        className="relative z-10 flex min-h-full w-full items-start justify-center sm:items-center sm:p-6"
+        className="relative z-10 flex h-full w-full items-start justify-center sm:items-center sm:p-6"
       >
         <div
-          onClick={(event) => event.stopPropagation()}
-          className="relative min-h-[100dvh] w-full rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:min-h-0 sm:max-w-lg sm:rounded-3xl"
+          ref={scrollRef}
+          data-onboarding-scroll="true"
+          style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+          className="no-chrome-pad relative h-[100dvh] w-full overflow-x-hidden overflow-y-auto overscroll-contain rounded-t-3xl border border-white/15 bg-[hsl(var(--surface-blue))]/95 shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-lg sm:rounded-3xl"
         >
         <div
           className="p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8"

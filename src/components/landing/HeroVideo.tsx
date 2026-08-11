@@ -373,9 +373,11 @@ const HeroVideo = () => {
           autoPlay
           loop
           playsInline
-          // preload="metadata" — videon hämtas ändå via <link rel="preload"> i index.html,
-          // så vi behöver inte att <video>-elementet startar en parallell auto-fetch.
-          preload="metadata"
+          // `auto` är avsiktligt: i inkognito är mediacachen helt kall och Chrome
+          // ignorerar dessutom preload-länkar med `as="video"`. Elementet måste då
+          // själv få buffra nog för att autoplay ska starta utan interaktion.
+          preload="auto"
+          src={skipVideo ? undefined : heroSrc}
           disablePictureInPicture
           disableRemotePlayback
           controlsList="nodownload noplaybackrate nofullscreen"
@@ -383,14 +385,7 @@ const HeroVideo = () => {
 
           onContextMenu={(e) => e.preventDefault()}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-        >
-          {!skipVideo && (
-            /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
-               så browsern återanvänder samma fetch istället för att ladda två filer. */
-            <source src={heroSrc} type="video/mp4" />
-          )}
-
-        </video>
+        />
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
