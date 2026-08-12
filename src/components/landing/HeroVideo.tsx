@@ -66,7 +66,11 @@ const getTier = (): HeroTier => {
 // 0 % låser källbildens absoluta överkant mot viewportens överkant och lägger
 // ALL beskärning i botten. Då kan webbläsaren aldrig kapa huvudet.
 const SOURCE_RATIO = 16 / 9;
-const LANDSCAPE_TOP_BIAS = '35%';
+// Hur högt upp i källan vi låser bilden när viewporten är bredare än 16:9.
+// 12 % = nästan all beskärning hamnar i botten (golv) → huvuden får alltid
+// luft ovanför, precis som när viewporten är smalare än källan.
+const LANDSCAPE_TOP_BIAS_MIN = 12;
+const LANDSCAPE_TOP_BIAS_MAX = 50;
 
 // Surfplatta stående: mastern är exakt 3:4 (1200×1600 = 0,75). En iPad i
 // porträtt är 0,75 på pappret men webbläsarens adressfält/verktygsfält gör
@@ -74,17 +78,23 @@ const LANDSCAPE_TOP_BIAS = '35%';
 // object-cover några procent i HÖJD — och med `center` fördelas det lika
 // mellan topp och botten, vilket är precis där huvudena ligger. 25 % lägger
 // merparten av bortfallet i botten (golv/mark) så huvudet alltid får rum.
-const TABLET_TOP_BIAS = '25%';
+const TABLET_TOP_BIAS = '20%';
 
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (!w || !h) return 'center center';
+  const ratio = w / h;
   // Smalare än källan → beskärningen sker i sidled, toppen är redan trygg.
-  if (w / h <= SOURCE_RATIO) return 'center center';
-  return `center ${LANDSCAPE_TOP_BIAS}`;
+  if (ratio <= SOURCE_RATIO) return 'center center';
+  // Ju bredare viewport, desto mer höjd kapas → glid mjukt från 50 % (ingen
+  // kapning) ner mot 12 % (nästan all kapning i botten) vid ~2.1:1 och bredare.
+  const t = Math.min(1, (ratio - SOURCE_RATIO) / (2.1 - SOURCE_RATIO));
+  const bias = LANDSCAPE_TOP_BIAS_MAX - t * (LANDSCAPE_TOP_BIAS_MAX - LANDSCAPE_TOP_BIAS_MIN);
+  return `center ${bias.toFixed(1)}%`;
 };
+
 
 // Har vi en gång hämtat 1080p-mastern ligger den i cachen. Att nedgradera till
 // lite-spåret när fönstret dras smalare vore då bara en extra nedladdning och en
