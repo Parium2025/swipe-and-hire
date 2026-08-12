@@ -81,6 +81,19 @@ export function useCardImage(
 
   const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
   const [blobFailed, setBlobFailed] = useState(false);
+  // Bild-CDN:en kan neka transformering (t.ex. mycket stora original) → fall
+  // tillbaka på originalbilden så att kortet aldrig blir tomt.
+  const [transformFailed, setTransformFailed] = useState(false);
+
+  useEffect(() => {
+    setTransformFailed(false);
+  }, [normalizedRawPath]);
+
+  const originalUrl = useMemo(() => {
+    if (!normalizedRawPath || normalizedRawPath.startsWith('http')) return null;
+    const { data } = supabase.storage.from(bucket).getPublicUrl(normalizedRawPath);
+    return appendVersionToUrl(data?.publicUrl || null, version);
+  }, [normalizedRawPath, bucket, version]);
 
   // Steg 3: Async ladda till blob-cache OM inte redan i cache.
   // Notera: setState körs bara när bilden faktiskt levereras → ingen extra
@@ -98,8 +111,12 @@ export function useCardImage(
         if (!cancelled) setLoadedBlobUrl(blobUrl);
       })
       .catch(() => {
-        // Blob-fetch misslyckades → tillåt fallback till raw URL
-        if (!cancelled) setBlobFailed(true);
+        // Blob-fetch misslyckades → tillåt fallback till raw URL,
+        // och till originalbilden om transformeringen nekades.
+        if (!cancelled) {
+          setBlobFailed(true);
+          if (originalUrl && resolvedUrl !== originalUrl) setTransformFailed(true);
+        }
       });
     return () => {
       cancelled = true;
@@ -113,7 +130,9 @@ export function useCardImage(
   // ännu inte hunnit klart eller service-worker/CDN gör att fetchen fastnar.
   // (Tidigare returnerades null tills blob var klar → risk för permanent
   // placeholder om blob-fetchen aldrig avslutades.)
-  const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
+  const displayUrl = transformFailed && originalUrl
+    ? originalUrl
+    : (cachedBlobUrl || loadedBlobUrl || resolvedUrl);
 
   // 🚀 Proaktiv decode: så fort vi har en URL, dekoda bitmapen off-main-thread.
   // Eliminerar "decode-blinken" när ett kort re-mountas efter scroll — bilden
@@ -131,9 +150,14 @@ export function useCardImage(
       if (e.currentTarget.src.startsWith('blob:')) {
         if (resolvedUrl) imageCache.evict(resolvedUrl);
         setBlobFailed(true);
+        return;
+      }
+      // Transformerad URL kunde inte renderas → visa originalbilden istället
+      if (originalUrl && e.currentTarget.src !== originalUrl) {
+        setTransformFailed(true);
       }
     },
-    [resolvedUrl]
+    [resolvedUrl, originalUrl]
   );
 
   return { displayUrl, handleError };

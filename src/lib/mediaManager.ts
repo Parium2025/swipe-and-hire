@@ -134,17 +134,36 @@ export async function uploadMedia(
     };
   }
   
+  // 🖼️ Bilder komprimeras/skalas ned före upload. Användaren får ladda upp stora
+  // original (upp till 50 MB), men vi lagrar en visningsoptimerad version — annars
+  // kan bild-CDN:en inte transformera filen och bilden visas inte alls.
+  let payload: Blob = file;
+  let fileExt = file.name.split('.').pop() || 'bin';
+  const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
+  if (isImage) {
+    try {
+      const { compressImageBlob } = await import('@/lib/imageUploadOptimization');
+      const compressed = await compressImageBlob(file, { maxDimension: 2560, quality: 0.9 });
+      if (compressed !== file) {
+        payload = compressed;
+        fileExt = 'webp';
+      }
+    } catch {
+      // Fallback: ladda upp originalet
+    }
+  }
+
   // Skapa unikt filnamn
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+  const safeExt = fileExt.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+  const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${safeExt}`;
   
   // 🚀 Resilient upload: XHR + retry med exponential backoff + progress
   try {
     await uploadWithRetry({
       bucket: config.bucket,
       path: fileName,
-      file,
-      contentType: file.type,
+      file: payload,
+      contentType: payload.type || file.type,
       cacheControl: '31536000',
       upsert: true,
       signal: options?.signal,
