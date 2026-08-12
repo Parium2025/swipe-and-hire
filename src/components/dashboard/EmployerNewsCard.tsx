@@ -33,6 +33,11 @@ interface EmployerNewsCardProps {
   setIsPaused: (v: boolean) => void;
 }
 
+const IS_TOUCH_ONLY =
+  typeof window !== 'undefined' &&
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
+  !(window.matchMedia?.('(hover: hover)').matches || window.matchMedia?.('(pointer: fine)').matches);
+
 export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCardProps) => {
   const { data: news, isLoading } = useHrNews();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -79,6 +84,9 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
   }
 
   const currentNews = newsItems[currentIndex];
+  const openArticle = () => {
+    if (currentNews?.source_url) window.open(currentNews.source_url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <Card
@@ -110,18 +118,40 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
+                onClick={!IS_TOUCH_ONLY ? openArticle : undefined}
                 className={`w-full flex flex-col overflow-hidden ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
               >
-                <TruncatedText
-                  text={currentNews.title}
-                  className="h-[39px] text-sm font-semibold text-white leading-snug mb-2.5 line-clamp-2"
-                />
-                <TruncatedText
-                  text={currentNews.summary || currentNews.title}
-                  lines={2}
-                  className="h-[36px] text-sm leading-[18px] text-white"
-                />
+                {IS_TOUCH_ONLY ? (
+                  <TruncatedText
+                    alwaysShowTooltip
+                    text={`${currentNews.title}\n\n${currentNews.summary || ''}`}
+                    className="w-full"
+                  >
+                    <div className="w-full">
+                      <div className="h-[39px] text-sm font-semibold text-white leading-snug mb-2.5 line-clamp-2">
+                        {currentNews.title}
+                      </div>
+                      <div
+                        className="h-[36px] text-sm leading-[18px] text-white overflow-hidden"
+                        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+                      >
+                        {currentNews.summary || currentNews.title}
+                      </div>
+                    </div>
+                  </TruncatedText>
+                ) : (
+                  <>
+                    <TruncatedText
+                      text={currentNews.title}
+                      className="h-[39px] text-sm font-semibold text-white leading-snug mb-2.5 line-clamp-2"
+                    />
+                    <TruncatedText
+                      text={currentNews.summary || currentNews.title}
+                      lines={2}
+                      className="h-[36px] text-sm leading-[18px] text-white"
+                    />
+                  </>
+                )}
               </motion.div>
             ) : (
               <p className="text-xs text-white/60 text-center">Inga nyheter just nu</p>
@@ -132,11 +162,16 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
         <div className="mt-auto flex items-center justify-between gap-2 shrink-0 h-6">
           <div className="flex-1 min-w-0">
             {currentNews?.source_url && (
-              <div className="flex items-center gap-1.5 text-white min-w-0 overflow-hidden whitespace-nowrap">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); openArticle(); }}
+                className="flex items-center gap-1.5 text-white min-w-0 overflow-hidden whitespace-nowrap"
+                aria-label="Läs artikeln"
+              >
                 <span className="text-xs shrink-0">Läs mer</span>
                 <span className="text-[10px] text-white truncate">· {currentNews.source}</span>
                 <ExternalLink className="h-3 w-3 shrink-0" />
-              </div>
+              </button>
             )}
           </div>
           <div className="shrink-0">
