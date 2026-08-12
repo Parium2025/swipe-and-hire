@@ -15,7 +15,13 @@ interface StatCard {
   icon: LucideIcon;
   title: string;
   value: number | string;
+  /** Dämpar kortet visuellt (opacity) medan data hämtas */
   loading?: boolean;
+  /**
+   * Ren datastatus för siffran. Används av räknaren för att veta om en 0:a
+   * betyder "laddar" eller "verkligen noll" — påverkar inte utseendet.
+   */
+  isLoading?: boolean;
   subItems?: SubItem[];
   /** Unique key for persisting the last known value across page loads */
   cacheKey?: string;
