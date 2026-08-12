@@ -35,7 +35,7 @@ import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 const MESSAGES_PAGE_SIZE = 200;
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
 interface ChatViewProps {
   conversation: Conversation;
