@@ -445,25 +445,10 @@ export const WizardListPreview = memo(function WizardListPreview({
           <PreviewRow label="Lön" value={salaryText || '–'} />
           <PreviewRow
             label="Förmåner"
-            value={
-              benefitsCount > 0 ? (
-                <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium">
-                  <Gift className="h-3 w-3 flex-shrink-0" />
-                  {benefitsCount} st
-                </span>
-              ) : (
-                '–'
-              )
-            }
+            value={benefitsCount > 0 ? `${benefitsCount} st` : '–'}
           />
           {/* Frågor visas inte i förhandsvisningen — kandidaten ser dem först när annonsen öppnas */}
           <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
-          {isExpired && (
-            <PreviewRow
-              label="Status"
-              value={<span className="text-red-300 font-medium">Utgången</span>}
-            />
-          )}
         </div>
       </div>
     </div>
