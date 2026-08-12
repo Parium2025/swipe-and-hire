@@ -813,7 +813,7 @@ export function ChatView({
             type="file"
             onChange={handleFileSelect}
             className="hidden"
-            accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+            accept="image/*,video/*,.pdf,.doc,.docx,.rtf,.odt,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip"
           />
 
           <Textarea

@@ -2467,7 +2467,7 @@ const Profile = () => {
                             setCvFileName('');
                           }}
                           currentFile={undefined}
-                          acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
+                          acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain']}
                           maxFileSize={50 * 1024 * 1024}
                         />
                       </div>

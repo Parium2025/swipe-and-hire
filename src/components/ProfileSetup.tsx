@@ -385,7 +385,7 @@ const ProfileSetup = () => {
                       setCvFileName('');
                     }}
                     currentFile={cvUrl ? { url: cvUrl, name: "Din valda fil" } : undefined}
-                    acceptedFileTypes={['application/pdf', '.doc', '.docx']}
+                    acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain']}
                     maxFileSize={50 * 1024 * 1024}
                   />
                 </div>
