@@ -69,7 +69,9 @@ const ActionTip = ({ label, children }: { label: string; children: React.ReactNo
 
 export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp }: MobileJobCardProps) => {
   const navigate = useNavigate();
-  const { ref: actionsRef, compact: compactActions } = useCompactWidth(300);
+  // Textetiketter kräver plats för "Återpublicera" + "Ta bort" utan avklippning;
+  // under detta går knapparna över till rena ikoner (med tooltip vid hover).
+  const { ref: actionsRef, compact: compactActions } = useCompactWidth(380);
   const [expanded, setExpanded] = useState(expandedProp ?? defaultExpanded);
   // Sync with controlled prop (used for global "Visa detaljer alla")
   useEffect(() => {
