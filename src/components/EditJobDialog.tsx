@@ -183,6 +183,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
   const [isScrolledTop, setIsScrolledTop] = useState(true);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
+  // Markerar att användaren aktivt tagit bort bilden — hindrar att annonsens
+  // sparade bild laddas tillbaka av bild-effekten (krävde tidigare två klick).
+  const imageClearedRef = useRef(false);
+  const desktopImageClearedRef = useRef(false);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [originalDesktopImageUrl, setOriginalDesktopImageUrl] = useState<string | null>(null);
