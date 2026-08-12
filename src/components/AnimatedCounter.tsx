@@ -37,7 +37,8 @@ export const AnimatedCounter = memo(({
   value, 
   duration = 500,
   className = '',
-  cacheKey
+  cacheKey,
+  isLoading
 }: AnimatedCounterProps) => {
   // If cacheKey is provided, use cached value as starting point
   const cachedInitial = cacheKey ? getCachedValue(cacheKey) : null;
@@ -53,14 +54,20 @@ export const AnimatedCounter = memo(({
   const animationRef = useRef<number | null>(null);
   // Track if we've seen "real" data since mount
   const hasReceivedRealData = useRef(false);
-  // Bekräftad nolla: en 0:a som stått kvar efter grace-perioden är riktig data
+  // Bekräftad nolla: en 0:a som är riktig data (inte ett laddningstillstånd)
   const [zeroConfirmed, setZeroConfirmed] = useState(false);
+  const hasExplicitLoading = isLoading !== undefined;
 
   // 🛡️ Noll-hantering: en 0:a kan antingen betyda "laddar" eller "verkligen 0".
-  // Vi visar cachat värde en kort stund; står 0:an kvar är den äkta och committas.
+  // Med explicit isLoading behövs ingen gissning alls — vi litar på flaggan.
+  // Utan flaggan faller vi tillbaka på en kort grace-period.
   useEffect(() => {
     if (value !== 0) {
       setZeroConfirmed(false);
+      return;
+    }
+    if (hasExplicitLoading) {
+      setZeroConfirmed(!isLoading);
       return;
     }
     if (!hasCachedValue || hasReceivedRealData.current) {
@@ -70,7 +77,7 @@ export const AnimatedCounter = memo(({
     }
     const t = setTimeout(() => setZeroConfirmed(true), 600);
     return () => clearTimeout(t);
-  }, [value, hasCachedValue]);
+  }, [value, hasCachedValue, hasExplicitLoading, isLoading]);
 
   useEffect(() => {
     const startValue = previousValue.current;
