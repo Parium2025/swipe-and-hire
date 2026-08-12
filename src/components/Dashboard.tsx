@@ -249,16 +249,17 @@ const Dashboard = memo(() => {
     const totalViews = serverStats?.total_views ?? filteredStats.totalViews;
     const totalApplications = serverStats?.total_applications ?? filteredStats.totalApplications;
     return [
-      { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : totalJobs, loading: false },
+      { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : totalJobs, loading: false, isLoading },
       {
         icon: TrendingUp,
         title: 'Aktiva',
         value: isLoading ? preloadedEmployerActiveJobs : activeCount,
         loading: false,
+        isLoading,
         subItems: [{ label: 'Utgångna', value: expiredCount }],
       },
-      { icon: Eye, title: 'Visningar', value: isLoading ? preloadedEmployerTotalViews : totalViews, loading: false },
-      { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : totalApplications, loading: false },
+      { icon: Eye, title: 'Visningar', value: isLoading ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading },
+      { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : totalApplications, loading: false, isLoading },
     ];
   }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
