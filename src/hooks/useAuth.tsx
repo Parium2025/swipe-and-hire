@@ -1938,6 +1938,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .select('organization_id')
         .eq('user_id', user.id)
         .eq('is_active', true)
+        .not('organization_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
       
       const orgId = userRole?.organization_id;
