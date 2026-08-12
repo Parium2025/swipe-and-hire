@@ -4,7 +4,7 @@ import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { isJobExpiredCheck } from '@/lib/date';
+import { isEmployerJobActive } from '@/lib/jobStatus';
 import { StatsCarousel } from './StatsCarousel';
 import type { StatData } from './StatsCarousel';
 
