@@ -81,7 +81,7 @@ export const AnimatedCounter = memo(({
     const isFirstRealData = !hasReceivedRealData.current;
     hasReceivedRealData.current = true;
     
-    // Cache the current value for next page load (only non-zero values)
+    // Cache the current value for next page load (även 0 — annars blir cachen stale)
     if (cacheKey) {
       setCachedValue(cacheKey, endValue);
     }
