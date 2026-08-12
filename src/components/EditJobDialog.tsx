@@ -157,13 +157,17 @@ interface EditJobDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onJobUpdated: () => void;
+  /** När true: annonsen publiceras (aktiveras 14 dagar) vid submit istället för att bara sparas. */
+  republishMode?: boolean;
 }
 
 const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 
-const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogProps) => {
+const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = false }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const isDraft = job ? !job.is_active : false;
+  // Publiceringsläge: utkast som publiceras, eller utgången annons som återpubliceras efter redigering
+  const publishMode = isDraft || republishMode;
   const [isInitializing, setIsInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -1853,7 +1857,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         image_focus_position: formData.image_focus_position || 'center',
         image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
-        ...(isDraft ? {
+        ...(publishMode ? {
           is_active: true,
           created_at: new Date().toISOString(),
           expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
@@ -1895,8 +1899,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       }
 
       toast({ 
-        title: isDraft ? 'Annons publicerad!' : 'Annons uppdaterad!', 
-        description: isDraft ? 'Din annons är nu publicerad och synlig för jobbsökare.' : 'Dina ändringar har sparats.' 
+        title: publishMode ? 'Annons publicerad!' : 'Annons uppdaterad!', 
+        description: publishMode ? 'Din annons är nu publicerad och synlig för jobbsökare.' : 'Dina ändringar har sparats.' 
       });
       clearEditJobDraft(); // Clear localStorage draft after successful save
       setHasUnsavedChanges(false);
@@ -4338,8 +4342,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 onSubmit={handleSubmit}
                 disabled={!canProceed()}
                 loading={loading}
-                submitLabel={isDraft ? "Publicera" : "Spara ändringar"}
-                loadingLabel={isDraft ? "Publicerar..." : "Sparar..."}
+                submitLabel={publishMode ? "Publicera" : "Spara ändringar"}
+                loadingLabel={publishMode ? "Publicerar..." : "Sparar..."}
                 showSubmitIcon={false}
                 hideBackOnFirstStep={false}
                 className="gap-3"
