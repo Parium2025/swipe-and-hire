@@ -73,6 +73,7 @@ import {
 // Import shared wizard components and types
 import { SortableQuestionItem, WizardFooter } from '@/components/wizard';
 import { JobQuestion } from '@/types/jobWizard';
+import { REPUBLISH_DAYS } from '@/lib/jobStatus';
 
 interface JobPosting {
   id: string;
@@ -1873,7 +1874,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
         ...(publishMode && isDraft ? {
           is_active: true,
           created_at: new Date().toISOString(),
-          expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          expires_at: new Date(Date.now() + REPUBLISH_DAYS * 24 * 60 * 60 * 1000).toISOString(),
         } : {})
       } as Record<string, any>;
 
