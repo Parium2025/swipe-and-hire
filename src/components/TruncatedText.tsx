@@ -40,6 +40,18 @@ const detectEnv = () => {
 
 const ENV = detectEnv();
 
+// Rensar bort osynliga tecken (zero-width, BOM, U+2028/2029, \r) och
+// tomma rader i slutet — annars får tooltip-bubblan ett stort tomrum längst ner.
+const sanitizeTooltipText = (value?: string) => {
+  if (!value) return value;
+  return value
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\u200B-\u200D\uFEFF\u2028\u2029]/g, '')
+    .replace(/[ \t\u00A0]+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, '');
+};
+
 // Singleton tracker — only one TruncatedText tooltip can be open at a time.
 // This prevents the "double tooltip" bug where two cards' tooltips overlap
 // when the user moves the mouse from one card to an adjacent one.
@@ -373,7 +385,7 @@ export function TruncatedText({
             avoidCollisions={true}
             collisionPadding={12}
             sticky="always"
-            className={`z-[999999] w-fit max-w-[min(calc(100vw-24px),360px)] sm:max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
+            className={`z-[999999] w-fit h-fit max-w-[min(calc(100vw-24px),360px)] sm:max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] whitespace-normal bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
             onMouseEnter={handleTooltipMouseEnter}
             onMouseLeave={handleTooltipMouseLeave}
             onPointerDown={stopTooltipPropagation}
@@ -386,8 +398,8 @@ export function TruncatedText({
             onWheel={(e) => e.stopPropagation()}
             onScrollCapture={stopTooltipPropagation}
           >
-            <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
-              {text?.replace(/\n{3,}/g, '\n\n').trim()}
+            <p className="text-sm leading-relaxed break-words whitespace-pre-line">
+              {sanitizeTooltipText(text)}
             </p>
           </TooltipContent>
         ) : null}
