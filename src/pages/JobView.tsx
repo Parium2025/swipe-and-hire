@@ -606,6 +606,15 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     } catch (error: any) {
       const raw = String(error?.message || '');
       const isQuota = raw.includes('application_quota_exceeded');
+      // Databasen har ett unikt index på (job_id, applicant_id). Om två klick/
+      // enheter hinner skicka samtidigt är det INTE ett fel — ansökan finns redan.
+      if (error?.code === '23505') {
+        setHasAlreadyApplied(true);
+        setApplicationStatusChecked(true);
+        toast({ title: 'Redan sökt', description: 'Du har redan skickat en ansökan för den här tjänsten.' });
+        setApplying(false);
+        return;
+      }
       toast({
         title: isQuota ? 'Ansökningsgränsen är nådd' : 'Ett fel uppstod',
         description: isQuota
