@@ -81,6 +81,19 @@ export function useCardImage(
 
   const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
   const [blobFailed, setBlobFailed] = useState(false);
+  // Bild-CDN:en kan neka transformering (t.ex. mycket stora original) → fall
+  // tillbaka på originalbilden så att kortet aldrig blir tomt.
+  const [transformFailed, setTransformFailed] = useState(false);
+
+  useEffect(() => {
+    setTransformFailed(false);
+  }, [normalizedRawPath]);
+
+  const originalUrl = useMemo(() => {
+    if (!normalizedRawPath || normalizedRawPath.startsWith('http')) return null;
+    const { data } = supabase.storage.from(bucket).getPublicUrl(normalizedRawPath);
+    return appendVersionToUrl(data?.publicUrl || null, version);
+  }, [normalizedRawPath, bucket, version]);
 
   // Steg 3: Async ladda till blob-cache OM inte redan i cache.
   // Notera: setState körs bara när bilden faktiskt levereras → ingen extra
