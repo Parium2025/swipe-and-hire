@@ -54,6 +54,18 @@ function getGradientForId(id: string) {
   return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
 }
 
+/** Hover-etikett för kortets åtgärdsknappar (visas i både ikon- och textläge) */
+const ActionTip = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <TooltipProvider delayDuration={200}>
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
+        {label}
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
+
 
 export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp }: MobileJobCardProps) => {
   const navigate = useNavigate();
