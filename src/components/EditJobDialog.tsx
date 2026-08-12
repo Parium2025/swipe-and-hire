@@ -903,7 +903,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
     const loadDesktopJobImage = async () => {
       if (!open) return;
 
-      const desktopUrl = formData.job_image_desktop_url || (job as any)?.job_image_desktop_url;
+      const desktopUrl = formData.job_image_desktop_url || (desktopImageClearedRef.current ? '' : (job as any)?.job_image_desktop_url);
 
       if (!desktopUrl) {
         setJobImageDesktopDisplayUrl(null);
