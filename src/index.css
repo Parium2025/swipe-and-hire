@@ -1044,20 +1044,12 @@ All colors MUST be HSL.
      och toasts renderas i portaler ovanpå sidan – de ligger inte i sidans scrollflöde.
      Utan detta får de ett osynligt 68px tomrum i botten (glapp under texten).
      Gäller hela appen: arbetsgivar- och jobbsökarsidan. */
-  [data-radix-popper-content-wrapper] *::after,
   [data-radix-popper-content-wrapper] .overflow-y-auto::after,
   [data-radix-popper-content-wrapper] .overflow-auto::after,
   [data-radix-popper-content-wrapper] .overflow-y-scroll::after,
-  [role="tooltip"]::after,
-  [role="dialog"] .overflow-y-auto::after,
-  [role="dialog"] .overflow-auto::after,
-  [role="dialog"] .overflow-y-scroll::after,
-  [role="dialog"]::after,
-  [role="alertdialog"] .overflow-y-auto::after,
-  [role="alertdialog"] .overflow-auto::after,
-  [role="alertdialog"] .overflow-y-scroll::after,
-  [role="listbox"]::after,
-  [role="menu"]::after,
+  [role="tooltip"].overflow-y-auto::after,
+  [role="listbox"].overflow-y-auto::after,
+  [role="menu"].overflow-y-auto::after,
   [data-sonner-toaster] .overflow-y-auto::after,
   [data-radix-toast-viewport] .overflow-y-auto::after {
     content: none !important;
@@ -1066,13 +1058,7 @@ All colors MUST be HSL.
 
   [data-radix-popper-content-wrapper] .overflow-y-auto,
   [data-radix-popper-content-wrapper] .overflow-auto,
-  [data-radix-popper-content-wrapper] .overflow-y-scroll,
-  [role="dialog"] .overflow-y-auto,
-  [role="dialog"] .overflow-auto,
-  [role="dialog"] .overflow-y-scroll,
-  [role="alertdialog"] .overflow-y-auto,
-  [role="alertdialog"] .overflow-auto,
-  [role="alertdialog"] .overflow-y-scroll {
+  [data-radix-popper-content-wrapper] .overflow-y-scroll {
     scroll-padding-bottom: 0 !important;
   }
 
