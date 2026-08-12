@@ -19,7 +19,7 @@ const openCreateJob = () => {
  * företaget är helt nytt eller redan har haft annonser uppe.
  */
 export const EmptyJobsCta = ({ compact = false, hasPreviousJobs = false }: EmptyJobsCtaProps) => {
-  const heading = hasPreviousJobs ? 'Inga aktiva annonser just nu' : 'Dags för er första annons';
+  const heading = hasPreviousJobs ? 'Inga aktiva annonser just nu!' : 'Dags för er första annons';
   const ctaLabel = hasPreviousJobs ? 'Skapa ny annons' : 'Skapa er första annons';
   const firstBullet = hasPreviousJobs
     ? 'Återpublicera en utgången annons eller skapa en ny.'
