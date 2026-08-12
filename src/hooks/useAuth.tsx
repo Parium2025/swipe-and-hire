@@ -900,13 +900,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Parallelize membership/organization fetches
+      // OBS: en användare kan ha flera aktiva roller (t.ex. en med och en utan org).
+      // Vi hämtar därför en lista och väljer den mest relevanta i stället för .maybeSingle()
+      // som kastar PGRST116 så fort det finns fler än en rad.
       const rolePromise = supabase
         .from('user_roles')
         .select('*')
         .eq('user_id', userId)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .maybeSingle();
+        .limit(10)
+        .then(({ data, error }) => ({
+          // Prioritera roll kopplad till en organisation, annars senaste
+          data: (data ?? []).find((r) => r.organization_id) ?? (data ?? [])[0] ?? null,
+          error,
+        }));
 
       const orgPromise = profileData?.organization_id
         ? supabase
