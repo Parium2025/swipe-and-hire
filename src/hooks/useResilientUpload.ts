@@ -31,7 +31,7 @@ interface MediaConfig {
 const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'profile-image': {
     bucket: 'job-applications',
-    maxSizeMB: 10,
+    maxSizeMB: 50,
     allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'],
     shouldCompress: true,
   },
@@ -43,25 +43,25 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   },
   'cover-image': {
     bucket: 'job-applications',
-    maxSizeMB: 10,
+    maxSizeMB: 50,
     allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
     shouldCompress: true,
   },
   'cv': {
     bucket: 'job-applications',
-    maxSizeMB: 10,
+    maxSizeMB: 25,
     allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
     shouldCompress: false,
   },
   'application-document': {
     bucket: 'job-applications',
-    maxSizeMB: 10,
+    maxSizeMB: 25,
     allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png'],
     shouldCompress: false,
   },
   'company-logo': {
     bucket: 'company-logos',
-    maxSizeMB: 5,
+    maxSizeMB: 50,
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'],
     shouldCompress: true,
   },

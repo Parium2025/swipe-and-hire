@@ -862,7 +862,7 @@ const JobApplication = () => {
                   <FileUpload
                     questionType="document"
                     acceptedFileTypes={['application/pdf', '.doc', '.docx']}
-                    maxFileSize={10 * 1024 * 1024}
+                    maxFileSize={25 * 1024 * 1024}
                     onFileUploaded={(url, fileName) => {
                       handleInputChange('cvUrl', url);
                       toast({
@@ -888,7 +888,7 @@ const JobApplication = () => {
                   <FileUpload
                     questionType="document"
                     acceptedFileTypes={['application/pdf', '.doc', '.docx', 'image/*']}
-                    maxFileSize={10 * 1024 * 1024}
+                    maxFileSize={25 * 1024 * 1024}
                     onFileUploaded={(url, fileName) => {
                       handleInputChange('additionalDocuments', url);
                       toast({
