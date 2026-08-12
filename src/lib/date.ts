@@ -1,5 +1,6 @@
 import { format, differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths, differenceInYears, addDays } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { REPUBLISH_DAYS } from '@/lib/jobStatus';
 
 /**
  * Format time ago in Swedish: hours → days → months → years
@@ -73,14 +74,16 @@ export function formatDateShortSv(input: Date | string | number | null | undefin
 }
 
 /**
- * Get effective expiration date - either from expires_at or calculated from created_at + 14 days
+ * Get effective expiration date - either from expires_at or created_at + REPUBLISH_DAYS.
+ * Fallbacken måste matcha arbetsgivarsidan (jobStatus.ts / republish_job) så att
+ * kandidat och arbetsgivare aldrig ser olika status på samma annons.
  */
 export function getEffectiveExpiresAt(createdAt: string, expiresAt?: string | null): Date {
   if (expiresAt) {
-    return new Date(expiresAt);
+    const parsed = new Date(expiresAt);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
   }
-  // Default: 1 day from creation (temporary for testing, change to 14 for production)
-  return addDays(new Date(createdAt), 1);
+  return addDays(new Date(createdAt), REPUBLISH_DAYS);
 }
 
 /**
