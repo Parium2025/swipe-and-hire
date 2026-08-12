@@ -4176,8 +4176,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                   
                                 if (publicUrl) {
                                   imageClearedRef.current = false;
-                                  imageClearedRef.current = false;
-                setJobImageDisplayUrl(publicUrl);
+                                  setJobImageDisplayUrl(publicUrl);
                                   const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
                                   await preloadSingleFile(publicUrl);
                                 }
@@ -4253,8 +4252,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                       .getPublicUrl(mobileUrl);
                                     if (publicUrl) {
                                       desktopImageClearedRef.current = false;
-                                  desktopImageClearedRef.current = false;
-                setJobImageDesktopDisplayUrl(publicUrl);
+                                      setJobImageDesktopDisplayUrl(publicUrl);
                                     }
                                   }
                                 }}
