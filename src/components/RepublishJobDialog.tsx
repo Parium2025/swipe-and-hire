@@ -13,8 +13,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { TruncatedText } from '@/components/TruncatedText';
-
-const REPUBLISH_DAYS = 14;
+import { REPUBLISH_DAYS } from '@/lib/jobStatus';
 
 interface RepublishJobDialogProps {
   jobId: string | null;

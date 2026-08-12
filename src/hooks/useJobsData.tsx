@@ -236,6 +236,10 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           : { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const },
         (payload) => {
           if (payload.eventType === 'UPDATE') {
+            // Serverns applications_count är sanning. Släpp eventuella optimistiska
+            // deltas för samma jobb, annars adderas de ovanpå ett redan uppdaterat
+            // värde och siffran dubbelräknas tills nästa event kommer in.
+            if (payload.new?.id) pendingDeltas.delete(payload.new.id as string);
             queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
               if (!oldData) return oldData;
               return oldData.map(job =>

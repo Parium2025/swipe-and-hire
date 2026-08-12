@@ -73,6 +73,7 @@ import {
 // Import shared wizard components and types
 import { SortableQuestionItem, WizardFooter } from '@/components/wizard';
 import { JobQuestion } from '@/types/jobWizard';
+import { REPUBLISH_DAYS } from '@/lib/jobStatus';
 
 interface JobPosting {
   id: string;
@@ -1873,7 +1874,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
         ...(publishMode && isDraft ? {
           is_active: true,
           created_at: new Date().toISOString(),
-          expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          expires_at: new Date(Date.now() + REPUBLISH_DAYS * 24 * 60 * 60 * 1000).toISOString(),
         } : {})
       } as Record<string, any>;
 
@@ -1890,10 +1891,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
       // Återpublicering: aktivera annonsen i 14 dagar via RPC (kringgår dubblettspärren,
       // behåller created_at, ansökningar och meddelanden).
       if (publishMode && !isDraft) {
-        const { error: republishError } = await supabase.rpc('republish_job', {
-          _job_id: job.id,
-          _days: 14,
-        });
+        // Två separata anrop (fält + aktivering) kan inte köras i en transaktion från
+        // klienten. Ett tillfälligt nätverksfel fick tidigare annonsen att stanna kvar
+        // som utgången trots sparad text. Vi gör därför upp till 3 försök innan vi ger upp.
+        let republishError: { message?: string } | null = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const { error: err } = await supabase.rpc('republish_job', {
+            _job_id: job.id,
+            _days: REPUBLISH_DAYS,
+          });
+          republishError = err;
+          if (!err) break;
+          await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
+        }
         if (republishError) {
           toast({
             title: 'Kunde inte publicera',

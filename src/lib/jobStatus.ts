@@ -1,3 +1,9 @@
+/**
+ * Livslängd för en publicerad/återpublicerad annons.
+ * Enda sanningen i klienten – matchar SQL-defaulten i republish_job(_days).
+ */
+export const REPUBLISH_DAYS = 14;
+
 export interface EmployerStatusJobLike {
   is_active: boolean | null;
   expires_at?: string | null;
