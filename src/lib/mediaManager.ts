@@ -142,14 +142,41 @@ export async function uploadMedia(
   const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
   if (isImage) {
     try {
-      const { compressImageBlob } = await import('@/lib/imageUploadOptimization');
-      const compressed = await compressImageBlob(file, { maxDimension: 2560, quality: 0.9 });
+      const { compressImageBlob, SAFE_UPLOAD_BYTES } = await import('@/lib/imageUploadOptimization');
+      let compressed = await compressImageBlob(file, { maxDimension: 2560, quality: 0.9 });
+
+      // Extremt detaljrika 4K/6K-bilder kan fortfarande bli stora → kör ett
+      // hårdare pass så att bild-CDN:en garanterat kan transformera filen.
+      if (compressed.size > SAFE_UPLOAD_BYTES) {
+        compressed = await compressImageBlob(compressed, { maxDimension: 1920, quality: 0.82 });
+      }
+
       if (compressed !== file) {
         payload = compressed;
-        fileExt = 'webp';
+        fileExt = compressed.type === 'image/jpeg' ? 'jpg' : compressed.type === 'image/png' ? 'png' : 'webp';
+      }
+
+      // Sista skyddsnätet: om komprimering inte gick att genomföra (t.ex. en
+      // HEIC-fil i en webbläsare som inte kan avkoda den) vägrar vi hellre
+      // uppladdningen än att spara en bild som aldrig går att visa.
+      if (payload.size > SAFE_UPLOAD_BYTES) {
+        return {
+          storagePath: '',
+          error: new Error(
+            'Bilden kunde inte bearbetas i din webbläsare. Spara om den som JPEG eller PNG och försök igen.'
+          ),
+        };
       }
     } catch {
-      // Fallback: ladda upp originalet
+      // Fallback: ladda upp originalet om det är tillräckligt litet
+      if (file.size > 6 * 1024 * 1024) {
+        return {
+          storagePath: '',
+          error: new Error(
+            'Bilden kunde inte bearbetas i din webbläsare. Spara om den som JPEG eller PNG och försök igen.'
+          ),
+        };
+      }
     }
   }
 
