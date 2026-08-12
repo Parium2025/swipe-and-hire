@@ -7,7 +7,6 @@ import {
   Clock,
   Eye,
   FileQuestion,
-  Gift,
   Heart,
   Users,
   X,
