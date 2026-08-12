@@ -62,6 +62,7 @@ const EmployerDashboard = memo(() => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [republishJob, setRepublishJob] = useState<JobPosting | null>(null);
   const [republishDialogOpen, setRepublishDialogOpen] = useState(false);
+  const [editRepublishMode, setEditRepublishMode] = useState(false);
   const [pendingEditJobId, setPendingEditJobId] = useState<string | null>(null);
   const { user, profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const { toast } = useToast();
@@ -377,8 +378,9 @@ const EmployerDashboard = memo(() => {
     }
   };
 
-  const handleEditJob = (job: JobPosting) => {
+  const handleEditJob = (job: JobPosting, opts?: { republish?: boolean }) => {
     setEditingJob(job);
+    setEditRepublishMode(!!opts?.republish);
     setEditDialogOpen(true);
   };
 
@@ -700,7 +702,11 @@ const EmployerDashboard = memo(() => {
       <EditJobDialog
         job={editingJob}
         open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
+        republishMode={editRepublishMode}
+        onOpenChange={(open) => {
+          setEditDialogOpen(open);
+          if (!open) setEditRepublishMode(false);
+        }}
         onJobUpdated={invalidateJobs}
       />
 
@@ -719,7 +725,7 @@ const EmployerDashboard = memo(() => {
         onEditFirst={() => {
           const job = republishJob;
           setRepublishJob(null);
-          if (job) handleEditJob(job);
+          if (job) handleEditJob(job, { republish: true });
         }}
       />
     </div>
