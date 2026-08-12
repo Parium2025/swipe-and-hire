@@ -64,7 +64,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                 </div>
                 <div className="px-1 pb-1 sm:px-1.5 sm:pb-1.5 md:px-3 md:pb-3">
                   <div className={`text-sm sm:text-base md:text-xl font-bold text-center flex justify-center ${colorClass}`}>
-                    <AnimatedCounter value={item.value} className="text-sm sm:text-base md:text-xl font-bold" cacheKey={item.cacheKey} />
+                    <AnimatedCounter value={item.value} className="text-sm sm:text-base md:text-xl font-bold" cacheKey={item.cacheKey} isLoading={stat.loading} />
                   </div>
                 </div>
               </div>
