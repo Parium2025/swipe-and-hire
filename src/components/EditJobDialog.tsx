@@ -1867,7 +1867,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
         image_focus_position: formData.image_focus_position || 'center',
         image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
-        ...(publishMode ? {
+        // Utkast som publiceras räknas som ny annons (nytt created_at).
+        // Återpublicering av en befintlig/utgången annons aktiveras via RPC nedan
+        // så att alla ansökningar, kandidater och historik följer med oförändrat.
+        ...(publishMode && isDraft ? {
           is_active: true,
           created_at: new Date().toISOString(),
           expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
@@ -1883,6 +1886,24 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
         toast({ title: 'Fel vid uppdatering', description: error.message, variant: 'destructive' });
         return;
       }
+
+      // Återpublicering: aktivera annonsen i 14 dagar via RPC (kringgår dubblettspärren,
+      // behåller created_at, ansökningar och meddelanden).
+      if (publishMode && !isDraft) {
+        const { error: republishError } = await supabase.rpc('republish_job', {
+          _job_id: job.id,
+          _days: 14,
+        });
+        if (republishError) {
+          toast({
+            title: 'Kunde inte publicera',
+            description: republishError.message || 'Ändringarna sparades, men annonsen kunde inte aktiveras.',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
 
       // Update job questions - delete all existing and insert new ones
       await supabase
