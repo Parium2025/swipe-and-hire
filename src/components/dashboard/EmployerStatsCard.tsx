@@ -94,6 +94,10 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
         invalidateStats
       )
+      // "Nya ansökningar" ska tickas upp live, inte först vid fliksbyte.
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' },
+        invalidateStats
+      )
       .subscribe();
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') invalidateStats();
