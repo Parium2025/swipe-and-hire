@@ -69,6 +69,9 @@ export function useTeamMembers() {
         .select('organization_id')
         .eq('user_id', user.id)
         .eq('is_active', true)
+        .not('organization_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (roleError) throw roleError;
