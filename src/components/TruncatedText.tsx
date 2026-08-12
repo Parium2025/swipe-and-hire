@@ -40,6 +40,18 @@ const detectEnv = () => {
 
 const ENV = detectEnv();
 
+// Rensar bort osynliga tecken (zero-width, BOM, U+2028/2029, \r) och
+// tomma rader i slutet — annars får tooltip-bubblan ett stort tomrum längst ner.
+const sanitizeTooltipText = (value?: string) => {
+  if (!value) return value;
+  return value
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\u200B-\u200D\uFEFF\u2028\u2029]/g, '')
+    .replace(/[ \t\u00A0]+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, '');
+};
+
 // Singleton tracker — only one TruncatedText tooltip can be open at a time.
 // This prevents the "double tooltip" bug where two cards' tooltips overlap
 // when the user moves the mouse from one card to an adjacent one.
