@@ -54,7 +54,7 @@ export const EmptyJobsCta = ({ compact = false, hasPreviousJobs = false }: Empty
           onClick={openCreateJob}
           className="mt-6 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-green-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
         >
-          Skapa er första annons
+          {ctaLabel}
           <Plus className="h-4 w-4" />
         </button>
       </div>
