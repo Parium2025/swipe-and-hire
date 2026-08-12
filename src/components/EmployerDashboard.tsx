@@ -446,20 +446,21 @@ const EmployerDashboard = memo(() => {
     const totalViews = serverStats?.total_views ?? activeJobs.reduce((s, j) => s + j.views_count, 0);
     const totalApps = serverStats?.total_applications ?? activeJobs.reduce((s, j) => s + j.applications_count, 0);
     return [
-      { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : totalJobs, loading: false, cacheKey: 'emp_total_jobs' },
+      { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs' },
       {
         icon: TrendingUp,
         title: 'Aktiva',
         value: loading ? preloadedEmployerActiveJobs : activeCount,
         loading: false,
+        isLoading: loading,
         cacheKey: 'emp_active_jobs',
         subItems: [
           { label: 'Utgångna', value: expiredCount, cacheKey: 'emp_expired_jobs' },
           { label: 'Utkast', value: draftCount, cacheKey: 'emp_draft_jobs' },
         ],
       },
-      { icon: Eye, title: 'Visningar', value: loading ? preloadedEmployerTotalViews : totalViews, loading: false, cacheKey: 'emp_total_views' },
-      { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : totalApps, loading: false, cacheKey: 'emp_total_apps' },
+      { icon: Eye, title: 'Visningar', value: loading ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading: loading, cacheKey: 'emp_total_views' },
+      { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : totalApps, loading: false, isLoading: loading, cacheKey: 'emp_total_apps' },
     ];
   }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
