@@ -240,7 +240,6 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             {salaryText && <PreviewPill text={salaryText} />}
             {benefitsCount > 0 && (
               <PreviewPill
-                icon={<Gift className="h-2 w-2 text-white" />}
                 text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
               />
             )}
