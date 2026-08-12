@@ -150,9 +150,14 @@ export function useCardImage(
       if (e.currentTarget.src.startsWith('blob:')) {
         if (resolvedUrl) imageCache.evict(resolvedUrl);
         setBlobFailed(true);
+        return;
+      }
+      // Transformerad URL kunde inte renderas → visa originalbilden istället
+      if (originalUrl && e.currentTarget.src !== originalUrl) {
+        setTransformFailed(true);
       }
     },
-    [resolvedUrl]
+    [resolvedUrl, originalUrl]
   );
 
   return { displayUrl, handleError };
