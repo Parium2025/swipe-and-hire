@@ -4358,7 +4358,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
         onOpenChange={setShowUnsavedDialog}
         onConfirm={handleConfirmClose}
         onCancel={handleCancelClose}
-        onSaveAndLeave={isDraft ? handleSaveAndLeave : undefined}
+        onSaveAndLeave={isDraft && !republishMode ? handleSaveAndLeave : undefined}
         isSaving={isSavingAndLeaving}
       />
 
