@@ -47,15 +47,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 50,
-    allowedTypes: [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-      'image/heic',
-      'image/heif'
-    ]
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml']
   },
   'profile-video': {
     bucket: 'job-applications',
@@ -67,14 +59,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 50,
-    allowedTypes: [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/webp',
-      'image/heic',
-      'image/heif'
-    ]
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml']
   },
   'cv': {
     bucket: 'job-applications',
@@ -92,7 +77,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'company-logos',
     isPublic: true,
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml']
   },
   'job-image': {
     bucket: 'job-images',
