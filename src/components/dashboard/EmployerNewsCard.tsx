@@ -33,6 +33,11 @@ interface EmployerNewsCardProps {
   setIsPaused: (v: boolean) => void;
 }
 
+const IS_TOUCH_ONLY =
+  typeof window !== 'undefined' &&
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
+  !(window.matchMedia?.('(hover: hover)').matches || window.matchMedia?.('(pointer: fine)').matches);
+
 export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCardProps) => {
   const { data: news, isLoading } = useHrNews();
   const [currentIndex, setCurrentIndex] = useState(0);
