@@ -283,6 +283,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
       sessionStorage.setItem(EDIT_JOB_SESSION_KEY, JSON.stringify({
         jobId: job.id,
         currentStep,
+        republish: republishMode,
         savedAt: Date.now(),
       }));
     } catch {
