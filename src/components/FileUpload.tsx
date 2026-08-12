@@ -27,7 +27,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   onFileUploaded,
   onFileRemoved,
   currentFile,
-  acceptedFileTypes = ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  acceptedFileTypes = ['image/*', 'video/*', 'application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain'],
   maxFileSize = 50 * 1024 * 1024, // 50MB default
   questionType,
   mediaType = 'cv', // Default till CV för job-applications bucket
