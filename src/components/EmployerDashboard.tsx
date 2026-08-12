@@ -716,6 +716,11 @@ const EmployerDashboard = memo(() => {
           invalidateJobs();
           setRepublishJob(null);
         }}
+        onEditFirst={() => {
+          const job = republishJob;
+          setRepublishJob(null);
+          if (job) handleEditJob(job);
+        }}
       />
     </div>
   );
