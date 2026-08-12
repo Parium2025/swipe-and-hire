@@ -51,19 +51,30 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   const { data: dashStats, isSuccess } = useQuery({
     queryKey: ['employer-dashboard-stats', user?.id, activeJobIds],
     queryFn: async () => {
-      if (!user?.id || activeJobIds.length === 0) return { new_applications: 0, saved_favorites: 0, unread_messages: 0 };
+      const empty = { new_applications: 0, saved_favorites: 0, unread_messages: 0 };
+      if (!user?.id) return empty;
+      // Inga aktiva annonser → siffrorna ÄR noll. Skriv även cachen, annars
+      // kan gamla värden ligga kvar och visas nästa gång sidan öppnas.
+      if (activeJobIds.length === 0) {
+        writeEmployerCachedStat(user.id, 'new_applications', 0);
+        writeEmployerCachedStat(user.id, 'saved_favorites', 0);
+        writeEmployerCachedStat(user.id, 'unread_messages', 0);
+        return empty;
+      }
       const { data, error } = await supabase.rpc('get_employer_dashboard_stats', {
         p_user_id: user.id,
         p_active_job_ids: activeJobIds,
       });
-      if (error) return { new_applications: 0, saved_favorites: 0, unread_messages: 0 };
+      if (error) throw error;
       const stats = data as { new_applications: number; saved_favorites: number; unread_messages: number };
       writeEmployerCachedStat(user.id, 'new_applications', stats.new_applications);
       writeEmployerCachedStat(user.id, 'saved_favorites', stats.saved_favorites);
       writeEmployerCachedStat(user.id, 'unread_messages', stats.unread_messages);
       return stats;
     },
-    enabled: !!user?.id && activeJobIds.length > 0,
+    // Vänta tills annonserna laddats – annars skulle vi räkna "0 aktiva" på
+    // en halvladdad lista och nolla korten i en blink.
+    enabled: !!user?.id && !jobsLoading,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
     refetchOnMount: true,
