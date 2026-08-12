@@ -853,6 +853,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
     setOriginalImageUrl(null);
     setJobImageDesktopDisplayUrl(null);
     setOriginalDesktopImageUrl(null);
+    imageClearedRef.current = false;
+    desktopImageClearedRef.current = false;
   }, [job?.id, open]);
 
   // Load job image if exists - use public URL from job-images bucket (mobile)
@@ -861,8 +863,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
       if (!open) return;
 
       // Form state wins (t.ex. återställt utkast eller nyss uppladdad bild),
-      // annars annonsens sparade bild.
-      const url = formData.job_image_url || job?.job_image_url;
+      // annars annonsens sparade bild. Har användaren aktivt tagit bort bilden
+      // får annonsens sparade bild aldrig komma tillbaka.
+      const url = formData.job_image_url || (imageClearedRef.current ? '' : job?.job_image_url);
 
       // No image on this job → clear any leftover state from a previously edited job
       if (!url) {
