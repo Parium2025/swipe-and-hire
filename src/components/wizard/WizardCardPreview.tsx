@@ -7,7 +7,6 @@ import {
   Clock,
   Eye,
   FileQuestion,
-  Gift,
   Heart,
   Users,
   X,
@@ -240,7 +239,6 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             {salaryText && <PreviewPill text={salaryText} />}
             {benefitsCount > 0 && (
               <PreviewPill
-                icon={<Gift className="h-2 w-2 text-white" />}
                 text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
               />
             )}
@@ -446,25 +444,10 @@ export const WizardListPreview = memo(function WizardListPreview({
           <PreviewRow label="Lön" value={salaryText || '–'} />
           <PreviewRow
             label="Förmåner"
-            value={
-              benefitsCount > 0 ? (
-                <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium">
-                  <Gift className="h-3 w-3 flex-shrink-0" />
-                  {benefitsCount} st
-                </span>
-              ) : (
-                '–'
-              )
-            }
+            value={benefitsCount > 0 ? `${benefitsCount} st` : '–'}
           />
           {/* Frågor visas inte i förhandsvisningen — kandidaten ser dem först när annonsen öppnas */}
           <PreviewRow label="Publicerad" value={publishedLabel || formatDateShortSv(new Date().toISOString())} />
-          {isExpired && (
-            <PreviewRow
-              label="Status"
-              value={<span className="text-red-300 font-medium">Utgången</span>}
-            />
-          )}
         </div>
       </div>
     </div>
