@@ -386,8 +386,8 @@ export function TruncatedText({
             onWheel={(e) => e.stopPropagation()}
             onScrollCapture={stopTooltipPropagation}
           >
-            <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
-              {text?.replace(/\n{3,}/g, '\n\n').trim()}
+            <p className="text-sm leading-relaxed break-words whitespace-pre-line">
+              {sanitizeTooltipText(text)}
             </p>
           </TooltipContent>
         ) : null}
