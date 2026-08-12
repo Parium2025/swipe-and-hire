@@ -111,8 +111,12 @@ export function useCardImage(
         if (!cancelled) setLoadedBlobUrl(blobUrl);
       })
       .catch(() => {
-        // Blob-fetch misslyckades → tillåt fallback till raw URL
-        if (!cancelled) setBlobFailed(true);
+        // Blob-fetch misslyckades → tillåt fallback till raw URL,
+        // och till originalbilden om transformeringen nekades.
+        if (!cancelled) {
+          setBlobFailed(true);
+          if (originalUrl && resolvedUrl !== originalUrl) setTransformFailed(true);
+        }
       });
     return () => {
       cancelled = true;
