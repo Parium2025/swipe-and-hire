@@ -27,6 +27,7 @@ const readEmployerCachedStats = (uid?: string | null): Record<string, number> =>
 };
 
 const writeEmployerCachedStat = (uid: string | null | undefined, key: string, value: number) => {
+  if (!uid) return;
   try {
     const current = readEmployerCachedStats(uid);
     current[key] = value;
