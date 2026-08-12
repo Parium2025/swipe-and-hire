@@ -13,6 +13,10 @@ const EMPLOYER_STATS_CACHE_PREFIX = 'parium-employer-stats';
 const statsCacheKey = (uid?: string | null) => `${EMPLOYER_STATS_CACHE_PREFIX}:${uid ?? 'anon'}`;
 
 const readEmployerCachedStats = (uid?: string | null): Record<string, number> => {
+  // Innan auth hunnit ladda finns inget konto att koppla siffrorna till.
+  // Läs/skriv aldrig en 'anon'-bucket – då kan två konton på samma enhet
+  // se varandras siffror i den första renderingen.
+  if (!uid) return {};
   try {
     // Rensa bort äldre, okontoskopad cache så gamla siffror inte kan visas för fel konto.
     localStorage.removeItem(EMPLOYER_STATS_CACHE_PREFIX);
