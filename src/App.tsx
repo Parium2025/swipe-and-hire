@@ -1,4 +1,3 @@
-import TooltipProbe from "@/pages/__TooltipProbe";
 import { useState, useEffect, useLayoutEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -223,7 +222,6 @@ const AnimatedRoutes = () => {
           <Route path="/guider/cv-mall-2026" element={<RRNavigate to="/guider" replace />} />
           <Route path="/guider/:slug" element={<GuidePage />} />
           <Route path="/om-oss" element={<AboutPage />} />
-          <Route path="/__tooltip-probe" element={<TooltipProbe />} />
           <Route path="/integritetspolicy" element={<IntegrityPolicyPage />} />
           <Route path="/dpa" element={<DpaPage />} />
           <Route path="/auth" element={<Auth />} />
