@@ -1326,7 +1326,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
               setCachedCvUrl(null); // Clear cache när CV tas bort
             }}
             acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} 
-            maxFileSize={25 * 1024 * 1024} 
+            maxFileSize={50 * 1024 * 1024} 
             currentFile={formData.cvUrl ? { 
               url: cachedCvUrl || formData.cvUrl, // Use cached URL for instant loading
               name: 'Din valda fil' 

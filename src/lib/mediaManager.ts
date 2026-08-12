@@ -79,13 +79,13 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'cv': {
     bucket: 'job-applications',
     isPublic: false,
-    maxSizeMB: 25,
+    maxSizeMB: 50,
     allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
   },
   'application-document': {
     bucket: 'job-applications',
     isPublic: false,
-    maxSizeMB: 25,
+    maxSizeMB: 50,
     allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png']
   },
   'company-logo': {
