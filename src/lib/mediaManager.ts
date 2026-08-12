@@ -65,13 +65,13 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 50,
-    allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain']
   },
   'application-document': {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 50,
-    allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png']
+    allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
   },
   'company-logo': {
     bucket: 'company-logos',
@@ -83,7 +83,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-images',
     isPublic: true,
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif']
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml']
   }
 };
 
