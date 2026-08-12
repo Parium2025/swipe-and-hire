@@ -611,7 +611,7 @@ const EmployerDashboard = memo(() => {
               <span>Inga annonser stämde med din sökning</span>
             </div>
           ) : activeTab === 'active' ? (
-            <EmptyJobsCta compact />
+            <EmptyJobsCta compact hasPreviousJobs={hasPreviousJobs} />
           ) : (
             <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
               <span>{activeTab === 'expired' ? 'Inga utgångna jobbannonser.' : 'Inga utkast.'}</span>
