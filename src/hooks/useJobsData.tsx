@@ -326,6 +326,11 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
 
   const invalidateJobs = () => {
     queryClient.invalidateQueries({ queryKey: ['jobs'] });
+    // Statistikkorten (Annonser/Aktiva/Utgångna/Utkast/Visningar/Ansökningar)
+    // hämtas via egna RPC-queries. Utan detta uppdaterades de först när
+    // realtime-eventet hann fram (upp till 3s debounce) — eller inte alls.
+    queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
+    queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
   };
 
   // Get unique recruiters from jobs
