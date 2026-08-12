@@ -183,6 +183,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
   const [isScrolledTop, setIsScrolledTop] = useState(true);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
+  // Markerar att användaren aktivt tagit bort bilden — hindrar att annonsens
+  // sparade bild laddas tillbaka av bild-effekten (krävde tidigare två klick).
+  const imageClearedRef = useRef(false);
+  const desktopImageClearedRef = useRef(false);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [originalDesktopImageUrl, setOriginalDesktopImageUrl] = useState<string | null>(null);
@@ -853,6 +857,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
     setOriginalImageUrl(null);
     setJobImageDesktopDisplayUrl(null);
     setOriginalDesktopImageUrl(null);
+    imageClearedRef.current = false;
+    desktopImageClearedRef.current = false;
   }, [job?.id, open]);
 
   // Load job image if exists - use public URL from job-images bucket (mobile)
@@ -861,8 +867,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
       if (!open) return;
 
       // Form state wins (t.ex. återställt utkast eller nyss uppladdad bild),
-      // annars annonsens sparade bild.
-      const url = formData.job_image_url || job?.job_image_url;
+      // annars annonsens sparade bild. Har användaren aktivt tagit bort bilden
+      // får annonsens sparade bild aldrig komma tillbaka.
+      const url = formData.job_image_url || (imageClearedRef.current ? '' : job?.job_image_url);
 
       // No image on this job → clear any leftover state from a previously edited job
       if (!url) {
@@ -896,7 +903,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
     const loadDesktopJobImage = async () => {
       if (!open) return;
 
-      const desktopUrl = formData.job_image_desktop_url || (job as any)?.job_image_desktop_url;
+      const desktopUrl = formData.job_image_desktop_url || (desktopImageClearedRef.current ? '' : (job as any)?.job_image_desktop_url);
 
       if (!desktopUrl) {
         setJobImageDesktopDisplayUrl(null);
@@ -4168,6 +4175,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                   .getPublicUrl(storagePath);
                                   
                                 if (publicUrl) {
+                                  imageClearedRef.current = false;
                                   setJobImageDisplayUrl(publicUrl);
                                   const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
                                   await preloadSingleFile(publicUrl);
@@ -4203,6 +4211,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                       handleInputChange('job_image_url', '');
                                       setOriginalImageUrl(null);
                                       setJobImageDisplayUrl(null);
+                                      imageClearedRef.current = true;
                                       setManualFocus(null);
                                     }}
                                     className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
@@ -4242,6 +4251,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                       .from('job-images')
                                       .getPublicUrl(mobileUrl);
                                     if (publicUrl) {
+                                      desktopImageClearedRef.current = false;
                                       setJobImageDesktopDisplayUrl(publicUrl);
                                     }
                                   }
@@ -4270,6 +4280,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                   .getPublicUrl(storagePath);
                                   
                                 if (publicUrl) {
+                                  desktopImageClearedRef.current = false;
                                   setJobImageDesktopDisplayUrl(publicUrl);
                                   const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
                                   await preloadSingleFile(publicUrl);
@@ -4305,6 +4316,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                       handleInputChange('job_image_desktop_url', '');
                                       setOriginalDesktopImageUrl(null);
                                       setJobImageDesktopDisplayUrl(null);
+                                      desktopImageClearedRef.current = true;
                                     }}
                                     className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                                   >
