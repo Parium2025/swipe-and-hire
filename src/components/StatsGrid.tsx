@@ -85,7 +85,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
               style={{ opacity: stat.loading ? 0.5 : 1 }}
             >
               {typeof stat.value === 'number' ? (
-                <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-bold" cacheKey={stat.cacheKey} />
+                <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-bold" cacheKey={stat.cacheKey} isLoading={stat.loading} />
               ) : stat.value}
             </div>
           </CardContent>
