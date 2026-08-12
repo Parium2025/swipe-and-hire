@@ -359,7 +359,7 @@ const ProfileSetup = () => {
                     onFileRemoved={() => setCompanyLogoUrl('')}
                     currentFile={companyLogoUrl ? { url: companyLogoUrl, name: "Företagslogotyp" } : undefined}
                     acceptedFileTypes={['image/*']}
-                    maxFileSize={2 * 1024 * 1024}
+                    maxFileSize={50 * 1024 * 1024}
                   />
                 </div>
               </div>
@@ -386,7 +386,7 @@ const ProfileSetup = () => {
                     }}
                     currentFile={cvUrl ? { url: cvUrl, name: "Din valda fil" } : undefined}
                     acceptedFileTypes={['application/pdf', '.doc', '.docx']}
-                    maxFileSize={5 * 1024 * 1024}
+                    maxFileSize={25 * 1024 * 1024}
                   />
                 </div>
               </div>

@@ -2468,7 +2468,7 @@ const Profile = () => {
                           }}
                           currentFile={undefined}
                           acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
-                          maxFileSize={5 * 1024 * 1024}
+                          maxFileSize={25 * 1024 * 1024}
                         />
                       </div>
                     )}

@@ -46,7 +46,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'profile-image': {
     bucket: 'job-applications',
     isPublic: false,
-    maxSizeMB: 10,
+    maxSizeMB: 50,
     allowedTypes: [
       'image/jpeg',
       'image/jpg',
@@ -66,7 +66,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'cover-image': {
     bucket: 'job-applications',
     isPublic: false,
-    maxSizeMB: 10,
+    maxSizeMB: 50,
     allowedTypes: [
       'image/jpeg',
       'image/jpg',
@@ -79,19 +79,19 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'cv': {
     bucket: 'job-applications',
     isPublic: false,
-    maxSizeMB: 10,
+    maxSizeMB: 25,
     allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
   },
   'application-document': {
     bucket: 'job-applications',
     isPublic: false,
-    maxSizeMB: 10,
+    maxSizeMB: 25,
     allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png']
   },
   'company-logo': {
     bucket: 'company-logos',
     isPublic: true,
-    maxSizeMB: 5,
+    maxSizeMB: 50,
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
   },
   'job-image': {
