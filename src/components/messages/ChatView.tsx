@@ -333,7 +333,7 @@ export function ChatView({
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error('Filen är för stor (max 10 MB)');
+      toast.error('Filen är för stor (max 25 MB)');
       return;
     }
 
