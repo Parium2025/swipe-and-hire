@@ -166,8 +166,10 @@ const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = false }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const isDraft = job ? !job.is_active : false;
+  // Utgången annons: aktiv i databasen men passerat utgångsdatum
+  const isExpired = !!job?.is_active && !!(job as any)?.expires_at && new Date((job as any).expires_at).getTime() <= Date.now();
   // Publiceringsläge: utkast som publiceras, eller utgången annons som återpubliceras efter redigering
-  const publishMode = isDraft || republishMode;
+  const publishMode = isDraft || republishMode || isExpired;
   const [isInitializing, setIsInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
