@@ -430,6 +430,14 @@ const EmployerDashboard = memo(() => {
     [jobs]
   );
   
+  /** Företaget har haft annonser tidigare (utgångna eller utkast finns) → annan tomlägestext */
+  const hasPreviousJobs = useMemo(() => {
+    const total = serverCounts?.total ?? jobs.length;
+    const expired = serverCounts?.expired ?? expiredJobsCount;
+    const draft = serverCounts?.draft ?? draftJobsCount;
+    return total > 0 || expired > 0 || draft > 0;
+  }, [serverCounts, jobs.length, expiredJobsCount, draftJobsCount]);
+
   const statsCards = useMemo(() => {
     const totalJobs = serverCounts?.total ?? jobs.length;
     const activeCount = serverCounts?.active ?? activeJobs.length;
@@ -539,7 +547,7 @@ const EmployerDashboard = memo(() => {
               Inga annonser stämde med din sökning
             </div>
           ) : activeTab === 'active' ? (
-            <EmptyJobsCta />
+            <EmptyJobsCta hasPreviousJobs={hasPreviousJobs} />
           ) : (
             <div className="text-center text-white py-12 font-medium text-sm">
               {activeTab === 'expired' ? 'Inga utgångna jobbannonser.' : 'Inga utkast.'}
@@ -603,7 +611,7 @@ const EmployerDashboard = memo(() => {
               <span>Inga annonser stämde med din sökning</span>
             </div>
           ) : activeTab === 'active' ? (
-            <EmptyJobsCta compact />
+            <EmptyJobsCta compact hasPreviousJobs={hasPreviousJobs} />
           ) : (
             <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
               <span>{activeTab === 'expired' ? 'Inga utgångna jobbannonser.' : 'Inga utkast.'}</span>

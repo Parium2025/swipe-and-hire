@@ -46,25 +46,42 @@ export const AnimatedCounter = memo(({
   const [direction, setDirection] = useState<'up' | 'down' | null>(null);
   const previousValue = useRef(initialValue);
   const animationRef = useRef<number | null>(null);
-  // Track if we've seen "real" data (non-zero value) since mount
+  // Track if we've seen "real" data since mount
   const hasReceivedRealData = useRef(false);
+  // Bekräftad nolla: en 0:a som stått kvar efter grace-perioden är riktig data
+  const [zeroConfirmed, setZeroConfirmed] = useState(false);
+
+  // 🛡️ Noll-hantering: en 0:a kan antingen betyda "laddar" eller "verkligen 0".
+  // Vi visar cachat värde en kort stund; står 0:an kvar är den äkta och committas.
+  useEffect(() => {
+    if (value !== 0) {
+      setZeroConfirmed(false);
+      return;
+    }
+    if (!hasCachedValue || hasReceivedRealData.current) {
+      // Ingen cache att skydda, eller vi har redan riktig data → 0 är sanning direkt
+      setZeroConfirmed(true);
+      return;
+    }
+    const t = setTimeout(() => setZeroConfirmed(true), 600);
+    return () => clearTimeout(t);
+  }, [value, hasCachedValue]);
 
   useEffect(() => {
     const startValue = previousValue.current;
     const endValue = value;
     const actualChange = endValue !== startValue;
-    
-    // Ignore zero values - these indicate data is still loading
-    // Don't cache 0 and don't animate from/to 0
-    if (endValue === 0) {
+
+    // Håll kvar cachat värde tills 0:an är bekräftad (undviker blink till 0 vid laddning)
+    if (endValue === 0 && !zeroConfirmed) {
       return;
     }
-    
+
     // Mark that we've received real data
     const isFirstRealData = !hasReceivedRealData.current;
     hasReceivedRealData.current = true;
     
-    // Cache the current value for next page load (only non-zero values)
+    // Cache the current value for next page load (även 0 — annars blir cachen stale)
     if (cacheKey) {
       setCachedValue(cacheKey, endValue);
     }
@@ -131,7 +148,7 @@ export const AnimatedCounter = memo(({
       }
       clearTimeout(directionTimeout);
     };
-  }, [value, duration, cacheKey, hasCachedValue]);
+  }, [value, duration, cacheKey, hasCachedValue, zeroConfirmed]);
 
   return (
     <span className={`inline-flex items-center gap-1 ${className}`}>
