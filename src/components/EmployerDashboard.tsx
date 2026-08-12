@@ -430,6 +430,14 @@ const EmployerDashboard = memo(() => {
     [jobs]
   );
   
+  /** Företaget har haft annonser tidigare (utgångna eller utkast finns) → annan tomlägestext */
+  const hasPreviousJobs = useMemo(() => {
+    const total = serverCounts?.total ?? jobs.length;
+    const expired = serverCounts?.expired ?? expiredJobsCount;
+    const draft = serverCounts?.draft ?? draftJobsCount;
+    return total > 0 || expired > 0 || draft > 0;
+  }, [serverCounts, jobs.length, expiredJobsCount, draftJobsCount]);
+
   const statsCards = useMemo(() => {
     const totalJobs = serverCounts?.total ?? jobs.length;
     const activeCount = serverCounts?.active ?? activeJobs.length;
