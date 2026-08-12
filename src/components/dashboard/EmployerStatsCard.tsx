@@ -41,11 +41,11 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readEmployerCachedStats(user?.id), [user?.id]);
 
+  // Samma statusregler som /my-jobs och databasens räknare (jobStatus.ts) –
+  // annars kan "Aktiva annonser" här visa ett annat tal än annonslistan.
   const activeJobIds = useMemo(() => {
     if (!jobs) return [];
-    return jobs
-      .filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at))
-      .map(j => j.id);
+    return jobs.filter(j => isEmployerJobActive(j)).map(j => j.id);
   }, [jobs]);
 
   const { data: dashStats, isSuccess } = useQuery({
