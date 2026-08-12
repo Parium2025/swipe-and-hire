@@ -117,6 +117,7 @@ export function useOfflineJobQueue(userId: string | undefined) {
       // Invalidera cache så dashboard uppdateras
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
       queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
       toast.success(synced === 1 ? 'Annons publicerad' : `${synced} annonser publicerade`);
     }
     if (failed > 0) {
