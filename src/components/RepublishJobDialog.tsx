@@ -22,6 +22,7 @@ interface RepublishJobDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRepublished?: (newJobId: string) => void;
+  onEditFirst?: () => void;
 }
 
 export function RepublishJobDialog({
@@ -30,6 +31,7 @@ export function RepublishJobDialog({
   open,
   onOpenChange,
   onRepublished,
+  onEditFirst,
 }: RepublishJobDialogProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
