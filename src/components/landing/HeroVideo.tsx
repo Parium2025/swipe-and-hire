@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import desktopAsset from '@/assets/hero8-desktop.mp4.asset.json';
-import landscapeLiteAsset from '@/assets/hero8-landscape-lite.mp4.asset.json';
-import tabletAsset from '@/assets/hero8-tablet.mp4.asset.json';
-import portraitAsset from '@/assets/hero8-portrait.mp4.asset.json';
-import posterAsset from '@/assets/hero8-poster.jpg.asset.json';
-import posterTabletAsset from '@/assets/hero8-poster-tablet.jpg.asset.json';
-import posterPortraitAsset from '@/assets/hero8-poster-portrait.jpg.asset.json';
+import desktopAsset from '@/assets/hero10-desktop.mp4.asset.json';
+import landscapeLiteAsset from '@/assets/hero10-landscape-lite.mp4.asset.json';
+import tabletAsset from '@/assets/hero10-tablet.mp4.asset.json';
+import portraitAsset from '@/assets/hero10-portrait.mp4.asset.json';
+import posterAsset from '@/assets/hero10-poster.jpg.asset.json';
+import posterTabletAsset from '@/assets/hero10-poster-tablet.jpg.asset.json';
+import posterPortraitAsset from '@/assets/hero10-poster-portrait.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
 
