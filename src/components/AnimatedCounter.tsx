@@ -8,6 +8,11 @@ interface AnimatedCounterProps {
   className?: string;
   /** Unique key for persisting the last known value across page loads */
   cacheKey?: string;
+  /**
+   * Explicit laddningsstatus. När den anges gissar komponenten inte längre om
+   * en 0:a betyder "laddar" eller "verkligen noll" — den litar på flaggan.
+   */
+  isLoading?: boolean;
 }
 
 // Helper to read/write cached values
