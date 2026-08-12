@@ -108,7 +108,25 @@ export function RepublishJobDialog({
               `Annonsen återaktiveras i ${REPUBLISH_DAYS} dagar. Alla tidigare kandidater, meddelanden och urval följer med.`
             )}
           </AlertDialogDescription>
+
+          {onEditFirst && (
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => {
+                  onOpenChange(false);
+                  onEditFirst();
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-white transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 disabled:opacity-60"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                <span>Redigera annonsen först</span>
+              </button>
+            </div>
+          )}
         </div>
+
 
         <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
           <AlertDialogCancel
