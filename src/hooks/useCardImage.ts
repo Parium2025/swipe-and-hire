@@ -130,7 +130,9 @@ export function useCardImage(
   // ännu inte hunnit klart eller service-worker/CDN gör att fetchen fastnar.
   // (Tidigare returnerades null tills blob var klar → risk för permanent
   // placeholder om blob-fetchen aldrig avslutades.)
-  const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
+  const displayUrl = transformFailed && originalUrl
+    ? originalUrl
+    : (cachedBlobUrl || loadedBlobUrl || resolvedUrl);
 
   // 🚀 Proaktiv decode: så fort vi har en URL, dekoda bitmapen off-main-thread.
   // Eliminerar "decode-blinken" när ett kort re-mountas efter scroll — bilden
