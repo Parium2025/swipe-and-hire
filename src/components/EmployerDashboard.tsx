@@ -87,6 +87,7 @@ const EmployerDashboard = memo(() => {
             console.log('🔄 Auto-restoring edit job dialog');
             // Don't remove session marker here — EditJobDialog will manage it
             setEditingJob(job);
+            setEditRepublishMode(!!parsed.republish);
             setEditDialogOpen(true);
           } else {
             sessionStorage.removeItem('parium-editing-job');
