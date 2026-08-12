@@ -148,7 +148,7 @@ export const AnimatedCounter = memo(({
       }
       clearTimeout(directionTimeout);
     };
-  }, [value, duration, cacheKey, hasCachedValue]);
+  }, [value, duration, cacheKey, hasCachedValue, zeroConfirmed]);
 
   return (
     <span className={`inline-flex items-center gap-1 ${className}`}>
