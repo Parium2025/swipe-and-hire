@@ -84,6 +84,9 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
   }
 
   const currentNews = newsItems[currentIndex];
+  const openArticle = () => {
+    if (currentNews?.source_url) window.open(currentNews.source_url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <Card
