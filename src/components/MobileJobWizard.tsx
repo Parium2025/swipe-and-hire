@@ -5033,7 +5033,7 @@ const MobileJobWizard = ({
                           setOriginalImageUrl(signedUrl || storagePath);
                         }}
                         acceptedFileTypes={['image/*']}
-                        maxFileSize={15 * 1024 * 1024}
+                        maxFileSize={50 * 1024 * 1024}
                       />
                     )}
                     
@@ -5128,7 +5128,7 @@ const MobileJobWizard = ({
                           setOriginalDesktopImageUrl(signedUrl || storagePath);
                         }}
                         acceptedFileTypes={['image/*']}
-                        maxFileSize={15 * 1024 * 1024}
+                        maxFileSize={50 * 1024 * 1024}
                       />
                     )}
                     
