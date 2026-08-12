@@ -4175,7 +4175,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                   .getPublicUrl(storagePath);
                                   
                                 if (publicUrl) {
-                                  setJobImageDisplayUrl(publicUrl);
+                                  imageClearedRef.current = false;
+                                  imageClearedRef.current = false;
+                setJobImageDisplayUrl(publicUrl);
                                   const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
                                   await preloadSingleFile(publicUrl);
                                 }
@@ -4210,6 +4212,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                       handleInputChange('job_image_url', '');
                                       setOriginalImageUrl(null);
                                       setJobImageDisplayUrl(null);
+                                      imageClearedRef.current = true;
                                       setManualFocus(null);
                                     }}
                                     className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
@@ -4249,7 +4252,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                       .from('job-images')
                                       .getPublicUrl(mobileUrl);
                                     if (publicUrl) {
-                                      setJobImageDesktopDisplayUrl(publicUrl);
+                                      desktopImageClearedRef.current = false;
+                                  desktopImageClearedRef.current = false;
+                setJobImageDesktopDisplayUrl(publicUrl);
                                     }
                                   }
                                 }}
@@ -4277,6 +4282,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                   .getPublicUrl(storagePath);
                                   
                                 if (publicUrl) {
+                                  desktopImageClearedRef.current = false;
                                   setJobImageDesktopDisplayUrl(publicUrl);
                                   const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
                                   await preloadSingleFile(publicUrl);
@@ -4312,6 +4318,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                                       handleInputChange('job_image_desktop_url', '');
                                       setOriginalDesktopImageUrl(null);
                                       setJobImageDesktopDisplayUrl(null);
+                                      desktopImageClearedRef.current = true;
                                     }}
                                     className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                                   >
