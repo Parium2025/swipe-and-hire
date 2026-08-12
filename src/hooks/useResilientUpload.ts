@@ -32,7 +32,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'profile-image': {
     bucket: 'job-applications',
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'],
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml'],
     shouldCompress: true,
   },
   'profile-video': {
@@ -44,31 +44,31 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'cover-image': {
     bucket: 'job-applications',
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml'],
     shouldCompress: true,
   },
   'cv': {
     bucket: 'job-applications',
     maxSizeMB: 50,
-    allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain'],
     shouldCompress: false,
   },
   'application-document': {
     bucket: 'job-applications',
     maxSizeMB: 50,
-    allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png'],
+    allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
     shouldCompress: false,
   },
   'company-logo': {
     bucket: 'company-logos',
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'],
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml'],
     shouldCompress: true,
   },
   'job-image': {
     bucket: 'job-images',
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif'],
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml'],
     shouldCompress: true,
   },
 };
