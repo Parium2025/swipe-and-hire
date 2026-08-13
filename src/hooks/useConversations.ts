@@ -210,6 +210,83 @@ function mergeConversationsWithLastKnownIdentity(
   });
 }
 
+// Minimal shape of a realtime INSERT on conversation_messages
+export interface IncomingRealtimeMessage {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  is_system_message?: boolean;
+  attachment_url?: string | null;
+  attachment_type?: string | null;
+  attachment_name?: string | null;
+}
+
+/**
+ * Patch the conversation list cache in-place for one incoming message.
+ * Returns false when the conversation is unknown (then the caller should refetch).
+ * This keeps bulk sends (tusentals meddelanden/inbjudningar) från att trigga
+ * en full omhämtning per event.
+ */
+export function applyIncomingMessageToConversations(
+  queryClient: ReturnType<typeof useQueryClient>,
+  userId: string,
+  msg: IncomingRealtimeMessage,
+  options: { incrementUnread: boolean }
+): boolean {
+  const key = ['conversations', userId];
+  const current = queryClient.getQueryData<Conversation[]>(key);
+  if (!current || current.length === 0) return false;
+
+  const idx = current.findIndex((c) => c.id === msg.conversation_id);
+  if (idx === -1) return false;
+
+  const existing = current[idx];
+
+  // Ignorera out-of-order/duplicerade events
+  if (existing.last_message?.id === msg.id) return true;
+  if (
+    existing.last_message_at &&
+    new Date(msg.created_at).getTime() < new Date(existing.last_message_at).getTime()
+  ) {
+    return true;
+  }
+
+  const isOwn = msg.sender_id === userId;
+  const shouldCount = options.incrementUnread && !isOwn;
+
+  const updated: Conversation = {
+    ...existing,
+    last_message_at: msg.created_at,
+    last_message: {
+      id: msg.id,
+      conversation_id: msg.conversation_id,
+      sender_id: msg.sender_id,
+      content: msg.content,
+      created_at: msg.created_at,
+      is_system_message: msg.is_system_message ?? false,
+      attachment_url: msg.attachment_url ?? null,
+      attachment_type: msg.attachment_type ?? null,
+      attachment_name: msg.attachment_name ?? null,
+      sender_profile: existing.members?.find((m) => m.user_id === msg.sender_id)?.profile,
+    },
+    unread_count: shouldCount ? (existing.unread_count || 0) + 1 : existing.unread_count || 0,
+  };
+
+  const next = [...current];
+  next[idx] = updated;
+  // Håll listan sorterad på senaste aktivitet
+  next.sort((a, b) => {
+    const ta = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
+    const tb = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
+    return tb - ta;
+  });
+
+  queryClient.setQueryData<Conversation[]>(key, next);
+  return true;
+}
+
 export function useConversations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
