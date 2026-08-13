@@ -3818,43 +3818,86 @@ export type Database = {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
       }
-      search_employer_candidates: {
-        Args: {
-          p_filters?: Json
-          p_limit?: number
-          p_offset?: number
-          p_search?: string
-          p_sort?: string
-          p_status?: string
-          p_with_count?: boolean
-        }
-        Returns: {
-          age: number
-          applicant_id: string
-          applied_at: string
-          availability: string
-          bio: string
-          custom_answers: Json
-          cv_url: string
-          email: string
-          employment_status: string
-          first_name: string
-          id: string
-          job_id: string
-          job_occupation: string
-          job_title: string
-          last_name: string
-          location: string
-          phone: string
-          questions_snapshot: Json
-          rating: number
-          status: string
-          total_count: number
-          updated_at: string
-          viewed_at: string
-          work_schedule: string
-        }[]
-      }
+      search_employer_candidates:
+        | {
+            Args: {
+              p_filters?: Json
+              p_limit?: number
+              p_offset?: number
+              p_search?: string
+              p_sort?: string
+              p_status?: string
+              p_with_count?: boolean
+            }
+            Returns: {
+              age: number
+              applicant_id: string
+              applied_at: string
+              availability: string
+              bio: string
+              custom_answers: Json
+              cv_url: string
+              email: string
+              employment_status: string
+              first_name: string
+              id: string
+              job_id: string
+              job_occupation: string
+              job_title: string
+              last_name: string
+              location: string
+              phone: string
+              questions_snapshot: Json
+              rating: number
+              status: string
+              total_count: number
+              updated_at: string
+              viewed_at: string
+              work_schedule: string
+            }[]
+          }
+        | {
+            Args: {
+              p_count_cap?: number
+              p_cursor_applied_at?: string
+              p_cursor_id?: string
+              p_filters?: Json
+              p_limit?: number
+              p_offset?: number
+              p_search?: string
+              p_sort?: string
+              p_status?: string
+              p_with_count?: boolean
+            }
+            Returns: {
+              account_deleted: boolean
+              age: number
+              applicant_id: string
+              applied_at: string
+              availability: string
+              bio: string
+              custom_answers: Json
+              cv_url: string
+              email: string
+              employment_status: string
+              first_name: string
+              id: string
+              job_id: string
+              job_occupation: string
+              job_title: string
+              last_name: string
+              location: string
+              match_source: string
+              phone: string
+              questions_snapshot: Json
+              rating: number
+              status: string
+              total_count: number
+              updated_at: string
+              viewed_at: string
+              work_schedule: string
+            }[]
+          }
       search_employer_jobs: {
         Args: {
           p_limit?: number
