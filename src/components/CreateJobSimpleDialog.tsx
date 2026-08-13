@@ -908,7 +908,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               onClick={() => {
                 setTemplateToDelete(null);
                 // Öppna dropdown-menyn igen efter att avbryt tryckts
-                setTimeout(() => setTemplateMenuOpen(true), 100);
+                later(() => setTemplateMenuOpen(true), 100);
               }}
               className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
