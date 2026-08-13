@@ -332,7 +332,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       initialStateRef.current = { title: '', templateId: null };
       setHasUnsavedChanges(false);
       // Force iOS refresh
-      setTimeout(() => {
+      later(() => {
         if (titleRef.current) {
           titleRef.current.value = '';
           titleRef.current.blur();
