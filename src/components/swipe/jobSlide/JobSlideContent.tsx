@@ -96,7 +96,7 @@ export const JobSlideContent = memo(function JobSlideContent({
         <h2
           ref={titleRef}
           {...(interactive ? { 'data-title-tap-zone': '' } : {})}
-          className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
+          className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.16] tracking-tight line-clamp-2 pb-[0.14em]"
           style={overlayTextStyle}
         >
           {job.title}
