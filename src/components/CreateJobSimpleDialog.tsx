@@ -391,7 +391,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     
     // Kort delay för smidig övergång
     setOpen(false);
-    setTimeout(() => {
+    later(() => {
       setShowDetailDialog(true);
     }, 150);
   }, [jobTitle, selectedTemplate, toast, setIntentionalCloseMarker]);
