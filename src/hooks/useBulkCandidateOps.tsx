@@ -75,12 +75,16 @@ export function useBulkCandidateOps({
       exitSelectionMode();
 
       try {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('my_candidates')
           .update({ stage: targetStage, updated_at: new Date().toISOString() })
-          .in('id', ids);
+          .in('id', ids)
+          .select('id');
 
         if (error) throw error;
+        if ((data?.length ?? 0) < ids.length) {
+          throw new Error('Vissa kandidater kunde inte flyttas');
+        }
         toast.success(`${count} kandidater flyttade till "${label}"`, {
           icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />,
         });
