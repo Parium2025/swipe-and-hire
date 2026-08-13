@@ -743,10 +743,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                      setTemplateToEdit(template);
                                      setTemplateMenuOpen(false);
                                      setMenuInstanceKey((k) => k + 1);
-                                     requestAnimationFrame(() => {
-                                       requestAnimationFrame(() => {
+                                     nextFrame(() => {
+                                       nextFrame(() => {
                                          setOpen(false);
-                                         setTimeout(() => {
+                                         later(() => {
                                            setShowTemplateWizard(true);
                                          }, 150);
                                        });
