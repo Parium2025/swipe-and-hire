@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
+import { useFitScale } from '@/hooks/useFitScale';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { WizardSwipePreview, WizardListPreview, buildWizardPreviewData } from '@/components/wizard/WizardCardPreview';
 import { StartDatePicker } from '@/components/StartDatePicker';
