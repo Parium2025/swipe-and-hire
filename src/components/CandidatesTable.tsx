@@ -733,6 +733,29 @@ export function CandidatesTable({
                                 </TooltipContent>
                               </Tooltip>
                             )}
+                            {application.account_deleted && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="px-1.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[10px] text-white font-medium">
+                                    Konto raderat
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs">
+                                  <p className="text-xs">Kandidaten har raderat sitt konto. Ansökan finns kvar som din dokumentation, men profil, media och chatt är inte längre tillgängliga.</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                            {application.match_source === 'cv' && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[10px] text-white font-medium">
+                                Träff i CV
+                              </span>
+                            )}
+                            {application.match_source === 'note' && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[10px] text-white font-medium">
+                                Träff i anteckning
+                              </span>
+                            )}
+
                           </div>
                           {application.phone && <div className="text-sm text-white">{application.phone}</div>}
                         </div>
