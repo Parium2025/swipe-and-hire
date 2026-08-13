@@ -177,17 +177,43 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [failed, setFailed] = useState(false);
   const [src, setSrc] = useState(() => getPlayableSrc(item));
   const [frameReady, setFrameReady] = useState(false);
-  // Fejden ska dölja Windows-decoder-blixten, men på iOS/macOS är den onödig
-  // och märkbar. Windows får en mjukare 250 ms fade; Apple får ingen alls.
-  const overlayTransition = isWindowsDevice()
-    ? 'transition-opacity duration-[250ms] ease-out'
-    : isAppleDevice()
-      ? ''
-      : 'transition-opacity duration-100 ease-out';
   const markReady = useCallback(() => {
     setFrameReady(true);
   }, []);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Ingen fade någonstans. Posterbilden ligger kvar UNDER videon tills en
+  // riktig bildruta faktiskt är dekodad och målad — då byts lagret direkt.
+  // Eftersom postern aldrig försvinner innan dess finns ingen svart/blixtrande
+  // ruta att dölja, och därmed inget behov av övertoning på Windows/Android.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || item.type !== 'video' || failed || frameReady) return;
+    let cancelled = false;
+    type WithRVFC = HTMLVideoElement & {
+      requestVideoFrameCallback?: (cb: () => void) => number;
+      cancelVideoFrameCallback?: (handle: number) => void;
+    };
+    const vf = v as WithRVFC;
+    let handle: number | undefined;
+
+    if (typeof vf.requestVideoFrameCallback === 'function') {
+      // Enda API:t som garanterar att pixlarna verkligen är på skärmen.
+      handle = vf.requestVideoFrameCallback(() => {
+        if (!cancelled) markReady();
+      });
+    } else if (v.readyState >= 2) {
+      markReady();
+    }
+
+    return () => {
+      cancelled = true;
+      if (handle !== undefined && typeof vf.cancelVideoFrameCallback === 'function') {
+        vf.cancelVideoFrameCallback(handle);
+      }
+    };
+  }, [item.type, failed, frameReady, src, markReady]);
+
 
   useEffect(() => {
     const v = videoRef.current;
