@@ -764,6 +764,8 @@ const MobileJobWizard = ({
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
   const screenRef = useRef<HTMLDivElement>(null);
   const previewSwipeRef = useRef<HTMLDivElement>(null);
+  // Skalar telefonmockup + tooltips så att "Obs, tryck här!" aldrig klipps.
+  const { ref: previewFitRef, scale: previewFitScale } = useFitScale(620);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const [scale, setScale] = useState(1);
   const BASE_WIDTH = 360;
