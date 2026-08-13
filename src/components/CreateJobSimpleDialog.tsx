@@ -66,6 +66,37 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
   const { handleTap, isPreview, resetPreview } = useTapToPreview();
   const templateTextRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
+  // Alla fördröjda callbacks registreras här så de kan avbrytas vid unmount
+  // (annars kan state sättas på en avmonterad komponent).
+  const timersRef = useRef<number[]>([]);
+  const rafsRef = useRef<number[]>([]);
+  const later = useCallback((fn: () => void, ms: number) => {
+    const id = window.setTimeout(() => {
+      timersRef.current = timersRef.current.filter((t) => t !== id);
+      fn();
+    }, ms);
+    timersRef.current.push(id);
+    return id;
+  }, []);
+  const nextFrame = useCallback((fn: () => void) => {
+    const id = requestAnimationFrame(() => {
+      rafsRef.current = rafsRef.current.filter((r) => r !== id);
+      fn();
+    });
+    rafsRef.current.push(id);
+    return id;
+  }, []);
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach((t) => window.clearTimeout(t));
+      rafsRef.current.forEach((r) => cancelAnimationFrame(r));
+      timersRef.current = [];
+      rafsRef.current = [];
+    };
+  }, []);
+
+
+
   const clearCreateJobSession = useCallback(() => {
     try {
       sessionStorage.removeItem(CREATE_JOB_SESSION_KEY);
