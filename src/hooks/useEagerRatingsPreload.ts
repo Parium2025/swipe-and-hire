@@ -190,10 +190,15 @@ export const useEagerRatingsPreload = () => {
     // ALLTID hämta ratings - ingen cache-check här
     // Detta är kritiskt för att ratings ska finnas INNAN snapshot läses
     // Cache-check görs nu bara för periodiska refreshes, inte initial preload
+    // Tak: en rekryterare med 300 000 kandidater får aldrig hela betygstabellen
+    // nedladdad och JSON-serialiserad på main thread. De senaste 5 000 räcker för
+    // instant-visning; resten fylls i per sida av useApplicationsData.
     const { data: ratingsData, error: ratingsError } = await supabase
       .from('candidate_ratings')
       .select('applicant_id, rating')
-      .eq('recruiter_id', userId);
+      .eq('recruiter_id', userId)
+      .order('updated_at', { ascending: false })
+      .limit(5000);
 
     if (!ratingsError && ratingsData) {
       const ratingsMap: Record<string, number> = {};
