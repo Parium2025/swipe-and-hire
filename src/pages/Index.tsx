@@ -124,6 +124,7 @@ const CandidatesContent = () => {
     loadedCount,
     updateRating,
     totalCount,
+    totalCountCapped,
   } = useApplicationsData(debouncedSearch, { questionFilters });
 
   // Medan en ny sökning väntar/hämtas visar vi INTE ett nytt tomläge — annars
@@ -179,6 +180,8 @@ const CandidatesContent = () => {
   const lastTotalRef = useRef(totalCount);
   if (!isBusy) lastTotalRef.current = totalCount;
   const displayTotal = isBusy ? lastTotalRef.current : filteredStats.total;
+  // Ärlig räknare: exakt upp till taket, därefter "10 000+".
+  const displayTotalLabel = `${displayTotal.toLocaleString('sv-SE')}${totalCountCapped ? '+' : ''}`;
 
 
 
@@ -229,7 +232,7 @@ const CandidatesContent = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
-            Alla kandidater ({isLoading ? '...' : displayTotal})
+            Alla kandidater ({isLoading ? '...' : displayTotalLabel})
           </h1>
           <p className="text-sm text-white mt-1">
             Hantera och granska kandidater som sökt till dina jobbannonser

@@ -36,9 +36,24 @@ export interface ApplicationData {
   last_active_at?: string | null;
   rating?: number | null;
   city?: string | null;
+  /** Varför kandidaten matchade sökningen: profil, CV-text eller anteckning. */
+  match_source?: 'profile' | 'cv' | 'note' | null;
+  /** True när kandidatens konto har raderats — ansökan finns kvar som dokumentation. */
+  account_deleted?: boolean;
 }
 
+
 const PAGE_SIZE = 25;
+// Räknaren är exakt upp till denna gräns; däröver visar UI "10 000+".
+// Att svepa hela träffmängden vid 100 000+ kandidater är inte försvarbart.
+const COUNT_CAP = 10000;
+
+/** Markör för nästa sida. Tidsbaserad sortering använder markören, övriga offset. */
+interface PageParam {
+  index: number;
+  cursorAppliedAt: string | null;
+  cursorId: string | null;
+}
 // Auto-prefetch bara de första 100 kandidaterna. Varje sida kostar 3 extra
 // RPC-anrop (media, aktivitet, betyg) — vid 10 000+ kandidater blir 20 sidor ren
 // bortkastad trafik. Resten laddas när användaren faktiskt scrollar.
@@ -235,6 +250,7 @@ export const useApplicationsData = (
   const questionFilters = options.questionFilters ?? [];
   const statusFilter = options.statusFilter && options.statusFilter !== 'all' ? options.statusFilter : null;
   const sortBy = options.sortBy || 'applied_at';
+  const isTimeSort = sortBy === 'applied_at' || sortBy === 'oldest';
 
   // Stabil nyckel så queryn inte refetchar på varje render
   const filtersKey = useMemo(() => JSON.stringify(questionFilters), [questionFilters]);
@@ -260,13 +276,22 @@ export const useApplicationsData = (
   } = useInfiniteQuery({
     queryKey,
 
-    initialPageParam: 0,
-    queryFn: async ({ pageParam = 0 }) => {
+    initialPageParam: { index: 0, cursorAppliedAt: null, cursorId: null } as PageParam,
+    queryFn: async ({ pageParam }) => {
+      const pp: PageParam =
+        typeof pageParam === 'number'
+          ? { index: pageParam, cursorAppliedAt: null, cursorId: null }
+          : ((pageParam as PageParam) ?? { index: 0, cursorAppliedAt: null, cursorId: null });
+
       if (!user) {
-        return { items: [], hasMore: false, totalCount: 0 };
+        return { items: [], hasMore: false, totalCount: 0, totalCapped: false, nextCursor: null };
       }
-      
-      const from = pageParam * PAGE_SIZE;
+
+      const from = pp.index * PAGE_SIZE;
+      // Markörpaginering används för tidsbaserad sortering (standardvyn). Då är
+      // sida 4 000 lika snabb som sida 1 — offset tvingar databasen att hoppa
+      // över alla föregående rader varje gång.
+      const useCursor = isTimeSort && !!pp.cursorAppliedAt && !!pp.cursorId;
 
       // Allt filtrerande (FTS + trigram-fuzzy + frågefilter + status + sortering)
       // körs i databasen. Kritiskt vid tiotusentals kandidater: annars filtrerar
@@ -281,14 +306,18 @@ export const useApplicationsData = (
           p_status: statusFilter,
           p_sort: sortBy,
           p_limit: PAGE_SIZE,
-          p_offset: from,
+          p_offset: useCursor ? 0 : from,
           // Räkna bara totalen på första sidan — vid 100 000+ kandidater
           // sparar det ett fullt svep per extra sida som scrollas in.
-          p_with_count: pageParam === 0,
+          p_with_count: pp.index === 0,
+          p_cursor_applied_at: useCursor ? pp.cursorAppliedAt : null,
+          p_cursor_id: useCursor ? pp.cursorId : null,
+          p_count_cap: COUNT_CAP,
         } as any);
         baseData = result.data as any[] | null;
         baseError = result.error;
       } catch (networkError) {
+
         // OFFLINE FALLBACK: If network fails, use cached snapshot with client-side search
         if (!navigator.onLine) {
           const snapshot = readSnapshot(user.id);
@@ -301,6 +330,8 @@ export const useApplicationsData = (
               items: filtered.slice(from, from + PAGE_SIZE),
               hasMore: filtered.length > from + PAGE_SIZE,
               totalCount: filtered.length,
+              totalCapped: false,
+              nextCursor: null,
             };
           }
         }
@@ -320,6 +351,8 @@ export const useApplicationsData = (
               items: filtered.slice(from, from + PAGE_SIZE),
               hasMore: filtered.length > from + PAGE_SIZE,
               totalCount: filtered.length,
+              totalCapped: false,
+              nextCursor: null,
             };
           }
         }
@@ -327,13 +360,15 @@ export const useApplicationsData = (
       }
 
       if (!baseData) {
-        return { items: [], hasMore: false, totalCount: 0 };
+        return { items: [], hasMore: false, totalCount: 0, totalCapped: false, nextCursor: null };
       }
 
       // total_count skickas bara med på första sidan (prestanda vid stora volymer).
       const rawTotal = baseData[0]?.total_count;
       const hasServerTotal = rawTotal !== null && rawTotal !== undefined;
-      const totalCount = hasServerTotal ? Number(rawTotal) : from + baseData.length;
+      const rawTotalNum = hasServerTotal ? Number(rawTotal) : from + baseData.length;
+      const totalCapped = hasServerTotal && rawTotalNum > COUNT_CAP;
+      const totalCount = totalCapped ? COUNT_CAP : rawTotalNum;
 
 
 
@@ -438,13 +473,18 @@ export const useApplicationsData = (
          };
        }) as ApplicationData[];
 
-      const hasMore = hasServerTotal
-        ? from + items.length < totalCount
-        : baseData.length === PAGE_SIZE;
+      // Med markörpaginering är sidstorleken det enda tillförlitliga svaret på
+      // om det finns mer — totalen är kapad och kan inte användas som gräns.
+      const hasMore = baseData.length === PAGE_SIZE;
+      const lastRow = baseData[baseData.length - 1];
+      const nextCursor =
+        isTimeSort && lastRow
+          ? { cursorAppliedAt: lastRow.applied_at as string, cursorId: lastRow.id as string }
+          : null;
 
       // Snapshot skrivs BARA för den ofiltrerade standardvyn — annars skulle
       // ett filtrerat urval återanvändas som "alla kandidater" nästa kalla start.
-      if (pageParam === 0 && items.length > 0 && isDefaultView) {
+      if (pp.index === 0 && items.length > 0 && isDefaultView) {
         writeSnapshot(user.id, items);
       }
 
@@ -465,10 +505,15 @@ export const useApplicationsData = (
         );
       })();
 
-      return { items, hasMore, totalCount };
+      return { items, hasMore, totalCount, totalCapped, nextCursor };
     },
-    getNextPageParam: (lastPage, allPages) => {
-      return lastPage.hasMore ? allPages.length : undefined;
+    getNextPageParam: (lastPage: any, allPages: any[]): PageParam | undefined => {
+      if (!lastPage?.hasMore) return undefined;
+      return {
+        index: allPages.length,
+        cursorAppliedAt: lastPage.nextCursor?.cursorAppliedAt ?? null,
+        cursorId: lastPage.nextCursor?.cursorId ?? null,
+      };
     },
     enabled: !!user,
     // Behåll föregående resultat medan en ny sökning/filtrering hämtas.
@@ -493,8 +538,8 @@ export const useApplicationsData = (
       const hasMore = snapshot.length >= PAGE_SIZE;
       
       return {
-        pages: [{ items: snapshot, hasMore, totalCount: snapshot.length }],
-        pageParams: [0],
+        pages: [{ items: snapshot, hasMore, totalCount: snapshot.length, totalCapped: false, nextCursor: null }],
+        pageParams: [{ index: 0, cursorAppliedAt: null, cursorId: null } as PageParam],
       };
     },
   });
@@ -899,6 +944,8 @@ export const useApplicationsData = (
     totalCount: hasNextPage
       ? Math.max(data?.pages?.[0]?.totalCount ?? 0, deduplicatedApplications.length)
       : deduplicatedApplications.length,
+    // True när träffarna överstiger räknarens tak → UI visar "10 000+".
+    totalCountCapped: Boolean((data?.pages?.[0] as any)?.totalCapped) && !!hasNextPage,
 
     // Nya för "Vill du fortsätta?" banner
     hasReachedLimit,

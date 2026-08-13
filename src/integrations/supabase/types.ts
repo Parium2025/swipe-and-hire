@@ -3820,6 +3820,9 @@ export type Database = {
       }
       search_employer_candidates: {
         Args: {
+          p_count_cap?: number
+          p_cursor_applied_at?: string
+          p_cursor_id?: string
           p_filters?: Json
           p_limit?: number
           p_offset?: number
@@ -3829,6 +3832,7 @@ export type Database = {
           p_with_count?: boolean
         }
         Returns: {
+          account_deleted: boolean
           age: number
           applicant_id: string
           applied_at: string
@@ -3845,6 +3849,7 @@ export type Database = {
           job_title: string
           last_name: string
           location: string
+          match_source: string
           phone: string
           questions_snapshot: Json
           rating: number
