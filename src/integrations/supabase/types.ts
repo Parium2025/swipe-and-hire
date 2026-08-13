@@ -3826,6 +3826,7 @@ export type Database = {
           p_search?: string
           p_sort?: string
           p_status?: string
+          p_with_count?: boolean
         }
         Returns: {
           age: number
