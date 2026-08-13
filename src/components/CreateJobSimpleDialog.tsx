@@ -448,9 +448,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     // Om en mall är vald, öppna dropdown igen
     // Annars stäng helt och gå till dashboard
     if (selectedTemplate) {
-      requestAnimationFrame(() => {
+      nextFrame(() => {
         setOpen(true);
-        setTimeout(() => setTemplateMenuOpen(true), 60);
+        later(() => setTemplateMenuOpen(true), 60);
         isNavigatingBack.current = false;
       });
     } else {
@@ -459,15 +459,15 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       setSelectedTemplate(null);
       isNavigatingBack.current = false;
     }
-  }, [clearCreateJobSession, selectedTemplate]);
+  }, [clearCreateJobSession, later, nextFrame, selectedTemplate]);
 
   const handleTemplateWizardBack = useCallback(() => {
     setShowTemplateWizard(false);
     // Snabbare timing för mer responsiv känsla
-    setTimeout(() => {
+    later(() => {
       setOpen(true);
       // Lägg till bounce-effekt på dropdown
-      setTimeout(() => setTemplateMenuOpen(true), 150);
+      later(() => setTemplateMenuOpen(true), 150);
     }, 80);
   }, []);
 
