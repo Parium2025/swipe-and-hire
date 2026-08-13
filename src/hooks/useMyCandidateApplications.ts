@@ -1,29 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { mapRawToApplicationData } from '@/lib/candidateApplicationMapper';
-import { safeReadJsonCache } from '@/lib/safeStorage';
+import {
+  readCandidateApplicationsCache,
+  writeCandidateApplicationsCache,
+  fetchApplicationsForApplicant,
+} from '@/lib/candidateApplicationsSource';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
-// v2: kortare TTL (60s) så nya ansökningar/profiluppdateringar studsar in nästan direkt.
-// Realtime invaliderar dessutom cachen vid nya rader i job_applications.
-const CANDIDATE_APPLICATIONS_CACHE_PREFIX = 'candidate_apps_cache_v2_';
-const CACHE_TTL_MS = 60 * 1000;
-
-interface CachedApplicationsEnvelope {
-  items: ApplicationData[];
-  cachedAt: number;
-}
-
-function isValidEnvelope(value: unknown): value is CachedApplicationsEnvelope {
-  if (!value || typeof value !== 'object') return false;
-  const env = value as Partial<CachedApplicationsEnvelope>;
-  return Array.isArray(env.items) && typeof env.cachedAt === 'number';
-}
-
 /**
- * Manages fetching all applications for a selected candidate in MyCandidates.
- * Shares the same localStorage cache format as useCandidateBatchPrefetch.
+ * Alla ansökningar för vald kandidat i "Mina kandidater".
+ *
+ * Delar hämtning, cache och sortering med /candidates via
+ * `candidateApplicationsSource` — ingen egen kopia av logiken.
  */
 export function useMyCandidateApplications(
   applicantId: string | null,
@@ -35,40 +24,17 @@ export function useMyCandidateApplications(
   }
 ) {
   const { user } = useAuth();
+  const userId = user?.id;
   const [allApplications, setAllApplications] = useState<ApplicationData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const getCacheKey = useCallback(
-    (aid: string) => `${CANDIDATE_APPLICATIONS_CACHE_PREFIX}${user?.id || 'anon'}_${aid}`,
-    [user?.id]
-  );
-
   const readCache = useCallback(
-    (aid: string): ApplicationData[] | null => {
-      if (!aid) return null;
-      const env = safeReadJsonCache<CachedApplicationsEnvelope>(
-        getCacheKey(aid),
-        isValidEnvelope,
-      );
-      if (!env || env.items.length === 0) return null;
-      if (Date.now() - env.cachedAt > CACHE_TTL_MS) return null;
-      return env.items;
-    },
-    [getCacheKey]
-  );
-
-  const writeCache = useCallback(
-    (aid: string, items: ApplicationData[]) => {
-      if (!aid || items.length === 0) return;
-      try {
-        localStorage.setItem(getCacheKey(aid), JSON.stringify({ items, cachedAt: Date.now() }));
-      } catch {}
-    },
-    [getCacheKey]
+    (aid: string) => readCandidateApplicationsCache(userId, aid),
+    [userId]
   );
 
   useEffect(() => {
-    if (!applicantId || !user || !dialogOpen) {
+    if (!applicantId || !userId || !dialogOpen) {
       setAllApplications([]);
       return;
     }
@@ -76,66 +42,21 @@ export function useMyCandidateApplications(
     let cancelled = false;
     setLoading(true);
 
-    // Serve from cache instantly
-    const cached = readCache(applicantId);
+    // Visa cache direkt
+    const cached = readCandidateApplicationsCache(userId, applicantId);
     if (cached?.length) {
       setAllApplications(cached);
     }
 
     const fetchAll = async () => {
       try {
-        const { data: orgJobs, error: jobsError } = await supabase
-          .from('job_postings')
-          .select('id, title')
-          .eq('employer_id', user.id);
-
-        if (jobsError) throw jobsError;
-        if (!orgJobs?.length) {
-          if (!cancelled) setAllApplications([]);
-          return;
-        }
-
-        const jobIds = orgJobs.map((j) => j.id);
-
-        const { data: apps, error: appError } = await supabase
-          .from('job_applications')
-          .select(`
-            id, job_id, applicant_id, first_name, last_name, email, phone,
-            location, bio, cv_url, age, employment_status, work_schedule,
-            availability, custom_answers, questions_snapshot, status, applied_at, updated_at,
-            profile_image_snapshot_url, video_snapshot_url,
-            job_postings!inner(title)
-          `)
-          .eq('applicant_id', applicantId)
-          .in('job_id', jobIds);
-
-        if (appError) throw appError;
-
-        const transformed = (apps || []).map((app: any) =>
-          mapRawToApplicationData(app, {
-            jobTitle: app.job_postings?.title,
-            fallbackProfileImageUrl: fallback?.profile_image_url,
-            fallbackVideoUrl: fallback?.video_url,
-            fallbackIsProfileVideo: fallback?.is_profile_video,
-          })
-        );
-
-        // Sort newest first (most recent application at top)
-        transformed.sort((a, b) => {
-          const dateA = a.applied_at ? new Date(a.applied_at).getTime() : 0;
-          const dateB = b.applied_at ? new Date(b.applied_at).getTime() : 0;
-          return dateB - dateA;
-        });
-
-        if (!cancelled) {
-          setAllApplications(transformed);
-          if (transformed.length > 0) writeCache(applicantId, transformed);
-        }
+        const items = await fetchApplicationsForApplicant(userId, applicantId, fallback);
+        if (cancelled) return;
+        setAllApplications(items);
+        if (items.length > 0) writeCandidateApplicationsCache(userId, applicantId, items);
       } catch (error) {
         console.error('Error fetching candidate applications:', error);
-        if (!cancelled && !cached?.length) {
-          setAllApplications([]);
-        }
+        if (!cancelled && !cached?.length) setAllApplications([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -143,8 +64,7 @@ export function useMyCandidateApplications(
 
     fetchAll();
 
-    // 🔴 Realtime: studsa in nya/uppdaterade ansökningar för just denna kandidat
-    // direkt i öppen dialog, utan att invänta cache-TTL.
+    // 🔴 Realtime: nya/uppdaterade ansökningar studsar in i öppen dialog
     const channel = supabase
       .channel(`my-candidate-apps-${applicantId}`)
       .on(
@@ -165,7 +85,7 @@ export function useMyCandidateApplications(
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [applicantId, user?.id, dialogOpen, readCache, writeCache, fallback?.profile_image_url, fallback?.video_url, fallback?.is_profile_video]);
+  }, [applicantId, userId, dialogOpen, fallback?.profile_image_url, fallback?.video_url, fallback?.is_profile_video]);
 
   return { allApplications, loading, readCache };
 }
