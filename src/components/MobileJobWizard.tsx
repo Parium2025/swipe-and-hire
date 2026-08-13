@@ -766,7 +766,7 @@ const MobileJobWizard = ({
   const screenRef = useRef<HTMLDivElement>(null);
   const previewSwipeRef = useRef<HTMLDivElement>(null);
   // Skalar telefonmockup + tooltips så att "Obs, tryck här!" aldrig klipps.
-  const { ref: previewFitRef, scale: previewFitScale, contentHeight: previewFitHeight } = useFitScale(440, { designWidthSm: 368, designHeight: 452, designHeightSm: 332, minScale: 0.4, maxScale: 1.95, bottomGutter: 8 });
+  const { ref: previewFitRef, scale: previewFitScale, contentHeight: previewFitHeight } = useFitScale(440, { designWidthSm: 368, designHeight: 452, designHeightSm: 332, minScale: 0.4, maxScale: 3, bottomGutter: 8 });
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const [scale, setScale] = useState(1);
   const BASE_WIDTH = 360;
