@@ -4,7 +4,14 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-export type ActivityType = 'rating_changed' | 'note_added' | 'note_edited' | 'added_to_pipeline';
+export type ActivityType =
+  | 'rating_changed'
+  | 'note_added'
+  | 'note_edited'
+  | 'added_to_pipeline'
+  | 'interview_scheduled'
+  | 'interview_rescheduled'
+  | 'interview_cancelled';
 
 export interface CandidateActivity {
   id: string;
