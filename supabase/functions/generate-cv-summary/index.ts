@@ -446,8 +446,23 @@ VIKTIGT:
 - Skriv allt på svenska, professionellt och hjälpsamt`;
 
 
+    // --- Adaptiv modellval: tre spår beroende på dokumenttyp/längd ---
+    // 1) Bild/skannad PDF (fakturor, foto på CV)  -> stark multimodal modell
+    // 2) Långa/komplexa texter (> 12 000 tecken)  -> starkare textmodell
+    // 3) Korta/normala texter                     -> snabb och billig modell
+    const textLength = typeof userContent === 'string' ? userContent.length : 0;
+    const isLongDocument = !needsVisionModel && textLength > 12000;
+    const selectedModel = needsVisionModel
+      ? 'google/gemini-3.5-flash'
+      : isLongDocument
+        ? 'google/gemini-3.6-flash'
+        : 'google/gemini-3.1-flash-lite';
+    console.log(
+      `AI routing: model=${selectedModel} vision=${needsVisionModel} textLength=${textLength}`,
+    );
+
     const aiController = new AbortController();
-    const aiTimeoutId = setTimeout(() => aiController.abort(), 60000); // 60s timeout for AI
+    const aiTimeoutId = setTimeout(() => aiController.abort(), isLongDocument ? 90000 : 60000);
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -455,13 +470,12 @@ VIKTIGT:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        // Cost control: cheap model for plain text, stronger multimodal model only for images/scanned PDFs
-        model: needsVisionModel ? 'google/gemini-3.5-flash' : 'google/gemini-3.1-flash-lite',
+        model: selectedModel,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userContent },
         ],
-        max_completion_tokens: 2000,
+        max_completion_tokens: isLongDocument ? 3000 : 2000,
       }),
       signal: aiController.signal,
     });

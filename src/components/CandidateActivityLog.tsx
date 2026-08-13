@@ -1,7 +1,7 @@
 import { useCandidateActivities, CandidateActivity } from '@/hooks/useCandidateActivities';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Star, StickyNote, Edit3, Activity, UserPlus } from 'lucide-react';
+import { Star, StickyNote, Edit3, Activity, UserPlus, CalendarPlus, CalendarClock, CalendarX } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 
@@ -20,9 +20,22 @@ const getActivityIcon = (type: string) => {
       return Edit3;
     case 'added_to_pipeline':
       return UserPlus;
+    case 'interview_scheduled':
+      return CalendarPlus;
+    case 'interview_rescheduled':
+      return CalendarClock;
+    case 'interview_cancelled':
+      return CalendarX;
     default:
       return Activity;
   }
+};
+
+const formatInterviewTime = (value: string | null) => {
+  if (!value) return 'okänd tid';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return 'okänd tid';
+  return format(d, "d MMM yyyy 'kl.' HH:mm", { locale: sv });
 };
 
 const getActivityDescription = (activity: CandidateActivity) => {
@@ -69,6 +82,27 @@ const getActivityDescription = (activity: CandidateActivity) => {
         <span>
           <span className="font-medium text-white">{name}</span>
           <span className="text-white"> lade till kandidaten i sin lista</span>
+        </span>
+      );
+    case 'interview_scheduled':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> bokade en intervju {formatInterviewTime(activity.new_value)}</span>
+        </span>
+      );
+    case 'interview_rescheduled':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> bokade om intervjun från {formatInterviewTime(activity.old_value)} till {formatInterviewTime(activity.new_value)}</span>
+        </span>
+      );
+    case 'interview_cancelled':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> avbokade intervjun {formatInterviewTime(activity.old_value)}</span>
         </span>
       );
     default:

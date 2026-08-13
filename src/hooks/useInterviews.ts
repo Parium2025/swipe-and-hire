@@ -164,6 +164,7 @@ export const useInterviews = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-activities'] });
     },
   });
 
@@ -181,6 +182,7 @@ export const useInterviews = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-activities'] });
     },
   });
 
