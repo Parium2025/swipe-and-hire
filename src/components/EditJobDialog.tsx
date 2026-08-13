@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import {
   AlertDialog,
@@ -1968,6 +1968,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContentNoFocus className="premium-modal-motion parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
+          <DialogTitle className="sr-only">Redigera jobbannons</DialogTitle>
+          <DialogDescription className="sr-only">Laddar annonsens innehåll…</DialogDescription>
           <AnimatedBackground showBubbles={false} variant="card" />
         </DialogContentNoFocus>
       </Dialog>
@@ -1983,6 +1985,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <AnimatedBackground showBubbles={false} variant="card" />
+          <DialogDescription className="sr-only">Redigera och förhandsgranska din jobbannons.</DialogDescription>
           <div className="premium-edit-shell relative">
             {/* Header */}
             <div className="premium-edit-header">
