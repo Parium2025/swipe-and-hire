@@ -234,7 +234,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const previewSwipeRef = useRef<HTMLDivElement>(null);
   // Skalar telefonmockup + tooltips så att "Obs, tryck här!" aldrig klipps.
-  const { ref: previewFitRef, scale: previewFitScale } = useFitScale(620, { designHeight: 470, minScale: 0.55, maxScale: 1.7, bottomGutter: 96 });
+  const { ref: previewFitRef, scale: previewFitScale, contentHeight: previewFitHeight } = useFitScale(462, { designWidthSm: 402, designHeight: 452, designHeightSm: 332, minScale: 0.5, maxScale: 1.25, bottomGutter: 28 });
   const isMobile = useIsMobile();
   const isTouchCapable = useTouchCapable();
 
@@ -3036,7 +3036,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
 
                       {/* Mobile Preview */}
                       {previewMode === 'mobile' && (
-                      <div ref={previewFitRef} className="flex flex-col items-center space-y-4 w-full" style={{ height: `${440 * previewFitScale}px` }}>
+                      <div ref={previewFitRef} className="flex flex-col items-center space-y-4 w-full" style={{ height: previewFitHeight ? `${previewFitHeight}px` : undefined }}>
                         <div
                           className="relative flex items-center justify-center gap-4"
                           style={{ transform: `scale(${previewFitScale})`, transformOrigin: 'center top' }}
