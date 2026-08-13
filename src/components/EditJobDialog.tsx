@@ -3034,8 +3034,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
 
                       {/* Mobile Preview */}
                       {previewMode === 'mobile' && (
-                      <div className="flex flex-col items-center space-y-4">
-                        <div className="relative flex items-center justify-center gap-4 scale-90 sm:scale-100">
+                      <div ref={previewFitRef} className="flex flex-col items-center space-y-4 w-full">
+                        <div
+                          className="relative flex items-center justify-center gap-4"
+                          style={{ transform: `scale(${previewFitScale})`, transformOrigin: 'center top' }}
+                        >
                           <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px] md:w-[220px] md:h-[440px]">
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                               <>
