@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { StartDatePicker } from '@/components/StartDatePicker';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
+import { useFitScale } from '@/hooks/useFitScale';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -232,6 +233,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
   const occupationRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const previewSwipeRef = useRef<HTMLDivElement>(null);
+  // Skalar telefonmockup + tooltips så att "Obs, tryck här!" aldrig klipps.
+  const { ref: previewFitRef, scale: previewFitScale } = useFitScale(620);
   const isMobile = useIsMobile();
   const isTouchCapable = useTouchCapable();
 
@@ -3033,8 +3036,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
 
                       {/* Mobile Preview */}
                       {previewMode === 'mobile' && (
-                      <div className="flex flex-col items-center space-y-4">
-                        <div className="relative flex items-center justify-center gap-4 scale-90 sm:scale-100">
+                      <div ref={previewFitRef} className="flex flex-col items-center space-y-4 w-full">
+                        <div
+                          className="relative flex items-center justify-center gap-4"
+                          style={{ transform: `scale(${previewFitScale})`, transformOrigin: 'center top' }}
+                        >
                           <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px] md:w-[220px] md:h-[440px]">
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                               <>

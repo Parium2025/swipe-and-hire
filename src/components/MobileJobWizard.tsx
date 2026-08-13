@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
+import { useFitScale } from '@/hooks/useFitScale';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { WizardSwipePreview, WizardListPreview, buildWizardPreviewData } from '@/components/wizard/WizardCardPreview';
 import { StartDatePicker } from '@/components/StartDatePicker';
@@ -764,6 +765,8 @@ const MobileJobWizard = ({
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
   const screenRef = useRef<HTMLDivElement>(null);
   const previewSwipeRef = useRef<HTMLDivElement>(null);
+  // Skalar telefonmockup + tooltips så att "Obs, tryck här!" aldrig klipps.
+  const { ref: previewFitRef, scale: previewFitScale } = useFitScale(620);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const [scale, setScale] = useState(1);
   const BASE_WIDTH = 360;
@@ -3823,9 +3826,12 @@ const MobileJobWizard = ({
 
                 {/* Mobile Preview */}
                 {previewMode === 'mobile' && (
-                <div className="flex flex-col items-center space-y-4">
+                <div ref={previewFitRef} className="flex flex-col items-center space-y-4 w-full">
                    {/* Phone mockup med ansökningsformulär + tooltip */}
-                  <div className="relative flex items-center justify-center gap-4 scale-90 sm:scale-100">
+                  <div
+                    className="relative flex items-center justify-center gap-4"
+                    style={{ transform: `scale(${previewFitScale})`, transformOrigin: 'center top' }}
+                  >
                     
                     <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px] md:w-[220px] md:h-[440px]">
                     {/* Tooltip framför mobilen som pekar på företagsnamnet + X-knapp */}

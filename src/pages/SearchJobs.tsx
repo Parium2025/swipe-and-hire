@@ -640,7 +640,10 @@ const SearchJobs = memo(() => {
       duration_unit: (job as any).duration_unit,
       part_time_days: (job as any).part_time_days,
       part_time_shifts: (job as any).part_time_shifts,
-      job_image_url: job.job_image_url,
+      // Swipe-kortet renderar alltid porträttbilden. Har arbetsgivaren bara
+      // laddat upp datorbilden faller vi tillbaka på den istället för att
+      // visa ett kort helt utan bild (listvyn gör redan samma fallback).
+      job_image_url: job.job_image_url || job.job_image_desktop_url || undefined,
       image_focus_position: job.image_focus_position,
       views_count: job.views_count,
       applications_count: job.applications_count,
