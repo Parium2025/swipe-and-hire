@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
 import real3 from '@/assets/landing/jobseeker-real-3.jpg';
@@ -16,7 +15,7 @@ import winReal3 from '@/assets/landing/windows/jobseeker-real-3-windows.mp4.asse
 import winReal4 from '@/assets/landing/windows/jobseeker-real-4-windows.mp4.asset.json';
 import winRealCenter from '@/assets/landing/windows/jobseeker-real-center-windows.mp4.asset.json';
 import { fetchPriority } from '@/lib/fetchPriority';
-import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, isWindowsDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
+import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
 
 /**
  * Apple-style "Så funkar det" sektion.
@@ -177,17 +176,43 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [failed, setFailed] = useState(false);
   const [src, setSrc] = useState(() => getPlayableSrc(item));
   const [frameReady, setFrameReady] = useState(false);
-  // Fejden ska dölja Windows-decoder-blixten, men på iOS/macOS är den onödig
-  // och märkbar. Windows får en mjukare 250 ms fade; Apple får ingen alls.
-  const overlayTransition = isWindowsDevice()
-    ? 'transition-opacity duration-[250ms] ease-out'
-    : isAppleDevice()
-      ? ''
-      : 'transition-opacity duration-100 ease-out';
   const markReady = useCallback(() => {
     setFrameReady(true);
   }, []);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Ingen fade någonstans. Posterbilden ligger kvar UNDER videon tills en
+  // riktig bildruta faktiskt är dekodad och målad — då byts lagret direkt.
+  // Eftersom postern aldrig försvinner innan dess finns ingen svart/blixtrande
+  // ruta att dölja, och därmed inget behov av övertoning på Windows/Android.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || item.type !== 'video' || failed || frameReady) return;
+    let cancelled = false;
+    type WithRVFC = HTMLVideoElement & {
+      requestVideoFrameCallback?: (cb: () => void) => number;
+      cancelVideoFrameCallback?: (handle: number) => void;
+    };
+    const vf = v as WithRVFC;
+    let handle: number | undefined;
+
+    if (typeof vf.requestVideoFrameCallback === 'function') {
+      // Enda API:t som garanterar att pixlarna verkligen är på skärmen.
+      handle = vf.requestVideoFrameCallback(() => {
+        if (!cancelled) markReady();
+      });
+    } else if (v.readyState >= 2) {
+      markReady();
+    }
+
+    return () => {
+      cancelled = true;
+      if (handle !== undefined && typeof vf.cancelVideoFrameCallback === 'function') {
+        vf.cancelVideoFrameCallback(handle);
+      }
+    };
+  }, [item.type, failed, frameReady, src, markReady]);
+
 
   useEffect(() => {
     const v = videoRef.current;
@@ -342,11 +367,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
               setFailed(true);
             }}
             style={{ objectPosition: item.position ?? '50% 50%' }}
-            className={cn(
-              'pointer-events-none',
-              overlayTransition,
-              frameReady ? 'opacity-100' : 'opacity-0'
-            )}
+            className="pointer-events-none opacity-100"
           />
           <img
             src={item.poster}
@@ -355,12 +376,16 @@ const CardItem = ({ item, index }: CardItemProps) => {
             decoding="async"
             {...fetchPriority(index < 2 ? 'high' : index >= 4 ? 'low' : 'auto')}
             draggable={false}
-            style={{ objectPosition: item.position ?? '50% 50%' }}
-            className={cn(
-              overlayTransition,
-              frameReady ? 'opacity-0' : 'opacity-100'
-            )}
+            aria-hidden={frameReady}
+            style={{
+              objectPosition: item.position ?? '50% 50%',
+              // Direkt byte, ingen transition: postern ligger ovanpå videon och
+              // tas bort i samma ögonblick som första bildrutan är målad.
+              visibility: frameReady ? 'hidden' : 'visible',
+            }}
+            className={frameReady ? 'opacity-0' : 'opacity-100'}
           />
+
         </>
       ) : (
         <img
@@ -944,9 +969,13 @@ const PinnedHorizontalGallery = () => {
           100% { transform: scale(1.04) translate3d(0,0,0); }
         }
         .phg-card img { animation: phg-kenburns 24s ease-in-out infinite; }
+        /* Posterbilden i ett videokort får ingen ken-burns: annars ligger den i
+           en annan skala än videon och bytet syns som ett litet hopp. */
+        .phg-card video + img { animation: none; transform: none; }
         @media (prefers-reduced-motion: reduce), (pointer: coarse) {
           .phg-card img { animation: none; }
         }
+
         .phg-card::after {
           content: '';
           position: absolute;
