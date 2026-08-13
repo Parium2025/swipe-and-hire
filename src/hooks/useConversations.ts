@@ -210,6 +210,11 @@ function mergeConversationsWithLastKnownIdentity(
   });
 }
 
+// Vilken konversation som är öppen just nu — används för att inte räkna upp
+// olästa för en chatt användaren tittar på (och för att undvika dubbelräkning
+// mellan den globala kanalen och konversationskanalen).
+let activeConversationId: string | null = null;
+
 // Minimal shape of a realtime INSERT on conversation_messages
 export interface IncomingRealtimeMessage {
   id: string;
@@ -291,6 +296,7 @@ export function useConversations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxWaitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const identityRecoveryTriggeredRef = useRef(false);
 
   // Fetch all conversations for current user
@@ -533,18 +539,48 @@ export function useConversations() {
           schema: 'public',
           table: 'conversation_messages',
         },
-        () => {
-          // Debounce: if many messages arrive quickly, only refetch once
+        (payload) => {
+          const msg = payload.new as IncomingRealtimeMessage;
+          if (!msg?.conversation_id) return;
+
+          // 1) Snabbaste vägen: patcha listan i minnet (ingen nätverksrundtur).
+          //    Vid bulkutskick (tusentals meddelanden) blir detta O(1) per event
+          //    istället för en full omhämtning.
+          const patched = applyIncomingMessageToConversations(queryClient, user.id, msg, {
+            incrementUnread: msg.conversation_id !== activeConversationId,
+          });
+
+          if (patched) return;
+
+          // 2) Okänd konversation (ny chatt/inbjudan) → coalescad omhämtning.
+          //    Debounce 400 ms, men aldrig längre än 2 s även vid konstant flöde.
+          if (!maxWaitRef.current) {
+            maxWaitRef.current = setTimeout(() => {
+              maxWaitRef.current = null;
+              if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+                debounceRef.current = null;
+              }
+              queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+            }, 2000);
+          }
+
           if (debounceRef.current) clearTimeout(debounceRef.current);
           debounceRef.current = setTimeout(() => {
+            debounceRef.current = null;
+            if (maxWaitRef.current) {
+              clearTimeout(maxWaitRef.current);
+              maxWaitRef.current = null;
+            }
             queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
-          }, 300);
+          }, 400);
         }
       )
       .subscribe();
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (maxWaitRef.current) clearTimeout(maxWaitRef.current);
       supabase.removeChannel(channel);
     };
   }, [user, queryClient]);
@@ -748,8 +784,13 @@ export function useConversationMessages(conversationId: string | null) {
             }
           );
 
-          // Also update conversation list to show new last message
-          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          // Also update conversation list to show new last message (utan refetch)
+          const patched = applyIncomingMessageToConversations(queryClient, user.id, newMessage, {
+            incrementUnread: false,
+          });
+          if (!patched) {
+            queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          }
         }
       )
       .on(
