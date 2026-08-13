@@ -7,6 +7,8 @@ import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json'
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import windowsSafe60Asset from '@/assets/showcase-jobseeker-windows-safe60.mp4.asset.json';
+import windowsSafe60_648Asset from '@/assets/showcase-jobseeker-safe60-648.mp4.asset.json';
+import windowsSafe60_810Asset from '@/assets/showcase-jobseeker-safe60-810.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { isAndroidDevice, isAppleDevice, isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
 
