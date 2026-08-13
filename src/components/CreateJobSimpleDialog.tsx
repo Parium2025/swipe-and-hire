@@ -658,10 +658,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                               // avmonteras — annars kan hela sidan bli oklickbar.
                               setTemplateMenuOpen(false);
                               setMenuInstanceKey((k) => k + 1);
-                              requestAnimationFrame(() => {
-                                requestAnimationFrame(() => {
+                              nextFrame(() => {
+                                nextFrame(() => {
                                   setOpen(false);
-                                  setTimeout(() => {
+                                  later(() => {
                                     setShowTemplateWizard(true);
                                   }, 150);
                                 });
