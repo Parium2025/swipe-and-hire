@@ -143,6 +143,32 @@ const pickLadder = (widthPx?: number) => {
   return (pool.find((r) => r.w >= target) ?? pool[pool.length - 1]).url;
 };
 
+/**
+ * Windows/Android-stege — SAMMA skärpelogik som Apple, men med den
+ * decoder-säkra kodningen (Constrained Baseline, 60 fps, inga B-frames,
+ * kort GOP, fastdecode).
+ *
+ * Tidigare fick Windows och Android ALLTID 432 px bred källa. Det räcker på en
+ * 100 %-skalad laptop (285 CSS-px × 1.25 dpr ≈ 356), men på en 4K-laptop med
+ * 200 % skalning (dpr 2 → 570) och på Android-telefoner (dpr 3 → ~570) tvingas
+ * browsern skala UPP filmen — vilket är exakt den suddighet vi bekämpar på
+ * Apple-sidan. Nu väljs minsta rung som täcker den faktiska pixelytan, med
+ * samma bandbreddstak som Apple-stegen.
+ */
+const SAFE_LADDER = [
+  { w: 432, url: windowsSafe60Asset.url },
+  { w: 648, url: windowsSafe60_648Asset.url },
+  { w: 810, url: windowsSafe60_810Asset.url },
+] as const;
+
+const pickSafeLadder = (widthPx?: number) => {
+  const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 3);
+  const target = estimateCssWidth(widthPx) * dpr;
+  const cap = maxWidthForConnection();
+  const allowed = SAFE_LADDER.filter((r) => r.w <= cap);
+  const pool = allowed.length > 0 ? allowed : [SAFE_LADDER[0]];
+  return (pool.find((r) => r.w >= target) ?? pool[pool.length - 1]).url;
+};
 
 const getSources = (widthPx?: number) =>
   prefersHevc()
@@ -162,13 +188,17 @@ const getSources = (widthPx?: number) =>
             // Välj bara 60-fps-mastern när browsern själv accepterar dess exakta
             // codecprofil. Annars används den brett kompatibla 30-fps-filen.
             supportsWindowsSafe60()
-              ? { src: windowsSafe60Asset.url, type: 'video/mp4; codecs="avc1.42C020"' }
+              ? { src: pickSafeLadder(widthPx), type: 'video/mp4; codecs="avc1.42C020"' }
               : { src: windowsLiteAsset.url, type: 'video/mp4' },
           ]
         : isAndroidDevice()
           ? [
               // Androids H.264-hårdvaruväg är jämnare mellan olika GPU:er än VP9.
-              { src: windowsLiteAsset.url, type: 'video/mp4' },
+              // Samma decoder-säkra profil som Windows, men nu i rätt upplösning
+              // för telefonens dpr i stället för en fast 432 px-uppskalning.
+              supportsWindowsSafe60()
+                ? { src: pickSafeLadder(widthPx), type: 'video/mp4; codecs="avc1.42C020"' }
+                : { src: windowsLiteAsset.url, type: 'video/mp4' },
             ]
           : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
 
