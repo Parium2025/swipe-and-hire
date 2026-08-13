@@ -469,7 +469,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       // Lägg till bounce-effekt på dropdown
       later(() => setTemplateMenuOpen(true), 150);
     }, 80);
-  }, []);
+  }, [later]);
 
   return (
     <>
