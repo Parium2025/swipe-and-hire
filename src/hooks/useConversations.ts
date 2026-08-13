@@ -727,6 +727,8 @@ export function useConversationMessages(conversationId: string | null) {
   useEffect(() => {
     if (!conversationId || !user) return;
 
+    activeConversationId = conversationId;
+
     const channel = supabase
       .channel(`messages-${conversationId}`)
       .on(
@@ -822,6 +824,7 @@ export function useConversationMessages(conversationId: string | null) {
       .subscribe();
 
     return () => {
+      if (activeConversationId === conversationId) activeConversationId = null;
       supabase.removeChannel(channel);
     };
   }, [conversationId, user, queryClient]);
