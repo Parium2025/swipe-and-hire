@@ -944,6 +944,8 @@ export const useApplicationsData = (
     totalCount: hasNextPage
       ? Math.max(data?.pages?.[0]?.totalCount ?? 0, deduplicatedApplications.length)
       : deduplicatedApplications.length,
+    // True när träffarna överstiger räknarens tak → UI visar "10 000+".
+    totalCountCapped: Boolean((data?.pages?.[0] as any)?.totalCapped) && !!hasNextPage,
 
     // Nya för "Vill du fortsätta?" banner
     hasReachedLimit,
