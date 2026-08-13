@@ -1,7 +1,7 @@
 import { useCandidateActivities, CandidateActivity } from '@/hooks/useCandidateActivities';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Star, StickyNote, Edit3, Activity, UserPlus } from 'lucide-react';
+import { Star, StickyNote, Edit3, Activity, UserPlus, CalendarPlus, CalendarClock, CalendarX } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 
