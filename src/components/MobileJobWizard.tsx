@@ -3826,7 +3826,7 @@ const MobileJobWizard = ({
 
                 {/* Mobile Preview */}
                 {previewMode === 'mobile' && (
-                <div ref={previewFitRef} className="flex flex-col items-center space-y-4 w-full">
+                <div ref={previewFitRef} className="flex flex-col items-center space-y-4 w-full" style={{ height: `${440 * previewFitScale}px` }}>
                    {/* Phone mockup med ansökningsformulär + tooltip */}
                   <div
                     className="relative flex items-center justify-center gap-4"
