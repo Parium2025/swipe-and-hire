@@ -180,6 +180,9 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const markReady = useCallback(() => {
     setFrameReady(true);
   }, []);
+  const resetReady = useCallback(() => {
+    setFrameReady(false);
+  }, []);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Ingen fade någonstans. Posterbilden ligger kvar UNDER videon tills en
