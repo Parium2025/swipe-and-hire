@@ -127,12 +127,16 @@ export function useBulkCandidateOps({
       exitSelectionMode();
 
       try {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('my_candidates')
           .delete()
-          .in('id', ids);
+          .in('id', ids)
+          .select('id');
 
         if (error) throw error;
+        if ((data?.length ?? 0) < ids.length) {
+          throw new Error('Vissa kandidater kunde inte tas bort');
+        }
         toast.success(`${ids.length} kandidater borttagna från din lista`);
       } catch {
         if (user) {
