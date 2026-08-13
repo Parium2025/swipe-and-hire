@@ -236,6 +236,7 @@ export const BookInterviewDialog = ({
       toast.success(`Intervju bokad för ${candidateName}`, { description });
 
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-activities'] });
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
