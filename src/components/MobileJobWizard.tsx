@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useHasActivePlan } from '@/hooks/useHasActivePlan';
 import { supabase } from '@/integrations/supabase/client';
+import { syncJobQuestions } from '@/lib/jobQuestionsSync';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -2398,37 +2399,9 @@ const MobileJobWizard = ({
         return;
       }
 
-      // Save questions - run delete and insert in parallel when possible
-      if (jobPost && customQuestions.length > 0) {
-        // If editing existing job, delete old questions first
-        if (existingJob?.id) {
-          await supabase
-            .from('job_questions')
-            .delete()
-            .eq('job_id', existingJob.id);
-        }
-
-        const questionData = customQuestions.map(q => ({
-          job_id: jobPost.id,
-          question_text: q.question_text,
-          question_type: q.question_type,
-          options: q.options || null,
-          is_required: q.is_required,
-          order_index: q.order_index,
-          placeholder_text: q.placeholder_text || null,
-          min_value: q.min_value || null,
-          max_value: q.max_value || null
-        }));
-
-        await supabase
-          .from('job_questions')
-          .insert(questionData);
-      } else if (jobPost && existingJob?.id) {
-        // Only delete if no new questions to add
-        await supabase
-          .from('job_questions')
-          .delete()
-          .eq('job_id', existingJob.id);
+      // Save questions — id-bevarande synk så att befintliga svar behåller sin fråga
+      if (jobPost) {
+        await syncJobQuestions(jobPost.id, customQuestions);
       }
 
       toast({
@@ -2625,35 +2598,10 @@ const MobileJobWizard = ({
 
       // Save questions to job_questions table if there are any
       if (jobPost) {
-        // If updating existing job in-place, delete old questions first
-        if (shouldUpdateExisting) {
-          await supabase
-            .from('job_questions')
-            .delete()
-            .eq('job_id', existingJob.id);
-        }
-
-        // Then insert new questions if any
-        if (customQuestions.length > 0) {
-          const questionData = customQuestions.map(q => ({
-            job_id: jobPost.id,
-            question_text: q.question_text,
-            question_type: q.question_type,
-            options: q.options || null,
-            is_required: q.is_required,
-            order_index: q.order_index,
-            placeholder_text: q.placeholder_text || null,
-            min_value: q.min_value || null,
-            max_value: q.max_value || null
-          }));
-
-          const { error: questionsError } = await supabase
-            .from('job_questions')
-            .insert(questionData);
-
-          if (questionsError) {
-            console.error('Error saving questions:', questionsError);
-          }
+        try {
+          await syncJobQuestions(jobPost.id, customQuestions);
+        } catch (questionsError) {
+          console.error('Error saving questions:', questionsError);
         }
       }
 
