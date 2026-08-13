@@ -970,9 +970,13 @@ const PinnedHorizontalGallery = () => {
           100% { transform: scale(1.04) translate3d(0,0,0); }
         }
         .phg-card img { animation: phg-kenburns 24s ease-in-out infinite; }
+        /* Posterbilden i ett videokort får ingen ken-burns: annars ligger den i
+           en annan skala än videon och bytet syns som ett litet hopp. */
+        .phg-card video + img { animation: none; transform: none; }
         @media (prefers-reduced-motion: reduce), (pointer: coarse) {
           .phg-card img { animation: none; }
         }
+
         .phg-card::after {
           content: '';
           position: absolute;
