@@ -1985,6 +1985,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <AnimatedBackground showBubbles={false} variant="card" />
+          <DialogDescription className="sr-only">Redigera och förhandsgranska din jobbannons.</DialogDescription>
           <div className="premium-edit-shell relative">
             {/* Header */}
             <div className="premium-edit-header">
