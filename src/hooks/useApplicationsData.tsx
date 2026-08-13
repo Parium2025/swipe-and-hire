@@ -330,7 +330,10 @@ export const useApplicationsData = (
         return { items: [], hasMore: false, totalCount: 0 };
       }
 
-      const totalCount = Number(baseData[0]?.total_count ?? baseData.length);
+      // total_count skickas bara med på första sidan (prestanda vid stora volymer).
+      const rawTotal = baseData[0]?.total_count;
+      const hasServerTotal = rawTotal !== null && rawTotal !== undefined;
+      const totalCount = hasServerTotal ? Number(rawTotal) : from + baseData.length;
 
 
 
