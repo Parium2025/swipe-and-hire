@@ -195,7 +195,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
               <div className="cursor-default mt-2">
                 <TruncatedText
                   text={title || 'Jobbtitel'}
-                  className="w-full text-[12px] font-extrabold leading-[1.15] tracking-tight line-clamp-2 break-words"
+                  className="w-full text-[12px] font-extrabold leading-[1.25] tracking-tight line-clamp-2 break-words pb-[0.14em]"
                   style={overlayStyle}
                 />
               </div>
