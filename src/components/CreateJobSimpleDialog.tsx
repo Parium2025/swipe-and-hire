@@ -66,6 +66,37 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
   const { handleTap, isPreview, resetPreview } = useTapToPreview();
   const templateTextRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
+  // Alla fördröjda callbacks registreras här så de kan avbrytas vid unmount
+  // (annars kan state sättas på en avmonterad komponent).
+  const timersRef = useRef<number[]>([]);
+  const rafsRef = useRef<number[]>([]);
+  const later = useCallback((fn: () => void, ms: number) => {
+    const id = window.setTimeout(() => {
+      timersRef.current = timersRef.current.filter((t) => t !== id);
+      fn();
+    }, ms);
+    timersRef.current.push(id);
+    return id;
+  }, []);
+  const nextFrame = useCallback((fn: () => void) => {
+    const id = requestAnimationFrame(() => {
+      rafsRef.current = rafsRef.current.filter((r) => r !== id);
+      fn();
+    });
+    rafsRef.current.push(id);
+    return id;
+  }, []);
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach((t) => window.clearTimeout(t));
+      rafsRef.current.forEach((r) => cancelAnimationFrame(r));
+      timersRef.current = [];
+      rafsRef.current = [];
+    };
+  }, []);
+
+
+
   const clearCreateJobSession = useCallback(() => {
     try {
       sessionStorage.removeItem(CREATE_JOB_SESSION_KEY);
@@ -301,7 +332,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       initialStateRef.current = { title: '', templateId: null };
       setHasUnsavedChanges(false);
       // Force iOS refresh
-      setTimeout(() => {
+      later(() => {
         if (titleRef.current) {
           titleRef.current.value = '';
           titleRef.current.blur();
@@ -321,7 +352,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       setHasUnsavedChanges(false);
     }
     setTemplateMenuOpen(false);
-  }, [templates]);
+  }, [later, templates]);
 
   // Filter templates based on search term
   const filteredTemplates = useMemo(
@@ -360,10 +391,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     
     // Kort delay för smidig övergång
     setOpen(false);
-    setTimeout(() => {
+    later(() => {
       setShowDetailDialog(true);
     }, 150);
-  }, [jobTitle, selectedTemplate, toast, setIntentionalCloseMarker]);
+  }, [jobTitle, later, selectedTemplate, toast, setIntentionalCloseMarker]);
 
   const handleClose = useCallback(() => {
     if (hasUnsavedChanges) {
@@ -417,9 +448,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     // Om en mall är vald, öppna dropdown igen
     // Annars stäng helt och gå till dashboard
     if (selectedTemplate) {
-      requestAnimationFrame(() => {
+      nextFrame(() => {
         setOpen(true);
-        setTimeout(() => setTemplateMenuOpen(true), 60);
+        later(() => setTemplateMenuOpen(true), 60);
         isNavigatingBack.current = false;
       });
     } else {
@@ -428,17 +459,17 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       setSelectedTemplate(null);
       isNavigatingBack.current = false;
     }
-  }, [clearCreateJobSession, selectedTemplate]);
+  }, [clearCreateJobSession, later, nextFrame, selectedTemplate]);
 
   const handleTemplateWizardBack = useCallback(() => {
     setShowTemplateWizard(false);
     // Snabbare timing för mer responsiv känsla
-    setTimeout(() => {
+    later(() => {
       setOpen(true);
       // Lägg till bounce-effekt på dropdown
-      setTimeout(() => setTemplateMenuOpen(true), 150);
+      later(() => setTemplateMenuOpen(true), 150);
     }, 80);
-  }, []);
+  }, [later]);
 
   return (
     <>
@@ -627,10 +658,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                               // avmonteras — annars kan hela sidan bli oklickbar.
                               setTemplateMenuOpen(false);
                               setMenuInstanceKey((k) => k + 1);
-                              requestAnimationFrame(() => {
-                                requestAnimationFrame(() => {
+                              nextFrame(() => {
+                                nextFrame(() => {
                                   setOpen(false);
-                                  setTimeout(() => {
+                                  later(() => {
                                     setShowTemplateWizard(true);
                                   }, 150);
                                 });
@@ -712,10 +743,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                      setTemplateToEdit(template);
                                      setTemplateMenuOpen(false);
                                      setMenuInstanceKey((k) => k + 1);
-                                     requestAnimationFrame(() => {
-                                       requestAnimationFrame(() => {
+                                     nextFrame(() => {
+                                       nextFrame(() => {
                                          setOpen(false);
-                                         setTimeout(() => {
+                                         later(() => {
                                            setShowTemplateWizard(true);
                                          }, 150);
                                        });
@@ -877,7 +908,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               onClick={() => {
                 setTemplateToDelete(null);
                 // Öppna dropdown-menyn igen efter att avbryt tryckts
-                setTimeout(() => setTemplateMenuOpen(true), 100);
+                later(() => setTemplateMenuOpen(true), 100);
               }}
               className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
