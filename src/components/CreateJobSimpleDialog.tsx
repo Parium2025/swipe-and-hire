@@ -622,11 +622,19 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                         <div className="flex-1">
                           <DropdownMenuItem
                             onSelect={() => {
+                              // Stäng menyn först och låt Radix städa upp sina
+                              // modal-lager (body pointer-events) innan dialogen
+                              // avmonteras — annars kan hela sidan bli oklickbar.
                               setTemplateMenuOpen(false);
-                              setOpen(false);
-                              setTimeout(() => {
-                                setShowTemplateWizard(true);
-                              }, 150);
+                              setMenuInstanceKey((k) => k + 1);
+                              requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                  setOpen(false);
+                                  setTimeout(() => {
+                                    setShowTemplateWizard(true);
+                                  }, 150);
+                                });
+                              });
                             }}
                             className="px-4 py-2.5 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
                           >
