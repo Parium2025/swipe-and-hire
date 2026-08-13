@@ -234,7 +234,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const previewSwipeRef = useRef<HTMLDivElement>(null);
   // Skalar telefonmockup + tooltips så att "Obs, tryck här!" aldrig klipps.
-  const { ref: previewFitRef, scale: previewFitScale } = useFitScale(620);
+  const { ref: previewFitRef, scale: previewFitScale } = useFitScale(620, { designHeight: 470, minScale: 0.55, maxScale: 1.7, bottomGutter: 96 });
   const isMobile = useIsMobile();
   const isTouchCapable = useTouchCapable();
 
