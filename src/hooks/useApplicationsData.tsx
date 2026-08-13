@@ -93,11 +93,20 @@ const readCachedRatings = (userId: string): Record<string, number> => {
 };
 
 // Save ratings to localStorage cache
+const RATINGS_CACHE_MAX_ENTRIES = 5000;
+
 const writeCachedRatings = (userId: string, ratings: Record<string, number>) => {
   try {
     const key = RATINGS_CACHE_PREFIX + userId;
+    // Tak på cachen: utan detta växer den obegränsat vid tiotusentals betyg och
+    // varje sidladdning betalar en JSON.stringify av flera MB på main thread.
+    // Objektnycklar behåller insättningsordning → vi behåller de senast skrivna.
+    const entries = Object.entries(ratings);
+    const trimmed = entries.length > RATINGS_CACHE_MAX_ENTRIES
+      ? Object.fromEntries(entries.slice(entries.length - RATINGS_CACHE_MAX_ENTRIES))
+      : ratings;
     const cache: RatingsCacheData = {
-      ratings,
+      ratings: trimmed,
       timestamp: Date.now()
     };
     safeSetItem(key, JSON.stringify(cache));
