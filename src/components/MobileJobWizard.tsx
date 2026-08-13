@@ -5015,7 +5015,28 @@ const MobileJobWizard = ({
                     <div className="flex items-center gap-2 mb-2">
                       <Smartphone className="h-4 w-4 text-white" />
                       <span className="text-white font-medium text-sm sm:text-base">Mobilbild + Jobbkort (valfritt)</span>
+                      {jobImageDesktopDisplayUrl && !jobImageDisplayUrl && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const desktopUrl = formData.job_image_desktop_url;
+                            if (desktopUrl) {
+                              handleInputChange('job_image_url', desktopUrl);
+                              setOriginalStoragePath(originalDesktopStoragePath);
+                              setImageIsEdited(false);
+                              const { getMediaUrl } = await import('@/lib/mediaManager');
+                              const signedUrl = await getMediaUrl(desktopUrl, 'job-image', 86400);
+                              setOriginalImageUrl(signedUrl || desktopUrl);
+                            }
+                          }}
+                          className="ml-auto premium-edit-pill-action inline-flex items-center gap-1.5 bg-primary/20 border border-primary/30 text-white text-xs transition-all duration-200 hover:bg-primary/30"
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>Använd datorbild</span>
+                        </button>
+                      )}
                     </div>
+
                     <p className="text-white text-xs sm:text-sm mb-3">
                       Bild som visas i mobilförhandsvisningen
                     </p>
