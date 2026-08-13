@@ -20,6 +20,12 @@ const getActivityIcon = (type: string) => {
       return Edit3;
     case 'added_to_pipeline':
       return UserPlus;
+    case 'interview_scheduled':
+      return CalendarPlus;
+    case 'interview_rescheduled':
+      return CalendarClock;
+    case 'interview_cancelled':
+      return CalendarX;
     default:
       return Activity;
   }
