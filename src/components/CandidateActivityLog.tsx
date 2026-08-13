@@ -77,6 +77,27 @@ const getActivityDescription = (activity: CandidateActivity) => {
           <span className="text-white"> lade till kandidaten i sin lista</span>
         </span>
       );
+    case 'interview_scheduled':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> bokade en intervju {formatInterviewTime(activity.new_value)}</span>
+        </span>
+      );
+    case 'interview_rescheduled':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> bokade om intervjun från {formatInterviewTime(activity.old_value)} till {formatInterviewTime(activity.new_value)}</span>
+        </span>
+      );
+    case 'interview_cancelled':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> avbokade intervjun {formatInterviewTime(activity.old_value)}</span>
+        </span>
+      );
     default:
       return (
         <span className="text-white">Okänd aktivitet</span>
