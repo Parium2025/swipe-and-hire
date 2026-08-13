@@ -352,7 +352,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       setHasUnsavedChanges(false);
     }
     setTemplateMenuOpen(false);
-  }, [templates]);
+  }, [later, templates]);
 
   // Filter templates based on search term
   const filteredTemplates = useMemo(
