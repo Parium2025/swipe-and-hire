@@ -368,11 +368,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
               setFailed(true);
             }}
             style={{ objectPosition: item.position ?? '50% 50%' }}
-            className={cn(
-              'pointer-events-none',
-              overlayTransition,
-              frameReady ? 'opacity-100' : 'opacity-0'
-            )}
+            className="pointer-events-none opacity-100"
           />
           <img
             src={item.poster}
@@ -381,12 +377,16 @@ const CardItem = ({ item, index }: CardItemProps) => {
             decoding="async"
             {...fetchPriority(index < 2 ? 'high' : index >= 4 ? 'low' : 'auto')}
             draggable={false}
-            style={{ objectPosition: item.position ?? '50% 50%' }}
-            className={cn(
-              overlayTransition,
-              frameReady ? 'opacity-0' : 'opacity-100'
-            )}
+            aria-hidden={frameReady}
+            style={{
+              objectPosition: item.position ?? '50% 50%',
+              // Direkt byte, ingen transition: postern ligger ovanpå videon och
+              // tas bort i samma ögonblick som första bildrutan är målad.
+              visibility: frameReady ? 'hidden' : 'visible',
+            }}
+            className={frameReady ? 'opacity-0' : 'opacity-100'}
           />
+
         </>
       ) : (
         <img
