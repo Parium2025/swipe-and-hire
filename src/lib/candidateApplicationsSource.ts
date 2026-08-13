@@ -19,6 +19,18 @@ import type { ApplicationData } from '@/hooks/useApplicationsData';
 const CACHE_PREFIX = 'candidate_apps_cache_v3_';
 const CACHE_TTL_MS = 60 * 1000;
 
+// Städa bort de två gamla, nu oanvända cacheformaten en gång per session så att
+// de inte ligger kvar och äter lagringsutrymme hos befintliga användare.
+if (typeof window !== 'undefined') {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith('candidate_apps_cache_v1_') || key.startsWith('candidate_apps_cache_v2_')) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch { /* ignore */ }
+}
+
 const APPLICATION_COLUMNS = `
   id, job_id, applicant_id, first_name, last_name, email, phone,
   location, bio, cv_url, age, employment_status, work_schedule,
