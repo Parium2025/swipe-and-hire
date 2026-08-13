@@ -282,7 +282,10 @@ export const useApplicationsData = (
           p_sort: sortBy,
           p_limit: PAGE_SIZE,
           p_offset: from,
-        });
+          // Räkna bara totalen på första sidan — vid 100 000+ kandidater
+          // sparar det ett fullt svep per extra sida som scrollas in.
+          p_with_count: pageParam === 0,
+        } as any);
         baseData = result.data as any[] | null;
         baseError = result.error;
       } catch (networkError) {
