@@ -278,6 +278,9 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
   const location = useLocation();
   const isLightweightRoute = isPublicLightweightPath(location.pathname);
 
+  // Skyddsnät: släpper alltid en kvarhängande pointer-events-spärr från Radix.
+  useUiLockGuard();
+
   return (
     <>
       <TopChromeStrip />
