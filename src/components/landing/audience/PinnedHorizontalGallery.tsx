@@ -346,17 +346,26 @@ const CardItem = ({ item, index }: CardItemProps) => {
             loop
             playsInline
             preload={getGalleryPreload()}
+            // Native poster: om elementet någonsin står utan dekodad bildruta
+            // (t.ex. när frys-vakten kör load(), eller när decodern släpps vid
+            // flikbyte) målar browsern posterbilden i stället för en svart ruta.
+            // Det är den svarta "blinken" som kunde synas vid snabb scroll på
+            // svag uppkoppling.
+            poster={item.poster}
             disablePictureInPicture
             disableRemotePlayback
             controlsList="nodownload noplaybackrate nofullscreen"
             onContextMenu={(e) => e.preventDefault()}
             onCanPlay={scheduleEvaluate}
-            onLoadedData={(e) => {
+            onLoadedData={() => {
               scheduleEvaluate();
               markReady();
             }}
             onPlaying={markReady}
             onTimeUpdate={markReady}
+            // Elementet har tappat sin mediakälla (load()/decoder-släpp) →
+            // lägg tillbaka vårt egna posterlager tills en ny bildruta målats.
+            onEmptied={resetReady}
             onError={() => {
               // Apple behåller sin befintliga fallback. På Windows/Android ska
               // ett codec-/decodefel inte följas av ett försök med en ännu tyngre
