@@ -693,7 +693,11 @@ export function CandidatesTable({
                       !selectionMode && "hover:bg-white/5 active:scale-[0.98]",
                       isSelected && "bg-white/10"
                     )}
-                    style={{ contain: 'layout style paint' }}
+                    // contentVisibility: webbläsaren hoppar över layout/paint för rader
+                    // utanför skärmen. Identisk rendering, men 20 000 rader kostar
+                    // som en skärmfull. contain-intrinsic-size håller scrollhöjden stabil.
+                    style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: '0 57px' } as React.CSSProperties}
+
                     onClick={() => handleRowClick(application)}
                     onMouseEnter={() => handlePrefetchCandidate(application)}
                     onTouchStart={() => handlePrefetchCandidate(application)}
