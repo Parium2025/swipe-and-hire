@@ -438,7 +438,9 @@ export const useApplicationsData = (
          };
        }) as ApplicationData[];
 
-      const hasMore = from + items.length < totalCount;
+      const hasMore = hasServerTotal
+        ? from + items.length < totalCount
+        : baseData.length === PAGE_SIZE;
 
       // Snapshot skrivs BARA för den ofiltrerade standardvyn — annars skulle
       // ett filtrerat urval återanvändas som "alla kandidater" nästa kalla start.
