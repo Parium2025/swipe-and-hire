@@ -30,6 +30,7 @@ import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
 import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
 import {
   findExistingConversationId,
+  resolveConversationIdsForCandidates,
   createConversationForCandidate,
   ensureConversationMemberships,
   isRetryableError,
@@ -331,13 +332,27 @@ export function CandidatesTable({
       return;
     }
 
+    // Pre-resolve existing conversations for ALL recipients in one round-trip
+    // (instead of 1 lookup per candidate — critical at 100s/1000s of recipients).
+    let existingConvIds = new Map<string, string>();
+    try {
+      existingConvIds = await resolveConversationIdsForCandidates(
+        recipients.map(r => r.applicant_id)
+      );
+    } catch {
+      // Fall back to per-candidate lookup below
+    }
+
     const sendToCandidate = async (app: ApplicationData, attempt = 1): Promise<void> => {
       try {
-        let conversationId = await findExistingConversationId(user.id, app.applicant_id);
+        let conversationId =
+          existingConvIds.get(app.applicant_id) ??
+          (await findExistingConversationId(user.id, app.applicant_id));
 
         if (!conversationId) {
           conversationId = await createConversationForCandidate(user.id, app.applicant_id, app.job_id, app.id);
         }
+        existingConvIds.set(app.applicant_id, conversationId);
 
         await ensureConversationMemberships(conversationId, user.id, app.applicant_id);
 
@@ -365,17 +380,27 @@ export function CandidatesTable({
     // --- Progress tracking ---
     setBulkProgress({ current: 0, total: recipients.length });
 
-    for (const app of recipients) {
-      try {
-        await sendToCandidate(app);
-        successCount++;
-      } catch (error: any) {
-        const reason = formatConversationError(error);
-        failureReasons.push(reason);
-        console.error(`Failed to send message to ${app.applicant_id}:`, error);
+    // Bounded concurrency — fast for large batches without hammering the backend.
+    const CONCURRENCY = Math.min(4, recipients.length);
+    let cursor = 0;
+    let done = 0;
+
+    const worker = async () => {
+      while (cursor < recipients.length) {
+        const app = recipients[cursor++];
+        try {
+          await sendToCandidate(app);
+          successCount++;
+        } catch (error: any) {
+          failureReasons.push(formatConversationError(error));
+          console.error(`Failed to send message to ${app.applicant_id}:`, error);
+        }
+        done++;
+        setBulkProgress({ current: done, total: recipients.length });
       }
-      setBulkProgress({ current: successCount + failureReasons.length, total: recipients.length });
-    }
+    };
+
+    await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
 
     setBulkProgress(null);
 
