@@ -29,6 +29,7 @@ const availabilityLabels: Record<string, string> = {
 interface ProfileInfoSectionsProps {
   displayApp: ApplicationData;
   jobQuestions: Record<string, { text: string; order: number }>;
+  questionsLoading?: boolean;
   questionsExpanded: boolean;
   onToggleQuestions: () => void;
   summaryHook: {
@@ -43,6 +44,7 @@ interface ProfileInfoSectionsProps {
 export const ProfileInfoSections = ({
   displayApp,
   jobQuestions,
+  questionsLoading = false,
   questionsExpanded,
   onToggleQuestions,
   summaryHook,
@@ -143,7 +145,7 @@ export const ProfileInfoSections = ({
 
           {questionsExpanded && (
             <div className="px-3 pb-3 space-y-2">
-              {!hasResolvedQuestions ? (
+              {questionsLoading && !hasResolvedQuestions ? (
                 <div className="flex items-center justify-center py-3">
                   <Loader2 className="h-4 w-4 text-white animate-spin" />
                   <span className="text-sm text-white ml-2">Laddar frågor...</span>
@@ -161,7 +163,7 @@ export const ProfileInfoSections = ({
                     className="border-t border-white/10 pt-2 first:border-t-0 first:pt-0"
                   >
                     <p className="text-sm text-white break-words">
-                      {jobQuestions[questionId].text}
+                      {jobQuestions[questionId]?.text || 'Fråga borttagen av arbetsgivaren'}
                     </p>
                     <p className="text-sm text-white break-words">
                       Svar: {String(answer) || <span className="opacity-50 italic">Inget svar</span>}

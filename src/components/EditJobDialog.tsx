@@ -4,6 +4,7 @@ import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
 import { useFitScale } from '@/hooks/useFitScale';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { syncJobQuestions } from '@/lib/jobQuestionsSync';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -1150,23 +1151,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
         return;
       }
 
-      // Save questions too
-      await supabase.from('job_questions').delete().eq('job_id', job.id);
-      if (customQuestions.length > 0) {
-        await supabase.from('job_questions').insert(
-          customQuestions.map(q => ({
-            job_id: job.id,
-            question_text: q.question_text,
-            question_type: q.question_type,
-            options: q.options || null,
-            is_required: q.is_required,
-            order_index: q.order_index,
-            min_value: q.min_value || null,
-            max_value: q.max_value || null,
-            placeholder_text: q.placeholder_text || null,
-          }))
-        );
-      }
+      // Save questions too (id-bevarande — raderar inte historiken)
+      await syncJobQuestions(job.id, customQuestions);
 
       toast({ title: 'Utkast sparat', description: 'Dina ändringar har sparats.' });
       clearEditJobDraft();
@@ -1918,29 +1904,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
       }
 
 
-      // Update job questions - delete all existing and insert new ones
-      await supabase
-        .from('job_questions')
-        .delete()
-        .eq('job_id', job.id);
-
-      if (customQuestions.length > 0) {
-        const questionsToInsert = customQuestions.map(q => ({
-          job_id: job.id,
-          question_text: q.question_text,
-          question_type: q.question_type,
-          options: q.options || null,
-          is_required: q.is_required,
-          order_index: q.order_index,
-          min_value: q.min_value || null,
-          max_value: q.max_value || null,
-          placeholder_text: q.placeholder_text || null
-        }));
-
-        await supabase
-          .from('job_questions')
-          .insert(questionsToInsert);
-      }
+      // Update job questions — behåll id:n så att inkomna svar aldrig tappar sin fråga
+      await syncJobQuestions(job.id, customQuestions);
 
       toast({ 
         title: publishMode ? 'Annons publicerad!' : 'Annons uppdaterad!', 

@@ -119,6 +119,7 @@ export const CandidateProfileDialog = ({
     }
     return {};
   });
+  const [questionsLoading, setQuestionsLoading] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [jobDropdownOpen, setJobDropdownOpen] = useState(false);
   const previousRating = useRef<number | undefined>(undefined);
@@ -211,9 +212,10 @@ export const CandidateProfileDialog = ({
 
     const qCacheKey = activeApplication.job_id;
     const cachedQ = questionsCache.get(qCacheKey);
-    if (cachedQ) { setJobQuestions(cachedQ); return; }
+    if (cachedQ && Object.keys(cachedQ).length > 0) { setJobQuestions(cachedQ); return; }
     const persistedQ = getPersistedCacheValue<Record<string, { text: string; order: number }>>(QUESTIONS_STORAGE_KEY, qCacheKey);
-    if (persistedQ) { questionsCache.set(qCacheKey, persistedQ); setJobQuestions(persistedQ); return; }
+    if (persistedQ && Object.keys(persistedQ).length > 0) { questionsCache.set(qCacheKey, persistedQ); setJobQuestions(persistedQ); return; }
+    setQuestionsLoading(true);
     try {
       const { data, error } = await supabase
         .from('job_questions')
@@ -223,11 +225,16 @@ export const CandidateProfileDialog = ({
       if (error) throw error;
       const questionsMap: Record<string, { text: string; order: number }> = {};
       data?.forEach(q => { questionsMap[q.id] = { text: q.question_text, order: q.order_index }; });
-      questionsCache.set(qCacheKey, questionsMap);
-      setPersistedCacheValue(QUESTIONS_STORAGE_KEY, qCacheKey, questionsMap);
+      // Cacha bara riktiga träffar — en tom karta får aldrig frysa vyn i "Laddar frågor…"
+      if (Object.keys(questionsMap).length > 0) {
+        questionsCache.set(qCacheKey, questionsMap);
+        setPersistedCacheValue(QUESTIONS_STORAGE_KEY, qCacheKey, questionsMap);
+      }
       setJobQuestions(questionsMap);
     } catch (error) {
       console.error('Error fetching job questions:', error);
+    } finally {
+      setQuestionsLoading(false);
     }
   }, [activeApplication?.id, activeApplication?.job_id]);
 
@@ -453,6 +460,7 @@ export const CandidateProfileDialog = ({
           <ProfileInfoSections
             displayApp={displayApp}
             jobQuestions={jobQuestions}
+            questionsLoading={questionsLoading}
             questionsExpanded={questionsExpanded}
             onToggleQuestions={() => setQuestionsExpanded(prev => !prev)}
             summaryHook={summaryHook}
