@@ -420,10 +420,10 @@ export const CandidateProfileDialog = ({
                       <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-50 w-[calc(100%+1rem)] max-w-sm rounded-lg border border-white/20 bg-slate-900/95 backdrop-blur-xl shadow-xl overflow-hidden">
                       <div className="max-h-60 overflow-y-auto overscroll-contain">
                         {allApplications!.map((app) => {
-                          const isActive = (selectedJobId || displayApp.job_id) === app.job_id;
+                          const isActive = (selectedApplicationId || displayApp.id) === app.id;
                           return (
                             <button
-                              key={app.job_id}
+                              key={app.id}
                               type="button"
                               onClick={() => {
                                 const cachedQ = questionsCache.get(app.job_id)
@@ -431,7 +431,7 @@ export const CandidateProfileDialog = ({
                                   || {};
                                 if (Object.keys(cachedQ).length > 0) questionsCache.set(app.job_id, cachedQ);
                                 setJobQuestions(cachedQ);
-                                setSelectedJobId(app.job_id);
+                                setSelectedApplicationId(app.id);
                                 setJobDropdownOpen(false);
                               }}
                               className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors min-h-touch ${
