@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.search_employer_candidates(text, jsonb, text, text, integer, integer);
