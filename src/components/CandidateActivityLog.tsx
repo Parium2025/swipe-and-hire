@@ -31,6 +31,13 @@ const getActivityIcon = (type: string) => {
   }
 };
 
+const formatInterviewTime = (value: string | null) => {
+  if (!value) return 'okänd tid';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return 'okänd tid';
+  return format(d, "d MMM yyyy 'kl.' HH:mm", { locale: sv });
+};
+
 const getActivityDescription = (activity: CandidateActivity) => {
   const name = `${activity.user_first_name || ''} ${activity.user_last_name || ''}`.trim() || 'Någon';
   
