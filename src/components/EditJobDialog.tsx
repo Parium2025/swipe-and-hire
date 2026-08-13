@@ -1968,6 +1968,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContentNoFocus className="premium-modal-motion parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
+          <DialogTitle className="sr-only">Redigera jobbannons</DialogTitle>
+          <DialogDescription className="sr-only">Laddar annonsens innehåll…</DialogDescription>
           <AnimatedBackground showBubbles={false} variant="card" />
         </DialogContentNoFocus>
       </Dialog>
