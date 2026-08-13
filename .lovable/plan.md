@@ -1,55 +1,49 @@
-# Skeleton-paritet 1:1 — hela appen
+# Kandidatsök i Apple-klass — skala till 100 000+
 
-Målet: varje skelett (den grå laddningsvyn) ska matcha den riktiga sidan i **struktur, positioner, storlekar och antal element** — exakt som vi nyss gjorde på `EmployerTopNav`. Ingen ska "hoppa" när riktiga innehållet tar över.
+## Nuläge, ärligt betyg
 
-## Omfattning
+| Område | Betyg | Kommentar |
+|---|---|---|
+| Dataisolering & säkerhet | 9,5 | Snapshots per ansökan, RLS + org-scoping håller |
+| Sökrelevans (namn/ort/jobb/svar) | 8 | FTS + trigram + synonymer fungerar bra |
+| Sök i CV och anteckningar | 3 | **Finns inte.** CV-text och anteckningar är osökbara idag |
+| Skalning vid 100 000+ | 6 | Offset-paginering + `DISTINCT ON` sorterar om hela träffmängden per sida |
+| Raderade konton | 6 | Ansökan överlever korrekt, men UI säger inte att kontot är borta |
+| Rendering vid långa listor | 7,5 | Alla inlästa rader ligger i DOM:en |
 
-### Arbetsgivarvyn (`EmployerPageSkeleton.tsx` + `JobDetailsSkeleton.tsx`)
-1. **`EmployerHomeSkeleton`** (`/home`) — jämför mot `EmployerHome` (hälsning, "Din översikt", `HomeDashboardGrid`, 4 kort).
-2. **`EmployerDashboardSkeleton`** (`/dashboard`, `/my-jobs`) — kontrollera stats-grid (mobil vs desktop), sökfält, tab-pills, kort-layout, paginering.
-3. **`EmployerMyCandidatesSkeleton`** (`/my-candidates`) — header, sök, stage-pills, kort.
-4. **`EmployerCandidatesSkeleton`** (`/candidates`) — verifiera att den finns; annars lägg till.
-5. **`JobDetailsSkeleton`** (`/job-details/:id`) — kanban-kolumner + kort per stage (redan per-annons-cache).
-6. **Topnav-chrome (`SkeletonChrome`)** — mobil-header + desktop-topnav (desktop är nyss fixad; verifiera mobilen mot `EmployerMobileHeader`).
+Kort svar på "hur hade Apple gjort": de hade aldrig visat en räknare de inte kan leverera på, aldrig
+använt offset-paginering, och sökfältet hade sökt i *allt* kandidaten lämnat — inte bara namnet.
 
-### Jobbsökarvyn
-7. **`SearchPageSkeleton`** (`/search`) — jämför mot `SearchJobs` (topnav, sökfält, filter-chip-rad, sort-pill, kort-grid). Verifiera bottom-nav på mobil.
-8. **`JobCardGridSkeleton`** — antal kort per breakpoint mot faktisk grid.
-9. **`JobViewSkeleton`** (`/job/:id`) — hero (2:1), logo-cirkel, titel, badges, förmåner, footer-CTA.
-10. **`ProfilePreviewSkeleton`** — mot `ProfilePreview` (avatar, namn, sektioner, badges).
-11. **Sidor med inline-skelett** (kontrollera, inte nödvändigtvis skriv om):
-    - `Messages` (konversationslista + chattvy)
-    - `MyApplications`, `SavedJobs`
-    - `Dashboard` (jobbsökar-hem)
-    - `MyCandidates`
+## Vad som byggs
 
-## Metod (per skelett)
+### 1. Sök i CV-text och anteckningar
+- Ny sökkälla: `profile_cv_summaries.raw_text` + `summary_text` (CV-innehåll) och `candidate_notes.note`
+  (endast den inloggade arbetsgivarens/organisationens egna anteckningar — aldrig andras).
+- Materialiserad sökkolumn per kandidat så att sökningen förblir en indexträff, inte en join-scan.
+- Träffar visas med källetikett i raden: "Träff i CV" / "Träff i anteckning", så man förstår varför
+  personen dök upp.
 
-1. Läs den riktiga komponenten. Notera: yttre wrapper-klasser, spacing (`space-y-*`, `gap-*`), grid-cols per breakpoint, exakta höjder (h-14, aspect-ratio 2/1, m.m.), avatar-storlekar, badge-storlekar, antal rader.
-2. Läs skelettet. Diffa mot 1.
-3. Rätta skelettet så att:
-   - Container-hierarkin matchar (samma paddings, `responsive-container-wide`, `p-3`, m.m.).
-   - Antal element (kort, kolumner, rader) drivs av `readCachedCount` / `useLiveEmployerJobCount` — inte hårdkodat.
-   - Höjder/bredder matchar de riktiga elementen på px-nivå.
-   - Endast en ton används (`bg-white/10`), ingen accentfärg.
-4. Testa mentalt hand-off: när riktigt innehåll poppar in ska ingenting flytta sig sidleds/nedåt.
+### 2. Keyset-paginering istället för offset
+- Byt `LIMIT/OFFSET` mot markörbaserad paginering (`applied_at, id` respektive sorteringsnyckel).
+- Sida 4 000 blir då lika snabb som sida 1. Idag växer kostnaden linjärt med sidnumret.
+- `DISTINCT ON (applicant_id)` ersätts med en förberäknad "senaste ansökan per kandidat"-nyckel så att
+  vi slipper sortera hela träffmängden vid varje sidladdning.
 
-## Teknisk not
+### 3. Ärlig räknare
+- Exakt antal upp till 10 000 träffar. Över det visas "10 000+" med exakt siffra beräknad i bakgrunden.
+- Ingen sidladdning blockeras längre av en totalräkning.
 
-- Skelett-tokens: `SHAPE = 'bg-white/10 animate-pulse'`, `fullscreenSkeletonStyle` (fixed overlay).
-- Live-räknare: `useLiveEmployerJobCount` (react-query cache → `localStorage` → default). Utöka mönstret till fler skelett där det ger värde (candidates, applications, messages).
-- Layout-cache för `JobDetails` (per-jobId stages+counts i `localStorage`) — verifiera att den fortfarande skrivs vid varje datauppdatering.
-- Mobilheader-skelettet ska följa `EmployerMobileHeader` exakt (samma knappar/positioner).
+### 4. Raderade konton
+- Kandidatraden och profilen märks tydligt när kontot är borttaget: ansökan finns kvar (den är
+  arbetsgivarens dokumentation), men profilbild/video/chatt visas som otillgängliga istället för tomma.
+- Bokning av intervju och meddelande blockeras med förklarande text i stället för att tyst misslyckas.
 
-## Leverans
+### 5. Virtualiserad lista
+- Endast synliga rader renderas. Noll visuell skillnad, men 20 000 inlästa rader blir lika lätta som 25.
 
-- Endast skelett-filer + ev. helper i `skeletonCounts.ts` ändras. Ingen affärslogik, ingen färg-/UX-ändring i live-UI.
-- Efter varje del: kort verifiering via `tsgo`/build.
-
-## Bedömning (efter genomgången)
-
-Ger en slutlig 1–10-bedömning av skelett-lagret + korta rekommendationer på det som inte är värt att jaga (t.ex. per-kort-metadata i skelett).
-
----
-
-**Bekräfta så kör jag hela sviten i ett svep** (kan bli 5–8 filredigeringar). Vill du att jag begränsar till en delmängd (t.ex. bara arbetsgivarsidan först) säg till.
+## Teknisk detalj
+- Databas: ny migration för sökkolumn + GIN-index, uppdaterad `search_employer_candidates` med
+  markörparametrar och `p_count_cap`.
+- Klient: `src/hooks/useApplicationsData.tsx` byter till markörbaserad `useInfiniteQuery`,
+  `src/components/CandidatesTable.tsx` får virtualisering och träffkälla-etiketter.
+- Offline-snapshoten behålls oförändrad.
