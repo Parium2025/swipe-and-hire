@@ -42,7 +42,20 @@ export function useFitScale(designWidth: number, options: FitScaleOptions = {}) 
     let next = rect.width / designWidth;
 
     if (designHeight && typeof window !== 'undefined') {
-      const available = window.innerHeight - rect.top - bottomGutter;
+      // Höjdbudget = den scrollbara behållarens synliga höjd (dialogens body),
+      // inte hela fönstret — annars blir skalan fel när innehållet ligger
+      // långt ned i en scrollad dialog.
+      let viewportHeight = window.innerHeight;
+      let parent = node.parentElement;
+      while (parent) {
+        const overflowY = getComputedStyle(parent).overflowY;
+        if ((overflowY === 'auto' || overflowY === 'scroll') && parent.clientHeight > 0) {
+          viewportHeight = parent.clientHeight;
+          break;
+        }
+        parent = parent.parentElement;
+      }
+      const available = viewportHeight - bottomGutter;
       if (available > 0) next = Math.min(next, available / designHeight);
     }
 
