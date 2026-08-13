@@ -30,6 +30,7 @@ import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
 import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
 import {
   findExistingConversationId,
+  resolveConversationIdsForCandidates,
   createConversationForCandidate,
   ensureConversationMemberships,
   isRetryableError,
