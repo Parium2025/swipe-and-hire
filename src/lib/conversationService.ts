@@ -22,25 +22,47 @@ export function createConversationId(): string {
   throw new Error('Din enhet saknar stöd för säker UUID-generering');
 }
 
+/**
+ * Resolve existing 1:1 conversations for many candidates in ONE round-trip
+ * (chunked). RLS on `conversations` already limits rows to conversations the
+ * current user is a member of, so no membership pre-fetch is needed.
+ */
+export async function resolveConversationIdsForCandidates(
+  candidateIds: string[]
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const unique = Array.from(new Set(candidateIds.filter(Boolean)));
+  const CHUNK = 200;
+
+  for (let i = 0; i < unique.length; i += CHUNK) {
+    const chunk = unique.slice(i, i + CHUNK);
+    const { data, error } = await supabase
+      .from('conversations')
+      .select('id, candidate_id, updated_at')
+      .eq('is_group', false)
+      .in('candidate_id', chunk)
+      .order('updated_at', { ascending: false });
+
+    if (error) throw error;
+    for (const row of data || []) {
+      const cid = (row as any).candidate_id as string | null;
+      if (cid && !map.has(cid)) map.set(cid, (row as any).id as string);
+    }
+  }
+
+  return map;
+}
+
 /** Find existing 1:1 conversation between current user and a candidate. */
 export async function findExistingConversationId(
   userId: string,
   candidateId: string
 ): Promise<string | null> {
-  const { data: myMemberships, error: memErr } = await supabase
-    .from('conversation_members')
-    .select('conversation_id')
-    .eq('user_id', userId);
-
-  if (memErr || !myMemberships || myMemberships.length === 0) return null;
-
-  const myConvIds = myMemberships.map((m) => m.conversation_id);
-
   const { data, error } = await supabase
     .from('conversations')
     .select('id')
+    .eq('is_group', false)
     .eq('candidate_id', candidateId)
-    .in('id', myConvIds)
     .order('updated_at', { ascending: false })
     .limit(1);
 
