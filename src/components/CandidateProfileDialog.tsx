@@ -120,16 +120,19 @@ export const CandidateProfileDialog = ({
     return {};
   });
   const [questionsLoading, setQuestionsLoading] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  // Identiteten är ANSÖKAN, inte jobbet. En kandidat kan söka samma annons två
+  // gånger (t.ex. efter återpublicering) — med job_id som nyckel valdes då fel
+  // ansökan och React fick dubbletter av samma key.
+  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [jobDropdownOpen, setJobDropdownOpen] = useState(false);
   const previousRating = useRef<number | undefined>(undefined);
   const lastResetApplicationIdRef = useRef<string | null>(null);
 
   const activeApplication = useMemo(() => {
     if (!allApplications || allApplications.length <= 1) return application;
-    if (!selectedJobId) return application;
-    return allApplications.find(app => app.job_id === selectedJobId) || application;
-  }, [allApplications, selectedJobId, application]);
+    if (!selectedApplicationId) return application;
+    return allApplications.find(app => app.id === selectedApplicationId) || application;
+  }, [allApplications, selectedApplicationId, application]);
 
   useLayoutEffect(() => {
     const jobId = activeApplication?.job_id;
