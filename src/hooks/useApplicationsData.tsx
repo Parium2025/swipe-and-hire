@@ -265,13 +265,22 @@ export const useApplicationsData = (
   } = useInfiniteQuery({
     queryKey,
 
-    initialPageParam: 0,
-    queryFn: async ({ pageParam = 0 }) => {
+    initialPageParam: { index: 0, cursorAppliedAt: null, cursorId: null } as PageParam,
+    queryFn: async ({ pageParam }) => {
+      const pp: PageParam =
+        typeof pageParam === 'number'
+          ? { index: pageParam, cursorAppliedAt: null, cursorId: null }
+          : ((pageParam as PageParam) ?? { index: 0, cursorAppliedAt: null, cursorId: null });
+
       if (!user) {
-        return { items: [], hasMore: false, totalCount: 0 };
+        return { items: [], hasMore: false, totalCount: 0, totalCapped: false, nextCursor: null };
       }
-      
-      const from = pageParam * PAGE_SIZE;
+
+      const from = pp.index * PAGE_SIZE;
+      // Markörpaginering används för tidsbaserad sortering (standardvyn). Då är
+      // sida 4 000 lika snabb som sida 1 — offset tvingar databasen att hoppa
+      // över alla föregående rader varje gång.
+      const useCursor = isTimeSort && !!pp.cursorAppliedAt && !!pp.cursorId;
 
       // Allt filtrerande (FTS + trigram-fuzzy + frågefilter + status + sortering)
       // körs i databasen. Kritiskt vid tiotusentals kandidater: annars filtrerar
@@ -286,14 +295,18 @@ export const useApplicationsData = (
           p_status: statusFilter,
           p_sort: sortBy,
           p_limit: PAGE_SIZE,
-          p_offset: from,
+          p_offset: useCursor ? 0 : from,
           // Räkna bara totalen på första sidan — vid 100 000+ kandidater
           // sparar det ett fullt svep per extra sida som scrollas in.
-          p_with_count: pageParam === 0,
+          p_with_count: pp.index === 0,
+          p_cursor_applied_at: useCursor ? pp.cursorAppliedAt : null,
+          p_cursor_id: useCursor ? pp.cursorId : null,
+          p_count_cap: COUNT_CAP,
         } as any);
         baseData = result.data as any[] | null;
         baseError = result.error;
       } catch (networkError) {
+
         // OFFLINE FALLBACK: If network fails, use cached snapshot with client-side search
         if (!navigator.onLine) {
           const snapshot = readSnapshot(user.id);
