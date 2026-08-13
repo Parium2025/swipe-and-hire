@@ -766,7 +766,7 @@ const MobileJobWizard = ({
   const screenRef = useRef<HTMLDivElement>(null);
   const previewSwipeRef = useRef<HTMLDivElement>(null);
   // Skalar telefonmockup + tooltips så att "Obs, tryck här!" aldrig klipps.
-  const { ref: previewFitRef, scale: previewFitScale, contentHeight: previewFitHeight } = useFitScale(440, { designWidthSm: 368, designHeight: 452, designHeightSm: 332, minScale: 0.4, maxScale: 1.95, bottomGutter: 8 });
+  const { ref: previewFitRef, scale: previewFitScale, contentHeight: previewFitHeight } = useFitScale(440, { designWidthSm: 368, designHeight: 452, designHeightSm: 332, minScale: 0.4, maxScale: 3, bottomGutter: 8 });
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const [scale, setScale] = useState(1);
   const BASE_WIDTH = 360;
@@ -4414,7 +4414,7 @@ const MobileJobWizard = ({
                 {previewMode === 'desktop' && (
                   <div className="flex flex-col items-center space-y-4">
                     {/* Desktop monitor frame - professional mockup */}
-                    <div className="relative w-full max-w-[380px] mx-auto">
+                    <div className="relative w-full max-w-[380px] sm:max-w-[440px] lg:max-w-[520px] mx-auto">
                       {/* Monitor screen */}
                       <div className="relative w-full rounded-t-xl bg-black p-2 shadow-2xl">
                         {/* Screen bezel */}
