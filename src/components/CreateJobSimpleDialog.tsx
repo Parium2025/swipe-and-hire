@@ -394,7 +394,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     later(() => {
       setShowDetailDialog(true);
     }, 150);
-  }, [jobTitle, selectedTemplate, toast, setIntentionalCloseMarker]);
+  }, [jobTitle, later, selectedTemplate, toast, setIntentionalCloseMarker]);
 
   const handleClose = useCallback(() => {
     if (hasUnsavedChanges) {
