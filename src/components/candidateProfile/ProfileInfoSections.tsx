@@ -143,7 +143,7 @@ export const ProfileInfoSections = ({
 
           {questionsExpanded && (
             <div className="px-3 pb-3 space-y-2">
-              {!hasResolvedQuestions ? (
+              {questionsLoading && !hasResolvedQuestions ? (
                 <div className="flex items-center justify-center py-3">
                   <Loader2 className="h-4 w-4 text-white animate-spin" />
                   <span className="text-sm text-white ml-2">Laddar frågor...</span>
