@@ -172,7 +172,7 @@ export const CandidateProfileDialog = ({
     if (!application) return;
     if (lastResetApplicationIdRef.current === application.id) return;
     lastResetApplicationIdRef.current = application.id;
-    setSelectedJobId(application.job_id);
+    setSelectedApplicationId(application.id);
     previousRating.current = candidateRating;
     setMobileTab('profile');
     setCvOpen(false);
