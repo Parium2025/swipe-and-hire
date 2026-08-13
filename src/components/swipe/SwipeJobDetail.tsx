@@ -154,7 +154,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                 </div>
                 <TruncatedText
                   text={job.title}
-                  className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 line-clamp-2"
+                  className="text-xl font-bold text-white leading-[1.2] tracking-tight mt-0.5 line-clamp-2 pb-[0.12em]"
                   tooltipSide="bottom"
                 />
               </div>
