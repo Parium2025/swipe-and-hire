@@ -3610,7 +3610,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                       {previewMode === 'desktop' && (
                         <div className="flex flex-col items-center space-y-4">
                           {/* Desktop monitor frame */}
-                           <div className="relative w-full max-w-[380px] sm:max-w-[440px] lg:max-w-[520px] mx-auto">
+                           <div className="relative w-full mx-auto" style={{ maxWidth: 'clamp(220px, calc((100vh - 380px) * 1.6), 520px)' }}>
                             {/* Monitor screen */}
                             <div className="relative w-full rounded-t-xl bg-black p-2 shadow-2xl">
                               {/* Screen bezel */}
