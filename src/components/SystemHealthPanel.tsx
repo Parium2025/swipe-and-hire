@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle, Wifi, Calendar, HeadphonesIcon, FileSearch, Newspaper, Lightbulb, Rss } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const ADMIN_EMAIL = 'pariumab@hotmail.com';
+
 
 // Free tier limits (Supabase)
 const LIMITS = {
@@ -119,27 +119,40 @@ const storeHistory = (stats: RealUsageStats) => {
   }
 };
 
-// Hook for checking admin status
+// Hook for checking admin status — måste spegla serverns kontroll
+// (public.user_roles / is_platform_admin), annars anropar klienten
+// admin-funktioner den inte har rätt till och får 403.
 export const useIsSystemAdmin = () => {
   const [isAdmin, setIsAdmin] = useState(false);
-  
+
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAdmin(session?.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+    let cancelled = false;
+
+    const check = async (userId?: string) => {
+      if (!userId) {
+        if (!cancelled) setIsAdmin(false);
+        return;
+      }
+      const { data, error } = await supabase.rpc('is_platform_admin', { _user_id: userId });
+      if (!cancelled) setIsAdmin(!error && data === true);
     };
-    
-    checkAuth();
-    
+
+    supabase.auth.getSession().then(({ data: { session } }) => check(session?.user?.id));
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setIsAdmin(session?.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+      // Undvik att anropa Supabase synkront i callbacken
+      setTimeout(() => check(session?.user?.id), 0);
     });
-    
-    return () => subscription.unsubscribe();
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
-  
+
   return isAdmin;
 };
+
 
 // Button component for embedding in nav
 export const SystemHealthButton = ({ onClick }: { onClick: () => void }) => {
