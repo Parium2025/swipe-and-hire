@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle, Wifi, Calendar, HeadphonesIcon, FileSearch, Newspaper, Lightbulb, Rss } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const ADMIN_EMAIL = 'pariumab@hotmail.com';
+
 
 // Free tier limits (Supabase)
 const LIMITS = {
