@@ -622,11 +622,19 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                         <div className="flex-1">
                           <DropdownMenuItem
                             onSelect={() => {
+                              // Stäng menyn först och låt Radix städa upp sina
+                              // modal-lager (body pointer-events) innan dialogen
+                              // avmonteras — annars kan hela sidan bli oklickbar.
                               setTemplateMenuOpen(false);
-                              setOpen(false);
-                              setTimeout(() => {
-                                setShowTemplateWizard(true);
-                              }, 150);
+                              setMenuInstanceKey((k) => k + 1);
+                              requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                  setOpen(false);
+                                  setTimeout(() => {
+                                    setShowTemplateWizard(true);
+                                  }, 150);
+                                });
+                              });
                             }}
                             className="px-4 py-2.5 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
                           >
@@ -698,16 +706,21 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                               >
                                 <button
                                   type="button"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setTemplateToEdit(template);
-                                    setTemplateMenuOpen(false);
-                                    setOpen(false);
-                                    setTimeout(() => {
-                                      setShowTemplateWizard(true);
-                                    }, 150);
-                                  }}
+                                   onClick={(e) => {
+                                     e.preventDefault();
+                                     e.stopPropagation();
+                                     setTemplateToEdit(template);
+                                     setTemplateMenuOpen(false);
+                                     setMenuInstanceKey((k) => k + 1);
+                                     requestAnimationFrame(() => {
+                                       requestAnimationFrame(() => {
+                                         setOpen(false);
+                                         setTimeout(() => {
+                                           setShowTemplateWizard(true);
+                                         }, 150);
+                                       });
+                                     });
+                                   }}
                                   onPointerDown={(e) => e.stopPropagation()}
                                   className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 bg-white/5 backdrop-blur-[2px] border-white/20 text-white text-xs transition-colors duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95 focus:outline-none focus:ring-0"
                                   aria-label={`Redigera mall ${template.name}`}

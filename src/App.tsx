@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
 import { initConnectivityManager } from "@/lib/connectivityManager";
+import { useUiLockGuard } from "@/hooks/useUiLockGuard";
 import { BrowserRouter, Routes, Route, useLocation, Navigate as RRNavigate } from "react-router-dom";
 
 // 🚀 CRITICAL: Keep auth + main app shell synchronous to avoid production chunk-mismatch
@@ -277,6 +278,9 @@ const AnimatedRoutes = () => {
 const AppShell = ({ showHeader }: { showHeader: boolean }) => {
   const location = useLocation();
   const isLightweightRoute = isPublicLightweightPath(location.pathname);
+
+  // Skyddsnät: släpper alltid en kvarhängande pointer-events-spärr från Radix.
+  useUiLockGuard();
 
   return (
     <>
