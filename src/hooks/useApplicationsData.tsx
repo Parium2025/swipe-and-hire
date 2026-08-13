@@ -36,7 +36,12 @@ export interface ApplicationData {
   last_active_at?: string | null;
   rating?: number | null;
   city?: string | null;
+  /** Varför kandidaten matchade sökningen: profil, CV-text eller anteckning. */
+  match_source?: 'profile' | 'cv' | 'note' | null;
+  /** True när kandidatens konto har raderats — ansökan finns kvar som dokumentation. */
+  account_deleted?: boolean;
 }
+
 
 const PAGE_SIZE = 25;
 // Auto-prefetch bara de första 100 kandidaterna. Varje sida kostar 3 extra
