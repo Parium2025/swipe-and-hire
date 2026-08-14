@@ -657,11 +657,13 @@ const JobSeekerVideoShowcase = ({
     let frozenTicks = 0;
     let rebuilding = false;
 
+    let rebuildRelease: number | null = null;
     const rebuildDecoder = () => {
       if (rebuilding || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
       rebuilding = true;
       const resumeAt = Number.isFinite(v.currentTime) ? v.currentTime : 0;
       const release = () => {
+        if (rebuildRelease !== null) { window.clearTimeout(rebuildRelease); rebuildRelease = null; }
         v.removeEventListener('loadedmetadata', restore);
         v.removeEventListener('error', release);
         rebuilding = false;
@@ -679,6 +681,14 @@ const JobSeekerVideoShowcase = ({
       };
       v.addEventListener('loadedmetadata', restore, { once: true });
       v.addEventListener('error', release, { once: true });
+      // Skyddsnät: om varken `loadedmetadata` eller `error` kommer (kan hända
+      // när Chromium tappar dekodern helt vid skärmdelning) skulle `rebuilding`
+      // annars låsa hälsovakten permanent — videon blev då aldrig återstartad.
+      rebuildRelease = window.setTimeout(() => {
+        rebuildRelease = null;
+        release();
+        attempt();
+      }, 5000);
       try {
         v.pause();
         v.load();
@@ -687,6 +697,7 @@ const JobSeekerVideoShowcase = ({
         attempt();
       }
     };
+
 
     const checkHealth = () => {
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible' || rebuilding) {
@@ -791,7 +802,9 @@ const JobSeekerVideoShowcase = ({
       clearCold();
       if (healthTimer !== null) window.clearInterval(healthTimer);
       if (displayTimer !== null) window.clearTimeout(displayTimer);
+      if (rebuildRelease !== null) window.clearTimeout(rebuildRelease);
       if (geometryFrame !== null) window.cancelAnimationFrame(geometryFrame);
+
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
       window.removeEventListener('touchstart', resume);
