@@ -302,6 +302,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
     let lastTime = v.currentTime;
     let frozenTicks = 0;
     let rebuilding = false;
+    let releaseTimer: number | null = null;
 
     const recover = () => {
       if (rebuilding || document.hidden) return;
@@ -310,6 +311,10 @@ const CardItem = ({ item, index }: CardItemProps) => {
       const release = () => {
         v.removeEventListener('loadedmetadata', restore);
         v.removeEventListener('error', release);
+        if (releaseTimer !== null) {
+          window.clearTimeout(releaseTimer);
+          releaseTimer = null;
+        }
         rebuilding = false;
       };
       const restore = () => {
@@ -325,6 +330,10 @@ const CardItem = ({ item, index }: CardItemProps) => {
       };
       v.addEventListener('loadedmetadata', restore, { once: true });
       v.addEventListener('error', release, { once: true });
+      // Skyddsnät: om varken loadedmetadata eller error någonsin kommer (t.ex.
+      // när dekodern släpps helt vid flikbyte) satt `rebuilding` kvar på true
+      // och frys-vakten var permanent avstängd för just det kortet.
+      releaseTimer = window.setTimeout(release, 5000);
       try {
         v.pause();
         v.load();
@@ -333,6 +342,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
         scheduleEvaluate();
       }
     };
+
 
     const check = () => {
       if (document.hidden || rebuilding || v.paused || v.ended || v.seeking) {
@@ -359,7 +369,9 @@ const CardItem = ({ item, index }: CardItemProps) => {
     const timer = window.setInterval(check, 1000);
     return () => {
       window.clearInterval(timer);
+      if (releaseTimer !== null) window.clearTimeout(releaseTimer);
     };
+
   }, [item.type, failed]);
 
 
