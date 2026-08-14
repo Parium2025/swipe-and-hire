@@ -660,7 +660,20 @@ const InlineHeroPhone = ({
     const sync = () => {
       frame = 0;
       setEnabled(getInlinePhonePlacement() === placement);
-      setMetrics(calculateInlinePhoneMetrics(variant, measureTop()));
+      const next = calculateInlinePhoneMetrics(variant, measureTop());
+      setMetrics((prev) => {
+        // Dämpning: ignorera mikroskillnader (<3px) så att en centrerad
+        // layout inte kan hamna i en oändlig mät→ändra→mät-loop.
+        if (
+          prev &&
+          Math.abs((prev.width ?? 0) - (next.width ?? 0)) < 3 &&
+          Math.abs((prev.height ?? 0) - (next.height ?? 0)) < 3 &&
+          Math.abs((prev.topGap ?? 0) - (next.topGap ?? 0)) < 3
+        ) {
+          return prev;
+        }
+        return next;
+      });
     };
 
     const schedule = () => {
