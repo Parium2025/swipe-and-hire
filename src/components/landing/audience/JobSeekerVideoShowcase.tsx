@@ -263,9 +263,8 @@ const JobSeekerVideoShowcase = ({
   active?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
-  if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
-  const sources = sourcesRef.current;
+  const [sources, setSources] = useState<ReturnType<typeof getSources>>(() => getSources(widthPx));
+
   /**
    * Posterlager: <video poster> ritas inte alltid direkt i Safari/iOS — ramen
    * kan stå svart tills första bildrutan är dekodad. Ett riktigt <img> ovanpå
