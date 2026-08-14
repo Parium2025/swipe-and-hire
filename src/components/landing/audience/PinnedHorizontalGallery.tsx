@@ -170,6 +170,41 @@ const scheduleEvaluate = () => {
   rafId = requestAnimationFrame(evaluateAll);
 };
 
+/**
+ * Lyssnarna är GLOBALA och delas av alla kort. addEventListener dedupliceras på
+ * (typ, funktionsreferens), så åtta kort registrerar i praktiken bara EN
+ * lyssnare — och tidigare räckte det att ETT kort avmonterades (t.ex. när en
+ * video failade och byttes mot poster) för att removeEventListener skulle döda
+ * koordinatorn för ALLA kort: resten frös då kvar på sin posterbild.
+ * Refräknaren gör att lyssnarna bara tas bort när sista kortet är borta.
+ */
+let coordinatorRefs = 0;
+let coordinatorRoot: HTMLElement | null = null;
+
+const attachCoordinator = () => {
+  coordinatorRefs += 1;
+  if (coordinatorRefs > 1) return;
+  coordinatorRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+  window.addEventListener('parium:gallery-progress', scheduleEvaluate);
+  window.addEventListener('resize', scheduleEvaluate);
+  window.addEventListener('scroll', scheduleEvaluate, { passive: true });
+  coordinatorRoot?.addEventListener('scroll', scheduleEvaluate, { passive: true });
+  document.addEventListener('visibilitychange', scheduleEvaluate);
+};
+
+const detachCoordinator = () => {
+  coordinatorRefs = Math.max(0, coordinatorRefs - 1);
+  if (coordinatorRefs > 0) return;
+  window.removeEventListener('parium:gallery-progress', scheduleEvaluate);
+  window.removeEventListener('resize', scheduleEvaluate);
+  window.removeEventListener('scroll', scheduleEvaluate);
+  coordinatorRoot?.removeEventListener('scroll', scheduleEvaluate);
+  document.removeEventListener('visibilitychange', scheduleEvaluate);
+  coordinatorRoot = null;
+};
+
+
+
 const CardItem = ({ item, index }: CardItemProps) => {
   // failed=true → byt ut <video> mot poster-bild som fallback. Triggas vid
   // network error, 404, codec-fel eller om användaren är offline när videon
