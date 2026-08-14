@@ -237,6 +237,15 @@ const getSources = (widthPx?: number) =>
             ]
           : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
 
+/** Källans faktiska pixelbredd (för att aldrig nedgradera vid skärmbyte). */
+const rungWidth = (url?: string) => {
+  if (!url) return 0;
+  const rung = [...LADDER, ...SAFE_LADDER].find((r) => r.url === url);
+  if (rung) return rung.w;
+  if (url === windowsLiteAsset.url) return 432;
+  return 0;
+};
+
 
 
 
