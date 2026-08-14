@@ -691,7 +691,25 @@ const JobSeekerVideoShowcase = ({
       }
     };
 
+    /**
+     * BUGG som fanns här: vakten kördes på VARJE resize-event. På iOS/Android
+     * skickar `visualViewport` resize varje gång adressfältet glider in/ut vid
+     * scroll, och på desktop vid varje pixel när fönstret dras. Varje gång
+     * pausades och startades videon om — ett synligt ryck mitt i uppspelningen
+     * utan att någon skärm faktiskt bytts.
+     *
+     * Nu jämför vi en signatur av den fysiska skärmen (dpr + skärmupplösning +
+     * färgdjup). Bara ett riktigt skärm-/GPU-byte eller ändrad systemskalning
+     * triggar återhämtningen; vanlig storleksändring lämnar videon i fred.
+     */
+    const displaySignature = () =>
+      `${window.devicePixelRatio || 1}|${window.screen?.width ?? 0}x${window.screen?.height ?? 0}|${window.screen?.colorDepth ?? 0}`;
+    let lastDisplaySignature = displaySignature();
+
     const handleDisplayChange = () => {
+      const sig = displaySignature();
+      if (sig === lastDisplaySignature) return;
+      lastDisplaySignature = sig;
       if (displayTimer !== null) window.clearTimeout(displayTimer);
       displayTimer = window.setTimeout(() => {
         displayTimer = null;
@@ -706,6 +724,7 @@ const JobSeekerVideoShowcase = ({
         } catch { /* best effort */ }
       }, 280);
     };
+
 
     healthTimer = window.setInterval(checkHealth, 1000);
 
