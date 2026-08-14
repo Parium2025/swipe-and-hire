@@ -766,7 +766,7 @@ const PinnedHorizontalGallery = () => {
       const header = headerRef.current;
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
-        gsapInstance.set(cards, { y: 0, opacity: 1, force3D: isAppleDevice(), clearProps: isAppleDevice() ? undefined : 'transform' });
+        gsapInstance.set(cards, { y: 0, opacity: 1, force3D: isAppleDevice(), ...(isAppleDevice() ? {} : { clearProps: 'transform' }) });
         if (header) {
           gsapInstance.killTweensOf(header);
           gsapInstance.set(header, { y: 0, opacity: 1, force3D: true });
