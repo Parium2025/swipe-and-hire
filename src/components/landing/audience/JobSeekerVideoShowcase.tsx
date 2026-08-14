@@ -717,8 +717,12 @@ const JobSeekerVideoShowcase = ({
     // bildrutor. Postern täcker hela kallstarten utan blinkning eller ryck.
     let paintStartTime: number | null = null;
     const markPainted = () => {
-      if (paintStartTime === null) paintStartTime = v.currentTime;
+      // Loop eller seek (t.ex. efter decoder-rebuild) kastar tillbaka
+      // currentTime — utan denna nollställning kunde skillnaden bli negativ
+      // för alltid och postern ligga kvar över en video som faktiskt spelar.
+      if (paintStartTime === null || v.currentTime < paintStartTime) paintStartTime = v.currentTime;
       if (v.currentTime - paintStartTime >= 0.18) setFirstFramePainted(true);
+
     };
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
