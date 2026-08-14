@@ -54,17 +54,31 @@ const prefersHevc = () => {
  * vid kallstart. Därför är Windows-filen kodad utan B-frames, med kort GOP och
  * `fastdecode`, så varje bildruta kan avkodas i ordning utan omkastningsbuffert.
  */
-// Native muted autoplay är stabilare än en egen buffertspärr i Chrome/Edge.
-// Apple/iOS hade redan den här vägen och lämnas därmed helt oförändrat.
-const usesBufferedStart = () => false;
+// Kallstart på Windows/Chromium: native autoplay startar så fort ~0,2 s är
+// buffrat. På en extern HDMI-skärm (annan uppdateringsfrekvens/GPU-plan än
+// den interna panelen) hinner dekodern då aldrig ikapp och de första
+// sekunderna hackar — men efter en scroll bort och tillbaka är filen cachad
+// och allt flyter. Vi håller därför postern kvar tills en riktig buffert finns
+// och startar först då. Apple/iOS-vägen är helt oförändrad (false).
+const usesBufferedStart = () => {
+  if (typeof navigator === 'undefined') return false;
+  if (isAppleDevice()) return false;
+  return isWindowsDevice();
+};
 
 /**
  * Windows/Chromium kan droppa frames när en <video>-overlay börjar spela medan
  * planet samtidigt flyttas/skalats av layouten. Det matchar beteendet här:
  * första rendern hackar, men efter att användaren scrollat bort och tillbaka är
- * telefonens geometri redan stabil och videon flyter perfekt.
+ * telefonens geometri redan stabil och videon flyter perfekt. Extra tydligt på
+ * en extern skärm, där Chrome måste flytta video-planet mellan GPU-outputs.
  */
-const usesStableGeometryStart = () => false;
+const usesStableGeometryStart = () => {
+  if (typeof navigator === 'undefined') return false;
+  if (isAppleDevice()) return false;
+  return isWindowsDevice();
+};
+
 
 /**
  * Upplösningsstege — vald efter FAKTISKA enhetspixlar, inte efter operativsystem.
