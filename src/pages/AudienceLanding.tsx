@@ -512,7 +512,10 @@ const useHeroSafeTopPadding = () => {
 // körs utanför React-trädet – räknar på rätt mockup.
 let currentHeroPhoneVariant: 'spline' | 'video' = 'spline';
 
-const calculateInlinePhoneMetrics = (variant: 'spline' | 'video' = currentHeroPhoneVariant) => {
+const calculateInlinePhoneMetrics = (
+  variant: 'spline' | 'video' = currentHeroPhoneVariant,
+  hostTop?: number | null,
+) => {
   if (typeof window === 'undefined') {
     return { height: 320, width: 320 * PHONE_ASPECT, zoom: 0.44, yOffset: 28 };
   }
@@ -528,17 +531,32 @@ const calculateInlinePhoneMetrics = (variant: 'spline' | 'video' = currentHeroPh
   if (variant === 'video') {
     const bottomSafe = clamp(height * 0.05, 28, 60);
     if (isPortraitTablet) {
-      const w = Math.round(clamp(width * 0.3, 200, 268));
-      const h = w * VIDEO_PHONE_BODY_RATIO;
+      const topGap = clamp(height * 0.03, 16, 40);
+      // Telefonen får ALDRIG bli högre än utrymmet mellan sin egen topp och
+      // viewportens underkant — hero-sektionen är h-[100svh] med
+      // overflow-hidden, så varje överskjutande pixel klipps bort.
+      // hostTop mäts i runtime (telefonens faktiska y i viewporten); saknas
+      // mätvärdet faller vi tillbaka på en konservativ uppskattning.
+      const hasMeasuredTop = typeof hostTop === 'number' && Number.isFinite(hostTop);
+      // hostTop är telefonboxens faktiska överkant (inkl. topGap-marginalen).
+      const measuredTop = hasMeasuredTop ? (hostTop as number) : height * 0.42 + topGap;
+      const available = Math.max(200, height - measuredTop - bottomSafe);
+      let w = Math.round(clamp(width * 0.3, 200, 268));
+      let h = w * VIDEO_PHONE_BODY_RATIO;
+      if (h > available) {
+        h = available;
+        w = Math.round(h / VIDEO_PHONE_BODY_RATIO);
+      }
       return {
         height: h,
         width: w,
         canvasHeight: h,
         canvasBottomTrim: 0,
         zoom: 0,
-        topGap: clamp(height * 0.03, 16, 40),
+        topGap,
       };
     }
+
     const anchorEl = document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null;
     const heroEl = document.querySelector('[data-mobile-hero-section]') as HTMLElement | null;
     const tBottom = anchorEl && heroEl
@@ -629,20 +647,64 @@ const InlineHeroPhone = ({
   
 
   useEffect(() => {
-    const sync = () => {
-      setEnabled(getInlinePhonePlacement() === placement);
-      setMetrics(calculateInlinePhoneMetrics(variant));
+    let frame = 0;
+    const measureTop = () => {
+      const el = wrapperRef.current;
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      // Överkanten utan marginalen inräknad två gånger: rect.top är redan
+      // efter marginTop, vilket är exakt vad höjdberäkningen behöver.
+      return rect.top;
     };
 
+    const sync = () => {
+      frame = 0;
+      setEnabled(getInlinePhonePlacement() === placement);
+      const next = calculateInlinePhoneMetrics(variant, measureTop());
+      setMetrics((prev) => {
+        // Dämpning: ignorera mikroskillnader (<3px) så att en centrerad
+        // layout inte kan hamna i en oändlig mät→ändra→mät-loop.
+        if (
+          prev &&
+          Math.abs((prev.width ?? 0) - (next.width ?? 0)) < 3 &&
+          Math.abs((prev.height ?? 0) - (next.height ?? 0)) < 3 &&
+          Math.abs((prev.topGap ?? 0) - (next.topGap ?? 0)) < 3
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(sync);
+    };
 
     sync();
-    window.addEventListener('resize', sync, { passive: true });
-    window.visualViewport?.addEventListener('resize', sync, { passive: true });
+    // Andra passet efter layout/fontladdning så mätvärdet är korrekt.
+    schedule();
+    const settle = window.setTimeout(schedule, 250);
+    document.fonts?.ready?.then(schedule).catch(() => {});
+
+    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('orientationchange', schedule, { passive: true });
+    window.visualViewport?.addEventListener('resize', schedule, { passive: true });
+
+    const anchor = document.querySelector('[data-hero-intro-stage] [data-hero-phone-anchor]');
+    const ro = anchor ? new ResizeObserver(schedule) : null;
+    if (anchor && ro) ro.observe(anchor);
+
     return () => {
-      window.removeEventListener('resize', sync);
-      window.visualViewport?.removeEventListener('resize', sync);
+      if (frame) window.cancelAnimationFrame(frame);
+      window.clearTimeout(settle);
+      ro?.disconnect();
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('orientationchange', schedule);
+      window.visualViewport?.removeEventListener('resize', schedule);
     };
   }, [placement, variant]);
+
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
