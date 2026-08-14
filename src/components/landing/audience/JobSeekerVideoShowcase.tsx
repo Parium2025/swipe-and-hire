@@ -54,12 +54,17 @@ const prefersHevc = () => {
  * vid kallstart. Därför är Windows-filen kodad utan B-frames, med kort GOP och
  * `fastdecode`, så varje bildruta kan avkodas i ordning utan omkastningsbuffert.
  */
-// Native muted autoplay är stabilare än att stapla egna load-, geometri- och
-// buffertspärrar. På kalla externa Chromium-skärmar kunde spärrarna tillsammans
-// vänta i över tio sekunder och samtidigt trigga dekodervakten. Det lätta
-// 30-fps-spåret hanterar belastningen; postern ligger kvar tills riktiga frames
-// har målats utan att vi fördröjer själva uppspelningen.
-const usesBufferedStart = () => false;
+// Kallstart på Windows/Chromium: native autoplay startar så fort ~0,2 s är
+// buffrat. På en extern HDMI-skärm (annan uppdateringsfrekvens/GPU-plan än
+// den interna panelen) hinner dekodern då aldrig ikapp och de första
+// sekunderna hackar — men efter en scroll bort och tillbaka är filen cachad
+// och allt flyter. Vi håller därför postern kvar tills en riktig buffert finns
+// och startar först då. Apple/iOS-vägen är helt oförändrad (false).
+const usesBufferedStart = () => {
+  if (typeof navigator === 'undefined') return false;
+  if (isAppleDevice()) return false;
+  return isWindowsDevice();
+};
 
 /**
  * Windows/Chromium kan droppa frames när en <video>-overlay börjar spela medan
@@ -68,7 +73,11 @@ const usesBufferedStart = () => false;
  * telefonens geometri redan stabil och videon flyter perfekt. Extra tydligt på
  * en extern skärm, där Chrome måste flytta video-planet mellan GPU-outputs.
  */
-const usesStableGeometryStart = () => false;
+const usesStableGeometryStart = () => {
+  if (typeof navigator === 'undefined') return false;
+  if (isAppleDevice()) return false;
+  return isWindowsDevice();
+};
 
 
 /**
@@ -106,16 +115,10 @@ const supportsWindowsSafe60 = () => {
  * situationen. 30 fps-mastern halverar decode/compositor-arbetet och är skarp
  * nog för telefonens maximala CSS-bredd på 285 px.
  */
-const prefersLargeChromiumDisplayTrack = () => {
-  if (typeof window === 'undefined' || (!isWindowsDevice() && !isAndroidDevice())) return false;
-  // Stora externa vyer ska alltid prioritera jämn hårdvaruavkodning. Ett senare
-  // hi-dpi-undantag skickade 4K/skalade Windows-skärmar tillbaka till det tunga
-  // 60-fps-spåret och upphävde därmed HDMI-fixen. Android via extern skärm fick
-  // aldrig lättspåret alls. 30 fps-mastern är fortfarande bredare än telefonens
-  // maximala CSS-yta och är därför rätt kompromiss även vid hög systemskalning.
+const prefersLargeWindowsDisplayTrack = () => {
+  if (typeof window === 'undefined' || !isWindowsDevice()) return false;
   return window.innerWidth >= 1280 || window.innerHeight >= 900;
 };
-
 
 /** Uppskattad CSS-bredd på telefonen innan första målningen (matchar max-w-stegen). */
 const estimateCssWidth = (widthPx?: number) => {
@@ -211,7 +214,7 @@ const getSources = (widthPx?: number) =>
             // som kommentaren ovan sade att Windows-källan skulle undvika.
             // Välj bara 60-fps-mastern när browsern själv accepterar dess exakta
             // codecprofil. Annars används den brett kompatibla 30-fps-filen.
-            prefersLargeChromiumDisplayTrack()
+            prefersLargeWindowsDisplayTrack()
               ? { src: windowsLiteAsset.url, type: 'video/mp4' }
               : supportsWindowsSafe60()
               ? { src: pickSafeLadder(widthPx), type: 'video/mp4; codecs="avc1.42C020"' }
@@ -222,22 +225,11 @@ const getSources = (widthPx?: number) =>
               // Androids H.264-hårdvaruväg är jämnare mellan olika GPU:er än VP9.
               // Samma decoder-säkra profil som Windows, men nu i rätt upplösning
               // för telefonens dpr i stället för en fast 432 px-uppskalning.
-              prefersLargeChromiumDisplayTrack()
-                ? { src: windowsLiteAsset.url, type: 'video/mp4' }
-                : supportsWindowsSafe60()
+              supportsWindowsSafe60()
                 ? { src: pickSafeLadder(widthPx), type: 'video/mp4; codecs="avc1.42C020"' }
                 : { src: windowsLiteAsset.url, type: 'video/mp4' },
             ]
           : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
-
-/** Källans faktiska pixelbredd (för att aldrig nedgradera vid skärmbyte). */
-const rungWidth = (url?: string) => {
-  if (!url) return 0;
-  const rung = [...LADDER, ...SAFE_LADDER].find((r) => r.url === url);
-  if (rung) return rung.w;
-  if (url === windowsLiteAsset.url) return 432;
-  return 0;
-};
 
 
 
@@ -265,8 +257,9 @@ const JobSeekerVideoShowcase = ({
   active?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [sources, setSources] = useState<ReturnType<typeof getSources>>(() => getSources(widthPx));
-
+  const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
+  if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
+  const sources = sourcesRef.current;
   /**
    * Posterlager: <video poster> ritas inte alltid direkt i Safari/iOS — ramen
    * kan stå svart tills första bildrutan är dekodad. Ett riktigt <img> ovanpå
@@ -317,79 +310,6 @@ const JobSeekerVideoShowcase = ({
     const t = window.setTimeout(() => setPosterVisible(false), 120);
     return () => window.clearTimeout(t);
   }, [firstFramePainted]);
-
-  /**
-   * Skärmbyte i drift: flyttas fönstret från en 1x-skärm till en Retina-/4K-
-   * panel (eller ändras systemskalningen under skärmdelning) förändras
-   * devicePixelRatio. Källan valdes vid mount och skulle annars skalas upp av
-   * browsern = suddig text på den nya skärmen. Vi väljer om stegen och byter
-   * ENDAST uppåt (aldrig ned), med bevarad tidsposition så bytet inte syns.
-   */
-  const currentSrc = sources[0]?.src;
-  useEffect(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
-    let mq: MediaQueryList | null = null;
-    let listener: (() => void) | null = null;
-    let cancelled = false;
-
-    const detach = () => {
-      if (mq && listener) mq.removeEventListener?.('change', listener);
-      mq = null;
-      listener = null;
-    };
-
-    const attach = () => {
-      if (cancelled) return;
-      detach();
-      const dpr = window.devicePixelRatio || 1;
-      mq = window.matchMedia(`(resolution: ${dpr}dppx)`);
-      listener = () => {
-        if (cancelled) return;
-        setSources((prev) => {
-          const next = getSources(widthPx);
-          const nextSrc = next[0]?.src;
-          const prevSrc = prev[0]?.src;
-          if (!nextSrc || nextSrc === prevSrc) return prev;
-          // Byt ENDAST uppåt. En nedgradering mitt i uppspelningen kostar en
-          // full omladdning utan att ge något — och kan dessutom göra texten
-          // suddigare om mätningen (t.ex. `downlink`) tillfälligt dippar.
-          if (rungWidth(nextSrc) <= rungWidth(prevSrc)) return prev;
-          return next;
-        });
-        attach();
-      };
-      mq.addEventListener?.('change', listener, { once: true });
-    };
-    attach();
-
-    return () => {
-      cancelled = true;
-      detach();
-    };
-  }, [widthPx]);
-
-
-  // Byt faktisk källa på elementet när stegen valts om (inte vid första mount).
-  const mountedSrcRef = useRef<string | undefined>(currentSrc);
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v || !currentSrc || mountedSrcRef.current === currentSrc) return;
-    mountedSrcRef.current = currentSrc;
-    const resumeAt = Number.isFinite(v.currentTime) ? v.currentTime : 0;
-    const onReady = () => {
-      try {
-        if (Number.isFinite(v.duration) && v.duration > 0) {
-          v.currentTime = Math.min(resumeAt, Math.max(0, v.duration - 0.1));
-        }
-      } catch { /* best effort */ }
-      const p = v.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-    };
-    v.addEventListener('loadedmetadata', onReady, { once: true });
-    try { v.load(); } catch { /* noop */ }
-    return () => v.removeEventListener('loadedmetadata', onReady);
-  }, [currentSrc]);
-
 
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
@@ -649,18 +569,12 @@ const JobSeekerVideoShowcase = ({
     let lastHealthTime = v.currentTime;
     let frozenTicks = 0;
     let rebuilding = false;
-    // Dekodervakten får inte diagnostisera den första nät-/decode-starten som
-    // en frusen videoplan. Den aktiveras först när tidslinjen bevisligen har
-    // avancerat; annars kunde den pausa/reloada videon mitt i kallstarten.
-    let playbackEstablished = false;
 
-    let rebuildRelease: number | null = null;
     const rebuildDecoder = () => {
       if (rebuilding || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
       rebuilding = true;
       const resumeAt = Number.isFinite(v.currentTime) ? v.currentTime : 0;
       const release = () => {
-        if (rebuildRelease !== null) { window.clearTimeout(rebuildRelease); rebuildRelease = null; }
         v.removeEventListener('loadedmetadata', restore);
         v.removeEventListener('error', release);
         rebuilding = false;
@@ -678,14 +592,6 @@ const JobSeekerVideoShowcase = ({
       };
       v.addEventListener('loadedmetadata', restore, { once: true });
       v.addEventListener('error', release, { once: true });
-      // Skyddsnät: om varken `loadedmetadata` eller `error` kommer (kan hända
-      // när Chromium tappar dekodern helt vid skärmdelning) skulle `rebuilding`
-      // annars låsa hälsovakten permanent — videon blev då aldrig återstartad.
-      rebuildRelease = window.setTimeout(() => {
-        rebuildRelease = null;
-        release();
-        attempt();
-      }, 5000);
       try {
         v.pause();
         v.load();
@@ -695,17 +601,10 @@ const JobSeekerVideoShowcase = ({
       }
     };
 
-
     const checkHealth = () => {
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible' || rebuilding) {
         frozenTicks = 0;
         lastHealthTime = v.currentTime;
-        return;
-      }
-      if (!playbackEstablished) {
-        frozenTicks = 0;
-        lastHealthTime = v.currentTime;
-        if (v.paused && v.readyState >= 2) attempt();
         return;
       }
       if (v.paused || v.ended || v.seeking || v.readyState < 2) {
@@ -730,25 +629,7 @@ const JobSeekerVideoShowcase = ({
       }
     };
 
-    /**
-     * BUGG som fanns här: vakten kördes på VARJE resize-event. På iOS/Android
-     * skickar `visualViewport` resize varje gång adressfältet glider in/ut vid
-     * scroll, och på desktop vid varje pixel när fönstret dras. Varje gång
-     * pausades och startades videon om — ett synligt ryck mitt i uppspelningen
-     * utan att någon skärm faktiskt bytts.
-     *
-     * Nu jämför vi en signatur av den fysiska skärmen (dpr + skärmupplösning +
-     * färgdjup). Bara ett riktigt skärm-/GPU-byte eller ändrad systemskalning
-     * triggar återhämtningen; vanlig storleksändring lämnar videon i fred.
-     */
-    const displaySignature = () =>
-      `${window.devicePixelRatio || 1}|${window.screen?.width ?? 0}x${window.screen?.height ?? 0}|${window.screen?.colorDepth ?? 0}`;
-    let lastDisplaySignature = displaySignature();
-
     const handleDisplayChange = () => {
-      const sig = displaySignature();
-      if (sig === lastDisplaySignature) return;
-      lastDisplaySignature = sig;
       if (displayTimer !== null) window.clearTimeout(displayTimer);
       displayTimer = window.setTimeout(() => {
         displayTimer = null;
@@ -764,7 +645,6 @@ const JobSeekerVideoShowcase = ({
       }, 280);
     };
 
-
     healthTimer = window.setInterval(checkHealth, 1000);
 
 
@@ -775,15 +655,8 @@ const JobSeekerVideoShowcase = ({
     // bildrutor. Postern täcker hela kallstarten utan blinkning eller ryck.
     let paintStartTime: number | null = null;
     const markPainted = () => {
-      // Loop eller seek (t.ex. efter decoder-rebuild) kastar tillbaka
-      // currentTime — utan denna nollställning kunde skillnaden bli negativ
-      // för alltid och postern ligga kvar över en video som faktiskt spelar.
-      if (paintStartTime === null || v.currentTime < paintStartTime) paintStartTime = v.currentTime;
-      if (v.currentTime - paintStartTime >= 0.18) {
-        playbackEstablished = true;
-        setFirstFramePainted(true);
-      }
-
+      if (paintStartTime === null) paintStartTime = v.currentTime;
+      if (v.currentTime - paintStartTime >= 0.18) setFirstFramePainted(true);
     };
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
@@ -808,9 +681,7 @@ const JobSeekerVideoShowcase = ({
       clearCold();
       if (healthTimer !== null) window.clearInterval(healthTimer);
       if (displayTimer !== null) window.clearTimeout(displayTimer);
-      if (rebuildRelease !== null) window.clearTimeout(rebuildRelease);
       if (geometryFrame !== null) window.cancelAnimationFrame(geometryFrame);
-
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('pageshow', resume);
       window.removeEventListener('touchstart', resume);
