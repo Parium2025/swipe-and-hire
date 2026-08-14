@@ -327,29 +327,45 @@ const JobSeekerVideoShowcase = ({
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
     let mq: MediaQueryList | null = null;
+    let listener: (() => void) | null = null;
     let cancelled = false;
+
+    const detach = () => {
+      if (mq && listener) mq.removeEventListener?.('change', listener);
+      mq = null;
+      listener = null;
+    };
 
     const attach = () => {
       if (cancelled) return;
+      detach();
       const dpr = window.devicePixelRatio || 1;
       mq = window.matchMedia(`(resolution: ${dpr}dppx)`);
-      const onChange = () => {
+      listener = () => {
         if (cancelled) return;
         setSources((prev) => {
           const next = getSources(widthPx);
-          return next[0]?.src === prev[0]?.src ? prev : next;
+          const nextSrc = next[0]?.src;
+          const prevSrc = prev[0]?.src;
+          if (!nextSrc || nextSrc === prevSrc) return prev;
+          // Byt ENDAST uppåt. En nedgradering mitt i uppspelningen kostar en
+          // full omladdning utan att ge något — och kan dessutom göra texten
+          // suddigare om mätningen (t.ex. `downlink`) tillfälligt dippar.
+          if (rungWidth(nextSrc) <= rungWidth(prevSrc)) return prev;
+          return next;
         });
         attach();
       };
-      mq.addEventListener?.('change', onChange, { once: true });
+      mq.addEventListener?.('change', listener, { once: true });
     };
     attach();
 
     return () => {
       cancelled = true;
-      mq = null;
+      detach();
     };
   }, [widthPx]);
+
 
   // Byt faktisk källa på elementet när stegen valts om (inte vid första mount).
   const mountedSrcRef = useRef<string | undefined>(currentSrc);
