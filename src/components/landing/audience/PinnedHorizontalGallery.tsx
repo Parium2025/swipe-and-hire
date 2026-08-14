@@ -798,10 +798,17 @@ const PinnedHorizontalGallery = () => {
             gsapInstance.set(header, { y: 0, opacity: 1, force3D: true });
           }
         }
+      } else {
+        // gsap ännu inte laddat (eller misslyckat) — skyddsnät så att rubriken
+        // aldrig kan bli permanent osynlig. then-grenen ovan tar över om/när
+        // chunken landar.
+        warmTimers.push(window.setTimeout(() => {
+          if (!disposed && !gsapInstance && entered) revealHeaderFallback();
+        }, 1200));
       }
-      const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
+
       if (playTimer) window.clearTimeout(playTimer);
       playTimer = window.setTimeout(() => {
         warmVideos();
