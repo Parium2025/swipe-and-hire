@@ -54,17 +54,12 @@ const prefersHevc = () => {
  * vid kallstart. Därför är Windows-filen kodad utan B-frames, med kort GOP och
  * `fastdecode`, så varje bildruta kan avkodas i ordning utan omkastningsbuffert.
  */
-// Kallstart på Windows/Chromium: native autoplay startar så fort ~0,2 s är
-// buffrat. På en extern HDMI-skärm (annan uppdateringsfrekvens/GPU-plan än
-// den interna panelen) hinner dekodern då aldrig ikapp och de första
-// sekunderna hackar — men efter en scroll bort och tillbaka är filen cachad
-// och allt flyter. Vi håller därför postern kvar tills en riktig buffert finns
-// och startar först då. Apple/iOS-vägen är helt oförändrad (false).
-const usesBufferedStart = () => {
-  if (typeof navigator === 'undefined') return false;
-  if (isAppleDevice()) return false;
-  return isWindowsDevice();
-};
+// Native muted autoplay är stabilare än att stapla egna load-, geometri- och
+// buffertspärrar. På kalla externa Chromium-skärmar kunde spärrarna tillsammans
+// vänta i över tio sekunder och samtidigt trigga dekodervakten. Det lätta
+// 30-fps-spåret hanterar belastningen; postern ligger kvar tills riktiga frames
+// har målats utan att vi fördröjer själva uppspelningen.
+const usesBufferedStart = () => false;
 
 /**
  * Windows/Chromium kan droppa frames när en <video>-overlay börjar spela medan
@@ -73,11 +68,7 @@ const usesBufferedStart = () => {
  * telefonens geometri redan stabil och videon flyter perfekt. Extra tydligt på
  * en extern skärm, där Chrome måste flytta video-planet mellan GPU-outputs.
  */
-const usesStableGeometryStart = () => {
-  if (typeof navigator === 'undefined') return false;
-  if (isAppleDevice()) return false;
-  return isWindowsDevice();
-};
+const usesStableGeometryStart = () => false;
 
 
 /**
@@ -658,6 +649,10 @@ const JobSeekerVideoShowcase = ({
     let lastHealthTime = v.currentTime;
     let frozenTicks = 0;
     let rebuilding = false;
+    // Dekodervakten får inte diagnostisera den första nät-/decode-starten som
+    // en frusen videoplan. Den aktiveras först när tidslinjen bevisligen har
+    // avancerat; annars kunde den pausa/reloada videon mitt i kallstarten.
+    let playbackEstablished = false;
 
     let rebuildRelease: number | null = null;
     const rebuildDecoder = () => {
@@ -705,6 +700,12 @@ const JobSeekerVideoShowcase = ({
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible' || rebuilding) {
         frozenTicks = 0;
         lastHealthTime = v.currentTime;
+        return;
+      }
+      if (!playbackEstablished) {
+        frozenTicks = 0;
+        lastHealthTime = v.currentTime;
+        if (v.paused && v.readyState >= 2) attempt();
         return;
       }
       if (v.paused || v.ended || v.seeking || v.readyState < 2) {
@@ -778,7 +779,10 @@ const JobSeekerVideoShowcase = ({
       // currentTime — utan denna nollställning kunde skillnaden bli negativ
       // för alltid och postern ligga kvar över en video som faktiskt spelar.
       if (paintStartTime === null || v.currentTime < paintStartTime) paintStartTime = v.currentTime;
-      if (v.currentTime - paintStartTime >= 0.18) setFirstFramePainted(true);
+      if (v.currentTime - paintStartTime >= 0.18) {
+        playbackEstablished = true;
+        setFirstFramePainted(true);
+      }
 
     };
 
