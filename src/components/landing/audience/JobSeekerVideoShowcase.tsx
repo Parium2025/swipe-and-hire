@@ -269,11 +269,14 @@ const JobSeekerVideoShowcase = ({
   const [posterVisible, setPosterVisible] = useState(true);
   // Poster-fejden behövs bara på Windows för att dölja decoder-blixten.
   // iOS/macOS ritar videon rent direkt, så där byter vi utan transition.
+  // Postern och videons första bildruta är samma motiv, men en <img> och en
+  // <video> rasteriseras via olika pipelines (JPEG i sRGB vs. YUV→RGB i
+  // videolagret). Ett hårt byte visas därför som en liten färg-/ljusstyrke-
+  // knäpp. Vi korsfejdar istället alltid — då är deltat omöjligt att uppfatta,
+  // och eftersom lagren visar identiskt innehåll syns ingen rörelse i fejden.
   const posterTransition = isWindowsDevice()
-    ? 'transition-opacity duration-[250ms] ease-out'
-    : isAppleDevice()
-      ? ''
-      : 'transition-opacity duration-100 ease-out';
+    ? 'transition-opacity duration-[320ms] ease-linear'
+    : 'transition-opacity duration-[260ms] ease-linear';
   // Spela Windows-filen direkt från dess vanliga URL. Den tidigare Blob-vägen
   // gjorde först en full fetch och matade sedan samma bytes till <video> via en
   // object URL. Chrome/Edge kunde inte initiera MP4-demuxern från den vägen i
@@ -311,7 +314,9 @@ const JobSeekerVideoShowcase = ({
 
   useEffect(() => {
     if (!firstFramePainted) return;
-    const t = window.setTimeout(() => setPosterVisible(false), 120);
+    // Avmontera postern först när korsfejden är helt klar (annars klipps
+    // fejden av och färgskillnaden blir synlig igen).
+    const t = window.setTimeout(() => setPosterVisible(false), 420);
     return () => window.clearTimeout(t);
   }, [firstFramePainted]);
 
