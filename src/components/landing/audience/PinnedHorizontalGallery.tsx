@@ -256,23 +256,16 @@ const CardItem = ({ item, index }: CardItemProps) => {
   useEffect(() => {
     const v = videoRef.current;
     if (!v || item.type !== 'video' || failed) return;
-    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     registry.add(v);
-    window.addEventListener('parium:gallery-progress', scheduleEvaluate);
-    window.addEventListener('resize', scheduleEvaluate);
-    window.addEventListener('scroll', scheduleEvaluate, { passive: true });
-    root?.addEventListener('scroll', scheduleEvaluate, { passive: true });
-    document.addEventListener('visibilitychange', scheduleEvaluate);
+    attachCoordinator();
     scheduleEvaluate();
     return () => {
       registry.delete(v);
-      window.removeEventListener('parium:gallery-progress', scheduleEvaluate);
-      window.removeEventListener('resize', scheduleEvaluate);
-      window.removeEventListener('scroll', scheduleEvaluate);
-      root?.removeEventListener('scroll', scheduleEvaluate);
-      document.removeEventListener('visibilitychange', scheduleEvaluate);
+      detachCoordinator();
+      scheduleEvaluate();
     };
   }, [item.type, failed]);
+
 
   // Starta varje kort på en egen tidsposition första gången metadata finns.
   // Då loopar inte alla Windows-videor samtidigt, utan varje kort börjar om i
