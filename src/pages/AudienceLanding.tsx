@@ -647,20 +647,51 @@ const InlineHeroPhone = ({
   
 
   useEffect(() => {
-    const sync = () => {
-      setEnabled(getInlinePhonePlacement() === placement);
-      setMetrics(calculateInlinePhoneMetrics(variant));
+    let frame = 0;
+    const measureTop = () => {
+      const el = wrapperRef.current;
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      // Överkanten utan marginalen inräknad två gånger: rect.top är redan
+      // efter marginTop, vilket är exakt vad höjdberäkningen behöver.
+      return rect.top;
     };
 
+    const sync = () => {
+      frame = 0;
+      setEnabled(getInlinePhonePlacement() === placement);
+      setMetrics(calculateInlinePhoneMetrics(variant, measureTop()));
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(sync);
+    };
 
     sync();
-    window.addEventListener('resize', sync, { passive: true });
-    window.visualViewport?.addEventListener('resize', sync, { passive: true });
+    // Andra passet efter layout/fontladdning så mätvärdet är korrekt.
+    schedule();
+    const settle = window.setTimeout(schedule, 250);
+    document.fonts?.ready?.then(schedule).catch(() => {});
+
+    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('orientationchange', schedule, { passive: true });
+    window.visualViewport?.addEventListener('resize', schedule, { passive: true });
+
+    const anchor = document.querySelector('[data-hero-intro-stage] [data-hero-phone-anchor]');
+    const ro = anchor ? new ResizeObserver(schedule) : null;
+    if (anchor && ro) ro.observe(anchor);
+
     return () => {
-      window.removeEventListener('resize', sync);
-      window.visualViewport?.removeEventListener('resize', sync);
+      if (frame) window.cancelAnimationFrame(frame);
+      window.clearTimeout(settle);
+      ro?.disconnect();
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('orientationchange', schedule);
+      window.visualViewport?.removeEventListener('resize', schedule);
     };
   }, [placement, variant]);
+
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
