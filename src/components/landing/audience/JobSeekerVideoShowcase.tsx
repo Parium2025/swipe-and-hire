@@ -304,6 +304,10 @@ const JobSeekerVideoShowcase = ({
   // Windows behöver den budgeten till galleriet längre ned på sidan.
   const keepAliveWhenHidden = false;
   const warmRef = useRef(false);
+  // Har vi redan synkat starten till tidslinjens början en gång? Rewinden ska
+  // bara ske vid allra första visningen, aldrig när man scrollar tillbaka.
+  const revealSyncedRef = useRef(false);
+
 
   useEffect(() => {
     if (!firstFramePainted) return;
@@ -653,11 +657,36 @@ const JobSeekerVideoShowcase = ({
     // extern skärm kan videoplanet fortfarande stå och tugga på första rutan.
     // Visa därför inte videon förrän tidslinjen faktiskt har avancerat flera
     // bildrutor. Postern täcker hela kallstarten utan blinkning eller ryck.
+    //
+    // MEN: allt som spelas medan postern ligger kvar går förlorat för ögat.
+    // Vid en kallstart hann klippet rulla förbi första swipe-animationen, så
+    // det såg ut som att kortet "hoppade" från jobb 1 till jobb 2 utan
+    // övergång. Vi spolar därför tillbaka till 0 i samma ögonblick som vi
+    // avslöjar videon — seeken sker bakom postern, så den syns aldrig.
     let paintStartTime: number | null = null;
+    const reveal = () => {
+      if (revealSyncedRef.current) { setFirstFramePainted(true); return; }
+      revealSyncedRef.current = true;
+      const drift = v.currentTime;
+      const canRewind = drift > 0.08 && (!Number.isFinite(v.duration) || drift < v.duration - 0.5);
+      if (!canRewind) { setFirstFramePainted(true); return; }
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        v.removeEventListener('seeked', finish);
+        setFirstFramePainted(true);
+      };
+      v.addEventListener('seeked', finish);
+      window.setTimeout(finish, 400);
+      try { v.currentTime = 0; } catch { finish(); }
+      safePlay(v);
+    };
     const markPainted = () => {
       if (paintStartTime === null) paintStartTime = v.currentTime;
-      if (v.currentTime - paintStartTime >= 0.18) setFirstFramePainted(true);
+      if (v.currentTime - paintStartTime >= 0.18) reveal();
     };
+
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
     document.addEventListener('visibilitychange', resume);
