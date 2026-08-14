@@ -80,7 +80,7 @@ const evaluateAll = () => {
   const centerX = vw / 2;
   const hidden = document.hidden;
 
-  type Entry = { el: HTMLVideoElement; covered: number; left: number; inView: boolean };
+  type Entry = { el: HTMLVideoElement; covered: number; left: number; distance: number; inView: boolean };
   const all: Entry[] = [];
   registry.forEach((el) => {
     const rect = el.getBoundingClientRect();
@@ -93,7 +93,8 @@ const evaluateAll = () => {
     // Hur stor del av kortets BREDD som faktiskt syns.
     const visibleW = Math.max(0, Math.min(rect.right, vw) - Math.max(rect.left, 0));
     const covered = rect.width > 0 ? visibleW / rect.width : 0;
-    all.push({ el, covered, left: rect.left, inView });
+    const cardCenter = rect.left + rect.width / 2;
+    all.push({ el, covered, left: rect.left, distance: Math.abs(cardCenter - centerX), inView });
   });
 
   // Kortens ordning i strippen = deras x-position (1 … 8), oavsett om de syns.
@@ -119,33 +120,17 @@ const evaluateAll = () => {
     }
   };
 
-  /**
-   * Urval — ett SAMMANHÄNGANDE fönster som glider vänster→höger:
-   * 1,2,3 → 2,3,4 → … → 6,7,8.
-   *
-   * Vi tar de N vänstraste synliga korten. Undantag i strippens slut: när det
-   * sista kortet syns finns inga kort kvar till höger, så fönstret ankras i
-   * stället mot höger (de N sista synliga). Utan detta hamnade kort 8 alltid
-   * utanför budgeten och stod kvar på posterbilden — samma sak för kort 1 vid
-   * strippens början, som ankras mot vänster.
-   */
-  const visibleIdx: number[] = [];
-  all.forEach((e, i) => {
-    if (e.inView && e.covered >= 0.5) visibleIdx.push(i);
-  });
-  // Om inget kort är halvt synligt (extremt smala vyer) → fall tillbaka på allt i vy.
-  if (visibleIdx.length === 0) all.forEach((e, i) => { if (e.inView) visibleIdx.push(i); });
-
   const picks = new Set<HTMLVideoElement>();
-  if (visibleIdx.length > 0) {
-    const lastCardIndex = all.length - 1;
-    const reachedEnd = visibleIdx[visibleIdx.length - 1] === lastCardIndex;
-    const slots = reachedEnd
-      ? visibleIdx.slice(Math.max(0, visibleIdx.length - maxConcurrent))
-      : visibleIdx.slice(0, maxConcurrent);
-    slots.forEach((i) => picks.add(all[i].el));
-
-  }
+  // Välj alltid korten närmast viewportens mitt. Den tidigare vänsterankrade
+  // fönsterlogiken kunde hålla kvar redan passerade kort i decoder-budgeten på
+  // breda skärmar. Då blev mittkorten (framför allt Restaurang) synliga men
+  // aldrig valda, medan kort 7–8 började spela när slutankringen slog till.
+  // Avståndsurvalet ger varje kort samma chans och behåller concurrency-taket.
+  all
+    .filter((entry) => entry.inView && entry.covered > 0)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, maxConcurrent)
+    .forEach((entry) => picks.add(entry.el));
 
   const candidates = all.filter((e) => e.inView);
   all.forEach(({ el, inView }) => {
@@ -352,12 +337,11 @@ const CardItem = ({ item, index }: CardItemProps) => {
       }
       if (Math.abs(v.currentTime - lastTime) < 0.04) {
         frozenTicks += 1;
-        if (frozenTicks === 2) {
-          try {
-            v.pause();
-            scheduleEvaluate();
-          } catch { /* best effort */ }
-        } else if (frozenTicks >= 5) {
+        // Pausa inte efter två sekunder: evaluateAll() startar då samma video
+        // direkt igen och kan skapa en pause/play-loop innan kallstarten hunnit
+        // producera sin första frame. Låt vakten göra en riktig rebuild först
+        // efter fem bekräftat frusna ticks.
+        if (frozenTicks >= 5) {
           recover();
         }
       } else {
