@@ -304,6 +304,10 @@ const JobSeekerVideoShowcase = ({
   // Windows behöver den budgeten till galleriet längre ned på sidan.
   const keepAliveWhenHidden = false;
   const warmRef = useRef(false);
+  // Har vi redan synkat starten till tidslinjens början en gång? Rewinden ska
+  // bara ske vid allra första visningen, aldrig när man scrollar tillbaka.
+  const revealSyncedRef = useRef(false);
+
 
   useEffect(() => {
     if (!firstFramePainted) return;
