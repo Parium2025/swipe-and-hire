@@ -710,13 +710,12 @@ const PinnedHorizontalGallery = () => {
         : profile === 'slim'
           ? videos.slice(0, 3)
           : videos.slice(0, 4);
-      // Windows/Android: värm bara de strömmar som faktiskt får spela samtidigt.
-      // evaluateAll() laddar nästa synliga kort vid behov. Att ändå köa alla åtta
-      // fyllde nätverk/dekodrar i bakgrunden och motverkade hela concurrency-taket.
-      // Apple/övriga plattformar behåller den befintliga fulla kön.
-      const queue = prefersLightweightVideo()
-        ? priority
-        : [...priority, ...videos.filter((v) => !priority.includes(v))];
+      // Alla kort måste ingå i kön även på Windows/Android. Tidigare bestod
+      // lightweight-kön bara av de första 2–3 videorna; Restaurang och övriga
+      // mittkort började därför helt kalla och hann pausas innan första frame.
+      // Kön är fortfarande strikt sekventiell, så endast en ny källa i taget
+      // hämtas/dekodas och playback-koordinatorns concurrency-tak påverkas inte.
+      const queue = [...priority, ...videos.filter((v) => !priority.includes(v))];
 
       let index = 0;
       const step = () => {
