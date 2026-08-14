@@ -642,9 +642,35 @@ const PinnedHorizontalGallery = () => {
     let hasEnteredOnce = false;
     let gsapInstance: typeof import('gsap').default | null = null;
 
-    import('gsap').then(({ default: gsap }) => {
-      if (!disposed) gsapInstance = gsap;
-    });
+    // Rubriken renderas med inline `opacity: 0` och lyfts fram av GSAP. Om
+    // enter() hinner köra INNAN gsap-chunken laddats (den är dynamiskt
+    // importerad) — eller om importen failar helt på ett dåligt nät — fanns
+    // ingen kod som någonsin gjorde rubriken synlig igen: "Vi gör det
+    // tillsammans!" blev då osynlig resten av sessionen. Korten skyddas redan
+    // av .phg-entered i CSS; rubriken behöver samma skyddsnät.
+    const revealHeaderFallback = () => {
+      const header = headerRef.current;
+      if (!header) return;
+      header.style.opacity = '1';
+      header.style.transform = 'translate3d(0, 0, 0)';
+    };
+
+    import('gsap')
+      .then(({ default: gsap }) => {
+        if (disposed) return;
+        gsapInstance = gsap;
+        // Har sektionen redan "entrat" utan gsap → sätt slutläget direkt.
+        if (entered) {
+          const header = headerRef.current;
+          const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
+          gsap.set(cards, { y: 0, opacity: 1, force3D: isAppleDevice(), ...(isAppleDevice() ? {} : { clearProps: 'transform' }) });
+          if (header) gsap.set(header, { y: 0, opacity: 1, force3D: true });
+        }
+      })
+      .catch(() => {
+        if (!disposed && entered) revealHeaderFallback();
+      });
+
 
     // Adaptiv warmup: på data-saver eller långsamma nät (2G/3G) warm:ar vi
     // bara de första 4 videorna direkt — resten warm:as först när användaren
@@ -772,10 +798,17 @@ const PinnedHorizontalGallery = () => {
             gsapInstance.set(header, { y: 0, opacity: 1, force3D: true });
           }
         }
+      } else {
+        // gsap ännu inte laddat (eller misslyckat) — skyddsnät så att rubriken
+        // aldrig kan bli permanent osynlig. then-grenen ovan tar över om/när
+        // chunken landar.
+        warmTimers.push(window.setTimeout(() => {
+          if (!disposed && !gsapInstance && entered) revealHeaderFallback();
+        }, 1200));
       }
-      const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
+
       if (playTimer) window.clearTimeout(playTimer);
       playTimer = window.setTimeout(() => {
         warmVideos();
