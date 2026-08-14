@@ -512,7 +512,10 @@ const useHeroSafeTopPadding = () => {
 // körs utanför React-trädet – räknar på rätt mockup.
 let currentHeroPhoneVariant: 'spline' | 'video' = 'spline';
 
-const calculateInlinePhoneMetrics = (variant: 'spline' | 'video' = currentHeroPhoneVariant) => {
+const calculateInlinePhoneMetrics = (
+  variant: 'spline' | 'video' = currentHeroPhoneVariant,
+  hostTop?: number | null,
+) => {
   if (typeof window === 'undefined') {
     return { height: 320, width: 320 * PHONE_ASPECT, zoom: 0.44, yOffset: 28 };
   }
@@ -528,17 +531,32 @@ const calculateInlinePhoneMetrics = (variant: 'spline' | 'video' = currentHeroPh
   if (variant === 'video') {
     const bottomSafe = clamp(height * 0.05, 28, 60);
     if (isPortraitTablet) {
-      const w = Math.round(clamp(width * 0.3, 200, 268));
-      const h = w * VIDEO_PHONE_BODY_RATIO;
+      const topGap = clamp(height * 0.03, 16, 40);
+      // Telefonen får ALDRIG bli högre än utrymmet mellan sin egen topp och
+      // viewportens underkant — hero-sektionen är h-[100svh] med
+      // overflow-hidden, så varje överskjutande pixel klipps bort.
+      // hostTop mäts i runtime (telefonens faktiska y i viewporten); saknas
+      // mätvärdet faller vi tillbaka på en konservativ uppskattning.
+      const measuredTop = typeof hostTop === 'number' && Number.isFinite(hostTop)
+        ? hostTop
+        : height * 0.42;
+      const available = Math.max(200, height - measuredTop - topGap - bottomSafe);
+      let w = Math.round(clamp(width * 0.3, 200, 268));
+      let h = w * VIDEO_PHONE_BODY_RATIO;
+      if (h > available) {
+        h = available;
+        w = Math.round(h / VIDEO_PHONE_BODY_RATIO);
+      }
       return {
         height: h,
         width: w,
         canvasHeight: h,
         canvasBottomTrim: 0,
         zoom: 0,
-        topGap: clamp(height * 0.03, 16, 40),
+        topGap,
       };
     }
+
     const anchorEl = document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null;
     const heroEl = document.querySelector('[data-mobile-hero-section]') as HTMLElement | null;
     const tBottom = anchorEl && heroEl
