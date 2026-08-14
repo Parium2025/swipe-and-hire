@@ -107,6 +107,19 @@ const supportsWindowsSafe60 = () => {
   return probe.canPlayType('video/mp4; codecs="avc1.42C020"') !== '';
 };
 
+/**
+ * Stor Windows-yta betyder ofta extern HDMI/DisplayPort-skärm. Där är 60 fps-
+ * videoplanet betydligt dyrare för Chromium att flytta och komponera än på den
+ * inbyggda laptopskärmen. Vi kan inte läsa vilken kabel som används, men
+ * viewportens storlek är en stabil och integritetsvänlig signal för exakt den
+ * situationen. 30 fps-mastern halverar decode/compositor-arbetet och är skarp
+ * nog för telefonens maximala CSS-bredd på 285 px.
+ */
+const prefersLargeWindowsDisplayTrack = () => {
+  if (typeof window === 'undefined' || !isWindowsDevice()) return false;
+  return window.innerWidth >= 1280 || window.innerHeight >= 900;
+};
+
 /** Uppskattad CSS-bredd på telefonen innan första målningen (matchar max-w-stegen). */
 const estimateCssWidth = (widthPx?: number) => {
   if (widthPx) return widthPx;
@@ -201,7 +214,9 @@ const getSources = (widthPx?: number) =>
             // som kommentaren ovan sade att Windows-källan skulle undvika.
             // Välj bara 60-fps-mastern när browsern själv accepterar dess exakta
             // codecprofil. Annars används den brett kompatibla 30-fps-filen.
-            supportsWindowsSafe60()
+            prefersLargeWindowsDisplayTrack()
+              ? { src: windowsLiteAsset.url, type: 'video/mp4' }
+              : supportsWindowsSafe60()
               ? { src: pickSafeLadder(widthPx), type: 'video/mp4; codecs="avc1.42C020"' }
               : { src: windowsLiteAsset.url, type: 'video/mp4' },
           ]
@@ -634,6 +649,16 @@ const JobSeekerVideoShowcase = ({
 
 
 
+    // `playing` betyder bara att Chromium har lämnat paused-läget; på en kall
+    // extern skärm kan videoplanet fortfarande stå och tugga på första rutan.
+    // Visa därför inte videon förrän tidslinjen faktiskt har avancerat flera
+    // bildrutor. Postern täcker hela kallstarten utan blinkning eller ryck.
+    let paintStartTime: number | null = null;
+    const markPainted = () => {
+      if (paintStartTime === null) paintStartTime = v.currentTime;
+      if (v.currentTime - paintStartTime >= 0.18) setFirstFramePainted(true);
+    };
+
     const gestureOpts: AddEventListenerOptions = { passive: true };
     document.addEventListener('visibilitychange', resume);
     window.addEventListener('pageshow', resume);
@@ -646,10 +671,8 @@ const JobSeekerVideoShowcase = ({
     v.addEventListener('loadeddata', resume);
     v.addEventListener('waiting', onWaiting);
     v.addEventListener('stalled', onWaiting);
-    const markPainted = () => setFirstFramePainted(true);
     v.addEventListener('playing', onPlaying);
     v.addEventListener('playing', onFirstStablePlay);
-    v.addEventListener('playing', markPainted);
     v.addEventListener('timeupdate', markPainted);
 
     return () => {
@@ -672,7 +695,6 @@ const JobSeekerVideoShowcase = ({
       v.removeEventListener('stalled', onWaiting);
       v.removeEventListener('playing', onPlaying);
       v.removeEventListener('playing', onFirstStablePlay);
-      v.removeEventListener('playing', markPainted);
       v.removeEventListener('timeupdate', markPainted);
     };
   }, [active, safePlay, coldGate, geometryGate, keepAliveWhenHidden]);
