@@ -316,6 +316,63 @@ const JobSeekerVideoShowcase = ({
     return () => window.clearTimeout(t);
   }, [firstFramePainted]);
 
+  /**
+   * Skärmbyte i drift: flyttas fönstret från en 1x-skärm till en Retina-/4K-
+   * panel (eller ändras systemskalningen under skärmdelning) förändras
+   * devicePixelRatio. Källan valdes vid mount och skulle annars skalas upp av
+   * browsern = suddig text på den nya skärmen. Vi väljer om stegen och byter
+   * ENDAST uppåt (aldrig ned), med bevarad tidsposition så bytet inte syns.
+   */
+  const currentSrc = sources[0]?.src;
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    let mq: MediaQueryList | null = null;
+    let cancelled = false;
+
+    const attach = () => {
+      if (cancelled) return;
+      const dpr = window.devicePixelRatio || 1;
+      mq = window.matchMedia(`(resolution: ${dpr}dppx)`);
+      const onChange = () => {
+        if (cancelled) return;
+        setSources((prev) => {
+          const next = getSources(widthPx);
+          return next[0]?.src === prev[0]?.src ? prev : next;
+        });
+        attach();
+      };
+      mq.addEventListener?.('change', onChange, { once: true });
+    };
+    attach();
+
+    return () => {
+      cancelled = true;
+      mq = null;
+    };
+  }, [widthPx]);
+
+  // Byt faktisk källa på elementet när stegen valts om (inte vid första mount).
+  const mountedSrcRef = useRef<string | undefined>(currentSrc);
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !currentSrc || mountedSrcRef.current === currentSrc) return;
+    mountedSrcRef.current = currentSrc;
+    const resumeAt = Number.isFinite(v.currentTime) ? v.currentTime : 0;
+    const onReady = () => {
+      try {
+        if (Number.isFinite(v.duration) && v.duration > 0) {
+          v.currentTime = Math.min(resumeAt, Math.max(0, v.duration - 0.1));
+        }
+      } catch { /* best effort */ }
+      const p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    };
+    v.addEventListener('loadedmetadata', onReady, { once: true });
+    try { v.load(); } catch { /* noop */ }
+    return () => v.removeEventListener('loadedmetadata', onReady);
+  }, [currentSrc]);
+
+
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
     if (!v || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
