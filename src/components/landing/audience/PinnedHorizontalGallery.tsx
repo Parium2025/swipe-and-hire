@@ -369,7 +369,9 @@ const CardItem = ({ item, index }: CardItemProps) => {
     const timer = window.setInterval(check, 1000);
     return () => {
       window.clearInterval(timer);
+      if (releaseTimer !== null) window.clearTimeout(releaseTimer);
     };
+
   }, [item.type, failed]);
 
 
