@@ -537,10 +537,10 @@ const calculateInlinePhoneMetrics = (
       // overflow-hidden, så varje överskjutande pixel klipps bort.
       // hostTop mäts i runtime (telefonens faktiska y i viewporten); saknas
       // mätvärdet faller vi tillbaka på en konservativ uppskattning.
-      const measuredTop = typeof hostTop === 'number' && Number.isFinite(hostTop)
-        ? hostTop
-        : height * 0.42;
-      const available = Math.max(200, height - measuredTop - topGap - bottomSafe);
+      const hasMeasuredTop = typeof hostTop === 'number' && Number.isFinite(hostTop);
+      // hostTop är telefonboxens faktiska överkant (inkl. topGap-marginalen).
+      const measuredTop = hasMeasuredTop ? (hostTop as number) : height * 0.42 + topGap;
+      const available = Math.max(200, height - measuredTop - bottomSafe);
       let w = Math.round(clamp(width * 0.3, 200, 268));
       let h = w * VIDEO_PHONE_BODY_RATIO;
       if (h > available) {
