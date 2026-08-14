@@ -117,8 +117,14 @@ const supportsWindowsSafe60 = () => {
  */
 const prefersLargeWindowsDisplayTrack = () => {
   if (typeof window === 'undefined' || !isWindowsDevice()) return false;
+  // Undantag: hög pixeltäthet (4K/200 %-skalning, ultrabreda hi-dpi-paneler).
+  // Där skulle 432 px-mastern behöva skalas UPP av browsern och texten i
+  // appen blir grötig. De skärmarna får istället rätt rung ur safe-stegen.
+  const dpr = window.devicePixelRatio || 1;
+  if (dpr >= 1.5) return false;
   return window.innerWidth >= 1280 || window.innerHeight >= 900;
 };
+
 
 /** Uppskattad CSS-bredd på telefonen innan första målningen (matchar max-w-stegen). */
 const estimateCssWidth = (widthPx?: number) => {
@@ -257,9 +263,8 @@ const JobSeekerVideoShowcase = ({
   active?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
-  if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
-  const sources = sourcesRef.current;
+  const [sources, setSources] = useState<ReturnType<typeof getSources>>(() => getSources(widthPx));
+
   /**
    * Posterlager: <video poster> ritas inte alltid direkt i Safari/iOS — ramen
    * kan stå svart tills första bildrutan är dekodad. Ett riktigt <img> ovanpå
@@ -310,6 +315,63 @@ const JobSeekerVideoShowcase = ({
     const t = window.setTimeout(() => setPosterVisible(false), 120);
     return () => window.clearTimeout(t);
   }, [firstFramePainted]);
+
+  /**
+   * Skärmbyte i drift: flyttas fönstret från en 1x-skärm till en Retina-/4K-
+   * panel (eller ändras systemskalningen under skärmdelning) förändras
+   * devicePixelRatio. Källan valdes vid mount och skulle annars skalas upp av
+   * browsern = suddig text på den nya skärmen. Vi väljer om stegen och byter
+   * ENDAST uppåt (aldrig ned), med bevarad tidsposition så bytet inte syns.
+   */
+  const currentSrc = sources[0]?.src;
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    let mq: MediaQueryList | null = null;
+    let cancelled = false;
+
+    const attach = () => {
+      if (cancelled) return;
+      const dpr = window.devicePixelRatio || 1;
+      mq = window.matchMedia(`(resolution: ${dpr}dppx)`);
+      const onChange = () => {
+        if (cancelled) return;
+        setSources((prev) => {
+          const next = getSources(widthPx);
+          return next[0]?.src === prev[0]?.src ? prev : next;
+        });
+        attach();
+      };
+      mq.addEventListener?.('change', onChange, { once: true });
+    };
+    attach();
+
+    return () => {
+      cancelled = true;
+      mq = null;
+    };
+  }, [widthPx]);
+
+  // Byt faktisk källa på elementet när stegen valts om (inte vid första mount).
+  const mountedSrcRef = useRef<string | undefined>(currentSrc);
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !currentSrc || mountedSrcRef.current === currentSrc) return;
+    mountedSrcRef.current = currentSrc;
+    const resumeAt = Number.isFinite(v.currentTime) ? v.currentTime : 0;
+    const onReady = () => {
+      try {
+        if (Number.isFinite(v.duration) && v.duration > 0) {
+          v.currentTime = Math.min(resumeAt, Math.max(0, v.duration - 0.1));
+        }
+      } catch { /* best effort */ }
+      const p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    };
+    v.addEventListener('loadedmetadata', onReady, { once: true });
+    try { v.load(); } catch { /* noop */ }
+    return () => v.removeEventListener('loadedmetadata', onReady);
+  }, [currentSrc]);
+
 
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
@@ -655,8 +717,12 @@ const JobSeekerVideoShowcase = ({
     // bildrutor. Postern täcker hela kallstarten utan blinkning eller ryck.
     let paintStartTime: number | null = null;
     const markPainted = () => {
-      if (paintStartTime === null) paintStartTime = v.currentTime;
+      // Loop eller seek (t.ex. efter decoder-rebuild) kastar tillbaka
+      // currentTime — utan denna nollställning kunde skillnaden bli negativ
+      // för alltid och postern ligga kvar över en video som faktiskt spelar.
+      if (paintStartTime === null || v.currentTime < paintStartTime) paintStartTime = v.currentTime;
       if (v.currentTime - paintStartTime >= 0.18) setFirstFramePainted(true);
+
     };
 
     const gestureOpts: AddEventListenerOptions = { passive: true };
