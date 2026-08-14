@@ -121,16 +121,36 @@ const evaluateAll = () => {
   };
 
   const picks = new Set<HTMLVideoElement>();
-  // Välj alltid korten närmast viewportens mitt. Den tidigare vänsterankrade
-  // fönsterlogiken kunde hålla kvar redan passerade kort i decoder-budgeten på
-  // breda skärmar. Då blev mittkorten (framför allt Restaurang) synliga men
-  // aldrig valda, medan kort 7–8 började spela när slutankringen slog till.
-  // Avståndsurvalet ger varje kort samma chans och behåller concurrency-taket.
-  all
-    .filter((entry) => entry.inView && entry.covered > 0)
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, maxConcurrent)
-    .forEach((entry) => picks.add(entry.el));
+  // Urval = korten närmast viewportens mitt, men med två skydd:
+  //
+  // 1. HYSTERES: ett kort som redan spelar får 25 % rabatt på sitt avstånd.
+  //    Utan det byter urvalet fram och tillbaka mellan två gränskort under
+  //    scroll → varje byte ger en pause/play + eventuellt posterlager tillbaka,
+  //    vilket är exakt den "blixt/hack"-känsla som syns vid mjuk scroll.
+  // 2. KANTANKRING: strippens sista (och första) kort hamnar aldrig närmast
+  //    mitten på breda skärmar — de blev därför aldrig valda och stod kvar på
+  //    poster. Är ett kantkort till större delen synligt får det spela.
+  const visible = all.filter((entry) => entry.inView && entry.covered > 0);
+  const scored = visible
+    .map((entry) => ({ entry, score: entry.el.paused ? entry.distance : entry.distance * 0.75 }))
+    .sort((a, b) => a.score - b.score);
+
+  const ordered = scored.map((s) => s.entry);
+  const edgeAnchors: Entry[] = [];
+  const firstCard = all[0];
+  const lastCard = all[all.length - 1];
+  for (const edge of [lastCard, firstCard]) {
+    if (edge && visible.includes(edge) && edge.covered >= 0.7) edgeAnchors.push(edge);
+  }
+
+  for (const entry of edgeAnchors) {
+    if (picks.size >= maxConcurrent) break;
+    picks.add(entry.el);
+  }
+  for (const entry of ordered) {
+    if (picks.size >= maxConcurrent) break;
+    picks.add(entry.el);
+  }
 
   const candidates = all.filter((e) => e.inView);
   all.forEach(({ el, inView }) => {
@@ -145,6 +165,7 @@ const evaluateAll = () => {
       el.pause();
     }
   });
+
 
 
 
