@@ -117,8 +117,14 @@ const supportsWindowsSafe60 = () => {
  */
 const prefersLargeWindowsDisplayTrack = () => {
   if (typeof window === 'undefined' || !isWindowsDevice()) return false;
+  // Undantag: hög pixeltäthet (4K/200 %-skalning, ultrabreda hi-dpi-paneler).
+  // Där skulle 432 px-mastern behöva skalas UPP av browsern och texten i
+  // appen blir grötig. De skärmarna får istället rätt rung ur safe-stegen.
+  const dpr = window.devicePixelRatio || 1;
+  if (dpr >= 1.5) return false;
   return window.innerWidth >= 1280 || window.innerHeight >= 900;
 };
+
 
 /** Uppskattad CSS-bredd på telefonen innan första målningen (matchar max-w-stegen). */
 const estimateCssWidth = (widthPx?: number) => {
