@@ -237,6 +237,15 @@ const getSources = (widthPx?: number) =>
             ]
           : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
 
+/** Källans faktiska pixelbredd (för att aldrig nedgradera vid skärmbyte). */
+const rungWidth = (url?: string) => {
+  if (!url) return 0;
+  const rung = [...LADDER, ...SAFE_LADDER].find((r) => r.url === url);
+  if (rung) return rung.w;
+  if (url === windowsLiteAsset.url) return 432;
+  return 0;
+};
+
 
 
 
@@ -327,29 +336,45 @@ const JobSeekerVideoShowcase = ({
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
     let mq: MediaQueryList | null = null;
+    let listener: (() => void) | null = null;
     let cancelled = false;
+
+    const detach = () => {
+      if (mq && listener) mq.removeEventListener?.('change', listener);
+      mq = null;
+      listener = null;
+    };
 
     const attach = () => {
       if (cancelled) return;
+      detach();
       const dpr = window.devicePixelRatio || 1;
       mq = window.matchMedia(`(resolution: ${dpr}dppx)`);
-      const onChange = () => {
+      listener = () => {
         if (cancelled) return;
         setSources((prev) => {
           const next = getSources(widthPx);
-          return next[0]?.src === prev[0]?.src ? prev : next;
+          const nextSrc = next[0]?.src;
+          const prevSrc = prev[0]?.src;
+          if (!nextSrc || nextSrc === prevSrc) return prev;
+          // Byt ENDAST uppåt. En nedgradering mitt i uppspelningen kostar en
+          // full omladdning utan att ge något — och kan dessutom göra texten
+          // suddigare om mätningen (t.ex. `downlink`) tillfälligt dippar.
+          if (rungWidth(nextSrc) <= rungWidth(prevSrc)) return prev;
+          return next;
         });
         attach();
       };
-      mq.addEventListener?.('change', onChange, { once: true });
+      mq.addEventListener?.('change', listener, { once: true });
     };
     attach();
 
     return () => {
       cancelled = true;
-      mq = null;
+      detach();
     };
   }, [widthPx]);
+
 
   // Byt faktisk källa på elementet när stegen valts om (inte vid första mount).
   const mountedSrcRef = useRef<string | undefined>(currentSrc);
@@ -691,7 +716,25 @@ const JobSeekerVideoShowcase = ({
       }
     };
 
+    /**
+     * BUGG som fanns här: vakten kördes på VARJE resize-event. På iOS/Android
+     * skickar `visualViewport` resize varje gång adressfältet glider in/ut vid
+     * scroll, och på desktop vid varje pixel när fönstret dras. Varje gång
+     * pausades och startades videon om — ett synligt ryck mitt i uppspelningen
+     * utan att någon skärm faktiskt bytts.
+     *
+     * Nu jämför vi en signatur av den fysiska skärmen (dpr + skärmupplösning +
+     * färgdjup). Bara ett riktigt skärm-/GPU-byte eller ändrad systemskalning
+     * triggar återhämtningen; vanlig storleksändring lämnar videon i fred.
+     */
+    const displaySignature = () =>
+      `${window.devicePixelRatio || 1}|${window.screen?.width ?? 0}x${window.screen?.height ?? 0}|${window.screen?.colorDepth ?? 0}`;
+    let lastDisplaySignature = displaySignature();
+
     const handleDisplayChange = () => {
+      const sig = displaySignature();
+      if (sig === lastDisplaySignature) return;
+      lastDisplaySignature = sig;
       if (displayTimer !== null) window.clearTimeout(displayTimer);
       displayTimer = window.setTimeout(() => {
         displayTimer = null;
@@ -706,6 +749,7 @@ const JobSeekerVideoShowcase = ({
         } catch { /* best effort */ }
       }, 280);
     };
+
 
     healthTimer = window.setInterval(checkHealth, 1000);
 
