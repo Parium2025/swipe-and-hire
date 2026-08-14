@@ -115,13 +115,13 @@ const supportsWindowsSafe60 = () => {
  * situationen. 30 fps-mastern halverar decode/compositor-arbetet och är skarp
  * nog för telefonens maximala CSS-bredd på 285 px.
  */
-const prefersLargeWindowsDisplayTrack = () => {
-  if (typeof window === 'undefined' || !isWindowsDevice()) return false;
-  // Undantag: hög pixeltäthet (4K/200 %-skalning, ultrabreda hi-dpi-paneler).
-  // Där skulle 432 px-mastern behöva skalas UPP av browsern och texten i
-  // appen blir grötig. De skärmarna får istället rätt rung ur safe-stegen.
-  const dpr = window.devicePixelRatio || 1;
-  if (dpr >= 1.5) return false;
+const prefersLargeChromiumDisplayTrack = () => {
+  if (typeof window === 'undefined' || (!isWindowsDevice() && !isAndroidDevice())) return false;
+  // Stora externa vyer ska alltid prioritera jämn hårdvaruavkodning. Ett senare
+  // hi-dpi-undantag skickade 4K/skalade Windows-skärmar tillbaka till det tunga
+  // 60-fps-spåret och upphävde därmed HDMI-fixen. Android via extern skärm fick
+  // aldrig lättspåret alls. 30 fps-mastern är fortfarande bredare än telefonens
+  // maximala CSS-yta och är därför rätt kompromiss även vid hög systemskalning.
   return window.innerWidth >= 1280 || window.innerHeight >= 900;
 };
 
@@ -220,7 +220,7 @@ const getSources = (widthPx?: number) =>
             // som kommentaren ovan sade att Windows-källan skulle undvika.
             // Välj bara 60-fps-mastern när browsern själv accepterar dess exakta
             // codecprofil. Annars används den brett kompatibla 30-fps-filen.
-            prefersLargeWindowsDisplayTrack()
+            prefersLargeChromiumDisplayTrack()
               ? { src: windowsLiteAsset.url, type: 'video/mp4' }
               : supportsWindowsSafe60()
               ? { src: pickSafeLadder(widthPx), type: 'video/mp4; codecs="avc1.42C020"' }
@@ -231,7 +231,9 @@ const getSources = (widthPx?: number) =>
               // Androids H.264-hårdvaruväg är jämnare mellan olika GPU:er än VP9.
               // Samma decoder-säkra profil som Windows, men nu i rätt upplösning
               // för telefonens dpr i stället för en fast 432 px-uppskalning.
-              supportsWindowsSafe60()
+              prefersLargeChromiumDisplayTrack()
+                ? { src: windowsLiteAsset.url, type: 'video/mp4' }
+                : supportsWindowsSafe60()
                 ? { src: pickSafeLadder(widthPx), type: 'video/mp4; codecs="avc1.42C020"' }
                 : { src: windowsLiteAsset.url, type: 'video/mp4' },
             ]
