@@ -70,6 +70,7 @@ export const prefersLightweightVideo = () => {
  */
 export const getMaxConcurrentVideos = () => {
   if (prefersReducedData()) return 1;
+  const coarse = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
   switch (getVideoPlatform()) {
     case 'windows':
       // Tre samtidiga 520px-strömmar: två platser går till strippens ytterkanter
@@ -80,11 +81,16 @@ export const getMaxConcurrentVideos = () => {
       return isLowPowerDevice() ? 1 : 2;
 
     case 'apple':
-      return 3;
+      // macOS-desktop har hårdvarudekodning med gott om marginal: låt ALLA
+      // kort rulla kontinuerligt i stället för att startas/pausas under scroll.
+      // Av/på-växlingen var det som kändes "stressigt". iPhone/iPad (coarse)
+      // behåller sin beprövade budget på tre.
+      return coarse || isLowPowerDevice() ? 3 : 8;
     default:
-      return isLowPowerDevice() ? 2 : 3;
+      return isLowPowerDevice() || coarse ? 2 : 8;
   }
 };
+
 
 /** Ska decoders frigöras (pausas) när galleriet lämnar viewporten? */
 export const shouldFreeDecodersOnLeave = () => {
