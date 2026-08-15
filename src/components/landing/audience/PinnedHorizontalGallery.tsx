@@ -603,6 +603,15 @@ const CardItem = ({ item, index }: CardItemProps) => {
             }}
             className={frameReady ? 'opacity-0' : 'opacity-100'}
           />
+          {/* Loop-söm: fryst slutbildruta som tonas ut när videon börjar om. */}
+          <canvas
+            ref={seamRef}
+            aria-hidden="true"
+            className="phg-seam"
+            style={{ objectPosition: item.position ?? '50% 50%' }}
+          />
+
+
 
         </>
       ) : (
