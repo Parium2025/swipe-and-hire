@@ -1092,23 +1092,16 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
       setActive(next);
     };
 
-    // Telefonen ligger i ett fixed lager men ska ändå ÅKA MED sidan precis som
-    // en vanlig sektion i flödet — därför översätter vi lagret med scrollTop
-    // i stället för att fejda bort mockupen på plats. Ingen opacity-övergång
-    // syns för användaren eftersom telefonen redan lämnat viewporten när
-    // synlighetsflaggan slår om.
-    let lastOffset = -1;
+    // Telefonen ligger kvar i sitt fixed lager på exakt samma position och
+    // fejdas ut när man scrollar förbi hero (som tidigare).
     const syncDesktopVisibility = () => {
       rafId = 0;
       const inline = getInlinePhonePlacement() !== null;
       const offset = scrollRoot ? scrollRoot.scrollTop : window.scrollY;
-      if (phoneWrapperRef.current && offset !== lastOffset) {
-        lastOffset = offset;
-        phoneWrapperRef.current.style.transform = `translate3d(0, ${-offset}px, 0)`;
-      }
-      apply(inline ? false : offset < window.innerHeight * 1.4);
+      apply(inline ? false : offset < window.innerHeight * 0.6);
       applyActive(inline ? false : isHeroZone());
     };
+
 
     let rafId = 0;
     const sync = () => {
