@@ -162,8 +162,8 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
     const waitForVisualSettle = async () => {
       const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
-      await waitForFrames(isCoarse ? 10 : 4);
-      await new Promise<void>((resolve) => window.setTimeout(resolve, isCoarse ? 760 : 140));
+      await waitForFrames(isCoarse ? 6 : 4);
+      await new Promise<void>((resolve) => window.setTimeout(resolve, isCoarse ? 320 : 120));
       const startedAt = performance.now();
       const maxWait = isCoarse ? 2800 : 1200;
       let stableFrames = 0;
@@ -176,7 +176,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
           continue;
         }
         stableFrames += 1;
-        if (stableFrames >= (isCoarse ? 10 : 4)) break;
+        if (stableFrames >= (isCoarse ? 6 : 4)) break;
       }
 
       await waitForFrames(isCoarse ? 4 : 1);
