@@ -447,6 +447,12 @@ const CardItem = ({ item, index }: CardItemProps) => {
 
 
     const check = () => {
+      // Under pågående scroll (senaste 600 ms) räknas inget som fruset.
+      if (performance.now() - lastGalleryActivity < 600) {
+        frozenTicks = 0;
+        lastTime = v.currentTime;
+        return;
+      }
       if (document.hidden || rebuilding || v.paused || v.ended || v.seeking) {
         frozenTicks = 0;
         lastTime = v.currentTime;
