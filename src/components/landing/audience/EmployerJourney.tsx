@@ -46,7 +46,7 @@ const steps: JourneyStep[] = [
   },
   {
     title: 'Ge alla kandidater ett svar',
-    body: 'När processen är klar skickar Parium ett automatiskt mejl till de kandidater som inte gått vidare. Välj vår förinställda text eller skriv ert helt egna meddelande — så ingen lämnas utan återkoppling.',
+    body: 'När processen är klar skickar Parium ett automatiskt mejl till de kandidater som inte gått vidare. Välj vår förinställda text eller skriv ert eget meddelande — så ingen lämnas utan återkoppling.',
     icon: Mail,
   },
 ];
