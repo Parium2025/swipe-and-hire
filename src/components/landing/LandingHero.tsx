@@ -115,12 +115,15 @@ const AudienceCard = ({
       onFocus={() => preloadAudienceAssets(role)}
       onTouchStart={() => preloadAudienceAssets(role)}
       variants={{
-        hidden: { opacity: 0, y: 34, scale: 0.96, filter: 'blur(12px)' },
-        show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
+        // Ingen blur-filter i entrén: den tvingar fram ett extra GPU-lager och
+        // syns som en "blixt"/oskärpa innan knappen landar. Ren opacitet + lyft.
+        hidden: { opacity: 0, y: 18 },
+        show: { opacity: 1, y: 0 },
       }}
       animate={isSelected ? { scale: 1.035, y: -3 } : isOtherSelected ? { opacity: 0.2, scale: 0.94 } : undefined}
       whileTap={!selectedRole ? { scale: 0.985 } : undefined}
-      transition={{ duration: 0.68, ease }}
+      transition={{ duration: 0.5, ease }}
+
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
       className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-none sm:w-[300px]"
     >
