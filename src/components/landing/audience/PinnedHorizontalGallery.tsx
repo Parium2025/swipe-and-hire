@@ -365,64 +365,81 @@ const CardItem = ({ item, index }: CardItemProps) => {
     if (!v || !c || item.type !== 'video' || failed) return;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
 
-    let raf = 0;
-    let last = 0;
+    // INGEN rAF-loop här: åtta kort × 60 fps mätning kostade mätbart med
+    // huvudtråd och gjorde galleriet trögt. Vi schemalägger i stället exakt
+    // två timers per varv (frys + uttoning) och använder `timeupdate` (~4 Hz)
+    // enbart som billig omschemaläggare.
+    let captureTimer: number | null = null;
+    let fadeTimer: number | null = null;
     let armed = false;
 
+    const clearTimers = () => {
+      if (captureTimer !== null) window.clearTimeout(captureTimer);
+      if (fadeTimer !== null) window.clearTimeout(fadeTimer);
+      captureTimer = null;
+      fadeTimer = null;
+    };
+
     const reset = () => {
+      clearTimers();
       c.style.transition = 'none';
       c.style.opacity = '0';
       armed = false;
     };
 
+    const fade = () => {
+      armed = false;
+      c.style.transition = 'opacity 420ms linear';
+      c.style.opacity = '0';
+    };
+
     const capture = () => {
+      captureTimer = null;
       const w = v.videoWidth;
       const h = v.videoHeight;
-      if (!w || !h) return false;
-      const scale = Math.min(1, 720 / w);
+      if (!w || !h || v.readyState < 2 || v.paused) return;
+      const scale = Math.min(1, 640 / w);
       c.width = Math.round(w * scale);
       c.height = Math.round(h * scale);
       const ctx = c.getContext('2d');
-      if (!ctx) return false;
+      if (!ctx) return;
       try {
         ctx.drawImage(v, 0, 0, c.width, c.height);
       } catch {
-        return false;
+        return;
       }
       c.style.transition = 'none';
       c.style.opacity = '1';
-      return true;
+      armed = true;
+      const remaining = Math.max(0, (v.duration - v.currentTime) * 1000);
+      fadeTimer = window.setTimeout(fade, remaining + 40);
     };
 
-    const tick = () => {
-      raf = requestAnimationFrame(tick);
+    const schedule = () => {
+      if (armed || captureTimer !== null) return;
       const d = v.duration;
-      if (!Number.isFinite(d) || d <= 0 || v.paused || v.seeking || document.hidden) {
-        last = v.currentTime;
-        return;
-      }
-      const t = v.currentTime;
-      if (armed && t < last - 0.2) {
-        // Loopen har skett — tona ut den frysta slutbilden över den nya starten.
-        armed = false;
-        requestAnimationFrame(() => {
-          c.style.transition = 'opacity 420ms linear';
-          c.style.opacity = '0';
-        });
-      } else if (!armed && d - t <= 0.22 && v.readyState >= 2) {
-        armed = capture();
-      }
-      last = t;
+      if (!Number.isFinite(d) || d <= 0 || v.paused || v.seeking || document.hidden) return;
+      const untilCapture = (d - v.currentTime - 0.22) * 1000;
+      if (untilCapture > 2000) return; // vänta, timeupdate kommer igen
+      captureTimer = window.setTimeout(capture, Math.max(0, untilCapture));
     };
 
-    raf = requestAnimationFrame(tick);
+    v.addEventListener('timeupdate', schedule);
+    v.addEventListener('play', schedule);
+    v.addEventListener('pause', reset);
+    v.addEventListener('seeking', reset);
     v.addEventListener('emptied', reset);
+    schedule();
     return () => {
-      cancelAnimationFrame(raf);
+      v.removeEventListener('timeupdate', schedule);
+      v.removeEventListener('play', schedule);
+      v.removeEventListener('pause', reset);
+      v.removeEventListener('seeking', reset);
       v.removeEventListener('emptied', reset);
       reset();
     };
   }, [item.type, failed, src]);
+
 
 
   // Chromium kan lämna en video i `paused=false` med frusen currentTime efter
