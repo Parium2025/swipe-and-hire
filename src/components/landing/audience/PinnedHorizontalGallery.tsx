@@ -1240,6 +1240,7 @@ const PinnedHorizontalGallery = () => {
         @media (prefers-reduced-motion: reduce), (pointer: coarse) {
           .phg-card img { animation: none; }
         }
+        .phg-seam { opacity: 0; will-change: opacity; }
 
         .phg-card::after {
           content: '';
