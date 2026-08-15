@@ -323,6 +323,13 @@ const JobSeekerVideoShowcase = ({
     return () => window.clearTimeout(t);
   }, [firstFramePainted, autoplayBlocked]);
 
+  // Blockeras autoplay efter att postern redan avmonterats (t.ex. sparläge slås
+  // på mitt i sessionen) måste den tillbaka, annars döljs videon mot svart.
+  useEffect(() => {
+    if (autoplayBlocked) setPosterVisible(true);
+  }, [autoplayBlocked]);
+
+
 
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
