@@ -261,6 +261,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [src, setSrc] = useState(() => getPlayableSrc(item));
   const [frameReady, setFrameReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const seamRef = useRef<HTMLCanvasElement>(null);
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef<number | null>(null);
   // VIKTIGT: `playing`/`timeupdate` kan fyra INNAN någon bildruta är dekodad
@@ -352,6 +353,77 @@ const CardItem = ({ item, index }: CardItemProps) => {
       v.removeEventListener('loadedmetadata', applyOffset);
     };
   }, [item.type, failed, index]);
+
+  // Mjuk loop-söm. Native `loop` hoppar hårt från sista bildrutan till frame 0
+  // — ett synligt klipp. Strax före slutet fryser vi sista bildrutan i en
+  // canvas ovanpå videon (pixelidentiskt → osynligt i stunden). När videon
+  // sedan börjar om tonas canvasen ut linjärt, vilket ger en riktig korsfejd
+  // mellan slut och start utan att någonsin skapa en andra dekoder.
+  useEffect(() => {
+    const v = videoRef.current;
+    const c = seamRef.current;
+    if (!v || !c || item.type !== 'video' || failed) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+
+    let raf = 0;
+    let last = 0;
+    let armed = false;
+
+    const reset = () => {
+      c.style.transition = 'none';
+      c.style.opacity = '0';
+      armed = false;
+    };
+
+    const capture = () => {
+      const w = v.videoWidth;
+      const h = v.videoHeight;
+      if (!w || !h) return false;
+      const scale = Math.min(1, 720 / w);
+      c.width = Math.round(w * scale);
+      c.height = Math.round(h * scale);
+      const ctx = c.getContext('2d');
+      if (!ctx) return false;
+      try {
+        ctx.drawImage(v, 0, 0, c.width, c.height);
+      } catch {
+        return false;
+      }
+      c.style.transition = 'none';
+      c.style.opacity = '1';
+      return true;
+    };
+
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
+      const d = v.duration;
+      if (!Number.isFinite(d) || d <= 0 || v.paused || v.seeking || document.hidden) {
+        last = v.currentTime;
+        return;
+      }
+      const t = v.currentTime;
+      if (armed && t < last - 0.2) {
+        // Loopen har skett — tona ut den frysta slutbilden över den nya starten.
+        armed = false;
+        requestAnimationFrame(() => {
+          c.style.transition = 'opacity 420ms linear';
+          c.style.opacity = '0';
+        });
+      } else if (!armed && d - t <= 0.22 && v.readyState >= 2) {
+        armed = capture();
+      }
+      last = t;
+    };
+
+    raf = requestAnimationFrame(tick);
+    v.addEventListener('emptied', reset);
+    return () => {
+      cancelAnimationFrame(raf);
+      v.removeEventListener('emptied', reset);
+      reset();
+    };
+  }, [item.type, failed, src]);
+
 
   // Chromium kan lämna en video i `paused=false` med frusen currentTime efter
   // GPU-/skärmbyte eller decoder-press. onError triggas då inte. Vakten kör bara
@@ -531,6 +603,15 @@ const CardItem = ({ item, index }: CardItemProps) => {
             }}
             className={frameReady ? 'opacity-0' : 'opacity-100'}
           />
+          {/* Loop-söm: fryst slutbildruta som tonas ut när videon börjar om. */}
+          <canvas
+            ref={seamRef}
+            aria-hidden="true"
+            className="phg-seam"
+            style={{ objectPosition: item.position ?? '50% 50%' }}
+          />
+
+
 
         </>
       ) : (
@@ -1136,6 +1217,7 @@ const PinnedHorizontalGallery = () => {
           box-shadow: none;
         }
         .phg-card img,
+        .phg-card canvas,
         .phg-card video {
           position: absolute;
           inset: 0;
@@ -1158,6 +1240,7 @@ const PinnedHorizontalGallery = () => {
         @media (prefers-reduced-motion: reduce), (pointer: coarse) {
           .phg-card img { animation: none; }
         }
+        .phg-seam { opacity: 0; will-change: opacity; }
 
         .phg-card::after {
           content: '';
