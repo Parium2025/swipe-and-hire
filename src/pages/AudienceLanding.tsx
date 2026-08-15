@@ -1602,11 +1602,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         el.setAttribute('data-lf-shown', 'false');
       });
 
-      // IntersectionObserver i stället för scroll-lyssnare: sidan scrollar på
-      // window (det finns ingen [data-landing-scroll-root]-nod), och på iOS
-      // fyrar window-scroll opålitligt under momentum-scroll. IO körs mot
-      // compositor-tråden och fungerar identiskt på alla telefoner, oavsett
-      // om Safaris verktygsfält fälls in eller inte.
+      const scrollRoot = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+
+      // Observera den faktiska fixed/overflow-scrollytan. `root: null` bevakar
+      // dokumentets viewport och kan missa uppdateringar från en separat
+      // momentum-scrollande container i iOS Safari.
       const observer = new IntersectionObserver(
         (entries) => {
           if (cancelled) return;
@@ -1617,7 +1617,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           });
         },
         {
-          root: null,
+          root: scrollRoot,
           // Trigga när elementet är väl inne i viewporten (topp ovanför ~82 %),
           // inte så fort kanten tittar fram.
           rootMargin: '0px 0px -18% 0px',
@@ -1633,15 +1633,35 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       const syncVisible = () => {
         if (cancelled) return;
         const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        const rootRect = scrollRoot?.getBoundingClientRect() ?? {
+          top: 0,
+          bottom: viewportHeight,
+        };
+        const revealLine = rootRect.top + (rootRect.bottom - rootRect.top) * 0.82;
         elements.forEach((el) => {
           if (el.getAttribute('data-lf-shown') === 'true') return;
           const rect = el.getBoundingClientRect();
-          if (rect.bottom > 16 && rect.top < viewportHeight * 0.82) {
+          if (rect.bottom > rootRect.top + 16 && rect.top < revealLine) {
             reveal(el);
             observer.unobserve(el);
           }
         });
       };
+      let raf = 0;
+      const scheduleSync = () => {
+        if (raf) return;
+        raf = window.requestAnimationFrame(() => {
+          raf = 0;
+          syncVisible();
+        });
+      };
+      scrollRoot?.addEventListener('scroll', scheduleSync, { passive: true });
+      window.visualViewport?.addEventListener('resize', scheduleSync, { passive: true });
+      cleanupFns.push(() => {
+        if (raf) window.cancelAnimationFrame(raf);
+        scrollRoot?.removeEventListener('scroll', scheduleSync);
+        window.visualViewport?.removeEventListener('resize', scheduleSync);
+      });
       timers.push(
         window.setTimeout(syncVisible, 80),
         window.setTimeout(syncVisible, 260),
