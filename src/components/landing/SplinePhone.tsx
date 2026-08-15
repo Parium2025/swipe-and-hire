@@ -172,7 +172,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
       while (!cancelled && performance.now() - startedAt < maxWait) {
         await waitForFrames(1);
-        const __i=performance.now(); const frame = inspectSplineFrame(); console.log('SPL iter', Math.round(performance.now()-__i), JSON.stringify(frame));
+        const frame = inspectSplineFrame();
         if (!frame.hasScenePixels || frame.hasWhiteSlab) {
           stableFrames = 0;
           continue;
@@ -187,7 +187,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
     const boot = async () => {
       try {
-        const __t=performance.now(); const { Application } = await import('@splinetool/runtime'); console.log('SPL import', Math.round(performance.now()-__t));
+        const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
 
         // Spline renderar utan MSAA (getContextAttributes().antialias === false,
@@ -225,7 +225,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
         app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
-        const __l=performance.now(); await app.load(SCENE_URL); console.log('SPL load', Math.round(performance.now()-__l));
+        await app.load(SCENE_URL);
         try {
           // OBS: Splines interna renderer ligger på `_renderer` (den publika
           // `renderer` finns inte) — tidigare försök att höja pixel ratio
@@ -253,7 +253,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         // En stoppad app ritar inga frames, så pixelinspektionen hittar aldrig
         // scenpixlar och loopen går alltid ut i maxWait (upp till ~2,8 s på
         // touch) innan telefonen får visas — det var det som kändes trögt.
-        const __s=performance.now(); await waitForVisualSettle(); console.log('SPL settle', Math.round(performance.now()-__s));
+        await waitForVisualSettle();
         if (!cancelled) {
           setIsReady(true);
           window.dispatchEvent(new Event('parium:spline-ready'));
