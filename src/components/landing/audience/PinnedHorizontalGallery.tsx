@@ -47,7 +47,7 @@ const items: MediaItem[] = [
   { type: 'video', src: '/landing/jobseeker-real-3.mp4', windowsSrc: winReal3.url, poster: posterRestaurant, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
   { type: 'video', src: '/landing/jobseeker-electrician.mp4', windowsSrc: winElectrician.url, poster: posterElectrician, eyebrow: 'Elektriker', title: 'Elektriker' },
   { type: 'video', src: '/landing/jobseeker-farmer.mp4', windowsSrc: winFarmer.url, poster: posterFarmer, eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
-  { type: 'video', src: '/landing/jobseeker-nurse.mp4', windowsSrc: winNurse.url, poster: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
+  { type: 'video', src: '/landing/jobseeker-nurse.mp4', windowsSrc: winNurse.url, poster: posterVard, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
 ];
 
 type CardItemProps = {
