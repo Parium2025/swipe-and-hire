@@ -350,17 +350,33 @@ const JobSeekerVideoShowcase = ({
       if (retryTimer !== null) { window.clearTimeout(retryTimer); retryTimer = null; }
     };
 
+    // iOS Lågeffektläge: Safari ritar sin egen play-ikon ovanpå <video> när
+    // autoplay nekas, och den går inte att CSS-dölja. Efter två nekade försök
+    // gömmer vi därför själva videoelementet och låter posterlagret ligga kvar
+    // — telefonen ser ut som en stillbild i stället för en trasig spelare.
+    // Detta är felstyrt (NotAllowedError), inte plattformsstyrt, så Windows
+    // påverkas inte: där nekas autoplay aldrig för muted video.
+    let blockedCount = 0;
     const attempt = () => {
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
       if (!v.paused && !v.ended) return;
       const p = v.play();
       if (p && typeof p.catch === 'function') {
-        p.then(clearRetry).catch(() => {
+        p.then(() => {
           clearRetry();
+          blockedCount = 0;
+          setAutoplayBlocked(false);
+        }).catch((err: unknown) => {
+          clearRetry();
+          if ((err as { name?: string } | null)?.name === 'NotAllowedError') {
+            blockedCount += 1;
+            if (blockedCount >= 2) setAutoplayBlocked(true);
+          }
           retryTimer = window.setTimeout(attempt, 600);
         });
       }
     };
+
 
     /** Hur många sekunder som är buffrat framför nuvarande position. */
     const aheadOf = (el: HTMLVideoElement) => {
