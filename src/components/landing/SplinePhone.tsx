@@ -184,7 +184,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
     const boot = async () => {
       try {
-        const { Application } = await import('@splinetool/runtime');
+        const __t=performance.now(); const { Application } = await import('@splinetool/runtime'); console.log('SPL import', Math.round(performance.now()-__t));
         if (cancelled) return;
 
         // Spline renderar utan MSAA (getContextAttributes().antialias === false,
@@ -222,7 +222,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
         app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
-        await app.load(SCENE_URL);
+        const __l=performance.now(); await app.load(SCENE_URL); console.log('SPL load', Math.round(performance.now()-__l));
         try {
           // OBS: Splines interna renderer ligger på `_renderer` (den publika
           // `renderer` finns inte) — tidigare försök att höja pixel ratio
@@ -250,7 +250,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         // En stoppad app ritar inga frames, så pixelinspektionen hittar aldrig
         // scenpixlar och loopen går alltid ut i maxWait (upp till ~2,8 s på
         // touch) innan telefonen får visas — det var det som kändes trögt.
-        await waitForVisualSettle();
+        const __s=performance.now(); await waitForVisualSettle(); console.log('SPL settle', Math.round(performance.now()-__s));
         if (!cancelled) {
           setIsReady(true);
           window.dispatchEvent(new Event('parium:spline-ready'));
