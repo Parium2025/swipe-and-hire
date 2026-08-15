@@ -239,7 +239,13 @@ const evaluateAll = () => {
 
 };
 
+// Tidsstämpel för senaste scroll-/progress-händelse. Frys-vakten använder den
+// för att INTE tolka en kortvarig decode-stall under en snabb scroll som en
+// frusen video — annars kunde ett hårt load() triggas mitt i rörelsen.
+export let lastGalleryActivity = 0;
+
 const scheduleEvaluate = () => {
+  lastGalleryActivity = performance.now();
   if (rafId) return;
   rafId = requestAnimationFrame(evaluateAll);
 };
