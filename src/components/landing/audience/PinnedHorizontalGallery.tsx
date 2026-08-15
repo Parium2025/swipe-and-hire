@@ -425,6 +425,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
   }, [item.type, failed, src]);
 
 
+  // Chromium kan lämna en video i `paused=false` med frusen currentTime efter
   // GPU-/skärmbyte eller decoder-press. onError triggas då inte. Vakten kör bara
   // för en video som faktiskt spelar och eskalerar från pause/play till load().
   useEffect(() => {
