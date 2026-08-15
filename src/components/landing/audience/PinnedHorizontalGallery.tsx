@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import real1 from '@/assets/landing/jobseeker-real-1.jpg';
+
 import posterElectrician from '@/assets/landing/poster-electrician.jpg';
 import posterFarmer from '@/assets/landing/poster-farmer.jpg';
 import posterPt from '@/assets/landing/poster-pt.jpg';
 import posterRestaurant from '@/assets/landing/poster-real-3.jpg';
-import real2 from '@/assets/landing/jobseeker-real-2.jpg';
+import posterAffarer from '@/assets/landing/poster-affarer.jpg';
+import posterService from '@/assets/landing/poster-service.jpg';
+import posterVard from '@/assets/landing/poster-vard.jpg';
 import real5 from '@/assets/landing/jobseeker-real-5.jpg';
-import real6 from '@/assets/landing/jobseeker-real-6.jpg';
 import winElectrician from '@/assets/landing/windows/jobseeker-electrician-windows.mp4.asset.json';
 import winFarmer from '@/assets/landing/windows/jobseeker-farmer-windows.mp4.asset.json';
 import winNurse from '@/assets/landing/windows/jobseeker-nurse-windows.mp4.asset.json';
@@ -41,12 +42,12 @@ type MediaItem = {
 const items: MediaItem[] = [
   { type: 'video', src: '/landing/jobseeker-pt.mp4', windowsSrc: winPt.url, poster: posterPt, eyebrow: 'Träning', title: 'Personliga tränare' },
   { type: 'video', src: '/landing/jobseeker-plumber.mp4', windowsSrc: winPlumber.url, poster: real5, position: '50% 30%', eyebrow: 'Hantverk', title: 'Rörmokare & byggare' },
-  { type: 'video', src: '/landing/jobseeker-real-center.mp4', windowsSrc: winRealCenter.url, poster: real1, eyebrow: 'Affärer', title: 'Yrkespersoner i sitt element' },
-  { type: 'video', src: '/landing/jobseeker-real-4.mp4', windowsSrc: winReal4.url, poster: real2, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
+  { type: 'video', src: '/landing/jobseeker-real-center.mp4', windowsSrc: winRealCenter.url, poster: posterAffarer, eyebrow: 'Affärer', title: 'Yrkespersoner i sitt element' },
+  { type: 'video', src: '/landing/jobseeker-real-4.mp4', windowsSrc: winReal4.url, poster: posterService, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
   { type: 'video', src: '/landing/jobseeker-real-3.mp4', windowsSrc: winReal3.url, poster: posterRestaurant, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
   { type: 'video', src: '/landing/jobseeker-electrician.mp4', windowsSrc: winElectrician.url, poster: posterElectrician, eyebrow: 'Elektriker', title: 'Elektriker' },
   { type: 'video', src: '/landing/jobseeker-farmer.mp4', windowsSrc: winFarmer.url, poster: posterFarmer, eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
-  { type: 'video', src: '/landing/jobseeker-nurse.mp4', windowsSrc: winNurse.url, poster: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
+  { type: 'video', src: '/landing/jobseeker-nurse.mp4', windowsSrc: winNurse.url, poster: posterVard, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
 ];
 
 type CardItemProps = {
