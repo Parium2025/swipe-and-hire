@@ -204,6 +204,10 @@ const HeroVideo = () => {
     if (!video || skipVideo) return;
     if (loadedSrcRef.current === heroSrc) return;
     loadedSrcRef.current = heroSrc;
+    // Källbyte = ny dekoder. Under omladdningen har videon ingen målad bildruta,
+    // så den måste tonas ut till postern igen — annars ligger en tom (svart)
+    // videoyta ovanpå posterlagret tills första frame kommer.
+    setVideoPainted(false);
     try {
       video.load();
     } catch { /* best effort */ }
