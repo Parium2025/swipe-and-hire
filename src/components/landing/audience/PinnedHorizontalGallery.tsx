@@ -17,7 +17,7 @@ import winReal3 from '@/assets/landing/windows/jobseeker-real-3-windows.mp4.asse
 import winReal4 from '@/assets/landing/windows/jobseeker-real-4-windows.mp4.asset.json';
 import winRealCenter from '@/assets/landing/windows/jobseeker-real-center-windows.mp4.asset.json';
 import { fetchPriority } from '@/lib/fetchPriority';
-import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, prefersLightweightVideo, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
+import { getGalleryPreload, getMaxConcurrentVideos, isAppleDevice, isWindowsDevice, prefersLightweightVideo, prefersReducedData, shouldFreeDecodersOnLeave } from '@/lib/videoPlatform';
 
 /**
  * Apple-style "Så funkar det" sektion.
@@ -1028,11 +1028,20 @@ const PinnedHorizontalGallery = () => {
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
 
+    // Tidig, tyst buffring: kön är strikt sekventiell (en källa i taget) så
+    // detta skapar ingen burst — det flyttar bara starten uppåt så att de
+    // första korten redan är spelbara när sektionen når viewporten. Windows
+    // lämnas orört (dess kallstartsväg är empiriskt intrimmad), och sparläge
+    // undantas för att inte äta mobildata i onödan.
+    const allowEarlyWarm = !isWindowsDevice() && !prefersReducedData();
+    const EARLY_WARM_VH = 2.2;
+
     const syncVisibleState = () => {
       const section = sectionRef.current;
       if (!section) return;
       const rect = section.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
+      if (allowEarlyWarm && !warmed && rect.top < vh * EARLY_WARM_VH && rect.bottom > 0) warmVideos();
       if (rect.top < vh * 0.92 && rect.bottom > vh * 0.08) enter();
       else if (rect.bottom <= 0 || rect.top >= vh) leave();
     };
