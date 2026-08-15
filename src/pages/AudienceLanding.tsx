@@ -1740,9 +1740,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   useEffect(() => {
     const forceVisibleIfStuck = () => {
       try {
-        const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-        if (!root) return;
-        const rootRect = root.getBoundingClientRect();
+        // Sidan scrollar på window; [data-landing-scroll-root] finns inte alltid.
+        const root = (document.querySelector('[data-landing-scroll-root]') as HTMLElement | null)
+          ?? document.body;
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        const rootRect = root === document.body
+          ? { top: 0, bottom: viewportHeight }
+          : root.getBoundingClientRect();
         const candidates = root.querySelectorAll<HTMLElement>(
           '[data-lf-shown="false"], [data-journey-shown="false"]',
         );
@@ -1779,6 +1783,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
     const timer = window.setTimeout(forceVisibleIfStuck, 1500);
     root?.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
 
     return () => {
