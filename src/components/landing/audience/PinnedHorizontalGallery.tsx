@@ -284,6 +284,10 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [frameReady, setFrameReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const retryCountRef = useRef(0);
+  // Antal "långsamma" återförsök efter att de snabba tagit slut. Utan tak
+  // körde en permanent trasig källa (t.ex. codec som saknas i webbläsaren)
+  // load() var tredje sekund i all evighet, på alla åtta kort.
+  const slowRetryRef = useRef(0);
   const retryTimerRef = useRef<number | null>(null);
   // VIKTIGT: `playing`/`timeupdate` kan fyra INNAN någon bildruta är dekodad
   // (särskilt i mobil-Safari och Chrome på Android efter en seek). Togs postern
