@@ -238,9 +238,10 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           <div className="flex w-full flex-col items-center gap-1.5 sm:gap-2">
             <motion.h1
               id="landing-hero-heading"
-              initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              transition={{ duration: 1.4, ease, delay: 0.4 }}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease, delay: 0.15 }}
+
               className="max-w-[21rem] min-[390px]:max-w-[38rem] sm:max-w-none text-balance font-semibold leading-[1.1] tracking-tight text-white text-[clamp(1rem,calc(0.6vw+0.88rem),1.4rem)] md:text-[clamp(1.15rem,calc(0.9vw+0.65rem),1.6rem)]"
             >
               Oavsett om du söker jobb eller rekryterar så finns vi här för dig
