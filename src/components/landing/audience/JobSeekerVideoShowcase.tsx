@@ -312,13 +312,17 @@ const JobSeekerVideoShowcase = ({
   const revealSyncedRef = useRef(false);
 
 
+  // iOS Lågeffektläge nekar autoplay → dölj videon och behåll postern.
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+
   useEffect(() => {
-    if (!firstFramePainted) return;
+    if (!firstFramePainted || autoplayBlocked) return;
     // Avmontera postern först när korsfejden är helt klar (annars klipps
     // fejden av och färgskillnaden blir synlig igen).
     const t = window.setTimeout(() => setPosterVisible(false), 420);
     return () => window.clearTimeout(t);
-  }, [firstFramePainted]);
+  }, [firstFramePainted, autoplayBlocked]);
+
 
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
