@@ -250,7 +250,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease, delay: 0.35 }}
+              transition={{ duration: 1, ease, delay: 0.9 }}
               className="whitespace-nowrap font-normal leading-[1.22] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] text-[clamp(1.3rem,5.5vw,2.4rem)] md:text-[clamp(2rem,4.5vw,3.5rem)]"
               style={{ color: '#ffffff' }}
             >
@@ -265,7 +265,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             animate="show"
             variants={{
               hidden: {},
-              show: { transition: { staggerChildren: 0.12, delayChildren: 0.55 } },
+              show: { transition: { staggerChildren: 0.18, delayChildren: 1.2 } },
             }}
           >
             {audienceOptions.map((option) => (
