@@ -491,6 +491,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
             onCanPlay={scheduleEvaluate}
             onLoadedData={() => {
               retryCountRef.current = 0;
+              slowRetryRef.current = 0;
               scheduleEvaluate();
               markReady();
             }}
@@ -524,12 +525,21 @@ const CardItem = ({ item, index }: CardItemProps) => {
               }
               if (isAppleDevice() && src !== item.src) {
                 retryCountRef.current = 0;
+                slowRetryRef.current = 0;
                 setSrc(item.src);
                 return;
               }
               // Behåll videoelementet och postern i kortet. Fortsätt med långsam
               // återhämtning i stället för permanent fallback; annars försvann
               // indexet ur kedjan och nästa video kunde hoppa över det.
+              //
+              // TAK: efter fem långsamma försök (~15 s) är källan bevisat
+              // ospelbar i den här webbläsaren (saknad codec, blockerad CDN).
+              // Då slutar vi ladda om — posterbilden ligger kvar och kortet
+              // behåller sin plats i kedjan, men vi bränner inte nätverk och
+              // decoder-initieringar var tredje sekund för evigt.
+              if (slowRetryRef.current >= 5) return;
+              slowRetryRef.current += 1;
               if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
               retryTimerRef.current = window.setTimeout(() => {
                 retryTimerRef.current = null;
@@ -540,6 +550,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
                   // Postern ligger kvar tills nästa lyckade laddning.
                 }
               }, 3000);
+            }}
             }}
             style={{ objectPosition: item.position ?? '50% 50%' }}
             className="pointer-events-none opacity-100"
