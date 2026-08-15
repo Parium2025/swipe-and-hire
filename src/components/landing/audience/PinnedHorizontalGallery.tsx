@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import real1 from '@/assets/landing/jobseeker-real-1.jpg';
+
 import posterElectrician from '@/assets/landing/poster-electrician.jpg';
 import posterFarmer from '@/assets/landing/poster-farmer.jpg';
 import posterPt from '@/assets/landing/poster-pt.jpg';
