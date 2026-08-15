@@ -437,6 +437,8 @@ const HeroVideo = () => {
       if (watchdog !== null) window.clearInterval(watchdog);
       document.removeEventListener('scroll', onUserGesture);
       video.removeEventListener('playing', onPlaying);
+      video.removeEventListener('timeupdate', markPainted);
+
       video.removeEventListener('loadeddata', onCanPlay);
       video.removeEventListener('canplay', onCanPlay);
 
