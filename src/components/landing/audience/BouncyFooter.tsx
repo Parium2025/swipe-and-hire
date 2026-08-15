@@ -119,8 +119,8 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     <div
       ref={wrapperRef}
       className="relative w-full overflow-hidden bg-primary"
-      // Ingen content-visibility här: platshållarhöjden gjorde att sektionen
-      // rapporterades synlig innan den verkligen var det vid kallstart.
+      {/* Ingen content-visibility: platshållarhöjden gjorde att sektionen
+          rapporterades synlig innan den verkligen var det vid kallstart. */}
     >
       {/* Bouncy gradient wave */}
       <div className="relative w-full">
