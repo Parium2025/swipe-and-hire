@@ -1083,12 +1083,31 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
       if (next === lastVisibleRef.current) return;
       lastVisibleRef.current = next;
       setVisible(next);
+    };
+
+    let lastActive = true;
+    const applyActive = (next: boolean) => {
+      if (next === lastActive) return;
+      lastActive = next;
       setActive(next);
     };
 
+    // Telefonen ligger i ett fixed lager men ska ändå ÅKA MED sidan precis som
+    // en vanlig sektion i flödet — därför översätter vi lagret med scrollTop
+    // i stället för att fejda bort mockupen på plats. Ingen opacity-övergång
+    // syns för användaren eftersom telefonen redan lämnat viewporten när
+    // synlighetsflaggan slår om.
+    let lastOffset = -1;
     const syncDesktopVisibility = () => {
       rafId = 0;
-      apply(getInlinePhonePlacement() ? false : isHeroZone());
+      const inline = getInlinePhonePlacement() !== null;
+      const offset = scrollRoot ? scrollRoot.scrollTop : window.scrollY;
+      if (phoneWrapperRef.current && offset !== lastOffset) {
+        lastOffset = offset;
+        phoneWrapperRef.current.style.transform = `translate3d(0, ${-offset}px, 0)`;
+      }
+      apply(inline ? false : offset < window.innerHeight * 1.4);
+      applyActive(inline ? false : isHeroZone());
     };
 
     let rafId = 0;
