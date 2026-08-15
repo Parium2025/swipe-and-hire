@@ -965,7 +965,7 @@ const PinnedHorizontalGallery = () => {
       playTimer = window.setTimeout(() => {
         warmVideos();
         scheduleEvaluate();
-      }, 800);
+      }, 240);
     };
     const leave = () => {
       if (!entered) return;
