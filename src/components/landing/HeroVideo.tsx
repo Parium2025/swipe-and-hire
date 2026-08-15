@@ -262,8 +262,20 @@ const HeroVideo = () => {
     // (touch/pointer/click hanteras redan av handleFirstInteraction längre ned.)
     const onUserGesture = () => tryPlay();
     document.addEventListener('scroll', onUserGesture, { passive: true });
-    const onPlaying = () => setAutoplayBlocked(false);
+    const markPainted = () => setVideoPainted(true);
+    const onPlaying = () => {
+      setAutoplayBlocked(false);
+      // requestVideoFrameCallback = exakt när en bildruta presenterats.
+      // Saknas den (äldre Safari) räcker `playing` + en frame.
+      const rvfc = (video as HTMLVideoElement & {
+        requestVideoFrameCallback?: (cb: () => void) => number;
+      }).requestVideoFrameCallback;
+      if (typeof rvfc === 'function') rvfc.call(video, markPainted);
+      else requestAnimationFrame(markPainted);
+    };
     video.addEventListener('playing', onPlaying);
+    video.addEventListener('timeupdate', markPainted);
+
 
 
 
