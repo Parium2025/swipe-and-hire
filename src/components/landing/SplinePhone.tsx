@@ -162,10 +162,12 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
     const waitForVisualSettle = async () => {
       const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
-      await waitForFrames(isCoarse ? 6 : 4);
-      await new Promise<void>((resolve) => window.setTimeout(resolve, isCoarse ? 320 : 120));
+      // OBS: varje inspektion gör getImageData → GPU-stall. Håll antalet lågt,
+      // annars blir själva "vänta tills scenen är ritad"-kontrollen det som gör
+      // uppstarten seg (den kostade tidigare flera sekunder).
+      await waitForFrames(2);
       const startedAt = performance.now();
-      const maxWait = isCoarse ? 2800 : 1200;
+      const maxWait = isCoarse ? 900 : 600;
       let stableFrames = 0;
 
       while (!cancelled && performance.now() - startedAt < maxWait) {
@@ -176,11 +178,12 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
           continue;
         }
         stableFrames += 1;
-        if (stableFrames >= (isCoarse ? 6 : 4)) break;
+        if (stableFrames >= 2) break;
       }
 
-      await waitForFrames(isCoarse ? 4 : 1);
+      await waitForFrames(1);
     };
+
 
     const boot = async () => {
       try {
