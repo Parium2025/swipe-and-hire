@@ -382,10 +382,10 @@
                 var cores = navigator.hardwareConcurrency || 8;
                 var lowPowerWin = isWin && (mem <= 4 || cores <= 4);
                 var rung = target <= 456
-                  ? '/__l5e/assets-v1/5a6fa64c-084a-46de-af89-df00353baf75/showcase-jobseeker-fit432.mp4'
+                  ? '/__l5e/assets-v1/9af23a07-0091-45b0-a439-cf420ec678f5/showcase-jobseeker-fit432.mp4'
                   : target <= 672
-                    ? '/__l5e/assets-v1/824c9bad-ed77-41f5-9941-3e99d6249a0b/showcase-jobseeker-win-crisp.mp4'
-                    : '/__l5e/assets-v1/fcdc9ff9-d4c5-4224-b75a-b28c76ad5934/showcase-jobseeker-hi-crisp.mp4';
+                    ? '/__l5e/assets-v1/9705fd9e-5a48-42d4-bfe6-57eb0196ef24/showcase-jobseeker-win-crisp.mp4'
+                    : '/__l5e/assets-v1/1cfd4117-8f8e-421f-82e5-ee879b5c7c7d/showcase-jobseeker-hi-crisp.mp4';
                 // Windows använder 60 fps Baseline-mastern utan B-frames;
                 // Android använder den lättare 30 fps-mastern.
                 // Preload måste vara exakt samma URL, annars hämtar browsern en
@@ -394,16 +394,16 @@
                 var safe60Ok = isWin && probe.canPlayType && probe.canPlayType('video/mp4; codecs="avc1.42C020"') !== '';
                 var showcaseHref = isWin
                   ? (safe60Ok
-                    ? '/__l5e/assets-v1/da1664a7-196a-40a9-9b48-691d2e7d44e0/showcase-jobseeker-windows-safe60.mp4'
-                    : '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4')
+                    ? '/__l5e/assets-v1/eb09446f-4134-4310-a95e-73e5a4f82631/showcase-jobseeker-windows-safe60.mp4'
+                    : '/__l5e/assets-v1/43bca5d6-8e25-4573-95c4-539b38f07e12/showcase-jobseeker-windows-lite.mp4')
                   : isAndroid
-                    ? '/__l5e/assets-v1/c6373b03-13be-418f-acc6-f120a66f54f3/showcase-jobseeker-windows-lite.mp4'
+                    ? '/__l5e/assets-v1/43bca5d6-8e25-4573-95c4-539b38f07e12/showcase-jobseeker-windows-lite.mp4'
                     : rung;
                 // Video-preload med as="video" stöds bara i Safari. I Chrome/Edge
                 // genererar det bara en varning och ingen faktisk preloading.
                 if (appleSafari) {
                   add(hevcOk
-                    ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/036f770d-d1fd-486e-a69a-1f8452a9c10c/showcase-jobseeker-v2.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
+                    ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/f7919f37-bcfe-44d3-9aa6-12eccc18f4eb/showcase-jobseeker.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
                     : { rel: 'preload', as: 'video', href: showcaseHref, type: 'video/mp4', fetchpriority: 'high' });
                 }
 
