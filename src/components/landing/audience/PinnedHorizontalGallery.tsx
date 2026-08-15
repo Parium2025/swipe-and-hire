@@ -172,20 +172,19 @@ const evaluateAll = () => {
     if (atStart && !atEnd) start = 0;
     else if (atEnd && !atStart) start = visible.length - windowSize;
 
-    // Behåll föregående fönster om det fortfarande är helt synligt och
-    // mittkortet ligger kvar i det → ingen pause/play vid minsta scroll.
-    if (!atStart && !atEnd && lastWindow.length === windowSize) {
-      const prevPositions = lastWindow.map((el) => visible.findIndex((e) => e.el === el));
-      const intact =
-        prevPositions.every((p, i) =>
-          p >= 0 &&
-          (i === 0 || (
-            p === prevPositions[i - 1] + 1 &&
-            visible[p].index === visible[prevPositions[i - 1]].index + 1
-          ))
-        ) &&
-        prevPositions.includes(centerPos);
-      if (intact) start = clampStart(prevPositions[0]);
+    // Flytta fönstret högst ETT kort per evaluation. Vid ett större scrollsteg
+    // ska följden därför alltid vara 1–2–3 → 2–3–4 → 3–4–5, aldrig hoppa
+    // direkt över ett mellanläge. Ytterligare rAF-ticks låter urvalet lugnt
+    // hinna ikapp målpositionen även när scrollen levererar ett stort hopp.
+    const desiredStartIndex = visible[start]?.index ?? 0;
+    const previousStartIndex = Number(lastWindow[0]?.closest<HTMLElement>('[data-gallery-index]')?.dataset.galleryIndex);
+    if (lastWindow.length === windowSize && Number.isFinite(previousStartIndex)) {
+      const steppedStartIndex = previousStartIndex + Math.sign(desiredStartIndex - previousStartIndex);
+      if (steppedStartIndex !== desiredStartIndex) scheduleEvaluate();
+      const steppedPosition = visible.findIndex((entry) => entry.index === steppedStartIndex);
+      if (steppedPosition >= 0 && steppedPosition <= visible.length - windowSize) {
+        start = steppedPosition;
+      }
     }
 
     let chosen = visible.slice(start, start + windowSize);
