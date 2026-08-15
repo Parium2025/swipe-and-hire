@@ -34,6 +34,7 @@
 - [Landing Page Rules](mem://constraints/landing-update-isolation-policy) — Isolerad utveckling för landningssidan.
 - [Pre-launch Checklist](mem://launch/pre-launch-checklist) — Kapacitetströsklar, Resend Pro, Cloud-uppgradering.
 - [Samtyckessidan borttagen](mem://constraints/no-data-sharing-consent-toggle) — Inget samtyckesreglage för datadelning; rättslig grund är avtal.
+- [Windows-video fryst](mem://constraints/windows-video-freeze) — Windows/HDMI-uppspelningen ändras aldrig utan test på riktig Windows-maskin.
 - [Ingen cookie-banner](mem://constraints/no-cookie-banner) — Bannern borttagen; endast nödvändig lagring.
 - [Ingen Resend](mem://constraints/no-resend-email-provider) — All e-post via Lovables inbyggda app-mejl; aldrig extern leverantör.
 - [Databasbehörigheter](mem://constraints/db-permission-policy) — GRANT/REVOKE-regler, policyroller, auth.uid()-kontroll i SECURITY DEFINER.
