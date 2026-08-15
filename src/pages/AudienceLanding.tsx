@@ -1790,6 +1790,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       window.clearTimeout(timer);
       if (raf) window.cancelAnimationFrame(raf);
       root?.removeEventListener('scroll', schedule);
+      window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
     };
   }, [audience]);
