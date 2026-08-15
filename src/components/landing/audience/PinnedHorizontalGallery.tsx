@@ -551,7 +551,6 @@ const CardItem = ({ item, index }: CardItemProps) => {
                 }
               }, 3000);
             }}
-            }}
             style={{ objectPosition: item.position ?? '50% 50%' }}
             className="pointer-events-none opacity-100"
           />
