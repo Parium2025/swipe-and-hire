@@ -161,9 +161,20 @@ const evaluateAll = () => {
 
     let start = clampStart(centerPos - Math.floor((windowSize - 1) / 2));
 
+    // Vid strippens ändlägen måste första/sista kortet alltid spela, även på en
+    // bred skärm där fem kort kan vara delvis synliga samtidigt. Utan detta
+    // valdes korten runt viewportens mitt (t.ex. 5–6–7 vid slutet) och kort 8
+    // syntes men startade aldrig.
+    const firstContentIndex = all[0]?.index;
+    const lastContentIndex = all[all.length - 1]?.index;
+    const atStart = visible[0]?.index === firstContentIndex;
+    const atEnd = visible[visible.length - 1]?.index === lastContentIndex;
+    if (atStart && !atEnd) start = 0;
+    else if (atEnd && !atStart) start = visible.length - windowSize;
+
     // Behåll föregående fönster om det fortfarande är helt synligt och
     // mittkortet ligger kvar i det → ingen pause/play vid minsta scroll.
-    if (lastWindow.length === windowSize) {
+    if (!atStart && !atEnd && lastWindow.length === windowSize) {
       const prevPositions = lastWindow.map((el) => visible.findIndex((e) => e.el === el));
       const intact =
         prevPositions.every((p, i) =>
@@ -494,12 +505,19 @@ const CardItem = ({ item, index }: CardItemProps) => {
                 setSrc(item.src);
                 return;
               }
-              // Behåll videoelementet och postern i kortet. Ett permanent
-              // fallback-byte här tog tidigare bort kortet ur registret och var
-              // den direkta orsaken till glapp som 2–3–5. Nästa gång kortet blir
-              // aktivt kan koordinatorn återstarta samma verifierade källa.
-              retryCountRef.current = 0;
-              scheduleEvaluate();
+              // Behåll videoelementet och postern i kortet. Fortsätt med långsam
+              // återhämtning i stället för permanent fallback; annars försvann
+              // indexet ur kedjan och nästa video kunde hoppa över det.
+              if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
+              retryTimerRef.current = window.setTimeout(() => {
+                retryTimerRef.current = null;
+                try {
+                  v.load();
+                  scheduleEvaluate();
+                } catch {
+                  // Postern ligger kvar tills nästa lyckade laddning.
+                }
+              }, 3000);
             }}
             style={{ objectPosition: item.position ?? '50% 50%' }}
             className="pointer-events-none opacity-100"
