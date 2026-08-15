@@ -1582,7 +1582,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     if (!isMobileFeatureMotion) return;
 
     let cancelled = false;
-    let raf = 0;
     const timers: number[] = [];
     const cleanupFns: Array<() => void> = [];
 
@@ -1593,7 +1592,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
     const start = () => {
       if (cancelled) return;
-      const scrollRoot = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
       const elements = Array.from(
         document.querySelectorAll<HTMLElement>('[data-mobile-feature-prearm] .landing-feature-mobile-in'),
       );
@@ -1604,56 +1602,57 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         el.setAttribute('data-lf-shown', 'false');
       });
 
-      const isVisible = (el: HTMLElement) => {
-        const rootRect = scrollRoot?.getBoundingClientRect() ?? {
-          top: 0,
-          bottom: window.innerHeight || document.documentElement.clientHeight,
-        };
-        const rect = el.getBoundingClientRect();
-        const rootHeight = rootRect.bottom - rootRect.top;
-        // Trigga när elementet faktiskt är väl inne i viewporten (topp ovanför
-        // 82% av höjden), inte så fort dess kant tittar fram. Annars hinner
-        // flera intilliggande element passera tröskeln samtidigt på liten
-        // skärm och animationen ser statisk ut.
-        return rect.bottom > rootRect.top + 16 && rect.top < rootRect.top + rootHeight * 0.82;
-      };
+      // IntersectionObserver i stället för scroll-lyssnare: sidan scrollar på
+      // window (det finns ingen [data-landing-scroll-root]-nod), och på iOS
+      // fyrar window-scroll opålitligt under momentum-scroll. IO körs mot
+      // compositor-tråden och fungerar identiskt på alla telefoner, oavsett
+      // om Safaris verktygsfält fälls in eller inte.
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (cancelled) return;
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            reveal(entry.target);
+            observer.unobserve(entry.target);
+          });
+        },
+        {
+          root: null,
+          // Trigga när elementet är väl inne i viewporten (topp ovanför ~82 %),
+          // inte så fort kanten tittar fram.
+          rootMargin: '0px 0px -18% 0px',
+          threshold: 0,
+        },
+      );
 
+      elements.forEach((el) => observer.observe(el));
+      cleanupFns.push(() => observer.disconnect());
+
+      // Skyddsnät: element som redan ligger i viewporten vid mount avslöjas
+      // direkt även om IO-callbacken skulle dröja.
       const syncVisible = () => {
         if (cancelled) return;
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
         elements.forEach((el) => {
-          if (isVisible(el)) reveal(el);
+          if (el.getAttribute('data-lf-shown') === 'true') return;
+          const rect = el.getBoundingClientRect();
+          if (rect.bottom > 16 && rect.top < viewportHeight * 0.82) {
+            reveal(el);
+            observer.unobserve(el);
+          }
         });
       };
-
-      const schedule = () => {
-        if (raf) return;
-        raf = window.requestAnimationFrame(() => {
-          raf = 0;
-          syncVisible();
-        });
-      };
-
-      schedule();
-      timers.push(window.setTimeout(syncVisible, 80), window.setTimeout(syncVisible, 260), window.setTimeout(syncVisible, 900));
-
-      scrollRoot?.addEventListener('scroll', schedule, { passive: true });
-      window.addEventListener('resize', schedule, { passive: true });
-      window.addEventListener('orientationchange', schedule, { passive: true });
-      window.visualViewport?.addEventListener('resize', schedule, { passive: true });
-      cleanupFns.push(() => {
-        if (raf) window.cancelAnimationFrame(raf);
-        scrollRoot?.removeEventListener('scroll', schedule);
-        window.removeEventListener('resize', schedule);
-        window.removeEventListener('orientationchange', schedule);
-        window.visualViewport?.removeEventListener('resize', schedule);
-      });
+      timers.push(
+        window.setTimeout(syncVisible, 80),
+        window.setTimeout(syncVisible, 260),
+        window.setTimeout(syncVisible, 900),
+      );
     };
 
     start();
 
     return () => {
       cancelled = true;
-      if (raf) window.cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
       cleanupFns.forEach((fn) => fn());
     };
@@ -1741,9 +1740,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   useEffect(() => {
     const forceVisibleIfStuck = () => {
       try {
-        const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-        if (!root) return;
-        const rootRect = root.getBoundingClientRect();
+        // Sidan scrollar på window; [data-landing-scroll-root] finns inte alltid.
+        const root = (document.querySelector('[data-landing-scroll-root]') as HTMLElement | null)
+          ?? document.body;
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        const rootRect = root === document.body
+          ? { top: 0, bottom: viewportHeight }
+          : root.getBoundingClientRect();
         const candidates = root.querySelectorAll<HTMLElement>(
           '[data-lf-shown="false"], [data-journey-shown="false"]',
         );
@@ -1780,12 +1783,14 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
     const timer = window.setTimeout(forceVisibleIfStuck, 1500);
     root?.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
 
     return () => {
       window.clearTimeout(timer);
       if (raf) window.cancelAnimationFrame(raf);
       root?.removeEventListener('scroll', schedule);
+      window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
     };
   }, [audience]);
