@@ -135,6 +135,9 @@ const HeroVideo = () => {
   // ovanpå <video> (kan inte alltid CSS-döljas). Vi döljer hela videoelementet
   // och visar postern som vanlig <img> — ser ut som en still, inte en trasig spelare.
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  // Har videon målat minst en riktig bildruta? Först då tonas den in ovanpå postern.
+  const [videoPainted, setVideoPainted] = useState(false);
+
 
 
   // Recompute source on resize/orientation change so the video adapts when a
