@@ -124,34 +124,46 @@ const evaluateAll = () => {
   const picks = new Set<HTMLVideoElement>();
   // Urval = korten närmast viewportens mitt, men med två skydd:
   //
-  // 1. HYSTERES: ett kort som redan spelar får 25 % rabatt på sitt avstånd.
-  //    Utan det byter urvalet fram och tillbaka mellan två gränskort under
-  //    scroll → varje byte ger en pause/play + eventuellt posterlager tillbaka,
-  //    vilket är exakt den "blixt/hack"-känsla som syns vid mjuk scroll.
-  // 2. KANTANKRING: strippens sista (och första) kort hamnar aldrig närmast
-  //    mitten på breda skärmar — de blev därför aldrig valda och stod kvar på
-  //    poster. Är ett kantkort till större delen synligt får det spela.
+  // 1. SAMMANHÄNGANDE FÖNSTER: urvalet är alltid N kort som ligger BREDVID
+  //    varandra i strippen (2-3-4, aldrig 2-3-5). Tidigare poängsattes varje
+  //    kort för sig med en hysteres-rabatt, vilket kunde låta ett kort längre
+  //    bort behålla sin plats framför ett närmare — då uppstod glappet.
+  // 2. HYSTERES PÅ FÖNSTRET: fönstret flyttas bara när mittkortet hamnat
+  //    utanför det. Då glider markören ett steg i taget, fram och tillbaka,
+  //    utan att flimra mellan två lägen vid gränsen.
+  // 3. KANTKLAMPNING: vid strippens början/slut skjuts fönstret in så att det
+  //    ryms bland de synliga korten — kantkorten blir därmed alltid valda.
   const visible = all.filter((entry) => entry.inView && entry.covered > 0);
-  const scored = visible
-    .map((entry) => ({ entry, score: entry.el.paused ? entry.distance : entry.distance * 0.75 }))
-    .sort((a, b) => a.score - b.score);
 
-  const ordered = scored.map((s) => s.entry);
-  const edgeAnchors: Entry[] = [];
-  const firstCard = all[0];
-  const lastCard = all[all.length - 1];
-  for (const edge of [lastCard, firstCard]) {
-    if (edge && visible.includes(edge) && edge.covered >= 0.7) edgeAnchors.push(edge);
+  if (visible.length > 0) {
+    const windowSize = Math.min(maxConcurrent, visible.length);
+    let centerPos = 0;
+    for (let i = 1; i < visible.length; i += 1) {
+      if (visible[i].distance < visible[centerPos].distance) centerPos = i;
+    }
+
+    const clampStart = (start: number) =>
+      Math.min(Math.max(start, 0), visible.length - windowSize);
+
+    let start = clampStart(centerPos - Math.floor((windowSize - 1) / 2));
+
+    // Behåll föregående fönster om det fortfarande är helt synligt och
+    // mittkortet ligger kvar i det → ingen pause/play vid minsta scroll.
+    if (lastWindow.length === windowSize) {
+      const prevPositions = lastWindow.map((el) => visible.findIndex((e) => e.el === el));
+      const intact =
+        prevPositions.every((p, i) => p >= 0 && (i === 0 || p === prevPositions[i - 1] + 1)) &&
+        prevPositions.includes(centerPos);
+      if (intact) start = clampStart(prevPositions[0]);
+    }
+
+    const chosen = visible.slice(start, start + windowSize);
+    chosen.forEach((entry) => picks.add(entry.el));
+    lastWindow = chosen.map((entry) => entry.el);
+  } else {
+    lastWindow = [];
   }
 
-  for (const entry of edgeAnchors) {
-    if (picks.size >= maxConcurrent) break;
-    picks.add(entry.el);
-  }
-  for (const entry of ordered) {
-    if (picks.size >= maxConcurrent) break;
-    picks.add(entry.el);
-  }
 
   const candidates = all.filter((e) => e.inView);
   all.forEach(({ el, inView }) => {
