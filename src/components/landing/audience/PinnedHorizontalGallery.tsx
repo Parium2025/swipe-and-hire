@@ -141,8 +141,12 @@ const evaluateAll = () => {
   // pausas sedan ALDRIG igen så länge fliken är synlig. Därmed finns ingen
   // start/stopp-stress kvar när man scrollar snabbt genom strippen.
   if (!hidden && maxConcurrent >= all.length && all.length > 0) {
-    all.forEach(({ el, inView }) => {
-      if (inView || el.dataset.phgStarted === '1') {
+    // Så snart NÅGOT kort syns startas hela strippen — även korten som ligger
+    // utanför skärmen horisontellt. Då är alla videor redan igång när man
+    // scrollar i sidled, i stället för att starta i samma stund de dyker upp.
+    const anyVisible = all.some((entry) => entry.inView) || all.some((entry) => entry.el.dataset.phgStarted === '1');
+    all.forEach(({ el }) => {
+      if (anyVisible) {
         el.dataset.phgStarted = '1';
         playVisible(el);
       }
