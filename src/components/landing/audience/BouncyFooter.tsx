@@ -62,7 +62,33 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     );
 
     io.observe(el);
-    return () => io.disconnect();
+
+    // Kallstartsskydd: vid första nedscrollningen kan IO ha rapporterat
+    // "intersecting" medan sidans höjd fortfarande justerades (bilder/videor
+    // som lägger till layout), så bouncen hann köras klart innan sektionen
+    // faktiskt syntes. En geometrisk kontroll på scroll säkerställer att
+    // animationen startar när sektionen verkligen är i bild.
+    const checkGeometry = () => {
+      const node = wrapperRef.current;
+      if (!node || !armed) return;
+      const rect = node.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      if (rect.top < vh * 0.85 && rect.bottom > 0) triggerBounce();
+      else if (rect.top > vh) armed = true;
+    };
+
+    scrollRoot?.addEventListener('scroll', checkGeometry, { passive: true });
+    window.addEventListener('scroll', checkGeometry, { passive: true });
+    window.addEventListener('resize', checkGeometry);
+    const initial = window.setTimeout(checkGeometry, 300);
+
+    return () => {
+      io.disconnect();
+      window.clearTimeout(initial);
+      scrollRoot?.removeEventListener('scroll', checkGeometry);
+      window.removeEventListener('scroll', checkGeometry);
+      window.removeEventListener('resize', checkGeometry);
+    };
   }, []);
 
 
