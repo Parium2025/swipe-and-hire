@@ -1207,21 +1207,60 @@ const SectionDivider = ({ className = '' }: { className?: string }) => {
 /**
  * IntroSplinePhone — Spline-telefonen i intro-sektionen ("Vi har gjort det enkelt för alla").
  *
- * Spline-scenen har ingen fast pixelstorlek: telefonens visuella höjd styrs av
- * `zoom` i förhållande till canvasens höjd. Därför mäts containern här och
- * zoom räknas fram med samma baslinje som hero-metriken (h/376 * 0.58), så att
- * telefonen alltid får identiska proportioner oavsett breakpoint — och aldrig
- * blir högre än textkolumnen bredvid.
+ * STORLEKSPARITET MED HERO
+ * ------------------------
+ * Telefonen ska ALLTID se ut att vara lika stor som hero-telefonen, oavsett
+ * skärmbredd. Tidigare styrdes storleken av fasta `max-w`-steg (140→184 px)
+ * medan hero växte med viewporten (upp till 244 px) — på stora skärmar blev
+ * intro-telefonen därför synligt mindre, vilket bröt känslan av att det är
+ * samma telefon genom hela sidan.
+ *
+ * Spline-scenen har ingen fast pixelstorlek: telefonens SYNLIGA bredd följer
+ * kamerazoomen linjärt mot canvasens höjd. Uppmätt samband (verifierat i
+ * browser på två oberoende canvasstorlekar):
+ *
+ *   synligBredd ≈ 0.657 × canvasHöjd × zoom
+ *   canvasHöjd  = canvasBredd × 19.5 / 9
+ *   ⇒ synligBredd ≈ 1.4235 × canvasBredd × zoom
+ *
+ * Vi vänder på formeln: målbredden hämtas från hero-metriken, och zoom räknas
+ * fram så att den synliga telefonen landar exakt där. Zoom taklås vid den
+ * punkt där telefonen skulle börja klippas mot canvasens över-/underkant.
  */
+/**
+ * Uppmätt i browser (tre oberoende canvasstorlekar): Spline-telefonens synliga
+ * bredd beror ENBART på kamerazoomen, inte på canvasens storlek —
+ *   synligTelefonbredd(px) ≈ 256 × zoom
+ * Telefonens mitt ligger dessutom ~26,6 % av sin egen höjd OVANFÖR canvasens
+ * mitt — scenen är inte centrerad. Därför behöver canvasen extra höjd, annars
+ * klipps toppen så fort telefonen blir stor.
+ */
+const SPLINE_WIDTH_PER_ZOOM_PX = 256;
+const SPLINE_PHONE_ASPECT = 19.5 / 9;
+/** Telefonens mittförskjutning uppåt, som andel av telefonens höjd. */
+const SPLINE_CENTER_OFFSET = 0.266;
+/** Andel av canvasbredden som telefonen får uppta. */
+const SPLINE_MAX_FILL = 0.9;
+/** Extra canvashöjd så toppen aldrig klipps (härlett ur mittförskjutningen). */
+const SPLINE_HEIGHT_HEADROOM = 1.45;
+
+
+/** Hero-telefonens faktiska synliga bredd vid nuvarande viewport. */
+const getHeroPhoneVisualWidth = () => {
+  if (typeof window === 'undefined') return 184;
+  const { width } = getViewportSize();
+  if (isMobileLikeHeroViewport()) {
+    const metrics = calculateInlinePhoneMetrics('video');
+    return metrics.width ?? heroVideoPhoneWidth(width);
+  }
+  return heroVideoPhoneWidth(width);
+};
+
 const IntroSplinePhone = () => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [active, setActive] = useState(false);
   const [zoom, setZoom] = useState(0.4);
-  const [isPortraitTablet, setIsPortraitTablet] = useState(false);
-  // Spline-canvasen renderar telefonen centrerat med luft över/under. Den luften
-  // kollapsas med negativa marginaler så att den SYNLIGA telefonen hamnar exakt
-  // centrerad mellan rubriken och brödtexten – ingen död yta.
-  const [trimPx, setTrimPx] = useState(0);
+  const [box, setBox] = useState<{ width: number; height: number; trimTop: number; trimBottom: number } | null>(null);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -1229,19 +1268,30 @@ const IntroSplinePhone = () => {
 
     const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
     const measure = () => {
-      const height = wrapper.getBoundingClientRect().height;
-      if (!height) return;
-      const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-      const portraitTablet = viewportWidth >= 768 && viewportWidth < 1180 && viewportHeight > viewportWidth;
-      setIsPortraitTablet(portraitTablet);
-      // Samma baslinje som hero-metriken: telefonens synliga höjd blir ca 74 %
-      // av canvasens höjd vid den här zoomen (högre zoom klipper toppen).
-      setZoom(clamp((height / 376) * (portraitTablet ? 0.42 : 0.46), 0.2, portraitTablet ? 0.54 : 0.58));
-      setTrimPx(Math.round(height * 0.16));
+      const target = getHeroPhoneVisualWidth();
+      const desiredWidth = Math.round(target / SPLINE_MAX_FILL);
+      const desiredHeight = Math.round(desiredWidth * SPLINE_PHONE_ASPECT * SPLINE_HEIGHT_HEADROOM);
+
+      // Faktisk bredd kan bli mindre om gridkolumnen är smalare — räkna zoom
+      // mot det som verkligen renderas, annars klipps telefonen.
+      const actual = wrapper.getBoundingClientRect();
+      const renderWidth = actual.width || desiredWidth;
+      const renderHeight = actual.height || desiredHeight;
+      const cappedTarget = Math.min(target, renderWidth * SPLINE_MAX_FILL);
+      const nextZoom = clamp(cappedTarget / SPLINE_WIDTH_PER_ZOOM_PX, 0.15, 1.2);
+      setZoom(nextZoom);
+
+      // Kollapsa den döda ytan över/under telefonen med negativa marginaler så
+      // att den SYNLIGA telefonen hamnar där layouten förväntar sig den.
+      const phoneHeight = cappedTarget * SPLINE_PHONE_ASPECT;
+      const phoneTop = renderHeight / 2 - SPLINE_CENTER_OFFSET * phoneHeight - phoneHeight / 2;
+      setBox({
+        width: desiredWidth,
+        height: desiredHeight,
+        trimTop: Math.max(0, Math.round(phoneTop)),
+        trimBottom: Math.max(0, Math.round(renderHeight - phoneTop - phoneHeight)),
+      });
     };
-
-
 
     measure();
     const resizeObserver = new ResizeObserver(measure);
@@ -1274,19 +1324,22 @@ const IntroSplinePhone = () => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 1, ease }}
-      style={{ marginTop: 0, marginBottom: -Math.round(trimPx * 2) }}
-      className={`pointer-events-none relative mx-auto aspect-[9/19.5] w-full ${
-        isPortraitTablet
-          ? 'max-w-[192px]'
-          : 'max-w-[140px] sm:max-w-[152px] md:max-w-[162px] lg:max-w-[172px] xl:max-w-[184px]'
-      }`}
-
+      style={{
+        width: box ? `${box.width}px` : undefined,
+        height: box ? `${box.height}px` : undefined,
+        marginTop: box ? -box.trimTop : 0,
+        marginBottom: box ? -box.trimBottom : 0,
+      }}
+      className="pointer-events-none relative mx-auto"
+      data-intro-spline-phone
     >
       <SplinePhone className="relative h-full w-full" zoom={zoom} active={active} />
 
     </motion.div>
   );
+
 };
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroIntroStage — Native scroll, inga hijacks.
