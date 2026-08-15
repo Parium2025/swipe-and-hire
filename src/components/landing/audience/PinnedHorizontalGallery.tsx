@@ -73,6 +73,8 @@ const getPlayableSrc = (item: MediaItem) =>
   prefersLightweightVideo() && item.windowsSrc ? item.windowsSrc : item.src;
 const registry = new Set<HTMLVideoElement>();
 let rafId = 0;
+/** Senast valda, sammanhängande fönster av spelande kort (vänster→höger). */
+let lastWindow: HTMLVideoElement[] = [];
 
 const evaluateAll = () => {
   rafId = 0;
