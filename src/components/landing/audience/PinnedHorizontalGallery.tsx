@@ -151,50 +151,44 @@ const evaluateAll = () => {
 
   if (visible.length > 0) {
     const windowSize = Math.min(maxConcurrent, visible.length);
-    let centerPos = 0;
-    for (let i = 1; i < visible.length; i += 1) {
-      if (visible[i].distance < visible[centerPos].distance) centerPos = i;
+    const progress = Number(document.querySelector<HTMLElement>('[data-phg-section]')?.dataset.phgProgress ?? 0);
+
+    // Utvärdera riktiga sammanhängande fönster i den fasta innehållsordningen,
+    // aldrig i en filtrerad lista där en saknad position kan kollapsa 3–4–5
+    // till 3–5. Poängen använder hela fönstrets centrum och fungerar därför
+    // symmetriskt även när enheten bara tillåter två samtidiga videor.
+    const possible: Array<{ start: number; entries: Entry[]; score: number }> = [];
+    for (let start = 0; start <= all.length - windowSize; start += 1) {
+      const entries = all.slice(start, start + windowSize);
+      const contiguous = entries.every((entry, i) => i === 0 || entry.index === entries[i - 1].index + 1);
+      if (!contiguous || entries.some((entry) => !entry.inView || entry.covered <= 0)) continue;
+      const firstRect = entries[0].el.closest<HTMLElement>('[data-gallery-index]')?.getBoundingClientRect();
+      const lastRect = entries[entries.length - 1].el.closest<HTMLElement>('[data-gallery-index]')?.getBoundingClientRect();
+      if (!firstRect || !lastRect) continue;
+      const windowCenter = (firstRect.left + lastRect.right) / 2;
+      possible.push({ start, entries, score: Math.abs(windowCenter - centerX) });
     }
 
-    const clampStart = (start: number) =>
-      Math.min(Math.max(start, 0), visible.length - windowSize);
+    if (possible.length > 0) {
+      let desired = possible.reduce((best, candidate) => candidate.score < best.score ? candidate : best);
+      // Exakta ändlägen ska alltid aktivera strippens verkliga ytterkort.
+      if (progress <= 0.002) desired = possible[0];
+      else if (progress >= 0.998) desired = possible[possible.length - 1];
 
-    let start = clampStart(centerPos - Math.floor((windowSize - 1) / 2));
-
-    // Vid strippens ändlägen måste första/sista kortet alltid spela, även på en
-    // bred skärm där fem kort kan vara delvis synliga samtidigt. Utan detta
-    // valdes korten runt viewportens mitt (t.ex. 5–6–7 vid slutet) och kort 8
-    // syntes men startade aldrig.
-    const firstContentIndex = all[0]?.index;
-    const lastContentIndex = all[all.length - 1]?.index;
-    const atStart = visible[0]?.index === firstContentIndex;
-    const atEnd = visible[visible.length - 1]?.index === lastContentIndex;
-    if (atStart && !atEnd) start = 0;
-    else if (atEnd && !atStart) start = visible.length - windowSize;
-
-    // Flytta fönstret högst ETT kort per evaluation. Vid ett större scrollsteg
-    // ska följden därför alltid vara 1–2–3 → 2–3–4 → 3–4–5, aldrig hoppa
-    // direkt över ett mellanläge. Ytterligare rAF-ticks låter urvalet lugnt
-    // hinna ikapp målpositionen även när scrollen levererar ett stort hopp.
-    const desiredStartIndex = visible[start]?.index ?? 0;
-    const previousStartIndex = Number(lastWindow[0]?.closest<HTMLElement>('[data-gallery-index]')?.dataset.galleryIndex);
-    if (lastWindow.length === windowSize && Number.isFinite(previousStartIndex)) {
-      const steppedStartIndex = previousStartIndex + Math.sign(desiredStartIndex - previousStartIndex);
-      if (steppedStartIndex !== desiredStartIndex) scheduleEvaluate();
-      const steppedPosition = visible.findIndex((entry) => entry.index === steppedStartIndex);
-      if (steppedPosition >= 0 && steppedPosition <= visible.length - windowSize) {
-        start = steppedPosition;
+      const previousStartIndex = Number(lastWindow[0]?.closest<HTMLElement>('[data-gallery-index]')?.dataset.galleryIndex);
+      if (lastWindow.length === windowSize && Number.isFinite(previousStartIndex)) {
+        const desiredStartIndex = desired.entries[0].index;
+        const steppedStartIndex = previousStartIndex + Math.sign(desiredStartIndex - previousStartIndex);
+        const stepped = possible.find((candidate) => candidate.entries[0].index === steppedStartIndex);
+        if (stepped) desired = stepped;
+        if (steppedStartIndex !== desiredStartIndex) scheduleEvaluate();
       }
-    }
 
-    let chosen = visible.slice(start, start + windowSize);
-    // Ett riktigt sammanhängande fönster måste vara sammanhängande även i
-    // innehållsindex. Om en video saknas ur registret får nästa kort aldrig
-    // hoppa in och skapa 2–3–5; håll i stället urvalet vid glappet.
-    const gapAt = chosen.findIndex((entry, i) => i > 0 && entry.index !== chosen[i - 1].index + 1);
-    if (gapAt > 0) chosen = chosen.slice(0, gapAt);
-    chosen.forEach((entry) => picks.add(entry.el));
-    lastWindow = chosen.map((entry) => entry.el);
+      desired.entries.forEach((entry) => picks.add(entry.el));
+      lastWindow = desired.entries.map((entry) => entry.el);
+    } else {
+      lastWindow = [];
+    }
   } else {
     lastWindow = [];
   }
