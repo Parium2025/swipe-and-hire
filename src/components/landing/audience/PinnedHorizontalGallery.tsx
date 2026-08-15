@@ -233,13 +233,19 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [failed, setFailed] = useState(false);
   const [src, setSrc] = useState(() => getPlayableSrc(item));
   const [frameReady, setFrameReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  // VIKTIGT: `playing`/`timeupdate` kan fyra INNAN någon bildruta är dekodad
+  // (särskilt i mobil-Safari och Chrome på Android efter en seek). Togs postern
+  // bort där syntes en kort svart blixt på kortet. Vi kräver därför alltid
+  // readyState >= HAVE_CURRENT_DATA innan posterlagret får släppa.
   const markReady = useCallback(() => {
+    const v = videoRef.current;
+    if (v && v.readyState < 2) return;
     setFrameReady(true);
   }, []);
   const resetReady = useCallback(() => {
     setFrameReady(false);
   }, []);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Ingen fade någonstans. Posterbilden ligger kvar UNDER videon tills en
   // riktig bildruta faktiskt är dekodad och målad — då byts lagret direkt.
