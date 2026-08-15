@@ -141,19 +141,42 @@ const evaluateAll = () => {
   // pausas sedan ALDRIG igen så länge fliken är synlig. Därmed finns ingen
   // start/stopp-stress kvar när man scrollar snabbt genom strippen.
   if (!hidden && maxConcurrent >= all.length && all.length > 0) {
-    // Så snart NÅGOT kort syns startas hela strippen — även korten som ligger
-    // utanför skärmen horisontellt. Då är alla videor redan igång när man
-    // scrollar i sidled, i stället för att starta i samma stund de dyker upp.
+    // Så snart NÅGOT kort syns startas strippen. MEN: vid kallstart (t.ex.
+    // inkognito, där HTTP-cachen är tom) får vi ALDRIG dra igång åtta
+    // parallella nedladdningar — då delar strömmarna bandbredd, ingen når
+    // första bildrutan och korten ser frusna ut på sin poster. Därför startas
+    // korten i innehållsordning och ett kort som ännu inte är spelbart
+    // (readyState < 3) räknas som "pågående kallstart": max två sådana åt
+    // gången. Kort som redan är buffrade startas alltid direkt, så efter
+    // första varvet är beteendet exakt som tidigare (allt igång, inga pauser).
     const anyVisible = all.some((entry) => entry.inView) || all.some((entry) => entry.el.dataset.phgStarted === '1');
-    all.forEach(({ el }) => {
-      if (anyVisible) {
+    const COLD_START_BUDGET = 2;
+    let coldInFlight = all.reduce(
+      (n, entry) => (entry.el.dataset.phgStarted === '1' && entry.el.readyState < 3 ? n + 1 : n),
+      0,
+    );
+    if (anyVisible) {
+      all.forEach(({ el, inView }) => {
+        if (el.dataset.phgStarted === '1') {
+          playVisible(el);
+          return;
+        }
+        const warm = el.readyState >= 3;
+        if (!warm && !inView && coldInFlight >= COLD_START_BUDGET) return;
+        if (!warm) coldInFlight += 1;
         el.dataset.phgStarted = '1';
         playVisible(el);
+      });
+      // Kör om tills alla kort hunnit startas (nästa tick när buffringen
+      // släppt igenom ett kort till).
+      if (all.some((entry) => entry.el.dataset.phgStarted !== '1')) {
+        window.setTimeout(scheduleEvaluate, 400);
       }
-    });
+    }
     lastWindow = all.map((entry) => entry.el);
     return;
   }
+
 
   if (hidden) {
     all.forEach(({ el }) => { if (!el.paused) el.pause(); });
