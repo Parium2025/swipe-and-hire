@@ -454,18 +454,23 @@ const HeroVideo = () => {
             i en 16:9-fil. object-cover beskär de svarta sidofälten och behåller
             personen centrerad. Landskap använder befintlig hero-master. */}
         <div className="absolute inset-0 h-full w-full">
-          {/* Lågeffektläge / blockerad autoplay: postern som stillbild ovanpå,
-              så Safaris play-knapp aldrig syns. Byts tillbaka när videon spelar. */}
-          {(autoplayBlocked || skipVideo) && (
-            <img
-              src={tier === 'portrait' ? posterPortraitAsset.url : tier === 'tablet' ? posterTabletAsset.url : posterAsset.url}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-              className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover"
-              style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center' }}
-            />
-          )}
+          {/* Postern ligger ALLTID kvar som ett eget <img>-lager under videon.
+              Poster-attributet ensamt räcker inte: i privat läge/kall cache
+              (och när nätet är segt) hann Safari visa en helsvart <video>-ruta
+              innan någon bild fanns. Med ett eget img-lager syns hero-bilden så
+              fort 53 kB laddats, och videon tonas in ovanpå när den faktiskt
+              målat sin första bildruta. */}
+          <img
+            src={tier === 'portrait' ? posterPortraitAsset.url : tier === 'tablet' ? posterTabletAsset.url : posterAsset.url}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            decoding="async"
+            className={`pointer-events-none absolute inset-0 h-full w-full object-cover ${
+              autoplayBlocked || skipVideo ? 'z-10' : 'z-0'
+            }`}
+            style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center' }}
+          />
 
           <video
             ref={videoRef}
@@ -487,7 +492,13 @@ const HeroVideo = () => {
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             // Varje nivå har en master med nästan samma proportion som viewporten,
             // så object-cover kapar bara några procent — aldrig svarta ränder.
-            style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center' }}
+            style={{
+              objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center',
+              // Tona in först när en riktig bildruta finns — annars kan Safaris
+              // tomma (svarta) videoyta lägga sig över posterlagret.
+              opacity: videoPainted && !autoplayBlocked && !skipVideo ? 1 : 0,
+              transition: 'opacity 240ms linear',
+            }}
           >
             {!skipVideo && (
               /* Endast EN källa — samma URL som <link rel="preload"> i index.html,
@@ -496,6 +507,7 @@ const HeroVideo = () => {
             )}
           </video>
         </div>
+
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />
