@@ -40,10 +40,10 @@ type MediaItem = {
 // 404, codec-issue) renderas posterbilden istället för en svart ruta —
 // användaren ser alltid något meningsfullt i kortet.
 const items: MediaItem[] = [
-  { type: 'video', src: '/landing/jobseeker-pt.mp4', windowsSrc: winPt.url, poster: posterPt, eyebrow: 'Träning', title: 'Personliga tränare' },
-  { type: 'video', src: '/landing/jobseeker-plumber.mp4', windowsSrc: winPlumber.url, poster: real5, position: '50% 30%', eyebrow: 'Hantverk', title: 'Rörmokare & byggare' },
+  { type: 'video', src: '/landing/jobseeker-pt.mp4', windowsSrc: winPt.url, poster: posterPt, eyebrow: 'Hälsa & träning', title: 'Personliga tränare' },
+  { type: 'video', src: '/landing/jobseeker-plumber.mp4', windowsSrc: winPlumber.url, poster: real5, position: '50% 30%', eyebrow: 'Transport', title: 'Rörmokare & byggare' },
   { type: 'video', src: '/landing/jobseeker-real-center.mp4', windowsSrc: winRealCenter.url, poster: posterAffarer, eyebrow: 'Affärer', title: 'Yrkespersoner i sitt element' },
-  { type: 'video', src: '/landing/jobseeker-real-4.mp4', windowsSrc: winReal4.url, poster: posterService, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
+  { type: 'video', src: '/landing/jobseeker-real-4.mp4', windowsSrc: winReal4.url, poster: posterService, eyebrow: 'Mäklare', title: 'Mäklare & rådgivare' },
   { type: 'video', src: '/landing/jobseeker-real-3.mp4', windowsSrc: winReal3.url, poster: posterRestaurant, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
   { type: 'video', src: '/landing/jobseeker-electrician.mp4', windowsSrc: winElectrician.url, poster: posterElectrician, eyebrow: 'Elektriker', title: 'Elektriker' },
   { type: 'video', src: '/landing/jobseeker-farmer.mp4', windowsSrc: winFarmer.url, poster: posterFarmer, eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
