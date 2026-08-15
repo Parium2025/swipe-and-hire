@@ -115,12 +115,15 @@ const AudienceCard = ({
       onFocus={() => preloadAudienceAssets(role)}
       onTouchStart={() => preloadAudienceAssets(role)}
       variants={{
-        hidden: { opacity: 0, y: 34, scale: 0.96, filter: 'blur(12px)' },
-        show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
+        // Ingen blur-filter i entrén: den tvingar fram ett extra GPU-lager och
+        // syns som en "blixt"/oskärpa innan knappen landar. Ren opacitet + lyft.
+        hidden: { opacity: 0, y: 18 },
+        show: { opacity: 1, y: 0 },
       }}
       animate={isSelected ? { scale: 1.035, y: -3 } : isOtherSelected ? { opacity: 0.2, scale: 0.94 } : undefined}
       whileTap={!selectedRole ? { scale: 0.985 } : undefined}
-      transition={{ duration: 0.68, ease }}
+      transition={{ duration: 0.5, ease }}
+
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
       className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-none sm:w-[300px]"
     >
@@ -235,9 +238,10 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           <div className="flex w-full flex-col items-center gap-1.5 sm:gap-2">
             <motion.h1
               id="landing-hero-heading"
-              initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              transition={{ duration: 1.4, ease, delay: 0.4 }}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease, delay: 0.15 }}
+
               className="max-w-[21rem] min-[390px]:max-w-[38rem] sm:max-w-none text-balance font-semibold leading-[1.1] tracking-tight text-white text-[clamp(1rem,calc(0.6vw+0.88rem),1.4rem)] md:text-[clamp(1.15rem,calc(0.9vw+0.65rem),1.6rem)]"
             >
               Oavsett om du söker jobb eller rekryterar så finns vi här för dig
@@ -246,7 +250,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, ease, delay: 0.9 }}
+              transition={{ duration: 0.9, ease, delay: 0.35 }}
               className="whitespace-nowrap font-normal leading-[1.22] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] text-[clamp(1.3rem,5.5vw,2.4rem)] md:text-[clamp(2rem,4.5vw,3.5rem)]"
               style={{ color: '#ffffff' }}
             >
@@ -261,7 +265,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             animate="show"
             variants={{
               hidden: {},
-              show: { transition: { staggerChildren: 0.18, delayChildren: 1.2 } },
+              show: { transition: { staggerChildren: 0.12, delayChildren: 0.55 } },
             }}
           >
             {audienceOptions.map((option) => (

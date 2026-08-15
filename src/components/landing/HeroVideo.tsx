@@ -321,12 +321,22 @@ const HeroVideo = () => {
         }
         if (video.currentTime === lastTime) {
           healthyTicks = 0;
+          // Kallstart (inkognito/tom cache): videon står stilla för att den
+          // fortfarande buffrar, inte för att dekodern hängt. Ett load() här
+          // slänger den pågående hämtningen och startar om allt från noll —
+          // det är precis den "laddar om"-känslan. Vänta i stället.
+          if (video.readyState < 3) {
+            stuckCount = 0;
+            tryPlay();
+            return;
+          }
           stuckCount++;
-          if (stuckCount >= 2) {
+          if (stuckCount >= 3) {
             stuckCount = 0;
             rebuildDecoder();
           }
         } else {
+
           stuckCount = 0;
           lastTime = video.currentTime;
           healthyTicks++;
