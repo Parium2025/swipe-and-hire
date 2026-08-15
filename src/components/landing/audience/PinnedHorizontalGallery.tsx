@@ -284,6 +284,10 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [frameReady, setFrameReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const retryCountRef = useRef(0);
+  // Antal "långsamma" återförsök efter att de snabba tagit slut. Utan tak
+  // körde en permanent trasig källa (t.ex. codec som saknas i webbläsaren)
+  // load() var tredje sekund i all evighet, på alla åtta kort.
+  const slowRetryRef = useRef(0);
   const retryTimerRef = useRef<number | null>(null);
   // VIKTIGT: `playing`/`timeupdate` kan fyra INNAN någon bildruta är dekodad
   // (särskilt i mobil-Safari och Chrome på Android efter en seek). Togs postern
@@ -487,6 +491,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
             onCanPlay={scheduleEvaluate}
             onLoadedData={() => {
               retryCountRef.current = 0;
+              slowRetryRef.current = 0;
               scheduleEvaluate();
               markReady();
             }}
@@ -520,12 +525,21 @@ const CardItem = ({ item, index }: CardItemProps) => {
               }
               if (isAppleDevice() && src !== item.src) {
                 retryCountRef.current = 0;
+                slowRetryRef.current = 0;
                 setSrc(item.src);
                 return;
               }
               // Behåll videoelementet och postern i kortet. Fortsätt med långsam
               // återhämtning i stället för permanent fallback; annars försvann
               // indexet ur kedjan och nästa video kunde hoppa över det.
+              //
+              // TAK: efter fem långsamma försök (~15 s) är källan bevisat
+              // ospelbar i den här webbläsaren (saknad codec, blockerad CDN).
+              // Då slutar vi ladda om — posterbilden ligger kvar och kortet
+              // behåller sin plats i kedjan, men vi bränner inte nätverk och
+              // decoder-initieringar var tredje sekund för evigt.
+              if (slowRetryRef.current >= 5) return;
+              slowRetryRef.current += 1;
               if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
               retryTimerRef.current = window.setTimeout(() => {
                 retryTimerRef.current = null;
