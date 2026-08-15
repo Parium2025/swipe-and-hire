@@ -83,10 +83,21 @@ const evaluateAll = () => {
   const centerX = vw / 2;
   const hidden = document.hidden;
 
-  type Entry = { el: HTMLVideoElement; covered: number; left: number; distance: number; inView: boolean };
+  type Entry = {
+    el: HTMLVideoElement;
+    index: number;
+    covered: number;
+    left: number;
+    distance: number;
+    inView: boolean;
+  };
   const all: Entry[] = [];
   registry.forEach((el) => {
-    const rect = el.getBoundingClientRect();
+    // Mät själva kortet, inte videolagret. Ett videofel får aldrig ta bort en
+    // position ur ordningsföljden och göra t.ex. 2–3–5 "sammanhängande".
+    const card = el.closest<HTMLElement>('[data-gallery-index]');
+    const rect = card?.getBoundingClientRect() ?? el.getBoundingClientRect();
+    const index = Number(card?.dataset.galleryIndex ?? -1);
     const inView =
       !hidden &&
       rect.bottom > 0 &&
@@ -97,11 +108,12 @@ const evaluateAll = () => {
     const visibleW = Math.max(0, Math.min(rect.right, vw) - Math.max(rect.left, 0));
     const covered = rect.width > 0 ? visibleW / rect.width : 0;
     const cardCenter = rect.left + rect.width / 2;
-    all.push({ el, covered, left: rect.left, distance: Math.abs(cardCenter - centerX), inView });
+    all.push({ el, index, covered, left: rect.left, distance: Math.abs(cardCenter - centerX), inView });
   });
 
-  // Kortens ordning i strippen = deras x-position (1 … 8), oavsett om de syns.
-  all.sort((a, b) => a.left - b.left);
+  // Stabil innehållsordning (1 … 8), oberoende av transform, subpixelvärden
+  // och scrollriktning. X-position används bara som defensiv fallback.
+  all.sort((a, b) => (a.index >= 0 && b.index >= 0 ? a.index - b.index : a.left - b.left));
 
   const maxConcurrent = getMaxConcurrent();
   const playVisible = (el: HTMLVideoElement) => {
@@ -154,12 +166,23 @@ const evaluateAll = () => {
     if (lastWindow.length === windowSize) {
       const prevPositions = lastWindow.map((el) => visible.findIndex((e) => e.el === el));
       const intact =
-        prevPositions.every((p, i) => p >= 0 && (i === 0 || p === prevPositions[i - 1] + 1)) &&
+        prevPositions.every((p, i) =>
+          p >= 0 &&
+          (i === 0 || (
+            p === prevPositions[i - 1] + 1 &&
+            visible[p].index === visible[prevPositions[i - 1]].index + 1
+          ))
+        ) &&
         prevPositions.includes(centerPos);
       if (intact) start = clampStart(prevPositions[0]);
     }
 
-    const chosen = visible.slice(start, start + windowSize);
+    let chosen = visible.slice(start, start + windowSize);
+    // Ett riktigt sammanhängande fönster måste vara sammanhängande även i
+    // innehållsindex. Om en video saknas ur registret får nästa kort aldrig
+    // hoppa in och skapa 2–3–5; håll i stället urvalet vid glappet.
+    const gapAt = chosen.findIndex((entry, i) => i > 0 && entry.index !== chosen[i - 1].index + 1);
+    if (gapAt > 0) chosen = chosen.slice(0, gapAt);
     chosen.forEach((entry) => picks.add(entry.el));
     lastWindow = chosen.map((entry) => entry.el);
   } else {
@@ -234,6 +257,8 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [src, setSrc] = useState(() => getPlayableSrc(item));
   const [frameReady, setFrameReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef<number | null>(null);
   // VIKTIGT: `playing`/`timeupdate` kan fyra INNAN någon bildruta är dekodad
   // (särskilt i mobil-Safari och Chrome på Android efter en seek). Togs postern
   // bort där syntes en kort svart blixt på kortet. Vi kräver därför alltid
@@ -278,6 +303,10 @@ const CardItem = ({ item, index }: CardItemProps) => {
       }
     };
   }, [item.type, failed, frameReady, src, markReady]);
+
+  useEffect(() => () => {
+    if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
+  }, []);
 
 
   useEffect(() => {
@@ -404,6 +433,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
   return (
     <div
       className="phg-card phg-card-enter"
+      data-gallery-index={index}
       style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
       {item.type === 'video' && !failed ? (
@@ -427,6 +457,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
             onContextMenu={(e) => e.preventDefault()}
             onCanPlay={scheduleEvaluate}
             onLoadedData={() => {
+              retryCountRef.current = 0;
               scheduleEvaluate();
               markReady();
             }}
@@ -436,10 +467,30 @@ const CardItem = ({ item, index }: CardItemProps) => {
             // lägg tillbaka vårt egna posterlager tills en ny bildruta målats.
             onEmptied={resetReady}
             onError={() => {
-              // Apple behåller sin befintliga fallback. På Windows/Android ska
-              // ett codec-/decodefel inte följas av ett försök med en ännu tyngre
-              // desktopfil, eftersom det förvärrar decoder- och nätverkstrycket.
+              const v = videoRef.current;
+              if (!v) return;
+              resetReady();
+
+              // Ett kort får inte försvinna permanent ur playback-kedjan på ett
+              // tillfälligt range-/decoderfel. Försök om den valda källan två
+              // gånger med lugn backoff. Apple kan därefter prova originalet;
+              // Windows/Android behåller den lätta, kompatibla källan.
+              if (retryCountRef.current < 2) {
+                retryCountRef.current += 1;
+                if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
+                retryTimerRef.current = window.setTimeout(() => {
+                  retryTimerRef.current = null;
+                  try {
+                    v.load();
+                    scheduleEvaluate();
+                  } catch {
+                    // Nästa media-error eller frys-vakten tar hand om resten.
+                  }
+                }, retryCountRef.current * 350);
+                return;
+              }
               if (isAppleDevice() && src !== item.src) {
+                retryCountRef.current = 0;
                 setSrc(item.src);
                 return;
               }
