@@ -1270,7 +1270,7 @@ const IntroSplinePhone = () => {
 
     const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
     const measure = () => {
-      const target = getHeroPhoneVisualWidth();
+      const target = getHeroPhoneVisualWidth() * SPLINE_SIZE_RATIO;
       const desiredWidth = Math.round(target / SPLINE_MAX_FILL);
       const desiredHeight = Math.round(desiredWidth * SPLINE_PHONE_ASPECT * SPLINE_HEIGHT_HEADROOM);
 
