@@ -136,14 +136,21 @@ const evaluateAll = () => {
   };
 
   // ALLTID-IGÅNG-LÄGE: när enheten klarar lika många strömmar som det finns
-  // kort behövs ingen växling alls. Alla videor rullar kontinuerligt så länge
-  // fliken är synlig — inget kort behöver "vakna" när man scrollar förbi, och
-  // känslan av start/stopp-stress försvinner helt.
+  // kort behövs ingen växling alls. Ett kort startas första gången det syns
+  // (så att åtta hämtningar inte drar igång samtidigt vid sidladdning) och
+  // pausas sedan ALDRIG igen så länge fliken är synlig. Därmed finns ingen
+  // start/stopp-stress kvar när man scrollar snabbt genom strippen.
   if (!hidden && maxConcurrent >= all.length && all.length > 0) {
-    all.forEach(({ el }) => playVisible(el));
+    all.forEach(({ el, inView }) => {
+      if (inView || el.dataset.phgStarted === '1') {
+        el.dataset.phgStarted = '1';
+        playVisible(el);
+      }
+    });
     lastWindow = all.map((entry) => entry.el);
     return;
   }
+
   if (hidden) {
     all.forEach(({ el }) => { if (!el.paused) el.pause(); });
     return;
