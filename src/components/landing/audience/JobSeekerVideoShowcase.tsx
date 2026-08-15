@@ -312,13 +312,24 @@ const JobSeekerVideoShowcase = ({
   const revealSyncedRef = useRef(false);
 
 
+  // iOS Lågeffektläge nekar autoplay → dölj videon och behåll postern.
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+
   useEffect(() => {
-    if (!firstFramePainted) return;
+    if (!firstFramePainted || autoplayBlocked) return;
     // Avmontera postern först när korsfejden är helt klar (annars klipps
     // fejden av och färgskillnaden blir synlig igen).
     const t = window.setTimeout(() => setPosterVisible(false), 420);
     return () => window.clearTimeout(t);
-  }, [firstFramePainted]);
+  }, [firstFramePainted, autoplayBlocked]);
+
+  // Blockeras autoplay efter att postern redan avmonterats (t.ex. sparläge slås
+  // på mitt i sessionen) måste den tillbaka, annars döljs videon mot svart.
+  useEffect(() => {
+    if (autoplayBlocked) setPosterVisible(true);
+  }, [autoplayBlocked]);
+
+
 
 
   const safePlay = useCallback((v: HTMLVideoElement | null) => {
@@ -350,17 +361,33 @@ const JobSeekerVideoShowcase = ({
       if (retryTimer !== null) { window.clearTimeout(retryTimer); retryTimer = null; }
     };
 
+    // iOS Lågeffektläge: Safari ritar sin egen play-ikon ovanpå <video> när
+    // autoplay nekas, och den går inte att CSS-dölja. Efter två nekade försök
+    // gömmer vi därför själva videoelementet och låter posterlagret ligga kvar
+    // — telefonen ser ut som en stillbild i stället för en trasig spelare.
+    // Detta är felstyrt (NotAllowedError), inte plattformsstyrt, så Windows
+    // påverkas inte: där nekas autoplay aldrig för muted video.
+    let blockedCount = 0;
     const attempt = () => {
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
       if (!v.paused && !v.ended) return;
       const p = v.play();
       if (p && typeof p.catch === 'function') {
-        p.then(clearRetry).catch(() => {
+        p.then(() => {
           clearRetry();
+          blockedCount = 0;
+          setAutoplayBlocked(false);
+        }).catch((err: unknown) => {
+          clearRetry();
+          if ((err as { name?: string } | null)?.name === 'NotAllowedError') {
+            blockedCount += 1;
+            if (blockedCount >= 2) setAutoplayBlocked(true);
+          }
           retryTimer = window.setTimeout(attempt, 600);
         });
       }
     };
+
 
     /** Hur många sekunder som är buffrat framför nuvarande position. */
     const aheadOf = (el: HTMLVideoElement) => {
@@ -800,7 +827,7 @@ const JobSeekerVideoShowcase = ({
                 className={cn(
                   'pointer-events-none absolute inset-0 h-full w-full object-cover',
                   posterTransition,
-                  firstFramePainted ? 'opacity-0' : 'opacity-100'
+                  firstFramePainted && !autoplayBlocked ? 'opacity-0' : 'opacity-100'
                 )}
                 style={{ zIndex: 1 }}
               />
@@ -821,7 +848,11 @@ const JobSeekerVideoShowcase = ({
                 // hårdvaruaccelererade video-overlayen och varje bildruta måste
                 // då komposit-renderas → hackig uppspelning på laptops utan
                 // dedikerad GPU.
+                // Sparläge på iOS: göm elementet så Safaris egen play-ikon inte
+                // ritas ovanpå postern. `visibility` påverkar inte decodern.
+                visibility: autoplayBlocked ? 'hidden' : undefined,
               }}
+            
             >
               {visibleSources.map((s) => (
                 <source key={s.src} src={s.src} type={s.type} />
