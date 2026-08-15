@@ -13,8 +13,7 @@ export function AppBadges({ className = '' }: { className?: string }) {
     >
       <div>
         <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">
-          Ladda ner Parium
-        </span>
+          x        </span>
         <p className="mt-3 text-lg font-semibold text-white sm:text-xl">
           Snart tillgänglig i App Store och Google Play.
         </p>
