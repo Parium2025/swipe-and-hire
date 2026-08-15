@@ -69,37 +69,24 @@ export const prefersLightweightVideo = () => {
  * Apple behåller sin tidigare budget på tre.
  */
 export const getMaxConcurrentVideos = () => {
+  // ALLTID-IGÅNG är standard. Att pausa/starta kort under scroll kändes
+  // "stressigt" och gjorde att en video låg pausad exakt när användaren kom
+  // fram. Källorna är lätta (4:5, ~2,4 Mbit/s) så åtta samtidiga strömmar
+  // klaras av alla moderna enheter. Bara sparläge/riktigt svaga enheter får
+  // ett glidande fönster.
   if (prefersReducedData()) return 1;
-  const coarse = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
-  switch (getVideoPlatform()) {
-    case 'windows':
-      // Tre samtidiga 520px-strömmar: två platser går till strippens ytterkanter
-      // (annars spelas aldrig första/sista kortet) och en till kortet i mitten.
-      // Källorna är den lätta Windows-mastern, så decode-trycket är litet.
-      return isLowPowerDevice() ? 2 : 3;
-    case 'android':
-      return isLowPowerDevice() ? 1 : 2;
-
-    case 'apple':
-      // macOS-desktop har hårdvarudekodning med gott om marginal: låt ALLA
-      // kort rulla kontinuerligt i stället för att startas/pausas under scroll.
-      // Av/på-växlingen var det som kändes "stressigt". iPhone/iPad (coarse)
-      // behåller sin beprövade budget på tre.
-      return coarse || isLowPowerDevice() ? 3 : 8;
-    default:
-      return isLowPowerDevice() || coarse ? 2 : 8;
-  }
+  if (isLowPowerDevice()) return getVideoPlatform() === 'android' ? 3 : 4;
+  return 8;
 };
 
 
 /** Ska decoders frigöras (pausas) när galleriet lämnar viewporten? */
 export const shouldFreeDecodersOnLeave = () => {
   if (typeof window === 'undefined') return false;
-  return (
-    getVideoPlatform() !== 'apple' ||
-    window.matchMedia('(pointer: coarse)').matches ||
-    isLowPowerDevice()
-  );
+  // Videorna ska ALDRIG pausas när galleriet lämnar viewporten — då ligger de
+  // pausade när användaren kommer tillbaka. Endast sparläge/svaga enheter
+  // frigör decoders.
+  return prefersReducedData() || isLowPowerDevice();
 };
 
 /**
@@ -113,11 +100,11 @@ export const shouldFreeDecodersOnLeave = () => {
 export const getGalleryPreload = (): 'none' | 'metadata' => {
   const platform = getVideoPlatform();
   if (prefersReducedData()) return 'none';
-  if (platform === 'android') return 'none';
+  if (platform === 'android') return 'metadata';
   // Windows-korten uppgraderas till `auto` först när koordinatorn väljer dem.
   // Att ge alla åtta `metadata` vid mount initierade åtta demuxers samtidigt
   // och motverkade concurrency-taket på två aktiva strömmar.
-  if (platform === 'windows') return 'none';
+  if (platform === 'windows') return 'metadata';
   return 'metadata';
 };
 
