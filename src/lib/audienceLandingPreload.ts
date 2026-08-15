@@ -33,9 +33,12 @@ const addLink = (rel: string, href: string, as?: string, priority?: 'high' | 'lo
   link.href = href;
   if (as) link.as = as;
   if (priority) link.setAttribute('fetchpriority', priority);
-  if (rel === 'prefetch') link.setAttribute('crossorigin', '');
+  // OBS: sätt INTE crossorigin på scen-prefetchen. Splines runtime hämtar
+  // filen utan CORS-läge, och en crossorigin-prefetch hamnar i en separat
+  // cache-partition → filen laddas ned två gånger och telefonen dröjer.
   document.head.appendChild(link);
 };
+
 
 const decode = (url: string) =>
   new Promise<void>((resolve) => {
