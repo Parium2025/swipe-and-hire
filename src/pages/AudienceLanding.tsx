@@ -1083,25 +1083,13 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
       if (next === lastVisibleRef.current) return;
       lastVisibleRef.current = next;
       setVisible(next);
-    };
-
-    let lastActive = true;
-    const applyActive = (next: boolean) => {
-      if (next === lastActive) return;
-      lastActive = next;
       setActive(next);
     };
 
-    // Telefonen ligger kvar i sitt fixed lager på exakt samma position och
-    // fejdas ut när man scrollar förbi hero (som tidigare).
     const syncDesktopVisibility = () => {
       rafId = 0;
-      const inline = getInlinePhonePlacement() !== null;
-      const offset = scrollRoot ? scrollRoot.scrollTop : window.scrollY;
-      apply(inline ? false : offset < window.innerHeight * 0.6);
-      applyActive(inline ? false : isHeroZone());
+      apply(getInlinePhonePlacement() ? false : isHeroZone());
     };
-
 
     let rafId = 0;
     const sync = () => {
@@ -1147,7 +1135,6 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
       <div
         ref={phoneWrapperRef}
         className={`relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center ${phoneMetrics.isPortraitTablet ? '' : 'md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16'} 2xl:max-w-[1440px]`}
-        style={{ willChange: 'opacity' }}
       >
         <div aria-hidden className="hidden md:block" />
         <div

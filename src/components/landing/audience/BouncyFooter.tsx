@@ -82,7 +82,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     }
   });
 
-  const headline = 'Skapa ett konto nu!';
+  const headline = 'Skapa ett konto nu.';
   const sub =
     audience === 'job_seeker'
       ? 'Vi är här för att ta dig till nästa steg.'
