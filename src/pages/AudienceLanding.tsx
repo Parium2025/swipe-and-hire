@@ -1243,6 +1243,8 @@ const SPLINE_CENTER_OFFSET = 0.266;
 const SPLINE_MAX_FILL = 0.9;
 /** Extra canvashöjd så toppen aldrig klipps (härlett ur mittförskjutningen). */
 const SPLINE_HEIGHT_HEADROOM = 1.45;
+/** Intro-telefonen ska vara något mindre än hero-telefonen (medvetet val). */
+const SPLINE_SIZE_RATIO = 0.8;
 
 
 /** Hero-telefonens faktiska synliga bredd vid nuvarande viewport. */
@@ -1268,7 +1270,7 @@ const IntroSplinePhone = () => {
 
     const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
     const measure = () => {
-      const target = getHeroPhoneVisualWidth();
+      const target = getHeroPhoneVisualWidth() * SPLINE_SIZE_RATIO;
       const desiredWidth = Math.round(target / SPLINE_MAX_FILL);
       const desiredHeight = Math.round(desiredWidth * SPLINE_PHONE_ASPECT * SPLINE_HEIGHT_HEADROOM);
 
