@@ -827,7 +827,7 @@ const JobSeekerVideoShowcase = ({
                 className={cn(
                   'pointer-events-none absolute inset-0 h-full w-full object-cover',
                   posterTransition,
-                  firstFramePainted ? 'opacity-0' : 'opacity-100'
+                  firstFramePainted && !autoplayBlocked ? 'opacity-0' : 'opacity-100'
                 )}
                 style={{ zIndex: 1 }}
               />
@@ -848,7 +848,11 @@ const JobSeekerVideoShowcase = ({
                 // hårdvaruaccelererade video-overlayen och varje bildruta måste
                 // då komposit-renderas → hackig uppspelning på laptops utan
                 // dedikerad GPU.
+                // Sparläge på iOS: göm elementet så Safaris egen play-ikon inte
+                // ritas ovanpå postern. `visibility` påverkar inte decodern.
+                visibility: autoplayBlocked ? 'hidden' : undefined,
               }}
+            
             >
               {visibleSources.map((s) => (
                 <source key={s.src} src={s.src} type={s.type} />
