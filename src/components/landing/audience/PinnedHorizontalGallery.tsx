@@ -1217,6 +1217,7 @@ const PinnedHorizontalGallery = () => {
           box-shadow: none;
         }
         .phg-card img,
+        .phg-card canvas,
         .phg-card video {
           position: absolute;
           inset: 0;
