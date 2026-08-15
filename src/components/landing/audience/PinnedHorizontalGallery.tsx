@@ -471,11 +471,11 @@ const CardItem = ({ item, index }: CardItemProps) => {
               if (!v) return;
               resetReady();
 
-              // Ett kort får inte försvinna permanent ur playback-kedjan på ett
-              // tillfälligt range-/decoderfel. Försök om den valda källan två
-              // gånger med lugn backoff. Apple kan därefter prova originalet;
-              // Windows/Android behåller den lätta, kompatibla källan.
-              if (retryCountRef.current < 2) {
+              // Ett kort får aldrig försvinna permanent ur playback-kedjan på
+              // ett tillfälligt range-/decoderfel. Försök om källan lugnt;
+              // Apple kan efter två försök prova originalet. Övriga plattformar
+              // behåller den lätta källan och gör ett nytt försök efter backoff.
+              if (retryCountRef.current < 3) {
                 retryCountRef.current += 1;
                 if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
                 retryTimerRef.current = window.setTimeout(() => {
@@ -486,7 +486,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
                   } catch {
                     // Nästa media-error eller frys-vakten tar hand om resten.
                   }
-                }, retryCountRef.current * 350);
+                }, retryCountRef.current < 3 ? retryCountRef.current * 350 : 3000);
                 return;
               }
               if (isAppleDevice() && src !== item.src) {
@@ -494,7 +494,12 @@ const CardItem = ({ item, index }: CardItemProps) => {
                 setSrc(item.src);
                 return;
               }
-              setFailed(true);
+              // Behåll videoelementet och postern i kortet. Ett permanent
+              // fallback-byte här tog tidigare bort kortet ur registret och var
+              // den direkta orsaken till glapp som 2–3–5. Nästa gång kortet blir
+              // aktivt kan koordinatorn återstarta samma verifierade källa.
+              retryCountRef.current = 0;
+              scheduleEvaluate();
             }}
             style={{ objectPosition: item.position ?? '50% 50%' }}
             className="pointer-events-none opacity-100"
