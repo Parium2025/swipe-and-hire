@@ -246,12 +246,17 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
         app.setZoom(zoomRef.current);
         requestAnimationFrame(() => app?.setZoom(zoomRef.current));
-        if (!activeRef.current) app.stop();
+        // VIKTIGT: stoppa INTE renderloopen före `waitForVisualSettle()`.
+        // En stoppad app ritar inga frames, så pixelinspektionen hittar aldrig
+        // scenpixlar och loopen går alltid ut i maxWait (upp till ~2,8 s på
+        // touch) innan telefonen får visas — det var det som kändes trögt.
         await waitForVisualSettle();
         if (!cancelled) {
           setIsReady(true);
           window.dispatchEvent(new Event('parium:spline-ready'));
         }
+        // Först nu respekterar vi active-flaggan (t.ex. sektionen inte i bild).
+        if (!cancelled && !activeRef.current && !app.isStopped) app.stop();
       } catch (error) {
         console.error('Kunde inte ladda Spline-telefonen:', error);
         if (!cancelled) setHasError(true);
