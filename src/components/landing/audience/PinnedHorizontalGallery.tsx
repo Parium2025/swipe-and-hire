@@ -353,31 +353,34 @@ const CardItem = ({ item, index }: CardItemProps) => {
   }, [item.type, failed]);
 
 
-  // Starta varje kort på en egen tidsposition första gången metadata finns.
-  // Då loopar inte alla Windows-videor samtidigt, utan varje kort börjar om i
-  // sin egen lugna takt — utan fade/transition-effekt på bilden.
+  // INGEN start-offset längre. Att sätta `currentTime` på ett kort som just
+  // fått metadata tvingar fram en seek → decodern kastar sin buffert, målar om
+  // och loopar sedan tillbaka till 0 mitt i en rörelse. Det var det som kändes
+  // "hårt" vid omstart. Nu spelar varje kort från 0 och native `loop` skarvar
+  // 0 → 0, vilket är den enda verkligt sömlösa vändpunkten.
+  //
+  // Full buffring: så snart metadata finns höjs preload till `auto` på de
+  // plattformar som klarar det, så hela klippet ligger i bufferten. Då finns
+  // ingen väntan varken vid loop-vändningen eller när ett kort återupptas
+  // efter en paus. Windows/Android rörs inte (getGalleryPreload styr dem).
   useEffect(() => {
     const v = videoRef.current;
     if (!v || item.type !== 'video' || failed) return;
-    const applyOffset = () => {
-      if (v.dataset.loopOffsetApplied === '1') return;
-      const d = v.duration;
-      if (!Number.isFinite(d) || d <= 1) return;
-      const safeDuration = Math.max(0.5, d - 0.35);
-      const offset = (index * 0.73) % safeDuration;
+    if (getGalleryPreload() === 'none') return;
+    const upgrade = () => {
       try {
-        v.currentTime = offset;
-        v.dataset.loopOffsetApplied = '1';
+        v.preload = 'auto';
       } catch {
-        // Best-effort only — native looping still works.
+        // Best-effort only.
       }
     };
-    if (v.readyState >= 1) applyOffset();
-    else v.addEventListener('loadedmetadata', applyOffset);
+    if (v.readyState >= 1) upgrade();
+    else v.addEventListener('loadedmetadata', upgrade, { once: true });
     return () => {
-      v.removeEventListener('loadedmetadata', applyOffset);
+      v.removeEventListener('loadedmetadata', upgrade);
     };
-  }, [item.type, failed, index]);
+  }, [item.type, failed]);
+
 
 
 
