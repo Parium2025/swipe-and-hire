@@ -261,6 +261,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
   const [src, setSrc] = useState(() => getPlayableSrc(item));
   const [frameReady, setFrameReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const seamRef = useRef<HTMLCanvasElement>(null);
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef<number | null>(null);
   // VIKTIGT: `playing`/`timeupdate` kan fyra INNAN någon bildruta är dekodad
