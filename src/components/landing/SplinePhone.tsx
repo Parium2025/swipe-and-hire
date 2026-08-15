@@ -172,7 +172,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
       while (!cancelled && performance.now() - startedAt < maxWait) {
         await waitForFrames(1);
-        const frame = inspectSplineFrame();
+        const __i=performance.now(); const frame = inspectSplineFrame(); console.log('SPL iter', Math.round(performance.now()-__i), JSON.stringify(frame));
         if (!frame.hasScenePixels || frame.hasWhiteSlab) {
           stableFrames = 0;
           continue;
