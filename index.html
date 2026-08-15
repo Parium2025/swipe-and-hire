@@ -292,9 +292,23 @@
     <!-- Preconnect to Spline CDN (3D scene assets) -->
     <link rel="preconnect" href="https://prod.spline.design" crossorigin>
     <link rel="dns-prefetch" href="https://prod.spline.design">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Instrument Serif italic — endast för accentord på landningssidan -->
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <!-- Fonterna hämtas i EN request och är INTE renderblockerande. Tidigare låg
+         två separata <link rel="stylesheet"> här: Safari höll då tillbaka första
+         paint tills båda CSS-filerna hämtats från fonts.googleapis.com (två extra
+         round trips på mobilnät → "sidan laddar länge"-känslan vid refresh).
+         media="print" gör länken icke-blockerande; onload växlar tillbaka till all.
+         display=swap gör att texten redan idag ritas i fallback först, så det finns
+         ingen visuell skillnad — bara snabbare first paint. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap"
+      media="print"
+      onload="this.media='all';this.onload=null;"
+    >
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap">
+    </noscript>
+
     <!-- Preload den vanligaste vikten (400) som WOFF2 så LCP-texten renderas utan FOIT-flimmer -->
     
     <!-- Preload Parium logos for instant rendering (logo-rings preloadas via main.tsx med hashad asset-URL) -->
