@@ -1243,6 +1243,8 @@ const SPLINE_CENTER_OFFSET = 0.266;
 const SPLINE_MAX_FILL = 0.9;
 /** Extra canvashöjd så toppen aldrig klipps (härlett ur mittförskjutningen). */
 const SPLINE_HEIGHT_HEADROOM = 1.45;
+/** Intro-telefonen ska vara något mindre än hero-telefonen (medvetet val). */
+const SPLINE_SIZE_RATIO = 0.8;
 
 
 /** Hero-telefonens faktiska synliga bredd vid nuvarande viewport. */
