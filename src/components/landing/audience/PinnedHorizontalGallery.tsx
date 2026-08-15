@@ -135,7 +135,22 @@ const evaluateAll = () => {
     }
   };
 
+  // ALLTID-IGÅNG-LÄGE: när enheten klarar lika många strömmar som det finns
+  // kort behövs ingen växling alls. Alla videor rullar kontinuerligt så länge
+  // fliken är synlig — inget kort behöver "vakna" när man scrollar förbi, och
+  // känslan av start/stopp-stress försvinner helt.
+  if (!hidden && maxConcurrent >= all.length && all.length > 0) {
+    all.forEach(({ el }) => playVisible(el));
+    lastWindow = all.map((entry) => entry.el);
+    return;
+  }
+  if (hidden) {
+    all.forEach(({ el }) => { if (!el.paused) el.pause(); });
+    return;
+  }
+
   const picks = new Set<HTMLVideoElement>();
+
   // Urval = korten närmast viewportens mitt, men med två skydd:
   //
   // 1. SAMMANHÄNGANDE FÖNSTER: urvalet är alltid N kort som ligger BREDVID
