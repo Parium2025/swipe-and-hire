@@ -4387,7 +4387,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
                 onBack={handleBack}
                 onNext={handleNext}
                 onSubmit={handleSubmit}
-                disabled={!canProceed()}
+                disabled={!canProceed() || (isLastStep && !publishMode && !republishMode && !hasUnsavedChanges)}
                 loading={loading}
                 submitLabel={publishMode ? "Publicera" : "Spara ändringar"}
                 loadingLabel={publishMode ? "Publicerar..." : "Sparar..."}
