@@ -21,7 +21,7 @@ const Landing = () => {
 
   // SEO
   useEffect(() => {
-    const title = 'Parium – Hitta jobb som passar dig & rekrytera rätt';
+    const title = 'Parium – Hitta jobb och rekrytera smartare';
     document.title = title;
 
     const setMeta = (name: string, content: string, attr = 'name') => {
@@ -34,7 +34,7 @@ const Landing = () => {
       el.setAttribute('content', content);
     };
 
-    const desc = 'Parium är jobbappen där du hittar lediga jobb som faktiskt passar dig – och där arbetsgivare rekryterar rätt, snabbt och enkelt.';
+    const desc = 'Upptäck lediga jobb och kandidater som passar just dig. Med hjälp av vårt verktyg tar vi arbetsmarknaden framåt!';
     setMeta('description', desc);
     setMeta('og:title', title, 'property');
     setMeta('og:description', desc, 'property');
