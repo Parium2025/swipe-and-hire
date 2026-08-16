@@ -391,11 +391,13 @@ async function runTranscode(
         data: sample.data,
       })
     );
-    // Håll kön kort så att minnet inte skenar på mobil.
-    if (decoder.decodeQueueSize > 24) {
+    // Håll både avkodnings- och kodningskön kort så att minnet inte skenar
+    // på mobil – utan detta kan hela pipelinen buffra hundratals bildrutor.
+    while (!encoderError && (decoder.decodeQueueSize > 24 || encoder.encodeQueueSize > 24)) {
       await new Promise((r) => window.setTimeout(r, 8));
     }
   }
+
 
   await decoder.flush();
   decoder.close();
