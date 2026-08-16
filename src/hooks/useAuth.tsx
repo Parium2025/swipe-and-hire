@@ -1368,6 +1368,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 🎬 Trigga auth splash för premium känsla vid utloggning
       authSplashEvents.show(currentSplashRole);
 
+      // 🔐 Starta serverns session-cleanup INNAN vi rensar auth-storage —
+      // annars går RPC:t iväg utan giltig JWT och nekas.
+      const sessionCleanup = removeSession();
+
       // 🧹 Rensa lokalt direkt och navigera omedelbart. Server/session-cleanup
       // får INTE blockera knappen — det var orsaken till seg logout.
       clearAllDrafts();
@@ -1388,7 +1392,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Remove session tracking + auth-server logout in the background.
       void (async () => {
         try {
-          await removeSession();
+          await sessionCleanup;
           await supabase.auth.signOut({ scope: 'local' });
         } catch (serverErr) {
           console.warn('SignOut background cleanup failed:', serverErr);
