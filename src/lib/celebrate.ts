@@ -17,39 +17,37 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
   const base: confetti.Options = {
     colors: BRAND_COLORS,
     disableForReducedMotion: true,
-    scalar: 0.95,
-    ticks: 180,
+    scalar: 0.8,
+    ticks: 140,
+    gravity: 0.9,
+    decay: 0.92,
     zIndex: 100000,
   };
 
-  // Huvudburst från mitten, något ovanför center
-  confetti({
-    ...base,
-    particleCount: big ? 90 : 60,
-    spread: 70,
-    startVelocity: 42,
-    origin: { x: 0.5, y: 0.42 },
-  });
+  const count = big ? 26 : 16;
 
-  // Två sidoburstar för djup
-  window.setTimeout(() => {
+  // Diskreta sidoburstar: en från vänster kant, en från höger kant.
+  const sides = () => {
     confetti({
       ...base,
-      particleCount: big ? 45 : 30,
-      angle: 60,
-      spread: 60,
-      startVelocity: 38,
-      origin: { x: 0.08, y: 0.7 },
+      particleCount: count,
+      angle: 55,
+      spread: 55,
+      startVelocity: 42,
+      origin: { x: 0, y: 0.72 },
     });
     confetti({
       ...base,
-      particleCount: big ? 45 : 30,
-      angle: 120,
-      spread: 60,
-      startVelocity: 38,
-      origin: { x: 0.92, y: 0.7 },
+      particleCount: count,
+      angle: 125,
+      spread: 55,
+      startVelocity: 42,
+      origin: { x: 1, y: 0.72 },
     });
-  }, 140);
+  };
+
+  sides();
+  window.setTimeout(sides, 180);
 }
 
 export default celebrate;
