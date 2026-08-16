@@ -2066,7 +2066,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   : 'Välj paket efter dagens behov. Skala upp när behoven växer — resten sköter vi.'}
               </motion.p>
               {audience === 'job_seeker' ? (
-                <div className="relative mt-8 grid gap-5 md:grid-cols-2">
+                <div className="relative mt-8 grid items-start gap-5 md:grid-cols-2">
                   {[
                     {
                       id: 'start' as const,
@@ -2164,7 +2164,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               ) : (
                 <>
                   {/* 3 månadspaket för arbetsgivare */}
-                  <div className="relative mt-8 grid gap-5 md:grid-cols-3">
+                  <div className="relative mt-8 grid items-start gap-5 md:grid-cols-3">
                     {employerPlans.map((plan, i) => {
                       const isActive = selectedPlan === plan.id;
                       return (
