@@ -183,7 +183,7 @@ serve(async (req) => {
     const { data: retentionRuns, error: retentionError } = await supabase
       .from("data_retention_runs")
       .select("*")
-      .order("created_at", { ascending: false })
+      .order("ran_at", { ascending: false })
       .limit(1);
 
     if (retentionError) {
@@ -196,7 +196,7 @@ serve(async (req) => {
       });
     } else {
       const lastRun = retentionRuns?.[0];
-      const age = hoursSince(lastRun?.created_at);
+      const age = hoursSince(lastRun?.ran_at);
       if (!lastRun || age === null || age > RETENTION_EVIDENCE_MAX_AGE_HOURS) {
         issues.push({
           code: "retention_evidence_stale",
@@ -205,7 +205,7 @@ serve(async (req) => {
           summary:
             "Cron kan rapportera att anropet skickats även om själva raderingen aldrig utfördes. Det här fångar den skillnaden.",
           details: {
-            last_run_at: lastRun?.created_at ?? null,
+            last_run_at: lastRun?.ran_at ?? null,
             age_hours: age === null ? null : Math.round(age),
             max_age_hours: RETENTION_EVIDENCE_MAX_AGE_HOURS,
           },

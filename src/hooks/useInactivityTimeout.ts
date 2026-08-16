@@ -52,7 +52,18 @@ export const useInactivityTimeout = (isAuthenticated: boolean) => {
         try {
           const token = localStorage.getItem('parium_session_token');
           if (token) {
-            await supabase.rpc('remove_session', { p_session_token: token });
+            // After 24h of inactivity the access token is usually expired —
+            // without a refresh the RPC runs as anon and is denied.
+            const { data } = await supabase.auth.getSession();
+            let hasSession = !!data.session;
+            const expiresAt = data.session?.expires_at ?? 0;
+            if (hasSession && expiresAt - Math.floor(Date.now() / 1000) < 60) {
+              const { error: refreshErr } = await supabase.auth.refreshSession();
+              hasSession = !refreshErr;
+            }
+            if (hasSession) {
+              await supabase.rpc('remove_session', { p_session_token: token });
+            }
           }
         } catch (err) {
           console.warn('Session cleanup on inactivity timeout failed:', err);
