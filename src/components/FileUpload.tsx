@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { looksLikeVideoFile, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
+import { looksLikeVideoFile, MAX_VIDEO_SECONDS, ACCEPTED_VIDEO_EXTENSIONS } from '@/lib/videoInput';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, File, Video, FileText, Check, WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -173,8 +173,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    // Videoändelserna måste listas explicit: Android och vissa Windows-
+    // filväljare skickar tom MIME-typ, och då matchar inte 'video/*'.
     accept: acceptedFileTypes.reduce((acc, type) => {
-      acc[type] = [];
+      acc[type] = type === 'video/*' ? [...ACCEPTED_VIDEO_EXTENSIONS] : [];
       return acc;
     }, {} as Record<string, string[]>),
     maxSize: maxFileSize,
