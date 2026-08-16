@@ -1920,6 +1920,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       setHasUnsavedChanges(false);
       onOpenChange(false);
       onJobUpdated();
+      if (publishMode) onPublished?.();
     } catch (err) {
       console.error('Edit job error:', err);
       toast({ title: 'Ett fel uppstod', description: 'Kunde inte uppdatera annonsen.', variant: 'destructive' });
