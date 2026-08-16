@@ -6,7 +6,7 @@ import { toast as sonnerToast, ExternalToast } from "sonner";
 interface ToastOptions {
   title?: string;
   description?: string;
-  variant?: "default" | "destructive";
+  variant?: "default" | "destructive" | "success" | "warning";
   action?: React.ReactNode;
   duration?: number;
 }
@@ -24,8 +24,17 @@ function toast({ title, description, variant, action, duration }: ToastOptions) 
     return sonnerToast.error(message, options);
   }
 
+  if (variant === "success") {
+    return sonnerToast.success(message, options);
+  }
+
+  if (variant === "warning") {
+    return sonnerToast.warning(message, options);
+  }
+
   return sonnerToast(message, options);
 }
+
 
 // Hook för bakåtkompatibilitet - returnerar samma API som tidigare
 function useToast() {
