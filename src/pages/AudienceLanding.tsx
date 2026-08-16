@@ -2205,8 +2205,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                             <PlanFeatures
                               features={plan.features}
                               isActive={isActive}
-                              open={openEmployerPlan === plan.id}
-                              onToggle={() => setOpenEmployerPlan((current) => current === plan.id ? null : plan.id)}
+                              open={openEmployerPlans.includes(plan.id)}
+                              onToggle={() => togglePlan(setOpenEmployerPlans, plan.id)}
                             />
                           </motion.div>
                         </motion.div>
