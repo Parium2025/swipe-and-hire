@@ -219,7 +219,7 @@ setGeneratingSummary(true);
 
       if (!silent) {
         if (data?.is_valid_cv === false) {
-          toast.message('Dokumentet är inte ett CV');
+          toast.info('Dokumentet verkar inte vara ett CV');
         } else {
           toast.success('Sammanfattning genererad från CV');
         }

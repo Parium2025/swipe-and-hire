@@ -1,9 +1,23 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { Toaster as Sonner } from "sonner";
+import { Toaster as Sonner, toast as sonnerToast } from "sonner";
 import { CheckCircle2, AlertTriangle, Info, XCircle, Loader2 } from "lucide-react";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
+
+// Centrala visningstider: bekräftelser försvinner snabbt, fel får mer tid att läsas.
+const DURATIONS = { success: 2600, info: 3200, warning: 4500, error: 5500 } as const;
+
+const patched = "__pariumDurations" as const;
+if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
+  (sonnerToast as any)[patched] = true;
+  (Object.keys(DURATIONS) as Array<keyof typeof DURATIONS>).forEach((kind) => {
+    const original = (sonnerToast as any)[kind]?.bind(sonnerToast);
+    if (!original) return;
+    (sonnerToast as any)[kind] = (message: any, options?: any) =>
+      original(message, { duration: DURATIONS[kind], ...(options ?? {}) });
+  });
+}
 
 const IconShell = ({
   children,
@@ -65,9 +79,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       style={{ zIndex: 99999 }}
       position="top-center"
-      duration={4000}
+      duration={3200}
       closeButton
       visibleToasts={3}
+      offset={16}
       expand={false}
       gap={10}
       icons={{
