@@ -231,12 +231,51 @@ async function runTranscode(
   const buffer = await file.arrayBuffer();
   (buffer as any).fileStart = 0;
 
+  // Demuxa hela filen i ett svep. Extraktionen måste konfigureras i onReady
+  // (innan flush) – annars levererar mp4box aldrig några samples.
+  const videoSamples: any[] = [];
+  const audioSamples: any[] = [];
+
   const info: any = await new Promise((resolve, reject) => {
+    let ready: any = null;
+    let videoDone = false;
+    let audioDone = false;
+    const settle = () => {
+      if (ready && videoDone && audioDone) resolve(ready);
+    };
+
     mp4boxFile.onError = (e: unknown) => reject(new Error(String(e)));
-    mp4boxFile.onReady = resolve;
+
+    mp4boxFile.onReady = (parsed: any) => {
+      ready = parsed;
+      const vTrack = parsed.videoTracks?.[0];
+      const aTrack = parsed.audioTracks?.[0];
+      if (!vTrack) { reject(new Error('inget videospår')); return; }
+      audioDone = !aTrack;
+
+      mp4boxFile.onSamples = (id: number, _user: unknown, samples: any[]) => {
+        if (id === vTrack.id) {
+          videoSamples.push(...samples);
+          if (videoSamples.length >= vTrack.nb_samples) { videoDone = true; settle(); }
+        } else if (aTrack && id === aTrack.id) {
+          audioSamples.push(...samples);
+          if (audioSamples.length >= aTrack.nb_samples) { audioDone = true; settle(); }
+        }
+      };
+
+      mp4boxFile.setExtractionOptions(vTrack.id, null, { nbSamples: 200 });
+      if (aTrack) mp4boxFile.setExtractionOptions(aTrack.id, null, { nbSamples: 500 });
+      mp4boxFile.start();
+    };
+
     mp4boxFile.appendBuffer(buffer);
     mp4boxFile.flush();
-    window.setTimeout(() => reject(new Error('demux-timeout')), 30000);
+    // Efter flush har mp4box levererat allt den kan – kvittera även om
+    // sample-räknaren inte matchar exakt (kan skilja i trasiga filer).
+    videoDone = videoDone || videoSamples.length > 0;
+    audioDone = audioDone || audioSamples.length > 0;
+    settle();
+    window.setTimeout(() => reject(new Error('demux-timeout')), 45000);
   });
 
   const videoTrack = info.videoTracks?.[0];
@@ -270,32 +309,6 @@ async function runTranscode(
   };
   const decoderSupport = await (window as any).VideoDecoder.isConfigSupported(decoderConfig);
   if (!decoderSupport?.supported) throw new Error('avkodning stöds ej');
-
-  /* --- samla samples ---------------------------------------------------- */
-  const videoSamples: any[] = [];
-  const audioSamples: any[] = [];
-
-  await new Promise<void>((resolve, reject) => {
-    let videoDone = !videoTrack;
-    let audioDone = !audioTrack;
-    const check = () => { if (videoDone && audioDone) resolve(); };
-
-    mp4boxFile.onSamples = (id: number, _user: unknown, samples: any[]) => {
-      if (id === videoTrack.id) {
-        videoSamples.push(...samples);
-        if (videoSamples.length >= videoTrack.nb_samples) { videoDone = true; check(); }
-      } else if (audioTrack && id === audioTrack.id) {
-        audioSamples.push(...samples);
-        if (audioSamples.length >= audioTrack.nb_samples) { audioDone = true; check(); }
-      }
-    };
-
-    mp4boxFile.setExtractionOptions(videoTrack.id, null, { nbSamples: 200 });
-    if (audioTrack) mp4boxFile.setExtractionOptions(audioTrack.id, null, { nbSamples: 500 });
-    mp4boxFile.start();
-    mp4boxFile.flush();
-    window.setTimeout(() => reject(new Error('sample-timeout')), 60000);
-  });
 
   if (videoSamples.length === 0) throw new Error('inga bildrutor');
 
