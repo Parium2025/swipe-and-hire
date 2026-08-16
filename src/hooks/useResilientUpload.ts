@@ -38,7 +38,9 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'profile-video': {
     bucket: 'job-applications',
     maxSizeMB: 50,
-    allowedTypes: ['video/mp4', 'video/quicktime', 'video/x-msvideo'],
+    // AVI utelämnas medvetet: ingen webbläsare kan spela upp det.
+    allowedTypes: ['video/mp4', 'video/quicktime'],
+
     shouldCompress: false,
   },
   'cover-image': {
@@ -157,16 +159,29 @@ export function useResilientUpload(): UseResilientUploadResult {
       // universell uppspelning). Misslyckas det laddas originalet upp.
       let posterBlob: Blob | null = null;
       if (file.type.startsWith('video/')) {
+        let playableEverywhere = false;
         try {
           const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
           const result = await optimizeVideoForUpload(file);
           payload = result.blob;
           extension = result.extension;
           posterBlob = result.poster;
+          playableEverywhere = result.playableEverywhere;
         } catch (err) {
           console.warn('[useResilientUpload] videokomprimering hoppades över', err);
         }
+
+        // Kunde vi varken komprimera eller verifiera H.264 skulle videon bli
+        // ospelbar på Android/Windows. Stoppa i stället för att lagra den.
+        if (!playableEverywhere) {
+          const msg =
+            'Videon kunde inte bearbetas i din webbläsare och formatet fungerar inte på alla enheter. Prova en annan webbläsare, eller spara om videon som MP4 (H.264).';
+          setState({ ...INITIAL_STATE, status: 'error', error: msg });
+          toast.error('Videoformatet stöds inte', { description: msg });
+          return null;
+        }
       }
+
 
       // Skapa unik storage path
       const safeExt = (extension || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');

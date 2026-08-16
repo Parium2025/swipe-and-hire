@@ -35,6 +35,14 @@ export interface TranscodeResult {
   poster: Blob | null;
   /** True om komprimeringen faktiskt kördes. */
   transcoded: boolean;
+  /**
+   * True om filen garanterat går att spela upp på alla plattformar
+   * (H.264 i MP4/MOV). False = t.ex. HEVC från iPhone, som Android och
+   * Windows inte kan avkoda — då får filen inte lagras.
+   */
+  playableEverywhere: boolean;
+  /** Videokodek i källfilen, för felmeddelanden och loggning. */
+  sourceCodec: string | null;
 }
 
 const DEFAULT_SHORT_SIDE = 720;
@@ -50,6 +58,45 @@ export function canTranscodeVideo(): boolean {
     typeof (window as any).OffscreenCanvas === 'function'
   );
 }
+
+/**
+ * Läser videospårets kodek ur containern utan att avkoda något.
+ * Returnerar t.ex. "avc1.640028" (H.264) eller "hvc1.1.6.L93.B0" (HEVC).
+ */
+export async function probeVideoCodec(file: Blob): Promise<string | null> {
+  try {
+    const MP4Box: any = await import('mp4box');
+    const createFile = MP4Box.createFile ?? MP4Box.default?.createFile;
+    if (!createFile) return null;
+
+    const mp4boxFile = createFile();
+    let codec: string | null = null;
+    mp4boxFile.onError = () => { /* ohanterbar container */ };
+    mp4boxFile.onReady = (info: any) => {
+      codec = info?.videoTracks?.[0]?.codec ?? null;
+    };
+
+    // iPhone lägger ibland moov-atomen sist, så hela filen måste läsas in.
+    const buffer = await file.arrayBuffer();
+    (buffer as any).fileStart = 0;
+    mp4boxFile.appendBuffer(buffer);
+    mp4boxFile.flush();
+    try { mp4boxFile.stop?.(); } catch { /* ignore */ }
+    return codec;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * H.264 (avc1/avc3) är den enda videokodek som spelas upp av alla webbläsare
+ * på alla plattformar. HEVC fungerar på Apple men inte på Android/Windows,
+ * och AV1/VP9 i MP4 saknar stöd i äldre Safari.
+ */
+export function isUniversallyPlayableCodec(codec: string | null): boolean {
+  return !!codec && /^avc[13]/i.test(codec);
+}
+
 
 /* -------------------------------------------------------------------------- */
 /* Posterbild                                                                  */
@@ -206,13 +253,21 @@ export async function optimizeVideoForUpload(
   const output: Blob = useTranscoded ? (transcodedBlob as Blob) : file;
   const poster = await extractPosterFrame(output).catch(() => null);
 
+  // Komprimerad utdata är alltid H.264. Originalet måste kontrolleras — en
+  // HEVC-inspelning från iPhone går inte att spela upp på Android/Windows.
+  const sourceCodec = useTranscoded ? null : await probeVideoCodec(file);
+  const playableEverywhere = useTranscoded || isUniversallyPlayableCodec(sourceCodec);
+
   return {
     blob: output,
     extension: useTranscoded ? 'mp4' : (file.name.split('.').pop() || 'mp4').toLowerCase(),
     poster,
     transcoded: useTranscoded,
+    playableEverywhere,
+    sourceCodec,
   };
 }
+
 
 async function runTranscode(
   file: File,
