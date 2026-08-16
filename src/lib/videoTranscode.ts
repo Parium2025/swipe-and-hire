@@ -166,7 +166,7 @@ async function pickEncoderConfig(width: number, height: number, bitrate: number)
       height,
       bitrate,
       framerate: 30,
-      avc: { format: 'avc' },
+      ...(codec.startsWith('avc1') ? { avc: { format: 'avc' as const } } : {}),
     };
     try {
       const support = await (window as any).VideoEncoder.isConfigSupported(config);
@@ -300,10 +300,15 @@ async function runTranscode(
   if (videoSamples.length === 0) throw new Error('inga bildrutor');
 
   /* --- muxer ------------------------------------------------------------ */
+  const muxVideoCodec: 'avc' | 'vp9' | 'av1' = encoderConfig.codec.startsWith('vp09')
+    ? 'vp9'
+    : encoderConfig.codec.startsWith('av01')
+      ? 'av1'
+      : 'avc';
   const target = new ArrayBufferTarget();
   const muxer = new Muxer({
     target,
-    video: { codec: 'avc', width, height },
+    video: { codec: muxVideoCodec, width, height },
     ...(audioTrack
       ? {
           audio: {
