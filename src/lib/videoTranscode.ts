@@ -273,6 +273,7 @@ async function runRecorderTranscode(
   file: File,
   shortSide: number,
   bitrate: number,
+  expectAudio: boolean | null,
   onProgress?: (ratio: number) => void
 ): Promise<Blob | null> {
   const mimeType = pickRecorderMimeType();
@@ -282,8 +283,9 @@ async function runRecorderTranscode(
   const video = document.createElement('video');
   video.src = url;
   video.playsInline = true;
-  video.muted = true; // krävs för att få starta uppspelning utan klick
   video.preload = 'auto';
+
+  let audioContext: AudioContext | null = null;
 
   let recorder: MediaRecorder | null = null;
   let raf = 0;
