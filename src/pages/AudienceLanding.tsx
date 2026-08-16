@@ -2141,6 +2141,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           open={openSeekerPlans.includes(plan.id)}
                           onToggle={() => togglePlan(setOpenSeekerPlans, plan.id)}
                         />
+                        <div className="mt-auto pt-7">
                         <button
                           type="button"
                           onPointerDown={(e) => { e.stopPropagation(); }}
@@ -2148,7 +2149,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                             e.stopPropagation();
                             navigate('/auth', { state: { mode: 'register', role: audience, plan: plan.id } });
                           }}
-                          className={`mt-auto pt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
+                          className={`flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
                             plan.highlight
                               ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] hover:-translate-y-0.5'
                               : 'bg-white/10 text-white border border-white/20 hover:bg-white/15 hover:border-white/30'
@@ -2156,6 +2157,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         >
                           {plan.cta}
                         </button>
+                        </div>
                       </motion.div>
                     );
                   })}
