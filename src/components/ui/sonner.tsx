@@ -116,15 +116,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
         closeButton: true,
         classNames: {
           toast:
-            "group toast relative cursor-pointer select-none " +
-            "group-[.toaster]:w-full group-[.toaster]:items-start group-[.toaster]:gap-3 " +
+            "group toast relative cursor-pointer select-none overflow-hidden " +
+            "group-[.toaster]:w-full group-[.toaster]:max-w-full group-[.toaster]:items-center group-[.toaster]:gap-3 " +
             "group-[.toaster]:rounded-2xl group-[.toaster]:px-4 group-[.toaster]:py-3.5 " +
-            "group-[.toaster]:bg-[linear-gradient(135deg,hsl(215_60%_14%/0.92),hsl(215_70%_9%/0.94))] " +
+            "group-[.toaster]:bg-[linear-gradient(135deg,hsl(215_60%_16%/0.94),hsl(215_72%_10%/0.96))] " +
             "group-[.toaster]:backdrop-blur-2xl group-[.toaster]:text-white " +
             "group-[.toaster]:border group-[.toaster]:border-white/12 " +
             "group-[.toaster]:shadow-[0_18px_50px_-12px_rgba(0,0,0,0.65),inset_0_1px_0_0_rgba(255,255,255,0.08)]",
-          icon: "group-[.toast]:mt-0.5 group-[.toast]:mr-0 group-[.toast]:!h-7 group-[.toast]:!w-7 group-[.toast]:!min-w-[1.75rem] group-[.toast]:shrink-0 group-[.toast]:grow-0 group-[.toast]:!m-0 group-[.toast]:!mt-0.5 group-[.toast]:!mr-0 group-[.toast]:items-center group-[.toast]:justify-center",
-          content: "group-[.toast]:gap-0.5",
+          icon: "group-[.toast]:!m-0 group-[.toast]:mr-0 group-[.toast]:!h-7 group-[.toast]:!w-7 group-[.toast]:!min-w-[1.75rem] group-[.toast]:shrink-0 group-[.toast]:grow-0 group-[.toast]:self-center group-[.toast]:items-center group-[.toast]:justify-center",
+          content: "group-[.toast]:gap-0.5 group-[.toast]:min-w-0",
           title:
             "group-[.toast]:text-[15px] group-[.toast]:font-semibold group-[.toast]:leading-snug group-[.toast]:tracking-[-0.01em] group-[.toast]:text-white",
           description:
