@@ -2066,7 +2066,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   : 'Välj paket efter dagens behov. Skala upp när behoven växer — resten sköter vi.'}
               </motion.p>
               {audience === 'job_seeker' ? (
-                <div className="relative mt-8 grid items-start gap-5 md:grid-cols-2">
+                <div className={`relative mt-8 grid gap-5 md:grid-cols-2 ${openSeekerPlans.includes('start') && openSeekerPlans.includes('premium') ? 'items-stretch' : 'items-start'}`}>
+
                   {[
                     {
                       id: 'start' as const,
@@ -2120,7 +2121,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         data-allow-focus-shadow="true"
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                          style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 0 ? '-46px' : '46px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${120 + i * 120}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
-                        className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 [@media_(hover:hover)]:backdrop-blur-xl ${
+                        className={`landing-feature-card landing-feature-mobile-in relative isolate flex h-full flex-col cursor-pointer rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 [@media_(hover:hover)]:backdrop-blur-xl ${
                           isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                         }`}
                       >
@@ -2140,6 +2141,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           open={openSeekerPlans.includes(plan.id)}
                           onToggle={() => togglePlan(setOpenSeekerPlans, plan.id)}
                         />
+                        <div className="mt-auto pt-7">
                         <button
                           type="button"
                           onPointerDown={(e) => { e.stopPropagation(); }}
@@ -2147,7 +2149,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                             e.stopPropagation();
                             navigate('/auth', { state: { mode: 'register', role: audience, plan: plan.id } });
                           }}
-                          className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
+                          className={`flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
                             plan.highlight
                               ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] hover:-translate-y-0.5'
                               : 'bg-white/10 text-white border border-white/20 hover:bg-white/15 hover:border-white/30'
@@ -2155,6 +2157,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         >
                           {plan.cta}
                         </button>
+                        </div>
                       </motion.div>
                     );
                   })}
