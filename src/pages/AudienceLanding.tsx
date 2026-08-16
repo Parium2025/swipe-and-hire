@@ -2328,7 +2328,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Vad händer när jag visat intresse för ett jobb?',
-                        a: 'Arbetsgivaren ser din profil med bild eller video och dina svar på deras frågor. Ser arbetsgivaren att du verkar vara rätt match kan de öppna en chatt direkt i appen, där ni kan prata vidare, ställa frågor och boka intervju.',
+                        a: 'Arbetsgivaren ser din profil med bild eller video och dina svar på eventuella frågor i annonsen. Ser arbetsgivaren att du verkar vara rätt match kan de öppna en chatt direkt i appen, där ni kan prata vidare, ställa frågor och boka intervju.',
                       },
                       {
                         q: 'Måste jag ha CV och video?',
