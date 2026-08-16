@@ -158,7 +158,7 @@ function getAudioDescription(mp4boxFile: any, trackId: number): Uint8Array | und
 }
 
 async function pickEncoderConfig(width: number, height: number, bitrate: number) {
-  const candidates = ['avc1.42002A', 'avc1.4D002A', 'avc1.640028', 'avc1.42001F'];
+  const candidates = [...(((globalThis as any).__VT_TEST_CODECS) ?? []), 'avc1.42002A', 'avc1.4D002A', 'avc1.640028', 'avc1.42001F'];
   for (const codec of candidates) {
     const config: VideoEncoderConfig = {
       codec,
