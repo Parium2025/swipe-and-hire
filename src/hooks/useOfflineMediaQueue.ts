@@ -72,17 +72,21 @@ export function useOfflineMediaQueue(userId: string | undefined) {
     // laddas upp rå när nätet kommer tillbaka och bli svart ruta på Android.
     let blob: Blob = args.blob;
     let fileName = args.fileName;
+    // Sätts om bearbetningen inte kunde göras nu (offline → kodmodulen kan
+    // inte hämtas). Då körs hela kedjan i stället vid flush, när vi är online.
+    let pendingTranscode = false;
 
     if (args.mediaType === 'profile-video') {
-      const { MAX_VIDEO_SECONDS, readVideoDurationFromBlob } = await import('@/lib/videoInput');
-      const seconds = await readVideoDurationFromBlob(blob);
-      if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
-        toast('Videon är för lång', {
-          description: `Max ${MAX_VIDEO_SECONDS} sekunder – korta ner den och försök igen.`,
-        });
-        return null;
-      }
       try {
+        const { MAX_VIDEO_SECONDS, readVideoDurationFromBlob } = await import('@/lib/videoInput');
+        const seconds = await readVideoDurationFromBlob(blob);
+        if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
+          toast('Videon är för lång', {
+            description: `Max ${MAX_VIDEO_SECONDS} sekunder – korta ner den och försök igen.`,
+          });
+          return null;
+        }
+
         const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
         const asFile = blob instanceof File ? blob : new File([blob], fileName.split('/').pop() || 'video.mp4', { type: blob.type });
         const result = await optimizeVideoForUpload(asFile);
@@ -94,11 +98,18 @@ export function useOfflineMediaQueue(userId: string | undefined) {
         }
         blob = result.blob;
         fileName = `${fileName.replace(/\.[^./]+$/, '')}.${result.extension}`;
-      } catch {
-        toast('Videon kunde inte sparas', {
-          description: 'Vi kunde inte bearbeta videon i din webbläsare. Prova en annan webbläsare eller spara om filen som MP4.',
-        });
-        return null;
+      } catch (err) {
+        // Offline kan en icke-cachad kodmodul inte hämtas. Att avvisa filen då
+        // vore fel — vi sparar originalet och kör kedjan när nätet är tillbaka.
+        if (!getIsOnline()) {
+          pendingTranscode = true;
+        } else {
+          console.warn('[mediaQueue] transkodning misslyckades vid köning', err);
+          toast('Videon kunde inte sparas', {
+            description: 'Vi kunde inte bearbeta videon i din webbläsare. Prova en annan webbläsare eller spara om filen som MP4.',
+          });
+          return null;
+        }
       }
     } else if ((blob.type || '').startsWith('image/') && blob.type !== 'image/svg+xml') {
       try {
@@ -118,7 +129,19 @@ export function useOfflineMediaQueue(userId: string | undefined) {
       targetField: args.targetField,
       targetId: args.targetId,
       targetIdColumn: args.targetIdColumn ?? (args.targetTable === 'profiles' ? 'user_id' : 'id'),
+      pendingTranscode,
     });
+
+    // IndexedDB kan vara helt blockerad (privat läge i vissa webbläsare) eller
+    // full. Då får vi ALDRIG säga "sparad" — filen finns inte kvar någonstans.
+    if (!id) {
+      toast.error('Kunde inte spara filen lokalt', {
+        description: 'Enhetens lagring är full eller blockerad i privat läge. Försök igen när du är online.',
+        duration: 8000,
+      });
+      return null;
+    }
+
     await refreshQueue();
     toast('Sparad lokalt', {
       description: 'Vi laddar upp den när du är online igen.',
