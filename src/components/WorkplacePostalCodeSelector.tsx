@@ -28,9 +28,7 @@ const WorkplacePostalCodeSelector = ({
   const [foundLocation, setFoundLocation] = useState<PostalCodeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
-  const [lastSuccessfulPostalCode, setLastSuccessfulPostalCode] = useState<string>('');
   const lastUserEditedPostalCodeRef = useRef('');
-  const lastCitySyncRef = useRef('');
 
   // Helper to validate city name (only letters, spaces, and hyphens)
   const isValidCityName = useCallback((city: string) => {
@@ -58,98 +56,61 @@ const WorkplacePostalCodeSelector = ({
     onValidationChange?.(hasValidLocation);
   }, [hasValidLocation, onValidationChange]);
 
-  // Initialize from cached info immediately on mount
   useEffect(() => {
-    if (cachedInfo && postalCodeValue.trim()) {
-      const cleanedCode = postalCodeValue.replace(/\s+/g, '');
-      const cachedCleanedCode = cachedInfo.postalCode.replace(/\s+/g, '');
-      
-      if (cleanedCode === cachedCleanedCode) {
-        setFoundLocation({
-          postalCode: cachedInfo.postalCode,
-          city: cachedInfo.city,
-          municipality: cachedInfo.municipality,
-          county: cachedInfo.county
-        });
-        setLastSuccessfulPostalCode(cleanedCode);
-        setIsValid(true);
-      }
-    }
-  }, [cachedInfo, postalCodeValue]);
+    let cancelled = false;
 
-  // Säkerhetsnät: Ort ska ALLTID spegla träffen (t.ex. när postnumret kom från
-  // en mall/cache och därför aldrig gick via API-anropet ovan).
-  useEffect(() => {
-    if (!foundLocation) return;
-    if (cityValue.trim() === foundLocation.city.trim()) return;
-    const syncKey = `${foundLocation.postalCode}|${foundLocation.city}`;
-    if (lastCitySyncRef.current === syncKey) return; // aldrig loopa
-    lastCitySyncRef.current = syncKey;
-    onLocationChange(
-      foundLocation.city,
-      foundLocation.postalCode?.replace(/\s+/g, ''),
-      foundLocation.municipality,
-      foundLocation.county || '',
-      'auto'
-    );
-  }, [foundLocation, cityValue, onLocationChange]);
-
-  useEffect(() => {
     const fetchLocation = async () => {
-      if (postalCodeValue.trim()) {
-        const cleanedCode = postalCodeValue.replace(/\s+/g, '');
-        const isValidFormat = isValidSwedishPostalCode(cleanedCode);
-        setIsValid(isValidFormat);
-        
-        // Check if we have cached info for this postal code - skip API call
-        if (cachedInfo && cleanedCode === cachedInfo.postalCode.replace(/\s+/g, '')) {
-          return; // Already set in initialization useEffect
-        }
-        
-        if (isValidFormat && cleanedCode.length === 5) {
-          setIsLoading(true);
-          try {
-            const location = await getCachedPostalCodeInfo(postalCodeValue);
-            setFoundLocation(location);
-            
-            if (location) {
-              setLastSuccessfulPostalCode(cleanedCode);
-              // Skicka tillbaka full info för caching
-              const source = cleanedCode === lastUserEditedPostalCodeRef.current ? 'user' : 'auto';
-              onLocationChange(location.city, cleanedCode, location.municipality, location.county || '', source);
-            } else {
-              setLastSuccessfulPostalCode('');
-            }
-          } catch (error) {
-            console.error('Error fetching postal code:', error);
-            setFoundLocation(null);
-            setLastSuccessfulPostalCode('');
-          } finally {
-            setIsLoading(false);
-          }
-        } else {
-          setFoundLocation(null);
-          setLastSuccessfulPostalCode('');
-          if (!postalCodeValue.trim()) {
-            const source = lastUserEditedPostalCodeRef.current === '' ? 'user' : 'auto';
-            onLocationChange('', undefined, undefined, undefined, source);
-          }
-          setIsLoading(false);
-        }
-      } else {
+      const cleanedCode = postalCodeValue.replace(/\D/g, '');
+      const isValidFormat = isValidSwedishPostalCode(cleanedCode);
+      setIsValid(isValidFormat);
+
+      if (!postalCodeValue.trim()) {
         setFoundLocation(null);
-        setIsValid(false);
-        setLastSuccessfulPostalCode('');
-        const source = lastUserEditedPostalCodeRef.current === '' ? 'user' : 'auto';
-        onLocationChange('', undefined, undefined, undefined, source);
         setIsLoading(false);
+        onLocationChange('', undefined, undefined, undefined, 'user');
+        return;
+      }
+
+      if (!isValidFormat || cleanedCode.length !== 5) {
+        setFoundLocation(null);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const cachedCleanedCode = cachedInfo?.postalCode.replace(/\D/g, '');
+        const location: PostalCodeResponse | null = cachedInfo && cachedCleanedCode === cleanedCode
+          ? {
+              postalCode: cachedInfo.postalCode,
+              city: cachedInfo.city,
+              municipality: cachedInfo.municipality,
+              county: cachedInfo.county,
+            }
+          : await getCachedPostalCodeInfo(cleanedCode);
+
+        if (cancelled) return;
+        setFoundLocation(location);
+
+        if (location) {
+          const source = cleanedCode === lastUserEditedPostalCodeRef.current ? 'user' : 'auto';
+          onLocationChange(location.city, cleanedCode, location.municipality, location.county || '', source);
+        }
+      } catch (error) {
+        if (cancelled) return;
+        console.error('Error fetching postal code:', error);
+        setFoundLocation(null);
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
     };
 
-    // Snabbare debounce för bättre användarupplevelse (200ms istället för 500ms)
     const timeoutId = setTimeout(fetchLocation, 200);
-    return () => clearTimeout(timeoutId);
-  }, [postalCodeValue, onLocationChange, lastSuccessfulPostalCode, foundLocation, cachedInfo]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [postalCodeValue, onLocationChange, cachedInfo]);
 
   const handlePostalCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -163,12 +124,10 @@ const WorkplacePostalCodeSelector = ({
       setFoundLocation(null);
       setIsValid(false);
       setIsLoading(false);
-      setLastSuccessfulPostalCode('');
     } else if (digits.length === 0) {
       setFoundLocation(null);
       setIsValid(false);
       setIsLoading(false);
-      setLastSuccessfulPostalCode('');
     }
   }, [onPostalCodeChange]);
 
