@@ -24,7 +24,8 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
     zIndex: 100000,
   };
 
-  const count = big ? 26 : 16;
+  const narrow = window.innerWidth < 768;
+  const count = (big ? 26 : 16) + (narrow ? 6 : 0);
 
   // Diskreta sidoburstar: en från vänster kant, en från höger kant.
   const sides = () => {
