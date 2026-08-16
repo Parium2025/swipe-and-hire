@@ -1910,17 +1910,25 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       // Update job questions — behåll id:n så att inkomna svar aldrig tappar sin fråga
       await syncJobQuestions(job.id, customQuestions);
 
-      if (publishMode) celebrate({ intensity: 'big' });
-      toast({ 
-        title: publishMode ? 'Annons publicerad!' : 'Annons uppdaterad!', 
-        description: publishMode ? 'Din annons är nu publicerad och synlig för jobbsökare.' : 'Dina ändringar har sparats.',
-        variant: 'success'
-      });
       clearEditJobDraft(); // Clear localStorage draft after successful save
       setHasUnsavedChanges(false);
       onOpenChange(false);
       onJobUpdated();
       if (publishMode) onPublished?.();
+
+      // Fira EFTER att dialogen stängts — annars hinner konfettin döljas bakom
+      // overlayen på mobil och notisen konkurrerar med stängningsanimationen.
+      const finish = () => {
+        if (publishMode) celebrate({ intensity: 'big' });
+        toast({
+          title: publishMode ? 'Annons publicerad!' : 'Annons uppdaterad!',
+          description: publishMode ? 'Din annons är nu publicerad och synlig för jobbsökare.' : 'Dina ändringar har sparats.',
+          variant: 'success',
+          duration: publishMode ? 5000 : undefined,
+        });
+      };
+      if (typeof window !== 'undefined') window.setTimeout(finish, 320);
+      else finish();
     } catch (err) {
       console.error('Edit job error:', err);
       toast({ title: 'Ett fel uppstod', description: 'Kunde inte uppdatera annonsen.', variant: 'destructive' });
