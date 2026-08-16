@@ -2139,8 +2139,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         <PlanFeatures
                           features={plan.features}
                           isActive={isActive}
-                          open={openSeekerPlan === plan.id}
-                          onToggle={() => setOpenSeekerPlan((current) => current === plan.id ? null : plan.id)}
+                          open={openSeekerPlans.includes(plan.id)}
+                          onToggle={() => togglePlan(setOpenSeekerPlans, plan.id)}
                         />
                         <button
                           type="button"
