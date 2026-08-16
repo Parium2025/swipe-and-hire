@@ -193,6 +193,21 @@ export function useResilientUpload(): UseResilientUploadResult {
         },
       });
 
+      // Posterbild bredvid videon (best-effort).
+      if (posterBlob) {
+        try {
+          const { supabase } = await import('@/integrations/supabase/client');
+          const { getVideoPosterPath } = await import('@/lib/mediaManager');
+          await supabase.storage.from(config.bucket).upload(getVideoPosterPath(storagePath), posterBlob, {
+            contentType: 'image/jpeg',
+            cacheControl: '31536000',
+            upsert: true,
+          });
+        } catch (posterError) {
+          console.warn('[useResilientUpload] posterbild kunde inte sparas', posterError);
+        }
+      }
+
       setState((prev) => ({ ...prev, status: 'success', storagePath }));
       abortControllerRef.current = null;
       return storagePath;
