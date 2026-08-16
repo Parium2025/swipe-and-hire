@@ -2324,7 +2324,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Vilka företag finns här?',
-                        a: 'Allt från lokala restauranger och butiker till växande techbolag och etablerade arbetsgivare runt om i Sverige. Vi lägger till nya företag löpande och prioriterar arbetsgivare som svarar snabbt och håller hög kvalitet på sina annonser.',
+                        a: 'Allt från lokala restauranger, butiker och kaféer till växande techbolag och etablerade arbetsgivare runt om i Sverige. Vi lägger till nya företag löpande och prioriterar arbetsgivare som svarar snabbt, med hög kvalitet på sina annonser.',
                       },
                       {
                         q: 'Vad händer när jag visat intresse för ett jobb?',
