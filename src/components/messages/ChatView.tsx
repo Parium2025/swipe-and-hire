@@ -394,6 +394,9 @@ export function ChatView({
         file: payload,
         contentType,
         upsert: true,
+        // Bilagor är oföränderliga (unik sökväg per fil) → ett års cache gör
+        // att samma video aldrig hämtas två gånger av samma mottagare.
+        cacheControl: '31536000',
       });
     } catch (error) {
       console.error('Upload error:', error);
