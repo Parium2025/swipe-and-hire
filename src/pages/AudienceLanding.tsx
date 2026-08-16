@@ -2099,7 +2099,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         'Spara obegränsat antal jobb',
                         'Chatta med arbetsgivare',
                         'Direktkontakt till arbetsgivaren via mejl',
-                        'Statistik över profilvisningar senaste 30 dagarna',
                       ],
                       cta: 'Bli Premium',
                       highlight: true,

@@ -139,7 +139,6 @@ const Subscription = () => {
         'Spara obegränsat antal jobb',
         'Chatta med arbetsgivare',
         'Direktkontakt till arbetsgivaren via mejl',
-        'Statistik över profilvisningar senaste 30 dagarna',
       ],
       icon: Crown,
     },
