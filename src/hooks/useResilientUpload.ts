@@ -38,7 +38,9 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'profile-video': {
     bucket: 'job-applications',
     maxSizeMB: 50,
-    allowedTypes: ['video/mp4', 'video/quicktime', 'video/x-msvideo'],
+    // AVI utelämnas medvetet: ingen webbläsare kan spela upp det.
+    allowedTypes: ['video/mp4', 'video/quicktime'],
+
     shouldCompress: false,
   },
   'cover-image': {
