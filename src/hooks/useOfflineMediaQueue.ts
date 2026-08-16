@@ -23,6 +23,7 @@ import {
   getQueuedUploads,
   removeQueuedUpload,
   updateQueuedUpload,
+  pruneStaleUploads,
   MEDIA_QUEUE_MAX_ATTEMPTS,
   type QueuedMediaUpload,
 } from '@/lib/offlineMediaQueue';
