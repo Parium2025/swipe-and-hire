@@ -253,13 +253,21 @@ export async function optimizeVideoForUpload(
   const output: Blob = useTranscoded ? (transcodedBlob as Blob) : file;
   const poster = await extractPosterFrame(output).catch(() => null);
 
+  // Komprimerad utdata är alltid H.264. Originalet måste kontrolleras — en
+  // HEVC-inspelning från iPhone går inte att spela upp på Android/Windows.
+  const sourceCodec = useTranscoded ? null : await probeVideoCodec(file);
+  const playableEverywhere = useTranscoded || isUniversallyPlayableCodec(sourceCodec);
+
   return {
     blob: output,
     extension: useTranscoded ? 'mp4' : (file.name.split('.').pop() || 'mp4').toLowerCase(),
     poster,
     transcoded: useTranscoded,
+    playableEverywhere,
+    sourceCodec,
   };
 }
+
 
 async function runTranscode(
   file: File,
