@@ -2461,7 +2461,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Kontakt</span>
               <SplitHeadline
                 as="h2"
-                text="Vi finns här för dig."
+                text="Vi finns här för dig!"
                 emphasizeLast
                 className="landing-h2 mt-4 text-white"
               />
