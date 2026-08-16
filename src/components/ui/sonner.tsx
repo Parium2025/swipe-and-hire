@@ -142,7 +142,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
           warning:
             "group-[.toaster]:!bg-[linear-gradient(135deg,hsl(38_60%_20%/0.92),hsl(30_60%_11%/0.94))] group-[.toaster]:!border-amber-300/25",
           info:
-            "group-[.toaster]:!bg-[linear-gradient(135deg,hsl(215_60%_16%/0.92),hsl(215_70%_9%/0.94))] group-[.toaster]:!border-white/12",
+            "group-[.toaster]:!bg-[linear-gradient(135deg,hsl(205_72%_22%/0.94),hsl(215_72%_11%/0.96))] group-[.toaster]:!border-sky-300/25",
+          default:
+            "group-[.toaster]:!bg-[linear-gradient(135deg,hsl(205_72%_22%/0.94),hsl(215_72%_11%/0.96))] group-[.toaster]:!border-sky-300/25",
         },
       }}
       {...props}
