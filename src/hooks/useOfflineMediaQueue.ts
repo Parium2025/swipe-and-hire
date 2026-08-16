@@ -225,7 +225,7 @@ export function useOfflineMediaQueue(userId: string | undefined) {
         // Uppdatera DB-raden med storage path
         const { error: dbError } = await supabase
           .from(item.targetTable as never)
-          .update({ [item.targetField]: item.fileName } as never)
+          .update({ [item.targetField]: uploadPath } as never)
           .eq(item.targetIdColumn as never, item.targetId as never);
 
         if (dbError) throw dbError;
