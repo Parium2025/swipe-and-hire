@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { uploadWithRetry, type UploadProgress, UploadAbortedError } from '@/lib/uploadWithProgress';
-import { isAcceptedVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
+import { isAcceptedVideoFile, looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS, ACCEPTED_VIDEO_MIME } from '@/lib/videoInput';
 
 /**
  * 🔒 KRITISKT: DETTA ÄR DEN ENDA KÄLLAN TILL SANNING FÖR MEDIA-HANTERING
@@ -54,9 +54,9 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 50,
-    // AVI utelämnas medvetet: ingen webbläsare kan spela upp det.
-    allowedTypes: ['video/mp4', 'video/quicktime']
-
+    // Bred lista: allt transkodas till H.264 i enheten. `isAcceptedVideoFile`
+    // täcker dessutom filer med tom MIME-typ (vanligt på Android).
+    allowedTypes: [...ACCEPTED_VIDEO_MIME]
   },
   'cover-image': {
     bucket: 'job-applications',
@@ -191,7 +191,7 @@ export async function uploadMedia(
   // (iPhone spelar annars in HEVC/MOV som Android/Windows inte alltid klarar).
   // Vi tar samtidigt fram en posterbild så att listor slipper röra videofilen.
   let posterBlob: Blob | null = null;
-  const isVideo = acceptedAsVideo || file.type.startsWith('video/');
+  const isVideo = acceptedAsVideo || looksLikeVideoFile(file);
   if (isVideo) {
     // Hård längdgräns – enda källan till sanning, gäller alla uppladdningsvägar.
     const seconds = await readVideoDurationFromBlob(file);
@@ -426,7 +426,7 @@ export async function deleteMedia(
 export function detectMediaType(file: File): MediaType | null {
   const type = file.type;
   
-  if (type.startsWith('video/')) return 'profile-video';
+  if (looksLikeVideoFile(file)) return 'profile-video';
   if (type.startsWith('image/')) {
     // Kan vara profil, cover eller annat - låt användaren specificera
     return 'profile-image';

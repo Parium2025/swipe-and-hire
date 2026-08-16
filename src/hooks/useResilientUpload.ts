@@ -16,7 +16,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { isAcceptedVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
+import { isAcceptedVideoFile, looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS, ACCEPTED_VIDEO_MIME } from '@/lib/videoInput';
 import { toast } from 'sonner';
 import { uploadWithRetry, UploadAbortedError, type UploadProgress } from '@/lib/uploadWithProgress';
 import { compressImageBlob } from '@/lib/imageUploadOptimization';
@@ -39,9 +39,8 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'profile-video': {
     bucket: 'job-applications',
     maxSizeMB: 50,
-    // AVI utelämnas medvetet: ingen webbläsare kan spela upp det.
-    allowedTypes: ['video/mp4', 'video/quicktime'],
-
+    // Bred lista: allt transkodas till H.264 i enheten före upload.
+    allowedTypes: [...ACCEPTED_VIDEO_MIME],
     shouldCompress: false,
   },
   'cover-image': {
@@ -162,7 +161,7 @@ export function useResilientUpload(): UseResilientUploadResult {
       // 🎬 Video komprimeras till 720p H.264 i enheten före upload (bandbredd +
       // universell uppspelning). Misslyckas det laddas originalet upp.
       let posterBlob: Blob | null = null;
-      if (acceptedAsVideo || file.type.startsWith('video/')) {
+      if (acceptedAsVideo || looksLikeVideoFile(file)) {
         const seconds = await readVideoDurationFromBlob(file);
         if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
           const msg = `Videon är ${Math.round(seconds)} sekunder. Max längd är ${MAX_VIDEO_SECONDS} sekunder – korta ner den och försök igen.`;
