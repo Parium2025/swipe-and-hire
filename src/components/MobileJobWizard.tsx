@@ -269,6 +269,9 @@ const MobileJobWizard = ({
       setOriginalDesktopStoragePath(null);
       setImageIsEdited(false);
       setDesktopImageIsEdited(false);
+      // A new wizard run must never inherit postal lookup data from the
+      // previously opened job or template.
+      setCachedPostalCodeInfo(null);
       setManualFocus(null);
       setImageTimestamp(Date.now());
       
