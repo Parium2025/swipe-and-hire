@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { uploadWithRetry, type UploadProgress, UploadAbortedError } from '@/lib/uploadWithProgress';
+import { isAcceptedVideoFile } from '@/lib/videoInput';
 
 /**
  * 🔒 KRITISKT: DETTA ÄR DEN ENDA KÄLLAN TILL SANNING FÖR MEDIA-HANTERING
@@ -128,11 +129,14 @@ export async function uploadMedia(
     };
   }
   
-  // Validera filtyp
-  if (!config.allowedTypes.includes(file.type)) {
+  // Validera filtyp. Videor valideras brett (alla format transkodas ändå till
+  // H.264 – det är `playableEverywhere` nedan som avgör om filen får sparas).
+  const videoBucket = config.allowedTypes.some((t) => t.startsWith('video/'));
+  const acceptedAsVideo = videoBucket && isAcceptedVideoFile(file);
+  if (!acceptedAsVideo && !config.allowedTypes.includes(file.type)) {
     return { 
       storagePath: '', 
-      error: new Error(`Filtypen ${file.type} är inte tillåten för ${mediaType}.`) 
+      error: new Error(`Filtypen ${file.type || 'okänd'} är inte tillåten för ${mediaType}.`) 
     };
   }
   
@@ -187,7 +191,7 @@ export async function uploadMedia(
   // (iPhone spelar annars in HEVC/MOV som Android/Windows inte alltid klarar).
   // Vi tar samtidigt fram en posterbild så att listor slipper röra videofilen.
   let posterBlob: Blob | null = null;
-  const isVideo = file.type.startsWith('video/');
+  const isVideo = acceptedAsVideo || file.type.startsWith('video/');
   if (isVideo) {
     let playableEverywhere = false;
     try {

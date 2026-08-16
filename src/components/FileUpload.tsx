@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { looksLikeVideoFile } from '@/lib/videoInput';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, File, Video, FileText, Check, WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -153,7 +154,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     if (file) {
 
       // Check if it's a video file for preview
-      const isVideo = file.type.startsWith('video/');
+      const isVideo = looksLikeVideoFile(file);
       if (isVideo) {
         const url = URL.createObjectURL(file);
         const seconds = await readVideoDuration(url);
@@ -217,7 +218,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   const getAcceptedTypesText = () => {
     if (questionType === 'video' || uploadType === 'video') {
-      return 'Video (MP4, MOV, AVI)';
+      return 'Video (MP4, MOV, WEBM)';
     }
     if (uploadType === 'image') {
       return 'Bilder';
@@ -297,6 +298,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <video 
             src={previewFile.url} 
             controls 
+            playsInline
+            preload="metadata"
             className="w-full h-auto max-h-64 object-contain bg-black"
           />
         </div>
