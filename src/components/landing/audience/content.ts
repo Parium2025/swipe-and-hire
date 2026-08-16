@@ -26,8 +26,8 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
       title: 'Vi har gjort det enkelt för alla!',
       paragraphs: [
         'Med Parium hittar du jobbannonser från hela Sverige. Sök och ansök snabbt — i appen eller på webben.',
-        'Samla erfarenhet, utbildning och personlighet. Ditt CV och din profil — på ett och samma ställe. Du fyller i din grund en enda gång.',
-        'Utifrån den grunden anpassar du sedan din presentation med rätt bild, video och budskap för varje roll du söker. Rätt intryck till rätt arbetsgivare — varje gång.',
+        'Erfarenhet, utbildning och personlighet — ditt CV och din profil på ett och samma ställe. Du fyller i din grund en enda gång.',
+        'Utifrån den grunden anpassar du sedan din presentation med rätt bild/video och budskap för varje roll du söker. Rätt intryck till rätt arbetsgivare — varje gång.',
         'I nästa sektion ser du exempel på yrken som tar Sverige framåt.',
       ],
     },
