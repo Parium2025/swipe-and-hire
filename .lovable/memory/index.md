@@ -40,3 +40,4 @@
 - [Databasbehörigheter](mem://constraints/db-permission-policy) — GRANT/REVOKE-regler, policyroller, auth.uid()-kontroll i SECURITY DEFINER.
 - [Raderingstider](mem://features/data-retention-timings) — 24 mån + 365 dagars frist, påminnelser 180/90/7 dagar, anonym räknare för raderade sökande.
 - [Stripe-lansering: juridik](mem://launch/stripe-legal-reminder) — Policy, DPA, registerförteckning och FAQ måste uppdateras när betalningar aktiveras.
+- [Videopipeline](mem://architecture/video-upload-pipeline) — 720p H.264-komprimering i enheten, posterbild, 90 s gräns.
