@@ -1517,8 +1517,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   );
   const [openEmployerPlans, setOpenEmployerPlans] = useState<string[]>([]);
   const [openSeekerPlans, setOpenSeekerPlans] = useState<string[]>([]);
-  const togglePlan = (setter: React.Dispatch<React.SetStateAction<string[]>>, id: string) =>
-    setter((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
+  // Alla kort öppnas/stängs tillsammans — slipper dubbeltryck
+  const toggleAllPlans = (setter: React.Dispatch<React.SetStateAction<string[]>>, ids: string[]) =>
+    setter((current) => (current.length > 0 ? [] : ids));
 
 
   const commonEmployerFeatures = [
