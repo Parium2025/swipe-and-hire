@@ -1907,9 +1907,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
       // Update job questions — behåll id:n så att inkomna svar aldrig tappar sin fråga
       await syncJobQuestions(job.id, customQuestions);
 
+      if (publishMode) celebrate({ intensity: 'big' });
       toast({ 
         title: publishMode ? 'Annons publicerad!' : 'Annons uppdaterad!', 
-        description: publishMode ? 'Din annons är nu publicerad och synlig för jobbsökare.' : 'Dina ändringar har sparats.' 
+        description: publishMode ? 'Din annons är nu publicerad och synlig för jobbsökare.' : 'Dina ändringar har sparats.',
+        variant: 'success'
       });
       clearEditJobDraft(); // Clear localStorage draft after successful save
       setHasUnsavedChanges(false);

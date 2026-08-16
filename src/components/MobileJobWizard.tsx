@@ -2620,9 +2620,11 @@ const MobileJobWizard = ({
       // Note: Template questions are now managed separately via job_question_templates table
       // No need to store questions directly on job_templates
 
+      celebrate({ intensity: 'big' });
       toast({
         title: "Jobbannons skapad!",
-        description: "Din annons är nu publicerad och synlig för jobbsökare."
+        description: "Din annons är nu publicerad och synlig för jobbsökare.",
+        variant: "success"
       });
 
       // Clear both sessionStorage and localStorage drafts BEFORE calling handleClose
