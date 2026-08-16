@@ -224,12 +224,145 @@ async function pickEncoderConfig(width: number, height: number, bitrate: number)
 }
 
 /* -------------------------------------------------------------------------- */
+/* Skyddsnät: realtidsomkodning via MediaRecorder                              */
+/* -------------------------------------------------------------------------- */
+
+/** MP4/H.264 är det enda vi accepterar från skyddsnätet – se kodekregeln ovan. */
+function pickRecorderMimeType(): string | null {
+  if (typeof MediaRecorder === 'undefined') return null;
+  const candidates = [
+    'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+    'video/mp4;codecs=avc1.42E01E',
+    'video/mp4;codecs=avc1',
+    'video/mp4',
+  ];
+  for (const type of candidates) {
+    try {
+      if (MediaRecorder.isTypeSupported(type)) return type;
+    } catch { /* pröva nästa */ }
+  }
+  return null;
+}
+
+/**
+ * Sista utvägen när WebCodecs inte finns eller misslyckas: spela upp videon
+ * dolt, rita av den till en canvas och spela in resultatet i realtid.
+ *
+ * Långsammare (tar lika lång tid som klippet), men den räddar exakt det fall
+ * som annars blir en svart ruta: en HEVC-inspelning från en äldre iPhone.
+ * Safari kan spela upp HEVC och spelar in i H.264 — så det som lämnar den
+ * här funktionen går alltid att spela upp på Android och Windows.
+ */
+async function runRecorderTranscode(
+  file: File,
+  shortSide: number,
+  bitrate: number,
+  onProgress?: (ratio: number) => void
+): Promise<Blob | null> {
+  const mimeType = pickRecorderMimeType();
+  if (!mimeType || typeof document === 'undefined') return null;
+
+  const url = URL.createObjectURL(file);
+  const video = document.createElement('video');
+  video.src = url;
+  video.playsInline = true;
+  video.muted = true; // krävs för att få starta uppspelning utan klick
+  video.preload = 'auto';
+
+  let recorder: MediaRecorder | null = null;
+  let raf = 0;
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const timer = window.setTimeout(() => reject(new Error('recorder-load-timeout')), 15000);
+      video.onloadeddata = () => { window.clearTimeout(timer); resolve(); };
+      video.onerror = () => { window.clearTimeout(timer); reject(new Error('recorder-load-error')); };
+    });
+
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    if (!vw || !vh) return null;
+    const { width, height } = targetSize(vw, vh, shortSide);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const canvasStream = canvas.captureStream(30);
+
+    // Ljudet tas från videoelementets egen ström. Saknas det spår helt går vi
+    // hellre vidare utan skyddsnät än levererar en presentationsvideo utan röst.
+    const elementStream: MediaStream | null =
+      typeof (video as any).captureStream === 'function'
+        ? (video as any).captureStream()
+        : typeof (video as any).mozCaptureStream === 'function'
+          ? (video as any).mozCaptureStream()
+          : null;
+    const audioTracks = elementStream?.getAudioTracks() ?? [];
+    for (const track of audioTracks) canvasStream.addTrack(track);
+
+    const chunks: Blob[] = [];
+    recorder = new MediaRecorder(canvasStream, {
+      mimeType,
+      videoBitsPerSecond: bitrate,
+      audioBitsPerSecond: 128_000,
+    });
+    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+
+    const finished = new Promise<void>((resolve, reject) => {
+      recorder!.onstop = () => resolve();
+      recorder!.onerror = () => reject(new Error('recorder-error'));
+    });
+
+    const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
+    const draw = () => {
+      ctx.drawImage(video, 0, 0, width, height);
+      if (onProgress && duration > 0) onProgress(Math.min(1, video.currentTime / duration));
+      raf = requestAnimationFrame(draw);
+    };
+
+    recorder.start(1000);
+    await video.play();
+    draw();
+
+    await new Promise<void>((resolve) => {
+      const guard = window.setTimeout(resolve, (duration || 90) * 1000 + 15000);
+      video.onended = () => { window.clearTimeout(guard); resolve(); };
+    });
+
+    cancelAnimationFrame(raf);
+    if (recorder.state !== 'inactive') recorder.stop();
+    await finished;
+
+    const blob = new Blob(chunks, { type: 'video/mp4' });
+    return blob.size > 0 ? blob : null;
+  } catch (error) {
+    console.warn('[videoTranscode] skyddsnätet kunde inte köras:', error);
+    return null;
+  } finally {
+    cancelAnimationFrame(raf);
+    try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch { /* ignore */ }
+    try { video.pause(); } catch { /* ignore */ }
+    video.removeAttribute('src');
+    try { video.load(); } catch { /* ignore */ }
+    URL.revokeObjectURL(url);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 /* Huvudfunktion                                                               */
 /* -------------------------------------------------------------------------- */
 
 /**
  * Komprimerar en video till 720p H.264 i användarens enhet och tar fram en
- * posterbild. Faller alltid tillbaka till originalfilen om något inte stöds.
+ * posterbild.
+ *
+ * Tre nivåer, i tur och ordning:
+ *  1. WebCodecs – snabbt, hög kvalitet, ingen kvalitetsförlust på ljudet.
+ *  2. MediaRecorder – realtid, används bara om (1) inte går. Räddar HEVC.
+ *  3. Originalfilen – bara om den redan är H.264 och alltså spelbar överallt.
  */
 export async function optimizeVideoForUpload(
   file: File,
@@ -243,19 +376,29 @@ export async function optimizeVideoForUpload(
     try {
       transcodedBlob = await runTranscode(file, shortSide, bitrate, options.onProgress);
     } catch (error) {
-      console.warn('[videoTranscode] fallback till originalfil:', error);
+      console.warn('[videoTranscode] WebCodecs misslyckades:', error);
       transcodedBlob = null;
     }
   }
 
   // Använd bara resultatet om det faktiskt blev mindre – annars är originalet bättre.
-  const useTranscoded = !!transcodedBlob && transcodedBlob.size > 0 && transcodedBlob.size < file.size;
+  let useTranscoded = !!transcodedBlob && transcodedBlob.size > 0 && transcodedBlob.size < file.size;
+
+  // Nivå 2: originalet duger inte och WebCodecs gav inget → kör skyddsnätet.
+  const sourceCodec = useTranscoded ? null : await probeVideoCodec(file);
+  if (!useTranscoded && !isUniversallyPlayableCodec(sourceCodec)) {
+    const recovered = await runRecorderTranscode(file, shortSide, bitrate, options.onProgress);
+    if (recovered && recovered.size > 0) {
+      transcodedBlob = recovered;
+      useTranscoded = true;
+    }
+  }
+
   const output: Blob = useTranscoded ? (transcodedBlob as Blob) : file;
   const poster = await extractPosterFrame(output).catch(() => null);
 
-  // Komprimerad utdata är alltid H.264. Originalet måste kontrolleras — en
+  // Egen utdata är alltid H.264 i MP4. Originalet måste kontrolleras — en
   // HEVC-inspelning från iPhone går inte att spela upp på Android/Windows.
-  const sourceCodec = useTranscoded ? null : await probeVideoCodec(file);
   const playableEverywhere = useTranscoded || isUniversallyPlayableCodec(sourceCodec);
 
   return {
@@ -267,6 +410,8 @@ export async function optimizeVideoForUpload(
     sourceCodec,
   };
 }
+
+
 
 
 async function runTranscode(
