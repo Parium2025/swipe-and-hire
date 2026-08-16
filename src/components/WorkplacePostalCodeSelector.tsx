@@ -76,6 +76,20 @@ const WorkplacePostalCodeSelector = ({
     }
   }, [cachedInfo, postalCodeValue]);
 
+  // Säkerhetsnät: Ort ska ALLTID spegla träffen (t.ex. när postnumret kom från
+  // en mall/cache och därför aldrig gick via API-anropet ovan).
+  useEffect(() => {
+    if (!foundLocation) return;
+    if (cityValue.trim() === foundLocation.city.trim()) return;
+    onLocationChange(
+      foundLocation.city,
+      foundLocation.postalCode?.replace(/\s+/g, ''),
+      foundLocation.municipality,
+      foundLocation.county || '',
+      'auto'
+    );
+  }, [foundLocation, cityValue, onLocationChange]);
+
   useEffect(() => {
     const fetchLocation = async () => {
       if (postalCodeValue.trim()) {
