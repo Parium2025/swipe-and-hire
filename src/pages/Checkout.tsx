@@ -17,7 +17,6 @@ const PLAN_DETAILS: Record<string, { name: string; price: string; tagline: strin
     perks: [
       'Visa intresse för obegränsat antal jobb',
       'Spara obegränsat antal jobb',
-      'Se vilka företag som tittat på din profil',
       'Direktkontakt till arbetsgivare via mejl',
       'Statistik över profilvisningar senaste 30 dagarna',
     ],

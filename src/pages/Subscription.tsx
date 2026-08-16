@@ -138,7 +138,6 @@ const Subscription = () => {
         'Visa intresse för hur många jobb du vill',
         'Spara obegränsat antal jobb',
         'Chatta med arbetsgivare',
-        'Se vilka företag som tittat på din profil',
         'Direktkontakt till arbetsgivaren via mejl',
         'Statistik över profilvisningar senaste 30 dagarna',
       ],
