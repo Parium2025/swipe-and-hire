@@ -1515,8 +1515,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium' | 'growth' | 'pro'>(
     audience === 'employer' ? 'pro' : 'premium',
   );
-  const [openEmployerPlan, setOpenEmployerPlan] = useState<'start' | 'growth' | 'pro' | null>(null);
-  const [openSeekerPlan, setOpenSeekerPlan] = useState<'start' | 'premium' | null>(null);
+  const [openEmployerPlans, setOpenEmployerPlans] = useState<string[]>([]);
+  const [openSeekerPlans, setOpenSeekerPlans] = useState<string[]>([]);
+  const togglePlan = (setter: React.Dispatch<React.SetStateAction<string[]>>, id: string) =>
+    setter((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
 
 
   const commonEmployerFeatures = [
