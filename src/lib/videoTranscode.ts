@@ -389,12 +389,15 @@ async function runRecorderTranscode(
     console.warn('[videoTranscode] skyddsnätet kunde inte köras:', error);
     return null;
   } finally {
-    cancelAnimationFrame(raf);
+    for (const timer of drawTimers) window.clearInterval(timer);
     try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch { /* ignore */ }
     try { video.pause(); } catch { /* ignore */ }
     video.removeAttribute('src');
     try { video.load(); } catch { /* ignore */ }
     URL.revokeObjectURL(url);
+    // AudioContext:en måste stängas – annars ligger den kvar och äter batteri
+    // och räknas mot webbläsarens tak på antal samtidiga kontexter.
+    try { await audioContext?.close(); } catch { /* ignore */ }
   }
 }
 
