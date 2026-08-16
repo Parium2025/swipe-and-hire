@@ -334,7 +334,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
       {/* Hidden file input for better mobile support */}
       <input 
         {...getInputProps()} 
-        accept={acceptedFileTypes.join(',')}
+        accept={[
+          ...acceptedFileTypes,
+          ...(acceptedFileTypes.includes('video/*') ? ACCEPTED_VIDEO_EXTENSIONS : []),
+        ].join(',')}
         style={{ display: 'none' }}
         id={`file-input-${Math.random().toString(36).substring(2)}`}
       />
