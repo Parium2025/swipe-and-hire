@@ -1006,7 +1006,7 @@ const Profile = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type.startsWith('video/')) {
+    if (looksLikeVideoFile(file)) {
       // Förbättrad video-validering med specifika felmeddelanden (samma som WelcomeTunnel)
       let proceeded = false;
       let metadataAttempted = false;
@@ -1934,7 +1934,7 @@ const Profile = () => {
               <input
                 id="profile-image"
                 type="file"
-                accept="image/*,video/*"
+                accept="image/*,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
                 onChange={handleMediaChange}
                 className="hidden"
                 disabled={isUploadingMedia}

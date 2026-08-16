@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
 import { useConversationMessages, type Conversation, type ConversationMessage } from '@/hooks/useConversations';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
@@ -343,8 +344,46 @@ export function ChatView({
   };
 
   const uploadFile = async (file: File): Promise<{ url: string; type: string; name: string } | null> => {
-    const ext = file.name.split('.').pop() || 'bin';
-    const path = `${currentUserId}/${conversation.id}/${Date.now()}.${ext}`;
+    let payload: Blob = file;
+    let ext = file.name.split('.').pop() || 'bin';
+    let contentType = file.type || 'application/octet-stream';
+
+    // 🎬 Videor i chatten går genom exakt samma kedja som profilvideor:
+    // längdgräns → 720p H.264 i enheten → blockera om filen inte går att
+    // spela upp överallt. Utan detta kunde en HEVC-video från en iPhone
+    // skickas till en arbetsgivare på Android och bara visas som svart ruta.
+    if (looksLikeVideoFile(file)) {
+      const seconds = await readVideoDurationFromBlob(file);
+      if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
+        toast.error('Videon är för lång', {
+          description: `Max längd är ${MAX_VIDEO_SECONDS} sekunder.`,
+        });
+        return null;
+      }
+
+      let playableEverywhere = false;
+      try {
+        const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
+        const result = await optimizeVideoForUpload(file);
+        payload = result.blob;
+        ext = result.extension;
+        contentType = result.transcoded ? 'video/mp4' : file.type || 'video/mp4';
+        playableEverywhere = result.playableEverywhere;
+      } catch (error) {
+        console.warn('[ChatView] videokomprimering hoppades över', error);
+      }
+
+      if (!playableEverywhere) {
+        toast.error('Videoformatet stöds inte', {
+          description:
+            'Videon kunde inte bearbetas i din webbläsare och skulle inte gå att spela upp på alla enheter. Spara om den som MP4 (H.264) och försök igen.',
+        });
+        return null;
+      }
+    }
+
+    const safeExt = ext.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+    const path = `${currentUserId}/${conversation.id}/${Date.now()}.${safeExt}`;
 
     try {
       // 🚀 Resilient upload med retry + exponential backoff
@@ -352,8 +391,8 @@ export function ChatView({
       await uploadWithRetry({
         bucket: 'message-attachments',
         path,
-        file,
-        contentType: file.type,
+        file: payload,
+        contentType,
         upsert: true,
       });
     } catch (error) {
@@ -374,7 +413,7 @@ export function ChatView({
 
     return {
       url: signedData.signedUrl,
-      type: file.type,
+      type: contentType,
       name: file.name,
     };
   };
@@ -813,7 +852,7 @@ export function ChatView({
             type="file"
             onChange={handleFileSelect}
             className="hidden"
-            accept="image/*,video/*,.pdf,.doc,.docx,.rtf,.odt,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip"
+            accept="image/*,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv,.pdf,.doc,.docx,.rtf,.odt,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip"
           />
 
           <Textarea

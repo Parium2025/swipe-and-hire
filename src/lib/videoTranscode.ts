@@ -59,21 +59,32 @@ export function canTranscodeVideo(): boolean {
   );
 }
 
+export interface ProbedTracks {
+  /** t.ex. "avc1.640028" (H.264) eller "hvc1.1.6.L93.B0" (HEVC). */
+  videoCodec: string | null;
+  /** null = containern kunde inte läsas (t.ex. webm/mkv) → vi vet inte. */
+  hasAudio: boolean | null;
+}
+
 /**
- * Läser videospårets kodek ur containern utan att avkoda något.
- * Returnerar t.ex. "avc1.640028" (H.264) eller "hvc1.1.6.L93.B0" (HEVC).
+ * Läser spårinformation ur containern utan att avkoda något.
+ * Returnerar `{ videoCodec: null, hasAudio: null }` om filen inte kan läsas.
  */
-export async function probeVideoCodec(file: Blob): Promise<string | null> {
+export async function probeMediaTracks(file: Blob): Promise<ProbedTracks> {
+  const unknown: ProbedTracks = { videoCodec: null, hasAudio: null };
   try {
     const MP4Box: any = await import('mp4box');
     const createFile = MP4Box.createFile ?? MP4Box.default?.createFile;
-    if (!createFile) return null;
+    if (!createFile) return unknown;
 
     const mp4boxFile = createFile();
-    let codec: string | null = null;
+    let result: ProbedTracks | null = null;
     mp4boxFile.onError = () => { /* ohanterbar container */ };
     mp4boxFile.onReady = (info: any) => {
-      codec = info?.videoTracks?.[0]?.codec ?? null;
+      result = {
+        videoCodec: info?.videoTracks?.[0]?.codec ?? null,
+        hasAudio: (info?.audioTracks?.length ?? 0) > 0,
+      };
     };
 
     // iPhone lägger ibland moov-atomen sist, så hela filen måste läsas in.
@@ -82,10 +93,15 @@ export async function probeVideoCodec(file: Blob): Promise<string | null> {
     mp4boxFile.appendBuffer(buffer);
     mp4boxFile.flush();
     try { mp4boxFile.stop?.(); } catch { /* ignore */ }
-    return codec;
+    return result ?? unknown;
   } catch {
-    return null;
+    return unknown;
   }
+}
+
+/** Bakåtkompatibel hjälpare: bara videokodeken. */
+export async function probeVideoCodec(file: Blob): Promise<string | null> {
+  return (await probeMediaTracks(file)).videoCodec;
 }
 
 /**
@@ -257,6 +273,7 @@ async function runRecorderTranscode(
   file: File,
   shortSide: number,
   bitrate: number,
+  expectAudio: boolean | null,
   onProgress?: (ratio: number) => void
 ): Promise<Blob | null> {
   const mimeType = pickRecorderMimeType();
@@ -266,11 +283,12 @@ async function runRecorderTranscode(
   const video = document.createElement('video');
   video.src = url;
   video.playsInline = true;
-  video.muted = true; // krävs för att få starta uppspelning utan klick
   video.preload = 'auto';
 
+  let audioContext: AudioContext | null = null;
+
   let recorder: MediaRecorder | null = null;
-  let raf = 0;
+  const drawTimers: number[] = [];
 
   try {
     await new Promise<void>((resolve, reject) => {
@@ -292,16 +310,31 @@ async function runRecorderTranscode(
 
     const canvasStream = canvas.captureStream(30);
 
-    // Ljudet tas från videoelementets egen ström. Saknas det spår helt går vi
-    // hellre vidare utan skyddsnät än levererar en presentationsvideo utan röst.
-    const elementStream: MediaStream | null =
-      typeof (video as any).captureStream === 'function'
-        ? (video as any).captureStream()
-        : typeof (video as any).mozCaptureStream === 'function'
-          ? (video as any).mozCaptureStream()
-          : null;
-    const audioTracks = elementStream?.getAudioTracks() ?? [];
-    for (const track of audioTracks) canvasStream.addTrack(track);
+    // Ljudet fångas via Web Audio i stället för elementets captureStream:
+    // captureStream saknas helt i Safari (exakt den webbläsare skyddsnätet
+    // finns för) och ger tyst spår när elementet är muted. MediaElementSource
+    // kopplas bara till en inspelningsdestination – aldrig till högtalarna –
+    // så användaren hör ingenting medan konverteringen pågår.
+    let audioCaptured = false;
+    try {
+      const Ctx = (window as any).AudioContext ?? (window as any).webkitAudioContext;
+      if (Ctx) {
+        audioContext = new Ctx();
+        const source = audioContext!.createMediaElementSource(video);
+        const destination = audioContext!.createMediaStreamDestination();
+        source.connect(destination);
+        const tracks = destination.stream.getAudioTracks();
+        for (const track of tracks) canvasStream.addTrack(track);
+        audioCaptured = tracks.length > 0;
+      }
+    } catch (audioError) {
+      console.warn('[videoTranscode] kunde inte fånga ljudet:', audioError);
+    }
+
+    // Har källan ljud men vi kan inte spela in det blir resultatet en tyst
+    // presentationsvideo. Det är värre än ett tydligt felmeddelande.
+    if (expectAudio === true && !audioCaptured) return null;
+
 
     const chunks: Blob[] = [];
     recorder = new MediaRecorder(canvasStream, {
@@ -320,11 +353,25 @@ async function runRecorderTranscode(
     const draw = () => {
       ctx.drawImage(video, 0, 0, width, height);
       if (onProgress && duration > 0) onProgress(Math.min(1, video.currentTime / duration));
-      raf = requestAnimationFrame(draw);
     };
+    // Timer i stället för requestAnimationFrame: rAF pausas när fliken hamnar
+    // i bakgrunden, och då hade inspelningen frusit mitt i.
+    const drawTimer = window.setInterval(draw, 1000 / 30);
+    drawTimers.push(drawTimer);
 
     recorder.start(1000);
-    await video.play();
+    try {
+      await audioContext?.resume();
+    } catch { /* ignore */ }
+    try {
+      await video.play();
+    } catch {
+      // Autoplay-policyn kan kräva tyst uppspelning. Då blir inspelningen
+      // ljudlös – har källan ljud avbryter vi hellre än sparar tyst video.
+      if (expectAudio === true) return null;
+      video.muted = true;
+      await video.play();
+    }
     draw();
 
     await new Promise<void>((resolve) => {
@@ -332,7 +379,7 @@ async function runRecorderTranscode(
       video.onended = () => { window.clearTimeout(guard); resolve(); };
     });
 
-    cancelAnimationFrame(raf);
+    window.clearInterval(drawTimer);
     if (recorder.state !== 'inactive') recorder.stop();
     await finished;
 
@@ -342,12 +389,15 @@ async function runRecorderTranscode(
     console.warn('[videoTranscode] skyddsnätet kunde inte köras:', error);
     return null;
   } finally {
-    cancelAnimationFrame(raf);
+    for (const timer of drawTimers) window.clearInterval(timer);
     try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch { /* ignore */ }
     try { video.pause(); } catch { /* ignore */ }
     video.removeAttribute('src');
     try { video.load(); } catch { /* ignore */ }
     URL.revokeObjectURL(url);
+    // AudioContext:en måste stängas – annars ligger den kvar och äter batteri
+    // och räknas mot webbläsarens tak på antal samtidiga kontexter.
+    try { await audioContext?.close(); } catch { /* ignore */ }
   }
 }
 
@@ -385,9 +435,12 @@ export async function optimizeVideoForUpload(
   const hasTranscode = !!transcodedBlob && transcodedBlob.size > 0;
   let useTranscoded = hasTranscode && (transcodedBlob as Blob).size < file.size;
 
-  // Vilken kodek har originalet? Behövs både för beslutet nedan och för
-  // felmeddelanden. (Hoppas över när vi redan bestämt oss för vår egen fil.)
-  const sourceCodec = useTranscoded ? null : await probeVideoCodec(file);
+  // Vilka spår har originalet? Behövs för beslutet nedan, för felmeddelanden
+  // och för att veta om skyddsnätet måste kunna spela in ljud.
+  const probed = useTranscoded
+    ? { videoCodec: null as string | null, hasAudio: null as boolean | null }
+    : await probeMediaTracks(file);
+  const sourceCodec = probed.videoCodec;
 
   // Originalet är inte spelbart överallt (t.ex. HEVC från iPhone). Har vi redan
   // en giltig H.264-fil från WebCodecs använder vi den även om den råkar vara
@@ -399,7 +452,13 @@ export async function optimizeVideoForUpload(
 
   // Nivå 2: varken original eller WebCodecs duger → kör skyddsnätet i realtid.
   if (!useTranscoded && !isUniversallyPlayableCodec(sourceCodec)) {
-    const recovered = await runRecorderTranscode(file, shortSide, bitrate, options.onProgress);
+    const recovered = await runRecorderTranscode(
+      file,
+      shortSide,
+      bitrate,
+      probed.hasAudio,
+      options.onProgress
+    );
     if (recovered && recovered.size > 0) {
       transcodedBlob = recovered;
       useTranscoded = true;
@@ -407,11 +466,14 @@ export async function optimizeVideoForUpload(
   }
 
   const output: Blob = useTranscoded ? (transcodedBlob as Blob) : file;
-  const poster = await extractPosterFrame(output).catch(() => null);
 
   // Egen utdata är alltid H.264 i MP4. Originalet måste kontrolleras — en
   // HEVC-inspelning från iPhone går inte att spela upp på Android/Windows.
   const playableEverywhere = useTranscoded || isUniversallyPlayableCodec(sourceCodec);
+
+  // Posterbilden tas bara fram för filer som faktiskt kommer att sparas.
+  // Att avkoda en video vi ändå tänker avvisa kostar bara tid och minne.
+  const poster = playableEverywhere ? await extractPosterFrame(output).catch(() => null) : null;
 
   return {
     blob: output,
