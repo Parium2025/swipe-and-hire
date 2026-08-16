@@ -79,9 +79,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       style={{ zIndex: 99999 }}
       position="top-center"
-      duration={4000}
+      duration={3200}
       closeButton
       visibleToasts={3}
+      offset={16}
       expand={false}
       gap={10}
       icons={{
