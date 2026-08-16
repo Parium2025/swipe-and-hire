@@ -297,6 +297,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <video 
             src={previewFile.url} 
             controls 
+            playsInline
+            preload="metadata"
             className="w-full h-auto max-h-64 object-contain bg-black"
           />
         </div>
