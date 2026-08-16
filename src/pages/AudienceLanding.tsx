@@ -1515,8 +1515,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium' | 'growth' | 'pro'>(
     audience === 'employer' ? 'pro' : 'premium',
   );
-  const [openEmployerPlan, setOpenEmployerPlan] = useState<'start' | 'growth' | 'pro' | null>(null);
-  const [openSeekerPlan, setOpenSeekerPlan] = useState<'start' | 'premium' | null>(null);
+  const [openEmployerPlans, setOpenEmployerPlans] = useState<string[]>([]);
+  const [openSeekerPlans, setOpenSeekerPlans] = useState<string[]>([]);
+  const togglePlan = (setter: React.Dispatch<React.SetStateAction<string[]>>, id: string) =>
+    setter((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
 
 
   const commonEmployerFeatures = [
@@ -2137,8 +2139,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         <PlanFeatures
                           features={plan.features}
                           isActive={isActive}
-                          open={openSeekerPlan === plan.id}
-                          onToggle={() => setOpenSeekerPlan((current) => current === plan.id ? null : plan.id)}
+                          open={openSeekerPlans.includes(plan.id)}
+                          onToggle={() => togglePlan(setOpenSeekerPlans, plan.id)}
                         />
                         <button
                           type="button"
@@ -2203,8 +2205,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                             <PlanFeatures
                               features={plan.features}
                               isActive={isActive}
-                              open={openEmployerPlan === plan.id}
-                              onToggle={() => setOpenEmployerPlan((current) => current === plan.id ? null : plan.id)}
+                              open={openEmployerPlans.includes(plan.id)}
+                              onToggle={() => togglePlan(setOpenEmployerPlans, plan.id)}
                             />
                           </motion.div>
                         </motion.div>
