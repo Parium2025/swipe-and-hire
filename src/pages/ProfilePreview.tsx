@@ -18,6 +18,7 @@ import { useDevice } from '@/hooks/use-device';
 import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { openCvFile } from '@/utils/cvUtils';
 import ProfileVideo from '@/components/ProfileVideo';
+import { useVideoPoster } from '@/hooks/useVideoPoster';
 import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -60,6 +61,8 @@ export default function ProfilePreview() {
   // 🎯 Generera signed URLs (hooks måste alltid anropas, inte villkorligt)
   const fallbackProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
   const signedVideoUrl = useMediaUrl(profile?.video_url, 'profile-video');
+  // Automatgenererad posterbild: visas som stillbild när ingen cover finns.
+  const videoPosterUrl = useVideoPoster(profile?.video_url);
   const fallbackCoverUrl = useMediaUrl(profile?.cover_image_url, 'cover-image');
   const signedCvUrl = useMediaUrl(profile?.cv_url, 'cv');
   
@@ -211,6 +214,7 @@ export default function ProfilePreview() {
                   <ProfileVideo
                    videoUrl={effectiveVideoUrl}
                    coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
+                   posterUrl={videoPosterUrl}
                    userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                    alt="Profilbild"
                    className="w-full h-full rounded-full"
@@ -529,6 +533,7 @@ export default function ProfilePreview() {
           <ProfileVideo
             videoUrl={effectiveVideoUrl}
             coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
+            posterUrl={videoPosterUrl}
             userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
             alt="Profilbild"
             className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"

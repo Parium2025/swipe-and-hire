@@ -87,6 +87,8 @@
     "lodash": "^4.18.1",
     "lodash-es": "^4.18.1",
     "lucide-react": "^0.462.0",
+    "mp4-muxer": "^5.2.2",
+    "mp4box": "^2.4.1",
     "next-themes": "^0.3.0",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^5.4.394",

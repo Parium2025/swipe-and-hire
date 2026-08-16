@@ -180,6 +180,25 @@ export async function uploadMedia(
     }
   }
 
+  // 🎬 Videor komprimeras till 720p H.264 i enheten före upload. Det kapar både
+  // lagring och utgående bandbredd med 60–80 % och gör filen spelbar överallt
+  // (iPhone spelar annars in HEVC/MOV som Android/Windows inte alltid klarar).
+  // Vi tar samtidigt fram en posterbild så att listor slipper röra videofilen.
+  let posterBlob: Blob | null = null;
+  const isVideo = file.type.startsWith('video/');
+  if (isVideo) {
+    try {
+      const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
+      const result = await optimizeVideoForUpload(file);
+      payload = result.blob;
+      fileExt = result.extension;
+      posterBlob = result.poster;
+    } catch (error) {
+      // Aldrig blockera användaren – originalet duger.
+      console.warn('[mediaManager] videokomprimering hoppades över:', error);
+    }
+  }
+
   // Skapa unikt filnamn
   const safeExt = fileExt.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
   const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${safeExt}`;
@@ -208,8 +227,35 @@ export async function uploadMedia(
     };
   }
   
+
+  // Posterbilden laddas upp på en härledd sökväg bredvid videon. Den är
+  // best-effort: misslyckas den faller uppspelningen tillbaka på videon själv.
+  if (posterBlob) {
+    try {
+      await supabase.storage
+        .from(config.bucket)
+        .upload(getVideoPosterPath(fileName), posterBlob, {
+          contentType: 'image/jpeg',
+          cacheControl: '31536000',
+          upsert: true,
+        });
+    } catch (posterError) {
+      console.warn('[mediaManager] posterbild kunde inte sparas:', posterError);
+    }
+  }
+
   // Returnera ENDAST storage path (aldrig URL)
   return { storagePath: fileName };
+}
+
+/**
+ * Härled sökvägen till en videos posterbild. Samma bucket, samma mapp.
+ * Finns ingen poster (äldre videor) returnerar signeringen null och UI:t
+ * faller tillbaka på sitt vanliga beteende.
+ */
+export function getVideoPosterPath(videoPath: string): string {
+  if (!videoPath) return '';
+  return `${videoPath.replace(/\.[^./]+$/, '')}-poster.jpg`;
 }
 
 /**
