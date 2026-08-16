@@ -2340,7 +2340,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur ökar jag mina chanser att bli kontaktad?',
-                        a: 'Komplettera profilen med video, ett tydligt CV och skriv några rader om dig själv och vad du söker i din presentation. Se också till att postnummer och ort, din nuvarande sysselsättning och när du kan börja ett nytt jobb stämmer — det är sådant arbetsgivare tittar på först när de går igenom kandidater.',
+                        a: 'Komplettera profilen med video, ett tydligt CV och skriv några rader om dig själv och vad du söker i din presentation. Under Min profil ser du också till att postnummer och ort, din nuvarande sysselsättning och när du kan börja ett nytt jobb stämmer — det är sådant arbetsgivare tittar på först när de går igenom kandidater.',
                       },
 
 
