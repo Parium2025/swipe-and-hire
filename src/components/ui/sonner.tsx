@@ -21,7 +21,7 @@ const IconShell = ({
   };
   return (
     <span
-      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-1 ${tones[tone]}`}
+      className={`flex h-7 w-7 min-w-[1.75rem] shrink-0 grow-0 basis-7 aspect-square items-center justify-center rounded-full ring-1 ${tones[tone]}`}
     >
       {children}
     </span>
@@ -108,7 +108,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "group-[.toaster]:backdrop-blur-2xl group-[.toaster]:text-white " +
             "group-[.toaster]:border group-[.toaster]:border-white/12 " +
             "group-[.toaster]:shadow-[0_18px_50px_-12px_rgba(0,0,0,0.65),inset_0_1px_0_0_rgba(255,255,255,0.08)]",
-          icon: "group-[.toast]:mt-0.5 group-[.toast]:mr-0",
+          icon: "group-[.toast]:mt-0.5 group-[.toast]:mr-0 group-[.toast]:!h-7 group-[.toast]:!w-7 group-[.toast]:!min-w-[1.75rem] group-[.toast]:shrink-0 group-[.toast]:grow-0 group-[.toast]:!m-0 group-[.toast]:!mt-0.5 group-[.toast]:!mr-0 group-[.toast]:items-center group-[.toast]:justify-center",
           content: "group-[.toast]:gap-0.5",
           title:
             "group-[.toast]:text-[15px] group-[.toast]:font-semibold group-[.toast]:leading-snug group-[.toast]:tracking-[-0.01em] group-[.toast]:text-white",
