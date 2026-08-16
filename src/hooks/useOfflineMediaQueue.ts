@@ -23,6 +23,7 @@ import {
   getQueuedUploads,
   removeQueuedUpload,
   updateQueuedUpload,
+  pruneStaleUploads,
   MEDIA_QUEUE_MAX_ATTEMPTS,
   type QueuedMediaUpload,
 } from '@/lib/offlineMediaQueue';
@@ -62,7 +63,11 @@ export function useOfflineMediaQueue(userId: string | undefined) {
     setQueue(items);
   }, [userId]);
 
-  useEffect(() => { void refreshQueue(); }, [refreshQueue]);
+  useEffect(() => {
+    // Rensa övergivna poster först — de äter lagringskvot och kan annars göra
+    // att nya köningar misslyckas på enheter med lite utrymme.
+    void pruneStaleUploads().then(() => refreshQueue());
+  }, [refreshQueue]);
 
   const enqueue = useCallback(async (args: EnqueueArgs) => {
     if (!userId) return null;
@@ -72,17 +77,21 @@ export function useOfflineMediaQueue(userId: string | undefined) {
     // laddas upp rå när nätet kommer tillbaka och bli svart ruta på Android.
     let blob: Blob = args.blob;
     let fileName = args.fileName;
+    // Sätts om bearbetningen inte kunde göras nu (offline → kodmodulen kan
+    // inte hämtas). Då körs hela kedjan i stället vid flush, när vi är online.
+    let pendingTranscode = false;
 
     if (args.mediaType === 'profile-video') {
-      const { MAX_VIDEO_SECONDS, readVideoDurationFromBlob } = await import('@/lib/videoInput');
-      const seconds = await readVideoDurationFromBlob(blob);
-      if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
-        toast('Videon är för lång', {
-          description: `Max ${MAX_VIDEO_SECONDS} sekunder – korta ner den och försök igen.`,
-        });
-        return null;
-      }
       try {
+        const { MAX_VIDEO_SECONDS, readVideoDurationFromBlob } = await import('@/lib/videoInput');
+        const seconds = await readVideoDurationFromBlob(blob);
+        if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
+          toast('Videon är för lång', {
+            description: `Max ${MAX_VIDEO_SECONDS} sekunder – korta ner den och försök igen.`,
+          });
+          return null;
+        }
+
         const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
         const asFile = blob instanceof File ? blob : new File([blob], fileName.split('/').pop() || 'video.mp4', { type: blob.type });
         const result = await optimizeVideoForUpload(asFile);
@@ -94,11 +103,18 @@ export function useOfflineMediaQueue(userId: string | undefined) {
         }
         blob = result.blob;
         fileName = `${fileName.replace(/\.[^./]+$/, '')}.${result.extension}`;
-      } catch {
-        toast('Videon kunde inte sparas', {
-          description: 'Vi kunde inte bearbeta videon i din webbläsare. Prova en annan webbläsare eller spara om filen som MP4.',
-        });
-        return null;
+      } catch (err) {
+        // Offline kan en icke-cachad kodmodul inte hämtas. Att avvisa filen då
+        // vore fel — vi sparar originalet och kör kedjan när nätet är tillbaka.
+        if (!getIsOnline()) {
+          pendingTranscode = true;
+        } else {
+          console.warn('[mediaQueue] transkodning misslyckades vid köning', err);
+          toast('Videon kunde inte sparas', {
+            description: 'Vi kunde inte bearbeta videon i din webbläsare. Prova en annan webbläsare eller spara om filen som MP4.',
+          });
+          return null;
+        }
       }
     } else if ((blob.type || '').startsWith('image/') && blob.type !== 'image/svg+xml') {
       try {
@@ -118,7 +134,19 @@ export function useOfflineMediaQueue(userId: string | undefined) {
       targetField: args.targetField,
       targetId: args.targetId,
       targetIdColumn: args.targetIdColumn ?? (args.targetTable === 'profiles' ? 'user_id' : 'id'),
+      pendingTranscode,
     });
+
+    // IndexedDB kan vara helt blockerad (privat läge i vissa webbläsare) eller
+    // full. Då får vi ALDRIG säga "sparad" — filen finns inte kvar någonstans.
+    if (!id) {
+      toast.error('Kunde inte spara filen lokalt', {
+        description: 'Enhetens lagring är full eller blockerad i privat läge. Försök igen när du är online.',
+        duration: 8000,
+      });
+      return null;
+    }
+
     await refreshQueue();
     toast('Sparad lokalt', {
       description: 'Vi laddar upp den när du är online igen.',
@@ -148,12 +176,51 @@ export function useOfflineMediaQueue(userId: string | undefined) {
           await new Promise(r => setTimeout(r, delay));
         }
 
+        let uploadBlob: Blob = item.blob;
+        let uploadPath = item.fileName;
+
+        // Videon köades utan bearbetning (offline). Kör hela mediakedjan nu,
+        // innan något lämnar enheten — inget ospelbart får nå lagringen.
+        if (item.pendingTranscode && item.mediaType === 'profile-video') {
+          const { MAX_VIDEO_SECONDS, readVideoDurationFromBlob } = await import('@/lib/videoInput');
+          const seconds = await readVideoDurationFromBlob(item.blob);
+          if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
+            await removeQueuedUpload(item.id);
+            toast.error('En köad video var för lång', {
+              description: `Max ${MAX_VIDEO_SECONDS} sekunder – ladda upp en kortare version.`,
+              duration: 8000,
+            });
+            continue;
+          }
+
+          const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
+          const asFile = item.blob instanceof File
+            ? item.blob
+            : new File([item.blob], item.fileName.split('/').pop() || 'video.mp4', { type: item.blob.type });
+          const result = await optimizeVideoForUpload(asFile);
+          if (!result.playableEverywhere) {
+            await removeQueuedUpload(item.id);
+            toast.error('En köad video kunde inte sparas', {
+              description: 'Formatet fungerar inte på alla enheter. Spara om den som MP4 (H.264) och ladda upp igen.',
+              duration: 8000,
+            });
+            continue;
+          }
+          uploadBlob = result.blob;
+          uploadPath = `${item.fileName.replace(/\.[^./]+$/, '')}.${result.extension}`;
+          await updateQueuedUpload(item.id, {
+            blob: uploadBlob,
+            fileName: uploadPath,
+            pendingTranscode: false,
+          });
+        }
+
         const bucket = BUCKETS[item.mediaType];
         await uploadWithRetry({
           bucket,
-          path: item.fileName,
-          file: item.blob,
-          contentType: item.blob.type || 'application/octet-stream',
+          path: uploadPath,
+          file: uploadBlob,
+          contentType: uploadBlob.type || 'application/octet-stream',
           upsert: true,
           cacheControl: '31536000',
           maxAttempts: 3, // hooken har egen yttre retry → håll inre låg
@@ -163,7 +230,7 @@ export function useOfflineMediaQueue(userId: string | undefined) {
         // Uppdatera DB-raden med storage path
         const { error: dbError } = await supabase
           .from(item.targetTable as never)
-          .update({ [item.targetField]: item.fileName } as never)
+          .update({ [item.targetField]: uploadPath } as never)
           .eq(item.targetIdColumn as never, item.targetId as never);
 
         if (dbError) throw dbError;

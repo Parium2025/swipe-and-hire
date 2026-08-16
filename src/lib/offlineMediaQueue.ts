@@ -42,6 +42,13 @@ export interface QueuedMediaUpload {
   queuedAt: number;
   attempts: number;
   lastError?: string;
+  /**
+   * True = filen kunde INTE bearbetas när den köades (t.ex. offline så att
+   * transkodnings-chunken inte kunde laddas ner). Den måste då köras genom
+   * hela mediakedjan innan uppladdning — annars riskerar en HEVC-video från
+   * iPhone att laddas upp rå och bli svart ruta på Android/Windows.
+   */
+  pendingTranscode?: boolean;
 }
 
 let dbPromise: Promise<IDBDatabase | null> | null = null;
@@ -139,7 +146,7 @@ export async function removeQueuedUpload(id: string): Promise<void> {
 
 export async function updateQueuedUpload(
   id: string,
-  patch: Partial<Pick<QueuedMediaUpload, 'attempts' | 'lastError'>>,
+  patch: Partial<Pick<QueuedMediaUpload, 'attempts' | 'lastError' | 'blob' | 'fileName' | 'pendingTranscode'>>,
 ): Promise<void> {
   const db = await openDb();
   if (!db) return;
@@ -163,3 +170,32 @@ export async function updateQueuedUpload(
 }
 
 export const MEDIA_QUEUE_MAX_ATTEMPTS = MAX_ATTEMPTS;
+
+/**
+ * Rensar köposter som blivit liggande orimligt länge (t.ex. en användare som
+ * loggat ut och aldrig kommit tillbaka). Utan detta kan flera hundra MB video
+ * ligga kvar i IndexedDB för alltid och äta upp enhetens lagringskvot — vilket
+ * i sin tur får nya köningar att misslyckas.
+ */
+export async function pruneStaleUploads(maxAgeMs = 14 * 24 * 60 * 60 * 1000): Promise<void> {
+  const db = await openDb();
+  if (!db) return;
+  const cutoff = Date.now() - maxAgeMs;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE, 'readwrite');
+      const store = tx.objectStore(STORE);
+      const req = store.getAll();
+      req.onsuccess = () => {
+        for (const item of (req.result || []) as QueuedMediaUpload[]) {
+          if (item.queuedAt < cutoff) store.delete(item.id);
+        }
+      };
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+      tx.onabort = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
+}
