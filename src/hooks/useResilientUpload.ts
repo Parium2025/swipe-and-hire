@@ -16,7 +16,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { isAcceptedVideoFile } from '@/lib/videoInput';
+import { isAcceptedVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
 import { toast } from 'sonner';
 import { uploadWithRetry, UploadAbortedError, type UploadProgress } from '@/lib/uploadWithProgress';
 import { compressImageBlob } from '@/lib/imageUploadOptimization';
@@ -163,6 +163,14 @@ export function useResilientUpload(): UseResilientUploadResult {
       // universell uppspelning). Misslyckas det laddas originalet upp.
       let posterBlob: Blob | null = null;
       if (acceptedAsVideo || file.type.startsWith('video/')) {
+        const seconds = await readVideoDurationFromBlob(file);
+        if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
+          const msg = `Videon är ${Math.round(seconds)} sekunder. Max längd är ${MAX_VIDEO_SECONDS} sekunder – korta ner den och försök igen.`;
+          setState({ ...INITIAL_STATE, status: 'error', error: msg });
+          toast.error('Videon är för lång', { description: msg });
+          return null;
+        }
+
         let playableEverywhere = false;
         try {
           const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
