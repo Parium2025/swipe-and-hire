@@ -18,7 +18,6 @@ const PLAN_DETAILS: Record<string, { name: string; price: string; tagline: strin
       'Visa intresse för obegränsat antal jobb',
       'Spara obegränsat antal jobb',
       'Direktkontakt till arbetsgivare via mejl',
-      'Statistik över profilvisningar senaste 30 dagarna',
     ],
   },
 };
