@@ -63,7 +63,11 @@ export function useOfflineMediaQueue(userId: string | undefined) {
     setQueue(items);
   }, [userId]);
 
-  useEffect(() => { void refreshQueue(); }, [refreshQueue]);
+  useEffect(() => {
+    // Rensa övergivna poster först — de äter lagringskvot och kan annars göra
+    // att nya köningar misslyckas på enheter med lite utrymme.
+    void pruneStaleUploads().then(() => refreshQueue());
+  }, [refreshQueue]);
 
   const enqueue = useCallback(async (args: EnqueueArgs) => {
     if (!userId) return null;
