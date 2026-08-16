@@ -4426,12 +4426,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
           onSave={async (blob) => {
             try {
               if (!user) return;
-              const file = new File([blob], `job-image-${Date.now()}.webp`, { type: 'image/webp' });
+              const { compressImageBlob } = await import('@/lib/imageUploadOptimization');
+              let payload: Blob = blob;
+              try {
+                payload = await compressImageBlob(blob, { maxDimension: 2560, quality: 0.9 });
+              } catch { /* fall tillbaka på originalet */ }
               const filePath = `${user.id}/job-${editingImageType}-${Date.now()}.webp`;
-              
+
               const { error: uploadError } = await supabase.storage
                 .from('job-images')
-                .upload(filePath, file);
+                .upload(filePath, payload, { cacheControl: '31536000', upsert: true, contentType: payload.type || 'image/webp' });
+
               
               if (uploadError) throw uploadError;
               
