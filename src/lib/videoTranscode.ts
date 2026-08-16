@@ -353,11 +353,25 @@ async function runRecorderTranscode(
     const draw = () => {
       ctx.drawImage(video, 0, 0, width, height);
       if (onProgress && duration > 0) onProgress(Math.min(1, video.currentTime / duration));
-      raf = requestAnimationFrame(draw);
     };
+    // Timer i stället för requestAnimationFrame: rAF pausas när fliken hamnar
+    // i bakgrunden, och då hade inspelningen frusit mitt i.
+    const drawTimer = window.setInterval(draw, 1000 / 30);
+    drawTimers.push(drawTimer);
 
     recorder.start(1000);
-    await video.play();
+    try {
+      await audioContext?.resume();
+    } catch { /* ignore */ }
+    try {
+      await video.play();
+    } catch {
+      // Autoplay-policyn kan kräva tyst uppspelning. Då blir inspelningen
+      // ljudlös – har källan ljud avbryter vi hellre än sparar tyst video.
+      if (expectAudio === true) return null;
+      video.muted = true;
+      await video.play();
+    }
     draw();
 
     await new Promise<void>((resolve) => {
@@ -365,7 +379,7 @@ async function runRecorderTranscode(
       video.onended = () => { window.clearTimeout(guard); resolve(); };
     });
 
-    cancelAnimationFrame(raf);
+    window.clearInterval(drawTimer);
     if (recorder.state !== 'inactive') recorder.stop();
     await finished;
 
