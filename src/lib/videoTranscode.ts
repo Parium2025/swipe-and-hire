@@ -435,9 +435,12 @@ export async function optimizeVideoForUpload(
   const hasTranscode = !!transcodedBlob && transcodedBlob.size > 0;
   let useTranscoded = hasTranscode && (transcodedBlob as Blob).size < file.size;
 
-  // Vilken kodek har originalet? Behövs både för beslutet nedan och för
-  // felmeddelanden. (Hoppas över när vi redan bestämt oss för vår egen fil.)
-  const sourceCodec = useTranscoded ? null : await probeVideoCodec(file);
+  // Vilka spår har originalet? Behövs för beslutet nedan, för felmeddelanden
+  // och för att veta om skyddsnätet måste kunna spela in ljud.
+  const probed = useTranscoded
+    ? { videoCodec: null as string | null, hasAudio: null as boolean | null }
+    : await probeMediaTracks(file);
+  const sourceCodec = probed.videoCodec;
 
   // Originalet är inte spelbart överallt (t.ex. HEVC från iPhone). Har vi redan
   // en giltig H.264-fil från WebCodecs använder vi den även om den råkar vara
@@ -449,7 +452,13 @@ export async function optimizeVideoForUpload(
 
   // Nivå 2: varken original eller WebCodecs duger → kör skyddsnätet i realtid.
   if (!useTranscoded && !isUniversallyPlayableCodec(sourceCodec)) {
-    const recovered = await runRecorderTranscode(file, shortSide, bitrate, options.onProgress);
+    const recovered = await runRecorderTranscode(
+      file,
+      shortSide,
+      bitrate,
+      probed.hasAudio,
+      options.onProgress
+    );
     if (recovered && recovered.size > 0) {
       transcodedBlob = recovered;
       useTranscoded = true;
@@ -457,11 +466,14 @@ export async function optimizeVideoForUpload(
   }
 
   const output: Blob = useTranscoded ? (transcodedBlob as Blob) : file;
-  const poster = await extractPosterFrame(output).catch(() => null);
 
   // Egen utdata är alltid H.264 i MP4. Originalet måste kontrolleras — en
   // HEVC-inspelning från iPhone går inte att spela upp på Android/Windows.
   const playableEverywhere = useTranscoded || isUniversallyPlayableCodec(sourceCodec);
+
+  // Posterbilden tas bara fram för filer som faktiskt kommer att sparas.
+  // Att avkoda en video vi ändå tänker avvisa kostar bara tid och minne.
+  const poster = playableEverywhere ? await extractPosterFrame(output).catch(() => null) : null;
 
   return {
     blob: output,
