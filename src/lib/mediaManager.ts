@@ -53,7 +53,9 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 50,
-    allowedTypes: ['video/mp4', 'video/quicktime', 'video/x-msvideo']
+    // AVI utelämnas medvetet: ingen webbläsare kan spela upp det.
+    allowedTypes: ['video/mp4', 'video/quicktime']
+
   },
   'cover-image': {
     bucket: 'job-applications',
