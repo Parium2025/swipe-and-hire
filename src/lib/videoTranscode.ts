@@ -59,21 +59,32 @@ export function canTranscodeVideo(): boolean {
   );
 }
 
+export interface ProbedTracks {
+  /** t.ex. "avc1.640028" (H.264) eller "hvc1.1.6.L93.B0" (HEVC). */
+  videoCodec: string | null;
+  /** null = containern kunde inte läsas (t.ex. webm/mkv) → vi vet inte. */
+  hasAudio: boolean | null;
+}
+
 /**
- * Läser videospårets kodek ur containern utan att avkoda något.
- * Returnerar t.ex. "avc1.640028" (H.264) eller "hvc1.1.6.L93.B0" (HEVC).
+ * Läser spårinformation ur containern utan att avkoda något.
+ * Returnerar `{ videoCodec: null, hasAudio: null }` om filen inte kan läsas.
  */
-export async function probeVideoCodec(file: Blob): Promise<string | null> {
+export async function probeMediaTracks(file: Blob): Promise<ProbedTracks> {
+  const unknown: ProbedTracks = { videoCodec: null, hasAudio: null };
   try {
     const MP4Box: any = await import('mp4box');
     const createFile = MP4Box.createFile ?? MP4Box.default?.createFile;
-    if (!createFile) return null;
+    if (!createFile) return unknown;
 
     const mp4boxFile = createFile();
-    let codec: string | null = null;
+    let result: ProbedTracks | null = null;
     mp4boxFile.onError = () => { /* ohanterbar container */ };
     mp4boxFile.onReady = (info: any) => {
-      codec = info?.videoTracks?.[0]?.codec ?? null;
+      result = {
+        videoCodec: info?.videoTracks?.[0]?.codec ?? null,
+        hasAudio: (info?.audioTracks?.length ?? 0) > 0,
+      };
     };
 
     // iPhone lägger ibland moov-atomen sist, så hela filen måste läsas in.
@@ -82,10 +93,15 @@ export async function probeVideoCodec(file: Blob): Promise<string | null> {
     mp4boxFile.appendBuffer(buffer);
     mp4boxFile.flush();
     try { mp4boxFile.stop?.(); } catch { /* ignore */ }
-    return codec;
+    return result ?? unknown;
   } catch {
-    return null;
+    return unknown;
   }
+}
+
+/** Bakåtkompatibel hjälpare: bara videokodeken. */
+export async function probeVideoCodec(file: Blob): Promise<string | null> {
+  return (await probeMediaTracks(file)).videoCodec;
 }
 
 /**
