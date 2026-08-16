@@ -66,10 +66,53 @@ export function useOfflineMediaQueue(userId: string | undefined) {
 
   const enqueue = useCallback(async (args: EnqueueArgs) => {
     if (!userId) return null;
+
+    // 🔒 Kön får ALDRIG kringgå mediakedjan. Allt som köas bearbetas här och nu
+    // (medan filen finns i minnet) — annars skulle en HEVC-video från iPhone
+    // laddas upp rå när nätet kommer tillbaka och bli svart ruta på Android.
+    let blob: Blob = args.blob;
+    let fileName = args.fileName;
+
+    if (args.mediaType === 'profile-video') {
+      const { MAX_VIDEO_SECONDS, readVideoDurationFromBlob } = await import('@/lib/videoInput');
+      const seconds = await readVideoDurationFromBlob(blob);
+      if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
+        toast('Videon är för lång', {
+          description: `Max ${MAX_VIDEO_SECONDS} sekunder – korta ner den och försök igen.`,
+        });
+        return null;
+      }
+      try {
+        const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
+        const asFile = blob instanceof File ? blob : new File([blob], fileName.split('/').pop() || 'video.mp4', { type: blob.type });
+        const result = await optimizeVideoForUpload(asFile);
+        if (!result.playableEverywhere) {
+          toast('Videon kunde inte sparas', {
+            description: 'Formatet fungerar inte på alla enheter. Spara om den som MP4 (H.264) och försök igen.',
+          });
+          return null;
+        }
+        blob = result.blob;
+        fileName = `${fileName.replace(/\.[^./]+$/, '')}.${result.extension}`;
+      } catch {
+        toast('Videon kunde inte sparas', {
+          description: 'Vi kunde inte bearbeta videon i din webbläsare. Prova en annan webbläsare eller spara om filen som MP4.',
+        });
+        return null;
+      }
+    } else if ((blob.type || '').startsWith('image/') && blob.type !== 'image/svg+xml') {
+      try {
+        const { compressImageBlob } = await import('@/lib/imageUploadOptimization');
+        blob = await compressImageBlob(blob, { maxDimension: 2560, quality: 0.9 });
+      } catch {
+        /* behåll originalet – bättre än att tappa filen */
+      }
+    }
+
     const id = await enqueueMediaUpload({
       userId,
-      blob: args.blob,
-      fileName: args.fileName,
+      blob,
+      fileName,
       mediaType: args.mediaType,
       targetTable: args.targetTable,
       targetField: args.targetField,
@@ -82,6 +125,7 @@ export function useOfflineMediaQueue(userId: string | undefined) {
     });
     return id;
   }, [userId, refreshQueue]);
+
 
   const flushQueue = useCallback(async () => {
     if (!userId || syncInProgressRef.current) return;
