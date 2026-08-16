@@ -108,10 +108,10 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     }
   });
 
-  const headline = 'Skapa ett konto nu!';
+  const headline = audience === 'job_seeker' ? 'Ditt nästa jobb väntar!' : 'Skapa ett konto nu!';
   const sub =
     audience === 'job_seeker'
-      ? 'Vi är här för att ta dig till nästa steg.'
+      ? 'Skapa ditt konto gratis och visa intresse redan idag.'
       : 'Er nästa stjärna/stjärnor finner ni här!\u00a0';
   const cta = audience === 'job_seeker' ? 'Kom igång gratis' : 'Skapa arbetsgivarkonto';
 
