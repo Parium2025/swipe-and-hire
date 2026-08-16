@@ -227,8 +227,35 @@ export async function uploadMedia(
     };
   }
   
+
+  // Posterbilden laddas upp på en härledd sökväg bredvid videon. Den är
+  // best-effort: misslyckas den faller uppspelningen tillbaka på videon själv.
+  if (posterBlob) {
+    try {
+      await supabase.storage
+        .from(config.bucket)
+        .upload(getVideoPosterPath(fileName), posterBlob, {
+          contentType: 'image/jpeg',
+          cacheControl: '31536000',
+          upsert: true,
+        });
+    } catch (posterError) {
+      console.warn('[mediaManager] posterbild kunde inte sparas:', posterError);
+    }
+  }
+
   // Returnera ENDAST storage path (aldrig URL)
   return { storagePath: fileName };
+}
+
+/**
+ * Härled sökvägen till en videos posterbild. Samma bucket, samma mapp.
+ * Finns ingen poster (äldre videor) returnerar signeringen null och UI:t
+ * faller tillbaka på sitt vanliga beteende.
+ */
+export function getVideoPosterPath(videoPath: string): string {
+  if (!videoPath) return '';
+  return `${videoPath.replace(/\.[^./]+$/, '')}-poster.jpg`;
 }
 
 /**
