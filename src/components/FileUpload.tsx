@@ -217,7 +217,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   const getAcceptedTypesText = () => {
     if (questionType === 'video' || uploadType === 'video') {
-      return 'Video (MP4, MOV, AVI)';
+      return 'Video (MP4, MOV, WEBM)';
     }
     if (uploadType === 'image') {
       return 'Bilder';
