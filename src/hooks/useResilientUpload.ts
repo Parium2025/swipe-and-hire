@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
+import { isAcceptedVideoFile } from '@/lib/videoInput';
 import { toast } from 'sonner';
 import { uploadWithRetry, UploadAbortedError, type UploadProgress } from '@/lib/uploadWithProgress';
 import { compressImageBlob } from '@/lib/imageUploadOptimization';
@@ -161,7 +162,7 @@ export function useResilientUpload(): UseResilientUploadResult {
       // 🎬 Video komprimeras till 720p H.264 i enheten före upload (bandbredd +
       // universell uppspelning). Misslyckas det laddas originalet upp.
       let posterBlob: Blob | null = null;
-      if (file.type.startsWith('video/')) {
+      if (acceptedAsVideo || file.type.startsWith('video/')) {
         let playableEverywhere = false;
         try {
           const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
