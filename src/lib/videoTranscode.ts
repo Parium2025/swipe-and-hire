@@ -310,16 +310,31 @@ async function runRecorderTranscode(
 
     const canvasStream = canvas.captureStream(30);
 
-    // Ljudet tas från videoelementets egen ström. Saknas det spår helt går vi
-    // hellre vidare utan skyddsnät än levererar en presentationsvideo utan röst.
-    const elementStream: MediaStream | null =
-      typeof (video as any).captureStream === 'function'
-        ? (video as any).captureStream()
-        : typeof (video as any).mozCaptureStream === 'function'
-          ? (video as any).mozCaptureStream()
-          : null;
-    const audioTracks = elementStream?.getAudioTracks() ?? [];
-    for (const track of audioTracks) canvasStream.addTrack(track);
+    // Ljudet fångas via Web Audio i stället för elementets captureStream:
+    // captureStream saknas helt i Safari (exakt den webbläsare skyddsnätet
+    // finns för) och ger tyst spår när elementet är muted. MediaElementSource
+    // kopplas bara till en inspelningsdestination – aldrig till högtalarna –
+    // så användaren hör ingenting medan konverteringen pågår.
+    let audioCaptured = false;
+    try {
+      const Ctx = (window as any).AudioContext ?? (window as any).webkitAudioContext;
+      if (Ctx) {
+        audioContext = new Ctx();
+        const source = audioContext!.createMediaElementSource(video);
+        const destination = audioContext!.createMediaStreamDestination();
+        source.connect(destination);
+        const tracks = destination.stream.getAudioTracks();
+        for (const track of tracks) canvasStream.addTrack(track);
+        audioCaptured = tracks.length > 0;
+      }
+    } catch (audioError) {
+      console.warn('[videoTranscode] kunde inte fånga ljudet:', audioError);
+    }
+
+    // Har källan ljud men vi kan inte spela in det blir resultatet en tyst
+    // presentationsvideo. Det är värre än ett tydligt felmeddelande.
+    if (expectAudio === true && !audioCaptured) return null;
+
 
     const chunks: Blob[] = [];
     recorder = new MediaRecorder(canvasStream, {
