@@ -130,8 +130,11 @@ export function useResilientUpload(): UseResilientUploadResult {
       return null;
     }
 
-    // Validering: typ
-    if (!config.allowedTypes.includes(file.type)) {
+    // Validering: typ. Videor tas emot brett – de transkodas till H.264 och
+    // stoppas längre ner om de inte kan göras spelbara överallt.
+    const videoBucket = config.allowedTypes.some((t) => t.startsWith('video/'));
+    const acceptedAsVideo = videoBucket && isAcceptedVideoFile(file);
+    if (!acceptedAsVideo && !config.allowedTypes.includes(file.type)) {
       const msg = 'Filtypen stöds inte.';
       setState({ ...INITIAL_STATE, status: 'error', error: msg });
       toast.error(msg);
