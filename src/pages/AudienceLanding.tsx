@@ -2121,7 +2121,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         data-allow-focus-shadow="true"
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                          style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 0 ? '-46px' : '46px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${120 + i * 120}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
-                        className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 [@media_(hover:hover)]:backdrop-blur-xl ${
+                        className={`landing-feature-card landing-feature-mobile-in relative isolate flex h-full flex-col cursor-pointer rounded-3xl border p-8 transition-all duration-300 hover:-translate-y-1 [@media_(hover:hover)]:backdrop-blur-xl ${
                           isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                         }`}
                       >
