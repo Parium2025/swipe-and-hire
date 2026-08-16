@@ -42,6 +42,13 @@ export interface QueuedMediaUpload {
   queuedAt: number;
   attempts: number;
   lastError?: string;
+  /**
+   * True = filen kunde INTE bearbetas när den köades (t.ex. offline så att
+   * transkodnings-chunken inte kunde laddas ner). Den måste då köras genom
+   * hela mediakedjan innan uppladdning — annars riskerar en HEVC-video från
+   * iPhone att laddas upp rå och bli svart ruta på Android/Windows.
+   */
+  pendingTranscode?: boolean;
 }
 
 let dbPromise: Promise<IDBDatabase | null> | null = null;
