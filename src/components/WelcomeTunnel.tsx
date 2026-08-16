@@ -1642,7 +1642,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
                   <input
                     id="profileMedia"
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/*,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
                     onChange={handleMediaChange}
                     className="hidden"
                     disabled={isUploadingMedia}
