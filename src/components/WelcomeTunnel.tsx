@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { looksLikeVideoFile } from '@/lib/videoInput';
 
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -580,7 +581,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   };
 
   const uploadProfileMedia = async (file: File) => {
-    const isVideo = file.type.startsWith('video/');
+    const isVideo = looksLikeVideoFile(file);
     setIsUploadingMedia(true);
     setUploadingMediaType(isVideo ? 'video' : 'image');
     setUploadProgress(0);
@@ -702,7 +703,7 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type.startsWith('video/')) {
+    if (looksLikeVideoFile(file)) {
       // Förbättrad video-validering med specifika felmeddelanden
       let proceeded = false;
       let metadataAttempted = false;

@@ -1006,7 +1006,7 @@ const Profile = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type.startsWith('video/')) {
+    if (looksLikeVideoFile(file)) {
       // Förbättrad video-validering med specifika felmeddelanden (samma som WelcomeTunnel)
       let proceeded = false;
       let metadataAttempted = false;
