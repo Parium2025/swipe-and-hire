@@ -17,7 +17,9 @@ function toast({ title, description, variant, action, duration }: ToastOptions) 
   const options: ExternalToast = {
     description: title ? description : undefined,
     action: action as ExternalToast["action"],
-    duration,
+    // Skicka bara med duration när den faktiskt är satt — annars skriver
+    // undefined över våra centrala visningstider i sonner.tsx.
+    ...(duration !== undefined ? { duration } : {}),
   };
 
   if (variant === "destructive") {
