@@ -155,7 +155,9 @@ export function useOfflineMediaQueue(userId: string | undefined) {
           file: item.blob,
           contentType: item.blob.type || 'application/octet-stream',
           upsert: true,
+          cacheControl: '31536000',
           maxAttempts: 3, // hooken har egen yttre retry → håll inre låg
+
         });
 
         // Uppdatera DB-raden med storage path
