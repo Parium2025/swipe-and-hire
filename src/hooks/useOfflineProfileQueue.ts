@@ -214,7 +214,7 @@ export function useOfflineProfileQueue(userId: string | undefined) {
     setSyncing(false);
 
     if (synced > 0) {
-      toast.success('Profil uppdaterad ✓', {
+      toast.success('Profil uppdaterad', {
         description: 'Dina köade profiländringar har sparats',
         duration: 5000,
       });
