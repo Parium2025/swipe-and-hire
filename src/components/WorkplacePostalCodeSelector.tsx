@@ -30,6 +30,7 @@ const WorkplacePostalCodeSelector = ({
   const [isValid, setIsValid] = useState(false);
   const [lastSuccessfulPostalCode, setLastSuccessfulPostalCode] = useState<string>('');
   const lastUserEditedPostalCodeRef = useRef('');
+  const lastCitySyncRef = useRef('');
 
   // Helper to validate city name (only letters, spaces, and hyphens)
   const isValidCityName = useCallback((city: string) => {
@@ -81,6 +82,9 @@ const WorkplacePostalCodeSelector = ({
   useEffect(() => {
     if (!foundLocation) return;
     if (cityValue.trim() === foundLocation.city.trim()) return;
+    const syncKey = `${foundLocation.postalCode}|${foundLocation.city}`;
+    if (lastCitySyncRef.current === syncKey) return; // aldrig loopa
+    lastCitySyncRef.current = syncKey;
     onLocationChange(
       foundLocation.city,
       foundLocation.postalCode?.replace(/\s+/g, ''),
