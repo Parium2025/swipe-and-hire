@@ -24,6 +24,7 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { CvViewer } from '@/components/CvViewer';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
+import { useVideoPoster } from '@/hooks/useVideoPoster';
 import ImageEditor from '@/components/ImageEditor';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
@@ -509,6 +510,7 @@ const Profile = () => {
   const effectiveProfileImagePath = profileImageUrl || (deletedProfileMedia ? null : (profile as any)?.profile_image_url);
   const fallbackProfileImageUrl = useMediaUrl(effectiveProfileImagePath, 'profile-image');
   const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
+  const videoPosterUrl = useVideoPoster(videoUrl || (profile as any)?.video_url);
   
   // För cover image: använd inte fallback från profile om coverImageUrl explicit är tom (har raderats)
   const effectiveCoverImagePath = coverImageUrl || ((deletedCoverImage || deletedProfileMedia) ? null : (profile as any)?.cover_image_url);
@@ -1871,6 +1873,7 @@ const Profile = () => {
                 <ProfileVideo
                   videoUrl={signedVideoUrl}
                   coverImageUrl={signedCoverUrl}
+                  posterUrl={videoPosterUrl}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
                   className="w-32 h-32 border-4 border-white/10 rounded-full overflow-hidden"
