@@ -2319,7 +2319,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Är mina uppgifter säkra?',
-                        a: 'Ja. All data lagras i EU (våra servrar ligger i Paris) och krypteras under överföring. Din fullständiga profil visas bara för arbetsgivare du aktivt visat intresse för. I inställningarna kan du när som helst ladda ner alla dina uppgifter eller radera hela ditt konto direkt — utan att kontakta oss. Har du inte loggat in på 12 månader mejlar vi en varning, påminner dig tre gånger till (180, 90 och 7 dagar kvar), och raderar kontot först ett år senare.',
+                        a: 'Ja. All data lagras i EU (våra servrar ligger i Paris) och krypteras under överföring. Din fullständiga profil visas bara för arbetsgivare du aktivt visat intresse för. I inställningarna kan du när som helst ladda ner alla dina uppgifter eller radera hela ditt konto direkt, utan att kontakta oss. Har du inte loggat in på 12 månader mejlar vi en varning och påminner dig sedan när 180, 90, 7 respektive 1 dag återstår. Kontot raderas först ett helt år efter varningen.',
 
                       },
                       {
