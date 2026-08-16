@@ -128,7 +128,26 @@ const FileUpload: React.FC<FileUploadProps> = ({
     }
   };
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  // Hård gräns för videolängd (sekunder). Skyddar lagring/bandbredd i stor skala.
+  const MAX_VIDEO_SECONDS = 90;
+
+  const readVideoDuration = (url: string) =>
+    new Promise<number | null>((resolve) => {
+      const el = document.createElement('video');
+      el.preload = 'metadata';
+      const done = (value: number | null) => {
+        el.onloadedmetadata = null;
+        el.onerror = null;
+        resolve(value);
+      };
+      el.onloadedmetadata = () => done(Number.isFinite(el.duration) ? el.duration : null);
+      el.onerror = () => done(null);
+      el.src = url;
+      // Säkerhetsventil om metadata aldrig kommer
+      window.setTimeout(() => done(null), 8000);
+    });
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     
     const file = acceptedFiles[0];
     if (file) {
@@ -137,6 +156,15 @@ const FileUpload: React.FC<FileUploadProps> = ({
       const isVideo = file.type.startsWith('video/');
       if (isVideo) {
         const url = URL.createObjectURL(file);
+        const seconds = await readVideoDuration(url);
+        if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
+          URL.revokeObjectURL(url);
+          setLastFailedFile(null);
+          setUploadError(
+            `Videon är ${Math.round(seconds)} sekunder. Max längd är ${MAX_VIDEO_SECONDS} sekunder – korta ner den och försök igen.`
+          );
+          return;
+        }
         setPreviewFile({ file, url });
       } else {
         // Non-video files upload immediately
