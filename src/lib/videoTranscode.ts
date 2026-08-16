@@ -382,10 +382,22 @@ export async function optimizeVideoForUpload(
   }
 
   // Använd bara resultatet om det faktiskt blev mindre – annars är originalet bättre.
-  let useTranscoded = !!transcodedBlob && transcodedBlob.size > 0 && transcodedBlob.size < file.size;
+  const hasTranscode = !!transcodedBlob && transcodedBlob.size > 0;
+  let useTranscoded = hasTranscode && (transcodedBlob as Blob).size < file.size;
 
-  // Nivå 2: originalet duger inte och WebCodecs gav inget → kör skyddsnätet.
+  // Vilken kodek har originalet? Behövs både för beslutet nedan och för
+  // felmeddelanden. (Hoppas över när vi redan bestämt oss för vår egen fil.)
   const sourceCodec = useTranscoded ? null : await probeVideoCodec(file);
+
+  // Originalet är inte spelbart överallt (t.ex. HEVC från iPhone). Har vi redan
+  // en giltig H.264-fil från WebCodecs använder vi den även om den råkar vara
+  // större – kompatibilitet går före några sparade kilobyte, och vi slipper
+  // köra det långsamma realtidsskyddsnätet i onödan.
+  if (!useTranscoded && !isUniversallyPlayableCodec(sourceCodec) && hasTranscode) {
+    useTranscoded = true;
+  }
+
+  // Nivå 2: varken original eller WebCodecs duger → kör skyddsnätet i realtid.
   if (!useTranscoded && !isUniversallyPlayableCodec(sourceCodec)) {
     const recovered = await runRecorderTranscode(file, shortSide, bitrate, options.onProgress);
     if (recovered && recovered.size > 0) {
