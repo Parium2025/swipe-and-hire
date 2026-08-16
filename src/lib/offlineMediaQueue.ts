@@ -146,7 +146,7 @@ export async function removeQueuedUpload(id: string): Promise<void> {
 
 export async function updateQueuedUpload(
   id: string,
-  patch: Partial<Pick<QueuedMediaUpload, 'attempts' | 'lastError'>>,
+  patch: Partial<Pick<QueuedMediaUpload, 'attempts' | 'lastError' | 'blob' | 'fileName' | 'pendingTranscode'>>,
 ): Promise<void> {
   const db = await openDb();
   if (!db) return;
