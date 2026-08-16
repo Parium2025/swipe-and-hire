@@ -1052,10 +1052,19 @@ const MobileJobWizard = ({
 
       console.log('MobileJobWizard handleImageEdit: Uploading to path:', fileName);
 
+      // 🖼️ Komprimera innan upload — annars kan editorns PNG bli flera MB och
+      // bild-CDN:en vägrar transformera den.
+      const { compressImageBlob } = await import('@/lib/imageUploadOptimization');
+      let payload: Blob = editedImageBlob;
+      try {
+        payload = await compressImageBlob(editedImageBlob, { maxDimension: 2560, quality: 0.9 });
+      } catch { /* fall tillbaka på originalet */ }
+
       // Ladda upp den redigerade bilden till Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('job-images')
-        .upload(fileName, editedImageBlob);
+        .upload(fileName, payload, { cacheControl: '31536000', upsert: true, contentType: payload.type || 'image/png' });
+
 
       if (uploadError) {
         console.error('MobileJobWizard handleImageEdit: Upload error:', uploadError);
