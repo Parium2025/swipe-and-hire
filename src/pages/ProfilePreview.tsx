@@ -214,7 +214,6 @@ export default function ProfilePreview() {
                   <ProfileVideo
                    videoUrl={effectiveVideoUrl}
                    coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
-            posterUrl={videoPosterUrl}
                    posterUrl={videoPosterUrl}
                    userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                    alt="Profilbild"
