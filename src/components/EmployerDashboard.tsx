@@ -713,6 +713,16 @@ const EmployerDashboard = memo(() => {
           // Hoppa till "Aktiva" så att den nypublicerade annonsen syns direkt
           setActiveTab('active');
           setPage(1);
+          // Glid mjukt upp till toppen så man ser statistiken uppdateras
+          if (typeof window !== 'undefined') {
+            requestAnimationFrame(() => {
+              getManagedScrollContainer()?.scrollTo({ top: 0, behavior: 'smooth' });
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              const positions = readPositions();
+              positions[window.location.pathname] = { top: 0 };
+              writePositions(positions);
+            });
+          }
         }}
       />
 
