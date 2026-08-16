@@ -2140,7 +2140,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           features={plan.features}
                           isActive={isActive}
                           open={openSeekerPlans.includes(plan.id)}
-                          onToggle={() => togglePlan(setOpenSeekerPlans, plan.id)}
+                          onToggle={() => toggleAllPlans(setOpenSeekerPlans, ['start', 'premium'])}
                         />
                         <div className="mt-auto pt-7">
                         <button
@@ -2208,7 +2208,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                               features={plan.features}
                               isActive={isActive}
                               open={openEmployerPlans.includes(plan.id)}
-                              onToggle={() => togglePlan(setOpenEmployerPlans, plan.id)}
+                              onToggle={() => toggleAllPlans(setOpenEmployerPlans, employerPlans.map((p) => p.id))}
                             />
                           </motion.div>
                         </motion.div>
