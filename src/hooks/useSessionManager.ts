@@ -330,14 +330,19 @@ export function useSessionManager(
     if (!token) return;
 
     try {
-      await supabase.rpc('remove_session', { p_session_token: token });
+      // The RPC requires an authenticated JWT. If the token is missing or
+      // expired the request runs as anon and fails with "permission denied".
+      const tokenOk = await ensureFreshToken();
+      if (tokenOk) {
+        await supabase.rpc('remove_session', { p_session_token: token });
+      }
     } catch (err) {
       console.warn('Session removal failed:', err);
     }
 
     registeredRef.current = false;
     sessionTokenRef.current = null;
-  }, []);
+  }, [ensureFreshToken]);
 
   // Fast validity check — polls every 15s to detect if our session was kicked
   // If session is gone, try to re-register first (it may have been cleaned by cron).
