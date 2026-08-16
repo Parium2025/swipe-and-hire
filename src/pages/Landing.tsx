@@ -34,7 +34,7 @@ const Landing = () => {
       el.setAttribute('content', content);
     };
 
-    const desc = 'Upptäck lediga jobb och kandidater som passar just dig. Med hjälp av vårt verktyg tar vi arbetsmarknaden framåt!';
+    const desc = 'Upptäck lediga jobb eller kandidater som passar just dig. Med hjälp av vårt verktyg tar vi arbetsmarknaden framåt!';
     setMeta('description', desc);
     setMeta('og:title', title, 'property');
     setMeta('og:description', desc, 'property');
