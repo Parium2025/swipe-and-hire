@@ -34,6 +34,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TruncatedText } from '@/components/TruncatedText';
 import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
+import { celebrate } from '@/lib/celebrate';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel, TYPES_WITH_DURATION, TYPES_WITH_PART_TIME_DAYS, formatEmploymentDetails, type DurationUnit } from '@/lib/employmentTypes';
@@ -2620,9 +2621,11 @@ const MobileJobWizard = ({
       // Note: Template questions are now managed separately via job_question_templates table
       // No need to store questions directly on job_templates
 
+      celebrate({ intensity: 'big' });
       toast({
         title: "Jobbannons skapad!",
-        description: "Din annons är nu publicerad och synlig för jobbsökare."
+        description: "Din annons är nu publicerad och synlig för jobbsökare.",
+        variant: "success"
       });
 
       // Clear both sessionStorage and localStorage drafts BEFORE calling handleClose
