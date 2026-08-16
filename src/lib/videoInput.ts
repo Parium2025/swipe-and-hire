@@ -36,6 +36,15 @@ const ACCEPTED_VIDEO_EXT = [
   'ogv',
 ];
 
+/**
+ * Samma lista som ändelser med punkt, för filväljare och react-dropzone.
+ *
+ * Utan detta faller Android-filer med tom MIME-typ bort redan i filväljaren
+ * ("Filtypen stöds inte") innan vår egen, bredare kontroll ens körs.
+ */
+export const ACCEPTED_VIDEO_EXTENSIONS = ACCEPTED_VIDEO_EXT.map((e) => `.${e}`);
+
+
 /** Ändelse i gemener utan punkt, eller tom sträng. */
 function extensionOf(name: string): string {
   const idx = name.lastIndexOf('.');
