@@ -49,6 +49,7 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
 
   sides();
   window.setTimeout(sides, 180);
+  if (big) window.setTimeout(sides, 400);
 }
 
 export default celebrate;
