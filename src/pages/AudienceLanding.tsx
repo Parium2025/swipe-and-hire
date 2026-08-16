@@ -2336,12 +2336,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                       {
                         q: 'Hur får jag notiser om nya jobb?',
-                        a: 'Spara en sökning med dina önskemål kring roll, ort och erfarenhet. När en ny annons stämmer med sökningen får du en notis — så missar du aldrig ett relevant jobb.',
+                        a: 'Spara en sökning med dina önskemål kring roll, ort och erfarenhet. När en ny annons stämmer med sökningen får du en notis. På webben syns den på klockikonen uppe i appen, och har du Parium som app i mobilen kommer den fram som en pushnotis direkt på låsskärmen — så missar du aldrig ett relevant jobb.',
                       },
                       {
                         q: 'Hur ökar jag mina chanser att bli kontaktad?',
-                        a: 'Komplettera profilen med video, ett tydligt CV och skriv några rader om vad du söker. Håll önskemål kring roll, ort och tillgänglighet uppdaterade.',
+                        a: 'Komplettera profilen med video, ett tydligt CV och skriv några rader om vad du söker. Håll sedan tre fält aktuella under Min profil: yrkesroll (vad du söker), ort (var du kan jobba) och när du kan börja ett nytt jobb. Arbetsgivare filtrerar på just de uppgifterna när de söker kandidater, så en profil med rätt och färsk information dyker upp i fler sökningar.',
                       },
+
                     ]
                   : [
                       {
