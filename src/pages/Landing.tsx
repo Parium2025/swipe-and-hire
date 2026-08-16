@@ -21,7 +21,7 @@ const Landing = () => {
 
   // SEO
   useEffect(() => {
-    const title = 'Parium – Hitta jobb som passar dig & rekrytera rätt';
+    const title = 'Parium – Hitta jobb och rekrytera smartare';
     document.title = title;
 
     const setMeta = (name: string, content: string, attr = 'name') => {
