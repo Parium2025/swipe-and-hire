@@ -153,6 +153,21 @@ export function useResilientUpload(): UseResilientUploadResult {
         if (compressed !== file) extension = 'webp';
       }
 
+      // 🎬 Video komprimeras till 720p H.264 i enheten före upload (bandbredd +
+      // universell uppspelning). Misslyckas det laddas originalet upp.
+      let posterBlob: Blob | null = null;
+      if (file.type.startsWith('video/')) {
+        try {
+          const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
+          const result = await optimizeVideoForUpload(file);
+          payload = result.blob;
+          extension = result.extension;
+          posterBlob = result.poster;
+        } catch (err) {
+          console.warn('[useResilientUpload] videokomprimering hoppades över', err);
+        }
+      }
+
       // Skapa unik storage path
       const safeExt = (extension || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');
       const storagePath = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
