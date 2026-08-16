@@ -288,7 +288,7 @@ async function runRecorderTranscode(
   let audioContext: AudioContext | null = null;
 
   let recorder: MediaRecorder | null = null;
-  let raf = 0;
+  const drawTimers: number[] = [];
 
   try {
     await new Promise<void>((resolve, reject) => {
