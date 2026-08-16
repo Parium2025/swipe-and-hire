@@ -32,7 +32,9 @@ function toast({ title, description, variant, action, duration }: ToastOptions) 
     return sonnerToast.warning(message, options);
   }
 
-  return sonnerToast(message, options);
+  // Standardnotiser får samma premiumstil (ikon + ton) som info istället för
+  // en tom, mörk ruta.
+  return sonnerToast.info(message, options);
 }
 
 

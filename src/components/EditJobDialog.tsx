@@ -161,13 +161,15 @@ interface EditJobDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onJobUpdated: () => void;
+  /** Anropas när annonsen publicerats (utkast → aktiv eller återpublicering). */
+  onPublished?: () => void;
   /** När true: annonsen publiceras (aktiveras 14 dagar) vid submit istället för att bara sparas. */
   republishMode?: boolean;
 }
 
 const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 
-const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = false }: EditJobDialogProps) => {
+const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, republishMode = false }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const isDraft = job ? !job.is_active : false;
   // Utgången annons: aktiv i databasen men passerat utgångsdatum
@@ -1918,6 +1920,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, republishMode = 
       setHasUnsavedChanges(false);
       onOpenChange(false);
       onJobUpdated();
+      if (publishMode) onPublished?.();
     } catch (err) {
       console.error('Edit job error:', err);
       toast({ title: 'Ett fel uppstod', description: 'Kunde inte uppdatera annonsen.', variant: 'destructive' });

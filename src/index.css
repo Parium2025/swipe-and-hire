@@ -2213,3 +2213,30 @@ html[data-glass="static"] [data-landing-scroll-root] *::after {
 html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   background-color: hsl(215 70% 16% / 0.72);
 }
+
+/* ============================================================
+   NOTISER (Sonner) — mobilcentrering & textbrytning
+   ============================================================
+   Sonners inbyggda mobil-CSS sätter width:100% samtidigt som left/right-
+   offset appliceras, vilket gör att panelen sticker ut åt höger på små
+   skärmar. Vi låser bredden till viewport minus marginal och centrerar. */
+@media (max-width: 600px) {
+  [data-sonner-toaster] {
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    left: 12px !important;
+    right: 12px !important;
+    transform: none !important;
+  }
+  [data-sonner-toaster] [data-sonner-toast] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+[data-sonner-toast] [data-title],
+[data-sonner-toast] [data-description] {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}

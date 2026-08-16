@@ -709,6 +709,11 @@ const EmployerDashboard = memo(() => {
           if (!open) setEditRepublishMode(false);
         }}
         onJobUpdated={invalidateJobs}
+        onPublished={() => {
+          // Hoppa till "Aktiva" så att den nypublicerade annonsen syns direkt
+          setActiveTab('active');
+          setPage(1);
+        }}
       />
 
       <RepublishJobDialog
