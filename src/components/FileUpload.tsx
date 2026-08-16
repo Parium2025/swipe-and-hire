@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { looksLikeVideoFile } from '@/lib/videoInput';
+import { looksLikeVideoFile, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, File, Video, FileText, Check, WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -128,9 +128,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
       setUploadProgress(0);
     }
   };
-
-  // Hård gräns för videolängd (sekunder). Skyddar lagring/bandbredd i stor skala.
-  const MAX_VIDEO_SECONDS = 90;
 
   const readVideoDuration = (url: string) =>
     new Promise<number | null>((resolve) => {

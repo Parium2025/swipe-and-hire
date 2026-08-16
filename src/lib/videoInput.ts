@@ -58,3 +58,34 @@ export function looksLikeVideoFile(file: { type?: string; name?: string }): bool
   if ((file.type || '').toLowerCase().startsWith('video/')) return true;
   return ACCEPTED_VIDEO_EXT.includes(extensionOf(file.name || ''));
 }
+
+/** Hård gräns för videolängd (sekunder). Skyddar lagring och bandbredd i skala. */
+export const MAX_VIDEO_SECONDS = 90;
+
+/**
+ * Läser videons längd via ett <video>-element. Returnerar null om längden
+ * inte går att läsa (då släpper vi igenom filen hellre än att blockera fel).
+ */
+export function readVideoDurationFromBlob(blob: Blob): Promise<number | null> {
+  if (typeof document === 'undefined') return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(blob);
+    const el = document.createElement('video');
+    el.preload = 'metadata';
+    let settled = false;
+    const done = (value: number | null) => {
+      if (settled) return;
+      settled = true;
+      el.onloadedmetadata = null;
+      el.onerror = null;
+      el.removeAttribute('src');
+      try { el.load(); } catch { /* ignore */ }
+      URL.revokeObjectURL(url);
+      resolve(value);
+    };
+    el.onloadedmetadata = () => done(Number.isFinite(el.duration) ? el.duration : null);
+    el.onerror = () => done(null);
+    el.src = url;
+    window.setTimeout(() => done(null), 8000);
+  });
+}

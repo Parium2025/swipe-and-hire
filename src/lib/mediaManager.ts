@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { uploadWithRetry, type UploadProgress, UploadAbortedError } from '@/lib/uploadWithProgress';
-import { isAcceptedVideoFile } from '@/lib/videoInput';
+import { isAcceptedVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
 
 /**
  * 🔒 KRITISKT: DETTA ÄR DEN ENDA KÄLLAN TILL SANNING FÖR MEDIA-HANTERING
@@ -193,6 +193,17 @@ export async function uploadMedia(
   let posterBlob: Blob | null = null;
   const isVideo = acceptedAsVideo || file.type.startsWith('video/');
   if (isVideo) {
+    // Hård längdgräns – enda källan till sanning, gäller alla uppladdningsvägar.
+    const seconds = await readVideoDurationFromBlob(file);
+    if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
+      return {
+        storagePath: '',
+        error: new Error(
+          `Videon är ${Math.round(seconds)} sekunder. Max längd är ${MAX_VIDEO_SECONDS} sekunder – korta ner den och försök igen.`
+        ),
+      };
+    }
+
     let playableEverywhere = false;
     try {
       const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');

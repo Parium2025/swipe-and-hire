@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { looksLikeVideoFile } from '@/lib/videoInput';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
@@ -845,7 +846,7 @@ const Profile = () => {
 
 
   const uploadProfileMedia = async (file: File) => {
-    const isVideo = file.type.startsWith('video/');
+    const isVideo = looksLikeVideoFile(file);
     setIsUploadingMedia(true);
     setUploadingMediaType(isVideo ? 'video' : 'image');
     setUploadProgress(0);
