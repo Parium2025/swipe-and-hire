@@ -8,6 +8,8 @@ import { fetchPriority } from '@/lib/fetchPriority';
 interface ProfileVideoProps {
   videoUrl: string;
   coverImageUrl?: string;
+  /** Automatgenererad posterbild ur videon. Används när ingen cover finns. */
+  posterUrl?: string | null;
   alt?: string;
   className?: string;
   userInitials?: string;
