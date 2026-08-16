@@ -171,12 +171,51 @@ export function useOfflineMediaQueue(userId: string | undefined) {
           await new Promise(r => setTimeout(r, delay));
         }
 
+        let uploadBlob: Blob = item.blob;
+        let uploadPath = item.fileName;
+
+        // Videon köades utan bearbetning (offline). Kör hela mediakedjan nu,
+        // innan något lämnar enheten — inget ospelbart får nå lagringen.
+        if (item.pendingTranscode && item.mediaType === 'profile-video') {
+          const { MAX_VIDEO_SECONDS, readVideoDurationFromBlob } = await import('@/lib/videoInput');
+          const seconds = await readVideoDurationFromBlob(item.blob);
+          if (seconds !== null && seconds > MAX_VIDEO_SECONDS) {
+            await removeQueuedUpload(item.id);
+            toast.error('En köad video var för lång', {
+              description: `Max ${MAX_VIDEO_SECONDS} sekunder – ladda upp en kortare version.`,
+              duration: 8000,
+            });
+            continue;
+          }
+
+          const { optimizeVideoForUpload } = await import('@/lib/videoTranscode');
+          const asFile = item.blob instanceof File
+            ? item.blob
+            : new File([item.blob], item.fileName.split('/').pop() || 'video.mp4', { type: item.blob.type });
+          const result = await optimizeVideoForUpload(asFile);
+          if (!result.playableEverywhere) {
+            await removeQueuedUpload(item.id);
+            toast.error('En köad video kunde inte sparas', {
+              description: 'Formatet fungerar inte på alla enheter. Spara om den som MP4 (H.264) och ladda upp igen.',
+              duration: 8000,
+            });
+            continue;
+          }
+          uploadBlob = result.blob;
+          uploadPath = `${item.fileName.replace(/\.[^./]+$/, '')}.${result.extension}`;
+          await updateQueuedUpload(item.id, {
+            blob: uploadBlob,
+            fileName: uploadPath,
+            pendingTranscode: false,
+          });
+        }
+
         const bucket = BUCKETS[item.mediaType];
         await uploadWithRetry({
           bucket,
-          path: item.fileName,
-          file: item.blob,
-          contentType: item.blob.type || 'application/octet-stream',
+          path: uploadPath,
+          file: uploadBlob,
+          contentType: uploadBlob.type || 'application/octet-stream',
           upsert: true,
           cacheControl: '31536000',
           maxAttempts: 3, // hooken har egen yttre retry → håll inre låg
