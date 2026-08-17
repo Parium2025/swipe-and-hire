@@ -13,6 +13,7 @@ import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { isAndroidDevice, isAppleDevice, isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
+const WINDOWS_BASELINE_30_SRC = '/landing/windows-safe/showcase-phone-baseline30.mp4';
 
 /**
  * Skärmens proportion = videons EXAKTA proportion (9:19.5).
@@ -207,18 +208,12 @@ const getSources = (widthPx?: number) =>
       ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : isWindowsDevice()
         ? [
-            // Den dedikerade Windows-mastern är 60 fps, Constrained Baseline,
-            // yuv420p och saknar B-frames. Det matchar originalets bildfrekvens
-            // och undviker frame-reordering vid kallstart. windowsLite är 30 fps,
-            // Main profile och har B-frames, så den gav precis det ryckiga förlopp
-            // som kommentaren ovan sade att Windows-källan skulle undvika.
-            // Välj bara 60-fps-mastern när browsern själv accepterar dess exakta
-            // codecprofil. Annars används den brett kompatibla 30-fps-filen.
-            prefersLargeWindowsDisplayTrack()
-              ? { src: windowsLiteAsset.url, type: 'video/mp4' }
-              : supportsWindowsSafe60()
-              ? { src: pickSafeLadder(widthPx), type: 'video/mp4; codecs="avc1.42C020"' }
-              : { src: windowsLiteAsset.url, type: 'video/mp4' },
+            // En enda konservativ Windows-master för både laptopskärm och extern
+            // HDMI/DisplayPort: H.264 Constrained Baseline, 30 fps, yuv420p,
+            // inga B-frames, en referensbild och kort GOP. Det undviker både den
+            // dyra 60-fps-kompositionen på externa skärmar och Main-profilens
+            // frame-reordering vid decoder-/GPU-output-byte.
+            { src: WINDOWS_BASELINE_30_SRC, type: 'video/mp4; codecs="avc1.42C01F"' },
           ]
         : isAndroidDevice()
           ? [
