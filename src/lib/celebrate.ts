@@ -43,8 +43,9 @@ function ensureCanvas(): HTMLCanvasElement | null {
 
   // Sätt pixelstorlek explicit (canvas-confettis egen resize hinner inte alltid
   // före första bursten på mobil).
-  const w = Math.round(window.visualViewport?.width ?? window.innerWidth);
-  const h = Math.round(window.visualViewport?.height ?? window.innerHeight);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.round((window.visualViewport?.width ?? window.innerWidth) * dpr);
+  const h = Math.round((window.visualViewport?.height ?? window.innerHeight) * dpr);
   if (w > 0 && h > 0 && (canvasEl.width !== w || canvasEl.height !== h)) {
     canvasEl.width = w;
     canvasEl.height = h;
