@@ -81,9 +81,9 @@ function NotificationItem({
           </div>
         </motion.button>
       </TooltipTrigger>
-      <TooltipContent side="left" className="max-w-[240px] text-xs">
-        <p className="font-medium">{notification.title}</p>
-        {notification.body && <p className="mt-1 opacity-80">{notification.body}</p>}
+      <TooltipContent side="left" className="max-w-[240px] text-xs text-white">
+        <p className="font-medium text-white">{notification.title}</p>
+        {notification.body && <p className="mt-1 text-white">{notification.body}</p>}
       </TooltipContent>
     </Tooltip>
   );
