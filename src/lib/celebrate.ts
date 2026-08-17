@@ -69,16 +69,26 @@ function getFire(): ConfettiFn | null {
 }
 
 /**
- * Premium konfetti-burst — samma animerade firande på mobil och desktop.
+ * Premium konfetti — EXAKT identiskt på alla plattformar (iOS, Android,
+ * Windows, macOS) och alla skärmstorlekar: två omgångar, varje omgång ett
+ * skjut från vänster kant och ett från höger kant. Totalt 4 burstar.
+ *
+ * `intensity` accepteras för bakåtkompatibilitet men påverkar inget — vi vill
+ * aldrig ha olika beteende mellan mobil och desktop.
  */
-export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
+let lastCelebrateAt = 0;
+
+export function celebrate(_options?: { intensity?: 'normal' | 'big' }) {
   if (typeof window === 'undefined') return;
 
+  // Skydd mot dubbelanrop (t.ex. om två flöden triggar samma publicering) —
+  // annars ser användaren 8 burstar istället för 4.
+  const now = Date.now();
+  if (now - lastCelebrateAt < 1200) return;
+  lastCelebrateAt = now;
 
   const fire = getFire();
   if (!fire) return;
-
-  const big = options?.intensity === 'big';
 
   // Exakt samma känsla på mobil som på desktop — endast partikelstorleken
   // kompenseras för att canvasen ritas i device-pixlar på retinaskärmar.
@@ -93,13 +103,13 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
     decay: 0.93,
   };
 
-  const count = big ? 30 : 18;
+  const COUNT = 24;
 
   // Diskreta sidoburstar: en från vänster kant, en från höger kant.
   const sides = () => {
     fire({
       ...base,
-      particleCount: count,
+      particleCount: COUNT,
       angle: 55,
       spread: 55,
       startVelocity: 42 * dpr,
@@ -107,7 +117,7 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
     });
     fire({
       ...base,
-      particleCount: count,
+      particleCount: COUNT,
       angle: 125,
       spread: 55,
       startVelocity: 42 * dpr,
@@ -115,12 +125,12 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
     });
   };
 
-  // Exakt två skjut (vänster + höger kant) — identiskt på mobil och desktop.
+  // Två omgångar — samma överallt.
   // Kör direkt (inte i rAF): på mobil kan rAF vara pausad precis efter att en
   // dialog stängts eller under smooth-scroll.
   sides();
-  if (big) window.setTimeout(sides, 260);
-
+  window.setTimeout(sides, 260);
 }
+
 
 export default celebrate;
