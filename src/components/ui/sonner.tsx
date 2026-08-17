@@ -131,13 +131,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme="dark"
       className="toaster group"
       style={{ zIndex: 99999 }}
-      position="top-center"
-      duration={3200}
+      position={isCompact ? "top-center" : "bottom-right"}
+      duration={4200}
       closeButton
       visibleToasts={3}
-      offset={16}
-      expand={false}
-      gap={10}
+      offset={isCompact ? 16 : 24}
+      // Fäll ut stapeln vid hover på desktop så inget döljs bakom en annan notis.
+      expand={!isCompact}
+      gap={isCompact ? 10 : 12}
+
       icons={{
         success: (
           <IconShell tone="success">
