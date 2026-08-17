@@ -257,6 +257,25 @@ Deno.serve(async (req) => {
       }
     }
 
+    // === RESPEKTERA ANVÄNDARENS NOTISINSTÄLLNINGAR ===
+    // Härled notistyp från payload eller data.type och kolla push-växeln.
+    const rawType = payload.notification_type ?? data?.type ?? null;
+    const prefType = rawType ? PREF_TYPE_ALIASES[rawType] ?? null : null;
+    if (prefType && !payload.bypass_preferences) {
+      const { data: enabled, error: prefError } = await supabase.rpc(
+        "is_notification_enabled",
+        { p_user_id: recipient_id, p_type: prefType }
+      );
+      if (prefError) {
+        console.error("Preference check failed, sending anyway:", prefError);
+      } else if (enabled === false) {
+        console.log(`Push skipped — ${prefType} disabled for ${recipient_id}`);
+        return new Response(
+          JSON.stringify({ success: true, sent: 0, skipped: "preferences_disabled", type: prefType }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
 
     // Get all active push tokens for the recipient
