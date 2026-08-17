@@ -164,7 +164,7 @@ const getSources = (widthPx?: number) =>
             // inga B-frames, en referensbild och kort GOP. Det undviker både den
             // dyra 60-fps-kompositionen på externa skärmar och Main-profilens
             // frame-reordering vid decoder-/GPU-output-byte.
-            { src: WINDOWS_BASELINE_30_SRC, type: 'video/mp4; codecs="avc1.42C01F"' },
+            { src: WINDOWS_BASELINE_30_SRC, type: 'video/mp4' },
           ]
         : isAndroidDevice()
           ? [
