@@ -257,19 +257,21 @@ const Dashboard = memo(() => {
     const totalViews = serverStats?.total_views ?? filteredStats.totalViews;
     const totalApplications = serverStats?.total_applications ?? filteredStats.totalApplications;
     return [
-      { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : totalJobs, loading: false, isLoading },
+      { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : totalJobs, loading: false, isLoading, onClick: () => goToTab('active'), ariaLabel: 'Visa alla annonser' },
       {
         icon: TrendingUp,
         title: 'Aktiva',
         value: isLoading ? preloadedEmployerActiveJobs : activeCount,
         loading: false,
         isLoading,
-        subItems: [{ label: 'Utgångna', value: expiredCount }],
+        onClick: () => goToTab('active'),
+        ariaLabel: 'Visa aktiva annonser',
+        subItems: [{ label: 'Utgångna', value: expiredCount, onClick: () => goToTab('expired'), ariaLabel: 'Visa utgångna annonser' }],
       },
       { icon: Eye, title: 'Visningar', value: isLoading ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading },
-      { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : totalApplications, loading: false, isLoading },
+      { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : totalApplications, loading: false, isLoading, onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
     ];
-  }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
+  }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
   if (!initialLoadDone) {
     return <EmployerDashboardSkeleton showDrafts={false} titleWidthClass="w-28" />;
