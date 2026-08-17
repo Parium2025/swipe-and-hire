@@ -74,6 +74,13 @@ export function useNotifications() {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  // Refetch when the local toast archive syncs a new item to the account
+  useEffect(() => {
+    const handler = () => fetchNotifications();
+    window.addEventListener('parium:notifications-refresh', handler);
+    return () => window.removeEventListener('parium:notifications-refresh', handler);
+  }, [fetchNotifications]);
+
   // Refetch when user returns to tab (after reading article, etc.)
   useEffect(() => {
     const handleVisibilityChange = () => {
