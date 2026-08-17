@@ -29,6 +29,10 @@ interface StatCard {
   subItems?: SubItem[];
   /** Unique key for persisting the last known value across page loads */
   cacheKey?: string;
+  /** Gör kortet klickbart (t.ex. hoppa till en flik eller sida) */
+  onClick?: () => void;
+  /** Tillgänglighetstext för klickbart kort */
+  ariaLabel?: string;
 }
 
 interface StatsGridProps {
