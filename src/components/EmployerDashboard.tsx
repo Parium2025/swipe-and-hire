@@ -458,7 +458,7 @@ const EmployerDashboard = memo(() => {
     const totalViews = serverStats?.total_views ?? activeJobs.reduce((s, j) => s + j.views_count, 0);
     const totalApps = serverStats?.total_applications ?? activeJobs.reduce((s, j) => s + j.applications_count, 0);
     return [
-      { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs', onClick: () => goToTab('active'), ariaLabel: 'Visa alla annonser' },
+      { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs' },
       {
         icon: TrendingUp,
         title: 'Aktiva',
