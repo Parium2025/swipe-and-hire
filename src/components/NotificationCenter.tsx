@@ -256,7 +256,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                 <p className="text-sm">Inga notifikationer</p>
               </div>
             ) : (
-              <div className="space-y-1.5">
+              <div className="divide-y divide-white/15 [&>*]:py-1.5 first:[&>*]:pt-0 last:[&>*]:pb-0">
                 {merged.map(entry => entry.kind === 'server' ? (
                   <NotificationItem
                     key={`s-${entry.n.id}`}
