@@ -88,6 +88,20 @@ function shouldTrackUrl(input: RequestInfo | URL): boolean {
   return /\/rest\/v1\//.test(value) || /\/functions\/v1\//.test(value) || /supabase\.co/.test(value) || /lovable/.test(value);
 }
 
+// Avbrutna anrop är inte fel: användaren navigerade vidare, stängde fliken,
+// eller tappade nätet en sekund. De ska aldrig bli notiser.
+function isBenignNetworkError(error: unknown, init?: RequestInit): boolean {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return true;
+  if (pageUnloading) return true;
+  if (init?.signal?.aborted) return true;
+  const name = error instanceof Error ? error.name : '';
+  const message = error instanceof Error ? error.message : String(error ?? '');
+  if (name === 'AbortError') return true;
+  return /abort|cancel|load failed|failed to fetch|network ?error/i.test(message);
+}
+
+let pageUnloading = false;
+
 type CreateFailureInput = Omit<AppFailure, 'id' | 'route' | 'createdAt' | 'fingerprint' | 'occurrenceCount' | 'lastSeenAt'> & {
   fingerprint?: string;
   occurrenceCount?: number;
@@ -146,6 +160,9 @@ export function installAppFailureMonitor(getOwnerUserId: () => string | null | u
     }));
   });
 
+  window.addEventListener('pagehide', () => { pageUnloading = true; });
+  window.addEventListener('beforeunload', () => { pageUnloading = true; });
+
   originalFetch = window.fetch.bind(window);
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const startedAt = performance.now();
@@ -163,7 +180,7 @@ export function installAppFailureMonitor(getOwnerUserId: () => string | null | u
       }
       return response;
     } catch (error) {
-      if (shouldTrackUrl(input)) {
+      if (shouldTrackUrl(input) && !isBenignNetworkError(error, init)) {
         recordFailure(createFailure({
           kind: 'backend_error',
           severity: 'critical',
