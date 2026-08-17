@@ -38,6 +38,9 @@ if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
         if (now - entry.at > DEDUPE_WINDOW) recent.delete(k);
       });
 
+      // Logga i notisarkivet så att inget kan missas ens om toasten hinner försvinna.
+      toastArchive.add(kind as any, textOf(message), textOf(options?.description) || undefined);
+
       const hit = key.length > 2 ? recent.get(key) : undefined;
       if (hit && now - hit.at < DEDUPE_WINDOW) {
 
