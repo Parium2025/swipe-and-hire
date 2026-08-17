@@ -8,32 +8,60 @@ const BRAND_COLORS = ['#ffffff', '#7cc4ff', '#2f7fd4', '#bfe3ff', '#0f4c81'];
 
 type ConfettiFn = ReturnType<typeof confetti.create>;
 
+let canvasEl: HTMLCanvasElement | null = null;
 let cachedFire: ConfettiFn | null = null;
 
 /**
- * Egen fullskärms-canvas som ligger överst i DOM:en (documentElement) med
- * maximal z-index. Detta gör konfettin synlig oavsett skärmstorlek, modaler,
- * portaler eller scroll-lås — tidigare kunde den hamna bakom overlays på mobil.
+ * Egen fullskärms-canvas som ligger överst i DOM:en med maximal z-index.
+ *
+ * Viktigt för mobil (iOS Safari):
+ *  - canvasen måste ligga direkt under <body> och ALLTID vara kvar i DOM:en
+ *    (SPA-navigering/portaler kunde tidigare koppla bort den),
+ *  - storleken sätts explicit i device-pixlar varje gång vi firar, eftersom
+ *    iOS ändrar viewporten när adressfältet fälls in/ut. Utan detta kunde
+ *    canvasen ha 0 px höjd och konfettin ritades utanför skärmen.
  */
+function ensureCanvas(): HTMLCanvasElement | null {
+  if (typeof document === 'undefined') return null;
+
+  if (!canvasEl) {
+    canvasEl = document.createElement('canvas');
+    canvasEl.setAttribute('data-parium-confetti', '');
+    Object.assign(canvasEl.style, {
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      width: '100vw',
+      height: '100dvh',
+      pointerEvents: 'none',
+      zIndex: '2147483647',
+    } as CSSStyleDeclaration);
+    cachedFire = null;
+  }
+
+  if (!canvasEl.isConnected) {
+    (document.body || document.documentElement).appendChild(canvasEl);
+    cachedFire = null;
+  }
+
+  // Sätt pixelstorlek explicit (canvas-confettis egen resize hinner inte alltid
+  // före första bursten på mobil).
+  const w = Math.round(window.visualViewport?.width ?? window.innerWidth);
+  const h = Math.round(window.visualViewport?.height ?? window.innerHeight);
+  if (w > 0 && h > 0 && (canvasEl.width !== w || canvasEl.height !== h)) {
+    canvasEl.width = w;
+    canvasEl.height = h;
+  }
+
+  return canvasEl;
+}
+
 function getFire(): ConfettiFn | null {
-  if (typeof window === 'undefined' || typeof document === 'undefined') return null;
-  if (cachedFire) return cachedFire;
-
-  const canvas = document.createElement('canvas');
-  canvas.setAttribute('data-parium-confetti', '');
-  Object.assign(canvas.style, {
-    position: 'fixed',
-    inset: '0',
-    top: '0',
-    left: '0',
-    width: '100%',
-    height: '100%',
-    pointerEvents: 'none',
-    zIndex: '2147483647',
-  } as CSSStyleDeclaration);
-  (document.body || document.documentElement).appendChild(canvas);
-
-  cachedFire = confetti.create(canvas, { resize: true, useWorker: false });
+  const canvas = ensureCanvas();
+  if (!canvas) return null;
+  if (!cachedFire) {
+    cachedFire = confetti.create(canvas, { resize: true, useWorker: false });
+  }
   return cachedFire;
 }
 
@@ -42,7 +70,12 @@ function getFire(): ConfettiFn | null {
  * Respekterar reducerad rörelse.
  */
 export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
-  if (typeof window === 'undefined' || prefersReducedMotion()) return;
+  if (typeof window === 'undefined') return;
+  if (prefersReducedMotion()) {
+    // Hjälper felsökning: på iOS slår "Reducera rörelse" av all konfetti.
+    console.info('[celebrate] hoppar över konfetti: prefers-reduced-motion är på');
+    return;
+  }
 
   const fire = getFire();
   if (!fire) return;
@@ -52,7 +85,9 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
 
   const base: confetti.Options = {
     colors: BRAND_COLORS,
-    disableForReducedMotion: true,
+    // Vi har redan gjort kontrollen ovan; låt inte biblioteket tysta bursten
+    // en gång till (dubbelkontroll gav inkonsekvent beteende på mobil).
+    disableForReducedMotion: false,
     scalar: narrow ? 0.9 : 0.8,
     ticks: 220,
     gravity: 0.85,
@@ -81,15 +116,15 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
     });
   };
 
-  // Vänta ett frame så att canvasen hunnit få rätt storlek innan första burst.
-  window.requestAnimationFrame(() => {
-    sides();
-    window.setTimeout(sides, 200);
-    if (big) {
-      window.setTimeout(sides, 430);
-      window.setTimeout(sides, 700);
-    }
-  });
+  // Kör första bursten direkt (inte i rAF) — på mobil kan rAF vara pausad
+  // precis efter att en dialog stängts eller under smooth-scroll, vilket
+  // gjorde att konfettin aldrig startade.
+  sides();
+  window.setTimeout(sides, 200);
+  if (big) {
+    window.setTimeout(sides, 430);
+    window.setTimeout(sides, 700);
+  }
 }
 
 export default celebrate;
