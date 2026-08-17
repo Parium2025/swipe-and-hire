@@ -2,6 +2,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { Toaster as Sonner, toast as sonnerToast } from "sonner";
 import { CheckCircle2, AlertTriangle, Info, XCircle, Loader2 } from "lucide-react";
+import { toastArchive } from "@/lib/toastArchive";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
