@@ -30,6 +30,7 @@ type MediaItem = {
   type: 'image' | 'video';
   src: string;
   windowsSrc?: string;
+  windowsSafeSrc?: string;
   poster?: string;
   position?: string;
   eyebrow: string;
@@ -40,14 +41,14 @@ type MediaItem = {
 // 404, codec-issue) renderas posterbilden istället för en svart ruta —
 // användaren ser alltid något meningsfullt i kortet.
 const items: MediaItem[] = [
-  { type: 'video', src: '/landing/jobseeker-pt.mp4', windowsSrc: winPt.url, poster: posterPt, eyebrow: 'Hälsa & träning', title: 'Personliga tränare' },
-  { type: 'video', src: '/landing/jobseeker-transport.mp4', windowsSrc: winTransport.url, poster: posterTransport, eyebrow: 'Transport', title: 'Chaufförer & logistik' },
-  { type: 'video', src: '/landing/jobseeker-real-center.mp4', windowsSrc: winRealCenter.url, poster: posterAffarer, eyebrow: 'Affärer', title: 'Yrkespersoner i sitt element' },
-  { type: 'video', src: '/landing/jobseeker-real-4.mp4', windowsSrc: winReal4.url, poster: posterService, eyebrow: 'Fastighet', title: 'Mäklare & rådgivare' },
-  { type: 'video', src: '/landing/jobseeker-real-3.mp4', windowsSrc: winReal3.url, poster: posterRestaurant, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
-  { type: 'video', src: '/landing/jobseeker-electrician.mp4', windowsSrc: winElectrician.url, poster: posterElectrician, eyebrow: 'El & energi', title: 'Elektriker' },
-  { type: 'video', src: '/landing/jobseeker-farmer.mp4', windowsSrc: winFarmer.url, poster: posterFarmer, eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
-  { type: 'video', src: '/landing/jobseeker-nurse.mp4', windowsSrc: winNurse.url, poster: posterVard, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
+  { type: 'video', src: '/landing/jobseeker-pt.mp4', windowsSrc: winPt.url, windowsSafeSrc: '/landing/windows-safe/jobseeker-pt-windows-baseline.mp4', poster: posterPt, eyebrow: 'Hälsa & träning', title: 'Personliga tränare' },
+  { type: 'video', src: '/landing/jobseeker-transport.mp4', windowsSrc: winTransport.url, windowsSafeSrc: '/landing/windows-safe/jobseeker-transport-windows-baseline.mp4', poster: posterTransport, eyebrow: 'Transport', title: 'Chaufförer & logistik' },
+  { type: 'video', src: '/landing/jobseeker-real-center.mp4', windowsSrc: winRealCenter.url, windowsSafeSrc: '/landing/windows-safe/jobseeker-real-center-windows-baseline.mp4', poster: posterAffarer, eyebrow: 'Affärer', title: 'Yrkespersoner i sitt element' },
+  { type: 'video', src: '/landing/jobseeker-real-4.mp4', windowsSrc: winReal4.url, windowsSafeSrc: '/landing/windows-safe/jobseeker-real-4-windows-baseline.mp4', poster: posterService, eyebrow: 'Fastighet', title: 'Mäklare & rådgivare' },
+  { type: 'video', src: '/landing/jobseeker-real-3.mp4', windowsSrc: winReal3.url, windowsSafeSrc: '/landing/windows-safe/jobseeker-real-3-windows-baseline.mp4', poster: posterRestaurant, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
+  { type: 'video', src: '/landing/jobseeker-electrician.mp4', windowsSrc: winElectrician.url, windowsSafeSrc: '/landing/windows-safe/jobseeker-electrician-windows-baseline.mp4', poster: posterElectrician, eyebrow: 'El & energi', title: 'Elektriker' },
+  { type: 'video', src: '/landing/jobseeker-farmer.mp4', windowsSrc: winFarmer.url, windowsSafeSrc: '/landing/windows-safe/jobseeker-farmer-windows-baseline.mp4', poster: posterFarmer, eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
+  { type: 'video', src: '/landing/jobseeker-nurse.mp4', windowsSrc: winNurse.url, windowsSafeSrc: '/landing/windows-safe/jobseeker-nurse-windows-baseline.mp4', poster: posterVard, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
 ];
 
 type CardItemProps = {
@@ -69,8 +70,10 @@ type CardItemProps = {
  */
 const getMaxConcurrent = () => getMaxConcurrentVideos();
 /** Lätt källa till Windows/Android/sparläge, full källa till Apple & desktop. */
-const getPlayableSrc = (item: MediaItem) =>
-  prefersLightweightVideo() && item.windowsSrc ? item.windowsSrc : item.src;
+const getPlayableSrc = (item: MediaItem) => {
+  if (isWindowsDevice() && item.windowsSafeSrc) return item.windowsSafeSrc;
+  return prefersLightweightVideo() && item.windowsSrc ? item.windowsSrc : item.src;
+};
 const registry = new Set<HTMLVideoElement>();
 let rafId = 0;
 /** Senast valda, sammanhängande fönster av spelande kort (vänster→höger). */
