@@ -334,7 +334,7 @@ const App = () => {
         <ConversationsProvider>
           <OnlineStatusProvider>
             <TooltipProvider delayDuration={0}>
-              <Toaster position="top-center" />
+              <Toaster />
               <AppFailureMonitor />
               <BrowserRouter>
                 <AppShell showHeader={showHeader} />
