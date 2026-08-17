@@ -64,8 +64,10 @@ export const prefersLightweightVideo = () => {
 /**
  * Antal videor som får spela samtidigt i galleriet.
  *
- * Windows och Android hålls till högst två samtidiga strömmar. Det lämnar en
- * hårdvarudecoder ledig åt telefonvideon och håller scroll-kompositorn mjuk.
+ * Windows får en enda samtidig galleriström. På vissa externa skärmar går
+ * Chromium via en gemensam MPO-/kompositionsväg där redan laddade, pausade
+ * videor fortfarande kan hålla decoder- och GPU-resurser. Ett hårt tak på en
+ * aktiv källa är därför den enda säkra minsta gemensamma nämnaren.
  * Apple behåller sin tidigare budget på tre.
  */
 export const getMaxConcurrentVideos = () => {
@@ -75,13 +77,9 @@ export const getMaxConcurrentVideos = () => {
   // klaras av Apple-enheter. Bara sparläge/riktigt svaga enheter får
   // ett glidande fönster.
   if (prefersReducedData()) return 1;
-  // Windows: Chromium delar en begränsad pool av hårdvarudekodrar per GPU-
-  // utgång. Kör man dessutom laptopskärm + extern HDMI-skärm samtidigt måste
-  // videoplanen komponeras två gånger. Åtta strömmar tömde poolen helt — då
-  // föll galleriet till mjukvaruavkodning och telefonvideon i hero fick ingen
-  // decoder alls (svart/fryst ram + segt scroll). Tre strömmar lämnar alltid
-  // budget kvar åt telefonen.
-  if (isWindowsDevice()) return 3;
+  // Windows/external display: endast en laddad och spelande gallerivideo åt
+  // gången. Övriga kort visar sina posters och har ingen src kopplad alls.
+  if (isWindowsDevice()) return 1;
   if (isLowPowerDevice()) return getVideoPlatform() === 'android' ? 3 : 4;
   return 8;
 };
