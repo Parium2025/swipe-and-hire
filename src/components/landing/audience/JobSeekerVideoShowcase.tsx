@@ -603,6 +603,10 @@ const JobSeekerVideoShowcase = ({
     let healthTimer: number | null = null;
     let displayTimer: number | null = null;
     let lastHealthTime = v.currentTime;
+    let lastScreenX = typeof window.screenX === 'number' ? window.screenX : 0;
+    let lastScreenY = typeof window.screenY === 'number' ? window.screenY : 0;
+    let lastDpr = window.devicePixelRatio || 1;
+
     let frozenTicks = 0;
     let rebuilding = false;
 
@@ -638,6 +642,19 @@ const JobSeekerVideoShowcase = ({
     };
 
     const checkHealth = () => {
+      // Fönstret kan flyttas till en annan skärm UTAN att `resize` triggas (samma
+      // upplösning på båda skärmarna). Då byter Chromium GPU-utgång i tysthet och
+      // videoplanet kan frysa. `screenX/screenY` + dpr är den enda signal vi får.
+      const originX = typeof window.screenX === 'number' ? window.screenX : 0;
+      const originY = typeof window.screenY === 'number' ? window.screenY : 0;
+      const dprNow = window.devicePixelRatio || 1;
+      if (originX !== lastScreenX || originY !== lastScreenY || dprNow !== lastDpr) {
+        lastScreenX = originX;
+        lastScreenY = originY;
+        lastDpr = dprNow;
+        handleDisplayChange();
+      }
+
       if ((!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible' || rebuilding) {
         frozenTicks = 0;
         lastHealthTime = v.currentTime;

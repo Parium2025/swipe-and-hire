@@ -71,13 +71,21 @@ export const prefersLightweightVideo = () => {
 export const getMaxConcurrentVideos = () => {
   // ALLTID-IGÅNG är standard. Att pausa/starta kort under scroll kändes
   // "stressigt" och gjorde att en video låg pausad exakt när användaren kom
-  // fram. Källorna är lätta (4:5, ~2,4 Mbit/s) så åtta samtidiga strömmar
-  // klaras av alla moderna enheter. Bara sparläge/riktigt svaga enheter får
+  // fram. Källorna är lätta (4:5, ~2,4 Mbit/s) så många samtidiga strömmar
+  // klaras av Apple-enheter. Bara sparläge/riktigt svaga enheter får
   // ett glidande fönster.
   if (prefersReducedData()) return 1;
+  // Windows: Chromium delar en begränsad pool av hårdvarudekodrar per GPU-
+  // utgång. Kör man dessutom laptopskärm + extern HDMI-skärm samtidigt måste
+  // videoplanen komponeras två gånger. Åtta strömmar tömde poolen helt — då
+  // föll galleriet till mjukvaruavkodning och telefonvideon i hero fick ingen
+  // decoder alls (svart/fryst ram + segt scroll). Tre strömmar lämnar alltid
+  // budget kvar åt telefonen.
+  if (isWindowsDevice()) return 3;
   if (isLowPowerDevice()) return getVideoPlatform() === 'android' ? 3 : 4;
   return 8;
 };
+
 
 
 /** Ska decoders frigöras (pausas) när galleriet lämnar viewporten? */
