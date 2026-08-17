@@ -37,7 +37,9 @@ if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
         if (now - entry.at > DEDUPE_WINDOW) recent.delete(k);
       });
 
+      const hit = key.length > 2 ? recent.get(key) : undefined;
       if (hit && now - hit.at < DEDUPE_WINDOW) {
+
         hit.count += 1;
         hit.at = now;
         const label = textOf(message);
