@@ -108,7 +108,7 @@ export const WizardFooter = ({
 
   return (
     <div
-      className={`flex items-center p-4 border-t border-white/20 flex-shrink-0 ${justifyClass} ${className}`}
+      className={`flex items-center p-4 flex-shrink-0 ${justifyClass} ${className}`}
       onMouseDown={handleContainerMouseDown}
       onTouchStart={handleContainerTouchStart}
     >
