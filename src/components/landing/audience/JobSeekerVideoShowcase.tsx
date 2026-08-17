@@ -661,11 +661,26 @@ const JobSeekerVideoShowcase = ({
         return;
       }
       if (v.paused || v.ended || v.seeking || v.readyState < 2) {
-        frozenTicks = 0;
+        // Dekodersvält på Windows: play() lyckas aldrig och videon förblir
+        // pausad/utan data. Mjuka försök i all evighet löser inte det — efter
+        // några misslyckade tick måste hela mediekedjan byggas om.
         lastHealthTime = v.currentTime;
+        if (!v.ended && !v.seeking) {
+          softTicks += 1;
+          if (softTicks >= 4) {
+            softTicks = 0;
+            rebuildDecoder();
+            return;
+          }
+        } else {
+          softTicks = 0;
+        }
+        frozenTicks = 0;
         attempt();
         return;
       }
+      softTicks = 0;
+
       if (Math.abs(v.currentTime - lastHealthTime) < 0.04) {
         frozenTicks += 1;
         if (frozenTicks === 2) {
