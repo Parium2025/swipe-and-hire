@@ -3847,7 +3847,7 @@ const MobileJobWizard = ({
                           
                            {/* Form container (toggle) */}
                            <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
-                             <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem] gap-1">
+                             <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem] gap-1">
                                <div className="text-[10px] font-bold text-white truncate min-w-0">Ansökan</div>
                                <div className="relative">
                                  {showCompanyTooltip && isScrolledTop && (
@@ -4392,7 +4392,7 @@ const MobileJobWizard = ({
                             {/* Application Form View (when clicked) - IDENTICAL to mobile */}
                             {showDesktopApplicationForm && (
                               <div className="flex flex-col h-full">
-                                <div className="flex items-center justify-between px-4 py-2 bg-black/20 border-b border-white/20 flex-shrink-0">
+                                <div className="flex items-center justify-between px-4 py-2 bg-black/20 flex-shrink-0">
                                   <div className="text-sm font-bold text-white">Ansökningsformulär</div>
                                   <div className="flex items-center gap-2">
                                     {/* Tooltip pointing at X button */}
