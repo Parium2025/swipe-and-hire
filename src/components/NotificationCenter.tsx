@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
+import { useNotificationPreferences, type NotificationType } from '@/hooks/useNotificationPreferences';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -203,9 +204,9 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
       }
       return { kind: 'server' as const, at, n };
     });
-    const b = archived.map(n => ({ kind: 'local' as const, at: n.at, n }));
+    const b = visibleArchived.map(n => ({ kind: 'local' as const, at: n.at, n }));
     return [...a, ...b].sort((x, y) => y.at - x.at);
-  }, [notifications, archived]);
+  }, [visibleNotifications, visibleArchived]);
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -297,7 +298,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs">
-                    Rensa alla
+                    Rensa allt
                   </TooltipContent>
                 </Tooltip>
               )}
