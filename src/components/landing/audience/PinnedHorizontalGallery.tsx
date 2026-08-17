@@ -827,6 +827,7 @@ const PinnedHorizontalGallery = () => {
     let disposed = false;
     let warmed = false;
     let entered = false;
+    let warmGeneration = 0;
     let hasEnteredOnce = false;
     let gsapInstance: typeof import('gsap').default | null = null;
 
@@ -895,6 +896,7 @@ const PinnedHorizontalGallery = () => {
     const warmVideos = () => {
       if (warmed) return;
       warmed = true;
+      const generation = warmGeneration;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
       const priority = prefersLightweightVideo()
@@ -911,9 +913,17 @@ const PinnedHorizontalGallery = () => {
 
       let index = 0;
       const step = () => {
-        if (disposed) return;
+        if (disposed || generation !== warmGeneration) return;
         const v = queue[index++];
         if (!v) return;
+        // Windows-dekodrarna släpps helt när galleriet lämnar viewporten.
+        // Återkoppla därför en källa i taget i samma sekventiella kö som redan
+        // skyddar kallstarten, aldrig alla åtta samtidigt.
+        const releasedSrc = v.dataset.phgReleasedSrc;
+        if (releasedSrc && !v.getAttribute('src')) {
+          v.setAttribute('src', releasedSrc);
+          delete v.dataset.phgReleasedSrc;
+        }
         if (v.readyState >= 3) {
           warmTimers.push(window.setTimeout(step, 60));
           return;
@@ -1023,7 +1033,20 @@ const PinnedHorizontalGallery = () => {
       const shouldFreeDecode = shouldFreeDecodersOnLeave();
       if (shouldFreeDecode) {
         const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
-        videos.forEach((video) => video.pause());
+        warmGeneration += 1;
+        warmed = false;
+        videos.forEach((video) => {
+          video.pause();
+          // pause() ensam behåller ofta Chromium-dekodern på Windows. Genom
+          // att koppla loss src och köra load() frigörs media-/GPU-resurserna
+          // på riktigt. Native poster + eget posterlager förhindrar svart ruta.
+          const currentSrc = video.getAttribute('src');
+          if (currentSrc) video.dataset.phgReleasedSrc = currentSrc;
+          video.removeAttribute('src');
+          delete video.dataset.phgStarted;
+          try { video.load(); } catch { /* best effort */ }
+        });
+        lastWindow = [];
       }
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
