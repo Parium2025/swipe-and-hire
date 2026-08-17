@@ -76,7 +76,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
       <div ref={railRef} className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
         {/* Sliding background — uses GPU-accelerated transform instead of layout-triggering left */}
         <motion.div
-          className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] will-change-transform"
+          className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] will-change-transform pointer-events-none z-0"
           style={{
             width: indicatorStyle.width,
             left: 0,
