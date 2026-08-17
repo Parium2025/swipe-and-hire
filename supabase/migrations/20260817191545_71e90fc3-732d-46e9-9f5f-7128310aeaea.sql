@@ -1,0 +1,1 @@
+DELETE FROM public.notifications WHERE type = 'system_app_failure' AND title = 'Backend-anrop kunde inte nås';
