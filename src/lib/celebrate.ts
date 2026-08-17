@@ -154,12 +154,11 @@ export function prewarmCelebration() {
 
 if (typeof window !== 'undefined') {
   const warm = () => { try { getFire(); } catch { /* noop */ } };
-  if ('requestIdleCallback' in window) {
-    (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(warm);
-  } else {
-    window.setTimeout(warm, 1200);
-  }
+  const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
+  if (ric) ric(warm);
+  else setTimeout(warm, 1200);
 }
+
 
 
 
