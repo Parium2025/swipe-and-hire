@@ -8,10 +8,55 @@ const prefersReducedMotion = () =>
 // några diskreta bakgrundsprickar på mobil trots att konfettin faktiskt kördes.
 const BRAND_COLORS = ['#ffffff', '#67e8f9', '#34d399', '#fbbf24', '#f472b6'];
 
+const STATIC_CONFETTI_POSITIONS = [
+  [4, 17, -18], [11, 31, 12], [19, 12, 35], [27, 25, -9], [36, 15, 22],
+  [46, 29, -28], [55, 11, 14], [64, 24, 31], [73, 14, -15], [82, 29, 18],
+  [91, 16, -32], [97, 35, 9], [7, 49, 24], [17, 61, -14], [29, 45, 32],
+  [41, 58, -25], [59, 46, 16], [71, 62, -11], [84, 48, 28], [94, 59, -20],
+] as const;
+
 type ConfettiFn = ReturnType<typeof confetti.create>;
 
 let canvasEl: HTMLCanvasElement | null = null;
 let cachedFire: ConfettiFn | null = null;
+
+/**
+ * Tillgänglig fallback när operativsystemet begär reducerad rörelse.
+ * Ingen fallande animation används, men firandet blir fortfarande tydligt.
+ */
+function showStaticConfetti() {
+  if (typeof document === 'undefined') return;
+
+  document.querySelector('[data-parium-static-confetti]')?.remove();
+  const layer = document.createElement('div');
+  layer.setAttribute('data-parium-static-confetti', '');
+  layer.setAttribute('aria-hidden', 'true');
+  Object.assign(layer.style, {
+    position: 'fixed',
+    inset: '0',
+    pointerEvents: 'none',
+    zIndex: '2147483647',
+  } as CSSStyleDeclaration);
+
+  STATIC_CONFETTI_POSITIONS.forEach(([x, y, rotation], index) => {
+    const piece = document.createElement('i');
+    Object.assign(piece.style, {
+      position: 'absolute',
+      left: `${x}%`,
+      top: `${y}%`,
+      width: index % 3 === 0 ? '12px' : '8px',
+      height: index % 3 === 0 ? '6px' : '11px',
+      borderRadius: index % 4 === 0 ? '999px' : '2px',
+      backgroundColor: BRAND_COLORS[index % BRAND_COLORS.length],
+      transform: `rotate(${rotation}deg)`,
+      boxShadow: '0 1px 4px rgba(0, 0, 0, 0.2)',
+    } as CSSStyleDeclaration);
+    layer.appendChild(piece);
+  });
+
+  (document.body || document.documentElement).appendChild(layer);
+  window.setTimeout(() => layer.remove(), 1800);
+}
 
 /**
  * Egen fullskärms-canvas som ligger överst i DOM:en med maximal z-index.
@@ -63,7 +108,10 @@ function getFire(): ConfettiFn | null {
   const canvas = ensureCanvas();
   if (!canvas) return null;
   if (!cachedFire) {
-    cachedFire = confetti.create(canvas, { resize: true, useWorker: false });
+    // ensureCanvas() äger storleken. Bibliotekets resize läser annars
+    // getBoundingClientRect() igen precis när iOS stänger dialogen och kan
+    // skriva över canvasen med en tillfällig 0-höjd från visualViewport.
+    cachedFire = confetti.create(canvas, { resize: false, useWorker: false });
   }
   return cachedFire;
 }
@@ -75,8 +123,7 @@ function getFire(): ConfettiFn | null {
 export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
   if (typeof window === 'undefined') return;
   if (prefersReducedMotion()) {
-    // Hjälper felsökning: på iOS slår "Reducera rörelse" av all konfetti.
-    console.info('[celebrate] hoppar över konfetti: prefers-reduced-motion är på');
+    showStaticConfetti();
     return;
   }
 
