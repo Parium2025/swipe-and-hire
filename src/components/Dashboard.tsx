@@ -313,6 +313,7 @@ const Dashboard = memo(() => {
         </div>
       )}
 
+      <div ref={listTopRef} className="scroll-mt-4" />
       {/* Status tabs: Aktiva / Utgångna + sidindikator */}
       <div className="relative flex justify-center items-center pr-11 sm:pr-0">
         <JobStatusTabs
@@ -341,7 +342,6 @@ const Dashboard = memo(() => {
 
       {/* Desktop: Card grid */}
       <div className="hidden md:block">
-        <div ref={listTopRef} />
         {tabFilteredJobs.length === 0 ? (
           <div className="text-center text-white py-12 font-medium text-sm">
             {getEmptyMessage(searchTerm, activeTab)}
