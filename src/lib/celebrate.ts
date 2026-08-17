@@ -76,22 +76,21 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
   if (!fire) return;
 
   const big = options?.intensity === 'big';
-  const narrow = window.innerWidth < 768;
+
+  // Exakt samma känsla på mobil som på desktop — endast partikelstorleken
+  // kompenseras för att canvasen ritas i device-pixlar på retinaskärmar.
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   const base: confetti.Options = {
     colors: BRAND_COLORS,
-    // Vi har redan gjort kontrollen ovan; låt inte biblioteket tysta bursten
-    // en gång till (dubbelkontroll gav inkonsekvent beteende på mobil).
     disableForReducedMotion: false,
-    // Retina-mobiler behöver något större bitar för att animationen ska läsas
-    // som konfetti och inte som svaga, enstaka pixlar. Antalet är oförändrat.
-    scalar: narrow ? 1.18 : 0.9,
+    scalar: 0.9 * dpr,
     ticks: 220,
-    gravity: narrow ? 0.78 : 0.85,
+    gravity: 0.85,
     decay: 0.93,
   };
 
-  const count = (big ? 30 : 18) + (narrow ? 10 : 0);
+  const count = big ? 30 : 18;
 
   // Diskreta sidoburstar: en från vänster kant, en från höger kant.
   const sides = () => {
@@ -99,16 +98,16 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
       ...base,
       particleCount: count,
       angle: 55,
-      spread: narrow ? 70 : 55,
-      startVelocity: narrow ? 48 : 42,
+      spread: 55,
+      startVelocity: 42 * dpr,
       origin: { x: 0, y: 0.78 },
     });
     fire({
       ...base,
       particleCount: count,
       angle: 125,
-      spread: narrow ? 70 : 55,
-      startVelocity: narrow ? 48 : 42,
+      spread: 55,
+      startVelocity: 42 * dpr,
       origin: { x: 1, y: 0.78 },
     });
   };
