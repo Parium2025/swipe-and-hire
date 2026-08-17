@@ -88,8 +88,69 @@ function NotificationItem({
   );
 }
 
+const toastIcons = {
+  success: CheckCircle2,
+  error: XCircle,
+  warning: AlertTriangle,
+  info: Info,
+} as const;
+
+const toastTones = {
+  success: 'bg-emerald-400/15 text-emerald-300 ring-emerald-400/30',
+  error: 'bg-red-400/15 text-red-300 ring-red-400/30',
+  warning: 'bg-amber-400/15 text-amber-300 ring-amber-400/30',
+  info: 'bg-sky-400/15 text-sky-300 ring-sky-400/30',
+} as const;
+
+function ArchivedToastItem({ item, onRead }: { item: ArchivedToast; onRead: (id: string) => void }) {
+  const Icon = toastIcons[item.kind] ?? Info;
+  const timeAgo = formatDistanceToNow(new Date(item.at), { addSuffix: true, locale: sv });
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.15 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => { if (!item.is_read) onRead(item.id); }}
+      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg ${
+        item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
+      }`}
+    >
+      <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
+        <Icon className="h-3.5 w-3.5" />
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-white break-words">{item.title}</span>
+          {item.count > 1 && (
+            <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
+              {item.count}×
+            </span>
+          )}
+          {!item.is_read && (
+            <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
+          )}
+        </div>
+        {item.body && <p className="text-xs text-white mt-0.5 line-clamp-2">{item.body}</p>}
+        <span className="text-[10px] text-white mt-1 block">{timeAgo}</span>
+      </div>
+    </motion.button>
+  );
+}
+
 function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' } = {}) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const { notifications, unreadCount: serverUnread, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const archived = useSyncExternalStore(toastArchive.subscribe, toastArchive.getSnapshot, toastArchive.getSnapshot);
+  const archivedUnread = useMemo(() => archived.filter(n => !n.is_read).length, [archived]);
+  const unreadCount = serverUnread + archivedUnread;
+
+  const merged = useMemo(() => {
+    const a = notifications.map(n => ({ kind: 'server' as const, at: new Date(n.created_at).getTime(), n }));
+    const b = archived.map(n => ({ kind: 'local' as const, at: n.at, n }));
+    return [...a, ...b].sort((x, y) => y.at - x.at);
+  }, [notifications, archived]);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
