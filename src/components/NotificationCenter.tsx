@@ -142,14 +142,50 @@ function ArchivedToastItem({ item, onRead }: { item: ArchivedToast; onRead: (id:
   );
 }
 
+// Tekniska felnotiser hör hemma i loggarna – aldrig i kundens notiscenter.
+const TECHNICAL_PATTERN = /backend-anrop|failed to fetch|appfel|misslyckat async|typeerror/i;
+
+function isTechnical(title: string, body?: string | null): boolean {
+  return TECHNICAL_PATTERN.test(`${title} ${body ?? ''}`);
+}
+
+// Kopplar notistyp till användarens inställning i profilen
+const PREF_BY_NOTIFICATION_TYPE: Record<string, NotificationType> = {
+  new_application: 'new_application',
+  application_status: 'application_status',
+  interview_scheduled: 'interview_scheduled',
+  interview_reminder: 'interview_scheduled',
+  message: 'new_message',
+  new_message: 'new_message',
+  job_expired: 'job_closed',
+  job_closed: 'job_closed',
+  saved_search_match: 'saved_search_match',
+  saved_job_expiring: 'saved_job_expiring',
+};
+
 function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' } = {}) {
   const { notifications, unreadCount: serverUnread, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const { isEnabled } = useNotificationPreferences();
   const archived = useSyncExternalStore(toastArchive.subscribe, toastArchive.getSnapshot, toastArchive.getSnapshot);
-  const archivedUnread = useMemo(() => archived.filter(n => !n.is_read).length, [archived]);
-  const unreadCount = serverUnread + archivedUnread;
+
+  const visibleNotifications = useMemo(() => notifications.filter(n => {
+    if (isTechnical(n.title, n.body)) return false;
+    const prefType = PREF_BY_NOTIFICATION_TYPE[n.type];
+    if (prefType && !isEnabled(prefType, 'in_app')) return false;
+    return true;
+  }), [notifications, isEnabled]);
+
+  const visibleArchived = useMemo(
+    () => archived.filter(n => !isTechnical(n.title, n.body)),
+    [archived]
+  );
+
+  const archivedUnread = useMemo(() => visibleArchived.filter(n => !n.is_read).length, [visibleArchived]);
+  const visibleServerUnread = useMemo(() => visibleNotifications.filter(n => !n.is_read).length, [visibleNotifications]);
+  const unreadCount = visibleServerUnread + archivedUnread;
 
   const merged = useMemo(() => {
-    const a = notifications.map(n => {
+    const a = visibleNotifications.map(n => {
       const at = new Date(n.created_at).getTime();
       // Toaster som synkats till kontot visas med toast-utseendet
       if (typeof n.type === 'string' && n.type.startsWith('toast_')) {
