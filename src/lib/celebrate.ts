@@ -66,15 +66,11 @@ function getFire(): ConfettiFn | null {
 }
 
 /**
- * Premium konfetti-burst — används när något verkligen firas (t.ex. publicerad annons).
- * Respekterar reducerad rörelse.
+ * Premium konfetti-burst — samma animerade firande på mobil och desktop.
  */
 export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
   if (typeof window === 'undefined') return;
-  if (prefersReducedMotion()) {
-    showStaticConfetti();
-    return;
-  }
+
 
   const fire = getFire();
   if (!fire) return;
