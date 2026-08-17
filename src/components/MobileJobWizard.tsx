@@ -2621,13 +2621,6 @@ const MobileJobWizard = ({
       // Note: Template questions are now managed separately via job_question_templates table
       // No need to store questions directly on job_templates
 
-      celebrate({ intensity: 'big' });
-      toast({
-        title: "Jobbannons skapad!",
-        description: "Din annons är nu publicerad och synlig för jobbsökare.",
-        variant: "success"
-      });
-
       // Clear both sessionStorage and localStorage drafts BEFORE calling handleClose
       // This prevents the unsaved changes dialog from appearing
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
@@ -2642,6 +2635,18 @@ const MobileJobWizard = ({
 
       onJobCreated(jobPost);
       onOpenChange(false); // Close dialog directly instead of handleClose to avoid race condition
+
+      // Vänta tills mobil-dialogens overlay och viewport har stabiliserats.
+      // Annars börjar canvas-animationen bakom stängningsövergången på iOS.
+      window.setTimeout(() => {
+        celebrate({ intensity: 'big' });
+        toast({
+          title: "Jobbannons skapad!",
+          description: "Din annons är nu publicerad och synlig för jobbsökare.",
+          variant: "success",
+          duration: 5000
+        });
+      }, 320);
 
     } catch (error) {
       console.error('Submit error:', error);
