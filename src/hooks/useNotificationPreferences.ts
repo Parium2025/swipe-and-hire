@@ -112,7 +112,8 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
     mutationFn: async ({ type, enabled, channel }: { type: NotificationType; enabled: boolean; channel: NotificationChannel }) => {
       if (!user?.id) throw new Error('Not authenticated');
       
-      const updateField = channel === 'email' ? 'email_enabled' : 'is_enabled';
+      const updateField = FIELD_BY_CHANNEL[channel];
+      
       
       // First check if row exists
       const { data: existing } = await supabase
