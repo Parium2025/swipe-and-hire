@@ -603,6 +603,10 @@ const JobSeekerVideoShowcase = ({
     let healthTimer: number | null = null;
     let displayTimer: number | null = null;
     let lastHealthTime = v.currentTime;
+    let lastScreenX = typeof window.screenX === 'number' ? window.screenX : 0;
+    let lastScreenY = typeof window.screenY === 'number' ? window.screenY : 0;
+    let lastDpr = window.devicePixelRatio || 1;
+
     let frozenTicks = 0;
     let rebuilding = false;
 
