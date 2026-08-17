@@ -250,19 +250,25 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
 
           {/* Notification list */}
           <div className="overflow-y-auto flex-1 p-2" style={{ WebkitOverflowScrolling: 'touch' }}>
-            {notifications.length === 0 ? (
+            {merged.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-white">
                 <Bell className="h-8 w-8 mb-3 opacity-60" />
                 <p className="text-sm">Inga notifikationer</p>
               </div>
             ) : (
               <div className="space-y-1.5">
-                {notifications.map(n => (
+                {merged.map(entry => entry.kind === 'server' ? (
                   <NotificationItem
-                    key={n.id}
-                    notification={n}
+                    key={`s-${entry.n.id}`}
+                    notification={entry.n}
                     onRead={markAsRead}
                     onNavigate={handleNavigate}
+                  />
+                ) : (
+                  <ArchivedToastItem
+                    key={`l-${entry.n.id}`}
+                    item={entry.n}
+                    onRead={toastArchive.markAsRead}
                   />
                 ))}
               </div>
