@@ -115,15 +115,12 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
     });
   };
 
-  // Kör första bursten direkt (inte i rAF) — på mobil kan rAF vara pausad
-  // precis efter att en dialog stängts eller under smooth-scroll, vilket
-  // gjorde att konfettin aldrig startade.
+  // Exakt två skjut (vänster + höger kant) — identiskt på mobil och desktop.
+  // Kör direkt (inte i rAF): på mobil kan rAF vara pausad precis efter att en
+  // dialog stängts eller under smooth-scroll.
   sides();
-  window.setTimeout(sides, 200);
-  if (big) {
-    window.setTimeout(sides, 430);
-    window.setTimeout(sides, 700);
-  }
+  if (big) window.setTimeout(sides, 260);
+
 }
 
 export default celebrate;
