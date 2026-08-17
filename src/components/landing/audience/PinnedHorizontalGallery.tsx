@@ -79,6 +79,31 @@ let rafId = 0;
 /** Senast valda, sammanhängande fönster av spelande kort (vänster→höger). */
 let lastWindow: HTMLVideoElement[] = [];
 
+/**
+ * Windows/extern skärm: pause() räcker inte för att släppa Chromiums video-
+ * overlay. Endast det valda kortet får därför ha en faktisk src. Alla andra
+ * är rena posterbilder utan demuxer, decoder eller GPU-plan.
+ */
+const releaseWindowsVideo = (el: HTMLVideoElement) => {
+  if (!isWindowsDevice()) return;
+  const currentSrc = el.getAttribute('src');
+  if (!currentSrc) return;
+  el.dataset.phgReleasedSrc = currentSrc;
+  el.pause();
+  el.removeAttribute('src');
+  delete el.dataset.phgStarted;
+  try { el.load(); } catch { /* best effort */ }
+};
+
+const connectWindowsVideo = (el: HTMLVideoElement) => {
+  if (!isWindowsDevice() || el.getAttribute('src')) return;
+  const source = el.dataset.phgReleasedSrc || el.dataset.phgSource;
+  if (!source) return;
+  el.setAttribute('src', source);
+  delete el.dataset.phgReleasedSrc;
+  try { el.load(); } catch { /* best effort */ }
+};
+
 const evaluateAll = () => {
   rafId = 0;
   const vh = window.innerHeight || document.documentElement.clientHeight;
@@ -120,6 +145,7 @@ const evaluateAll = () => {
 
   const maxConcurrent = getMaxConcurrent();
   const playVisible = (el: HTMLVideoElement) => {
+    connectWindowsVideo(el);
     el.muted = true;
     el.playsInline = true;
     try {
@@ -255,6 +281,8 @@ const evaluateAll = () => {
   candidates.forEach(({ el }) => {
     if (picks.has(el)) {
       playVisible(el);
+    } else if (isWindowsDevice()) {
+      releaseWindowsVideo(el);
     } else if (!el.paused) {
       el.pause();
     }
@@ -518,7 +546,8 @@ const CardItem = ({ item, index }: CardItemProps) => {
         <>
           <video
             ref={videoRef}
-            src={src}
+            src={isWindowsDevice() ? undefined : src}
+            data-phg-source={src}
             muted
             loop
             playsInline
@@ -899,6 +928,14 @@ const PinnedHorizontalGallery = () => {
     const warmVideos = () => {
       if (warmed) return;
       warmed = true;
+      // Windows använder strikt decoder-leasing i evaluateAll(): bara kortet
+      // närmast viewportens mitt får en src. En warmup-kö skulle återansluta
+      // alla åtta demuxers och återskapa exakt den externa-skärm-belastning som
+      // leasingmodellen ska eliminera.
+      if (isWindowsDevice()) {
+        scheduleEvaluate();
+        return;
+      }
       const generation = warmGeneration;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
@@ -1039,15 +1076,8 @@ const PinnedHorizontalGallery = () => {
         warmGeneration += 1;
         warmed = false;
         videos.forEach((video) => {
-          video.pause();
-          // pause() ensam behåller ofta Chromium-dekodern på Windows. Genom
-          // att koppla loss src och köra load() frigörs media-/GPU-resurserna
-          // på riktigt. Native poster + eget posterlager förhindrar svart ruta.
-          const currentSrc = video.getAttribute('src');
-          if (currentSrc) video.dataset.phgReleasedSrc = currentSrc;
-          video.removeAttribute('src');
-          delete video.dataset.phgStarted;
-          try { video.load(); } catch { /* best effort */ }
+          if (isWindowsDevice()) releaseWindowsVideo(video);
+          else video.pause();
         });
         lastWindow = [];
       }
