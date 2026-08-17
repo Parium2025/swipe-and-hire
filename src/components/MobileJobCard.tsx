@@ -295,8 +295,8 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
 
 
         {!(hideActions && isDraft) && (
-          <div className={(collapsible && !expanded) ? 'hidden' : ''}>
-            <div className="h-px bg-white/10 mx-2" />
+          <div>
+
             <div ref={actionsRef} className={`flex gap-2 px-2 py-1.5 ${compactActions ? 'justify-center' : ''}`}>
               {!hideActions && !isExpired && (
                 <ActionTip label={isDraft ? 'Redigera utkast' : 'Redigera annons'}>
