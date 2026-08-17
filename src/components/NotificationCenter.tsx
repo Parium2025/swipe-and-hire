@@ -1,7 +1,8 @@
-import { memo, useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
