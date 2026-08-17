@@ -87,10 +87,20 @@ const IconShell = ({
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const [mounted, setMounted] = React.useState(false);
+  // På stora skärmar lägger sig notiserna nere till höger så att de aldrig
+  // täcker rubriker, flikar eller knappar högst upp. På mobil behålls
+  // top-center (botten är reserverad för navigering och tumzonen).
+  const [isCompact, setIsCompact] = React.useState(true);
 
   React.useEffect(() => {
     setMounted(true);
+    const mq = window.matchMedia("(max-width: 900px)");
+    const sync = () => setIsCompact(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, []);
+
 
   // Gör Sonner-toasts klickbara för att stänga (utan att kräva ett synligt X).
   React.useEffect(() => {
