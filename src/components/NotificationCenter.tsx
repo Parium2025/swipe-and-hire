@@ -63,9 +63,10 @@ function NotificationItem({
               : 'hover:bg-white/10 bg-white/5'
           }`}
         >
-          <div className={`mt-0.5 shrink-0 ${colorClass}`}>
-            <Icon className="h-4 w-4" />
+          <div className={`mt-0.5 flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 ${colorClass}`}>
+            <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
           </div>
+
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-white break-words line-clamp-2">{notification.title}</span>
