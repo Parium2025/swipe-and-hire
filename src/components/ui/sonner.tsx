@@ -5,8 +5,21 @@ import { CheckCircle2, AlertTriangle, Info, XCircle, Loader2 } from "lucide-reac
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
-// Centrala visningstider: bekräftelser försvinner snabbt, fel får mer tid att läsas.
-const DURATIONS = { success: 2600, info: 3200, warning: 4500, error: 5500 } as const;
+// Centrala visningstider. Längre än tidigare — man ska hinna läsa klart även
+// om blicken är på en annan del av skärmen när notisen dyker upp.
+const DURATIONS = { success: 4200, info: 4600, warning: 6000, error: 7000 } as const;
+
+// Sammanslagning av dubbletter: identiska notiser inom samma tidsfönster
+// uppdaterar den befintliga notisen med en räknare i stället för att stapla
+// tre likadana rutor ovanpå varandra.
+const DEDUPE_WINDOW = 6000;
+const recent = new Map<string, { id: string | number; count: number; at: number }>();
+
+const textOf = (value: unknown): string => {
+  if (value == null) return "";
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  return "";
+};
 
 const patched = "__pariumDurations" as const;
 if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
@@ -14,10 +27,51 @@ if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
   (Object.keys(DURATIONS) as Array<keyof typeof DURATIONS>).forEach((kind) => {
     const original = (sonnerToast as any)[kind]?.bind(sonnerToast);
     if (!original) return;
-    (sonnerToast as any)[kind] = (message: any, options?: any) =>
-      original(message, { duration: DURATIONS[kind], ...(options ?? {}) });
+    (sonnerToast as any)[kind] = (message: any, options?: any) => {
+      const duration = options?.duration ?? DURATIONS[kind];
+      const key = `${kind}|${textOf(message)}|${textOf(options?.description)}`;
+      const now = Date.now();
+
+      // Städa gamla nycklar så mappen aldrig växer.
+      recent.forEach((entry, k) => {
+        if (now - entry.at > DEDUPE_WINDOW) recent.delete(k);
+      });
+
+      const hit = key.length > 2 ? recent.get(key) : undefined;
+      if (hit && now - hit.at < DEDUPE_WINDOW) {
+
+        hit.count += 1;
+        hit.at = now;
+        const label = textOf(message);
+        original(
+          label ? (
+            <span className="flex items-center gap-2">
+              <span className="min-w-0">{label}</span>
+              <span className="shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-white">
+                {hit.count}×
+              </span>
+            </span>
+          ) : (
+            message
+          ),
+          {
+            ...(options ?? {}),
+            id: hit.id,
+            duration,
+            className: `${options?.className ?? ""} parium-toast-repeat`.trim(),
+          }
+        );
+        return hit.id;
+      }
+
+
+      const id = original(message, { duration, ...(options ?? {}) });
+      if (key.length > 2) recent.set(key, { id, count: 1, at: now });
+      return id;
+    };
   });
 }
+
 
 const IconShell = ({
   children,
@@ -44,10 +98,20 @@ const IconShell = ({
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const [mounted, setMounted] = React.useState(false);
+  // På stora skärmar lägger sig notiserna nere till höger så att de aldrig
+  // täcker rubriker, flikar eller knappar högst upp. På mobil behålls
+  // top-center (botten är reserverad för navigering och tumzonen).
+  const [isCompact, setIsCompact] = React.useState(true);
 
   React.useEffect(() => {
     setMounted(true);
+    const mq = window.matchMedia("(max-width: 900px)");
+    const sync = () => setIsCompact(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, []);
+
 
   // Gör Sonner-toasts klickbara för att stänga (utan att kräva ett synligt X).
   React.useEffect(() => {
@@ -78,13 +142,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme="dark"
       className="toaster group"
       style={{ zIndex: 99999 }}
-      position="top-center"
-      duration={3200}
+      position={isCompact ? "top-center" : "bottom-right"}
+      duration={4200}
       closeButton
       visibleToasts={3}
-      offset={16}
-      expand={false}
-      gap={10}
+      offset={isCompact ? 16 : 24}
+      // Fäll ut stapeln vid hover på desktop så inget döljs bakom en annan notis.
+      expand={!isCompact}
+      gap={isCompact ? 10 : 12}
+
       icons={{
         success: (
           <IconShell tone="success">

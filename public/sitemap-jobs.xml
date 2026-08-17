@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://www.parium.se/annons/56d89593-cc18-4e39-9933-e85b66be321d</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.parium.se/annons/31aae9e1-b71c-4689-ad8d-f20ab95bc585</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.parium.se/annons/61a0c33f-7ab4-4e21-bac0-641340e1ef83</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
@@ -49,44 +61,8 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.parium.se/annons/aeb27880-b257-4ecc-a30f-6a547c8e596a</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.parium.se/annons/cf31fb82-aba9-46e0-a416-c0507f4afb25</loc>
     <lastmod>2026-08-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.parium.se/annons/48d8ab74-be43-453c-bd57-0df407091df0</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.parium.se/annons/88d84d5f-a4ac-4fa8-8324-f69f270f07bd</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.parium.se/annons/a81ef963-0bc3-4789-bf19-da44c92b5aaf</loc>
-    <lastmod>2026-08-16</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.parium.se/annons/88f2ac75-71a9-4928-9432-f9c7dfd03dde</loc>
-    <lastmod>2026-08-16</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.parium.se/annons/7a483ab4-b5d6-4726-82a7-46cb1fd6ee74</loc>
-    <lastmod>2026-08-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>

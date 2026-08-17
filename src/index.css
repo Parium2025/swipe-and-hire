@@ -2247,3 +2247,17 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   word-break: break-word;
   white-space: normal;
 }
+
+/* Notis som upprepas: en kort, diskret puls signalerar att räknaren ökat
+   i stället för att en ny identisk ruta staplas ovanpå. */
+@keyframes parium-toast-repeat-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.018); }
+  100% { transform: scale(1); }
+}
+[data-sonner-toast].parium-toast-repeat {
+  animation: parium-toast-repeat-pulse 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toast].parium-toast-repeat { animation: none; }
+}
