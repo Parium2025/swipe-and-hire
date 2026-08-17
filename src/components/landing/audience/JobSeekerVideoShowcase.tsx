@@ -608,7 +608,9 @@ const JobSeekerVideoShowcase = ({
     let lastDpr = window.devicePixelRatio || 1;
 
     let frozenTicks = 0;
+    let softTicks = 0;
     let rebuilding = false;
+
 
     const rebuildDecoder = () => {
       if (rebuilding || (!active && !keepAliveWhenHidden) || document.visibilityState !== 'visible') return;
