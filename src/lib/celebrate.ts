@@ -1,6 +1,8 @@
 import confetti from 'canvas-confetti';
 
-const BRAND_COLORS = ['#ffffff', '#67e8f9', '#34d399', '#fbbf24', '#f472b6'];
+// Identisk palett överallt (mobil + desktop): vitt + Pariums blå toner.
+const BRAND_COLORS = ['#ffffff', '#67e8f9', '#38bdf8', '#0ea5e9'];
+
 
 type ConfettiFn = ReturnType<typeof confetti.create>;
 
@@ -113,15 +115,12 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
     });
   };
 
-  // Kör första bursten direkt (inte i rAF) — på mobil kan rAF vara pausad
-  // precis efter att en dialog stängts eller under smooth-scroll, vilket
-  // gjorde att konfettin aldrig startade.
+  // Exakt två skjut (vänster + höger kant) — identiskt på mobil och desktop.
+  // Kör direkt (inte i rAF): på mobil kan rAF vara pausad precis efter att en
+  // dialog stängts eller under smooth-scroll.
   sides();
-  window.setTimeout(sides, 200);
-  if (big) {
-    window.setTimeout(sides, 430);
-    window.setTimeout(sides, 700);
-  }
+  if (big) window.setTimeout(sides, 260);
+
 }
 
 export default celebrate;

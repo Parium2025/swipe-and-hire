@@ -1228,7 +1228,14 @@ All colors MUST be HSL.
     padding-inline: clamp(0.75rem, 0.68rem + 0.35vw, 1rem);
     font-size: clamp(0.8125rem, 0.79rem + 0.12vw, 0.9375rem);
     line-height: 1;
+    /* iOS Safari: håll etiketten i ett eget kompositlager så att den aldrig
+       "försvinner" när den animerade indikatorn (transform-lager) glider under. */
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    isolation: isolate;
   }
+
 
   .preview-tab-compact {
     min-height: 2rem;
