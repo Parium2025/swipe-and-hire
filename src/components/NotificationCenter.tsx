@@ -147,10 +147,28 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
   const unreadCount = serverUnread + archivedUnread;
 
   const merged = useMemo(() => {
-    const a = notifications.map(n => ({ kind: 'server' as const, at: new Date(n.created_at).getTime(), n }));
+    const a = notifications.map(n => {
+      const at = new Date(n.created_at).getTime();
+      // Toaster som synkats till kontot visas med toast-utseendet
+      if (typeof n.type === 'string' && n.type.startsWith('toast_')) {
+        const kind = n.type.slice(6) as ArchivedToast['kind'];
+        const toast: ArchivedToast = {
+          id: n.id,
+          kind: (['success', 'info', 'warning', 'error'] as const).includes(kind) ? kind : 'info',
+          title: n.title,
+          body: n.body || undefined,
+          at,
+          count: Number(n.metadata?.count) > 1 ? Number(n.metadata.count) : 1,
+          is_read: n.is_read,
+        };
+        return { kind: 'synced' as const, at, n: toast };
+      }
+      return { kind: 'server' as const, at, n };
+    });
     const b = archived.map(n => ({ kind: 'local' as const, at: n.at, n }));
     return [...a, ...b].sort((x, y) => y.at - x.at);
   }, [notifications, archived]);
+
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
