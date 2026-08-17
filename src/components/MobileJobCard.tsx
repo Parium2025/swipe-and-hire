@@ -212,20 +212,6 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           />
         </div>
 
-        {collapsible && (
-          <div className="flex justify-center pb-1">
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
-              aria-label={expanded ? 'Dölj detaljer' : 'Visa detaljer'}
-              aria-expanded={expanded}
-              className="flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-3 py-1 text-xs font-medium text-white transition-colors"
-            >
-              <span>{expanded ? 'Dölj detaljer' : 'Visa detaljer'}</span>
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
-            </button>
-          </div>
-        )}
 
         {!(hideActions && isDraft) && (
           <div>
@@ -300,6 +286,21 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                 </ActionTip>
               )}
             </div>
+          </div>
+        )}
+
+        {collapsible && (
+          <div className="flex justify-center pb-1">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
+              aria-label={expanded ? 'Dölj detaljer' : 'Visa detaljer'}
+              aria-expanded={expanded}
+              className="flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-3 py-1 text-xs font-medium text-white transition-colors"
+            >
+              <span>{expanded ? 'Dölj detaljer' : 'Visa detaljer'}</span>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+            </button>
           </div>
         )}
 
