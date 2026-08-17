@@ -43,16 +43,6 @@ function ensureCanvas(): HTMLCanvasElement | null {
     cachedFire = null;
   }
 
-  // Sätt pixelstorlek explicit (canvas-confettis egen resize hinner inte alltid
-  // före första bursten på mobil).
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const w = Math.round((window.visualViewport?.width ?? window.innerWidth) * dpr);
-  const h = Math.round((window.visualViewport?.height ?? window.innerHeight) * dpr);
-  if (w > 0 && h > 0 && (canvasEl.width !== w || canvasEl.height !== h)) {
-    canvasEl.width = w;
-    canvasEl.height = h;
-  }
-
   return canvasEl;
 }
 
@@ -60,10 +50,11 @@ function getFire(): ConfettiFn | null {
   const canvas = ensureCanvas();
   if (!canvas) return null;
   if (!cachedFire) {
-    // ensureCanvas() äger storleken. Bibliotekets resize läser annars
-    // getBoundingClientRect() igen precis när iOS stänger dialogen och kan
-    // skriva över canvasen med en tillfällig 0-höjd från visualViewport.
-    cachedFire = confetti.create(canvas, { resize: false, useWorker: false });
+    // Rendera utanför huvudtråden där webbläsaren stödjer OffscreenCanvas.
+    // Det gör att dashboardens omrendering och dialogstängning aldrig kan få
+    // desktop-konfettin att hacka. Biblioteket faller automatiskt tillbaka på
+    // vanlig canvas på äldre iOS-versioner.
+    cachedFire = confetti.create(canvas, { resize: true, useWorker: true });
   }
   return cachedFire;
 }
@@ -90,20 +81,16 @@ export function celebrate(_options?: { intensity?: 'normal' | 'big' }) {
   const fire = getFire();
   if (!fire) return;
 
-  // Exakt samma känsla på mobil som på desktop — endast partikelstorleken
-  // kompenseras för att canvasen ritas i device-pixlar på retinaskärmar.
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
   const base: confetti.Options = {
     colors: BRAND_COLORS,
     disableForReducedMotion: false,
-    scalar: 0.9 * dpr,
-    ticks: 220,
-    gravity: 0.85,
-    decay: 0.93,
+    scalar: 1,
+    ticks: 190,
+    gravity: 0.9,
+    decay: 0.94,
   };
 
-  const COUNT = 24;
+  const COUNT = 22;
 
   // Diskreta sidoburstar: en från vänster kant, en från höger kant.
   const sides = () => {
@@ -112,7 +99,7 @@ export function celebrate(_options?: { intensity?: 'normal' | 'big' }) {
       particleCount: COUNT,
       angle: 55,
       spread: 55,
-      startVelocity: 42 * dpr,
+      startVelocity: 46,
       origin: { x: 0, y: 0.78 },
     });
     fire({
@@ -120,26 +107,17 @@ export function celebrate(_options?: { intensity?: 'normal' | 'big' }) {
       particleCount: COUNT,
       angle: 125,
       spread: 55,
-      startVelocity: 42 * dpr,
+      startVelocity: 46,
       origin: { x: 1, y: 0.78 },
     });
   };
 
-  // Två omgångar — samma överallt.
-  // Första skottet väntar på en riktig frame (dubbel rAF): på desktop pågår
-  // dialogstängning + omrendering av dashboarden exakt då, och att skjuta mitt
-  // i det arbetet ger ett hack innan konfettin syns. Andra omgången ligger
-  // 320 ms senare så den aldrig hamnar i samma jank-fönster.
-  const raf = window.requestAnimationFrame?.bind(window);
-  if (raf) {
-    raf(() => raf(() => {
-      sides();
-      window.setTimeout(sides, 320);
-    }));
-  } else {
-    sides();
-    window.setTimeout(sides, 320);
-  }
+  // Två tydligt separerade omgångar. Eftersom renderingen sker i en worker
+  // behöver vi inte längre fördröja första skottet med dubbla animation frames
+  // (det var den märkbara pausen på desktop). 520 ms gör andra omgången
+  // visuellt distinkt i stället för att smälta ihop med den första.
+  sides();
+  window.setTimeout(sides, 520);
 }
 
 /**
