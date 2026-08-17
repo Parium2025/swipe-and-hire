@@ -91,11 +91,19 @@ export const getMaxConcurrentVideos = () => {
 /** Ska decoders frigöras (pausas) när galleriet lämnar viewporten? */
 export const shouldFreeDecodersOnLeave = () => {
   if (typeof window === 'undefined') return false;
-  // Videorna ska ALDRIG pausas när galleriet lämnar viewporten — då ligger de
-  // pausade när användaren kommer tillbaka. Endast sparläge/svaga enheter
-  // frigör decoders.
+  // Apple: videorna ska ALDRIG pausas när galleriet lämnar viewporten — då
+  // ligger de pausade när användaren kommer tillbaka.
+  //
+  // Windows: tvärtom. Chromium har en begränsad pool av hårdvarudekodrar per
+  // GPU-utgång. Scrollar man ner till galleriet och sedan tillbaka upp har
+  // gallerivideorna tagit poolen, och telefonvideon i hero (som frigör sin
+  // decoder när den lämnar viewporten) får ingen tillbaka → svart/fryst ram.
+  // Genom att frigöra galleriets decoders när sektionen lämnar viewporten
+  // finns det alltid budget kvar åt hero-videon.
+  if (isWindowsDevice()) return true;
   return prefersReducedData() || isLowPowerDevice();
 };
+
 
 /**
  * `preload`-strategi för gallerivideor.
