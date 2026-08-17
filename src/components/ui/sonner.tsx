@@ -22,7 +22,7 @@ const textOf = (value: unknown): string => {
   return "";
 };
 
-const patched = "__pariumDurations" as const;
+const patched = "__pariumDurations_v2" as const;
 if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
   (sonnerToast as any)[patched] = true;
   (Object.keys(DURATIONS) as Array<keyof typeof DURATIONS>).forEach((kind) => {
