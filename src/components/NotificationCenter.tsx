@@ -219,7 +219,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => markAllAsRead()}
+                      onClick={() => { markAllAsRead(); toastArchive.markAllAsRead(); }}
                       className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:bg-white/10 transition-colors"
                     >
                       <CheckCheck className="h-3.5 w-3.5" />
