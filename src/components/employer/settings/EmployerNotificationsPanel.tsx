@@ -12,10 +12,10 @@ interface EmployerNotificationsPanelProps {
   prefsLoading: boolean;
 }
 
-const notificationItems: { type: NotificationPreferenceType; label: string; desc: string }[] = [
+const notificationItems: { type: NotificationPreferenceType; label: string; desc: string; hasEmail?: boolean }[] = [
   { type: 'new_application', label: 'Nya ansökningar', desc: 'När någon söker dina jobb' },
   { type: 'new_message', label: 'Meddelanden', desc: 'När du får nya meddelanden' },
-  { type: 'interview_scheduled', label: 'Intervjupåminnelser', desc: 'Påminnelser om bokade intervjuer' },
+  { type: 'interview_scheduled', label: 'Intervjupåminnelser', desc: 'Påminnelser om bokade intervjuer', hasEmail: true },
 ];
 
 const EmployerNotificationsPanel = ({ isEnabled, toggle, prefsLoading }: EmployerNotificationsPanelProps) => {
