@@ -37,22 +37,31 @@ if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
         if (now - entry.at > DEDUPE_WINDOW) recent.delete(k);
       });
 
-      const hit = key.length > 2 ? recent.get(key) : undefined;
       if (hit && now - hit.at < DEDUPE_WINDOW) {
         hit.count += 1;
         hit.at = now;
-        original(message, {
-          ...(options ?? {}),
-          id: hit.id,
-          duration,
-          description: options?.description,
-          // Räknaren visar att samma händelse skett flera gånger.
-          className: `${options?.className ?? ""} parium-toast-repeat`.trim(),
-          style: { ...(options?.style ?? {}) },
-          data: { ...(options?.data ?? {}), count: hit.count },
-        });
+        const label = textOf(message);
+        original(
+          label ? (
+            <span className="flex items-center gap-2">
+              <span className="min-w-0">{label}</span>
+              <span className="shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-white">
+                {hit.count}×
+              </span>
+            </span>
+          ) : (
+            message
+          ),
+          {
+            ...(options ?? {}),
+            id: hit.id,
+            duration,
+            className: `${options?.className ?? ""} parium-toast-repeat`.trim(),
+          }
+        );
         return hit.id;
       }
+
 
       const id = original(message, { duration, ...(options ?? {}) });
       if (key.length > 2) recent.set(key, { id, count: 1, at: now });
