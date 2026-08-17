@@ -4,10 +4,11 @@ import { Switch } from '@/components/ui/switch';
 import SettingsPanel from './SettingsPanel';
 
 type NotificationPreferenceType = 'new_application' | 'new_message' | 'interview_scheduled';
+type Channel = 'push' | 'email' | 'in_app';
 
 interface EmployerNotificationsPanelProps {
-  isEnabled: (type: NotificationPreferenceType, channel: 'push' | 'email') => boolean;
-  toggle: (type: NotificationPreferenceType, checked: boolean, channel: 'push' | 'email') => void;
+  isEnabled: (type: NotificationPreferenceType, channel: Channel) => boolean;
+  toggle: (type: NotificationPreferenceType, checked: boolean, channel: Channel) => void;
   prefsLoading: boolean;
 }
 
@@ -26,34 +27,52 @@ const EmployerNotificationsPanel = ({ isEnabled, toggle, prefsLoading }: Employe
           <h3 className="text-sm font-medium text-white">Aviseringar</h3>
         </div>
 
-        <div className="flex items-center justify-end gap-6 pr-1 pb-1 border-b border-white/10">
-          <div className="flex items-center gap-1 text-xs text-white">
+        <div className="flex items-center justify-end gap-4 pb-1 border-b border-white/10">
+          <div className="flex w-11 items-center justify-center gap-1 text-xs text-white">
+            <Bell className="h-3 w-3" />
+            <span>I appen</span>
+          </div>
+          <div className="flex w-11 items-center justify-center gap-1 text-xs text-white">
             <Smartphone className="h-3 w-3" />
             <span>Push</span>
           </div>
-          <div className="flex items-center gap-1 text-xs text-white">
+          <div className="flex w-11 items-center justify-center gap-1 text-xs text-white">
             <Mail className="h-3 w-3" />
             <span>Mejl</span>
           </div>
         </div>
 
         {notificationItems.map(({ type, label, desc }) => (
-          <div key={type} className="flex items-center justify-between">
+          <div key={type} className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
               <Label className="text-sm text-white">{label}</Label>
               <p className="text-sm text-white">{desc}</p>
             </div>
-            <div className="flex items-center gap-6 ml-3">
-              <Switch
-                checked={isEnabled(type, 'push')}
-                onCheckedChange={(checked) => toggle(type, checked, 'push')}
-                disabled={prefsLoading}
-              />
-              <Switch
-                checked={isEnabled(type, 'email')}
-                onCheckedChange={(checked) => toggle(type, checked, 'email')}
-                disabled={prefsLoading}
-              />
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="flex w-11 justify-center">
+                <Switch
+                  checked={isEnabled(type, 'in_app')}
+                  onCheckedChange={(checked) => toggle(type, checked, 'in_app')}
+                  disabled={prefsLoading}
+                  aria-label={`I appen: ${label}`}
+                />
+              </div>
+              <div className="flex w-11 justify-center">
+                <Switch
+                  checked={isEnabled(type, 'push')}
+                  onCheckedChange={(checked) => toggle(type, checked, 'push')}
+                  disabled={prefsLoading}
+                  aria-label={`Push: ${label}`}
+                />
+              </div>
+              <div className="flex w-11 justify-center">
+                <Switch
+                  checked={isEnabled(type, 'email')}
+                  onCheckedChange={(checked) => toggle(type, checked, 'email')}
+                  disabled={prefsLoading}
+                  aria-label={`Mejl: ${label}`}
+                />
+              </div>
             </div>
           </div>
         ))}

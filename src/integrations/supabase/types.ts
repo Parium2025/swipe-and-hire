@@ -2002,6 +2002,7 @@ export type Database = {
           created_at: string
           email_enabled: boolean
           id: string
+          in_app_enabled: boolean
           is_enabled: boolean
           notification_type: string
           updated_at: string
@@ -2011,6 +2012,7 @@ export type Database = {
           created_at?: string
           email_enabled?: boolean
           id?: string
+          in_app_enabled?: boolean
           is_enabled?: boolean
           notification_type: string
           updated_at?: string
@@ -2020,6 +2022,7 @@ export type Database = {
           created_at?: string
           email_enabled?: boolean
           id?: string
+          in_app_enabled?: boolean
           is_enabled?: boolean
           notification_type?: string
           updated_at?: string

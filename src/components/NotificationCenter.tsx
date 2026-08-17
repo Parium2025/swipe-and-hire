@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
+import { useNotificationPreferences, type NotificationType } from '@/hooks/useNotificationPreferences';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -63,7 +64,7 @@ function NotificationItem({
               : 'hover:bg-white/10 bg-white/5'
           }`}
         >
-          <div className={`mt-0.5 flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 ${colorClass}`}>
+          <div className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 ${colorClass}`}>
             <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
           </div>
 
@@ -81,9 +82,9 @@ function NotificationItem({
           </div>
         </motion.button>
       </TooltipTrigger>
-      <TooltipContent side="left" className="max-w-[240px] text-xs">
-        <p className="font-medium">{notification.title}</p>
-        {notification.body && <p className="mt-1 opacity-80">{notification.body}</p>}
+      <TooltipContent side="left" className="max-w-[240px] text-xs text-white">
+        <p className="font-medium text-white">{notification.title}</p>
+        {notification.body && <p className="mt-1 text-white">{notification.body}</p>}
       </TooltipContent>
     </Tooltip>
   );
@@ -119,7 +120,7 @@ function ArchivedToastItem({ item, onRead }: { item: ArchivedToast; onRead: (id:
         item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
       }`}
     >
-      <span className={`mt-0.5 flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
+      <span className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
         <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
       </span>
 
@@ -142,14 +143,50 @@ function ArchivedToastItem({ item, onRead }: { item: ArchivedToast; onRead: (id:
   );
 }
 
+// Tekniska felnotiser hör hemma i loggarna – aldrig i kundens notiscenter.
+const TECHNICAL_PATTERN = /backend-anrop|failed to fetch|appfel|misslyckat async|typeerror/i;
+
+function isTechnical(title: string, body?: string | null): boolean {
+  return TECHNICAL_PATTERN.test(`${title} ${body ?? ''}`);
+}
+
+// Kopplar notistyp till användarens inställning i profilen
+const PREF_BY_NOTIFICATION_TYPE: Record<string, NotificationType> = {
+  new_application: 'new_application',
+  application_status: 'application_status',
+  interview_scheduled: 'interview_scheduled',
+  interview_reminder: 'interview_scheduled',
+  message: 'new_message',
+  new_message: 'new_message',
+  job_expired: 'job_closed',
+  job_closed: 'job_closed',
+  saved_search_match: 'saved_search_match',
+  saved_job_expiring: 'saved_job_expiring',
+};
+
 function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' } = {}) {
   const { notifications, unreadCount: serverUnread, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const { isEnabled } = useNotificationPreferences();
   const archived = useSyncExternalStore(toastArchive.subscribe, toastArchive.getSnapshot, toastArchive.getSnapshot);
-  const archivedUnread = useMemo(() => archived.filter(n => !n.is_read).length, [archived]);
-  const unreadCount = serverUnread + archivedUnread;
+
+  const visibleNotifications = useMemo(() => notifications.filter(n => {
+    if (isTechnical(n.title, n.body)) return false;
+    const prefType = PREF_BY_NOTIFICATION_TYPE[n.type];
+    if (prefType && !isEnabled(prefType, 'in_app')) return false;
+    return true;
+  }), [notifications, isEnabled]);
+
+  const visibleArchived = useMemo(
+    () => archived.filter(n => !isTechnical(n.title, n.body)),
+    [archived]
+  );
+
+  const archivedUnread = useMemo(() => visibleArchived.filter(n => !n.is_read).length, [visibleArchived]);
+  const visibleServerUnread = useMemo(() => visibleNotifications.filter(n => !n.is_read).length, [visibleNotifications]);
+  const unreadCount = visibleServerUnread + archivedUnread;
 
   const merged = useMemo(() => {
-    const a = notifications.map(n => {
+    const a = visibleNotifications.map(n => {
       const at = new Date(n.created_at).getTime();
       // Toaster som synkats till kontot visas med toast-utseendet
       if (typeof n.type === 'string' && n.type.startsWith('toast_')) {
@@ -167,9 +204,9 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
       }
       return { kind: 'server' as const, at, n };
     });
-    const b = archived.map(n => ({ kind: 'local' as const, at: n.at, n }));
+    const b = visibleArchived.map(n => ({ kind: 'local' as const, at: n.at, n }));
     return [...a, ...b].sort((x, y) => y.at - x.at);
-  }, [notifications, archived]);
+  }, [visibleNotifications, visibleArchived]);
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -261,7 +298,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs">
-                    Rensa alla
+                    Rensa allt
                   </TooltipContent>
                 </Tooltip>
               )}

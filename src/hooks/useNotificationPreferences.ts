@@ -12,12 +12,13 @@ export type NotificationType =
   | 'saved_job_expiring'
   | 'application_status';
 
-export type NotificationChannel = 'push' | 'email';
+export type NotificationChannel = 'push' | 'email' | 'in_app';
 
 interface NotificationPreference {
   notification_type: NotificationType;
   is_enabled: boolean;
   email_enabled: boolean;
+  in_app_enabled: boolean;
 }
 
 const CACHE_KEY = 'parium_notif_prefs_';
@@ -48,7 +49,7 @@ export const useNotificationPreferences = () => {
       if (!user?.id) return [];
       const { data, error } = await supabase
         .from('notification_preferences')
-        .select('notification_type, is_enabled, email_enabled')
+        .select('notification_type, is_enabled, email_enabled, in_app_enabled')
         .eq('user_id', user.id);
       if (error) throw error;
       const result = data as NotificationPreference[];
@@ -93,17 +94,26 @@ export const useNotificationPreferences = () => {
     };
   }, [user?.id, queryClient]);
 
+const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enabled' | 'in_app_enabled'> = {
+  push: 'is_enabled',
+  email: 'email_enabled',
+  in_app: 'in_app_enabled',
+};
+
   const isEnabled = (type: NotificationType, channel: NotificationChannel = 'push'): boolean => {
     const pref = preferences.find(p => p.notification_type === type);
     if (!pref) return true; // default enabled
-    return channel === 'email' ? pref.email_enabled : pref.is_enabled;
+    const value = pref[FIELD_BY_CHANNEL[channel]];
+    return value ?? true;
   };
+
 
   const toggleMutation = useMutation({
     mutationFn: async ({ type, enabled, channel }: { type: NotificationType; enabled: boolean; channel: NotificationChannel }) => {
       if (!user?.id) throw new Error('Not authenticated');
       
-      const updateField = channel === 'email' ? 'email_enabled' : 'is_enabled';
+      const updateField = FIELD_BY_CHANNEL[channel];
+      
       
       // First check if row exists
       const { data: existing } = await supabase
@@ -128,6 +138,7 @@ export const useNotificationPreferences = () => {
             notification_type: type,
             is_enabled: channel === 'push' ? enabled : true,
             email_enabled: channel === 'email' ? enabled : true,
+            in_app_enabled: channel === 'in_app' ? enabled : true,
             updated_at: new Date().toISOString(),
           });
         if (error) throw error;
@@ -143,7 +154,7 @@ export const useNotificationPreferences = () => {
           const exists = old.find(p => p.notification_type === type);
           if (exists) {
             return old.map(p => p.notification_type === type 
-              ? { ...p, [channel === 'email' ? 'email_enabled' : 'is_enabled']: enabled } 
+              ? { ...p, [FIELD_BY_CHANNEL[channel]]: enabled } 
               : p
             );
           }
@@ -151,6 +162,7 @@ export const useNotificationPreferences = () => {
             notification_type: type, 
             is_enabled: channel === 'push' ? enabled : true,
             email_enabled: channel === 'email' ? enabled : true,
+            in_app_enabled: channel === 'in_app' ? enabled : true,
           }];
         }
       );
