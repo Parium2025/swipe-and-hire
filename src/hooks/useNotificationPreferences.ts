@@ -94,11 +94,19 @@ export const useNotificationPreferences = () => {
     };
   }, [user?.id, queryClient]);
 
+const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enabled' | 'in_app_enabled'> = {
+  push: 'is_enabled',
+  email: 'email_enabled',
+  in_app: 'in_app_enabled',
+};
+
   const isEnabled = (type: NotificationType, channel: NotificationChannel = 'push'): boolean => {
     const pref = preferences.find(p => p.notification_type === type);
     if (!pref) return true; // default enabled
-    return channel === 'email' ? pref.email_enabled : pref.is_enabled;
+    const value = pref[FIELD_BY_CHANNEL[channel]];
+    return value ?? true;
   };
+
 
   const toggleMutation = useMutation({
     mutationFn: async ({ type, enabled, channel }: { type: NotificationType; enabled: boolean; channel: NotificationChannel }) => {
