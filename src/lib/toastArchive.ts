@@ -1,5 +1,10 @@
-// Lokalt notisarkiv: varje toast som visas loggas här så att den går att läsa
+// Notisarkiv: varje toast som visas loggas här så att den går att läsa
 // i efterhand via klockan i headern — man ska aldrig kunna missa en notis.
+// Arkivet synkas till kontot (tabellen notifications, type = "toast_<kind>")
+// så att samma notiser syns på alla enheter. Lokala poster används bara som
+// omedelbar optimistisk visning tills servern bekräftat, eller när man är utloggad.
+
+import { supabase } from "@/integrations/supabase/client";
 
 export type ToastKind = "success" | "info" | "warning" | "error";
 
@@ -16,6 +21,7 @@ export interface ArchivedToast {
 const KEY = "parium_toast_archive_v1";
 const MAX = 50;
 const MERGE_WINDOW = 60_000;
+const SYNC_DEBOUNCE = 1400;
 
 let items: ArchivedToast[] = load();
 const listeners = new Set<() => void>();
@@ -42,6 +48,56 @@ function persist() {
   listeners.forEach((l) => l());
 }
 
+function notifyServerRefresh() {
+  try {
+    window.dispatchEvent(new CustomEvent("parium:notifications-refresh"));
+  } catch {}
+}
+
+// --- Serversynk ---------------------------------------------------------
+
+const pending = new Map<string, { timer: number; localId: string; kind: ToastKind; title: string; body?: string }>();
+
+async function flushToServer(key: string) {
+  const entry = pending.get(key);
+  if (!entry) return;
+  pending.delete(key);
+
+  const local = items.find((n) => n.id === entry.localId);
+  const count = local?.count ?? 1;
+
+  try {
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth?.user?.id;
+    if (!userId) return; // utloggad → behåll lokalt
+
+    const { error } = await supabase.from("notifications").insert({
+      user_id: userId,
+      type: `toast_${entry.kind}`,
+      title: entry.title,
+      body: entry.body ?? null,
+      metadata: { toast: true, count },
+    });
+    if (error) return; // behåll lokalt om synken misslyckas
+
+    // Servern äger posten nu → ta bort den lokala dubbletten
+    items = items.filter((n) => n.id !== entry.localId);
+    persist();
+    notifyServerRefresh();
+  } catch {
+    /* behåll lokalt */
+  }
+}
+
+function scheduleSync(localId: string, kind: ToastKind, title: string, body?: string) {
+  if (typeof window === "undefined") return;
+  const key = `${kind}|${title}|${body || ""}`;
+  const existing = pending.get(key);
+  if (existing) window.clearTimeout(existing.timer);
+  const timer = window.setTimeout(() => flushToServer(key), SYNC_DEBOUNCE);
+  pending.set(key, { timer, localId, kind, title, body });
+}
+
 export const toastArchive = {
   getSnapshot: () => items,
   subscribe(listener: () => void) {
@@ -53,6 +109,7 @@ export const toastArchive = {
     if (!clean) return;
     const now = Date.now();
     const existing = items[0];
+    let localId: string;
     if (
       existing &&
       existing.kind === kind &&
@@ -60,11 +117,13 @@ export const toastArchive = {
       (existing.body || "") === (body || "") &&
       now - existing.at < MERGE_WINDOW
     ) {
+      localId = existing.id;
       items = [{ ...existing, count: existing.count + 1, at: now, is_read: false }, ...items.slice(1)];
     } else {
+      localId = `${now}-${Math.random().toString(36).slice(2, 8)}`;
       items = [
         {
-          id: `${now}-${Math.random().toString(36).slice(2, 8)}`,
+          id: localId,
           kind,
           title: clean,
           body: body?.trim() || undefined,
@@ -76,6 +135,7 @@ export const toastArchive = {
       ].slice(0, MAX);
     }
     persist();
+    scheduleSync(localId, kind, clean, body?.trim() || undefined);
   },
   markAsRead(id: string) {
     items = items.map((n) => (n.id === id ? { ...n, is_read: true } : n));
