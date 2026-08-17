@@ -441,6 +441,15 @@ const EmployerDashboard = memo(() => {
     return total > 0 || expired > 0 || draft > 0;
   }, [serverCounts, jobs.length, expiredJobsCount, draftJobsCount]);
 
+  // Klick på ett statistikkort → byt flik och glid mjukt ner till listan
+  const goToTab = useCallback((tab: JobStatusTab) => {
+    setActiveTab(tab);
+    setPage(1);
+    requestAnimationFrame(() => {
+      listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [setActiveTab, setPage]);
+
   const statsCards = useMemo(() => {
     const totalJobs = serverCounts?.total ?? jobs.length;
     const activeCount = serverCounts?.active ?? activeJobs.length;
@@ -449,7 +458,7 @@ const EmployerDashboard = memo(() => {
     const totalViews = serverStats?.total_views ?? activeJobs.reduce((s, j) => s + j.views_count, 0);
     const totalApps = serverStats?.total_applications ?? activeJobs.reduce((s, j) => s + j.applications_count, 0);
     return [
-      { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs' },
+      { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs', onClick: () => goToTab('active'), ariaLabel: 'Visa alla annonser' },
       {
         icon: TrendingUp,
         title: 'Aktiva',
@@ -457,15 +466,17 @@ const EmployerDashboard = memo(() => {
         loading: false,
         isLoading: loading,
         cacheKey: 'emp_active_jobs',
+        onClick: () => goToTab('active'),
+        ariaLabel: 'Visa aktiva annonser',
         subItems: [
-          { label: 'Utgångna', value: expiredCount, cacheKey: 'emp_expired_jobs' },
-          { label: 'Utkast', value: draftCount, cacheKey: 'emp_draft_jobs' },
+          { label: 'Utgångna', value: expiredCount, cacheKey: 'emp_expired_jobs', onClick: () => goToTab('expired'), ariaLabel: 'Visa utgångna annonser' },
+          { label: 'Utkast', value: draftCount, cacheKey: 'emp_draft_jobs', onClick: () => goToTab('draft'), ariaLabel: 'Visa utkast' },
         ],
       },
       { icon: Eye, title: 'Visningar', value: loading ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading: loading, cacheKey: 'emp_total_views' },
-      { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : totalApps, loading: false, isLoading: loading, cacheKey: 'emp_total_apps' },
+      { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : totalApps, loading: false, isLoading: loading, cacheKey: 'emp_total_apps', onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
     ];
-  }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
+  }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
   // Full-screen skeleton vid kall mount i tab-sessionen — visas tills första data
   // landar oavsett om localStorage-cachen var varm (mirror av seeker SearchJobs).
