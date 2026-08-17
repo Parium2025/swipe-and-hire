@@ -46,11 +46,33 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   const multiColCards = stats.filter(s => s.subItems && s.subItems.length > 0);
   const regularCards = stats.filter(s => !s.subItems || s.subItems.length === 0);
   
+  /** Klickbar yta som behåller exakt samma layout som en vanlig div */
+  const interactiveProps = (onClick?: () => void, ariaLabel?: string) =>
+    onClick
+      ? {
+          role: 'button' as const,
+          tabIndex: 0,
+          'aria-label': ariaLabel,
+          onClick,
+          onKeyDown: (e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onClick();
+            }
+          },
+          className:
+            'cursor-pointer transition-colors hover:bg-white/[0.06] active:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-lg',
+        }
+      : {};
+
   const renderCard = (stat: StatCard, index: number, spanClass = '') => (
-    <Card key={index} className={`bg-white/5 border-white/20 ${spanClass}`}>
+    <Card key={index} className={`bg-white/5 border-white/20 overflow-hidden ${spanClass}`}>
       {stat.subItems && stat.subItems.length > 0 ? (
         <div className="flex h-full">
-          <div className="flex-1 flex flex-col min-w-0">
+          <div
+            {...interactiveProps(stat.onClick, stat.ariaLabel)}
+            className={`flex-1 flex flex-col min-w-0 ${interactiveProps(stat.onClick, stat.ariaLabel).className ?? ''}`}
+          >
             <div className="flex items-center justify-center p-1 sm:p-1.5 md:p-3 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
               <span className="text-[10px] sm:text-xs md:text-sm font-medium text-green-400 whitespace-nowrap truncate">
                 {stat.title}
@@ -69,8 +91,13 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
           </div>
           {stat.subItems.map((item, idx) => {
             const colorClass = idx === 0 ? 'text-red-400' : 'text-amber-400';
+            const props = interactiveProps(item.onClick, item.ariaLabel);
             return (
-              <div key={idx} className="flex-1 flex flex-col border-l border-white/30 min-w-0">
+              <div
+                key={idx}
+                {...props}
+                className={`flex-1 flex flex-col border-l border-white/30 min-w-0 ${props.className ?? ''}`}
+              >
                 <div className="flex items-center justify-center p-1 sm:p-1.5 md:p-3 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
                   <span className={`text-[10px] sm:text-xs md:text-sm font-medium whitespace-nowrap truncate ${colorClass}`}>
                     {item.label}
@@ -86,7 +113,10 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
           })}
         </div>
       ) : (
-        <>
+        <div
+          {...interactiveProps(stat.onClick, stat.ariaLabel)}
+          className={`h-full ${interactiveProps(stat.onClick, stat.ariaLabel).className ?? ''}`}
+        >
           <CardHeader className="flex flex-row items-center justify-center gap-1 md:gap-2 space-y-0 p-1.5 sm:p-2 md:p-3 min-w-0 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
             <stat.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-white flex-shrink-0" />
             <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">
@@ -103,7 +133,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
               ) : stat.value}
             </div>
           </CardContent>
-        </>
+        </div>
       )}
     </Card>
   );
