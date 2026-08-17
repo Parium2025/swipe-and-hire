@@ -303,9 +303,13 @@ const JobSeekerVideoShowcase = ({
   const geometryGateRef = useRef<boolean | null>(null);
   if (geometryGateRef.current === null) geometryGateRef.current = usesStableGeometryStart();
   const geometryGate = geometryGateRef.current;
-  // Frigör alltid telefonvideons decoder när hero-zonen lämnar viewporten.
-  // Windows behöver den budgeten till galleriet längre ned på sidan.
-  const keepAliveWhenHidden = false;
+  // Windows/extern skärm: behåll telefonens redan etablerade videoplan under
+  // scrollen. Att pausa här och sedan försöka återta en decoder när användaren
+  // går upp igen får Chromium/MPO att bygga om GPU-planet samtidigt som
+  // galleriets tre videor spelar — då kan både telefonen och galleriet frysa.
+  // Galleriets Windows-budget är redan låst till tre strömmar just för att
+  // lämna en decoder åt telefonen. Övriga plattformar behåller tidigare väg.
+  const keepAliveWhenHidden = isWindowsDevice();
   const warmRef = useRef(false);
   // Har vi redan synkat starten till tidslinjens början en gång? Rewinden ska
   // bara ske vid allra första visningen, aldrig när man scrollar tillbaka.
