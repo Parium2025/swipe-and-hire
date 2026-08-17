@@ -9,6 +9,10 @@ interface SubItem {
   value: number;
   /** Unique key for persisting the last known value across page loads */
   cacheKey?: string;
+  /** Gör delkolumnen klickbar (t.ex. hoppa till Utgångna-fliken) */
+  onClick?: () => void;
+  /** Tillgänglighetstext för klickbar delkolumn */
+  ariaLabel?: string;
 }
 
 interface StatCard {
