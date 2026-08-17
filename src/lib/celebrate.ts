@@ -126,11 +126,41 @@ export function celebrate(_options?: { intensity?: 'normal' | 'big' }) {
   };
 
   // Två omgångar — samma överallt.
-  // Kör direkt (inte i rAF): på mobil kan rAF vara pausad precis efter att en
-  // dialog stängts eller under smooth-scroll.
-  sides();
-  window.setTimeout(sides, 260);
+  // Första skottet väntar på en riktig frame (dubbel rAF): på desktop pågår
+  // dialogstängning + omrendering av dashboarden exakt då, och att skjuta mitt
+  // i det arbetet ger ett hack innan konfettin syns. Andra omgången ligger
+  // 320 ms senare så den aldrig hamnar i samma jank-fönster.
+  const raf = window.requestAnimationFrame?.bind(window);
+  if (raf) {
+    raf(() => raf(() => {
+      sides();
+      window.setTimeout(sides, 320);
+    }));
+  } else {
+    sides();
+    window.setTimeout(sides, 320);
+  }
 }
+
+/**
+ * Förvärm canvas + confetti-instans innan firandet. Anropas när ett
+ * publiceringsflöde startar så att första skottet inte betalar init-kostnaden
+ * (canvas-insättning + kontextallokering) mitt i dialogstängningen.
+ */
+export function prewarmCelebration() {
+  if (typeof window === 'undefined') return;
+  getFire();
+}
+
+if (typeof window !== 'undefined') {
+  const warm = () => { try { getFire(); } catch { /* noop */ } };
+  const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
+  if (ric) ric(warm);
+  else setTimeout(warm, 1200);
+}
+
+
+
 
 
 export default celebrate;
