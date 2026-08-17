@@ -216,7 +216,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         {!(hideActions && isDraft) && (
           <div>
 
-            <div ref={actionsRef} className={`flex gap-2 px-2 py-1.5 ${compactActions ? 'justify-center' : ''}`}>
+            <div ref={actionsRef} className={`flex gap-2 px-2 pt-1 pb-2 ${compactActions ? 'justify-center' : ''}`}>
               {!hideActions && !isExpired && (
                 <ActionTip label={isDraft ? 'Redigera utkast' : 'Redigera annons'}>
                   <Button
@@ -290,7 +290,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         )}
 
         {collapsible && (
-          <div className="flex justify-center pb-1">
+          <div className="flex justify-center pt-0.5 pb-2">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
