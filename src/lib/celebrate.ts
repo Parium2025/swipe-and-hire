@@ -4,7 +4,9 @@ const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-const BRAND_COLORS = ['#ffffff', '#7cc4ff', '#2f7fd4', '#bfe3ff', '#0f4c81'];
+// Hög kontrast mot appens mörkblå ytor. Den tidigare blå paletten syntes som
+// några diskreta bakgrundsprickar på mobil trots att konfettin faktiskt kördes.
+const BRAND_COLORS = ['#ffffff', '#67e8f9', '#34d399', '#fbbf24', '#f472b6'];
 
 type ConfettiFn = ReturnType<typeof confetti.create>;
 
@@ -33,6 +35,7 @@ function ensureCanvas(): HTMLCanvasElement | null {
       left: '0',
       width: '100vw',
       height: '100dvh',
+      display: 'block',
       pointerEvents: 'none',
       zIndex: '2147483647',
     } as CSSStyleDeclaration);
@@ -88,9 +91,11 @@ export function celebrate(options?: { intensity?: 'normal' | 'big' }) {
     // Vi har redan gjort kontrollen ovan; låt inte biblioteket tysta bursten
     // en gång till (dubbelkontroll gav inkonsekvent beteende på mobil).
     disableForReducedMotion: false,
-    scalar: narrow ? 0.9 : 0.8,
+    // Retina-mobiler behöver något större bitar för att animationen ska läsas
+    // som konfetti och inte som svaga, enstaka pixlar. Antalet är oförändrat.
+    scalar: narrow ? 1.18 : 0.9,
     ticks: 220,
-    gravity: 0.85,
+    gravity: narrow ? 0.78 : 0.85,
     decay: 0.93,
   };
 
