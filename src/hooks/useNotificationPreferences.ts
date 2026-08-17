@@ -12,12 +12,13 @@ export type NotificationType =
   | 'saved_job_expiring'
   | 'application_status';
 
-export type NotificationChannel = 'push' | 'email';
+export type NotificationChannel = 'push' | 'email' | 'in_app';
 
 interface NotificationPreference {
   notification_type: NotificationType;
   is_enabled: boolean;
   email_enabled: boolean;
+  in_app_enabled: boolean;
 }
 
 const CACHE_KEY = 'parium_notif_prefs_';
