@@ -512,6 +512,7 @@ const EmployerDashboard = memo(() => {
         hasDrafts={hasDrafts}
       />
 
+      <div ref={listTopRef} className="scroll-mt-4" />
       {/* Status tabs: Aktiva / Utgångna / Utkast + sidindikator */}
       <div className="relative flex justify-center items-center pr-11 sm:pr-0">
         <JobStatusTabs
@@ -555,7 +556,6 @@ const EmployerDashboard = memo(() => {
 
       {/* Desktop: Card grid — virtualiserad + DOM-persistent över tabbar */}
       <div className="hidden md:block">
-        <div ref={listTopRef} />
         {tabFilteredJobs.length === 0 ? (
           searchTerm.trim() ? (
             <div className="text-center text-white py-12 font-medium text-sm">
@@ -634,7 +634,6 @@ const EmployerDashboard = memo(() => {
           )
         ) : (
           <>
-            <div ref={listTopRef} />
             <VirtualJobGrid
               activeTab={listActiveTab}
               tabs={[
