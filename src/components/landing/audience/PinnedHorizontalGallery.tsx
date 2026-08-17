@@ -860,6 +860,8 @@ const PinnedHorizontalGallery = () => {
     let warmed = false;
     let entered = false;
     let warmGeneration = 0;
+    let decoderReleaseTimer: number | null = null;
+    let visibilityFrame: number | null = null;
     let hasEnteredOnce = false;
     let gsapInstance: typeof import('gsap').default | null = null;
 
@@ -996,6 +998,13 @@ const PinnedHorizontalGallery = () => {
     const onWarm = () => warmVideos();
 
     const enter = () => {
+      // En snabb riktningsändring kan passera sektionsgränsen fram och tillbaka
+      // inom några få frames. Avbryt då den fördröjda decoder-frisläppningen så
+      // vi aldrig river ner den aktiva Windows-videon mitt i återinträdet.
+      if (decoderReleaseTimer !== null) {
+        window.clearTimeout(decoderReleaseTimer);
+        decoderReleaseTimer = null;
+      }
       if (entered) return;
       const shouldAnimateIn = !hasEnteredOnce;
       entered = true;
@@ -1072,14 +1081,22 @@ const PinnedHorizontalGallery = () => {
       }
       const shouldFreeDecode = shouldFreeDecodersOnLeave();
       if (shouldFreeDecode) {
-        const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
-        warmGeneration += 1;
-        warmed = false;
-        videos.forEach((video) => {
-          if (isWindowsDevice()) releaseWindowsVideo(video);
-          else video.pause();
-        });
-        lastWindow = [];
+        // Vänta tills sektionen verkligen varit utanför viewporten en stund.
+        // Utan denna hysteres kunde ett enda hjul-/trackpad-drag ge leave→enter
+        // och därmed load()/src-teardown mitt i scrollen på extern Windows-skärm.
+        if (decoderReleaseTimer !== null) window.clearTimeout(decoderReleaseTimer);
+        decoderReleaseTimer = window.setTimeout(() => {
+          decoderReleaseTimer = null;
+          if (disposed || entered) return;
+          const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
+          warmGeneration += 1;
+          warmed = false;
+          videos.forEach((video) => {
+            if (isWindowsDevice()) releaseWindowsVideo(video);
+            else video.pause();
+          });
+          lastWindow = [];
+        }, 400);
       }
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
@@ -1092,7 +1109,8 @@ const PinnedHorizontalGallery = () => {
     const allowEarlyWarm = !isWindowsDevice() && !prefersReducedData();
     const EARLY_WARM_VH = 2.2;
 
-    const syncVisibleState = () => {
+    const evaluateVisibleState = () => {
+      visibilityFrame = null;
       const section = sectionRef.current;
       if (!section) return;
       const rect = section.getBoundingClientRect();
@@ -1100,6 +1118,14 @@ const PinnedHorizontalGallery = () => {
       if (allowEarlyWarm && !warmed && rect.top < vh * EARLY_WARM_VH && rect.bottom > 0) warmVideos();
       if (rect.top < vh * 0.92 && rect.bottom > vh * 0.08) enter();
       else if (rect.bottom <= 0 || rect.top >= vh) leave();
+    };
+
+    // Native scroll kan leverera många events per bildruta. Kollapsa dem till
+    // en enda geometriavläsning så enter/leave aldrig oscillerar inom samma
+    // frame och så getBoundingClientRect inte tvingar upprepade layouts.
+    const syncVisibleState = () => {
+      if (visibilityFrame !== null) return;
+      visibilityFrame = window.requestAnimationFrame(evaluateVisibleState);
     };
 
     const onEnter = () => enter();
@@ -1115,6 +1141,8 @@ const PinnedHorizontalGallery = () => {
     return () => {
       disposed = true;
       if (playTimer) window.clearTimeout(playTimer);
+      if (decoderReleaseTimer !== null) window.clearTimeout(decoderReleaseTimer);
+      if (visibilityFrame !== null) window.cancelAnimationFrame(visibilityFrame);
       warmTimers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('parium:gallery-warm', onWarm);
       window.removeEventListener('parium:gallery-enter', onEnter);
