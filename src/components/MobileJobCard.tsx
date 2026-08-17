@@ -227,73 +227,6 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           </div>
         )}
 
-        <AnimatePresence initial={false}>
-          {(!collapsible || expanded) && (
-            <motion.div
-              key="details"
-              initial={collapsible ? { height: 0, opacity: 0 } : false}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="h-px bg-white/10 mx-2" />
-
-              <div className="flex flex-col px-3 pb-1 [&>div]:py-2.5 [&>div]:border-b [&>div]:border-white/10 [&>div:last-child]:border-b-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm leading-snug text-white">Ansökningar:</span>
-                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
-                    <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                    {job.applications_count || 0}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm leading-snug text-white">Status:</span>
-                  <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-400' : isDraft ? 'text-amber-300' : 'text-white'}`}>
-                    {isExpired ? 'Utgången' : isDraft ? 'Utkast' : `${timeInfo.text} kvar`}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
-                  <TruncatedText
-                    text={recruiterName || '–'}
-                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
-                  <TruncatedText
-                    text={job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}
-                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
-                  <TruncatedText
-                    text={job.location || '–'}
-                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white flex-shrink-0">Startdatum:</span>
-                  <span className="text-sm leading-snug text-white font-medium text-right">
-                    {(job as any).start_date
-                      ? new Date((job as any).start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
-                      : 'Omgående'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm leading-snug text-white">Publicerad:</span>
-                  <span className="text-sm leading-snug text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
-                </div>
-
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-
         {!(hideActions && isDraft) && (
           <div>
 
@@ -369,6 +302,74 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
             </div>
           </div>
         )}
+
+        <AnimatePresence initial={false}>
+          {(!collapsible || expanded) && (
+            <motion.div
+              key="details"
+              initial={collapsible ? { height: 0, opacity: 0 } : false}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="h-px bg-white/10 mx-2" />
+
+              <div className="flex flex-col px-3 pb-1 [&>div]:py-2.5 [&>div]:border-b [&>div]:border-white/10 [&>div:last-child]:border-b-0">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm leading-snug text-white">Ansökningar:</span>
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
+                    <Users className="h-3.5 w-3.5 flex-shrink-0" />
+                    {job.applications_count || 0}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm leading-snug text-white">Status:</span>
+                  <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-400' : isDraft ? 'text-amber-300' : 'text-white'}`}>
+                    {isExpired ? 'Utgången' : isDraft ? 'Utkast' : `${timeInfo.text} kvar`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
+                  <TruncatedText
+                    text={recruiterName || '–'}
+                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
+                  <TruncatedText
+                    text={job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}
+                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
+                  <TruncatedText
+                    text={job.location || '–'}
+                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Startdatum:</span>
+                  <span className="text-sm leading-snug text-white font-medium text-right">
+                    {(job as any).start_date
+                      ? new Date((job as any).start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+                      : 'Omgående'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm leading-snug text-white">Publicerad:</span>
+                  <span className="text-sm leading-snug text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+
 
       </div>
     </Card>
