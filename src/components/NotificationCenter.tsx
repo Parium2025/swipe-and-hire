@@ -119,9 +119,10 @@ function ArchivedToastItem({ item, onRead }: { item: ArchivedToast; onRead: (id:
         item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
       }`}
     >
-      <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
-        <Icon className="h-3.5 w-3.5" />
+      <span className={`mt-0.5 flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
+        <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
       </span>
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-white break-words">{item.title}</span>
