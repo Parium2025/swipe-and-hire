@@ -138,6 +138,7 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
             notification_type: type,
             is_enabled: channel === 'push' ? enabled : true,
             email_enabled: channel === 'email' ? enabled : true,
+            in_app_enabled: channel === 'in_app' ? enabled : true,
             updated_at: new Date().toISOString(),
           });
         if (error) throw error;
@@ -153,7 +154,7 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
           const exists = old.find(p => p.notification_type === type);
           if (exists) {
             return old.map(p => p.notification_type === type 
-              ? { ...p, [channel === 'email' ? 'email_enabled' : 'is_enabled']: enabled } 
+              ? { ...p, [FIELD_BY_CHANNEL[channel]]: enabled } 
               : p
             );
           }
@@ -161,6 +162,7 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
             notification_type: type, 
             is_enabled: channel === 'push' ? enabled : true,
             email_enabled: channel === 'email' ? enabled : true,
+            in_app_enabled: channel === 'in_app' ? enabled : true,
           }];
         }
       );
