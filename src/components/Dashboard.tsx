@@ -238,6 +238,14 @@ const Dashboard = memo(() => {
     }
   }, [page]);
 
+  // Klick på ett statistikkort → byt flik och glid mjukt ner till listan
+  const goToTab = useCallback((tab: JobStatusTab) => {
+    setActiveTab(tab);
+    requestAnimationFrame(() => {
+      listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [setActiveTab]);
+
   const statsCards = useMemo(() => {
     // Föredra server-counts/stats (exakta även vid 10k+ jobb).
     // Dashboard (företagsvy): exkludera utkast — visa endast publicerade (Aktiva + Utgångna)
