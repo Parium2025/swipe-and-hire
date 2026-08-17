@@ -476,7 +476,7 @@ export function ApplicationQuestionsWizard({
       {/* Navigation - all buttons always rendered, visibility via CSS to prevent flash */}
       <div
         ref={navRef}
-        className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]"
+        className="flex items-center justify-center gap-3 pt-2"
         onMouseDown={handleContainerMouseDown}
         onTouchStart={handleContainerTouchStart}
       >
