@@ -49,7 +49,7 @@ export const useNotificationPreferences = () => {
       if (!user?.id) return [];
       const { data, error } = await supabase
         .from('notification_preferences')
-        .select('notification_type, is_enabled, email_enabled')
+        .select('notification_type, is_enabled, email_enabled, in_app_enabled')
         .eq('user_id', user.id);
       if (error) throw error;
       const result = data as NotificationPreference[];
