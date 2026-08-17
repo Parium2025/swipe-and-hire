@@ -257,7 +257,7 @@ const Dashboard = memo(() => {
     const totalViews = serverStats?.total_views ?? filteredStats.totalViews;
     const totalApplications = serverStats?.total_applications ?? filteredStats.totalApplications;
     return [
-      { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : totalJobs, loading: false, isLoading, onClick: () => goToTab('active'), ariaLabel: 'Visa alla annonser' },
+      { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : totalJobs, loading: false, isLoading },
       {
         icon: TrendingUp,
         title: 'Aktiva',

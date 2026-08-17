@@ -166,8 +166,25 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   if (prevProps.stats.length !== nextProps.stats.length) return false;
   return prevProps.stats.every((stat, index) => {
     const nextStat = nextProps.stats[index];
-    const subItemsEqual = JSON.stringify(stat.subItems) === JSON.stringify(nextStat.subItems);
-    return stat.value === nextStat.value && stat.title === nextStat.title && stat.loading === nextStat.loading && subItemsEqual;
+    const prevSubs = stat.subItems ?? [];
+    const nextSubs = nextStat.subItems ?? [];
+    if (prevSubs.length !== nextSubs.length) return false;
+    // Jämför även handlers/labels — JSON.stringify tappar funktioner och skulle
+    // annars låsa fast gamla onClick-closures (fel flik vid klick).
+    const subItemsEqual = prevSubs.every((s, i) =>
+      s.label === nextSubs[i].label &&
+      s.value === nextSubs[i].value &&
+      s.onClick === nextSubs[i].onClick &&
+      s.ariaLabel === nextSubs[i].ariaLabel
+    );
+    return (
+      stat.value === nextStat.value &&
+      stat.title === nextStat.title &&
+      stat.loading === nextStat.loading &&
+      stat.onClick === nextStat.onClick &&
+      stat.ariaLabel === nextStat.ariaLabel &&
+      subItemsEqual
+    );
   });
 });
 
