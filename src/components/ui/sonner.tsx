@@ -2,6 +2,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { Toaster as Sonner, toast as sonnerToast } from "sonner";
 import { CheckCircle2, AlertTriangle, Info, XCircle, Loader2 } from "lucide-react";
+import { toastArchive } from "@/lib/toastArchive";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -36,6 +37,9 @@ if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
       recent.forEach((entry, k) => {
         if (now - entry.at > DEDUPE_WINDOW) recent.delete(k);
       });
+
+      // Logga i notisarkivet så att inget kan missas ens om toasten hinner försvinna.
+      toastArchive.add(kind as any, textOf(message), textOf(options?.description) || undefined);
 
       const hit = key.length > 2 ? recent.get(key) : undefined;
       if (hit && now - hit.at < DEDUPE_WINDOW) {

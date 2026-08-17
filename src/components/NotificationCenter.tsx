@@ -1,7 +1,8 @@
-import { memo, useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
@@ -87,8 +88,69 @@ function NotificationItem({
   );
 }
 
+const toastIcons = {
+  success: CheckCircle2,
+  error: XCircle,
+  warning: AlertTriangle,
+  info: Info,
+} as const;
+
+const toastTones = {
+  success: 'bg-emerald-400/15 text-emerald-300 ring-emerald-400/30',
+  error: 'bg-red-400/15 text-red-300 ring-red-400/30',
+  warning: 'bg-amber-400/15 text-amber-300 ring-amber-400/30',
+  info: 'bg-sky-400/15 text-sky-300 ring-sky-400/30',
+} as const;
+
+function ArchivedToastItem({ item, onRead }: { item: ArchivedToast; onRead: (id: string) => void }) {
+  const Icon = toastIcons[item.kind] ?? Info;
+  const timeAgo = formatDistanceToNow(new Date(item.at), { addSuffix: true, locale: sv });
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.15 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => { if (!item.is_read) onRead(item.id); }}
+      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg ${
+        item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
+      }`}
+    >
+      <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
+        <Icon className="h-3.5 w-3.5" />
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-white break-words">{item.title}</span>
+          {item.count > 1 && (
+            <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
+              {item.count}×
+            </span>
+          )}
+          {!item.is_read && (
+            <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
+          )}
+        </div>
+        {item.body && <p className="text-xs text-white mt-0.5 line-clamp-2">{item.body}</p>}
+        <span className="text-[10px] text-white mt-1 block">{timeAgo}</span>
+      </div>
+    </motion.button>
+  );
+}
+
 function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' } = {}) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const { notifications, unreadCount: serverUnread, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const archived = useSyncExternalStore(toastArchive.subscribe, toastArchive.getSnapshot, toastArchive.getSnapshot);
+  const archivedUnread = useMemo(() => archived.filter(n => !n.is_read).length, [archived]);
+  const unreadCount = serverUnread + archivedUnread;
+
+  const merged = useMemo(() => {
+    const a = notifications.map(n => ({ kind: 'server' as const, at: new Date(n.created_at).getTime(), n }));
+    const b = archived.map(n => ({ kind: 'local' as const, at: n.at, n }));
+    return [...a, ...b].sort((x, y) => y.at - x.at);
+  }, [notifications, archived]);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -157,7 +219,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => markAllAsRead()}
+                      onClick={() => { markAllAsRead(); toastArchive.markAllAsRead(); }}
                       className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:bg-white/10 transition-colors"
                     >
                       <CheckCheck className="h-3.5 w-3.5" />
@@ -168,11 +230,11 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                   </TooltipContent>
                 </Tooltip>
               )}
-              {notifications.length > 0 && (
+              {merged.length > 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => clearAll()}
+                      onClick={() => { clearAll(); toastArchive.clear(); }}
                       className="flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -188,19 +250,25 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
 
           {/* Notification list */}
           <div className="overflow-y-auto flex-1 p-2" style={{ WebkitOverflowScrolling: 'touch' }}>
-            {notifications.length === 0 ? (
+            {merged.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-white">
                 <Bell className="h-8 w-8 mb-3 opacity-60" />
                 <p className="text-sm">Inga notifikationer</p>
               </div>
             ) : (
               <div className="space-y-1.5">
-                {notifications.map(n => (
+                {merged.map(entry => entry.kind === 'server' ? (
                   <NotificationItem
-                    key={n.id}
-                    notification={n}
+                    key={`s-${entry.n.id}`}
+                    notification={entry.n}
                     onRead={markAsRead}
                     onNavigate={handleNavigate}
+                  />
+                ) : (
+                  <ArchivedToastItem
+                    key={`l-${entry.n.id}`}
+                    item={entry.n}
+                    onRead={toastArchive.markAsRead}
                   />
                 ))}
               </div>
