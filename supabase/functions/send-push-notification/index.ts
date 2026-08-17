@@ -10,7 +10,25 @@ interface PushNotificationPayload {
   title: string;
   body: string;
   data?: Record<string, string>;
+  /** Notistyp för att respektera användarens notisinställningar. */
+  notification_type?: string;
+  /** Sätt true för system-/säkerhetsmeddelanden som alltid ska gå fram. */
+  bypass_preferences?: boolean;
 }
+
+/** Mappar interna data.type-värden till notification_preferences-typer. */
+const PREF_TYPE_ALIASES: Record<string, string> = {
+  interview_reminder: "interview_scheduled",
+  interview_scheduled: "interview_scheduled",
+  new_application: "new_application",
+  new_message: "new_message",
+  saved_search_match: "saved_search_match",
+  job_closed: "job_closed",
+  job_expiring: "job_closed",
+  saved_job_expiring: "saved_job_expiring",
+  application_status: "application_status",
+};
+
 
 interface ServiceAccountCredentials {
   type: string;
