@@ -6,9 +6,6 @@ import hiCrispAsset from '@/assets/showcase-jobseeker-hi-crisp.mp4.asset.json';
 import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json';
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
-import windowsSafe60Asset from '@/assets/showcase-jobseeker-windows-safe60.mp4.asset.json';
-import windowsSafe60_648Asset from '@/assets/showcase-jobseeker-safe60-648.mp4.asset.json';
-import windowsSafe60_810Asset from '@/assets/showcase-jobseeker-safe60-810.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
 import { isAndroidDevice, isAppleDevice, isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
 
@@ -102,25 +99,6 @@ const LADDER = [
   { w: 810, url: hiCrispAsset.url },
 ] as const;
 
-const supportsWindowsSafe60 = () => {
-  if (typeof document === 'undefined') return false;
-  const probe = document.createElement('video');
-  return probe.canPlayType('video/mp4; codecs="avc1.42C020"') !== '';
-};
-
-/**
- * Stor Windows-yta betyder ofta extern HDMI/DisplayPort-skärm. Där är 60 fps-
- * videoplanet betydligt dyrare för Chromium att flytta och komponera än på den
- * inbyggda laptopskärmen. Vi kan inte läsa vilken kabel som används, men
- * viewportens storlek är en stabil och integritetsvänlig signal för exakt den
- * situationen. 30 fps-mastern halverar decode/compositor-arbetet och är skarp
- * nog för telefonens maximala CSS-bredd på 285 px.
- */
-const prefersLargeWindowsDisplayTrack = () => {
-  if (typeof window === 'undefined' || !isWindowsDevice()) return false;
-  return window.innerWidth >= 1280 || window.innerHeight >= 900;
-};
-
 /** Uppskattad CSS-bredd på telefonen innan första målningen (matchar max-w-stegen). */
 const estimateCssWidth = (widthPx?: number) => {
   if (widthPx) return widthPx;
@@ -171,33 +149,6 @@ const pickLadder = (widthPx?: number) => {
   return (pool.find((r) => r.w >= target) ?? pool[pool.length - 1]).url;
 };
 
-/**
- * Windows/Android-stege — SAMMA skärpelogik som Apple, men med den
- * decoder-säkra kodningen (Constrained Baseline, 60 fps, inga B-frames,
- * kort GOP, fastdecode).
- *
- * Tidigare fick Windows och Android ALLTID 432 px bred källa. Det räcker på en
- * 100 %-skalad laptop (285 CSS-px × 1.25 dpr ≈ 356), men på en 4K-laptop med
- * 200 % skalning (dpr 2 → 570) och på Android-telefoner (dpr 3 → ~570) tvingas
- * browsern skala UPP filmen — vilket är exakt den suddighet vi bekämpar på
- * Apple-sidan. Nu väljs minsta rung som täcker den faktiska pixelytan, med
- * samma bandbreddstak som Apple-stegen.
- */
-const SAFE_LADDER = [
-  { w: 432, url: windowsSafe60Asset.url },
-  { w: 648, url: windowsSafe60_648Asset.url },
-  { w: 810, url: windowsSafe60_810Asset.url },
-] as const;
-
-const pickSafeLadder = (widthPx?: number) => {
-  const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 3);
-  const target = estimateCssWidth(widthPx) * dpr;
-  const cap = maxWidthForConnection();
-  const allowed = SAFE_LADDER.filter((r) => r.w <= cap);
-  const pool = allowed.length > 0 ? allowed : [SAFE_LADDER[0]];
-  return (pool.find((r) => r.w >= target) ?? pool[pool.length - 1]).url;
-};
-
 const getSources = (widthPx?: number) =>
   prefersHevc()
     ? [
@@ -220,9 +171,7 @@ const getSources = (widthPx?: number) =>
               // Androids H.264-hårdvaruväg är jämnare mellan olika GPU:er än VP9.
               // Samma decoder-säkra profil som Windows, men nu i rätt upplösning
               // för telefonens dpr i stället för en fast 432 px-uppskalning.
-              supportsWindowsSafe60()
-                ? { src: pickSafeLadder(widthPx), type: 'video/mp4; codecs="avc1.42C020"' }
-                : { src: windowsLiteAsset.url, type: 'video/mp4' },
+              { src: windowsLiteAsset.url, type: 'video/mp4' },
             ]
           : [{ src: pickLadder(widthPx), type: 'video/mp4' }];
 
