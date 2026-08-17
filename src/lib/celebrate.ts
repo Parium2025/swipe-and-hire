@@ -1,6 +1,8 @@
 import confetti from 'canvas-confetti';
 
-const BRAND_COLORS = ['#ffffff', '#67e8f9', '#34d399', '#fbbf24', '#f472b6'];
+// Identisk palett överallt (mobil + desktop): vitt + Pariums blå toner.
+const BRAND_COLORS = ['#ffffff', '#67e8f9', '#38bdf8', '#0ea5e9'];
+
 
 type ConfettiFn = ReturnType<typeof confetti.create>;
 
