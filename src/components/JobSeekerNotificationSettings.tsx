@@ -26,6 +26,10 @@ export const JobSeekerNotificationSettings = () => {
         {/* Column headers */}
         <div className="flex items-center justify-end gap-4 pb-1 border-b border-white/10">
           <div className="flex w-11 items-center justify-center gap-1 text-xs text-white">
+            <Bell className="h-3 w-3" />
+            <span>I appen</span>
+          </div>
+          <div className="flex w-11 items-center justify-center gap-1 text-xs text-white">
             <Smartphone className="h-3 w-3" />
             <span>Push</span>
           </div>
@@ -42,6 +46,14 @@ export const JobSeekerNotificationSettings = () => {
               <p className="text-sm text-white">{description}</p>
             </div>
             <div className="flex items-center gap-4 shrink-0">
+              <div className="flex w-11 justify-center">
+                <Switch
+                  checked={isEnabled(type, 'in_app')}
+                  onCheckedChange={(checked) => toggle(type, checked, 'in_app')}
+                  disabled={isLoading}
+                  aria-label={`I appen: ${label}`}
+                />
+              </div>
               <div className="flex w-11 justify-center">
                 <Switch
                   checked={isEnabled(type, 'push')}
