@@ -284,11 +284,12 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                   />
                 ) : (
                   <ArchivedToastItem
-                    key={`l-${entry.n.id}`}
+                    key={`${entry.kind === 'synced' ? 'y' : 'l'}-${entry.n.id}`}
                     item={entry.n}
-                    onRead={toastArchive.markAsRead}
+                    onRead={entry.kind === 'synced' ? markAsRead : toastArchive.markAsRead}
                   />
                 ))}
+
               </div>
             )}
           </div>
