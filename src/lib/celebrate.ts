@@ -108,7 +108,10 @@ function getFire(): ConfettiFn | null {
   const canvas = ensureCanvas();
   if (!canvas) return null;
   if (!cachedFire) {
-    cachedFire = confetti.create(canvas, { resize: true, useWorker: false });
+    // ensureCanvas() äger storleken. Bibliotekets resize läser annars
+    // getBoundingClientRect() igen precis när iOS stänger dialogen och kan
+    // skriva över canvasen med en tillfällig 0-höjd från visualViewport.
+    cachedFire = confetti.create(canvas, { resize: false, useWorker: false });
   }
   return cachedFire;
 }
