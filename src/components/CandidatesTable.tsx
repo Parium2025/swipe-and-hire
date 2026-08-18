@@ -29,6 +29,7 @@ import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSe
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
 import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
+import { PillButton } from '@/components/ui/pill-button';
 import {
   findExistingConversationId,
   resolveConversationIdsForCandidates,
