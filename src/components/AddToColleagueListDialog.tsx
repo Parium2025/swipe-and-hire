@@ -65,17 +65,64 @@ export function AddToColleagueListDialog({
     if (rows.length === 0) return;
     setIsAdding(key);
     try {
+      // 1) Hitta första giltiga steget i mållistan (annars hamnar korten i ett steg som inte visas)
+      const { data: stageSettings } = await supabase
+        .from('user_stage_settings')
+        .select('stage_key, order_index')
+        .eq('user_id', recruiterId)
+        .eq('list_id', listId)
+        .gt('order_index', -1)
+        .order('order_index', { ascending: true })
+        .limit(1);
+
+      const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
+
+      // 2) Kolla vilka kandidater som redan finns hos mottagaren (per person, inte per ansökan)
+      const applicantIds = Array.from(new Set(rows.map((r) => r.applicantId)));
+      const { data: existing } = await supabase
+        .from('my_candidates')
+        .select('id, applicant_id, application_id, list_id')
+        .eq('recruiter_id', recruiterId)
+        .in('applicant_id', applicantIds);
+
+      const existingByApplicant = new Map<string, { id: string; list_id: string | null }[]>();
+      (existing ?? []).forEach((e) => {
+        const arr = existingByApplicant.get(e.applicant_id) ?? [];
+        arr.push({ id: e.id, list_id: e.list_id });
+        existingByApplicant.set(e.applicant_id, arr);
+      });
+
       let added = 0;
+      let moved = 0;
       let duplicates = 0;
 
-      for (const row of rows) {
+      for (const applicantId of applicantIds) {
+        const current = existingByApplicant.get(applicantId);
+
+        if (current && current.length > 0) {
+          const alreadyInTarget = current.every((c) => c.list_id === listId);
+          if (alreadyInTarget) {
+            duplicates += 1;
+            continue;
+          }
+          // Flytta befintliga kort till den valda listan (en kandidat = en lista)
+          const { error: moveError } = await supabase
+            .from('my_candidates')
+            .update({ list_id: listId, stage: defaultStage })
+            .in('id', current.map((c) => c.id));
+          if (moveError) throw moveError;
+          moved += 1;
+          continue;
+        }
+
+        const row = rows.find((r) => r.applicantId === applicantId)!;
         const { error } = await supabase.from('my_candidates').insert({
           recruiter_id: recruiterId,
           applicant_id: row.applicantId,
           application_id: row.applicationId,
           job_id: row.jobId || null,
           list_id: listId,
-          stage: 'to_contact',
+          stage: defaultStage,
         });
 
         if (error) {
@@ -91,21 +138,24 @@ export function AddToColleagueListDialog({
       queryClient.invalidateQueries({ queryKey: ['my-candidates'] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts'] });
 
-      if (added === 0) {
+      const target = isOwnList ? 'din lista' : 'kollegans lista';
+
+      if (added === 0 && moved === 0) {
         toast.error(
-          rows.length === 1
-            ? isOwnList
-              ? 'Kandidaten finns redan i din lista'
-              : 'Kandidaten finns redan i kollegans lista'
-            : 'Alla valda kandidater finns redan i listan',
+          applicantIds.length === 1
+            ? `Kandidaten finns redan i ${target}`
+            : `Alla valda kandidater finns redan i listan`,
         );
       } else {
+        const parts: string[] = [];
+        if (added > 0) parts.push(`${added} tillagd${added !== 1 ? 'a' : ''}`);
+        if (moved > 0) parts.push(`${moved} flyttad${moved !== 1 ? 'e' : ''}`);
+        if (duplicates > 0) parts.push(`${duplicates} fanns redan`);
+
         toast.success(
-          rows.length === 1
-            ? isOwnList
-              ? 'Kandidat tillagd i din lista'
-              : 'Kandidat tillagd i kollegans lista'
-            : `${added} kandidat${added !== 1 ? 'er' : ''} tillagda${duplicates > 0 ? ` (${duplicates} fanns redan)` : ''}`,
+          applicantIds.length === 1 && moved === 0 && duplicates === 0
+            ? `Kandidat tillagd i ${target}`
+            : `${parts.join(', ')}`,
         );
         onAdded?.();
       }
@@ -131,7 +181,7 @@ export function AddToColleagueListDialog({
             <Users className="h-5 w-5" />
             {title}
           </DialogTitle>
-          <DialogDescription className="text-white/70">
+          <DialogDescription className="text-white">
             {rows.length > 1 ? (
               <>Välj vilken lista kandidaterna ska läggas till i.</>
             ) : (
@@ -155,10 +205,10 @@ export function AddToColleagueListDialog({
                     onPointerDown={(e) => e.preventDefault()}
                     disabled={isAdding !== null}
                   >
-                    <UserCheck className="h-5 w-5 text-fuchsia-400 flex-shrink-0" />
+                    <UserCheck className="h-5 w-5 text-white flex-shrink-0" />
                     <div className="text-left min-w-0">
                       <div className="font-medium break-words">{list.name}</div>
-                      <div className="text-xs text-white/60">Min lista</div>
+                      <div className="text-xs text-white">Min lista</div>
                     </div>
                     {isAdding === `own:${list.id}` && (
                       <div className="ml-auto animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
@@ -173,10 +223,10 @@ export function AddToColleagueListDialog({
                     onPointerDown={(e) => e.preventDefault()}
                     disabled={isAdding !== null}
                   >
-                    <UserCheck className="h-5 w-5 text-fuchsia-400 flex-shrink-0" />
+                    <UserCheck className="h-5 w-5 text-white flex-shrink-0" />
                     <div className="text-left">
                       <div className="font-medium">Mina kandidater</div>
-                      <div className="text-xs text-white/60">Min lista</div>
+                      <div className="text-xs text-white">Min lista</div>
                     </div>
                     {isAdding === 'own:default' && (
                       <div className="ml-auto animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
@@ -211,7 +261,7 @@ export function AddToColleagueListDialog({
                   />
                   <div className="text-left min-w-0">
                     <div className="font-medium break-words">{entry.name}</div>
-                    <div className="text-xs text-white/60">
+                    <div className="text-xs text-white">
                       {member.firstName} {member.lastName}
                     </div>
                   </div>
