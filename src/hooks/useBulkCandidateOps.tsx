@@ -139,6 +139,7 @@ export function useBulkCandidateOps({
         if ((data?.length ?? 0) < ids.length) {
           throw new Error('Vissa kandidater kunde inte tas bort');
         }
+        queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
         toast.success(`${ids.length} kandidater borttagna från din lista`);
       } catch {
         if (user) {
@@ -204,6 +205,7 @@ export function useBulkCandidateOps({
       }
 
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user.id] });
       toast.success(`${ids.length} kandidat${ids.length !== 1 ? 'er' : ''} flyttade till "${targetListName}"`);
     },
     [user, isViewingColleague, selectedCandidateIds, updateCandidatesCache, exitSelectionMode, queryClient],
