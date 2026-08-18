@@ -7,7 +7,7 @@ import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json'
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
-import { isAndroidDevice, isAppleDevice, isWindowsDevice, prefersReducedData } from '@/lib/videoPlatform';
+import { getVideoQualityTier, isAndroidDevice, isAppleDevice, isWindowsDevice, prefersReducedData, watchPlaybackHealth } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 const WINDOWS_BASELINE_30_SRC = '/landing/windows-safe/showcase-phone-baseline30.mp4';
@@ -158,14 +158,25 @@ const getSources = (widthPx?: number) =>
     : prefersReducedData()
       ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : isWindowsDevice()
-        ? [
-            // En enda konservativ Windows-master för både laptopskärm och extern
-            // HDMI/DisplayPort: H.264 Constrained Baseline, 30 fps, yuv420p,
-            // inga B-frames, en referensbild och kort GOP. Det undviker både den
-            // dyra 60-fps-kompositionen på externa skärmar och Main-profilens
-            // frame-reordering vid decoder-/GPU-output-byte.
-            { src: WINDOWS_BASELINE_30_SRC, type: 'video/mp4' },
-          ]
+        ? getVideoQualityTier() === 'high'
+          ? [
+              // STARK maskin (>=8 kärnor, >=8 GB, ingen sparläge): samma skarpa
+              // master som Mac får i motsvarande storlek. En stationär med
+              // extern skärm ska INTE straffas av att den svagaste tänkbara
+              // ultrabooken också kör Windows. Hälsovakten (watchPlaybackHealth)
+              // mäter tappade bildrutor och faller tillbaka på baseline-filen
+              // om just den här maskinen ändå inte klarar det.
+              { src: pickLadder(widthPx), type: 'video/mp4' },
+              { src: WINDOWS_BASELINE_30_SRC, type: 'video/mp4' },
+            ]
+          : [
+              // Konservativ Windows-master: H.264 Constrained Baseline, 30 fps,
+              // yuv420p, inga B-frames, kort GOP. Undviker både den dyra
+              // 60-fps-kompositionen på externa skärmar och Main-profilens
+              // frame-reordering vid decoder-/GPU-output-byte.
+              { src: WINDOWS_BASELINE_30_SRC, type: 'video/mp4' },
+            ]
+
         : isAndroidDevice()
           ? [
               // Androids H.264-hårdvaruväg är jämnare mellan olika GPU:er än VP9.
@@ -201,8 +212,16 @@ const JobSeekerVideoShowcase = ({
   active?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  // Kvalitetsnivån kan degraderas i realtid av hälsovakten. Vi håller den i
+  // state så att källistan byggs om och videon laddar den säkra filen — med
+  // bevarad tidsposition, så bytet knappt märks.
+  const [qualityTier, setQualityTier] = useState(() => getVideoQualityTier());
   const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
-  if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
+  const tierRef = useRef(qualityTier);
+  if (sourcesRef.current === null || tierRef.current !== qualityTier) {
+    tierRef.current = qualityTier;
+    sourcesRef.current = getSources(widthPx);
+  }
   const sources = sourcesRef.current;
   /**
    * Posterlager: <video poster> ritas inte alltid direkt i Safari/iOS — ramen
@@ -273,6 +292,42 @@ const JobSeekerVideoShowcase = ({
   useEffect(() => {
     if (autoplayBlocked) setPosterVisible(true);
   }, [autoplayBlocked]);
+
+  /**
+   * Hälsovakt för hög kvalitet (bara Windows/hög nivå).
+   *
+   * Mäter faktiskt tappade bildrutor. Klarar maskinen inte den skarpa källan —
+   * t.ex. när fönstret flyttas till en extern skärm och Chromium byter
+   * GPU-output — degraderas sessionen en gång och videon laddar om den säkra
+   * filen på samma tidsposition. Klarar den det (som din TV-uppkopplade
+   * maskin) rörs ingenting och du behåller full skärpa.
+   */
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || qualityTier !== 'high' || !isWindowsDevice()) return;
+    const stopWatch = watchPlaybackHealth(v, () => setQualityTier('safe'));
+    const onDegraded = () => setQualityTier('safe');
+    window.addEventListener('parium:video-degraded', onDegraded);
+    return () => { stopWatch(); window.removeEventListener('parium:video-degraded', onDegraded); };
+  }, [qualityTier]);
+
+  // Byte av kvalitetsnivå: ladda om elementet men behåll tidsposition.
+  const appliedTierRef = useRef(qualityTier);
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || appliedTierRef.current === qualityTier) return;
+    appliedTierRef.current = qualityTier;
+    const at = v.currentTime;
+    v.load();
+    const resume = () => {
+      try { v.currentTime = at; } catch { /* seek före metadata */ }
+      const p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    };
+    v.addEventListener('loadedmetadata', resume, { once: true });
+    return () => v.removeEventListener('loadedmetadata', resume);
+  }, [qualityTier]);
+
 
 
 

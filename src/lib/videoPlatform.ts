@@ -61,6 +61,110 @@ export const prefersLightweightVideo = () => {
   return prefersReducedData();
 };
 
+/* ------------------------------------------------------------------ *
+ * Adaptiv kvalitetsstege (mätt, inte gissad)
+ * ------------------------------------------------------------------ *
+ * Tidigare fick ALLA Windows-maskiner den mest konservativa källan, för
+ * att den svagaste tänkbara laptopen skulle klara den. Följden: en stark
+ * stationär med extern 4K-skärm — som utan problem klarar full kvalitet —
+ * fick samma grötiga bild som en 4-kärnig ultrabook.
+ *
+ * Nu görs det tvärtom: vi STARTAR högt när hårdvaran mäter starkt och
+ * degraderar bara om uppspelningen faktiskt tappar bildrutor. Beslutet
+ * sparas i sessionStorage så att sidan inte pendlar mellan nivåerna.
+ */
+
+export type VideoQualityTier = 'high' | 'safe';
+
+const TIER_KEY = 'parium:video-tier';
+
+const readStoredTier = (): VideoQualityTier | null => {
+  try {
+    const v = sessionStorage.getItem(TIER_KEY);
+    return v === 'high' || v === 'safe' ? v : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeStoredTier = (tier: VideoQualityTier) => {
+  try { sessionStorage.setItem(TIER_KEY, tier); } catch { /* private mode */ }
+};
+
+/**
+ * Klarar den här maskinen den skarpa källan?
+ *
+ * Kriterier: minst 8 logiska kärnor och (när webbläsaren rapporterar det)
+ * minst 8 GB RAM, samt en uppkoppling utan sparläge. Det utesluter i praktiken
+ * ultrabooks med delad GPU-minnesbudget men släpper igenom i stort sett alla
+ * stationära och moderna bärbara med dedikerad eller modern integrerad GPU —
+ * alltså exakt de maskiner som driver externa skärmar.
+ */
+const hardwareLooksStrong = () => {
+  if (typeof navigator === 'undefined') return false;
+  if (prefersReducedData()) return false;
+  const cores = navigator.hardwareConcurrency;
+  if (typeof cores === 'number' && cores < 8) return false;
+  const mem = (navigator as unknown as { deviceMemory?: number }).deviceMemory;
+  if (typeof mem === 'number' && mem < 8) return false;
+  return true;
+};
+
+/** Aktuell kvalitetsnivå för den här sessionen. */
+export const getVideoQualityTier = (): VideoQualityTier => {
+  if (typeof window === 'undefined') return 'safe';
+  const stored = readStoredTier();
+  if (stored) return stored;
+  const tier: VideoQualityTier = hardwareLooksStrong() ? 'high' : 'safe';
+  writeStoredTier(tier);
+  return tier;
+};
+
+/** Tvinga ner sessionen ett steg (anropas av hälsovakten vid frame drops). */
+export const degradeVideoQuality = () => {
+  if (typeof window === 'undefined') return false;
+  if (readStoredTier() === 'safe') return false;
+  writeStoredTier('safe');
+  window.dispatchEvent(new CustomEvent('parium:video-degraded'));
+  return true;
+};
+
+/**
+ * Hälsovakt: mäter faktiskt tappade bildrutor på ett <video>-element.
+ *
+ * Detta är skillnaden mellan "vi tror att Windows är svagt" och "den här
+ * maskinen klarar det inte". Tappas mer än 12 % av bildrutorna över ett
+ * meningsfullt urval degraderas sessionen en gång — sedan är vakten klar.
+ * Returnerar en avregistreringsfunktion.
+ */
+export const watchPlaybackHealth = (
+  video: HTMLVideoElement,
+  onDegrade: () => void,
+): (() => void) => {
+  if (typeof window === 'undefined') return () => {};
+  const q = (video as unknown as { getVideoPlaybackQuality?: () => VideoPlaybackQuality })
+    .getVideoPlaybackQuality;
+  if (typeof q !== 'function') return () => {};
+  let stopped = false;
+  const timer = window.setInterval(() => {
+    if (stopped) return;
+    const stats = video.getVideoPlaybackQuality();
+    const total = stats.totalVideoFrames;
+    const dropped = stats.droppedVideoFrames;
+    // Kräv ett rimligt urval innan vi dömer — kallstartens första sekunder
+    // tappar ofta någon ruta helt normalt.
+    if (total < 150) return;
+    if (dropped / total > 0.12) {
+      stopped = true;
+      window.clearInterval(timer);
+      if (degradeVideoQuality()) onDegrade();
+    }
+    // Ser det bra ut efter en dryg minut behöver vi inte mäta mer.
+    if (total > 3000) { stopped = true; window.clearInterval(timer); }
+  }, 1500);
+  return () => { stopped = true; window.clearInterval(timer); };
+};
+
 /**
  * Antal videor som får spela samtidigt i galleriet.
  *
@@ -83,6 +187,10 @@ export const getMaxConcurrentVideos = () => {
   // vilket var värre än den decode-belastning taket skulle skydda mot.
   // Windows kör därför samma "alltid igång"-läge som Apple.
   if (isLowPowerDevice()) return getVideoPlatform() === 'android' ? 3 : 4;
+  // Windows i säkert läge (svagare maskin, eller degraderad av hälsovakten):
+  // håll nere antalet parallella decoders så att hero-videon alltid får
+  // budget. Stark maskin kör samma "alltid igång"-läge som Apple.
+  if (isWindowsDevice() && getVideoQualityTier() === 'safe') return 4;
   return 8;
 };
 
