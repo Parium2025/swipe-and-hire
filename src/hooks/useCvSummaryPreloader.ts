@@ -93,21 +93,31 @@ export const useCvSummaryPreloader = (candidates: CandidateWithCv[]) => {
           return !existingKeyPoints;
         });
 
-        // Generera sammanfattningar i bakgrunden (max 3 samtidigt)
+        // Generera sammanfattningar i bakgrunden (max 3 samtidigt).
+        // Circuit breaker: sluta direkt om gatewayen svarar 402/429, annars
+        // bränner vi kvot på anrop som garanterat misslyckas.
+        let gatewayBlocked = false;
         const batchSize = 3;
         for (let i = 0; i < candidatesNeedingSummary.length; i += batchSize) {
+          if (gatewayBlocked) break;
           const batch = candidatesNeedingSummary.slice(i, i + batchSize);
           
           await Promise.allSettled(
             batch.map(async (candidate) => {
               try {
-                await supabase.functions.invoke('generate-cv-summary', {
+                const { data, error } = await supabase.functions.invoke('generate-cv-summary', {
                   body: {
                     applicant_id: candidate.applicant_id,
                     application_id: candidate.application_id,
                     job_id: candidate.job_id,
                   },
                 });
+                const status = (error as { context?: { status?: number } } | null)?.context?.status;
+                const message = String((data as { error?: string } | null)?.error ?? error?.message ?? '');
+                if (status === 402 || status === 429 || /rate limit|credit/i.test(message)) {
+                  gatewayBlocked = true;
+                  return;
+                }
                 console.log(`CV summary generated for ${candidate.application_id}`);
               } catch (error) {
                 console.warn(`Failed to generate CV summary for ${candidate.application_id}:`, error);
