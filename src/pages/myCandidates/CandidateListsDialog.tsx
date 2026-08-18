@@ -173,107 +173,35 @@ export const CandidateListsDialog = ({
           </DialogHeader>
 
           <div className="space-y-2 max-h-[45vh] overflow-y-auto overflow-x-hidden px-0.5 py-0.5">
-            {order.map((list) => (
-              <div
-                key={list.id}
-                ref={(el) => {
-                  if (el) rowRefs.current.set(list.id, el);
-                  else rowRefs.current.delete(list.id);
-                }}
-                className={`relative flex w-full items-center gap-2 overflow-hidden rounded-full bg-white/5 ring-1 ring-inset ring-white/20 pr-1.5 py-1.5 min-w-0 transition-colors duration-200 ${
-                  canReorder && editingId !== list.id ? 'pl-1' : 'pl-4'
-                } ${draggingId === list.id ? 'bg-white/15 ring-white/40' : ''}`}
-              >
-                {editingId === list.id ? (
-                  <>
-                    <Input
-                      autoFocus
-                      value={editingName}
-                      onChange={(e) => setEditingName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleRename(list.id);
-                        if (e.key === 'Escape') setEditingId(null);
-                      }}
-                      maxLength={40}
-                      className="h-9 rounded-full text-base bg-white/5 border-white/20 text-white"
-                    />
-                    <button
-                      onClick={() => handleRename(list.id)}
-                      aria-label="Spara namn"
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20"
-                    >
-                      <Check className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => setEditingId(null)}
-                      aria-label="Avbryt"
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {canReorder && (
-                      <button
-                        type="button"
-                        aria-label={`Flytta ${list.name}`}
-                        onPointerDown={handleDragPointerDown(list.id)}
-                        onPointerMove={handleDragPointerMove(list.id)}
-                        onPointerUp={finishDrag}
-                        onPointerCancel={finishDrag}
-                        onKeyDown={(e) => {
-                          const index = order.findIndex((l) => l.id === list.id);
-                          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                            e.preventDefault();
-                            const target = index + (e.key === 'ArrowUp' ? -1 : 1);
-                            if (target < 0 || target >= order.length) return;
-                            const next = [...order];
-                            const [moved] = next.splice(index, 1);
-                            next.splice(target, 0, moved);
-                            orderRef.current = next;
-                            setOrder(next);
-                            onReorder?.(next.map((l) => l.id));
-                          }
-                        }}
-                        className="flex h-9 w-8 flex-shrink-0 cursor-grab touch-none items-center justify-center rounded-full text-white transition-colors active:cursor-grabbing md:hover:bg-white/10"
-                      >
-                        <GripVertical className="h-4 w-4" />
-                      </button>
-                    )}
-                    <div className="min-w-0 flex-1 py-0.5">
-                      <p className="truncate text-sm font-medium text-white">{list.name}</p>
-                      <p className="text-xs text-white">
-                        {countByList[list.id] ?? 0} kandidater
-                        {list.is_default ? ' · standardlista' : ''}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setEditingId(list.id);
-                        setEditingName(list.name);
-                      }}
-                      aria-label={`Byt namn på ${list.name}`}
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      disabled={list.is_default}
-                      onClick={() => setPendingDelete(list)}
-                      aria-label={`Ta bort ${list.name}`}
-                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
-                        list.is_default
-                          ? 'border-white/5 text-white/30 bg-white/5 cursor-not-allowed'
-                          : 'border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
-                      }`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </>
-                )}
-              </div>
-            ))}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              autoScroll
+              measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging } }}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={order.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+                {order.map((list) => (
+                  <SortableListRow
+                    key={list.id}
+                    list={list}
+                    canReorder={canReorder}
+                    isEditing={editingId === list.id}
+                    count={countByList[list.id] ?? 0}
+                    editingName={editingName}
+                    onEditingNameChange={setEditingName}
+                    onStartEdit={() => {
+                      setEditingId(list.id);
+                      setEditingName(list.name);
+                    }}
+                    onCancelEdit={() => setEditingId(null)}
+                    onSaveEdit={() => handleRename(list.id)}
+                    onRequestDelete={() => setPendingDelete(list)}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+
           </div>
 
           <div className="flex items-center gap-2 pt-1">
