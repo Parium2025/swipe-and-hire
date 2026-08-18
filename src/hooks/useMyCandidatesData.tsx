@@ -1258,7 +1258,8 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
       updateMyCandidatesCache(user?.id, (items) =>
         items.map((c) =>
           c.application_id === applicationId ? { ...c, viewed_at: viewedAt } : c
-        )
+        ),
+        listId
       );
       
       queryClient.setQueryData(queryKey, (old: any) => {
