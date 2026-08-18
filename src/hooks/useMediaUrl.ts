@@ -125,10 +125,31 @@ function getOrCreateSignedUrlLoad(
 ) {
   const cacheKey = getCacheKey(storagePath, mediaType, transform);
   const existing = ongoingLoads.get(cacheKey);
-  if (existing) return existing;
+  if (existing) {
+    // Ett synligt kort får inte ärva ett enda best-effort-försök från en
+    // bakgrundsprefetch. Vänta först på samma request och gör därefter ett
+    // riktigt high-priority-försök om prefetch-anropet misslyckades.
+    if (priority === 'high') {
+      return existing.then((url) => {
+        if (url) return url;
+        ongoingLoads.delete(cacheKey);
+        failedLoads.delete(cacheKey);
+        return getOrCreateSignedUrlLoad(
+          storagePath,
+          mediaType,
+          expiresInSeconds,
+          transform,
+          'high',
+        );
+      });
+    }
+    return existing;
+  }
 
   const failedAt = failedLoads.get(cacheKey);
-  if (failedAt && Date.now() - failedAt < FAILED_COOLDOWN_MS) {
+  // Negativ cache skyddar endast bakgrundsförladdningen. En avatar som är
+  // synlig måste alltid få försöka självläka efter nät-/tokenproblem.
+  if (priority === 'low' && failedAt && Date.now() - failedAt < FAILED_COOLDOWN_MS) {
     return Promise.resolve<string | null>(null);
   }
 
@@ -296,22 +317,46 @@ export function useMediaUrl(
   
   const [url, setUrl] = useState<string | null>(cachedUrl);
   const mountedRef = useRef(true);
+  const [retryNonce, setRetryNonce] = useState(0);
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
     if (!storagePath) {
       setUrl(null);
+      retryCountRef.current = 0;
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
       return;
     }
+
+    let cancelled = false;
+    const scheduleVisibleRetry = () => {
+      if (cancelled || !mountedRef.current || retryTimerRef.current) return;
+      const delays = [2_000, 5_000, 15_000, 30_000];
+      const delay = delays[Math.min(retryCountRef.current, delays.length - 1)];
+      retryCountRef.current += 1;
+      retryTimerRef.current = setTimeout(() => {
+        retryTimerRef.current = null;
+        if (mountedRef.current) setRetryNonce((value) => value + 1);
+      }, delay);
+    };
     
     const refreshSignedUrl = async () => {
       clearMediaUrlCache(storagePath, mediaType);
       const freshSignedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform);
-      if (!freshSignedUrl || !mountedRef.current) return;
+      if (!freshSignedUrl || !mountedRef.current) {
+        scheduleVisibleRetry();
+        return;
+      }
+      retryCountRef.current = 0;
       setUrl(freshSignedUrl);
       if (shouldWarmBlobCache(mediaType)) {
         imageCache.loadImage(freshSignedUrl)
@@ -325,6 +370,7 @@ export function useMediaUrl(
     // Om vi redan har cached URL, använd den direkt
     if (cachedUrl) {
       setUrl(cachedUrl);
+      retryCountRef.current = 0;
       
       // Ladda blob i bakgrunden för ännu snabbare framtida laddning
       if (shouldWarmBlobCache(mediaType) && !cachedUrl.startsWith('blob:')) {
@@ -359,8 +405,11 @@ export function useMediaUrl(
         const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform);
         
         if (!signedUrl || !mountedRef.current) {
+          scheduleVisibleRetry();
           return;
         }
+
+        retryCountRef.current = 0;
 
         // Visa signed URL direkt
         if (mountedRef.current) {
@@ -382,11 +431,16 @@ export function useMediaUrl(
 
       } catch (e) {
         console.error('Failed to get media URL:', e);
+        scheduleVisibleRetry();
       }
     })();
 
+    return () => {
+      cancelled = true;
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storagePath, mediaType, expiresInSeconds, cachedUrl, transformKey]);
+  }, [storagePath, mediaType, expiresInSeconds, cachedUrl, transformKey, retryNonce]);
 
   return url;
 }

@@ -78,7 +78,7 @@ function CandidateAvatarBase({
     return (
       <div onClick={handleClick}>
         <ProfileVideo
-          videoUrl={resolvedVideoUrl!}
+          videoUrl={resolvedVideoUrl}
           coverImageUrl={resolvedImageUrl || undefined}
           userInitials={initials}
           alt="Kandidatvideo"
