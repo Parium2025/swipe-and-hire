@@ -305,6 +305,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isSessionKickRef = useRef(false); // Suppress duplicate toast on session kick
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
+  const isSigningOutRef = useRef(false); // 🔒 Dubbelklickskydd på "Logga ut"
+
   const mediaPreloadCompleteRef = useRef(false);
   const profileLoadedRef = useRef(false); // 🔧 Track when profile is loaded for login flow
   const prefetchedEmployerCandidateMediaForUserRef = useRef<string | null>(null);
