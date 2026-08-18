@@ -588,14 +588,8 @@ export function CandidatesTable({
                     <button
                       type="button"
                       className="flex items-center justify-center gap-1.5 px-4 h-9 rounded-full border border-white/20 bg-white/5 text-xs font-medium text-white whitespace-nowrap flex-shrink-0 transition-all duration-200 hover:bg-white/10 hover:border-white/50 data-[state=open]:bg-white/20 data-[state=open]:border-white/30 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
-                      onPointerDown={(e) => e.preventDefault()}
-                      onClick={(e) => {
-                        // Radix normally opens on pointerdown; we suppress that to
-                        // avoid the focus flash, so drive the menu from click instead.
-                        (e.currentTarget as HTMLButtonElement).dispatchEvent(
-                          new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'mouse', button: 0 })
-                        );
-                      }}
+                      onMouseDown={(e) => e.preventDefault()}
+
                     >
                       Åtgärder
                       <ChevronDown className="h-3 w-3 text-white" />
