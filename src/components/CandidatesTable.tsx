@@ -7,7 +7,8 @@ import { CandidateAvatar } from './CandidateAvatar';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
-import { AddToColleagueListDialog } from './AddToColleagueListDialog';
+import { AddToColleagueListDialog, type CandidateToAdd } from './AddToColleagueListDialog';
+import { useCandidateLists } from '@/hooks/useCandidateLists';
 import { UserPlus, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
@@ -87,6 +88,9 @@ export function CandidatesTable({
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { lists: ownCandidateLists } = useCandidateLists(user?.id ?? null);
+  // Öppna listväljaren när det finns fler än en möjlig destination
+  const needsListPicker = hasTeam || ownCandidateLists.length > 1;
   
   // ── Extracted hooks ──────────────────────────────────
   useBulkMessageSync();
@@ -264,6 +268,9 @@ export function CandidatesTable({
     onSelectionModeChange?.(false);
   }, [onSelectionModeChange]);
 
+  const [bulkListDialogOpen, setBulkListDialogOpen] = useState(false);
+  const [bulkCandidates, setBulkCandidates] = useState<CandidateToAdd[]>([]);
+
   const handleBulkAddToMyCandidates = useCallback(async () => {
     const selectedApps = selectedApplications;
     if (selectedApps.length === 0) return;
@@ -274,11 +281,17 @@ export function CandidatesTable({
       jobId: app.job_id,
     }));
 
+    if (needsListPicker) {
+      setBulkCandidates(candidatesToAdd);
+      setBulkListDialogOpen(true);
+      return;
+    }
+
     await addCandidates.mutateAsync(candidatesToAdd);
     setSelectedIds(new Set());
     onSelectionModeChange?.(false);
     onUpdate();
-  }, [selectedApplications, addCandidates, onSelectionModeChange, onUpdate]);
+  }, [selectedApplications, addCandidates, onSelectionModeChange, onUpdate, needsListPicker]);
 
   const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number } | null>(null);
@@ -531,12 +544,17 @@ export function CandidatesTable({
   }, []);
 
   const handleMobileAddCandidate = useCallback((app: ApplicationData) => {
+    if (needsListPicker) {
+      setSelectedApplicationForTeam(app);
+      setTeamDialogOpen(true);
+      return;
+    }
     addCandidate.mutate({
       applicationId: app.id,
       applicantId: app.applicant_id,
       jobId: app.job_id,
     });
-  }, [addCandidate]);
+  }, [addCandidate, needsListPicker]);
 
   const handleMobileAddToTeam = useCallback((app: ApplicationData) => {
     setSelectedApplicationForTeam(app);
@@ -588,7 +606,8 @@ export function CandidatesTable({
                     <button
                       type="button"
                       className="flex items-center justify-center gap-1.5 px-4 h-9 rounded-full border border-white/20 bg-white/5 text-xs font-medium text-white whitespace-nowrap flex-shrink-0 transition-all duration-200 hover:bg-white/10 hover:border-white/50 data-[state=open]:bg-white/20 data-[state=open]:border-white/30 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
-                      onMouseDown={(e) => e.preventDefault()}
+                      onFocus={(e) => e.currentTarget.blur()}
+
 
                     >
                       Åtgärder
@@ -793,32 +812,29 @@ export function CandidatesTable({
                     </TableCell>
                     <TableCell>
                       {!isMyCandidatesLoading && !isMyCandidatesSettling && !isAlreadyAdded && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-white/10"
-                              disabled={addCandidate.isPending}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (hasTeam) {
-                                  setSelectedApplicationForTeam(application);
-                                  setTeamDialogOpen(true);
-                                } else {
-                                  addCandidate.mutate({
-                                    applicationId: application.id,
-                                    applicantId: application.applicant_id,
-                                    jobId: application.job_id,
-                                  });
-                                }
-                              }}
-                            >
-                              <UserPlus className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>{hasTeam ? 'Lägg till i kandidatlista' : 'Lägg till i Mina kandidater'}</TooltipContent>
-                        </Tooltip>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Lägg till i kandidatlista"
+                          className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                          disabled={addCandidate.isPending}
+                          onPointerDown={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (needsListPicker) {
+                              setSelectedApplicationForTeam(application);
+                              setTeamDialogOpen(true);
+                            } else {
+                              addCandidate.mutate({
+                                applicationId: application.id,
+                                applicantId: application.applicant_id,
+                                jobId: application.job_id,
+                              });
+                            }
+                          }}
+                        >
+                          <UserPlus className="h-4 w-4" />
+                        </Button>
                       )}
                     </TableCell>
                   </TableRow>
@@ -897,6 +913,21 @@ export function CandidatesTable({
           applicantId={selectedApplicationForTeam.applicant_id}
           jobId={selectedApplicationForTeam.job_id}
           candidateName={`${selectedApplicationForTeam.first_name || ''} ${selectedApplicationForTeam.last_name || ''}`.trim() || 'Kandidat'}
+        />
+      )}
+
+      {bulkListDialogOpen && bulkCandidates.length > 0 && (
+        <AddToColleagueListDialog
+          open={bulkListDialogOpen}
+          onOpenChange={(open) => { setBulkListDialogOpen(open); if (!open) setBulkCandidates([]); }}
+          teamMembers={teamMembers}
+          candidates={bulkCandidates}
+          candidateName={`${bulkCandidates.length} kandidater`}
+          onAdded={() => {
+            setSelectedIds(new Set());
+            onSelectionModeChange?.(false);
+            onUpdate();
+          }}
         />
       )}
 
