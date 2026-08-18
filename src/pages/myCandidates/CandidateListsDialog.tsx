@@ -290,9 +290,12 @@ export const CandidateListsDialog = ({
               collisionDetection={closestCenter}
               autoScroll
               measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging } }}
+              onDragStart={(event: DragStartEvent) => setDraggingId(String(event.active.id))}
+              onDragCancel={() => setDraggingId(null)}
               onDragEnd={handleDragEnd}
             >
               <SortableContext items={order.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
                 {order.map((list) => (
                   <SortableListRow
                     key={list.id}
