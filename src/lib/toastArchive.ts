@@ -71,14 +71,29 @@ async function flushToServer(key: string) {
     const userId = auth?.user?.id;
     if (!userId) return; // utloggad → behåll lokalt
 
-    const { error } = await supabase.from("notifications").insert({
-      user_id: userId,
-      type: `toast_${entry.kind}`,
-      title: entry.title,
-      body: entry.body ?? null,
-      metadata: { toast: true, count },
-    });
-    if (error) return; // behåll lokalt om synken misslyckas
+    // Sista skyddet mot dubbletter: finns redan en identisk notis på kontot
+    // (t.ex. skapad från en annan flik eller enhet) hoppar vi över inserten
+    // och städar bara bort den lokala kopian.
+    const since = new Date(Date.now() - 120_000).toISOString();
+    const { data: existing } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("type", `toast_${entry.kind}`)
+      .eq("title", entry.title)
+      .gte("created_at", since)
+      .limit(1);
+
+    if (!existing || existing.length === 0) {
+      const { error } = await supabase.from("notifications").insert({
+        user_id: userId,
+        type: `toast_${entry.kind}`,
+        title: entry.title,
+        body: entry.body ?? null,
+        metadata: { toast: true, count },
+      });
+      if (error) return; // behåll lokalt om synken misslyckas
+    }
 
     // Servern äger posten nu → ta bort den lokala dubbletten. Vi matchar både
     // på id och på innehåll, så att inga lokala kopior blir kvar om samma notis
