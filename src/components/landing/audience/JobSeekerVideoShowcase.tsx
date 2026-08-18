@@ -293,6 +293,42 @@ const JobSeekerVideoShowcase = ({
     if (autoplayBlocked) setPosterVisible(true);
   }, [autoplayBlocked]);
 
+  /**
+   * Hälsovakt för hög kvalitet (bara Windows/hög nivå).
+   *
+   * Mäter faktiskt tappade bildrutor. Klarar maskinen inte den skarpa källan —
+   * t.ex. när fönstret flyttas till en extern skärm och Chromium byter
+   * GPU-output — degraderas sessionen en gång och videon laddar om den säkra
+   * filen på samma tidsposition. Klarar den det (som din TV-uppkopplade
+   * maskin) rörs ingenting och du behåller full skärpa.
+   */
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || qualityTier !== 'high' || !isWindowsDevice()) return;
+    const stopWatch = watchPlaybackHealth(v, () => setQualityTier('safe'));
+    const onDegraded = () => setQualityTier('safe');
+    window.addEventListener('parium:video-degraded', onDegraded);
+    return () => { stopWatch(); window.removeEventListener('parium:video-degraded', onDegraded); };
+  }, [qualityTier]);
+
+  // Byte av kvalitetsnivå: ladda om elementet men behåll tidsposition.
+  const appliedTierRef = useRef(qualityTier);
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || appliedTierRef.current === qualityTier) return;
+    appliedTierRef.current = qualityTier;
+    const at = v.currentTime;
+    v.load();
+    const resume = () => {
+      try { v.currentTime = at; } catch { /* seek före metadata */ }
+      const p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    };
+    v.addEventListener('loadedmetadata', resume, { once: true });
+    return () => v.removeEventListener('loadedmetadata', resume);
+  }, [qualityTier]);
+
+
 
 
 
