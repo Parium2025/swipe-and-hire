@@ -98,65 +98,23 @@ export const CandidateListsDialog = ({
     }
   };
 
-  const moveTo = useCallback((id: string, targetIndex: number) => {
-    const current = orderRef.current;
-    const from = current.findIndex((l) => l.id === id);
-    if (from === -1 || targetIndex === from) return;
-    const clamped = Math.max(0, Math.min(current.length - 1, targetIndex));
-    if (clamped === from) return;
-    const next = [...current];
-    const [moved] = next.splice(from, 1);
-    next.splice(clamped, 0, moved);
-    orderRef.current = next;
-    setOrder(next);
-  }, []);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      setDraggingId(null);
+      if (!over || active.id === over.id) return;
+      const current = orderRef.current;
+      const from = current.findIndex((l) => l.id === active.id);
+      const to = current.findIndex((l) => l.id === over.id);
+      if (from === -1 || to === -1) return;
+      const next = arrayMove(current, from, to);
+      orderRef.current = next;
+      setOrder(next);
+      onReorder?.(next.map((l) => l.id));
+    },
+    [onReorder],
+  );
 
-  const handleDragPointerDown = (id: string) => (e: React.PointerEvent) => {
-    if (!canReorder || editingId) return;
-    e.preventDefault();
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    startOrderRef.current = orderRef.current.map((l) => l.id);
-    setDraggingId(id);
-  };
-
-  const handleDragPointerMove = (id: string) => (e: React.PointerEvent) => {
-    if (draggingId !== id) return;
-    const y = e.clientY;
-    const entries = orderRef.current
-      .map((l) => {
-        const el = rowRefs.current.get(l.id);
-        return el ? { id: l.id, rect: el.getBoundingClientRect() } : null;
-      })
-      .filter(Boolean) as { id: string; rect: DOMRect }[];
-
-    for (let i = 0; i < entries.length; i++) {
-      const { id: otherId, rect } = entries[i];
-      if (otherId === id) continue;
-      const midpoint = rect.top + rect.height / 2;
-      const currentIndex = orderRef.current.findIndex((l) => l.id === id);
-      if (i < currentIndex && y < midpoint) {
-        moveTo(id, i);
-        return;
-      }
-      if (i > currentIndex && y > midpoint) {
-        moveTo(id, i);
-        return;
-      }
-    }
-  };
-
-  const finishDrag = (e: React.PointerEvent) => {
-    if (!draggingId) return;
-    try {
-      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    } catch {
-      /* pointer redan släppt */
-    }
-    setDraggingId(null);
-    const nextIds = orderRef.current.map((l) => l.id);
-    const changed = nextIds.some((id, i) => id !== startOrderRef.current[i]);
-    if (changed) onReorder?.(nextIds);
-  };
 
   const pendingCount = pendingDelete ? countByList[pendingDelete.id] ?? 0 : 0;
 
