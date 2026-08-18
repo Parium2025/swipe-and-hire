@@ -6,6 +6,7 @@ import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 const PAGE_SIZE = 50; // Större batch för att ha mer data redo
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
@@ -258,7 +259,6 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
   }
 
   // Förladda bilder i bakgrunden — matcha CandidateAvatar (40px, 2x retina)
-  const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
   const imagePaths = items
     .map((i: any) => i.profile_image_url)
     .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '')
@@ -444,7 +444,6 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
   }
 
   // Förladda bilder — matcha CandidateAvatar (40px, 2x retina)
-  const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
   const imagePaths = items
     .map((i) => i.profile_image_url)
     .filter((p): p is string => typeof p === 'string' && p.trim() !== '')

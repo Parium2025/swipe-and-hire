@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 /**
  * 🖼️ JOB SEEKER MEDIA WARMUP
@@ -25,7 +26,6 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
  */
 
 const LOGO_TRANSFORM = { width: 80, height: 80, resize: 'cover' as const };
-const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
 const MAX_NEW_PER_UPDATE = 50;
 
 interface JobLike {

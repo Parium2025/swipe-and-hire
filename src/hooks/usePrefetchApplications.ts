@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 /**
  * Shared hook for prefetching applications data.
@@ -77,7 +78,6 @@ export const usePrefetchApplications = () => {
         });
 
         // Prefetch avatars in background — matcha CandidateAvatar (40px, 2x retina)
-        const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
         setTimeout(() => {
           const paths = (items as any[])
             .map((i) => i.profile_image_url)

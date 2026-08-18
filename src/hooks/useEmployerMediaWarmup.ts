@@ -5,6 +5,7 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { imageCache } from '@/lib/imageCache';
+import { AVATAR_TRANSFORM, PROFILE_IMAGE_TRANSFORM } from '@/lib/mediaPresets';
 
 /**
  * 🖼️ EMPLOYER MEDIA WARMUP
@@ -29,8 +30,6 @@ import { imageCache } from '@/lib/imageCache';
  *  - Avregistrerar vid unmount
  */
 
-const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
-const PROFILE_IMAGE_TRANSFORM = { width: 200, height: 200, resize: 'cover' as const };
 const MAX_NEW_PER_UPDATE = 50;
 
 interface ItemWithMedia {

@@ -6,6 +6,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { smartSearchCandidates } from '@/lib/smartSearch';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 export interface ApplicationData {
   id: string;
@@ -501,7 +502,6 @@ export const useApplicationsData = (
       // Detta körs asynkront och blockerar inte returnering av data
       // Matcha CandidateAvatar (40px, 2x retina) så cache-key blir samma
       (async () => {
-        const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
         const storagePaths = items
           .map((i) => i.profile_image_url)
           .filter((p): p is string => typeof p === 'string' && p.trim() !== '');

@@ -19,6 +19,7 @@ import { useSessionManager, clearSessionToken } from '@/hooks/useSessionManager'
 import { useQueryClient } from '@tanstack/react-query';
 import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -2112,7 +2113,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
 
             // Matcha CandidateAvatar (40px, 2x retina) så cache-key blir samma
-            const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
             const paths = (batchMediaData || [])
               .map((row: any) => row.profile_image_url)
               .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '');
@@ -2147,12 +2147,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               p_employer_id: user.id,
             });
 
-            const myCandAvatarTransform = { width: 40, height: 40, resize: 'cover' as const };
             const myCandPaths = (myCandMediaData || [])
               .map((row: any) => row.profile_image_url)
               .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '');
             if (myCandPaths.length > 0) {
-              await Promise.all(myCandPaths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, myCandAvatarTransform).catch(() => {})));
+              await Promise.all(myCandPaths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {})));
+            }
+
+            // Värm även profilvideornas signerade URL:er så avataren aldrig
+            // hinner rendera initialer innan videon är redo.
+            const myCandVideoPaths = (myCandMediaData || [])
+              .filter((row: any) => row?.is_profile_video && typeof row?.video_url === 'string' && row.video_url.trim() !== '')
+              .map((row: any) => row.video_url as string)
+              .slice(0, 8);
+            if (myCandVideoPaths.length > 0) {
+              await Promise.all(myCandVideoPaths.map((p) => prefetchMediaUrl(p, 'profile-video').catch(() => {})));
             }
           }
         } catch {
