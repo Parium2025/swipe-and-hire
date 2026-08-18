@@ -544,12 +544,17 @@ export function CandidatesTable({
   }, []);
 
   const handleMobileAddCandidate = useCallback((app: ApplicationData) => {
+    if (needsListPicker) {
+      setSelectedApplicationForTeam(app);
+      setTeamDialogOpen(true);
+      return;
+    }
     addCandidate.mutate({
       applicationId: app.id,
       applicantId: app.applicant_id,
       jobId: app.job_id,
     });
-  }, [addCandidate]);
+  }, [addCandidate, needsListPicker]);
 
   const handleMobileAddToTeam = useCallback((app: ApplicationData) => {
     setSelectedApplicationForTeam(app);
