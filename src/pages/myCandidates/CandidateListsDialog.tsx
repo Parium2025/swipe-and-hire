@@ -242,11 +242,17 @@ export const CandidateListsDialog = ({
     }
   };
 
-  const handleRename = async (id: string) => {
-    if (!editingName.trim() || busy) return;
+  const handleRename = async (id: string, currentName?: string) => {
+    const next = editingName.trim();
+    if (!next || busy) return;
+    // Inget faktiskt namnbyte -> stäng bara redigeringen, ingen notis
+    if (currentName !== undefined && next === currentName.trim()) {
+      setEditingId(null);
+      return;
+    }
     setBusy(true);
     try {
-      await onRename(id, editingName);
+      await onRename(id, next);
       setEditingId(null);
     } finally {
       setBusy(false);
@@ -311,7 +317,7 @@ export const CandidateListsDialog = ({
                       setEditingName(list.name);
                     }}
                     onCancelEdit={() => setEditingId(null)}
-                    onSaveEdit={() => handleRename(list.id)}
+                    onSaveEdit={() => handleRename(list.id, list.name)}
                     onRequestDelete={() => setPendingDelete(list)}
                   />
                 ))}
