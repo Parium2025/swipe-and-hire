@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -169,7 +170,7 @@ export const MyCandidatesHeader = ({
               </DropdownMenuItem>
 
               {hasTeam && teamMembers.length > 0 && (
-                <>
+                <DropdownMenuGroup>
                   <DropdownMenuSeparator className="bg-white/10" />
                   <DropdownMenuLabel className="text-xs font-medium text-white">Kollegors listor</DropdownMenuLabel>
                   {teamMembers.map(member => {
@@ -219,7 +220,7 @@ export const MyCandidatesHeader = ({
                       </DropdownMenuSub>
                     );
                   })}
-                </>
+                </DropdownMenuGroup>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

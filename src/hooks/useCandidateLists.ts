@@ -155,6 +155,7 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
     onSuccess: () => {
       invalidate();
       queryClient.invalidateQueries({ queryKey: ['my-candidates', ownerId] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', ownerId] });
       toast.success('Listan togs bort');
     },
     onError: (error: any) => toast.error(error.message || 'Kunde inte ta bort listan'),
