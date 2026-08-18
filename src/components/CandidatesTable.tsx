@@ -87,6 +87,9 @@ export function CandidatesTable({
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { lists: ownCandidateLists } = useCandidateLists(user?.id ?? null);
+  // Öppna listväljaren när det finns fler än en möjlig destination
+  const needsListPicker = hasTeam || ownCandidateLists.length > 1;
   
   // ── Extracted hooks ──────────────────────────────────
   useBulkMessageSync();
