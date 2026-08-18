@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedText } from '@/components/TruncatedText';
+import { useCandidateListCounts } from '@/hooks/useCandidateListCounts';
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 import {
   Search,
@@ -102,6 +104,8 @@ export const MyCandidatesHeader = ({
   stageConfig,
   useMobileView,
 }: MyCandidatesHeaderProps) => {
+  const [listMenuOpen, setListMenuOpen] = React.useState(false);
+  const countByList = useCandidateListCounts(!isViewingColleague);
   const activeListName = activeList?.name || 'Mina kandidater';
 
   const title = isViewingColleague
@@ -113,13 +117,22 @@ export const MyCandidatesHeader = ({
       {/* Title and description */}
       <div className="text-center mb-4">
         <div className="flex items-center justify-center gap-2 min-w-0">
-          <DropdownMenu>
+          <DropdownMenu open={listMenuOpen} onOpenChange={setListMenuOpen}>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 min-w-0 max-w-full text-xl md:text-2xl font-semibold text-white tracking-tight hover:text-white/80 transition-colors">
+              <button
+                aria-label="Byt lista"
+                className="flex items-center gap-2 min-w-0 max-w-full text-xl md:text-2xl font-semibold text-white tracking-tight transition-colors md:hover:text-white/80 active:scale-[0.99] touch-manipulation"
+              >
                 {isViewingColleague && <Eye className="h-5 w-5 flex-shrink-0 text-fuchsia-400" />}
-                <span className="truncate min-w-0">{title}</span>
-                <span className="text-white/60 flex-shrink-0">({totalCount})</span>
-                <ChevronDown className="h-4 w-4 text-white/60 flex-shrink-0" />
+                <TruncatedText
+                  text={title}
+                  className="truncate min-w-0 text-white"
+                  tooltipSide="bottom"
+                />
+                <span className="text-white flex-shrink-0">({totalCount})</span>
+                <ChevronDown
+                  className={`h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 ease-out ${listMenuOpen ? 'rotate-180' : 'rotate-0'}`}
+                />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[240px] max-w-[86vw]">
@@ -141,6 +154,9 @@ export const MyCandidatesHeader = ({
                       <UserCheck className="h-4 w-4 mr-2 flex-shrink-0 text-white/70" />
                     )}
                     <span className="truncate min-w-0">{list.name}</span>
+                    <span className="ml-auto pl-2 flex-shrink-0 text-white tabular-nums">
+                      ({countByList[list.id] ?? 0})
+                    </span>
                   </DropdownMenuItem>
                 );
               })}
