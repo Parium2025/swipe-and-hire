@@ -149,7 +149,7 @@ const SortableListRow = ({
             disabled={list.is_default}
             onClick={onRequestDelete}
             aria-label={`Ta bort ${list.name}`}
-            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
+            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-colors focus:outline-none focus:ring-0 focus-visible:ring-0 ${
               list.is_default
                 ? 'border-white/5 text-white/30 bg-white/5 cursor-not-allowed'
                 : 'border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
@@ -334,7 +334,7 @@ export const CandidateListsDialog = ({
             <button
               onClick={handleCreate}
               disabled={atLimit || !newName.trim() || busy}
-              className={`flex h-11 flex-shrink-0 items-center gap-1.5 rounded-full px-5 text-sm font-medium text-white ring-1 ring-inset transition-all active:scale-[0.97] touch-manipulation ${
+              className={`flex h-11 flex-shrink-0 items-center gap-1.5 rounded-full px-5 text-sm font-medium text-white ring-1 ring-inset transition-all active:scale-[0.97] touch-manipulation focus:outline-none focus:ring-0 focus-visible:ring-0 ${
                 atLimit || !newName.trim() || busy
                   ? 'bg-white/5 ring-white/10 opacity-40 cursor-default'
                   : 'bg-white/10 ring-white/30 md:hover:bg-white/20'
@@ -356,7 +356,7 @@ export const CandidateListsDialog = ({
         <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col">
           <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
             <div className="flex items-center justify-center gap-2.5">
-              <div className="bg-red-500/20 p-2 rounded-full focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0">
+              <div className="bg-red-500/20 p-2 rounded-full">
                 <AlertTriangle className="h-4 w-4 text-white" />
               </div>
               <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
