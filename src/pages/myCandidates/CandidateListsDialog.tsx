@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -18,9 +17,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { Check, ListPlus, Pencil, Trash2, X } from 'lucide-react';
+import { TruncatedText } from '@/components/TruncatedText';
+import { useCandidateListCounts } from '@/hooks/useCandidateListCounts';
+import { AlertTriangle, Check, ListPlus, Pencil, Trash2, X } from 'lucide-react';
 import type { CandidateList } from '@/hooks/useCandidateLists';
 import { MAX_CANDIDATE_LISTS } from '@/hooks/useCandidateLists';
 
@@ -41,37 +40,13 @@ export const CandidateListsDialog = ({
   onRename,
   onDelete,
 }: CandidateListsDialogProps) => {
-  const { user } = useAuth();
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [pendingDelete, setPendingDelete] = useState<CandidateList | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Antal unika personer per lista — samma person räknas en gång även om
-  // hen sökt flera jobb.
-  const { data: countByList = {} } = useQuery({
-    queryKey: ['candidate-list-counts', user?.id],
-    queryFn: async () => {
-      if (!user) return {} as Record<string, number>;
-      const { data, error } = await supabase
-        .from('my_candidates')
-        .select('list_id, applicant_id')
-        .eq('recruiter_id', user.id);
-      if (error) throw error;
-
-      const seen = new Map<string, Set<string>>();
-      for (const row of data || []) {
-        if (!row.list_id) continue;
-        const set = seen.get(row.list_id) ?? new Set<string>();
-        set.add(row.applicant_id);
-        seen.set(row.list_id, set);
-      }
-      return Object.fromEntries([...seen].map(([id, set]) => [id, set.size]));
-    },
-    enabled: open && !!user,
-    staleTime: 30 * 1000,
-  });
+  const countByList = useCandidateListCounts(open);
 
   useEffect(() => {
     if (!open) {
@@ -180,7 +155,7 @@ export const CandidateListsDialog = ({
                       className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition-colors ${
                         list.is_default
                           ? 'text-white/30 bg-white/5 cursor-not-allowed'
-                          : 'text-white border border-destructive/40 bg-destructive/20 md:hover:bg-destructive/30'
+                          : 'text-white bg-white/10 md:hover:bg-white/20'
                       }`}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -222,28 +197,53 @@ export const CandidateListsDialog = ({
       </Dialog>
 
       <AlertDialog open={!!pendingDelete} onOpenChange={() => setPendingDelete(null)}>
-        <AlertDialogContent className="bg-card-parium border-white/20 rounded-3xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">
-              Ta bort "{pendingDelete?.name}"?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-white">
-              {pendingCount > 0
-                ? `Listan innehåller ${pendingCount} kandidater. De tas bort från din pipeline — ansökningarna finns kvar under Kandidater.`
-                : 'Listan och dess steg tas bort. Det går inte att ångra.'}
-            </AlertDialogDescription>
+        <AlertDialogContent className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col">
+          <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-white" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort lista
+              </AlertDialogTitle>
+            </div>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-full text-white">Avbryt</AlertDialogCancel>
+          <div className="overflow-y-auto flex-1 my-4">
+            <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
+              {pendingDelete && (
+                <>
+                  Är du säker på att du vill ta bort{' '}
+                  <TruncatedText
+                    text={`"${pendingDelete.name}"`}
+                    className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom"
+                  />
+                  ?{' '}
+                  {pendingCount > 0
+                    ? `Listan innehåller ${pendingCount} kandidater som tas bort från din pipeline — ansökningarna finns kvar under Kandidater. `
+                    : ''}
+                  Denna åtgärd går inte att ångra.
+                </>
+              )}
+            </AlertDialogDescription>
+          </div>
+          <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
+            <AlertDialogCancel
+              onClick={() => setPendingDelete(null)}
+              className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
+              Avbryt
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
                 const target = pendingDelete;
                 setPendingDelete(null);
                 if (target) await onDelete(target.id);
               }}
-              className="rounded-full bg-destructive text-white hover:bg-destructive/90"
+              variant="destructiveSoft"
+              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
             >
-              Ta bort listan
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
