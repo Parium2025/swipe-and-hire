@@ -1,3 +1,4 @@
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from '@/hooks/useAuth';
 import { useProgressivePagination } from '@/hooks/useProgressivePagination';
 import { useEmployerMediaWarmup } from '@/hooks/useEmployerMediaWarmup';
