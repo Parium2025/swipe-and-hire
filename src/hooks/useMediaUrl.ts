@@ -108,6 +108,14 @@ function storeSignedUrlCache(
   }
 }
 
+// Negativ cache: en path som just misslyckats (rättighetsfel, nätglapp) ska
+// inte hamras om och om igen av hundratals kort. Efter kylperioden får den
+// försöka igen automatiskt.
+const failedLoads = new Map<string, number>();
+const FAILED_COOLDOWN_MS = 30_000;
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 function getOrCreateSignedUrlLoad(
   storagePath: string,
   mediaType: MediaType,
@@ -119,15 +127,34 @@ function getOrCreateSignedUrlLoad(
   const existing = ongoingLoads.get(cacheKey);
   if (existing) return existing;
 
+  const failedAt = failedLoads.get(cacheKey);
+  if (failedAt && Date.now() - failedAt < FAILED_COOLDOWN_MS) {
+    return Promise.resolve<string | null>(null);
+  }
+
+  // Upp till 3 försök med kort backoff — täcker tillfälliga nätglapp och
+  // token-refresh precis efter inloggning, vilket annars gav en tom avatar.
+  const attempts = priority === 'high' ? 3 : 1;
+
   const promise = acquireSignedUrlSlot(priority)
-    .then(() => {
-      const now = Date.now();
-      return getMediaUrl(storagePath, mediaType, expiresInSeconds, transform).then((signedUrl) => {
+    .then(async () => {
+      for (let attempt = 0; attempt < attempts; attempt++) {
+        const now = Date.now();
+        let signedUrl: string | null = null;
+        try {
+          signedUrl = await getMediaUrl(storagePath, mediaType, expiresInSeconds, transform);
+        } catch {
+          signedUrl = null;
+        }
         if (signedUrl) {
           storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now);
+          failedLoads.delete(cacheKey);
+          return signedUrl;
         }
-        return signedUrl;
-      });
+        if (attempt < attempts - 1) await sleep(250 * (attempt + 1));
+      }
+      failedLoads.set(cacheKey, Date.now());
+      return null;
     })
     .finally(() => {
       releaseSignedUrlSlot();
@@ -137,6 +164,7 @@ function getOrCreateSignedUrlLoad(
   ongoingLoads.set(cacheKey, promise);
   return promise;
 }
+
 
 
 // Hämta cached URL synkront (för initial render utan flicker)
@@ -220,6 +248,12 @@ export function clearMediaUrlCache(
   for (const key of Array.from(ongoingLoads.keys())) {
     if (matchesStoragePath(key)) ongoingLoads.delete(key);
   }
+
+  // Släpp ev. "misslyckad"-markering så nästa render får försöka direkt.
+  for (const key of Array.from(failedLoads.keys())) {
+    if (matchesStoragePath(key)) failedLoads.delete(key);
+  }
+
 
   try {
     const keysToRemove: string[] = [];
