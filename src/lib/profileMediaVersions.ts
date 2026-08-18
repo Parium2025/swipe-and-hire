@@ -64,10 +64,10 @@ export function syncProfileMediaVersions(rows: MediaVersionRow[]) {
     const newImageV = row.image_updated_at ?? null;
     const newVideoV = row.video_updated_at ?? null;
 
-    if (prev.image && newImageV && prev.image !== newImageV && row.profile_image_url) {
+    if (prev.image !== undefined && newImageV && prev.image !== newImageV && row.profile_image_url) {
       clearMediaUrlCache(row.profile_image_url, 'profile-image');
     }
-    if (prev.video && newVideoV && prev.video !== newVideoV && row.video_url) {
+    if (prev.video !== undefined && newVideoV && prev.video !== newVideoV && row.video_url) {
       clearMediaUrlCache(row.video_url, 'profile-video');
     }
 

@@ -88,7 +88,7 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
           .from('profiles')
           .select('profile_image_url, cover_image_url, video_url')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (currentProfile) {
           const tasks: Promise<void>[] = [];
