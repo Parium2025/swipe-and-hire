@@ -8,7 +8,7 @@ import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, X } from 'lucide-react';
+import { UserPlus, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { Button } from '@/components/ui/button';
@@ -576,20 +576,23 @@ export function CandidatesTable({
               <>
                 <div className="w-px h-5 bg-white/20 flex-shrink-0" />
                 <button
-                  className="flex items-center justify-center px-2.5 h-9 text-xs font-medium whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
+                  type="button"
+                  className="flex items-center justify-center gap-1.5 px-4 h-9 rounded-full border border-white/20 bg-white/5 text-xs font-medium text-white whitespace-nowrap flex-shrink-0 transition-all duration-200 hover:bg-white/10 hover:border-white/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                   onClick={() => setSelectedIds(new Set())}
-                  onMouseDown={(e) => e.preventDefault()}
+                  onPointerDown={(e) => e.preventDefault()}
                 >
                   Avmarkera
                 </button>
-                <div className="w-px h-5 bg-white/20 flex-shrink-0" />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className="flex items-center px-2.5 h-9 text-xs font-medium whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
+                      type="button"
+                      className="flex items-center justify-center gap-1.5 px-4 h-9 rounded-full border border-white/20 bg-white/5 text-xs font-medium text-white whitespace-nowrap flex-shrink-0 transition-all duration-200 hover:bg-white/10 hover:border-white/50 data-[state=open]:bg-white/20 data-[state=open]:border-white/30 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                       onMouseDown={(e) => e.preventDefault()}
+
                     >
                       Åtgärder
+                      <ChevronDown className="h-3 w-3 text-white" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
@@ -620,12 +623,15 @@ export function CandidatesTable({
             )}
             <div className="w-px h-5 bg-white/20 flex-shrink-0" />
             <button
-              className="flex h-9 w-9 items-center justify-center rounded-full text-white outline-none focus:outline-none transition-all duration-200 active:scale-[0.97] touch-manipulation"
+              type="button"
+              aria-label="Avsluta urval"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white transition-all duration-200 hover:bg-white/10 hover:border-white/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
               onClick={clearSelection}
-              onMouseDown={(e) => e.preventDefault()}
+              onPointerDown={(e) => e.preventDefault()}
             >
               <X className="h-4 w-4" />
             </button>
+
           </div>
         </div>
       )}
