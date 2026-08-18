@@ -806,32 +806,29 @@ export function CandidatesTable({
                     </TableCell>
                     <TableCell>
                       {!isMyCandidatesLoading && !isMyCandidatesSettling && !isAlreadyAdded && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-white/10"
-                              disabled={addCandidate.isPending}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (hasTeam) {
-                                  setSelectedApplicationForTeam(application);
-                                  setTeamDialogOpen(true);
-                                } else {
-                                  addCandidate.mutate({
-                                    applicationId: application.id,
-                                    applicantId: application.applicant_id,
-                                    jobId: application.job_id,
-                                  });
-                                }
-                              }}
-                            >
-                              <UserPlus className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>{hasTeam ? 'Lägg till i kandidatlista' : 'Lägg till i Mina kandidater'}</TooltipContent>
-                        </Tooltip>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Lägg till i kandidatlista"
+                          className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                          disabled={addCandidate.isPending}
+                          onPointerDown={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (needsListPicker) {
+                              setSelectedApplicationForTeam(application);
+                              setTeamDialogOpen(true);
+                            } else {
+                              addCandidate.mutate({
+                                applicationId: application.id,
+                                applicantId: application.applicant_id,
+                                jobId: application.job_id,
+                              });
+                            }
+                          }}
+                        >
+                          <UserPlus className="h-4 w-4" />
+                        </Button>
                       )}
                     </TableCell>
                   </TableRow>
