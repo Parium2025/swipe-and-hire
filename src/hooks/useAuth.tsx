@@ -574,11 +574,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // 🧹 Reset transient flags on a fresh successful sign-in so future
         // unexpected sign-outs (network blips etc.) trigger recovery as expected.
-        if (newUserId !== null && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        // OBS: endast vid SIGNED_IN — ett TOKEN_REFRESHED får aldrig häva en
+        // pågående manuell utloggning (det var precis den vägen som kunde
+        // återuppliva sessionen).
+        if (newUserId !== null && event === 'SIGNED_IN') {
           isSessionKickRef.current = false;
           isManualSignOutRef.current = false;
           isRecoveringSessionRef.current = false;
+          isSigningOutRef.current = false;
+          endSignOutTracking();
         }
+
 
         if (event !== 'INITIAL_SESSION') {
           finishInitialization();
