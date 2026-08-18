@@ -311,6 +311,14 @@ const JobSeekerVideoShowcase = ({
     return () => { stopWatch(); window.removeEventListener('parium:video-degraded', onDegraded); };
   }, [qualityTier]);
 
+  /**
+   * Skärmuppsättningen: kopplas en extern skärm in som UTÖKAT skrivbord går vi
+   * ner i säkert läge direkt, innan hacket hinner synas. Dras den ur går vi
+   * tillbaka upp till full skärpa utan omladdning. Spegling påverkar inget.
+   */
+  useEffect(() => watchDisplayTopology(setQualityTier), []);
+
+
   // Byte av kvalitetsnivå: ladda om elementet men behåll tidsposition.
   const appliedTierRef = useRef(qualityTier);
   useEffect(() => {
