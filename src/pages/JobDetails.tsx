@@ -5,6 +5,7 @@ import { usePullToDismiss } from '@/hooks/usePullToDismiss';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
+import { prefetchCandidateNotes } from '@/hooks/useCandidateNotes';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTouchCapable } from '@/hooks/useInputCapability';
@@ -379,6 +380,7 @@ const JobDetails = () => {
   const handlePrefetchCandidate = useCallback((app: JobApplication) => {
     if (!user || !app.applicant_id) return;
     prefetchCandidateActivities(queryClient, app.applicant_id, user.id);
+    prefetchCandidateNotes(app.applicant_id);
   }, [user, queryClient]);
 
   const handleMobileMove = useCallback(async (applicationId: string, newStage: string) => {
