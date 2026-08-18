@@ -15,7 +15,7 @@ import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 import { authSplashEvents, cacheAuthRoleForEmail, getCachedAuthRoleForEmail, normalizeAuthSplashRole } from '@/lib/authSplashEvents';
 import { forceConnectivityCheck, getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
-import { useSessionManager, clearSessionToken } from '@/hooks/useSessionManager';
+import { useSessionManager, clearSessionToken, beginSignOutTracking, endSignOutTracking } from '@/hooks/useSessionManager';
 import { useQueryClient } from '@tanstack/react-query';
 import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';

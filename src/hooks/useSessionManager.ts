@@ -224,7 +224,7 @@ export function useSessionManager(
 
   // Register session when user logs in (or when returning from background)
   const registerSession = useCallback(async (force = false) => {
-    if (!userId || isPreviewEnv) return;
+    if (!userId || isPreviewEnv || signOutInProgress) return;
     // Skip if already registered, unless forced (e.g. on mobile foreground)
     if (registeredRef.current && !force) return;
 
@@ -284,7 +284,7 @@ export function useSessionManager(
   // Only kick if re-registration reveals we're over the session limit AND got replaced.
   const sendHeartbeat = useCallback(async () => {
     const token = sessionTokenRef.current;
-    if (!token || !userId) return;
+    if (!token || !userId || signOutInProgress) return;
 
     try {
       const { data: isValid } = await supabase.rpc('heartbeat_session', {
@@ -365,6 +365,7 @@ export function useSessionManager(
   const checkSessionValidity = useCallback(async () => {
     const token = sessionTokenRef.current;
     if (!token || !userId || !registeredRef.current || alreadyKickedRef.current) return;
+    if (signOutInProgress) return;
 
     // Grace period: skip validity check right after registration (mobile wake-up scenario)
     const timeSinceRegistration = Date.now() - lastRegisteredAtRef.current;
