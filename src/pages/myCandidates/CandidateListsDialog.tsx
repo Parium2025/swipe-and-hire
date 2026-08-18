@@ -180,13 +180,9 @@ export const CandidateListsDialog = ({
                   if (el) rowRefs.current.set(list.id, el);
                   else rowRefs.current.delete(list.id);
                 }}
-                className={`flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-inset ring-white/20 pr-1.5 py-1.5 min-w-0 transition-[box-shadow,transform,background-color] duration-200 ${
-                  canReorder && editingId !== list.id ? 'pl-1.5' : 'pl-4'
-                } ${
-                  draggingId === list.id
-                    ? 'bg-white/15 ring-white/40 shadow-lg scale-[1.01] z-10 relative'
-                    : ''
-                }`}
+                className={`relative flex w-full items-center gap-2 overflow-hidden rounded-full bg-white/5 ring-1 ring-inset ring-white/20 pr-1.5 py-1.5 min-w-0 transition-colors duration-200 ${
+                  canReorder && editingId !== list.id ? 'pl-1' : 'pl-4'
+                } ${draggingId === list.id ? 'bg-white/15 ring-white/40' : ''}`}
               >
                 {editingId === list.id ? (
                   <>
