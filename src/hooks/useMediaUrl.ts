@@ -249,6 +249,12 @@ export function clearMediaUrlCache(
     if (matchesStoragePath(key)) ongoingLoads.delete(key);
   }
 
+  // Släpp ev. "misslyckad"-markering så nästa render får försöka direkt.
+  for (const key of Array.from(failedLoads.keys())) {
+    if (matchesStoragePath(key)) failedLoads.delete(key);
+  }
+
+
   try {
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
