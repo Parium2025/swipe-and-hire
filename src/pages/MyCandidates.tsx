@@ -852,7 +852,6 @@ const MyCandidates = () => {
         open={listsDialogOpen}
         onOpenChange={setListsDialogOpen}
         lists={lists}
-        countByList={{ [activeListId ?? '']: stats.total }}
         onCreate={async (name) => {
           const created = await createList.mutateAsync(name);
           setActiveListId(created.id);
