@@ -152,10 +152,10 @@ export const CandidateListsDialog = ({
                       disabled={list.is_default}
                       onClick={() => setPendingDelete(list)}
                       aria-label={`Ta bort ${list.name}`}
-                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition-colors ${
+                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
                         list.is_default
-                          ? 'text-white/30 bg-white/5 cursor-not-allowed'
-                          : 'text-white bg-white/10 md:hover:bg-white/20'
+                          ? 'border-white/5 text-white/30 bg-white/5 cursor-not-allowed'
+                          : 'border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
                       }`}
                     >
                       <Trash2 className="h-4 w-4" />

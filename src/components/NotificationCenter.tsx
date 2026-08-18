@@ -205,7 +205,20 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
       return { kind: 'server' as const, at, n };
     });
     const b = visibleArchived.map(n => ({ kind: 'local' as const, at: n.at, n }));
-    return [...a, ...b].sort((x, y) => y.at - x.at);
+    // Dedupe: en notis som hunnit synkas till kontot kan fortfarande finnas kvar
+    // lokalt (t.ex. om synken skedde i en annan flik). Visa den bara en gång.
+    const all = [...a, ...b].sort((x, y) => y.at - x.at);
+    const seen = new Map<string, number>();
+    const DEDUPE_MS = 120_000;
+    return all.filter(entry => {
+      const title = (entry.n as { title?: string }).title || '';
+      const body = (entry.n as { body?: string | null }).body || '';
+      const key = `${title}|${body}`;
+      const prev = seen.get(key);
+      if (prev !== undefined && Math.abs(prev - entry.at) < DEDUPE_MS) return false;
+      seen.set(key, entry.at);
+      return true;
+    });
   }, [visibleNotifications, visibleArchived]);
 
   const navigate = useNavigate();
