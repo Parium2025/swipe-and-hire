@@ -1,7 +1,8 @@
 import { useCandidateActivities, CandidateActivity } from '@/hooks/useCandidateActivities';
 import { formatDistanceToNow, format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Star, StickyNote, Edit3, Activity, UserPlus, CalendarPlus, CalendarClock, CalendarX } from 'lucide-react';
+import { Star, StickyNote, Edit3, Activity, UserPlus, CalendarPlus, CalendarClock, CalendarX, MoveRight } from 'lucide-react';
+import { STAGE_CONFIG } from '@/hooks/useMyCandidatesData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 
@@ -14,6 +15,8 @@ const getActivityIcon = (type: string) => {
   switch (type) {
     case 'rating_changed':
       return Star;
+    case 'stage_changed':
+      return MoveRight;
     case 'note_added':
       return StickyNote;
     case 'note_edited':
@@ -29,6 +32,14 @@ const getActivityIcon = (type: string) => {
     default:
       return Activity;
   }
+};
+
+const stageLabel = (key: string | null) => {
+  if (!key) return 'okänt steg';
+  const preset = (STAGE_CONFIG as Record<string, { label: string }>)[key];
+  if (preset) return preset.label;
+  // Custom stages use their key as identifier — make it readable
+  return key.replace(/[_-]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 };
 
 const formatInterviewTime = (value: string | null) => {
@@ -61,6 +72,16 @@ const getActivityDescription = (activity: CandidateActivity) => {
           <span className="whitespace-nowrap"><span className="text-white">{oldRating}</span><span className="text-yellow-400"> ★</span></span>
           <span className="text-white"> till </span>
           <span className="whitespace-nowrap"><span className="text-white">{newRating}</span><span className="text-yellow-400"> ★</span></span>
+        </span>
+      );
+    case 'stage_changed':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> flyttade kandidaten från </span>
+          <span className="text-white">{stageLabel(activity.old_value)}</span>
+          <span className="text-white"> till </span>
+          <span className="text-white">{stageLabel(activity.new_value)}</span>
         </span>
       );
     case 'note_added':
