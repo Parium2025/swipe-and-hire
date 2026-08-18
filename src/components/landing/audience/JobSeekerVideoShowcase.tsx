@@ -7,7 +7,7 @@ import winCrispAsset from '@/assets/showcase-jobseeker-win-crisp.mp4.asset.json'
 import posterAsset from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
 import windowsLiteAsset from '@/assets/showcase-jobseeker-windows-lite.mp4.asset.json';
 import fit432Asset from '@/assets/showcase-jobseeker-fit432.mp4.asset.json';
-import { getVideoQualityTier, isAndroidDevice, isAppleDevice, isWindowsDevice, prefersReducedData, watchPlaybackHealth } from '@/lib/videoPlatform';
+import { getVideoQualityTier, isAndroidDevice, isAppleDevice, isWindowsDevice, prefersReducedData, watchDisplayTopology, watchPlaybackHealth } from '@/lib/videoPlatform';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 const WINDOWS_BASELINE_30_SRC = '/landing/windows-safe/showcase-phone-baseline30.mp4';
