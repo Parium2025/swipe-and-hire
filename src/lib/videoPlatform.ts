@@ -187,6 +187,10 @@ export const getMaxConcurrentVideos = () => {
   // vilket var värre än den decode-belastning taket skulle skydda mot.
   // Windows kör därför samma "alltid igång"-läge som Apple.
   if (isLowPowerDevice()) return getVideoPlatform() === 'android' ? 3 : 4;
+  // Windows i säkert läge (svagare maskin, eller degraderad av hälsovakten):
+  // håll nere antalet parallella decoders så att hero-videon alltid får
+  // budget. Stark maskin kör samma "alltid igång"-läge som Apple.
+  if (isWindowsDevice() && getVideoQualityTier() === 'safe') return 4;
   return 8;
 };
 
