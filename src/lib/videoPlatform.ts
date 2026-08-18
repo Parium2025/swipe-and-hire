@@ -226,6 +226,11 @@ export const watchPlaybackHealth = (
  */
 export const getMaxConcurrentVideos = () => {
   if (prefersReducedData()) return 1;
+  // Windows med UTÖKAT skrivbord: två kompositionsplan delar samma
+  // dekoderpool och varje ström kostar mer (zero-copy-vägen bryts). Här är
+  // taket därför hårt satt till 2 — spegling träffas inte av regeln, vilket
+  // stämmer med att spegling redan fungerar felfritt.
+  if (isWindowsDevice() && isExtendedDisplay()) return 2;
   if (isLowPowerDevice()) return getVideoPlatform() === 'android' ? 3 : 4;
   // Windows i säkert läge (svagare maskin, eller degraderad av hälsovakten):
   // håll nere antalet parallella decoders så att hero-videon alltid får budget.
@@ -235,6 +240,7 @@ export const getMaxConcurrentVideos = () => {
   if (isExtendedDisplay()) return 4;
   return 8;
 };
+
 
 
 
