@@ -376,7 +376,8 @@ export async function prefetchMediaUrl(
   }
 
   try {
-    const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform);
+    const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform, 'low');
+
     if (!signedUrl) return;
 
     // Preloada till blob-cache (så UI kan visa direkt)
