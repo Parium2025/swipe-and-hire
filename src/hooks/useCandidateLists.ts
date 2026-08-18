@@ -194,3 +194,34 @@ export function useActiveCandidateList(lists: CandidateList[]) {
 
   return { activeListId, activeList, setActiveListId };
 }
+
+/**
+ * Alla synliga listor för ett gäng kollegor, i en enda query.
+ * Används för att kunna hoppa direkt till "Annas lager-lista".
+ */
+export function useTeamCandidateLists(ownerIds: string[]) {
+  const key = [...ownerIds].sort().join(',');
+
+  const { data } = useQuery({
+    queryKey: ['team-candidate-lists', key],
+    queryFn: async () => {
+      if (ownerIds.length === 0) return {} as Record<string, CandidateList[]>;
+      const { data, error } = await supabase
+        .from('candidate_lists')
+        .select('id, owner_id, name, order_index, is_default, created_at')
+        .in('owner_id', ownerIds)
+        .order('order_index', { ascending: true });
+      if (error) throw error;
+
+      const grouped: Record<string, CandidateList[]> = {};
+      for (const list of (data || []) as CandidateList[]) {
+        (grouped[list.owner_id] ||= []).push(list);
+      }
+      return grouped;
+    },
+    enabled: ownerIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return data ?? {};
+}
