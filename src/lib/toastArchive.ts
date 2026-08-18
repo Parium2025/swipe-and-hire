@@ -80,8 +80,14 @@ async function flushToServer(key: string) {
     });
     if (error) return; // behåll lokalt om synken misslyckas
 
-    // Servern äger posten nu → ta bort den lokala dubbletten
-    items = items.filter((n) => n.id !== entry.localId);
+    // Servern äger posten nu → ta bort den lokala dubbletten. Vi matchar både
+    // på id och på innehåll, så att inga lokala kopior blir kvar om samma notis
+    // hann arkiveras i flera steg (t.ex. två flikar eller snabb upprepning).
+    items = items.filter(
+      (n) =>
+        n.id !== entry.localId &&
+        !(n.kind === entry.kind && n.title === entry.title && (n.body || "") === (entry.body || ""))
+    );
     persist();
     notifyServerRefresh();
   } catch {
