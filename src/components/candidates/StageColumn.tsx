@@ -55,6 +55,17 @@ export const StageColumn = ({
 
   const displayColor = liveColor ?? stageSettings.color;
 
+  // ── Virtualisering (aktiveras först vid stora kolumner) ──
+  const VIRTUALIZE_THRESHOLD = 60;
+  const OVERSCAN = 10;
+  const GAP = 6; // space-y-1.5
+  const [itemHeight, setItemHeight] = useState(56);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const firstItemRef = useRef<HTMLDivElement>(null);
+
+  const isVirtual = candidates.length > VIRTUALIZE_THRESHOLD;
+
   const checkScroll = useCallback(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
@@ -63,11 +74,40 @@ export const StageColumn = ({
     const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
     setCanScrollUp(hasScrollableContent && !isAtTop);
     setCanScrollDown(hasScrollableContent && !isAtBottom);
+    setScrollTop(el.scrollTop);
+    setViewportHeight(el.clientHeight);
   }, []);
 
   useEffect(() => {
     checkScroll();
   }, [candidates.length, checkScroll]);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => checkScroll());
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [checkScroll]);
+
+  useLayoutEffect(() => {
+    const h = firstItemRef.current?.offsetHeight;
+    if (h && Math.abs(h - itemHeight) > 1) setItemHeight(h);
+  });
+
+  const pitch = itemHeight + GAP;
+  const { startIndex, endIndex } = useMemo(() => {
+    if (!isVirtual) return { startIndex: 0, endIndex: candidates.length };
+    const vh = viewportHeight || 600;
+    const start = Math.max(0, Math.floor(scrollTop / pitch) - OVERSCAN);
+    const visible = Math.ceil(vh / pitch) + OVERSCAN * 2;
+    return { startIndex: start, endIndex: Math.min(candidates.length, start + visible) };
+  }, [isVirtual, candidates.length, scrollTop, viewportHeight, pitch]);
+
+  const visibleCandidates = isVirtual ? candidates.slice(startIndex, endIndex) : candidates;
+  const topSpacer = isVirtual && startIndex > 0 ? startIndex * pitch - GAP : 0;
+  const bottomSpacer =
+    isVirtual && endIndex < candidates.length ? (candidates.length - endIndex) * pitch - GAP : 0;
 
   // Dynamic gap: (totalStageCount - 1) * 0.75rem
   const gapTotal = `${(totalStageCount - 1) * 0.75}rem`;
