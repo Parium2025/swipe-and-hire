@@ -330,9 +330,9 @@ export const CandidateListsDialog = ({
                   />
                   ?{' '}
                   {pendingCount > 0
-                    ? `${pendingCount} kandidater flyttas till din standardlista — ingen kandidat, anteckning eller ansökan försvinner. `
-                    : ''}
-                  Listans egna steg tas bort och det går inte att ångra.
+                    ? `${pendingCount} ${pendingCount === 1 ? 'kandidat' : 'kandidater'} tas bort från din pipeline tillsammans med listans egna steg — ansökningarna finns kvar under Kandidater. Vill du behålla dem: stäng den här rutan, markera kandidaterna och flytta dem till en annan lista först. `
+                    : 'Listans egna steg tas bort. '}
+                  Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>
