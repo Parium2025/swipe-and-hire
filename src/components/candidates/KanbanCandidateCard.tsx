@@ -8,6 +8,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
 import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 
 /* ── Star Rating (read-only) ──────────────────────── */
 const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxStars?: number }) => (
@@ -91,6 +92,7 @@ export const CandidateCardContent = memo(function CandidateCardContent({
         }`}
       onClick={handleClick}
       onMouseEnter={onPrefetch}
+      onTouchStart={onPrefetch}
     >
       {/* Selection checkbox */}
       {isSelectionMode && (
@@ -174,8 +176,13 @@ export const CandidateCardContent = memo(function CandidateCardContent({
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute right-1 top-1 p-1 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-full
-            opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100"
+          aria-label="Ta bort kandidat"
+          className={`absolute right-0.5 top-0.5 flex h-9 w-9 items-center justify-center text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-full
+            transition-all duration-300 ${
+              isTouchDevice
+                ? 'opacity-100 scale-100'
+                : 'opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100'
+            }`}
         >
           <Trash2 className="h-3 w-3" />
         </button>
