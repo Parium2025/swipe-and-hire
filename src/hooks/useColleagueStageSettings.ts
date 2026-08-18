@@ -26,20 +26,23 @@ interface DbStageSetting {
  * Hook to fetch a colleague's stage settings.
  * Used when viewing another team member's candidate list.
  */
-export function useColleagueStageSettings(colleagueId: string | null) {
+export function useColleagueStageSettings(colleagueId: string | null, listId: string | null = null) {
   const queryClient = useQueryClient();
 
   const { data: dbSettings, isLoading } = useQuery({
-    queryKey: ['colleague-stage-settings', colleagueId],
+    queryKey: ['colleague-stage-settings', colleagueId, listId],
     queryFn: async () => {
       if (!colleagueId) return [];
-      
-      const { data, error } = await supabase
+
+      let q = supabase
         .from('user_stage_settings')
         .select('*')
-        .eq('user_id', colleagueId)
-        .order('order_index', { ascending: true });
-      
+        .eq('user_id', colleagueId);
+
+      if (listId) q = q.eq('list_id', listId);
+
+      const { data, error } = await q.order('order_index', { ascending: true });
+
       if (error) throw error;
       return (data || []) as DbStageSetting[];
     },

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
@@ -121,13 +122,18 @@ export const useEmployerBackgroundSync = () => {
 
   // 👥 Preload mina kandidater (alltid hämta färsk data - realtime synkar)
   const preloadMyCandidates = useCallback(async (userId: string) => {
-    const cacheKey = MY_CANDIDATES_CACHE_KEY + userId;
+    const listId = getActiveCandidateListId(userId);
+    const cacheKey = MY_CANDIDATES_CACHE_KEY + userId + (listId ? `_${listId}` : '');
 
-    // Hämta mina kandidater
-    const { data: myCandidates, error } = await supabase
+    // Hämta mina kandidater i den aktiva listan
+    let mcQuery = supabase
       .from('my_candidates')
       .select('*')
-      .eq('recruiter_id', userId)
+      .eq('recruiter_id', userId);
+
+    if (listId) mcQuery = mcQuery.eq('list_id', listId);
+
+    const { data: myCandidates, error } = await mcQuery
       .order('updated_at', { ascending: false })
       .limit(INITIAL_PAGE_SIZE);
 
@@ -186,11 +192,11 @@ export const useEmployerBackgroundSync = () => {
       
       // Synka React Query-cachen — bevara extra sidor som
       // useProgressivePagination kan ha laddat (sida 2-5)
-      const existingMc: any = queryClient.getQueryData(['my-candidates', userId, '']);
+      const existingMc: any = queryClient.getQueryData(['my-candidates', userId, '', listId]);
       const existingMcPages = existingMc?.pages ?? [];
       const existingMcParams = existingMc?.pageParams ?? [null];
       const newFirstMcPage = { items, nextCursor: items.length >= INITIAL_PAGE_SIZE ? items[items.length - 1]?.updated_at ?? null : null };
-      queryClient.setQueryData(['my-candidates', userId, ''], {
+      queryClient.setQueryData(['my-candidates', userId, '', listId], {
         pages: existingMcPages.length > 1
           ? [newFirstMcPage, ...existingMcPages.slice(1)]
           : [newFirstMcPage],

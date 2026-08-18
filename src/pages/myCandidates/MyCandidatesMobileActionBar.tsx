@@ -3,11 +3,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   ArrowDown,
+  ListChecks,
   Trash2,
   CheckSquare,
   Square,
@@ -24,6 +27,8 @@ interface MyCandidatesMobileActionBarProps {
   stageOrder: string[];
   stageConfig: Record<string, { label: string; color: string; iconName?: string }>;
   onBulkMoveToStage: (stage: string) => void;
+  otherLists?: { id: string; name: string }[];
+  onBulkMoveToList?: (listId: string, listName: string) => void;
   onBulkDeleteClick: () => void;
 }
 
@@ -35,6 +40,8 @@ export const MyCandidatesMobileActionBar = ({
   stageOrder,
   stageConfig,
   onBulkMoveToStage,
+  otherLists = [],
+  onBulkMoveToList,
   onBulkDeleteClick,
 }: MyCandidatesMobileActionBarProps) => {
   const device = useDevice();
@@ -206,6 +213,22 @@ export const MyCandidatesMobileActionBar = ({
                     </Tooltip>
                   );
                 })}
+                {otherLists.length > 0 && onBulkMoveToList && (
+                  <>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuLabel className="text-xs font-medium text-white/50">Flytta till annan lista</DropdownMenuLabel>
+                    {otherLists.map(list => (
+                      <DropdownMenuItem
+                        key={list.id}
+                        onSelect={() => onBulkMoveToList(list.id, list.name)}
+                        className="text-white hover:text-white cursor-pointer min-h-[44px]"
+                      >
+                        <ListChecks className="h-4 w-4 mr-2 text-white/70 flex-shrink-0" />
+                        <span className="truncate min-w-0">{list.name}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </>
+                )}
               </TooltipProvider>
             </DropdownMenuContent>
           </DropdownMenu>

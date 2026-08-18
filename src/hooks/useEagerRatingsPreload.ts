@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
@@ -216,7 +217,9 @@ export const useEagerRatingsPreload = () => {
     }
 
     // Hämta stage-settings också (för Kanban-vy utan flicker)
-    const existingStageCache = localStorage.getItem(STAGE_SETTINGS_CACHE_KEY + userId);
+    const activeListId = getActiveCandidateListId(userId);
+    const stageCacheKey = STAGE_SETTINGS_CACHE_KEY + userId + (activeListId ? `_${activeListId}` : '');
+    const existingStageCache = localStorage.getItem(stageCacheKey);
     let shouldFetchStages = true;
     
     if (existingStageCache) {
@@ -232,14 +235,18 @@ export const useEagerRatingsPreload = () => {
     }
 
     if (shouldFetchStages) {
-      const { data: stageSettings, error: stageError } = await supabase
+      let stageQuery = supabase
         .from('user_stage_settings')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', userId);
+
+      if (activeListId) stageQuery = stageQuery.eq('list_id', activeListId);
+
+      const { data: stageSettings, error: stageError } = await stageQuery
         .order('order_index', { ascending: true });
 
       if (!stageError && stageSettings) {
-        safeSetItem(STAGE_SETTINGS_CACHE_KEY + userId, JSON.stringify({
+        safeSetItem(stageCacheKey, JSON.stringify({
           settings: stageSettings,
           timestamp: Date.now()
         }));

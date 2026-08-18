@@ -2,10 +2,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
   ArrowDown,
+  ListChecks,
   Trash2,
   CheckSquare,
   Square,
@@ -20,6 +23,8 @@ interface MyCandidatesDesktopActionBarProps {
   stageOrder: string[];
   stageConfig: Record<string, { label: string; color: string; iconName?: string }>;
   onBulkMoveToStage: (stage: string) => void;
+  otherLists?: { id: string; name: string }[];
+  onBulkMoveToList?: (listId: string, listName: string) => void;
   onBulkDeleteClick: () => void;
 }
 
@@ -31,6 +36,8 @@ export const MyCandidatesDesktopActionBar = ({
   stageOrder,
   stageConfig,
   onBulkMoveToStage,
+  otherLists = [],
+  onBulkMoveToList,
   onBulkDeleteClick,
 }: MyCandidatesDesktopActionBarProps) => {
   return (
@@ -79,6 +86,22 @@ export const MyCandidatesDesktopActionBar = ({
                 </DropdownMenuItem>
               );
             })}
+            {otherLists.length > 0 && onBulkMoveToList && (
+              <>
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuLabel className="text-xs font-medium text-white/50">Flytta till annan lista</DropdownMenuLabel>
+                {otherLists.map(list => (
+                  <DropdownMenuItem
+                    key={list.id}
+                    onClick={() => onBulkMoveToList(list.id, list.name)}
+                    className="text-white hover:text-white cursor-pointer"
+                  >
+                    <ListChecks className="h-4 w-4 mr-2 text-white/70 flex-shrink-0" />
+                    <span className="truncate">{list.name}</span>
+                  </DropdownMenuItem>
+                ))}
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 

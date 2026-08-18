@@ -323,6 +323,36 @@ export type Database = {
           },
         ]
       }
+      candidate_lists: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          order_index: number
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          order_index?: number
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          order_index?: number
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       candidate_notes: {
         Row: {
           applicant_id: string
@@ -1965,6 +1995,7 @@ export type Database = {
           created_at: string
           id: string
           job_id: string | null
+          list_id: string | null
           notes: string | null
           rating: number | null
           recruiter_id: string
@@ -1977,6 +2008,7 @@ export type Database = {
           created_at?: string
           id?: string
           job_id?: string | null
+          list_id?: string | null
           notes?: string | null
           rating?: number | null
           recruiter_id: string
@@ -1989,13 +2021,22 @@ export type Database = {
           created_at?: string
           id?: string
           job_id?: string | null
+          list_id?: string | null
           notes?: string | null
           rating?: number | null
           recruiter_id?: string
           stage?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "my_candidates_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_lists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_preferences: {
         Row: {
@@ -3147,6 +3188,7 @@ export type Database = {
           icon_name: string | null
           id: string
           is_custom: boolean
+          list_id: string | null
           order_index: number
           stage_key: string
           updated_at: string
@@ -3159,6 +3201,7 @@ export type Database = {
           icon_name?: string | null
           id?: string
           is_custom?: boolean
+          list_id?: string | null
           order_index?: number
           stage_key: string
           updated_at?: string
@@ -3171,12 +3214,21 @@ export type Database = {
           icon_name?: string | null
           id?: string
           is_custom?: boolean
+          list_id?: string | null
           order_index?: number
           stage_key?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_stage_settings_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_lists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_subscriptions: {
         Row: {
@@ -3380,6 +3432,10 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      ensure_default_candidate_list: {
+        Args: { p_owner_id: string }
+        Returns: string
       }
       get_active_plan_details: {
         Args: { _user_id: string }
@@ -3945,25 +4001,46 @@ export type Database = {
           workplace_postal_code: string
         }[]
       }
-      search_my_candidates: {
-        Args: {
-          p_cursor_updated_at?: string
-          p_limit?: number
-          p_recruiter_id: string
-          p_search_query: string
-        }
-        Returns: {
-          applicant_id: string
-          application_id: string
-          created_at: string
-          job_id: string
-          my_candidate_id: string
-          notes: string
-          rating: number
-          stage: string
-          updated_at: string
-        }[]
-      }
+      search_my_candidates:
+        | {
+            Args: {
+              p_cursor_updated_at?: string
+              p_limit?: number
+              p_recruiter_id: string
+              p_search_query: string
+            }
+            Returns: {
+              applicant_id: string
+              application_id: string
+              created_at: string
+              job_id: string
+              my_candidate_id: string
+              notes: string
+              rating: number
+              stage: string
+              updated_at: string
+            }[]
+          }
+        | {
+            Args: {
+              p_cursor_updated_at?: string
+              p_limit?: number
+              p_list_id?: string
+              p_recruiter_id: string
+              p_search_query: string
+            }
+            Returns: {
+              applicant_id: string
+              application_id: string
+              created_at: string
+              job_id: string
+              my_candidate_id: string
+              notes: string
+              rating: number
+              stage: string
+              updated_at: string
+            }[]
+          }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       switch_conversation_job_context: {

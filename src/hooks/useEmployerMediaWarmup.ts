@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { supabase } from '@/integrations/supabase/client';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { imageCache } from '@/lib/imageCache';
 
 /**
@@ -120,7 +121,7 @@ export function useEmployerMediaWarmup() {
 
     // Initial scan av befintlig data
     const applicationsData = queryClient.getQueryData<InfinitePageData>(['applications', userId, '']);
-    const myCandidatesData = queryClient.getQueryData<InfinitePageData>(['my-candidates', userId, '']);
+    const myCandidatesData = queryClient.getQueryData<InfinitePageData>(['my-candidates', userId, '', getActiveCandidateListId(userId)]);
     collectAndWarm(applicationsData);
     collectAndWarm(myCandidatesData);
 

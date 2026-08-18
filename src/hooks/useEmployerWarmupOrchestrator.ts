@@ -1,3 +1,4 @@
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from '@/hooks/useAuth';
 import { useProgressivePagination } from '@/hooks/useProgressivePagination';
 import { useEmployerMediaWarmup } from '@/hooks/useEmployerMediaWarmup';
@@ -41,7 +42,7 @@ export function useEmployerWarmupOrchestrator() {
   });
 
   useProgressivePagination({
-    queryKey: ['my-candidates', userId, ''],
+    queryKey: ['my-candidates', userId, '', getActiveCandidateListId(userId)],
     enabled: !!userId && isEmployer,
     maxPages: 5,
     delayBetweenPages: 800,

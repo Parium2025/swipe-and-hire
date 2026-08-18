@@ -3,6 +3,7 @@ import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { toast } from 'sonner';
 import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/useCandidateOperationQueue';
 import { getIsOnline } from '@/lib/connectivityManager';
@@ -70,9 +71,14 @@ interface CachedMyCandidates {
   timestamp: number;
 }
 
-function readMyCandidatesCache(userId: string): MyCandidateData[] | null {
+/** Cachen är per lista — annars läcker kandidater mellan listorna vid cold start. */
+export function myCandidatesCacheKey(userId: string, listId: string | null = null): string {
+  return MY_CANDIDATES_CACHE_KEY + userId + (listId ? `_${listId}` : '');
+}
+
+function readMyCandidatesCache(userId: string, listId: string | null = null): MyCandidateData[] | null {
   try {
-    const key = MY_CANDIDATES_CACHE_KEY + userId;
+    const key = myCandidatesCacheKey(userId, listId);
     const cached = safeReadJsonCache<CachedMyCandidates>(key, (value): value is CachedMyCandidates => {
       const cache = value as Partial<CachedMyCandidates>;
       return Array.isArray(cache.items) && typeof cache.timestamp === 'number';
@@ -94,8 +100,8 @@ function readMyCandidatesCache(userId: string): MyCandidateData[] | null {
   }
 }
 
-function readMyCandidatesCacheTimestamp(userId: string): number | null {
-  const key = MY_CANDIDATES_CACHE_KEY + userId;
+function readMyCandidatesCacheTimestamp(userId: string, listId: string | null = null): number | null {
+  const key = myCandidatesCacheKey(userId, listId);
   const cached = safeReadJsonCache<CachedMyCandidates>(key, (value): value is CachedMyCandidates => {
     const cache = value as Partial<CachedMyCandidates>;
     return Array.isArray(cache.items) && typeof cache.timestamp === 'number';
@@ -114,9 +120,9 @@ function deduplicateByApplicant(items: MyCandidateData[]): MyCandidateData[] {
   return Array.from(seen.values());
 }
 
-function writeMyCandidatesCache(userId: string, items: MyCandidateData[]): void {
+function writeMyCandidatesCache(userId: string, items: MyCandidateData[], listId: string | null = null): void {
   try {
-    const key = MY_CANDIDATES_CACHE_KEY + userId;
+    const key = myCandidatesCacheKey(userId, listId);
     const cached: CachedMyCandidates = {
       items: deduplicateByApplicant(items).slice(0, 100),
       timestamp: Date.now(),
@@ -129,27 +135,35 @@ function writeMyCandidatesCache(userId: string, items: MyCandidateData[]): void 
 
 function updateMyCandidatesCache(
   userId: string | undefined,
-  updater: (items: MyCandidateData[]) => MyCandidateData[]
+  updater: (items: MyCandidateData[]) => MyCandidateData[],
+  listId: string | null = null
 ): void {
   if (!userId) return;
-  const cached = readMyCandidatesCache(userId);
+  const cached = readMyCandidatesCache(userId, listId);
   if (!cached) return;
-  writeMyCandidatesCache(userId, updater(cached));
+  writeMyCandidatesCache(userId, updater(cached), listId);
 }
 
-export function useMyCandidatesData(searchQuery: string = '') {
+export function useMyCandidatesData(searchQuery: string = '', listId: string | null = null) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   // Stable query key for optimistic updates (must match useInfiniteQuery key exactly)
-  const queryKey = useMemo(() => ['my-candidates', user?.id, searchQuery] as const, [user?.id, searchQuery]);
+  const queryKey = useMemo(
+    () => ['my-candidates', user?.id, searchQuery, listId] as const,
+    [user?.id, searchQuery, listId],
+  );
+
+  // Nya kandidater hamnar i listan användaren jobbar i just nu (även när de
+  // läggs till från /candidates, där hooken anropas utan list-id).
+  const insertListId = listId ?? getActiveCandidateListId(user?.id);
 
   // 🔥 Auto-sync queued candidate operations when connectivity returns
   useCandidateOperationQueue(user?.id);
   const [isDragging, setIsDragging] = useState(false);
 
   // Check for cached data BEFORE query runs (only for non-search queries)
-  const hasCachedData = user && !searchQuery ? readMyCandidatesCache(user.id) !== null : false;
+  const hasCachedData = user && !searchQuery ? readMyCandidatesCache(user.id, listId) !== null : false;
 
   // Use infinite query for scalable pagination (handles 100k+ candidates)
   const {
@@ -162,7 +176,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['my-candidates', user?.id, searchQuery],
+    queryKey: ['my-candidates', user?.id, searchQuery, listId],
     initialPageParam: null as string | null,
     queryFn: async ({ pageParam }) => {
       if (!user) return { items: [], nextCursor: null };
@@ -174,6 +188,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           p_search_query: searchQuery.trim(),
           p_limit: PAGE_SIZE,
           p_cursor_updated_at: pageParam || null,
+          p_list_id: listId,
         });
 
         if (searchError) throw searchError;
@@ -309,6 +324,9 @@ export function useMyCandidatesData(searchQuery: string = '') {
         .eq('recruiter_id', user.id)
         .order('updated_at', { ascending: false })
         .limit(PAGE_SIZE);
+
+      // Varje lista har sina egna kandidater
+      if (listId) query = query.eq('list_id', listId);
 
       // Apply cursor for pagination
       if (pageParam) {
@@ -475,7 +493,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
 
       // 🔥 Cache first page for instant-load on next visit (only for non-search)
       if (!pageParam && !searchQuery && items.length > 0) {
-        writeMyCandidatesCache(user.id, items);
+        writeMyCandidatesCache(user.id, items, listId);
       }
 
       return { items, nextCursor };
@@ -489,7 +507,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
     // 🔥 Instant-load from localStorage cache (only for non-search queries)
     initialData: () => {
       if (!user || searchQuery) return undefined;
-      const cached = readMyCandidatesCache(user.id);
+      const cached = readMyCandidatesCache(user.id, listId);
       if (!cached || cached.length === 0) return undefined;
       return {
         pages: [{ items: cached, nextCursor: cached.length >= PAGE_SIZE ? cached[cached.length - 1]?.updated_at : null }],
@@ -498,7 +516,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
     initialDataUpdatedAt: () => {
       if (!user || searchQuery) return undefined;
-      return readMyCandidatesCacheTimestamp(user.id) ?? undefined;
+      return readMyCandidatesCacheTimestamp(user.id, listId) ?? undefined;
     },
   });
 
@@ -551,10 +569,11 @@ export function useMyCandidatesData(searchQuery: string = '') {
           // For the common case (stage change), update cache in-place to avoid
           // refetch jitter that makes drag/drop feel "laggy".
           if (payload?.eventType === 'UPDATE' && payload?.new?.id) {
-            const next = payload.new as { id: string; stage?: CandidateStage; recruiter_id?: string };
+            const next = payload.new as { id: string; stage?: CandidateStage; recruiter_id?: string; list_id?: string | null };
 
-            // Only update if it's the current user's candidate
-            if (next.recruiter_id === user.id && next.stage) {
+            // Only update if it's the current user's candidate — och fortfarande i samma lista
+            const sameList = !listId || !next.list_id || next.list_id === listId;
+            if (next.recruiter_id === user.id && next.stage && sameList) {
               queryClient.setQueryData(
                 queryKey,
                 (old: any) => {
@@ -763,6 +782,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
         .from('user_stage_settings')
         .select('stage_key, order_index')
         .eq('user_id', user.id)
+        .eq('list_id', insertListId)
         .gt('order_index', -1)
         .order('order_index', { ascending: true })
         .limit(1);
@@ -797,6 +817,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           applicant_id: applicantId,
           application_id: applicationId,
           job_id: jobId || null,
+          list_id: insertListId,
           stage: defaultStage,
           rating: restoredRating, // Restore previous rating if exists
           notes: restoredNotes, // Restore previous notes if exists
@@ -851,6 +872,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
         .from('user_stage_settings')
         .select('stage_key, order_index, custom_label')
         .eq('user_id', user.id)
+        .eq('list_id', insertListId)
         .gt('order_index', -1) // Exclude deleted stages
         .order('order_index', { ascending: true })
         .limit(1);
@@ -883,6 +905,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
         applicant_id: c.applicantId,
         application_id: c.applicationId,
         job_id: c.jobId || null,
+        list_id: insertListId,
         stage: defaultStage,
         rating: ratingsMap.get(c.applicantId) || 0, // Restore previous rating
         notes: notesMap.get(c.applicantId) || null, // Restore previous notes
@@ -1235,7 +1258,8 @@ export function useMyCandidatesData(searchQuery: string = '') {
       updateMyCandidatesCache(user?.id, (items) =>
         items.map((c) =>
           c.application_id === applicationId ? { ...c, viewed_at: viewedAt } : c
-        )
+        ),
+        listId
       );
       
       queryClient.setQueryData(queryKey, (old: any) => {
