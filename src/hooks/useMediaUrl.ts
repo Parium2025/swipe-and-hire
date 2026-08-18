@@ -122,7 +122,7 @@ function getOrCreateSignedUrlLoad(
   expiresInSeconds: number,
   transform?: ImageTransformOptions,
   priority: LoadPriority = 'high'
-) {
+): Promise<string | null> {
   const cacheKey = getCacheKey(storagePath, mediaType, transform);
   const existing = ongoingLoads.get(cacheKey);
   if (existing) {
