@@ -77,9 +77,11 @@ export const getMaxConcurrentVideos = () => {
   // klaras av Apple-enheter. Bara sparläge/riktigt svaga enheter får
   // ett glidande fönster.
   if (prefersReducedData()) return 1;
-  // Windows/external display: endast en laddad och spelande gallerivideo åt
-  // gången. Övriga kort visar sina posters och har ingen src kopplad alls.
-  if (isWindowsDevice()) return 1;
+  // Windows: galleriets Windows-källor är extremt lätta (560x700, Constrained
+  // Baseline, ~1,1 Mbit/s, ~340 kB per klipp). Ett tak på en ström gjorde att
+  // bara ett kort spelade och att uppspelningen dog så fort man scrollade —
+  // vilket var värre än den decode-belastning taket skulle skydda mot.
+  // Windows kör därför samma "alltid igång"-läge som Apple.
   if (isLowPowerDevice()) return getVideoPlatform() === 'android' ? 3 : 4;
   return 8;
 };
