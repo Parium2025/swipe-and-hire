@@ -178,8 +178,10 @@ export const StageColumn = ({
             </div>
           )}
 
+          {topSpacer > 0 && <div data-spacer="top" style={{ height: topSpacer }} aria-hidden />}
+
           <SortableContext items={candidates.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-            {candidates.map((candidate) => (
+            {visibleCandidates.map((candidate) => (
               <SortableCandidateCard
                 key={candidate.id}
                 candidate={candidate}
