@@ -317,7 +317,7 @@ export const CandidateListsDialog = ({
                       setEditingName(list.name);
                     }}
                     onCancelEdit={() => setEditingId(null)}
-                    onSaveEdit={() => handleRename(list.id)}
+                    onSaveEdit={() => handleRename(list.id, list.name)}
                     onRequestDelete={() => setPendingDelete(list)}
                   />
                 ))}
