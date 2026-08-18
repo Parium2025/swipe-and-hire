@@ -830,6 +830,14 @@ const JobSeekerVideoShowcase = ({
                 // Sparläge på iOS: göm elementet så Safaris egen play-ikon inte
                 // ritas ovanpå postern. `visibility` påverkar inte decodern.
                 visibility: autoplayBlocked ? 'hidden' : undefined,
+                // Windows + extern skärm: Chromium kan frysa sitt native MPO-
+                // videoplan när fönstret ligger på en annan GPU-output, trots
+                // att currentTime fortsätter gå. En nästan ogenomskinlig alpha
+                // gör videon till en vanlig komposit-textur i samma lager som
+                // telefonramen. Den visuella skillnaden är omätbar, men vi
+                // slipper skärmbundna overlay-plan. Den redan lätta 432p/30-
+                // källan håller kostnaden för denna väg låg.
+                opacity: isWindowsDevice() ? 0.999 : undefined,
               }}
             
             >
