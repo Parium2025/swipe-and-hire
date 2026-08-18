@@ -161,7 +161,53 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
     onError: (error: any) => toast.error(error.message || 'Kunde inte ta bort listan'),
   });
 
-  return { lists, defaultList, isLoading, createList, renameList, deleteList };
+  /**
+   * Ny ordning på listorna. Tar emot id:n i önskad ordning och skriver
+   * order_index 0..n. Cachen uppdateras direkt så menyn inte hoppar.
+   */
+  const reorderLists = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      if (!ownerId) throw new Error('Not authenticated');
+      const updates = orderedIds.map((id, index) =>
+        supabase.from('candidate_lists').update({ order_index: index }).eq('id', id),
+      );
+      const results = await Promise.all(updates);
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+      return orderedIds;
+    },
+    onMutate: async (orderedIds: string[]) => {
+      await queryClient.cancelQueries({ queryKey: ['candidate-lists', ownerId] });
+      const previous = queryClient.getQueryData<CandidateList[]>(['candidate-lists', ownerId]);
+      if (previous) {
+        const byId = new Map(previous.map((l) => [l.id, l]));
+        const next = orderedIds
+          .map((id, index) => {
+            const list = byId.get(id);
+            return list ? { ...list, order_index: index } : null;
+          })
+          .filter(Boolean) as CandidateList[];
+        if (next.length === previous.length) {
+          queryClient.setQueryData(['candidate-lists', ownerId], next);
+          if (isOwn) {
+            writeCachedCandidateLists(ownerId!, next.map(({ id, name, order_index, is_default }) => ({
+              id, name, order_index, is_default,
+            })));
+          }
+        }
+      }
+      return { previous };
+    },
+    onError: (error: any, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['candidate-lists', ownerId], context.previous);
+      }
+      toast.error(error?.message || 'Kunde inte spara ordningen');
+    },
+    onSettled: () => invalidate(),
+  });
+
+  return { lists, defaultList, isLoading, createList, renameList, deleteList, reorderLists };
 }
 
 /**

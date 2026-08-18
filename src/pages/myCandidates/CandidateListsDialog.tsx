@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useCandidateListCounts } from '@/hooks/useCandidateListCounts';
-import { AlertTriangle, Check, ListPlus, Pencil, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Check, GripVertical, ListPlus, Pencil, Trash2, X } from 'lucide-react';
 import type { CandidateList } from '@/hooks/useCandidateLists';
 import { MAX_CANDIDATE_LISTS } from '@/hooks/useCandidateLists';
 
@@ -30,6 +30,7 @@ interface CandidateListsDialogProps {
   onCreate: (name: string) => Promise<unknown>;
   onRename: (id: string, name: string) => Promise<unknown>;
   onDelete: (id: string) => Promise<unknown>;
+  onReorder?: (orderedIds: string[]) => Promise<unknown> | void;
 }
 
 export const CandidateListsDialog = ({
@@ -39,6 +40,7 @@ export const CandidateListsDialog = ({
   onCreate,
   onRename,
   onDelete,
+  onReorder,
 }: CandidateListsDialogProps) => {
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -46,7 +48,20 @@ export const CandidateListsDialog = ({
   const [pendingDelete, setPendingDelete] = useState<CandidateList | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Lokal ordning under pågående drag — synkas från servern när vi inte drar.
+  const [order, setOrder] = useState<CandidateList[]>(lists);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const orderRef = useRef<CandidateList[]>(lists);
+  const startOrderRef = useRef<string[]>([]);
+
   const countByList = useCandidateListCounts(open);
+
+  useEffect(() => {
+    if (draggingId) return;
+    setOrder(lists);
+    orderRef.current = lists;
+  }, [lists, draggingId]);
 
   useEffect(() => {
     if (!open) {
@@ -54,10 +69,12 @@ export const CandidateListsDialog = ({
       setEditingId(null);
       setEditingName('');
       setPendingDelete(null);
+      setDraggingId(null);
     }
   }, [open]);
 
   const atLimit = lists.length >= MAX_CANDIDATE_LISTS;
+  const canReorder = !!onReorder && lists.length > 1;
 
   const handleCreate = async () => {
     if (!newName.trim() || busy) return;
@@ -81,6 +98,66 @@ export const CandidateListsDialog = ({
     }
   };
 
+  const moveTo = useCallback((id: string, targetIndex: number) => {
+    const current = orderRef.current;
+    const from = current.findIndex((l) => l.id === id);
+    if (from === -1 || targetIndex === from) return;
+    const clamped = Math.max(0, Math.min(current.length - 1, targetIndex));
+    if (clamped === from) return;
+    const next = [...current];
+    const [moved] = next.splice(from, 1);
+    next.splice(clamped, 0, moved);
+    orderRef.current = next;
+    setOrder(next);
+  }, []);
+
+  const handleDragPointerDown = (id: string) => (e: React.PointerEvent) => {
+    if (!canReorder || editingId) return;
+    e.preventDefault();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    startOrderRef.current = orderRef.current.map((l) => l.id);
+    setDraggingId(id);
+  };
+
+  const handleDragPointerMove = (id: string) => (e: React.PointerEvent) => {
+    if (draggingId !== id) return;
+    const y = e.clientY;
+    const entries = orderRef.current
+      .map((l) => {
+        const el = rowRefs.current.get(l.id);
+        return el ? { id: l.id, rect: el.getBoundingClientRect() } : null;
+      })
+      .filter(Boolean) as { id: string; rect: DOMRect }[];
+
+    for (let i = 0; i < entries.length; i++) {
+      const { id: otherId, rect } = entries[i];
+      if (otherId === id) continue;
+      const midpoint = rect.top + rect.height / 2;
+      const currentIndex = orderRef.current.findIndex((l) => l.id === id);
+      if (i < currentIndex && y < midpoint) {
+        moveTo(id, i);
+        return;
+      }
+      if (i > currentIndex && y > midpoint) {
+        moveTo(id, i);
+        return;
+      }
+    }
+  };
+
+  const finishDrag = (e: React.PointerEvent) => {
+    if (!draggingId) return;
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      /* pointer redan släppt */
+    }
+    setDraggingId(null);
+    const nextIds = orderRef.current.map((l) => l.id);
+    const changed = nextIds.some((id, i) => id !== startOrderRef.current[i]);
+    if (changed) onReorder?.(nextIds);
+  };
+
   const pendingCount = pendingDelete ? countByList[pendingDelete.id] ?? 0 : 0;
 
   return (
@@ -96,10 +173,20 @@ export const CandidateListsDialog = ({
           </DialogHeader>
 
           <div className="space-y-2 max-h-[45vh] overflow-y-auto pr-1">
-            {lists.map((list) => (
+            {order.map((list) => (
               <div
                 key={list.id}
-                className="flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-inset ring-white/20 pl-4 pr-1.5 py-1.5 min-w-0"
+                ref={(el) => {
+                  if (el) rowRefs.current.set(list.id, el);
+                  else rowRefs.current.delete(list.id);
+                }}
+                className={`flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-inset ring-white/20 pr-1.5 py-1.5 min-w-0 transition-[box-shadow,transform,background-color] duration-200 ${
+                  canReorder && editingId !== list.id ? 'pl-1.5' : 'pl-4'
+                } ${
+                  draggingId === list.id
+                    ? 'bg-white/15 ring-white/40 shadow-lg scale-[1.01] z-10 relative'
+                    : ''
+                }`}
               >
                 {editingId === list.id ? (
                   <>
@@ -131,6 +218,33 @@ export const CandidateListsDialog = ({
                   </>
                 ) : (
                   <>
+                    {canReorder && (
+                      <button
+                        type="button"
+                        aria-label={`Flytta ${list.name}`}
+                        onPointerDown={handleDragPointerDown(list.id)}
+                        onPointerMove={handleDragPointerMove(list.id)}
+                        onPointerUp={finishDrag}
+                        onPointerCancel={finishDrag}
+                        onKeyDown={(e) => {
+                          const index = order.findIndex((l) => l.id === list.id);
+                          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            const target = index + (e.key === 'ArrowUp' ? -1 : 1);
+                            if (target < 0 || target >= order.length) return;
+                            const next = [...order];
+                            const [moved] = next.splice(index, 1);
+                            next.splice(target, 0, moved);
+                            orderRef.current = next;
+                            setOrder(next);
+                            onReorder?.(next.map((l) => l.id));
+                          }
+                        }}
+                        className="flex h-9 w-8 flex-shrink-0 cursor-grab touch-none items-center justify-center rounded-full text-white transition-colors active:cursor-grabbing md:hover:bg-white/10"
+                      >
+                        <GripVertical className="h-4 w-4" />
+                      </button>
+                    )}
                     <div className="min-w-0 flex-1 py-0.5">
                       <p className="truncate text-sm font-medium text-white">{list.name}</p>
                       <p className="text-xs text-white">
@@ -190,8 +304,9 @@ export const CandidateListsDialog = ({
             </button>
           </div>
           <p className="text-xs text-white">
-            {lists.length} av {MAX_CANDIDATE_LISTS} listor. En kandidat kan bara ligga i en lista
-            åt gången — även om personen har sökt flera av dina jobb.
+            {lists.length} av {MAX_CANDIDATE_LISTS} listor.
+            {canReorder ? ' Dra i handtaget för att ändra ordningen.' : ''} En kandidat kan bara
+            ligga i en lista åt gången — även om personen har sökt flera av dina jobb.
           </p>
         </DialogContent>
       </Dialog>
@@ -219,9 +334,9 @@ export const CandidateListsDialog = ({
                   />
                   ?{' '}
                   {pendingCount > 0
-                    ? `Listan innehåller ${pendingCount} kandidater som tas bort från din pipeline — ansökningarna finns kvar under Kandidater. `
+                    ? `${pendingCount} kandidater flyttas till din standardlista — ingen kandidat, anteckning eller ansökan försvinner. `
                     : ''}
-                  Denna åtgärd går inte att ångra.
+                  Listans egna steg tas bort och det går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>

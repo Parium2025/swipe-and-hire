@@ -64,7 +64,7 @@ const MyCandidates = () => {
   const { setStageCount } = useKanbanLayout();
 
   // ── Kandidatlistor (Lager, Chefsroller, ...) ─────────
-  const { lists, createList, renameList, deleteList } = useCandidateLists(user?.id ?? null, { ensureDefault: true });
+  const { lists, createList, renameList, deleteList, reorderLists } = useCandidateLists(user?.id ?? null, { ensureDefault: true });
   const { activeListId, activeList, setActiveListId } = useActiveCandidateList(lists);
   const [listsDialogOpen, setListsDialogOpen] = useState(false);
 
@@ -858,6 +858,7 @@ const MyCandidates = () => {
         }}
         onRename={(id, name) => renameList.mutateAsync({ id, name })}
         onDelete={(id) => deleteList.mutateAsync(id)}
+        onReorder={(orderedIds) => reorderLists.mutateAsync(orderedIds)}
       />
     </div>
   );
