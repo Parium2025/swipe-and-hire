@@ -216,10 +216,14 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
 
         // Fetch profile media batch
         const profileMediaMap: Record<string, any> = {};
-        const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+        const { data: batchMediaData, error: batchMediaError } = await supabase.rpc('get_applicant_profile_media_batch', {
           p_applicant_ids: applicantIds,
           p_employer_id: user.id,
         });
+
+        // Media är en obligatorisk del av kandidatkortet. Ett tillfälligt RPC-fel
+        // får inte tyst omvandlas till null och sedan cachas som initialer.
+        if (batchMediaError) throw batchMediaError;
 
         if (batchMediaData) {
           batchMediaData.forEach((row: any) => {
@@ -379,10 +383,14 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
       const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; last_active_at: string | null }> = {};
 
       // Single batch RPC call instead of N individual calls - critical for 10M+ users
-      const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+      const { data: batchMediaData, error: batchMediaError } = await supabase.rpc('get_applicant_profile_media_batch', {
         p_applicant_ids: applicantIds,
         p_employer_id: user.id,
       });
+
+      // Låt React Query göra om hela sidans hämtning vid transient auth-/nätfel.
+      // Tidigare fortsatte flödet med null-media och skrev det till listcachen.
+      if (batchMediaError) throw batchMediaError;
 
       if (batchMediaData && Array.isArray(batchMediaData)) {
         batchMediaData.forEach((row: any) => {
