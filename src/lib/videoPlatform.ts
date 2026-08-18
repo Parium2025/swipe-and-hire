@@ -212,13 +212,10 @@ export const shouldFreeDecodersOnLeave = () => {
  * bytet blir osynligt. Android och sparläge behåller `none` (bandbredd).
  */
 export const getGalleryPreload = (): 'none' | 'metadata' => {
-  const platform = getVideoPlatform();
+  // Sparläge/långsam uppkoppling laddar inget i förväg; alla andra värmer
+  // decodern med `metadata` så att bytet från poster till första bildruta
+  // inte syns som ett "pop". Koordinatorn höjer till `auto` vid uppspelning.
   if (prefersReducedData()) return 'none';
-  if (platform === 'android') return 'metadata';
-  // Windows-korten uppgraderas till `auto` först när koordinatorn väljer dem.
-  // Att ge alla åtta `metadata` vid mount initierade åtta demuxers samtidigt
-  // och motverkade concurrency-taket på två aktiva strömmar.
-  if (platform === 'windows') return 'metadata';
   return 'metadata';
 };
 
