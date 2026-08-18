@@ -20,8 +20,149 @@ import { Input } from '@/components/ui/input';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useCandidateListCounts } from '@/hooks/useCandidateListCounts';
 import { AlertTriangle, Check, GripVertical, ListPlus, Pencil, Trash2, X } from 'lucide-react';
+import {
+  DndContext,
+  DragEndEvent,
+  DragStartEvent,
+  KeyboardSensor,
+  MeasuringStrategy,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import type { CandidateList } from '@/hooks/useCandidateLists';
 import { MAX_CANDIDATE_LISTS } from '@/hooks/useCandidateLists';
+
+interface SortableListRowProps {
+  list: CandidateList;
+  canReorder: boolean;
+  isEditing: boolean;
+  count: number;
+  editingName: string;
+  onEditingNameChange: (value: string) => void;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onRequestDelete: () => void;
+}
+
+const SortableListRow = ({
+  list,
+  canReorder,
+  isEditing,
+  count,
+  editingName,
+  onEditingNameChange,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onRequestDelete,
+}: SortableListRowProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: list.id,
+    disabled: !canReorder || isEditing,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? undefined : transition,
+    opacity: isDragging ? 0.5 : 1,
+    willChange: 'transform',
+    zIndex: isDragging ? 20 : 'auto' as const,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative flex w-full select-none items-center gap-2 overflow-hidden rounded-full bg-white/5 py-1.5 pr-1.5 ring-1 ring-inset ring-white/20 min-w-0 transition-colors duration-150 ${
+        canReorder && !isEditing ? 'pl-1' : 'pl-4'
+      } ${isDragging ? 'bg-white/10 ring-white/30' : ''}`}
+    >
+      {isEditing ? (
+        <>
+          <Input
+            autoFocus
+            value={editingName}
+            onChange={(e) => onEditingNameChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onSaveEdit();
+              if (e.key === 'Escape') onCancelEdit();
+            }}
+            maxLength={40}
+            className="h-9 rounded-full text-base bg-white/5 border-white/20 text-white"
+          />
+          <button
+            onClick={onSaveEdit}
+            aria-label="Spara namn"
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20"
+          >
+            <Check className="h-4 w-4" />
+          </button>
+          <button
+            onClick={onCancelEdit}
+            aria-label="Avbryt"
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </>
+      ) : (
+        <>
+          {canReorder && (
+            <div
+              data-dnd-draggable="true"
+              aria-label={`Flytta ${list.name}`}
+              {...attributes}
+              {...listeners}
+              className="flex h-9 w-9 flex-shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-full text-white transition-colors active:cursor-grabbing md:hover:bg-white/10"
+            >
+              <GripVertical className="h-4 w-4" />
+            </div>
+          )}
+          <div className="min-w-0 flex-1 py-0.5">
+            <p className="truncate text-sm font-medium text-white">{list.name}</p>
+            <p className="text-xs text-white">
+              {count} kandidater
+              {list.is_default ? ' · standardlista' : ''}
+            </p>
+          </div>
+          <button
+            onClick={onStartEdit}
+            aria-label={`Byt namn på ${list.name}`}
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            disabled={list.is_default}
+            onClick={onRequestDelete}
+            aria-label={`Ta bort ${list.name}`}
+            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
+              list.is_default
+                ? 'border-white/5 text-white/30 bg-white/5 cursor-not-allowed'
+                : 'border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
+            }`}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
 
 interface CandidateListsDialogProps {
   open: boolean;
