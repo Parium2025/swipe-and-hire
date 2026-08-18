@@ -76,19 +76,40 @@ export const prefersLightweightVideo = () => {
 
 export type VideoQualityTier = 'high' | 'safe';
 
-const TIER_KEY = 'parium:video-tier';
+/**
+ * Nyckeln lagrar ENBART hälsovaktens beslut ("den här maskinen tappade
+ * bildrutor"). Skärmuppsättningen lagras medvetet inte — den kan ändras när
+ * som helst under sessionen och måste därför läsas av på nytt varje gång.
+ */
+const TIER_KEY = 'parium:video-degraded';
 
-const readStoredTier = (): VideoQualityTier | null => {
+const readDegraded = (): boolean => {
   try {
-    const v = sessionStorage.getItem(TIER_KEY);
-    return v === 'high' || v === 'safe' ? v : null;
+    return sessionStorage.getItem(TIER_KEY) === '1';
   } catch {
-    return null;
+    return false;
   }
 };
 
-const writeStoredTier = (tier: VideoQualityTier) => {
-  try { sessionStorage.setItem(TIER_KEY, tier); } catch { /* private mode */ }
+const writeDegraded = () => {
+  try { sessionStorage.setItem(TIER_KEY, '1'); } catch { /* private mode */ }
+};
+
+/**
+ * Kör skrivbordet utökat över flera skärmar?
+ *
+ * Spegling (samma bild till två portar) är billigt för GPU:n — den skickar en
+ * färdig bild två gånger. Utökat skrivbord är dubbelt arbete: två separata
+ * kompositionsplan, ofta med olika uppdateringsfrekvens. På integrerade
+ * Intel-GPU:er är det exakt där video-decodern får slut på budget.
+ *
+ * `screen.isExtended` finns i Chromium (Windows/ChromeOS) och är false vid
+ * spegling — precis den skillnad vi behöver. Saknas API:et antar vi en skärm.
+ */
+export const isExtendedDisplay = () => {
+  if (typeof window === 'undefined') return false;
+  const s = window.screen as Screen & { isExtended?: boolean };
+  return s?.isExtended === true;
 };
 
 /**
@@ -110,24 +131,50 @@ const hardwareLooksStrong = () => {
   return true;
 };
 
-/** Aktuell kvalitetsnivå för den här sessionen. */
+/**
+ * Aktuell kvalitetsnivå.
+ *
+ * Ordning: hälsovaktens degradering (sticky) → utökat skrivbord på Windows
+ * (dynamiskt, återställs när skärmen kopplas ur) → hårdvarumätning.
+ */
 export const getVideoQualityTier = (): VideoQualityTier => {
   if (typeof window === 'undefined') return 'safe';
-  const stored = readStoredTier();
-  if (stored) return stored;
-  const tier: VideoQualityTier = hardwareLooksStrong() ? 'high' : 'safe';
-  writeStoredTier(tier);
-  return tier;
+  if (readDegraded()) return 'safe';
+  if (isWindowsDevice() && isExtendedDisplay()) return 'safe';
+  return hardwareLooksStrong() ? 'high' : 'safe';
 };
 
 /** Tvinga ner sessionen ett steg (anropas av hälsovakten vid frame drops). */
 export const degradeVideoQuality = () => {
   if (typeof window === 'undefined') return false;
-  if (readStoredTier() === 'safe') return false;
-  writeStoredTier('safe');
+  if (readDegraded()) return false;
+  writeDegraded();
   window.dispatchEvent(new CustomEvent('parium:video-degraded'));
   return true;
 };
+
+/**
+ * Bevaka skärmuppsättningen och signalera när kvalitetsnivån ändras.
+ *
+ * Slår användaren i HDMI och utökar skrivbordet går vi ner i säkert läge INNAN
+ * hacket hinner synas; dras skärmen ur går vi tillbaka upp till full skärpa
+ * utan omladdning. Returnerar en avregistreringsfunktion.
+ */
+export const watchDisplayTopology = (onChange: (tier: VideoQualityTier) => void): (() => void) => {
+  if (typeof window === 'undefined') return () => {};
+  const s = window.screen as Screen & { isExtended?: boolean; addEventListener?: Screen['addEventListener'] };
+  if (typeof s?.isExtended !== 'boolean' || typeof s.addEventListener !== 'function') return () => {};
+  let last = getVideoQualityTier();
+  const handler = () => {
+    const next = getVideoQualityTier();
+    if (next === last) return;
+    last = next;
+    onChange(next);
+  };
+  s.addEventListener('change', handler);
+  return () => s.removeEventListener('change', handler);
+};
+
 
 /**
  * Hälsovakt: mäter faktiskt tappade bildrutor på ett <video>-element.
