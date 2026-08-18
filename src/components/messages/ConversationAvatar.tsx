@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
+import { CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { cn } from '@/lib/utils';
 import { Users } from 'lucide-react';
 import { getCompanyInitials } from '@/lib/companyInitials';
@@ -27,8 +28,8 @@ export function ConversationAvatar({
   fallbackClassName,
 }: ConversationAvatarProps) {
   // Avatarer i meddelandelistan är små (32-48px) → be om optimerad version
-  const sizePx = size === 'sm' ? 32 : size === 'md' ? 40 : 48;
-  const resolvedUrl = useResolvedAvatarUrl(profile, { width: sizePx, height: sizePx, resize: 'cover' });
+  // En gemensam transform för alla storlekar → prefetch och render delar cache-nyckel
+  const resolvedUrl = useResolvedAvatarUrl(profile, CHAT_AVATAR_TRANSFORM);
 
   const getInitials = () => {
     if (isGroup && groupName) {
