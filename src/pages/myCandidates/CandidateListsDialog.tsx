@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Check, ListPlus, Pencil, Trash2, X } from 'lucide-react';
 import type { CandidateList } from '@/hooks/useCandidateLists';
 import { MAX_CANDIDATE_LISTS } from '@/hooks/useCandidateLists';
@@ -26,7 +28,6 @@ interface CandidateListsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   lists: CandidateList[];
-  countByList: Record<string, number>;
   onCreate: (name: string) => Promise<unknown>;
   onRename: (id: string, name: string) => Promise<unknown>;
   onDelete: (id: string) => Promise<unknown>;
@@ -36,16 +37,41 @@ export const CandidateListsDialog = ({
   open,
   onOpenChange,
   lists,
-  countByList,
   onCreate,
   onRename,
   onDelete,
 }: CandidateListsDialogProps) => {
+  const { user } = useAuth();
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [pendingDelete, setPendingDelete] = useState<CandidateList | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Antal unika personer per lista — samma person räknas en gång även om
+  // hen sökt flera jobb.
+  const { data: countByList = {} } = useQuery({
+    queryKey: ['candidate-list-counts', user?.id],
+    queryFn: async () => {
+      if (!user) return {} as Record<string, number>;
+      const { data, error } = await supabase
+        .from('my_candidates')
+        .select('list_id, applicant_id')
+        .eq('recruiter_id', user.id);
+      if (error) throw error;
+
+      const seen = new Map<string, Set<string>>();
+      for (const row of data || []) {
+        if (!row.list_id) continue;
+        const set = seen.get(row.list_id) ?? new Set<string>();
+        set.add(row.applicant_id);
+        seen.set(row.list_id, set);
+      }
+      return Object.fromEntries([...seen].map(([id, set]) => [id, set.size]));
+    },
+    enabled: open && !!user,
+    staleTime: 30 * 1000,
+  });
 
   useEffect(() => {
     if (!open) {
@@ -80,13 +106,15 @@ export const CandidateListsDialog = ({
     }
   };
 
+  const pendingCount = pendingDelete ? countByList[pendingDelete.id] ?? 0 : 0;
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card-parium border-white/20 max-w-md">
+        <DialogContent className="bg-card-parium border-white/20 rounded-3xl max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Hantera listor</DialogTitle>
-            <DialogDescription className="text-white/70">
+            <DialogDescription className="text-white">
               Dela upp kandidaterna i egna listor, till exempel Lager eller Chefsroller.
               Varje lista har sina egna steg.
             </DialogDescription>
@@ -96,7 +124,7 @@ export const CandidateListsDialog = ({
             {lists.map((list) => (
               <div
                 key={list.id}
-                className="flex items-center gap-2 rounded-lg bg-white/5 ring-1 ring-inset ring-white/10 px-3 py-2 min-w-0"
+                className="flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-inset ring-white/20 pl-4 pr-1.5 py-1.5 min-w-0"
               >
                 {editingId === list.id ? (
                   <>
@@ -109,28 +137,28 @@ export const CandidateListsDialog = ({
                         if (e.key === 'Escape') setEditingId(null);
                       }}
                       maxLength={40}
-                      className="h-9 text-base bg-white/5 border-white/20 text-white"
+                      className="h-9 rounded-full text-base bg-white/5 border-white/20 text-white"
                     />
                     <button
                       onClick={() => handleRename(list.id)}
                       aria-label="Spara namn"
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md text-white hover:bg-white/10"
+                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20"
                     >
                       <Check className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
                       aria-label="Avbryt"
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md text-white hover:bg-white/10"
+                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </>
                 ) : (
                   <>
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 py-0.5">
                       <p className="truncate text-sm font-medium text-white">{list.name}</p>
-                      <p className="text-xs text-white/60">
+                      <p className="text-xs text-white">
                         {countByList[list.id] ?? 0} kandidater
                         {list.is_default ? ' · standardlista' : ''}
                       </p>
@@ -141,7 +169,7 @@ export const CandidateListsDialog = ({
                         setEditingName(list.name);
                       }}
                       aria-label={`Byt namn på ${list.name}`}
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md text-white hover:bg-white/10"
+                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20"
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
@@ -149,10 +177,10 @@ export const CandidateListsDialog = ({
                       disabled={list.is_default}
                       onClick={() => setPendingDelete(list)}
                       aria-label={`Ta bort ${list.name}`}
-                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md transition-colors ${
+                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition-colors ${
                         list.is_default
-                          ? 'text-white/25 cursor-not-allowed'
-                          : 'text-white border border-destructive/40 bg-destructive/20 hover:bg-destructive/30'
+                          ? 'text-white/30 bg-white/5 cursor-not-allowed'
+                          : 'text-white border border-destructive/40 bg-destructive/20 md:hover:bg-destructive/30'
                       }`}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -163,7 +191,7 @@ export const CandidateListsDialog = ({
             ))}
           </div>
 
-          <div className="flex items-center gap-2 pt-2">
+          <div className="flex items-center gap-2 pt-1">
             <Input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
@@ -171,41 +199,49 @@ export const CandidateListsDialog = ({
               placeholder={atLimit ? `Max ${MAX_CANDIDATE_LISTS} listor` : 'Namn på ny lista'}
               maxLength={40}
               disabled={atLimit}
-              className="h-10 text-base bg-white/5 border-white/20 text-white placeholder:text-white/60"
+              className="h-11 rounded-full px-5 text-base bg-white/5 border-white/20 text-white placeholder:text-white/70"
             />
-            <Button
+            <button
               onClick={handleCreate}
               disabled={atLimit || !newName.trim() || busy}
-              className="h-10 flex-shrink-0"
+              className={`flex h-11 flex-shrink-0 items-center gap-1.5 rounded-full px-5 text-sm font-medium text-white ring-1 ring-inset transition-all active:scale-[0.97] touch-manipulation ${
+                atLimit || !newName.trim() || busy
+                  ? 'bg-white/5 ring-white/10 opacity-40 cursor-default'
+                  : 'bg-white/10 ring-white/30 md:hover:bg-white/20'
+              }`}
             >
-              <ListPlus className="h-4 w-4 mr-1.5" />
+              <ListPlus className="h-4 w-4" />
               Skapa
-            </Button>
+            </button>
           </div>
+          <p className="text-xs text-white">
+            {lists.length} av {MAX_CANDIDATE_LISTS} listor. En kandidat kan bara ligga i en lista
+            åt gången — även om personen har sökt flera av dina jobb.
+          </p>
         </DialogContent>
       </Dialog>
 
       <AlertDialog open={!!pendingDelete} onOpenChange={() => setPendingDelete(null)}>
-        <AlertDialogContent className="bg-card-parium border-white/20">
+        <AlertDialogContent className="bg-card-parium border-white/20 rounded-3xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">
               Ta bort "{pendingDelete?.name}"?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-white/80">
-              {(countByList[pendingDelete?.id ?? ''] ?? 0) > 0
-                ? `Listan innehåller ${countByList[pendingDelete!.id]} kandidater. De tas bort från din pipeline — ansökningarna finns kvar under Kandidater.`
+            <AlertDialogDescription className="text-white">
+              {pendingCount > 0
+                ? `Listan innehåller ${pendingCount} kandidater. De tas bort från din pipeline — ansökningarna finns kvar under Kandidater.`
                 : 'Listan och dess steg tas bort. Det går inte att ångra.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="text-white">Avbryt</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-full text-white">Avbryt</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
                 const target = pendingDelete;
                 setPendingDelete(null);
                 if (target) await onDelete(target.id);
               }}
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="rounded-full bg-destructive text-white hover:bg-destructive/90"
             >
               Ta bort listan
             </AlertDialogAction>
