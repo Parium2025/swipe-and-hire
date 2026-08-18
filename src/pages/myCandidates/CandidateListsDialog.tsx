@@ -172,7 +172,7 @@ export const CandidateListsDialog = ({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-2 max-h-[45vh] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[45vh] overflow-y-auto overflow-x-hidden px-0.5 py-0.5">
             {order.map((list) => (
               <div
                 key={list.id}
