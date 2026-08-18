@@ -3,10 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
-import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
-import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 const PAGE_SIZE = 50; // Större batch för att ha mer data redo
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';

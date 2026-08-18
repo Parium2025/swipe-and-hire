@@ -41,6 +41,7 @@ import { PariumLogoButton } from "@/components/PariumLogoButton";
 
 import NotificationCenter from "@/components/NotificationCenter";
 import { TruncatedText } from "@/components/TruncatedText";
+import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 
 // Dashboard dropdown items
 const dashboardItems = [
@@ -102,7 +103,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
     return null;
   })();
   // TopNav-avatar är alltid liten (~32-40px) → be om optimerad version (2x för retina automatiskt)
-  const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image', 86400, { width: 40, height: 40, resize: 'cover' });
+  const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
 
   // Preload avatar in <head> so the topnav image renders without a flicker
   useEffect(() => {

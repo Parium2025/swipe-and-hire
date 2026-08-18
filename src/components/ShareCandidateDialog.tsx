@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { Loader2, Check, Users } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 
 interface ShareCandidateDialogProps {
   open: boolean;
@@ -20,7 +21,7 @@ interface ShareCandidateDialogProps {
 
 function TeamMemberAvatar({ imageUrl }: { imageUrl: string | null }) {
   // Liten avatar (40px) → be om optimerad version
-  const resolvedUrl = useMediaUrl(imageUrl, 'profile-image', 86400, { width: 40, height: 40, resize: 'cover' });
+  const resolvedUrl = useMediaUrl(imageUrl, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
   return (
     <Avatar className="h-10 w-10">
       <AvatarImage src={resolvedUrl || ''} />
