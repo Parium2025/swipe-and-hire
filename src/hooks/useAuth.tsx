@@ -1355,13 +1355,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    // 🔒 Dubbelklickskydd: andra trycket ska inte starta ett nytt, parallellt
+    // utloggningsförlopp (två samtidiga förlopp var en av orsakerna till att
+    // knappen ibland behövde tryckas två gånger).
+    if (isSigningOutRef.current) return;
+    isSigningOutRef.current = true;
+
+    // Markera manuell utloggning. Flaggan nollställs INTE på tid — den lever
+    // tills en ny inloggning sker (SIGNED_IN/TOKEN_REFRESHED). Tidigare
+    // 500 ms-timeout kunde släppa flaggan innan Supabase hann sända
+    // SIGNED_OUT, varpå återhämtningslogiken tolkade den riktiga
+    // utloggningen som ett nätverksglapp och loggade in användaren igen.
+    isManualSignOutRef.current = true;
+
+    // ⏸️ Stoppa heartbeat/validitetskontroll direkt. De anropar annars
+    // refreshSession() och kan skriva tillbaka ett giltigt token EFTER att vi
+    // rensat storage → användaren är "inloggad igen" när hen kommer tillbaka.
+    beginSignOutTracking();
+
+    const clearLocalState = () => {
+      currentUserIdRef.current = null;
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setUserRole(null);
+      setOrganization(null);
+      setLoading(false);
+      setAuthAction(null);
+    };
+
     try {
       setAuthAction('logout');
-      
-      // Markera att detta är en manuell utloggning
-      isManualSignOutRef.current = true;
-
-      // Sätt loading state för smooth utloggning
       setLoading(true);
 
       const currentSplashRole = (profile as any)?.role || userRole?.role || null;
@@ -1369,62 +1393,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 🎬 Trigga auth splash för premium känsla vid utloggning
       authSplashEvents.show(currentSplashRole);
 
-      // 🔐 Starta serverns session-cleanup INNAN vi rensar auth-storage —
-      // annars går RPC:t iväg utan giltig JWT och nekas.
-      const sessionCleanup = removeSession();
-
-      // 🧹 Rensa lokalt direkt och navigera omedelbart. Server/session-cleanup
-      // får INTE blockera knappen — det var orsaken till seg logout.
+      // Rensa UI-state direkt så att utloggningen känns omedelbar.
       clearAllDrafts();
       clearAllAppCaches();
-      clearSessionToken();
-      authStorage.clear();
-      
-      // 🔧 Tvinga user/session till null om onAuthStateChange inte hann fira
-      currentUserIdRef.current = null;
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setUserRole(null);
-      setOrganization(null);
-      setLoading(false);
-      setAuthAction(null);
+      try { queryClient.clear(); } catch {}
+      clearLocalState();
 
-      // Remove session tracking + auth-server logout in the background.
+      // 🔐 Rensa i rätt ordning i bakgrunden:
+      // 1) server-RPC (kräver giltig JWT), 2) Supabase signOut (sänder
+      // SIGNED_OUT och tömmer sin egen storage), 3) vår storage-rensning
+      // SIST så att inget sent refresh-svar kan återuppliva sessionen.
       void (async () => {
         try {
-          await sessionCleanup;
+          await removeSession();
+        } catch (rpcErr) {
+          console.warn('Session cleanup RPC failed:', rpcErr);
+        }
+        try {
           await supabase.auth.signOut({ scope: 'local' });
         } catch (serverErr) {
-          console.warn('SignOut background cleanup failed:', serverErr);
-        } finally {
-          setTimeout(() => {
-            isManualSignOutRef.current = false;
-          }, 500);
+          console.warn('Supabase signOut failed:', serverErr);
         }
+        try {
+          clearSessionToken();
+          authStorage.clear();
+        } catch {}
+        // Extra säkerhetsnät: om ett sent svar hann skriva tillbaka ett token
+        // strax efter rensningen tas det bort här.
+        setTimeout(() => {
+          try { authStorage.clear(); } catch {}
+        }, 1200);
+        isSigningOutRef.current = false;
       })();
-      
+
     } catch (error: any) {
       console.error('Sign out error:', error);
       // Även vid oväntat fel: rensa lokalt så användaren inte fastnar
       clearAllDrafts();
       clearAllAppCaches();
+      try { queryClient.clear(); } catch {}
       clearSessionToken();
       authStorage.clear();
-      // 🔧 Tvinga state till null
-      currentUserIdRef.current = null;
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setUserRole(null);
-      setOrganization(null);
-      setLoading(false);
-      setAuthAction(null);
-      setTimeout(() => {
-        isManualSignOutRef.current = false;
-      }, 500);
+      clearLocalState();
+      isSigningOutRef.current = false;
     }
   };
+
 
   const refreshProfile = async () => {
     if (user) {
