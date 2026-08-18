@@ -19,7 +19,7 @@ export interface CandidateList {
   created_at: string;
 }
 
-export const MAX_CANDIDATE_LISTS = 20;
+export const MAX_CANDIDATE_LISTS = 10;
 
 /**
  * Kandidatlistor för en ägare (jag själv eller en kollega).

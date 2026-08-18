@@ -89,7 +89,7 @@ export const MyCandidatesDesktopActionBar = ({
             {otherLists.length > 0 && onBulkMoveToList && (
               <>
                 <DropdownMenuSeparator className="bg-white/10" />
-                <DropdownMenuLabel className="text-xs font-medium text-white/50">Flytta till annan lista</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-xs font-medium text-white">Flytta till annan lista</DropdownMenuLabel>
                 {otherLists.map(list => (
                   <DropdownMenuItem
                     key={list.id}

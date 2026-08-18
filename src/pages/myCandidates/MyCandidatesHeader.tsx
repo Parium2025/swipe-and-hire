@@ -123,7 +123,7 @@ export const MyCandidatesHeader = ({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[240px] max-w-[86vw]">
-              <DropdownMenuLabel className="text-xs font-medium text-white/50">Mina listor</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs font-medium text-white">Mina listor</DropdownMenuLabel>
               {lists.map(list => {
                 const isActive = !isViewingColleague && activeList?.id === list.id;
                 return (
@@ -155,7 +155,7 @@ export const MyCandidatesHeader = ({
               {hasTeam && teamMembers.length > 0 && (
                 <>
                   <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuLabel className="text-xs font-medium text-white/50">Kollegors listor</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs font-medium text-white">Kollegors listor</DropdownMenuLabel>
                   {teamMembers.map(member => {
                     const memberLists = colleagueListsByOwner[member.userId] ?? [];
                     const avatar = (
