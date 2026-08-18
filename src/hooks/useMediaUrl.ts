@@ -39,6 +39,48 @@ const shouldWarmBlobCache = (mediaType: MediaType) =>
   mediaType === 'company-logo' ||
   mediaType === 'job-image';
 
+// Tak för minnescachen. Utan tak växer Map:en för varje unik
+// (path + typ + transform) som setts under sessionen — på en rekryterare med
+// tusentals kandidater blir det tiotusentals poster som aldrig frigörs.
+const MAX_MEMORY_CACHE_ENTRIES = 600;
+
+function enforceMemoryCacheLimit() {
+  if (signedUrlMemoryCache.size <= MAX_MEMORY_CACHE_ENTRIES) return;
+  const overflow = signedUrlMemoryCache.size - MAX_MEMORY_CACHE_ENTRIES;
+  let removed = 0;
+  // Map bevarar insättningsordning → äldsta poster först (LRU via re-insert).
+  for (const key of signedUrlMemoryCache.keys()) {
+    signedUrlMemoryCache.delete(key);
+    if (++removed >= overflow) break;
+  }
+}
+
+// Global gräns för samtidiga signed-URL-anrop. Flera warmup-hookar kan annars
+// starta 100+ parallella requests vid inloggning, vilket svälter de synliga
+// bilderna och triggar rate limits på svaga nät.
+const MAX_CONCURRENT_SIGNED_URL_LOADS = 8;
+let activeSignedUrlLoads = 0;
+const signedUrlQueue: Array<() => void> = [];
+
+function acquireSignedUrlSlot(): Promise<void> {
+  if (activeSignedUrlLoads < MAX_CONCURRENT_SIGNED_URL_LOADS) {
+    activeSignedUrlLoads++;
+    return Promise.resolve();
+  }
+  return new Promise<void>((resolve) => {
+    signedUrlQueue.push(() => {
+      activeSignedUrlLoads++;
+      resolve();
+    });
+  });
+}
+
+function releaseSignedUrlSlot() {
+  activeSignedUrlLoads = Math.max(0, activeSignedUrlLoads - 1);
+  const next = signedUrlQueue.shift();
+  if (next) next();
+}
+
 function storeSignedUrlCache(
   cacheKey: string,
   signedUrl: string,
@@ -48,7 +90,9 @@ function storeSignedUrlCache(
   const expiresAt = now + (expiresInSeconds * 1000 * 0.8);
   const cacheData = { url: signedUrl, expiresAt };
 
+  signedUrlMemoryCache.delete(cacheKey);
   signedUrlMemoryCache.set(cacheKey, cacheData);
+  enforceMemoryCacheLimit();
 
   try {
     localStorage.setItem(cacheKey, JSON.stringify(cacheData));
@@ -67,15 +111,18 @@ function getOrCreateSignedUrlLoad(
   const existing = ongoingLoads.get(cacheKey);
   if (existing) return existing;
 
-  const now = Date.now();
-  const promise = getMediaUrl(storagePath, mediaType, expiresInSeconds, transform)
-    .then((signedUrl) => {
-      if (signedUrl) {
-        storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now);
-      }
-      return signedUrl;
+  const promise = acquireSignedUrlSlot()
+    .then(() => {
+      const now = Date.now();
+      return getMediaUrl(storagePath, mediaType, expiresInSeconds, transform).then((signedUrl) => {
+        if (signedUrl) {
+          storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now);
+        }
+        return signedUrl;
+      });
     })
     .finally(() => {
+      releaseSignedUrlSlot();
       ongoingLoads.delete(cacheKey);
     });
 
@@ -103,7 +150,12 @@ function getCachedUrlSync(storagePath: string, mediaType: MediaType, transform?:
   const memCached = signedUrlMemoryCache.get(cacheKey);
   if (memCached && memCached.expiresAt > now) {
     const resolved = resolveSignedUrl(memCached.url);
-    if (resolved) return resolved;
+    if (resolved) {
+      // Flytta posten sist i Map:en → äkta LRU vid utrensning.
+      signedUrlMemoryCache.delete(cacheKey);
+      signedUrlMemoryCache.set(cacheKey, memCached);
+      return resolved;
+    }
     signedUrlMemoryCache.delete(cacheKey);
   }
 
