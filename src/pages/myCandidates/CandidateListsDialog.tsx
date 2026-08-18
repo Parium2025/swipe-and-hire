@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Input } from '@/components/ui/input';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useCandidateListCounts } from '@/hooks/useCandidateListCounts';
@@ -353,7 +354,7 @@ export const CandidateListsDialog = ({
       </Dialog>
 
       <AlertDialog open={!!pendingDelete} onOpenChange={() => setPendingDelete(null)}>
-        <AlertDialogContent className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col">
+        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col">
           <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
             <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
@@ -402,7 +403,7 @@ export const CandidateListsDialog = ({
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
     </>
   );

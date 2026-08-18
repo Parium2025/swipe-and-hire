@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -302,7 +303,7 @@ const Subscription = () => {
       </div>
 
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent className="bg-primary border-white/15 text-white">
+        <AlertDialogContentNoFocus className="bg-primary border-white/15 text-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Avbryt Premium?</AlertDialogTitle>
             <AlertDialogDescription className="text-white/70">
@@ -317,7 +318,7 @@ const Subscription = () => {
               Avbryt prenumeration
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
 
 

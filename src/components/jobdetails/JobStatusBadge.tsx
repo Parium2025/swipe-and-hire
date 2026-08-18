@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 
 interface JobStatusBadgeProps {
   jobId: string;
@@ -78,7 +79,7 @@ export const JobStatusBadge = memo(({ jobId, isActive, expiresAt, canToggle, onO
         {statusLabel}
       </Badge>
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg mx-0">
+        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg mx-0">
           <AlertDialogHeader className="space-y-3 text-center">
             <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
               {goingInactive ? 'Inaktivera annons?' : 'Aktivera annons?'}
@@ -101,7 +102,7 @@ export const JobStatusBadge = memo(({ jobId, isActive, expiresAt, canToggle, onO
               {goingInactive ? 'Inaktivera' : 'Aktivera'}
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
     </>
   );
