@@ -17,6 +17,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMyCandidateApplications } from '@/hooks/useMyCandidateApplications';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
 import { useBulkCandidateOps } from '@/hooks/useBulkCandidateOps';
+import { useCandidateLists, useActiveCandidateList, useTeamCandidateLists } from '@/hooks/useCandidateLists';
+import { CandidateListsDialog } from '@/pages/myCandidates/CandidateListsDialog';
 import { 
   UserCheck,
   Plus,
@@ -59,15 +61,30 @@ const MyCandidates = () => {
   const device = useDevice();
   const isTouchDevice = useTouchCapable();
   const useMobileView = device === 'mobile';
-  const { stageConfig, stageOrder, deleteStage } = useStageSettings();
   const { setStageCount } = useKanbanLayout();
-  
+
+  // ── Kandidatlistor (Lager, Chefsroller, ...) ─────────
+  const { lists, createList, renameList, deleteList } = useCandidateLists(user?.id ?? null, { ensureDefault: true });
+  const { activeListId, activeList, setActiveListId } = useActiveCandidateList(lists);
+  const [listsDialogOpen, setListsDialogOpen] = useState(false);
+
+  const { stageConfig, stageOrder, deleteStage } = useStageSettings(activeListId);
+
   // Team members for colleague switching
   const { teamMembers, hasTeam, isLoading: loadingTeam } = useTeamMembers();
-  
+  const teamListsByOwner = useTeamCandidateLists(useMemo(() => teamMembers.map(m => m.userId), [teamMembers]));
+
   // State for viewing a colleague's list
   const [viewingColleagueId, setViewingColleagueId] = useState<string | null>(null);
+  const [viewingColleagueListId, setViewingColleagueListId] = useState<string | null>(null);
   const viewingColleague = teamMembers.find(m => m.userId === viewingColleagueId);
+  const colleagueLists = viewingColleagueId ? (teamListsByOwner[viewingColleagueId] ?? []) : [];
+  const viewingColleagueList = colleagueLists.find(l => l.id === viewingColleagueListId) ?? null;
+
+  const handleViewColleague = useCallback((colleagueId: string | null, listId: string | null = null) => {
+    setViewingColleagueId(colleagueId);
+    setViewingColleagueListId(colleagueId ? listId : null);
+  }, []);
   const isViewingColleague = !!viewingColleagueId;
   
   // Colleague's candidates and stage settings
@@ -78,12 +95,12 @@ const MyCandidates = () => {
     moveCandidateInColleagueList,
     removeCandidateFromColleagueList,
     setCandidates: setColleagueCandidates,
-  } = useColleagueCandidates(viewingColleagueId);
+  } = useColleagueCandidates(viewingColleagueId, viewingColleagueListId);
   
   const { 
     stageConfig: colleagueStageConfig, 
     stageOrder: colleagueStageOrder,
-  } = useColleagueStageSettings(viewingColleagueId);
+  } = useColleagueStageSettings(viewingColleagueId, viewingColleagueListId);
   
   // Use colleague's settings when viewing their list
   const activeStageConfig = isViewingColleague ? colleagueStageConfig : stageConfig;
@@ -116,7 +133,7 @@ const MyCandidates = () => {
     updateNotes: hookUpdateNotes,
     updateRating: hookUpdateRating,
     markAsViewed: hookMarkAsViewed,
-  } = useMyCandidatesData(debouncedSearchQuery);
+  } = useMyCandidatesData(debouncedSearchQuery, activeListId);
 
   // updateCandidatesCache is now provided by useBulkCandidateOps hook
 
@@ -260,8 +277,9 @@ const MyCandidates = () => {
 
 
   // Bulk operations (extracted hook — with retry queue)
-  const { bulkMoveToStage, bulkDelete, updateCandidatesCache } = useBulkCandidateOps({
+  const { bulkMoveToStage, bulkDelete, bulkMoveToList, updateCandidatesCache } = useBulkCandidateOps({
     debouncedSearchQuery,
+    listId: activeListId,
     stageConfig: activeStageConfig,
     isViewingColleague,
     moveCandidateInColleagueList,
@@ -270,6 +288,11 @@ const MyCandidates = () => {
     selectedCandidateIds,
     displayedCandidates,
   });
+
+  const otherLists = useMemo(
+    () => lists.filter(l => l.id !== activeListId).map(l => ({ id: l.id, name: l.name })),
+    [lists, activeListId],
+  );
 
   const confirmBulkDelete = async () => {
     setShowBulkDeleteConfirm(false);
@@ -580,7 +603,13 @@ const MyCandidates = () => {
         isViewingColleague={isViewingColleague}
         viewingColleague={viewingColleague}
         viewingColleagueId={viewingColleagueId}
-        onViewColleague={setViewingColleagueId}
+        onViewColleague={handleViewColleague}
+        colleagueListsByOwner={teamListsByOwner}
+        viewingColleagueList={viewingColleagueList}
+        lists={lists}
+        activeList={activeList}
+        onSelectList={setActiveListId}
+        onManageLists={() => setListsDialogOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         isSelectionMode={isSelectionMode}
@@ -628,6 +657,8 @@ const MyCandidates = () => {
               stageOrder={activeStageOrder}
               stageConfig={activeStageConfig}
               onBulkMoveToStage={bulkMoveToStage}
+              otherLists={isViewingColleague ? [] : otherLists}
+              onBulkMoveToList={bulkMoveToList}
               onBulkDeleteClick={() => setShowBulkDeleteConfirm(true)}
             />
           ) : undefined}
@@ -808,6 +839,8 @@ const MyCandidates = () => {
           stageOrder={activeStageOrder}
           stageConfig={activeStageConfig}
           onBulkMoveToStage={bulkMoveToStage}
+          otherLists={isViewingColleague ? [] : otherLists}
+          onBulkMoveToList={bulkMoveToList}
           onBulkDeleteClick={() => setShowBulkDeleteConfirm(true)}
         />
       )}
@@ -815,6 +848,18 @@ const MyCandidates = () => {
 
 
 
+      <CandidateListsDialog
+        open={listsDialogOpen}
+        onOpenChange={setListsDialogOpen}
+        lists={lists}
+        countByList={{ [activeListId ?? '']: stats.total }}
+        onCreate={async (name) => {
+          const created = await createList.mutateAsync(name);
+          setActiveListId(created.id);
+        }}
+        onRename={(id, name) => renameList.mutateAsync({ id, name })}
+        onDelete={(id) => deleteList.mutateAsync(id)}
+      />
     </div>
   );
 };
