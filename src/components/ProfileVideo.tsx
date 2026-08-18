@@ -4,6 +4,11 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 import { Play, Pause } from 'lucide-react';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { fetchPriority } from '@/lib/fetchPriority';
+import {
+  acquireProfileVideoDecoder,
+  releaseProfileVideoDecoder,
+  shouldReleaseDecoderOnStop,
+} from '@/lib/profileVideoDecoders';
 
 interface ProfileVideoProps {
   videoUrl: string;
@@ -33,6 +38,8 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
   const [isDragging, setIsDragging] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  // Unik nyckel i den globala dekoder-budgeten för profilvideor.
+  const decoderTokenRef = useRef<symbol>(Symbol('profile-video'));
   const device = useDevice();
   const isMobile = device === 'mobile';
   const isTouchDevice = useTouchCapable();
@@ -78,7 +85,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
 
   // Cleanup when component unmounts - reset video and clear all states
   useEffect(() => {
+    const token = decoderTokenRef.current;
     return () => {
+      releaseProfileVideoDecoder(token);
       if (videoRef.current) {
         try {
           videoRef.current.pause();
@@ -96,6 +105,26 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
       setIsDragging(false);
     };
   }, []);
+
+  /** Stoppar uppspelning och frigör dekodern på plattformar med liten pool. */
+  const stopPlayback = (hideVideo: boolean) => {
+    releaseProfileVideoDecoder(decoderTokenRef.current);
+    setIsPlaying(false);
+    if (hideVideo) setShowVideo(false);
+    const el = videoRef.current;
+    if (!el) return;
+    try {
+      el.pause();
+      if (el.readyState >= 1) el.currentTime = 0;
+      if (shouldReleaseDecoderOnStop()) {
+        // pause() räcker inte på Windows/Android – elementet håller kvar
+        // hårdvarudekodern. load() släpper den tillbaka till poolen.
+        el.load();
+      }
+    } catch {
+      // ignorera – elementet kan vara på väg att avmonteras
+    }
+  };
 
   // Remove hover-based autoplay to avoid flicker; play only on explicit tap/click
   // (Keeping function names removed to simplify behavior)
@@ -115,6 +144,8 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
     if (!isPlaying) {
       setShowVideo(true);
       setIsPlaying(true);
+      // Ta en plats i dekoder-budgeten; äldsta profilvideon pausas vid behov.
+      acquireProfileVideoDecoder(decoderTokenRef.current, () => stopPlayback(!effectiveIsTouchDevice));
       if (videoRef.current) {
         try {
           videoRef.current.currentTime = 0;
@@ -129,32 +160,17 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
             await videoRef.current.play();
           } catch (mutedPlayError) {
             console.warn('Failed to play video even when muted:', mutedPlayError);
+            // Fastna inte i ett "spelar"-läge som visar en tom ram.
+            stopPlayback(true);
           }
         }
       }
     } else {
-      setShowVideo(false);
-      setIsPlaying(false);
-      if (videoRef.current) {
-        try {
-          videoRef.current.pause();
-          // Vissa WebKit-versioner kastar InvalidStateError om metadata
-          // inte hunnit laddas när currentTime sätts.
-          if (videoRef.current.readyState >= 1) videoRef.current.currentTime = 0;
-        } catch {
-          // ignorera städfel vid unmount
-        }
-      }
+      stopPlayback(true);
     }
   };
   const handleVideoEnd = () => {
-    setIsPlaying(false);
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-    }
-    if (!effectiveIsTouchDevice) {
-      setShowVideo(false);
-    }
+    stopPlayback(!effectiveIsTouchDevice);
   };
 
   const handleTimeUpdate = () => {
