@@ -5,7 +5,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -17,8 +21,11 @@ import {
   Eye,
   ChevronDown,
   CheckSquare,
+  Check,
+  Settings2,
 } from 'lucide-react';
 import type { CandidateStage } from '@/hooks/useStageSettings';
+import type { CandidateList } from '@/hooks/useCandidateLists';
 
 interface TeamMember {
   userId: string;
@@ -39,8 +46,16 @@ interface MyCandidatesHeaderProps {
   isViewingColleague: boolean;
   viewingColleague?: TeamMember;
   viewingColleagueId: string | null;
-  onViewColleague: (id: string | null) => void;
-  
+  onViewColleague: (id: string | null, listId?: string | null) => void;
+  colleagueListsByOwner: Record<string, CandidateList[]>;
+  viewingColleagueList: CandidateList | null;
+
+  // Lists
+  lists: CandidateList[];
+  activeList: CandidateList | null;
+  onSelectList: (id: string) => void;
+  onManageLists: () => void;
+
   // Search
   searchQuery: string;
   onSearchChange: (query: string) => void;
@@ -70,6 +85,12 @@ export const MyCandidatesHeader = ({
   viewingColleague,
   viewingColleagueId,
   onViewColleague,
+  colleagueListsByOwner,
+  viewingColleagueList,
+  lists,
+  activeList,
+  onSelectList,
+  onManageLists,
   searchQuery,
   onSearchChange,
   isSelectionMode,
@@ -81,60 +102,111 @@ export const MyCandidatesHeader = ({
   stageConfig,
   useMobileView,
 }: MyCandidatesHeaderProps) => {
+  const activeListName = activeList?.name || 'Mina kandidater';
+
+  const title = isViewingColleague
+    ? `${viewingColleague?.firstName} ${viewingColleague?.lastName}${viewingColleagueList && !viewingColleagueList.is_default ? ` · ${viewingColleagueList.name}` : ''}`
+    : activeListName;
+
   return (
     <div className="mb-6 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
       {/* Title and description */}
       <div className="text-center mb-4">
-        <div className="flex items-center justify-center gap-2">
-          {hasTeam ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-white tracking-tight hover:text-white/80 transition-colors">
-                  {isViewingColleague ? (
-                    <>
-                      <Eye className="h-5 w-5 text-fuchsia-400" />
-                      {viewingColleague?.firstName} {viewingColleague?.lastName}s kandidater
-                    </>
-                  ) : (
-                    <>Mina kandidater</>
-                  )}
-                  <span className="text-white/60">({totalCount})</span>
-                  <ChevronDown className="h-4 w-4 text-white/60" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[200px]">
-                <DropdownMenuItem 
-                  onClick={() => onViewColleague(null)}
-                  className={`text-white hover:text-white ${!isViewingColleague ? 'bg-white/10' : ''}`}
-                >
-                  <UserCheck className="h-4 w-4 mr-2" />
-                  Mina kandidater
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/10" />
-                <div className="px-2 py-1.5 text-xs text-white/50 font-medium">Kollegors listor</div>
-                {teamMembers.map(member => (
-                  <DropdownMenuItem 
-                    key={member.userId}
-                    onClick={() => onViewColleague(member.userId)}
-                    className={`text-white hover:text-white ${viewingColleagueId === member.userId ? 'bg-white/10' : ''}`}
+        <div className="flex items-center justify-center gap-2 min-w-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 min-w-0 max-w-full text-xl md:text-2xl font-semibold text-white tracking-tight hover:text-white/80 transition-colors">
+                {isViewingColleague && <Eye className="h-5 w-5 flex-shrink-0 text-fuchsia-400" />}
+                <span className="truncate min-w-0">{title}</span>
+                <span className="text-white/60 flex-shrink-0">({totalCount})</span>
+                <ChevronDown className="h-4 w-4 text-white/60 flex-shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[240px] max-w-[86vw]">
+              <DropdownMenuLabel className="text-xs font-medium text-white/50">Mina listor</DropdownMenuLabel>
+              {lists.map(list => {
+                const isActive = !isViewingColleague && activeList?.id === list.id;
+                return (
+                  <DropdownMenuItem
+                    key={list.id}
+                    onClick={() => {
+                      onViewColleague(null);
+                      onSelectList(list.id);
+                    }}
+                    className={`text-white hover:text-white cursor-pointer ${isActive ? 'bg-white/10' : ''}`}
                   >
-                    <TeamMemberAvatar
-                      profileImageUrl={member.profileImageUrl}
-                      firstName={member.firstName}
-                      lastName={member.lastName}
-                      size="xs"
-                      className="mr-2"
-                    />
-                    {member.firstName} {member.lastName}
+                    {isActive ? (
+                      <Check className="h-4 w-4 mr-2 flex-shrink-0" />
+                    ) : (
+                      <UserCheck className="h-4 w-4 mr-2 flex-shrink-0 text-white/70" />
+                    )}
+                    <span className="truncate min-w-0">{list.name}</span>
                   </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
-              Mina kandidater ({totalCount})
-            </h1>
-          )}
+                );
+              })}
+              <DropdownMenuItem
+                onClick={onManageLists}
+                className="text-white hover:text-white cursor-pointer"
+              >
+                <Settings2 className="h-4 w-4 mr-2 flex-shrink-0 text-white/70" />
+                Hantera listor
+              </DropdownMenuItem>
+
+              {hasTeam && teamMembers.length > 0 && (
+                <>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuLabel className="text-xs font-medium text-white/50">Kollegors listor</DropdownMenuLabel>
+                  {teamMembers.map(member => {
+                    const memberLists = colleagueListsByOwner[member.userId] ?? [];
+                    const avatar = (
+                      <TeamMemberAvatar
+                        profileImageUrl={member.profileImageUrl}
+                        firstName={member.firstName}
+                        lastName={member.lastName}
+                        size="xs"
+                        className="mr-2 flex-shrink-0"
+                      />
+                    );
+
+                    if (memberLists.length <= 1) {
+                      return (
+                        <DropdownMenuItem
+                          key={member.userId}
+                          onClick={() => onViewColleague(member.userId, memberLists[0]?.id ?? null)}
+                          className={`text-white hover:text-white cursor-pointer ${viewingColleagueId === member.userId ? 'bg-white/10' : ''}`}
+                        >
+                          {avatar}
+                          <span className="truncate min-w-0">{member.firstName} {member.lastName}</span>
+                        </DropdownMenuItem>
+                      );
+                    }
+
+                    return (
+                      <DropdownMenuSub key={member.userId}>
+                        <DropdownMenuSubTrigger className="text-white hover:text-white cursor-pointer">
+                          {avatar}
+                          <span className="truncate min-w-0">{member.firstName} {member.lastName}</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="bg-card-parium border-white/20 min-w-[200px]">
+                          {memberLists.map(list => (
+                            <DropdownMenuItem
+                              key={list.id}
+                              onClick={() => onViewColleague(member.userId, list.id)}
+                              className={`text-white hover:text-white cursor-pointer ${
+                                viewingColleagueId === member.userId && viewingColleagueList?.id === list.id ? 'bg-white/10' : ''
+                              }`}
+                            >
+                              <span className="truncate min-w-0">{list.name}</span>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    );
+                  })}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <p className="text-sm text-white mt-1">
           {isViewingColleague 
@@ -143,6 +215,7 @@ export const MyCandidatesHeader = ({
           }
         </p>
       </div>
+
 
       {/* Search and Stage Filters */}
       {totalCount > 0 && (
