@@ -195,6 +195,9 @@ export const StageColumn = ({
             ))}
           </SortableContext>
 
+          {bottomSpacer > 0 && <div data-spacer="bottom" style={{ height: bottomSpacer }} aria-hidden />}
+
+
           {candidates.length === 0 && !isOver && (
             <div className="text-center py-8 text-xs text-white">
               Inga kandidater i detta steg
