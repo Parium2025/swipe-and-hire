@@ -24,3 +24,14 @@ export const PROFILE_IMAGE_TRANSFORM: ImageTransformOptions = {
 
 /** Standard-livslängd på signerade URL:er (24h). */
 export const MEDIA_URL_TTL = 86400;
+
+/**
+ * Chattavatarer renderas i 32/40/48 px. Vi använder EN gemensam 48px-variant
+ * för alla storlekar så att prefetch och render delar cache-nyckel
+ * (cachen nycklas på path + mediaType + transform).
+ */
+export const CHAT_AVATAR_TRANSFORM: ImageTransformOptions = {
+  width: 48,
+  height: 48,
+  resize: 'cover',
+};

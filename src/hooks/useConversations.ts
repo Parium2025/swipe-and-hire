@@ -7,6 +7,7 @@ import { fetchCachedProfile, fetchCachedProfiles, rateLimited } from '@/lib/perf
 import { measurePerformance } from '@/lib/realtimePerformance';
 import { useAuth } from './useAuth';
 import { prefetchMediaUrl } from './useMediaUrl';
+import { CHAT_AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { toast } from 'sonner';
 
 export interface ConversationMember {
@@ -469,7 +470,7 @@ export function useConversations() {
       repairedResult.forEach((conv) => {
         // Prefetch snapshot image if available (frozen candidate profile photo)
         if (conv.applicationSnapshot?.profile_image_snapshot_url) {
-          prefetchMediaUrl(conv.applicationSnapshot.profile_image_snapshot_url, 'profile-image');
+          void prefetchMediaUrl(conv.applicationSnapshot.profile_image_snapshot_url, 'profile-image', MEDIA_URL_TTL, CHAT_AVATAR_TRANSFORM).catch(() => {});
         }
         (conv.members || []).forEach((member) => {
           if (member.user_id !== user.id && member.profile) {
@@ -478,7 +479,11 @@ export function useConversations() {
               ? member.profile.company_logo_url
               : member.profile.profile_image_url;
             if (storagePath) {
-              prefetchMediaUrl(storagePath, isEmployer ? 'company-logo' : 'profile-image');
+              if (isEmployer) {
+                void prefetchMediaUrl(storagePath, 'company-logo').catch(() => {});
+              } else {
+                void prefetchMediaUrl(storagePath, 'profile-image', MEDIA_URL_TTL, CHAT_AVATAR_TRANSFORM).catch(() => {});
+              }
             }
           }
         });
