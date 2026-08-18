@@ -147,6 +147,7 @@ const SortableListRow = ({
           </button>
           <button
             disabled={list.is_default}
+            onPointerDown={(event) => event.preventDefault()}
             onClick={onRequestDelete}
             aria-label={`Ta bort ${list.name}`}
             className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-colors focus:outline-none focus:ring-0 focus-visible:ring-0 ${
@@ -353,7 +354,7 @@ export const CandidateListsDialog = ({
       </Dialog>
 
       <AlertDialog open={!!pendingDelete} onOpenChange={() => setPendingDelete(null)}>
-        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col">
+        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [-webkit-tap-highlight-color:transparent]">
           <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
             <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
@@ -384,19 +385,21 @@ export const CandidateListsDialog = ({
           </div>
           <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
             <AlertDialogCancel
+              onPointerDown={(event) => event.preventDefault()}
               onClick={() => setPendingDelete(null)}
-              className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 !outline-none !ring-0 !ring-offset-0 focus:!outline-none focus:!ring-0 focus:!ring-offset-0 focus-visible:!outline-none focus-visible:!ring-0 focus-visible:!ring-offset-0 active:!outline-none [-webkit-tap-highlight-color:transparent]"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
+              onPointerDown={(event) => event.preventDefault()}
               onClick={async () => {
                 const target = pendingDelete;
                 setPendingDelete(null);
                 if (target) await onDelete(target.id);
               }}
               variant="destructiveSoft"
-              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full !outline-none !ring-0 !ring-offset-0 focus:!outline-none focus:!ring-0 focus:!ring-offset-0 focus-visible:!outline-none focus-visible:!ring-0 focus-visible:!ring-offset-0 active:!outline-none [-webkit-tap-highlight-color:transparent]"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
