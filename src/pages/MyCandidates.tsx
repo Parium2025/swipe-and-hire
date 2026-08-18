@@ -13,6 +13,7 @@ import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useColleagueCandidates } from '@/hooks/useColleagueCandidates';
 import { useColleagueStageSettings } from '@/hooks/useColleagueStageSettings';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
+import { prefetchCandidateNotes } from '@/hooks/useCandidateNotes';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMyCandidateApplications } from '@/hooks/useMyCandidateApplications';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
@@ -477,6 +478,7 @@ const MyCandidates = () => {
     if (!user || !candidate.applicant_id) return;
     
     prefetchCandidateActivities(queryClient, candidate.applicant_id, user.id);
+    prefetchCandidateNotes(candidate.applicant_id);
     
     queryClient.prefetchQuery({
       queryKey: ['candidate-notes', candidate.applicant_id],

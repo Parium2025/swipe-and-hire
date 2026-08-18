@@ -120,6 +120,20 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
     }
   }, [applicantId, user?.id, fetchNotesFromDb, refreshInBackground]);
 
+  // ─── Realtime: keep notes in sync across colleagues/devices ─────
+  useEffect(() => {
+    if (!applicantId || !user) return;
+    const channel = supabase
+      .channel(`candidate-notes-${applicantId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'candidate_notes', filter: `applicant_id=eq.${applicantId}` },
+        () => { refreshInBackground(applicantId); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [applicantId, user?.id, refreshInBackground]);
+
   // ─── Helpers to persist optimistic changes ──────────────────────
   const persistOptimistic = useCallback((id: string, updated: CandidateNote[]) => {
     notesCache.set(id, updated);
