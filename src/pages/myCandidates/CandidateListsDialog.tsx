@@ -314,7 +314,9 @@ export const CandidateListsDialog = ({
                     onRequestDelete={() => setPendingDelete(list)}
                   />
                 ))}
+                </div>
               </SortableContext>
+
             </DndContext>
 
           </div>
