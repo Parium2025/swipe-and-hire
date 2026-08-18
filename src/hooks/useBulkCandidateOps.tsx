@@ -8,6 +8,7 @@ import type { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesDat
 
 interface UseBulkCandidateOpsParams {
   debouncedSearchQuery: string;
+  listId: string | null;
   stageConfig: Record<string, { label: string; color: string; iconName: string }>;
   isViewingColleague: boolean;
   moveCandidateInColleagueList: (id: string, stage: string) => Promise<void>;
@@ -22,6 +23,7 @@ interface UseBulkCandidateOpsParams {
  */
 export function useBulkCandidateOps({
   debouncedSearchQuery,
+  listId,
   stageConfig,
   isViewingColleague,
   moveCandidateInColleagueList,
@@ -33,7 +35,7 @@ export function useBulkCandidateOps({
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const queryKey = ['my-candidates', user?.id, debouncedSearchQuery] as const;
+  const queryKey = ['my-candidates', user?.id, debouncedSearchQuery, listId] as const;
 
   const updateCandidatesCache = useCallback(
     (updater: (items: MyCandidateData[]) => MyCandidateData[]) => {
@@ -48,7 +50,7 @@ export function useBulkCandidateOps({
         };
       });
     },
-    [queryClient, queryKey[0], queryKey[1], queryKey[2]],
+    [queryClient, queryKey[0], queryKey[1], queryKey[2], queryKey[3]],
   );
 
   const bulkMoveToStage = useCallback(
@@ -160,5 +162,52 @@ export function useBulkCandidateOps({
     [selectedCandidateIds, isViewingColleague, removeCandidateFromColleagueList, exitSelectionMode, updateCandidatesCache, user, displayedCandidates, queryClient],
   );
 
-  return { bulkMoveToStage, bulkDelete, updateCandidatesCache };
+  /**
+   * Flytta valda kandidater till en annan lista.
+   *
+   * En kandidat kan bara ligga i en lista i taget, så raden flyttas — den
+   * kopieras inte. Eftersom stegen är unika per lista landar kandidaten i
+   * mållistans första steg.
+   */
+  const bulkMoveToList = useCallback(
+    async (targetListId: string, targetListName: string) => {
+      if (!user || isViewingColleague) return;
+      const ids = Array.from(selectedCandidateIds);
+      if (ids.length === 0) return;
+
+      // Mållistans första steg (stegen skiljer sig mellan listor)
+      const { data: targetStages } = await supabase
+        .from('user_stage_settings')
+        .select('stage_key, order_index')
+        .eq('user_id', user.id)
+        .eq('list_id', targetListId)
+        .gt('order_index', -1)
+        .order('order_index', { ascending: true })
+        .limit(1);
+
+      const targetStage = targetStages?.[0]?.stage_key || 'to_contact';
+
+      // Optimistiskt: kandidaterna försvinner ur den lista vi tittar på
+      updateCandidatesCache(items => items.filter(c => !selectedCandidateIds.has(c.id)));
+      exitSelectionMode();
+
+      const { data, error } = await supabase
+        .from('my_candidates')
+        .update({ list_id: targetListId, stage: targetStage, updated_at: new Date().toISOString() })
+        .in('id', ids)
+        .select('id');
+
+      if (error || (data?.length ?? 0) < ids.length) {
+        queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+        toast.error('Kunde inte flytta alla kandidater');
+        return;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+      toast.success(`${ids.length} kandidat${ids.length !== 1 ? 'er' : ''} flyttade till "${targetListName}"`);
+    },
+    [user, isViewingColleague, selectedCandidateIds, updateCandidatesCache, exitSelectionMode, queryClient],
+  );
+
+  return { bulkMoveToStage, bulkDelete, bulkMoveToList, updateCandidatesCache };
 }
