@@ -1,0 +1,26 @@
+/**
+ * Central källa för alla media-transformationer i kandidatflödet.
+ *
+ * Signed-URL-cachen nycklas på (path + mediaType + transform). Om en warmup
+ * använder en annan transform än komponenten som renderar bilden blir cachen
+ * värdelös och avataren hinner visa initialer innan bilden dyker upp.
+ * Därför MÅSTE alla prefetchers och komponenter använda konstanterna här.
+ */
+import type { ImageTransformOptions } from '@/lib/mediaManager';
+
+/** Storleken CandidateAvatar/topbar-avatarer renderar (40px CSS, 2x hanteras av Supabase). */
+export const AVATAR_TRANSFORM: ImageTransformOptions = {
+  width: 40,
+  height: 40,
+  resize: 'cover',
+};
+
+/** Större variant som används i profil-dialoger och kort. */
+export const PROFILE_IMAGE_TRANSFORM: ImageTransformOptions = {
+  width: 200,
+  height: 200,
+  resize: 'cover',
+};
+
+/** Standard-livslängd på signerade URL:er (24h). */
+export const MEDIA_URL_TTL = 86400;
