@@ -10,12 +10,12 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 
 interface PrivacyDataPanelProps {
   /** Arbetsgivare ser även länk till personuppgiftsbiträdesavtalet */
@@ -189,7 +189,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
       </div>
 
       <AlertDialog open={deleteOpen} onOpenChange={(o) => !deleting && setDeleteOpen(o)}>
-        <AlertDialogContent className="bg-parium-navy text-white border-white/10">
+        <AlertDialogContentNoFocus className="bg-parium-navy text-white border-white/10">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Radera ditt konto permanent?</AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-white">
@@ -225,7 +225,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
             </AlertDialogAction>
           </AlertDialogFooter>
 
-        </AlertDialogContent>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
     </div>
   );
