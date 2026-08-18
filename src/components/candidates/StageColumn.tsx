@@ -62,7 +62,7 @@ export const StageColumn = ({
   const [itemHeight, setItemHeight] = useState(56);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
-  const firstItemRef = useRef<HTMLDivElement>(null);
+  
 
   const isVirtual = candidates.length > VIRTUALIZE_THRESHOLD;
 
