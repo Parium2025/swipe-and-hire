@@ -230,6 +230,9 @@ export const getMaxConcurrentVideos = () => {
   // Windows i säkert läge (svagare maskin, eller degraderad av hälsovakten):
   // håll nere antalet parallella decoders så att hero-videon alltid får budget.
   if (isWindowsDevice() && getVideoQualityTier() === 'safe') return 4;
+  // Extern/utökad skärm delar samma GPU-dekoderpool oavsett OS (Linux,
+  // ChromeOS och Mac med extern 4K-skärm hamnar annars på fullt tak).
+  if (isExtendedDisplay()) return 4;
   return 8;
 };
 
