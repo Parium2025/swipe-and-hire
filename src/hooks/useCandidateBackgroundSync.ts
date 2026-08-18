@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
@@ -291,11 +292,13 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
  * Synka "Mina kandidater" data (my_candidates)
  */
 async function syncMyCandidatesData(userId: string, queryClient: ReturnType<typeof useQueryClient>) {
-  const queryKey = ['my-candidates', userId, ''];
+  // Synka den lista användaren senast tittade på — samma nyckel som vyn läser.
+  const listId = getActiveCandidateListId(userId);
+  const queryKey = ['my-candidates', userId, '', listId];
   const PAGE_SIZE = 50;
 
   // Hämta första sidan med mina kandidater
-  const { data: myCandidates, error: mcError } = await supabase
+  let mcQuery = supabase
     .from('my_candidates')
     .select(`
       id,
@@ -309,7 +312,11 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
       created_at,
       updated_at
     `)
-    .eq('recruiter_id', userId)
+    .eq('recruiter_id', userId);
+
+  if (listId) mcQuery = mcQuery.eq('list_id', listId);
+
+  const { data: myCandidates, error: mcError } = await mcQuery
     .order('updated_at', { ascending: false })
     .range(0, PAGE_SIZE - 1);
 
@@ -452,22 +459,26 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
  * Synka stage-settings för instant Kanban-vy (ingen "default steg" flicker)
  */
 async function syncStageSettings(userId: string, queryClient: ReturnType<typeof useQueryClient>) {
-  const queryKey = ['stage-settings', userId];
-  
+  const listId = getActiveCandidateListId(userId);
+  const queryKey = ['stage-settings', userId, listId];
+
   try {
-    const { data: settings, error } = await supabase
+    let query = supabase
       .from('user_stage_settings')
       .select('*')
-      .eq('user_id', userId)
-      .order('order_index', { ascending: true });
-    
+      .eq('user_id', userId);
+
+    if (listId) query = query.eq('list_id', listId);
+
+    const { data: settings, error } = await query.order('order_index', { ascending: true });
+
     if (error || !settings) return;
     
     // Uppdatera React Query cache
     queryClient.setQueryData(queryKey, settings);
     
     // Spara till localStorage för instant first paint nästa gång
-    const cacheKey = STAGE_SETTINGS_CACHE_KEY + userId;
+    const cacheKey = STAGE_SETTINGS_CACHE_KEY + userId + (listId ? `_${listId}` : '');
     safeSetItem(cacheKey, JSON.stringify({
       settings,
       timestamp: Date.now(),

@@ -41,7 +41,7 @@ export function useEmployerWarmupOrchestrator() {
   });
 
   useProgressivePagination({
-    queryKey: ['my-candidates', userId, ''],
+    queryKey: ['my-candidates', userId, '', getActiveCandidateListId(userId)],
     enabled: !!userId && isEmployer,
     maxPages: 5,
     delayBetweenPages: 800,
