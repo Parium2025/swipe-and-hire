@@ -10,6 +10,7 @@ import { getIsOnline } from '@/lib/connectivityManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -305,7 +306,6 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
           .slice(0, 8);
 
         // Matcha CandidateAvatar (40px, 2x retina) + förladda full-size för profil-dialog (instant open, ingen FA-fallback)
-        const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
         setTimeout(() => {
           void Promise.allSettled([
             ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400, AVATAR_TRANSFORM)),
@@ -482,10 +482,9 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
         .slice(0, 8);
 
       // Matcha CandidateAvatar (40px, 2x retina) + förladda full-size för profil-dialog (instant open, ingen FA-fallback)
-      const AVATAR_TRANSFORM_2 = { width: 40, height: 40, resize: 'cover' as const };
       setTimeout(() => {
         void Promise.allSettled([
-          ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400, AVATAR_TRANSFORM_2)),
+          ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400, AVATAR_TRANSFORM)),
           ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400)),
           ...videoPaths.map((path) => prefetchMediaUrl(path, 'profile-video')),
         ]);

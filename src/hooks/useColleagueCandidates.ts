@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 // Page size for scalable pagination
 const PAGE_SIZE = 50;
@@ -198,7 +199,6 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
         .slice(0, 8);
 
       // Matcha CandidateAvatar (40px, 2x retina)
-      const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
       setTimeout(() => {
         void Promise.allSettled([
           ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400, AVATAR_TRANSFORM)),
