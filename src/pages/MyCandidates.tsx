@@ -858,6 +858,7 @@ const MyCandidates = () => {
         }}
         onRename={(id, name) => renameList.mutateAsync({ id, name })}
         onDelete={(id) => deleteList.mutateAsync(id)}
+        onReorder={(orderedIds) => reorderLists.mutateAsync(orderedIds)}
       />
     </div>
   );
