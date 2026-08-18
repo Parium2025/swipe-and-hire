@@ -158,14 +158,25 @@ const getSources = (widthPx?: number) =>
     : prefersReducedData()
       ? [{ src: windowsLiteAsset.url, type: 'video/mp4' }]
       : isWindowsDevice()
-        ? [
-            // En enda konservativ Windows-master för både laptopskärm och extern
-            // HDMI/DisplayPort: H.264 Constrained Baseline, 30 fps, yuv420p,
-            // inga B-frames, en referensbild och kort GOP. Det undviker både den
-            // dyra 60-fps-kompositionen på externa skärmar och Main-profilens
-            // frame-reordering vid decoder-/GPU-output-byte.
-            { src: WINDOWS_BASELINE_30_SRC, type: 'video/mp4' },
-          ]
+        ? getVideoQualityTier() === 'high'
+          ? [
+              // STARK maskin (>=8 kärnor, >=8 GB, ingen sparläge): samma skarpa
+              // master som Mac får i motsvarande storlek. En stationär med
+              // extern skärm ska INTE straffas av att den svagaste tänkbara
+              // ultrabooken också kör Windows. Hälsovakten (watchPlaybackHealth)
+              // mäter tappade bildrutor och faller tillbaka på baseline-filen
+              // om just den här maskinen ändå inte klarar det.
+              { src: pickLadder(widthPx), type: 'video/mp4' },
+              { src: WINDOWS_BASELINE_30_SRC, type: 'video/mp4' },
+            ]
+          : [
+              // Konservativ Windows-master: H.264 Constrained Baseline, 30 fps,
+              // yuv420p, inga B-frames, kort GOP. Undviker både den dyra
+              // 60-fps-kompositionen på externa skärmar och Main-profilens
+              // frame-reordering vid decoder-/GPU-output-byte.
+              { src: WINDOWS_BASELINE_30_SRC, type: 'video/mp4' },
+            ]
+
         : isAndroidDevice()
           ? [
               // Androids H.264-hårdvaruväg är jämnare mellan olika GPU:er än VP9.
