@@ -579,6 +579,14 @@ const CardItem = ({ item, index }: CardItemProps) => {
               if (!v) return;
               resetReady();
 
+              // AVSIKTLIGT SLÄPP: på Windows plockar koordinatorn bort src för
+              // kort som inte ska spela. Det ger ett media-error som INTE är
+              // ett riktigt fel — det får aldrig äta av retry-budgeten (då
+              // skulle kortet vara "förbrukat" innan ett verkligt nätverksfel
+              // ens inträffat). connectWindowsVideo() sätter tillbaka källan.
+              if (!v.getAttribute('src')) return;
+
+
               // Ett kort får aldrig försvinna permanent ur playback-kedjan på
               // ett tillfälligt range-/decoderfel. Försök om källan lugnt;
               // Apple kan efter två försök prova originalet. Övriga plattformar
