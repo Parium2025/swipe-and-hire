@@ -91,7 +91,13 @@ export const StageColumn = ({
   }, [checkScroll]);
 
   useLayoutEffect(() => {
-    const h = firstItemRef.current?.offsetHeight;
+    if (!isVirtual) return;
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const card = Array.from(el.children).find(
+      (child) => !(child as HTMLElement).dataset.spacer && (child as HTMLElement).offsetHeight > 20
+    ) as HTMLElement | undefined;
+    const h = card?.offsetHeight;
     if (h && Math.abs(h - itemHeight) > 1) setItemHeight(h);
   });
 
