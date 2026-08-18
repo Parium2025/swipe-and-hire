@@ -168,31 +168,21 @@ export const watchPlaybackHealth = (
 /**
  * Antal videor som får spela samtidigt i galleriet.
  *
- * Windows får en enda samtidig galleriström. På vissa externa skärmar går
- * Chromium via en gemensam MPO-/kompositionsväg där redan laddade, pausade
- * videor fortfarande kan hålla decoder- och GPU-resurser. Ett hårt tak på en
- * aktiv källa är därför den enda säkra minsta gemensamma nämnaren.
- * Apple behåller sin tidigare budget på tre.
+ * "Alltid igång" är standard: källorna är lätta och att pausa/starta kort
+ * under scroll kändes stressigt (en video låg pausad exakt när användaren kom
+ * fram). Bara sparläge, svaga enheter och Windows i säkert läge får ett
+ * glidande fönster.
  */
 export const getMaxConcurrentVideos = () => {
-  // ALLTID-IGÅNG är standard. Att pausa/starta kort under scroll kändes
-  // "stressigt" och gjorde att en video låg pausad exakt när användaren kom
-  // fram. Källorna är lätta (4:5, ~2,4 Mbit/s) så många samtidiga strömmar
-  // klaras av Apple-enheter. Bara sparläge/riktigt svaga enheter får
-  // ett glidande fönster.
   if (prefersReducedData()) return 1;
-  // Windows: galleriets Windows-källor är extremt lätta (560x700, Constrained
-  // Baseline, ~1,1 Mbit/s, ~340 kB per klipp). Ett tak på en ström gjorde att
-  // bara ett kort spelade och att uppspelningen dog så fort man scrollade —
-  // vilket var värre än den decode-belastning taket skulle skydda mot.
-  // Windows kör därför samma "alltid igång"-läge som Apple.
   if (isLowPowerDevice()) return getVideoPlatform() === 'android' ? 3 : 4;
   // Windows i säkert läge (svagare maskin, eller degraderad av hälsovakten):
-  // håll nere antalet parallella decoders så att hero-videon alltid får
-  // budget. Stark maskin kör samma "alltid igång"-läge som Apple.
+  // håll nere antalet parallella decoders så att hero-videon alltid får budget.
   if (isWindowsDevice() && getVideoQualityTier() === 'safe') return 4;
   return 8;
 };
+
+
 
 
 
@@ -222,13 +212,10 @@ export const shouldFreeDecodersOnLeave = () => {
  * bytet blir osynligt. Android och sparläge behåller `none` (bandbredd).
  */
 export const getGalleryPreload = (): 'none' | 'metadata' => {
-  const platform = getVideoPlatform();
+  // Sparläge/långsam uppkoppling laddar inget i förväg; alla andra värmer
+  // decodern med `metadata` så att bytet från poster till första bildruta
+  // inte syns som ett "pop". Koordinatorn höjer till `auto` vid uppspelning.
   if (prefersReducedData()) return 'none';
-  if (platform === 'android') return 'metadata';
-  // Windows-korten uppgraderas till `auto` först när koordinatorn väljer dem.
-  // Att ge alla åtta `metadata` vid mount initierade åtta demuxers samtidigt
-  // och motverkade concurrency-taket på två aktiva strömmar.
-  if (platform === 'windows') return 'metadata';
   return 'metadata';
 };
 
