@@ -7,7 +7,7 @@
  * - Activity logging on every mutation
  * - Automatic rollback on failure
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,6 +18,46 @@ import {
   setPersistedNotes,
 } from '@/components/candidateProfile/candidateProfileCache';
 import type { CandidateNote } from '@/components/candidateProfile/candidateProfileCache';
+
+/** Module-level fetch — shared by the hook and the hover prefetch. */
+async function fetchNotesForApplicant(id: string): Promise<CandidateNote[]> {
+  const { data, error } = await supabase
+    .from('candidate_notes')
+    .select(`
+      id, note, created_at, updated_at, employer_id,
+      profiles!candidate_notes_employer_id_fkey(first_name, last_name)
+    `)
+    .eq('applicant_id', id)
+    .order('updated_at', { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map((note: any) => ({
+    id: note.id,
+    note: note.note,
+    created_at: note.created_at,
+    updated_at: note.updated_at || note.created_at,
+    employer_id: note.employer_id,
+    author_name: note.profiles
+      ? `${note.profiles.first_name || ''} ${note.profiles.last_name || ''}`.trim() || 'Okänd'
+      : 'Okänd',
+  }));
+}
+
+/**
+ * Prefetch notes on hover/touch so the Anteckningar-tab opens with data already
+ * in the same cache the hook reads from (memory → localStorage → DB).
+ */
+export function prefetchCandidateNotes(applicantId: string | null | undefined): void {
+  if (!applicantId) return;
+  if (notesCache.has(applicantId)) return;
+  fetchNotesForApplicant(applicantId)
+    .then((fresh) => {
+      notesCache.set(applicantId, fresh);
+      setPersistedNotes(applicantId, fresh);
+    })
+    .catch(() => { /* cache stays cold — the dialog fetches on open */ });
+}
 
 interface UseCandidateNotesOptions {
   applicantId: string | null;
@@ -36,29 +76,7 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 
   // ─── Shared DB fetch ────────────────────────────────────────────
-  const fetchNotesFromDb = useCallback(async (id: string): Promise<CandidateNote[]> => {
-    const { data, error } = await supabase
-      .from('candidate_notes')
-      .select(`
-        id, note, created_at, updated_at, employer_id,
-        profiles!candidate_notes_employer_id_fkey(first_name, last_name)
-      `)
-      .eq('applicant_id', id)
-      .order('updated_at', { ascending: false });
-
-    if (error) throw error;
-
-    return (data || []).map((note: any) => ({
-      id: note.id,
-      note: note.note,
-      created_at: note.created_at,
-      updated_at: note.updated_at || note.created_at,
-      employer_id: note.employer_id,
-      author_name: note.profiles
-        ? `${note.profiles.first_name || ''} ${note.profiles.last_name || ''}`.trim() || 'Okänd'
-        : 'Okänd',
-    }));
-  }, []);
+  const fetchNotesFromDb = useCallback((id: string) => fetchNotesForApplicant(id), []);
 
   // Background-only refresh (no loading state)
   const refreshInBackground = useCallback(async (id: string) => {
