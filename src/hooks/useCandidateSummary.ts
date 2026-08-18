@@ -158,9 +158,10 @@ export function useCandidateSummary({ applicantId, jobId, applicationId, cvUrl, 
       const meta = extractSummaryMeta(keyPoints);
 
       // Check if summary is stale (CV changed since summary was generated).
-      // Only treat as stale when source_cv_url exists AND differs.
-      // Older summaries without source_cv_url should still be considered valid.
-      const isStale = !!cvUrl && !!meta.sourceCvUrl && meta.sourceCvUrl !== cvUrl;
+      // Stale when source_cv_url differs — OR when the field is missing entirely
+      // (legacy rows). Legacy rows can never detect a new CV otherwise, so they
+      // regenerate once and then carry the field going forward.
+      const isStale = !!cvUrl && meta.sourceCvUrl !== cvUrl;
       if (isStale) {
         setAiSummary(null);
         return { shouldAutoGenerate: true };

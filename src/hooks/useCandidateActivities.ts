@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export type ActivityType =
   | 'rating_changed'
+  | 'stage_changed'
   | 'note_added'
   | 'note_edited'
   | 'added_to_pipeline'
