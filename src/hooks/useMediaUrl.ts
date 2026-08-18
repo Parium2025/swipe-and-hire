@@ -60,24 +60,31 @@ function enforceMemoryCacheLimit() {
 // bilderna och triggar rate limits på svaga nät.
 const MAX_CONCURRENT_SIGNED_URL_LOADS = 8;
 let activeSignedUrlLoads = 0;
-const signedUrlQueue: Array<() => void> = [];
 
-function acquireSignedUrlSlot(): Promise<void> {
+// Två köer: synliga komponenter (high) går ALLTID före förladdning (low).
+// Utan detta kan 50+ prefetch-anrop äta upp alla slots och en avatar som
+// faktiskt syns på skärmen fastnar i "laddar"-läge (tom platta / initialer).
+type LoadPriority = 'high' | 'low';
+const signedUrlQueueHigh: Array<() => void> = [];
+const signedUrlQueueLow: Array<() => void> = [];
+
+function acquireSignedUrlSlot(priority: LoadPriority = 'high'): Promise<void> {
   if (activeSignedUrlLoads < MAX_CONCURRENT_SIGNED_URL_LOADS) {
     activeSignedUrlLoads++;
     return Promise.resolve();
   }
   return new Promise<void>((resolve) => {
-    signedUrlQueue.push(() => {
+    const run = () => {
       activeSignedUrlLoads++;
       resolve();
-    });
+    };
+    (priority === 'high' ? signedUrlQueueHigh : signedUrlQueueLow).push(run);
   });
 }
 
 function releaseSignedUrlSlot() {
   activeSignedUrlLoads = Math.max(0, activeSignedUrlLoads - 1);
-  const next = signedUrlQueue.shift();
+  const next = signedUrlQueueHigh.shift() ?? signedUrlQueueLow.shift();
   if (next) next();
 }
 
@@ -105,13 +112,14 @@ function getOrCreateSignedUrlLoad(
   storagePath: string,
   mediaType: MediaType,
   expiresInSeconds: number,
-  transform?: ImageTransformOptions
+  transform?: ImageTransformOptions,
+  priority: LoadPriority = 'high'
 ) {
   const cacheKey = getCacheKey(storagePath, mediaType, transform);
   const existing = ongoingLoads.get(cacheKey);
   if (existing) return existing;
 
-  const promise = acquireSignedUrlSlot()
+  const promise = acquireSignedUrlSlot(priority)
     .then(() => {
       const now = Date.now();
       return getMediaUrl(storagePath, mediaType, expiresInSeconds, transform).then((signedUrl) => {
@@ -129,6 +137,7 @@ function getOrCreateSignedUrlLoad(
   ongoingLoads.set(cacheKey, promise);
   return promise;
 }
+
 
 // Hämta cached URL synkront (för initial render utan flicker)
 function getCachedUrlSync(storagePath: string, mediaType: MediaType, transform?: ImageTransformOptions): string | null {
@@ -367,7 +376,8 @@ export async function prefetchMediaUrl(
   }
 
   try {
-    const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform);
+    const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform, 'low');
+
     if (!signedUrl) return;
 
     // Preloada till blob-cache (så UI kan visa direkt)

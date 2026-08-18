@@ -53,6 +53,27 @@ function CandidateAvatarBase({
 
   const handleClick = stopPropagation ? (e: React.MouseEvent) => e.stopPropagation() : undefined;
 
+  // Media är på väg (path finns men signerad URL/video är inte klar än) →
+  // visa en neutral platta istället för initialer, så att inga bokstäver
+  // hinner blinka förbi innan bilden/videon renderas.
+  const mediaPending =
+    (!!profileImageUrl && !resolvedImageUrl && !avatarError) ||
+    (!!isProfileVideo && !!videoUrl && !resolvedVideoUrl);
+
+  // Skyddsnät: om signeringen misslyckas (t.ex. rättighetsfel eller nätfel)
+  // får kortet ALDRIG fastna i en tom platta för alltid — efter en kort stund
+  // visar vi initialerna i stället.
+  const [pendingTimedOut, setPendingTimedOut] = useState(false);
+  useEffect(() => {
+    if (!mediaPending) {
+      setPendingTimedOut(false);
+      return;
+    }
+    setPendingTimedOut(false);
+    const timer = setTimeout(() => setPendingTimedOut(true), 4000);
+    return () => clearTimeout(timer);
+  }, [mediaPending, profileImageUrl, videoUrl]);
+
   if (hasVideo) {
     return (
       <div onClick={handleClick}>
@@ -70,14 +91,7 @@ function CandidateAvatarBase({
     );
   }
 
-  // Media är på väg (path finns men signerad URL/video är inte klar än) →
-  // visa en neutral platta istället för initialer, så att inga bokstäver
-  // hinner blinka förbi innan bilden/videon renderas.
-  const mediaPending =
-    (!!profileImageUrl && !resolvedImageUrl && !avatarError) ||
-    (!!isProfileVideo && !!videoUrl && !resolvedVideoUrl);
-
-  if (mediaPending) {
+  if (mediaPending && !pendingTimedOut) {
     return (
       <div
         className="h-10 w-10 rounded-full bg-white/10 ring-2 ring-inset ring-white/20 transform-gpu"
@@ -86,6 +100,7 @@ function CandidateAvatarBase({
       />
     );
   }
+
 
   return (
     <Avatar className="h-10 w-10 ring-2 ring-inset ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
