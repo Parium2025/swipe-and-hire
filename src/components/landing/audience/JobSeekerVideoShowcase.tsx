@@ -212,8 +212,16 @@ const JobSeekerVideoShowcase = ({
   active?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  // Kvalitetsnivån kan degraderas i realtid av hälsovakten. Vi håller den i
+  // state så att källistan byggs om och videon laddar den säkra filen — med
+  // bevarad tidsposition, så bytet knappt märks.
+  const [qualityTier, setQualityTier] = useState(() => getVideoQualityTier());
   const sourcesRef = useRef<ReturnType<typeof getSources> | null>(null);
-  if (sourcesRef.current === null) sourcesRef.current = getSources(widthPx);
+  const tierRef = useRef(qualityTier);
+  if (sourcesRef.current === null || tierRef.current !== qualityTier) {
+    tierRef.current = qualityTier;
+    sourcesRef.current = getSources(widthPx);
+  }
   const sources = sourcesRef.current;
   /**
    * Posterlager: <video poster> ritas inte alltid direkt i Safari/iOS — ramen
