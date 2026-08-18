@@ -51,11 +51,24 @@ export const CandidateListsDialog = ({
   // Lokal ordning under pågående drag — synkas från servern när vi inte drar.
   const [order, setOrder] = useState<CandidateList[]>(lists);
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const orderRef = useRef<CandidateList[]>(lists);
-  const startOrderRef = useRef<string[]>([]);
+
+  const isTouchCapable = useTouchCapable();
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: { delay: 120, tolerance: 8 },
+  });
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: { distance: 6 },
+  });
+  const keyboardSensor = useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  });
+  const sensors = useSensors(
+    ...(isTouchCapable ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]),
+  );
 
   const countByList = useCandidateListCounts(open);
+
 
   useEffect(() => {
     if (draggingId) return;
