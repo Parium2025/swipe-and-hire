@@ -268,6 +268,9 @@ export function CandidatesTable({
     onSelectionModeChange?.(false);
   }, [onSelectionModeChange]);
 
+  const [bulkListDialogOpen, setBulkListDialogOpen] = useState(false);
+  const [bulkCandidates, setBulkCandidates] = useState<CandidateToAdd[]>([]);
+
   const handleBulkAddToMyCandidates = useCallback(async () => {
     const selectedApps = selectedApplications;
     if (selectedApps.length === 0) return;
@@ -278,11 +281,17 @@ export function CandidatesTable({
       jobId: app.job_id,
     }));
 
+    if (needsListPicker) {
+      setBulkCandidates(candidatesToAdd);
+      setBulkListDialogOpen(true);
+      return;
+    }
+
     await addCandidates.mutateAsync(candidatesToAdd);
     setSelectedIds(new Set());
     onSelectionModeChange?.(false);
     onUpdate();
-  }, [selectedApplications, addCandidates, onSelectionModeChange, onUpdate]);
+  }, [selectedApplications, addCandidates, onSelectionModeChange, onUpdate, needsListPicker]);
 
   const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number } | null>(null);
