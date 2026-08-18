@@ -459,17 +459,18 @@
 
     <!-- Organization/WebSite-schema definieras en gång högre upp i <head>. Dubblett borttagen för att undvika motstridiga beskrivningar. -->
   <link rel="manifest" href="/manifest.json?v=20260721-1">
-  <!-- Flikikon: ringarna på solid vit platta (ingen transparens) så att Google,
-       Safari och mörka flikfält alla visar samma rena vita bricka som Wikipedia. -->
-  <link rel="shortcut icon" href="/parium-favicon-v5.ico?v=20260818-1" sizes="any">
-  <link rel="icon" href="/parium-favicon-v5.ico?v=20260818-1" sizes="any">
-  <link rel="icon" type="image/png" sizes="32x32" href="/parium-favicon-v5-32.png?v=20260818-1">
-  <link rel="icon" type="image/png" sizes="48x48" href="/parium-favicon-v5-48.png?v=20260818-1">
-  <!-- Stor ikon för Google-sökresultat: vit bakgrund -->
+  <!-- Flikikon: transparent bakgrund (bara ringarna) -->
+  <link rel="shortcut icon" href="/parium-favicon-v3.ico?v=20260805-2" sizes="any">
+  <link rel="icon" href="/parium-favicon-v3.ico?v=20260805-2" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/parium-favicon-v3-32.png?v=20260805-2">
+  <link rel="icon" type="image/png" sizes="48x48" href="/parium-favicon-v3-48.png?v=20260805-2">
+  <!-- Stor ikon för Google-sökresultat: solid vit platta + luft runt ringarna så
+       att Googles runda beskärning inte kapar kanterna. Rör INTE flikikonerna. -->
   <link rel="icon" type="image/png" sizes="512x512" href="/parium-favicon-v5-512.png?v=20260818-1">
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/parium-favicon-v5-180.png?v=20260818-1">
-  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/parium-favicon-v5-180.png?v=20260818-1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/parium-touch-icon-v3.png?v=20260721-1">
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/parium-touch-icon-v3.png?v=20260721-1">
+
 
   <style>
     /* Body-färgen sätts INLINE av syncBrowserChrome() vid varje route-byte:
