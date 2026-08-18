@@ -916,6 +916,21 @@ export function CandidatesTable({
         />
       )}
 
+      {bulkListDialogOpen && bulkCandidates.length > 0 && (
+        <AddToColleagueListDialog
+          open={bulkListDialogOpen}
+          onOpenChange={(open) => { setBulkListDialogOpen(open); if (!open) setBulkCandidates([]); }}
+          teamMembers={teamMembers}
+          candidates={bulkCandidates}
+          candidateName={`${bulkCandidates.length} kandidater`}
+          onAdded={() => {
+            setSelectedIds(new Set());
+            onSelectionModeChange?.(false);
+            onUpdate();
+          }}
+        />
+      )}
+
       {bulkMessageOpen && (
         <BulkMessageDialog
           open={bulkMessageOpen}
