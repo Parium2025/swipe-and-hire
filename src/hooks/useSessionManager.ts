@@ -2,6 +2,21 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const SESSION_TOKEN_KEY = 'parium_session_token';
+
+/**
+ * Global "vi loggar ut nu"-signal.
+ *
+ * Varför: heartbeat, validitetskontroll och re-registrering vid
+ * visibilitychange/online anropar `refreshSession()`. Om en sådan tick landar
+ * medan utloggningen pågår skrivs ett giltigt auth-token tillbaka i storage
+ * EFTER att vi rensat — användaren är då plötsligt inloggad igen nästa gång
+ * hen öppnar appen. Flaggan stoppar all sessionstrafik tills nästa inloggning.
+ */
+let signOutInProgress = false;
+export const isSignOutInProgress = () => signOutInProgress;
+export const beginSignOutTracking = () => { signOutInProgress = true; };
+export const endSignOutTracking = () => { signOutInProgress = false; };
+
 const SESSION_TOKEN_COOKIE = 'parium_device_token';
 const HEARTBEAT_INTERVAL_MS = 90 * 1000; // 90s — well under DB cleanup threshold (5 min)
 const VALIDITY_CHECK_INTERVAL_MS = 30 * 1000; // 30 seconds — reduced frequency to avoid false kicks on mobile
