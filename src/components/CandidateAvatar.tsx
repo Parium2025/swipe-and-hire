@@ -69,15 +69,34 @@ function CandidateAvatarBase({
     );
   }
 
+  // Media är på väg (path finns men signerad URL/video är inte klar än) →
+  // visa en neutral platta istället för initialer, så att inga bokstäver
+  // hinner blinka förbi innan bilden/videon renderas.
+  const mediaPending =
+    (!!profileImageUrl && !resolvedImageUrl && !avatarError) ||
+    (!!isProfileVideo && !!videoUrl && !resolvedVideoUrl);
+
+  if (mediaPending) {
+    return (
+      <div
+        className="h-10 w-10 rounded-full bg-white/10 ring-2 ring-inset ring-white/20 transform-gpu"
+        aria-label={`${firstName || ''} ${lastName || ''}`.trim() || undefined}
+        style={{ contain: 'paint' }}
+      />
+    );
+  }
+
   return (
     <Avatar className="h-10 w-10 ring-2 ring-inset ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
-      <AvatarImage 
-        src={resolvedImageUrl || ''} 
+      <AvatarImage
+        src={resolvedImageUrl || ''}
         alt={`${firstName || ''} ${lastName || ''}`}
+        loading="eager"
+        decoding="async"
         onError={() => setAvatarError(true)}
         onLoad={() => setImageLoaded(true)}
       />
-      <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={1200}>
+      <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={hasImage ? 1200 : 0}>
         {initials || '?'}
       </AvatarFallback>
     </Avatar>
