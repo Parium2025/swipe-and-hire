@@ -80,8 +80,14 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
   useEffect(() => {
     return () => {
       if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
+        try {
+          videoRef.current.pause();
+          // Vissa WebKit-versioner kastar InvalidStateError om metadata
+          // inte hunnit laddas när currentTime sätts.
+          if (videoRef.current.readyState >= 1) videoRef.current.currentTime = 0;
+        } catch {
+          // ignorera städfel vid unmount
+        }
       }
       setIsPlaying(false);
       setShowVideo(false);
@@ -130,8 +136,14 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
       setShowVideo(false);
       setIsPlaying(false);
       if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
+        try {
+          videoRef.current.pause();
+          // Vissa WebKit-versioner kastar InvalidStateError om metadata
+          // inte hunnit laddas när currentTime sätts.
+          if (videoRef.current.readyState >= 1) videoRef.current.currentTime = 0;
+        } catch {
+          // ignorera städfel vid unmount
+        }
       }
     }
   };
@@ -161,32 +173,45 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
     console.error('Video playback error');
   };
 
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
+  // Sökning sker via Pointer Events så att mus, touch och penna beter sig
+  // identiskt (mouse-only gjorde progressbaren odragbar på iOS/Android).
+  const seekToClientX = (clientX: number) => {
     if (!progressBarRef.current || !videoRef.current) return;
-    
+
     const rect = progressBarRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const x = clientX - rect.left;
     const percentage = Math.max(0, Math.min(1, x / rect.width));
     const newTime = percentage * duration;
-    
+
     videoRef.current.currentTime = newTime;
     setProgress(newTime);
   };
 
-  const handleProgressDrag = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    handleProgressClick(e);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleProgressPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
     setIsDragging(true);
-    handleProgressClick(e);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Pointer capture saknas i äldre webbläsare — global fallback nedan
+    }
+    seekToClientX(e.clientX);
   };
 
-  const handleMouseUp = () => {
+  const handleProgressPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    e.stopPropagation();
+    seekToClientX(e.clientX);
+  };
+
+  const handleProgressPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignorera
+    }
   };
 
   const handleMouseEnter = () => {
@@ -216,21 +241,17 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
           setControlsVisible(false);
         }
       };
-      const handleGlobalMouseMove = (e: MouseEvent) => {
-        if (!progressBarRef.current || !videoRef.current) return;
-        const rect = progressBarRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const percentage = Math.max(0, Math.min(1, x / rect.width));
-        const newTime = percentage * duration;
-        videoRef.current.currentTime = newTime;
-        setProgress(newTime);
+      const handleGlobalPointerMove = (e: PointerEvent) => {
+        seekToClientX(e.clientX);
       };
-      
-      document.addEventListener('mouseup', handleGlobalMouseUp);
-      document.addEventListener('mousemove', handleGlobalMouseMove);
+
+      document.addEventListener('pointerup', handleGlobalMouseUp);
+      document.addEventListener('pointercancel', handleGlobalMouseUp);
+      document.addEventListener('pointermove', handleGlobalPointerMove);
       return () => {
-        document.removeEventListener('mouseup', handleGlobalMouseUp);
-        document.removeEventListener('mousemove', handleGlobalMouseMove);
+        document.removeEventListener('pointerup', handleGlobalMouseUp);
+        document.removeEventListener('pointercancel', handleGlobalMouseUp);
+        document.removeEventListener('pointermove', handleGlobalPointerMove);
       };
     }
   }, [isDragging, effectiveIsTouchDevice, duration]);
@@ -262,7 +283,11 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
           {...fetchPriority('high')}
         />
       ) : (
-        <div className={`w-full h-full bg-[hsl(210,35%,22%)] flex items-center justify-center text-white font-semibold text-2xl transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>
+        <div
+          role="img"
+          aria-label={alt}
+          className={`w-full h-full bg-[hsl(210,35%,22%)] flex items-center justify-center text-white font-semibold text-2xl transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+        >
           {userInitials}
         </div>
       )}
@@ -296,9 +321,19 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
                   : 'bg-black/20 opacity-0 hover:opacity-100')
               : 'bg-transparent opacity-0'
           }`}
+          role="button"
+          tabIndex={0}
+          aria-label={isPlaying ? 'Pausa video' : 'Spela video'}
           onClick={(e) => {
             e.stopPropagation();
             handleTap();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.stopPropagation();
+              handleTap();
+            }
           }}
         >
           {isPlaying ? (
@@ -347,14 +382,15 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
           className={`absolute bottom-2 left-2 right-2 md:bottom-4 md:left-3 md:right-3 transition-opacity duration-300 ${
             (controlsVisible || isDragging || countdownVariant === 'preview') && isPlaying ? 'opacity-100' : 'opacity-0'
           }`}
-          onMouseMove={handleProgressDrag}
         >
           <div
             ref={progressBarRef}
-            className="h-1.5 md:h-2 bg-white/40 backdrop-blur-sm cursor-pointer hover:h-2 hover:bg-white/50 md:hover:h-3 transition-all rounded-full overflow-hidden shadow-lg"
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onClick={handleProgressClick}
+            className="h-1.5 md:h-2 bg-white/40 backdrop-blur-sm cursor-pointer hover:h-2 hover:bg-white/50 md:hover:h-3 transition-all rounded-full overflow-hidden shadow-lg touch-none"
+            onPointerDown={handleProgressPointerDown}
+            onPointerMove={handleProgressPointerMove}
+            onPointerUp={handleProgressPointerUp}
+            onPointerCancel={handleProgressPointerUp}
+            onClick={(e) => e.stopPropagation()}
           >
             <div 
               className="h-full bg-white transition-all rounded-full"

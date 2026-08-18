@@ -289,7 +289,9 @@ setGeneratingSummary(true);
 
   // ─── Polling with exponential backoff ──────────────────────────
   useEffect(() => {
-    if (!open || !applicantId || aiSummary || loadingSummary || generatingSummary || !cvUrl) return;
+    // Utan jobId finns ingen rad i candidate_summaries att polla efter
+    // (Supabase tolkar .eq('job_id', null) som alltid falskt).
+    if (!open || !applicantId || !jobId || aiSummary || loadingSummary || generatingSummary || !cvUrl) return;
 
     let attempt = 0;
     const MAX_ATTEMPTS = 10;
@@ -303,7 +305,7 @@ setGeneratingSummary(true);
         const { data } = await supabase
           .from('candidate_summaries')
           .select('summary_text, key_points')
-          .eq('job_id', jobId!)
+          .eq('job_id', jobId)
           .eq('applicant_id', applicantId)
           .order('generated_at', { ascending: false })
           .limit(1)

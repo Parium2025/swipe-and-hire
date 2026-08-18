@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
+import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 
 type CandidateAvatarProps = {
   profileImageUrl: string | null | undefined;
@@ -28,7 +29,7 @@ function CandidateAvatarBase({
   // Use useMediaUrl hook properly at component level
   // These will generate signed URLs for private bucket files
   // Avatarn renderas alltid 40x40 → be Supabase om en 40px-version (2x för retina) → ~95% mindre fil
-  const resolvedImageUrl = useMediaUrl(profileImageUrl, 'profile-image', 86400, { width: 40, height: 40, resize: 'cover' });
+  const resolvedImageUrl = useMediaUrl(profileImageUrl, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
   const resolvedVideoUrl = useMediaUrl(videoUrl, 'profile-video');
   
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();

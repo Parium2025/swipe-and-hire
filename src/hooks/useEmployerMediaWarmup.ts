@@ -5,7 +5,7 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { imageCache } from '@/lib/imageCache';
-import { AVATAR_TRANSFORM, PROFILE_IMAGE_TRANSFORM } from '@/lib/mediaPresets';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 /**
  * 🖼️ EMPLOYER MEDIA WARMUP
@@ -105,10 +105,12 @@ export function useEmployerMediaWarmup() {
             prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}),
           ),
         );
-        // Större (för detaljvy / swipe) — cap till 10 för att spara bandbredd
+        // Detaljvy / swipe hämtar bilden UTAN transform (CandidateSlide,
+        // CandidateProfileDialog) — warma exakt den cache-nyckeln, annars är
+        // förvärmningen bortkastad. Cap till 10 för att spara bandbredd.
         Promise.allSettled(
           limitedImages.slice(0, 10).map((p) =>
-            prefetchMediaUrl(p, 'profile-image', 86400, PROFILE_IMAGE_TRANSFORM).catch(() => {}),
+            prefetchMediaUrl(p, 'profile-image', 86400).catch(() => {}),
           ),
         );
         // Videos (poster frame)

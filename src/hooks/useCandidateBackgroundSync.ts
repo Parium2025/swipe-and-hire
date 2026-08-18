@@ -3,10 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
-import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
-import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 const PAGE_SIZE = 50; // Större batch för att ha mer data redo
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
@@ -258,15 +256,9 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
     console.log('🔄 Candidate sync: updated applications cache (ratings included)');
   }
 
-  // Förladda bilder i bakgrunden — matcha CandidateAvatar (40px, 2x retina)
-  const imagePaths = items
-    .map((i: any) => i.profile_image_url)
-    .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '')
-    .slice(0, 25);
-
-  if (imagePaths.length > 0) {
-    Promise.all(imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}))).catch(() => {});
-  }
+  // Bildförvärmning ägs av useEmployerMediaWarmup, som lyssnar på exakt de
+  // setQueryData-anrop vi gör ovan. Dubbel förvärmning här skickade samma
+  // requests två gånger vid varje synk.
 
   // Uppdatera localStorage snapshot för instant first paint
   try {
@@ -443,15 +435,7 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
     });
   }
 
-  // Förladda bilder — matcha CandidateAvatar (40px, 2x retina)
-  const imagePaths = items
-    .map((i) => i.profile_image_url)
-    .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
-    .slice(0, 25);
-
-  if (imagePaths.length > 0) {
-    Promise.all(imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}))).catch(() => {});
-  }
+  // Se kommentaren ovan: useEmployerMediaWarmup förvärmer bilderna.
 }
 
 /**

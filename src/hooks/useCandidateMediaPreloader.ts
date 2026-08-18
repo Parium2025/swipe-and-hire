@@ -31,6 +31,9 @@ export function useCandidateMediaPreloader(
   useEffect(() => {
     if (!enabled) {
       didBulkRef.current = false;
+      // Släpp dedupe-setet när visaren stängs så minnet inte växer obegränsat
+      // över en lång session (hundratals kandidater × 2 poster).
+      loadedRef.current.clear();
     }
   }, [enabled]);
 
@@ -106,9 +109,21 @@ export function useCandidateMediaPreloader(
 
     if (tasks.length === 0) return;
 
-    // Fire and forget — prefetchMediaUrl handles dedupe internally too.
-    tasks.forEach(t => {
-      prefetchMediaUrl(t.path, t.type).catch(() => {});
-    });
+    // Samma batchning som bulk-förladdningen: max 6 samtidiga requests, annars
+    // kan ett enda index-hopp trigga 12 parallella signed-URL/blob-hämtningar.
+    let i = 0;
+    let cancelled = false;
+    const batchSize = 6;
+    const next = () => {
+      if (cancelled || i >= tasks.length) return;
+      const batch = tasks.slice(i, i + batchSize);
+      i += batchSize;
+      Promise.allSettled(
+        batch.map(t => prefetchMediaUrl(t.path, t.type).catch(() => {})),
+      ).finally(next);
+    };
+    next();
+
+    return () => { cancelled = true; };
   }, [enabled, applications, currentIndex, lookahead, lookbehind]);
 }

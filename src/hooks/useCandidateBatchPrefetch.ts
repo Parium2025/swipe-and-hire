@@ -77,7 +77,13 @@ export function useCandidateBatchPrefetch(applications: ApplicationData[]) {
 
   const prevHashRef = useRef('');
 
+  // `applications` är en ny arrayreferens vid varje render; håll den i en ref
+  // så effekten bara körs när hashen (faktiska kandidater) ändras.
+  const applicationsRef = useRef(applications);
+  applicationsRef.current = applications;
+
   useEffect(() => {
+    const applications = applicationsRef.current;
     if (!userId || applications.length === 0) return;
     if (applicantIdsHash === prevHashRef.current) return;
     prevHashRef.current = applicantIdsHash;
@@ -120,7 +126,8 @@ export function useCandidateBatchPrefetch(applications: ApplicationData[]) {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [userId, applicantIdsHash, applications, readCache, writeCache]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, applicantIdsHash, readCache, writeCache]);
 
   return {
     readCache,

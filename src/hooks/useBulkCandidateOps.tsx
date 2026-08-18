@@ -64,6 +64,10 @@ export function useBulkCandidateOps({
       if (isViewingColleague) {
         for (const id of ids) await moveCandidateInColleagueList(id, targetStage);
         exitSelectionMode();
+        // Håll stegräknare och kollegors vy i synk – enskilda flyttar gör detta,
+        // bulkflytten missade det tidigare.
+        queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
+        queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
         toast.success(`${count} kandidater flyttade till "${label}"`, {
           icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />,
         });
@@ -140,6 +144,7 @@ export function useBulkCandidateOps({
           throw new Error('Vissa kandidater kunde inte tas bort');
         }
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
+        queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
         toast.success(`${ids.length} kandidater borttagna från din lista`);
       } catch {
         if (user) {

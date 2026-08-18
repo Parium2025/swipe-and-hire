@@ -1163,9 +1163,11 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
         };
       });
       
-      // Also optimistically update applications cache for /candidates
+      // Also optimistically update applications cache for /candidates.
+      // Uppdaterar ALLA applications-cachar (även filtrerade sökningar), inte
+      // bara den med tom söksträng.
       if (applicantId) {
-        queryClient.setQueryData(['applications', user?.id, ''], (old: any) => {
+        queryClient.setQueriesData({ queryKey: ['applications', user?.id] }, (old: any) => {
           if (!old?.pages) return old;
           return {
             ...old,
