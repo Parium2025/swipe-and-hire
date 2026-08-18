@@ -162,7 +162,11 @@ export const degradeVideoQuality = () => {
  */
 export const watchDisplayTopology = (onChange: (tier: VideoQualityTier) => void): (() => void) => {
   if (typeof window === 'undefined') return () => {};
-  const s = window.screen as Screen & { isExtended?: boolean; addEventListener?: Screen['addEventListener'] };
+  const s = window.screen as unknown as {
+    isExtended?: boolean;
+    addEventListener?: (t: string, cb: () => void) => void;
+    removeEventListener?: (t: string, cb: () => void) => void;
+  };
   if (typeof s?.isExtended !== 'boolean' || typeof s.addEventListener !== 'function') return () => {};
   let last = getVideoQualityTier();
   const handler = () => {
@@ -172,7 +176,7 @@ export const watchDisplayTopology = (onChange: (tier: VideoQualityTier) => void)
     onChange(next);
   };
   s.addEventListener('change', handler);
-  return () => s.removeEventListener('change', handler);
+  return () => s.removeEventListener?.('change', handler);
 };
 
 
