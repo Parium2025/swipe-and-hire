@@ -12,7 +12,7 @@ const PAGE_SIZE = 50;
  * Hook to fetch and manage a colleague's candidates.
  * Uses cursor-based pagination for scalability (handles 100k+ candidates).
  */
-export function useColleagueCandidates(colleagueId: string | null) {
+export function useColleagueCandidates(colleagueId: string | null, listId: string | null = null) {
   const { user } = useAuth();
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,6 +39,9 @@ export function useColleagueCandidates(colleagueId: string | null) {
         .eq('recruiter_id', colleagueId)
         .order('updated_at', { ascending: false })
         .limit(PAGE_SIZE);
+
+      // Varje lista har sina egna kandidater
+      if (listId) query = query.eq('list_id', listId);
 
       // Apply cursor for pagination
       if (loadMore && cursorRef.current) {
@@ -217,7 +220,7 @@ export function useColleagueCandidates(colleagueId: string | null) {
     } finally {
       setIsLoading(false);
     }
-  }, [colleagueId, user]);
+  }, [colleagueId, listId, user]);
 
   // 📡 REALTIME: Prenumerera på kollegans kandidatändringar
   useEffect(() => {
@@ -324,6 +327,7 @@ try {
           application_id: applicationId,
           job_id: jobId || null,
           stage,
+          list_id: listId,
         })
         .select()
         .single();

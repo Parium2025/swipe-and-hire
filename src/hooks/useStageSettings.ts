@@ -76,6 +76,7 @@ export function getIconByName(iconName: string): LucideIcon {
 interface DbStageSetting {
   id: string;
   user_id: string;
+  list_id: string | null;
   stage_key: string;
   custom_label: string | null;
   color: string | null;
@@ -95,9 +96,14 @@ interface CachedStageSettings {
   timestamp: number;
 }
 
-function readCachedSettings(userId: string): DbStageSetting[] | null {
+/** Stegen är unika per lista — därför ingår list-id:t i cache-nyckeln. */
+export function stageSettingsCacheKey(userId: string, listId: string | null): string {
+  return STAGE_SETTINGS_CACHE_KEY + userId + (listId ? `_${listId}` : '');
+}
+
+function readCachedSettings(userId: string, listId: string | null = null): DbStageSetting[] | null {
   try {
-    const key = STAGE_SETTINGS_CACHE_KEY + userId;
+    const key = stageSettingsCacheKey(userId, listId);
     const raw = localStorage.getItem(key);
     if (!raw) return null;
 
@@ -109,14 +115,14 @@ function readCachedSettings(userId: string): DbStageSetting[] | null {
     return cached.settings;
   } catch (parseError) {
     console.warn('Failed to parse cached stage settings:', parseError);
-    try { localStorage.removeItem(STAGE_SETTINGS_CACHE_KEY + userId); } catch { /* ignore */ }
+    try { localStorage.removeItem(stageSettingsCacheKey(userId, listId)); } catch { /* ignore */ }
     return null;
   }
 }
 
-function writeCachedSettings(userId: string, settings: DbStageSetting[]): void {
+function writeCachedSettings(userId: string, settings: DbStageSetting[], listId: string | null = null): void {
   try {
-    const key = STAGE_SETTINGS_CACHE_KEY + userId;
+    const key = stageSettingsCacheKey(userId, listId);
     const cached: CachedStageSettings = {
       settings,
       timestamp: Date.now(),
@@ -127,29 +133,38 @@ function writeCachedSettings(userId: string, settings: DbStageSetting[]): void {
   }
 }
 
-export function useStageSettings() {
+/**
+ * Steginställningar för EN kandidatlista.
+ *
+ * `listId = null` betyder "innan listan hunnit laddas" och läser då alla
+ * användarens steg, precis som före listfunktionen.
+ */
+export function useStageSettings(listId: string | null = null) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   // Check if we have cached data BEFORE the query runs
-  const hasCachedData = user ? readCachedSettings(user.id) !== null : false;
+  const hasCachedData = user ? readCachedSettings(user.id, listId) !== null : false;
 
   const { data: dbSettings, isLoading: queryLoading } = useQuery({
-    queryKey: ['stage-settings', user?.id],
+    queryKey: ['stage-settings', user?.id, listId],
     queryFn: async () => {
       if (!user) return [];
-      
-      const { data, error } = await supabase
+
+      let query = supabase
         .from('user_stage_settings')
         .select('*')
-        .eq('user_id', user.id)
-        .order('order_index', { ascending: true });
-      
+        .eq('user_id', user.id);
+
+      if (listId) query = query.eq('list_id', listId);
+
+      const { data, error } = await query.order('order_index', { ascending: true });
+
       if (error) throw error;
       const settings = (data || []) as DbStageSetting[];
       
       // Cache for instant display on next visit
-      writeCachedSettings(user.id, settings);
+      writeCachedSettings(user.id, settings, listId);
       
       return settings;
     },
@@ -158,16 +173,17 @@ export function useStageSettings() {
     // Use cached data as initial data for instant display
     initialData: () => {
       if (!user) return undefined;
-      const cached = readCachedSettings(user.id);
+      const cached = readCachedSettings(user.id, listId);
       return cached ?? undefined;
     },
     // If we have cached data, don't show loading state initially
     initialDataUpdatedAt: () => {
       if (!user) return undefined;
-      const cached = readCachedSettings(user.id);
+      const cached = readCachedSettings(user.id, listId);
       return cached ? Date.now() - 1000 : undefined; // Trigger background refetch
     },
   });
+
 
   // 📡 REALTIME: Prenumerera på stage settings-ändringar
   useEffect(() => {
@@ -310,6 +326,7 @@ export function useStageSettings() {
           .from('user_stage_settings')
           .insert({
             user_id: user.id,
+            list_id: listId,
             stage_key: stageKey,
             custom_label: label || null,
             color: color || defaultConfig?.color || null,
@@ -351,6 +368,7 @@ export function useStageSettings() {
         .from('user_stage_settings')
         .insert({
           user_id: user.id,
+          list_id: listId,
           stage_key: stageKey,
           custom_label: label,
           color: color,
@@ -413,6 +431,7 @@ export function useStageSettings() {
           .from('user_stage_settings')
           .insert({
             user_id: user.id,
+            list_id: listId,
             stage_key: stageKey,
             custom_label: '__DELETED__',
             color: null,
@@ -446,13 +465,15 @@ export function useStageSettings() {
       if (!user) throw new Error('Not authenticated');
       
       // Remove the deleted marker
-      const { error } = await supabase
+      let query = supabase
         .from('user_stage_settings')
         .delete()
         .eq('user_id', user.id)
         .eq('stage_key', stageKey)
         .eq('custom_label', '__DELETED__');
-      
+      if (listId) query = query.eq('list_id', listId);
+
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
@@ -464,12 +485,14 @@ export function useStageSettings() {
     mutationFn: async (stageKey: string) => {
       if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase
+      let query = supabase
         .from('user_stage_settings')
         .delete()
         .eq('user_id', user.id)
         .eq('stage_key', stageKey);
-      
+      if (listId) query = query.eq('list_id', listId);
+
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
