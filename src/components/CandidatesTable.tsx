@@ -593,26 +593,15 @@ export function CandidatesTable({
             {selectedIds.size > 0 && (
               <>
                 <div className="w-px h-5 bg-white/20 flex-shrink-0" />
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-1.5 px-4 h-9 rounded-full border border-white/20 bg-white/5 text-xs font-medium text-white whitespace-nowrap flex-shrink-0 transition-all duration-200 hover:bg-white/10 hover:border-white/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
-                  onClick={() => setSelectedIds(new Set())}
-                  onPointerDown={(e) => e.preventDefault()}
-                >
+                <PillButton onClick={() => setSelectedIds(new Set())}>
                   Avmarkera
-                </button>
+                </PillButton>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex items-center justify-center gap-1.5 px-4 h-9 rounded-full border border-white/20 bg-white/5 text-xs font-medium text-white whitespace-nowrap flex-shrink-0 transition-all duration-200 hover:bg-white/10 hover:border-white/50 data-[state=open]:bg-white/20 data-[state=open]:border-white/30 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
-                      onFocus={(e) => e.currentTarget.blur()}
-
-
-                    >
+                    <PillButton menu>
                       Åtgärder
                       <ChevronDown className="h-3 w-3 text-white" />
-                    </button>
+                    </PillButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
                     <DropdownMenuItem 
@@ -641,15 +630,10 @@ export function CandidatesTable({
               </>
             )}
             <div className="w-px h-5 bg-white/20 flex-shrink-0" />
-            <button
-              type="button"
-              aria-label="Avsluta urval"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white transition-all duration-200 hover:bg-white/10 hover:border-white/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
-              onClick={clearSelection}
-              onPointerDown={(e) => e.preventDefault()}
-            >
+            <PillButton shape="icon" aria-label="Avsluta urval" onClick={clearSelection}>
               <X className="h-4 w-4" />
-            </button>
+            </PillButton>
+
 
           </div>
         </div>
