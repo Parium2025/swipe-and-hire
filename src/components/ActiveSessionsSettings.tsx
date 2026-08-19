@@ -77,6 +77,24 @@ export function ActiveSessionsSettings() {
 
   useEffect(() => {
     fetchSessions();
+
+    // Auto-uppdatera var 30:e sekund samt när fliken/fönstret blir aktivt igen
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') fetchSessions();
+    }, 30000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchSessions();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
   }, [fetchSessions]);
 
   const handleKickSession = async (sessionId: string) => {
@@ -129,7 +147,7 @@ export function ActiveSessionsSettings() {
         </div>
 
         <p className="text-xs text-white">
-          Du kan ha max 2 aktiva sessioner samtidigt. Om du loggar in på en tredje enhet avslutas den äldsta sessionen automatiskt.
+          Du kan ha max 2 aktiva sessioner samtidigt. Om du loggar in på en tredje enhet avslutas den äldsta sessionen automatiskt. Listan uppdateras automatiskt var 30:e sekund.
         </p>
 
         {loading && sessions.length === 0 ? (
