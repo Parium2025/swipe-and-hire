@@ -179,11 +179,11 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
         {/* Logo + Title */}
         <div className="flex flex-col items-center justify-start gap-1.5 px-2 pt-2">
           {logoUrl ? (
-            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
               <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
             </div>
           ) : (
-            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center flex-shrink-0 shadow-lg">
               <span className="text-base font-bold text-white/70 tracking-wide">{initials}</span>
             </div>
           )}
