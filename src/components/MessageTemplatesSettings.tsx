@@ -1120,7 +1120,17 @@ export function MessageTemplatesSettings() {
             onClick={() => setActiveStudioTab('templates')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
-            Mallar
+            Mall
+          </button>
+          <button
+            ref={libraryTabRef}
+            type="button"
+            role="tab"
+            aria-selected={activeStudioTab === 'library'}
+            onClick={() => setActiveStudioTab('library')}
+            className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
+          >
+            Mallbibliotek
           </button>
           <button
             ref={automationsTabRef}
