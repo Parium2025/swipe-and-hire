@@ -1173,7 +1173,7 @@ export function MessageTemplatesSettings() {
             onClick={() => setActiveStudioTab('logs')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
-            Logg
+            3 · Logg
           </button>
         </div>
 
