@@ -1376,8 +1376,20 @@ export function MessageTemplatesSettings() {
           <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="mb-3 space-y-3">
               <div>
-                <h4 className="text-sm font-semibold text-white md:text-base">Regelöversikt</h4>
-                <p className="text-xs text-white md:text-sm">Välj vad du vill se och öppna en regel i dropdownen i stället för en lång lista.</p>
+                <h4 className="text-sm font-semibold text-white md:text-base">Steg 2 · Välj mall och när den ska skickas</h4>
+                <p className="text-xs text-white md:text-sm">Varje rad nedan är en av dina mallar. Statusen visar om mallen redan har en regel eller inte.</p>
+              </div>
+
+              <div className="rounded-2xl border border-white/[0.12] bg-white/5 p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-white">Så funkar det</p>
+                <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-white">
+                  <li>Skapa mallen under fliken <strong className="font-semibold">1 · Mall</strong> (texten som skickas).</li>
+                  <li>Välj mallen här och sätt när den ska skickas — spara regeln.</li>
+                  <li>Följ utskicken under fliken <strong className="font-semibold">3 · Logg</strong>.</li>
+                </ol>
+                <p className="mt-2 text-[11px] text-white">
+                  Mallar som heter t.ex. "Jobb avslutat · professionellt mejl" är Pariums färdiga startmallar från "Kom igång snabbt" — de fungerar precis som dina egna och går att ändra eller ta bort.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -1397,7 +1409,10 @@ export function MessageTemplatesSettings() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">Regel / mall</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-white">Välj mall</Label>
+                  <InfoHint text="Listan visar alla dina mallar. 'Ingen regel' betyder att mallen bara ligger sparad — 'Aktiv' betyder att den skickas automatiskt vid vald händelse." />
+                </div>
                 <Select
                   value={selectedTemplateFamilyKey ?? undefined}
                   onValueChange={setSelectedTemplateFamilyKey}
