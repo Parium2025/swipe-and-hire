@@ -1339,7 +1339,12 @@ export function MessageTemplatesSettings() {
                   <InfoHint text="Här visar vi bara stabila variabler som fungerar i vanliga mallar. Intervjudatum, tid, längd och plats/länk hör hemma i själva bokningsflödet och fylls därifrån när en intervju skapas." />
                 </div>
                 <p className="mt-1 text-[11px] text-white">
-                  Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(activeTemplateChannel).toLowerCase()}.
+                  Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(
+                    templateForm.channels.includes(activeTemplateChannel)
+                      ? activeTemplateChannel
+                      : (templateForm.channels[0] ?? activeTemplateChannel),
+                  ).toLowerCase()}.
+
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
