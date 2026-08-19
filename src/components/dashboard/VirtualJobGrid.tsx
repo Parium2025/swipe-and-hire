@@ -65,7 +65,9 @@ function VirtualJobGridImpl<T extends JobPosting>({
         return (
           <div
             key={tab.key}
-            className={`${gridClassName} job-card-grid-no-entry ${isVisible ? '' : 'job-panel-hidden'}`}
+            // Identiska klasser för synlig/dold panel: inga stilskillnader som
+            // tvingar Safari att rita om (transform/backdrop-filter) vid flikbyte.
+            className={`${gridClassName} job-card-grid-no-entry`}
             aria-hidden={!isVisible}
             {...(!isVisible ? { inert: '' } : {})}
             // Inaktiva paneler layoutas och rasteriseras i förväg så bilder,
