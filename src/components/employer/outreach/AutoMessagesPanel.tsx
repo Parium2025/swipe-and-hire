@@ -233,12 +233,26 @@ export function AutoMessagesPanel() {
             {AUTO_RULE_EVENTS.map((event) => {
               const delay = getDelay(event);
               const hasAnyRow = (rowsByTrigger.get(event.trigger) ?? []).length > 0;
+              const previewEntries: PreviewEntry[] = AUTO_RULE_CHANNELS.map(({ value, label }) => {
+                const config = event.templates[value];
+                const saved = templates.find((template) => template.name === config.name && template.channel === value);
+                return {
+                  channel: value,
+                  label,
+                  subject: saved ? saved.subject : config.subject,
+                  body: saved ? saved.body : config.body,
+                  edited: Boolean(saved && (saved.body !== config.body || saved.subject !== config.subject)),
+                };
+              });
 
               return (
                 <div key={event.trigger} className="rounded-xl border border-white/10 bg-white/5 p-4 md:p-3">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0 flex-1">
-                      <Label className="text-sm font-medium text-white">{event.title}</Label>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm font-medium text-white">{event.title}</Label>
+                        <TemplatePreview title={event.title} entries={previewEntries} />
+                      </div>
                       <p className="text-sm text-white">{event.description}</p>
                     </div>
 
