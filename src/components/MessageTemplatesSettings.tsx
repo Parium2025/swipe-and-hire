@@ -334,7 +334,21 @@ export function MessageTemplatesSettings() {
   const automationsTabRef = useRef<HTMLButtonElement>(null);
   const logsTabRef = useRef<HTMLButtonElement>(null);
   const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 4, width: 0 });
-  const [templateForm, setTemplateForm] = useState<TemplateForm>(EMPTY_TEMPLATE_FORM);
+  const templateDraftKey = user ? `${TEMPLATE_DRAFT_PREFIX}${user.id}` : null;
+  const [templateForm, setTemplateForm] = useState<TemplateForm>(() => {
+    if (!user) return EMPTY_TEMPLATE_FORM;
+    try {
+      const raw = localStorage.getItem(`${TEMPLATE_DRAFT_PREFIX}${user.id}`);
+      if (!raw) return EMPTY_TEMPLATE_FORM;
+      const parsed = JSON.parse(raw) as TemplateForm;
+      if (!parsed || typeof parsed !== 'object' || !parsed.channelContent || !Array.isArray(parsed.channels)) {
+        return EMPTY_TEMPLATE_FORM;
+      }
+      return { ...EMPTY_TEMPLATE_FORM, ...parsed, channelContent: { ...EMPTY_TEMPLATE_FORM.channelContent, ...parsed.channelContent } };
+    } catch {
+      return EMPTY_TEMPLATE_FORM;
+    }
+  });
   const [activeTemplateChannel, setActiveTemplateChannel] = useState<AutomationChannel>('push');
   const [automationForm, setAutomationForm] = useState<AutomationForm>(EMPTY_AUTOMATION_FORM);
   const [selectedTemplateFamilyKey, setSelectedTemplateFamilyKey] = useState<string | null>(null);
