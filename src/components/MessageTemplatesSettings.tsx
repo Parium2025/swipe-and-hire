@@ -1279,11 +1279,11 @@ export function MessageTemplatesSettings() {
                         }
                       }}
                       className={[
-                        'flex h-[var(--control-height-compact)] items-center gap-2 rounded-full border px-3 py-1 text-left text-xs transition-colors',
-                        checked
-                          ? 'border-white/30 bg-white/10 text-white'
-                          : 'border-white/10 bg-white/5 text-white md:hover:border-white/20',
+                        'flex h-[var(--control-height-compact)] items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-left text-xs text-white',
+                        'transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none',
+                        'md:hover:border-white/20',
                       ].join(' ')}
+
                     >
                       <Checkbox checked={checked} className="pointer-events-none" />
                       <span className="font-medium">{option.label}</span>
