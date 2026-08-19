@@ -120,6 +120,31 @@ function InfoHint({ text }: { text: string }) {
   );
 }
 
+function VariableChips({ channelLabel, onInsert }: { channelLabel: string; onInsert: (token: string) => void }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/5 p-2.5">
+      <div className="flex items-center gap-2">
+        <p className="text-[10px] uppercase tracking-[0.16em] text-white">Variabler · {channelLabel}</p>
+        <InfoHint text="Tryck på en variabel så läggs den in i texten för just den här kanalen. Värdena fylls i automatiskt när utskicket skickas." />
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {TEMPLATE_EDITOR_VARIABLES.map((variable) => (
+          <button
+            key={variable.key}
+            type="button"
+            onPointerDown={(event) => event.preventDefault()}
+            onClick={() => onInsert(`{${variable.key}}`)}
+            className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-left text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:hover:border-white/30"
+          >
+            <span className="block text-[11px] font-medium">{variable.label}</span>
+            <span className="block text-[10px] text-white/70">{`{${variable.key}}`}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
   name: '',
