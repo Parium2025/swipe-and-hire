@@ -1051,7 +1051,7 @@ export function MessageTemplatesSettings() {
         </AlertDialogContentNoFocus>
       </AlertDialog>
 
-      <div className="overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3.5 backdrop-blur-sm">
+      <div className="overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3.5">
       <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h3 className="text-sm font-semibold text-white md:text-base">Mallar, regler och utskick</h3>
@@ -1097,7 +1097,7 @@ export function MessageTemplatesSettings() {
       </div>
 
       <Tabs value={activeStudioTab} onValueChange={(value) => setActiveStudioTab(value as StudioTab)} className="space-y-2.5">
-        <div className="relative mx-auto flex w-fit gap-0.5 rounded-md border border-white/10 bg-white/5 p-1 backdrop-blur-[2px]" role="tablist" aria-label="Outreach sektioner">
+        <div className="relative mx-auto flex w-fit gap-0.5 rounded-md border border-white/10 bg-white/5 p-1" role="tablist" aria-label="Outreach sektioner">
           <motion.div
             className="absolute bottom-1 top-1 rounded-[5px] bg-parium-navy"
             initial={false}
