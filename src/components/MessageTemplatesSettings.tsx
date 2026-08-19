@@ -89,7 +89,7 @@ type TemplateFamily = {
   primaryTemplate: OutreachTemplate;
 };
 
-type StudioTab = 'templates' | 'automations' | 'logs';
+type StudioTab = 'templates' | 'library' | 'automations' | 'logs';
 type AutomationVisibilityFilter = 'all' | 'active' | 'paused' | 'unlinked';
 
 type PendingDeleteAction = {
@@ -300,6 +300,7 @@ export function MessageTemplatesSettings() {
   const [runningDispatch, setRunningDispatch] = useState(false);
   const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('templates');
   const templatesTabRef = useRef<HTMLButtonElement>(null);
+  const libraryTabRef = useRef<HTMLButtonElement>(null);
   const automationsTabRef = useRef<HTMLButtonElement>(null);
   const logsTabRef = useRef<HTMLButtonElement>(null);
   const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 4, width: 0 });
@@ -577,6 +578,7 @@ export function MessageTemplatesSettings() {
     const updateIndicator = () => {
       const refs = {
         templates: templatesTabRef,
+        library: libraryTabRef,
         automations: automationsTabRef,
         logs: logsTabRef,
       } as const;
