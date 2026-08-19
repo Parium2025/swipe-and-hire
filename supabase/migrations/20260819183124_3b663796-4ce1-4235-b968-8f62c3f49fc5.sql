@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.enforce_job_posting_plan() FROM PUBLIC, anon, authenticated;
