@@ -1154,7 +1154,7 @@ export function MessageTemplatesSettings() {
           </button>
         </div>
 
-        <TabsContent value="templates" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <TabsContent value="library" className="mt-0 min-w-0">
           <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -1224,7 +1224,9 @@ export function MessageTemplatesSettings() {
               </div>
             )}
           </div>
+        </TabsContent>
 
+        <TabsContent value="templates" className="mt-0 min-w-0">
           <div className="min-w-0 space-y-3 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
