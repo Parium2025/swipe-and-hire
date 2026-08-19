@@ -223,12 +223,6 @@ const getDelayFieldHint = (trigger: OutreachTrigger) => {
   }
 };
 
-const AUTOMATION_VISIBILITY_OPTIONS: { value: AutomationVisibilityFilter; label: string }[] = [
-  { value: 'all', label: 'Visa alla mallar' },
-  { value: 'active', label: 'Skickas automatiskt' },
-  { value: 'paused', label: 'Pausade (skickas inte)' },
-  { value: 'unlinked', label: 'Saknar regel (skickas aldrig)' },
-];
 
 const normalizeTimelineTrigger = (trigger: OutreachTrigger): OutreachTrigger =>
   trigger === 'application_no_response_14d' ? 'job_closed' : trigger;
