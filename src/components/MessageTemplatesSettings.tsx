@@ -1193,8 +1193,9 @@ export function MessageTemplatesSettings() {
                             },
                           })}
                         >
-                          <Pencil className="h-2.5 w-2.5" />
-                        </Button>
+                          <Pencil className="h-3 w-3" />
+                        </PillButton>
+
                         <PillButton
                           shape="icon"
                           className="h-8 w-8 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
