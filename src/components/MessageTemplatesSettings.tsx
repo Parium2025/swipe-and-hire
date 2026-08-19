@@ -1195,14 +1195,14 @@ export function MessageTemplatesSettings() {
                         >
                           <Pencil className="h-2.5 w-2.5" />
                         </Button>
-                        <Button
-                          variant="outlineNeutral"
-                          size="sm"
-                          className="h-7 w-7 rounded-full border-destructive/40 bg-destructive/20 p-0 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                        <PillButton
+                          shape="icon"
+                          className="h-8 w-8 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
                           onClick={() => openDeleteTemplateDialog(template)}
                         >
-                          <Trash2 className="h-2.5 w-2.5" />
-                        </Button>
+                          <Trash2 className="h-3 w-3" />
+                        </PillButton>
+
                       </div>
                     </div>
                   </div>
