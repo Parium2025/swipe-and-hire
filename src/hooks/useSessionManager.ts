@@ -290,7 +290,7 @@ export function useSessionManager(
         registrationPromiseRef.current = null;
       }
     }
-  }, [userId, isPreviewEnv, ensureFreshToken]);
+  }, [userId, isPreviewEnv, ensureFreshToken, onKicked]);
 
   // Heartbeat to keep session alive
   // If heartbeat returns false (session expired after offline), try to re-register.
