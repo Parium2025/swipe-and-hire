@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { PillButton } from '@/components/ui/pill-button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -1516,19 +1517,25 @@ export function MessageTemplatesSettings() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-2">
-                  <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveAutomation} disabled={savingAutomation || !automationFormHasAllTemplates}>{savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{automationForm.id ? 'Uppdatera regel' : 'Spara regel'}</Button>
+                  <PillButton
+                    className="px-4 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50"
+                    onClick={handleSaveAutomation}
+                    disabled={savingAutomation || !automationFormHasAllTemplates}
+                  >
+                    {savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                    {automationForm.id ? 'Uppdatera regel' : 'Spara regel'}
+                  </PillButton>
                   {selectedAutomationGroup && (
-                    <Button
-                      variant="outlineNeutral"
-                      size="sm"
-                      className="h-9 rounded-full border-destructive/40 bg-destructive/20 px-3 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                    <PillButton
+                      className="px-4 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
                       onClick={() => openDeleteAutomationDialog(selectedAutomationGroup, selectedTemplateFamily)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       Ta bort regel
-                    </Button>
+                    </PillButton>
                   )}
                 </div>
+
               </>
             )}
           </div>
