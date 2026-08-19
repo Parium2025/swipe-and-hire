@@ -107,7 +107,13 @@ serve(async (req) => {
     const issues: Issue[] = [];
 
     // 1) Schemaläggningens status
-    const { data: jobs, error: jobsError } = await supabase.rpc("get_cron_job_health");
+    // Ett enstaka statement timeout ska inte larma – vi försöker igen en gång.
+    let { data: jobs, error: jobsError } = await supabase.rpc("get_cron_job_health");
+    if (jobsError) {
+      console.warn("get_cron_job_health failed, retrying once:", jobsError.message);
+      await new Promise((r) => setTimeout(r, 2000));
+      ({ data: jobs, error: jobsError } = await supabase.rpc("get_cron_job_health"));
+    }
 
     if (jobsError) {
       issues.push({
