@@ -42,13 +42,15 @@ function VirtualJobGridImpl<T extends JobPosting>({
   emptyState,
 }: VirtualJobGridProps<T>) {
   return (
-    <div className={className}>
+    <div className={className} style={{ isolation: 'isolate' }}>
       {tabs.map((tab) => {
         const isVisible = tab.key === activeTab;
         if (tab.jobs.length === 0) {
           return (
             <div
               key={tab.key}
+              hidden={!isVisible}
+              aria-hidden={!isVisible}
               style={{ display: isVisible ? 'block' : 'none' }}
             >
               {isVisible ? emptyState : null}
@@ -58,11 +60,17 @@ function VirtualJobGridImpl<T extends JobPosting>({
         return (
           <div
             key={tab.key}
-            className={gridClassName}
-            // display:none gör att React behåller alla DOM-noder MEN
-            // browsern hoppar över paint/layout för dolda paneler.
-            // Result: tab-byte = en stilflagga, ingen reconcile.
-            style={{ display: isVisible ? undefined : 'none' }}
+            className={`${gridClassName} ${isVisible ? '' : 'job-panel-hidden'}`}
+            hidden={!isVisible}
+            aria-hidden={!isVisible}
+            {...(!isVisible ? { inert: '' } : {})}
+            // display:none + hidden + inert: browsern hoppar över paint/layout
+            // OCH Safari får inte behålla en komposit-layer som "spöke".
+            style={{
+              display: isVisible ? undefined : 'none',
+              contentVisibility: isVisible ? 'visible' : 'hidden',
+              pointerEvents: isVisible ? undefined : 'none',
+            }}
           >
             {tab.jobs.map((job, idx) => (
               <div key={job.id} style={{ contain: 'layout style paint' }}>
@@ -75,5 +83,6 @@ function VirtualJobGridImpl<T extends JobPosting>({
     </div>
   );
 }
+
 
 export const VirtualJobGrid = memo(VirtualJobGridImpl) as typeof VirtualJobGridImpl;
