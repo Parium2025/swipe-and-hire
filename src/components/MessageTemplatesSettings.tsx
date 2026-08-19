@@ -884,7 +884,7 @@ export function MessageTemplatesSettings() {
       toast.error('Kunde inte spara regeln');
     } else {
       const wasUpdate = !!automationForm.id;
-      toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel skapad');
+      toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
       if (!wasUpdate) {
         setAutomationForm(EMPTY_AUTOMATION_FORM);
       }
