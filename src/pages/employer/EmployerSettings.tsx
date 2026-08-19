@@ -118,6 +118,7 @@ const EmployerSettings = () => {
         onToggle={handleBackgroundLocationToggle}
       />
 
+      <AutoMessagesPanel />
       <MessageTemplatesSettings />
       <ActiveSessionsSettings />
       <PrivacyDataPanel showDpaLink />
