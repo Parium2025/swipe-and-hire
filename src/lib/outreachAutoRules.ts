@@ -117,17 +117,17 @@ export const AUTO_RULE_EVENTS: AutoRuleEvent[] = [
       email: {
         name: 'Efter intervju · professionellt mejl',
         subject: 'Tack för din intervju för {job_title}',
-        body: 'Hej {candidate_name},\n\nTack för intervjun för {job_title} hos {company_name}. Vi uppskattar din tid och återkommer när vi har nästa steg i processen.\n\nVänliga hälsningar,\n{company_name}',
+        body: 'Hej {candidate_name},\n\nTack för intervjun för {job_title} hos {company_name}. Vi uppskattar din tid och återkommer inom kort.\n\nVänliga hälsningar,\n{company_name}',
       },
       push: {
         name: 'Efter intervju · push',
         subject: '{company_name}',
-        body: 'Tack för din intervju för {job_title}. Vi återkommer med nästa steg.',
+        body: 'Tack för din intervju för {job_title}. Vi återkommer inom kort.',
       },
       chat: {
         name: 'Efter intervju · chat',
         subject: null,
-        body: 'Hej {first_name}! Tack för intervjun för {job_title}. Vi återkommer med nästa steg.',
+        body: 'Hej {first_name}! Tack för intervjun för {job_title}. Vi uppskattar din tid och återkommer inom kort.',
       },
     },
   },
