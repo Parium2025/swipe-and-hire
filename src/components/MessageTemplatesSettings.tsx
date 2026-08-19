@@ -1057,17 +1057,18 @@ export function MessageTemplatesSettings() {
         </div>
         <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:justify-end">
           <div className="flex items-center gap-1.5">
-            <Button size="sm" variant="glassPurple" onClick={() => setShowSeedConfirmDialog(true)} disabled={seeding} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
+            <PillButton onClick={() => setShowSeedConfirmDialog(true)} disabled={seeding} className="px-3.5 disabled:opacity-50">
               {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
               Kom igång snabbt
-            </Button>
+            </PillButton>
             <InfoHint text="Lägger in färdiga startmallar och standardregler som ni sedan kan redigera efter företagets ton och process." />
           </div>
           <div className="flex items-center gap-1.5">
-            <Button size="sm" variant="glassBlue" onClick={handleRunDispatch} disabled={runningDispatch} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
+            <PillButton onClick={handleRunDispatch} disabled={runningDispatch} className="px-3.5 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50">
               {runningDispatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Rocket className="h-3.5 w-3.5" />}
               Skicka nu
-            </Button>
+            </PillButton>
+
             <InfoHint text="Kör väntande utskick direkt. Bra vid test eller om ni vill trigga utskick manuellt utan att vänta på nästa schemalagda körning." />
           </div>
         </div>
