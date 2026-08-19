@@ -508,12 +508,10 @@ export function MessageTemplatesSettings() {
     };
   }, [user, fetchStudio]);
 
-  useEffect(() => {
-    if (templateForm.channels.length === 0) return;
-    if (!templateForm.channels.includes(activeTemplateChannel)) {
-      setActiveTemplateChannel(templateForm.channels[0]);
-    }
-  }, [templateForm.channels, activeTemplateChannel]);
+  // Aktiv kanal härleds vid användning (se effectiveTemplateChannel) i stället för att
+  // uppdateras via state när kanaler bockas i/ur – det gav en extra omrendering som
+  // syntes som en kort nedtoning av hela glaskortet.
+
 
   useEffect(() => {
     if (templateFamilies.length === 0) {
