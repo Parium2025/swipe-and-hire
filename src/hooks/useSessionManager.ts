@@ -257,13 +257,26 @@ export function useSessionManager(
           return;
         }
 
+        const result = data as Record<string, unknown> | null;
+
+        // Fjärrutloggad från en annan enhet → logga ut direkt, återanslut inte.
+        if (result?.status === 'revoked') {
+          if (!alreadyKickedRef.current) {
+            alreadyKickedRef.current = true;
+            registeredRef.current = false;
+            console.log('🚫 Sessionen har loggats ut från en annan enhet');
+            onKicked();
+          }
+          return;
+        }
+
         registeredRef.current = true;
         lastRegisteredAtRef.current = Date.now();
 
-        const result = data as Record<string, unknown> | null;
         if (result?.status === 'kicked_oldest') {
           console.log(`📱 Kicked oldest session (${result.kicked_device || 'unknown device'}) to make room for ${result.new_device || 'this device'}`);
         }
+
       } catch (err) {
         console.warn('Session registration error:', err);
       }
@@ -277,7 +290,7 @@ export function useSessionManager(
         registrationPromiseRef.current = null;
       }
     }
-  }, [userId, isPreviewEnv, ensureFreshToken]);
+  }, [userId, isPreviewEnv, ensureFreshToken, onKicked]);
 
   // Heartbeat to keep session alive
   // If heartbeat returns false (session expired after offline), try to re-register.

@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { Monitor, Smartphone, Tablet, Laptop, Globe, LogOut, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PillButton } from '@/components/ui/pill-button';
+
 import { Label } from '@/components/ui/label';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -197,17 +199,16 @@ export function ActiveSessionsSettings() {
                   </p>
                 </div>
                 {!session.is_current && (
-                  <Button
-                    variant="glass"
-                    size="sm"
+                  <PillButton
                     onClick={() => handleKickSession(session.id)}
                     disabled={kickingId === session.id}
-                    className="h-8 rounded-full px-3 text-xs text-white shrink-0"
+                    className="h-8 px-3 text-xs disabled:opacity-60"
                   >
                     <LogOut className={`h-3.5 w-3.5 mr-1 ${kickingId === session.id ? 'animate-spin' : ''}`} />
                     Logga ut
-                  </Button>
+                  </PillButton>
                 )}
+
               </div>
             ))}
           </div>
