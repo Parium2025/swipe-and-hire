@@ -1299,7 +1299,7 @@ export function MessageTemplatesSettings() {
                   <h4 className="text-sm font-semibold text-white md:text-base">Steg 1 · Skapa mall</h4>
                   <InfoHint text="Här bygger du grunden för automatiska eller manuella utskick. Börja med namn, välj kanaler och skriv sedan innehåll per kanal." />
                 </div>
-                <p className="text-xs text-white md:text-sm">Använd variabler för att göra utskicken personliga.</p>
+                <p className="text-xs text-white md:text-sm">Här skriver du bara texten — när den ska skickas väljer du i steg 2. Variablerna fylls i automatiskt per kandidat. Ditt utkast sparas automatiskt, även om du laddar om sidan.</p>
               </div>
             </div>
 
