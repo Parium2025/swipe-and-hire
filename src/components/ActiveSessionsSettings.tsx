@@ -51,9 +51,9 @@ export function ActiveSessionsSettings() {
   const [loading, setLoading] = useState(true);
   const [kickingId, setKickingId] = useState<string | null>(null);
 
-  const fetchSessions = useCallback(async () => {
+  const fetchSessions = useCallback(async (silent = false) => {
     if (!user?.id) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const { data, error } = await supabase.rpc('get_active_sessions');
       if (error) {
@@ -71,12 +71,30 @@ export function ActiveSessionsSettings() {
     } catch (err) {
       console.warn('Error fetching sessions:', err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [user?.id]);
 
   useEffect(() => {
     fetchSessions();
+
+    // Auto-uppdatera var 30:e sekund samt när fliken/fönstret blir aktivt igen
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') fetchSessions(true);
+    }, 30000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchSessions(true);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
   }, [fetchSessions]);
 
   const handleKickSession = async (sessionId: string) => {
@@ -120,7 +138,7 @@ export function ActiveSessionsSettings() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={fetchSessions}
+            onClick={() => fetchSessions()}
             disabled={loading}
             className="h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] shrink-0 aspect-square rounded-full p-0 text-white transition-colors hover:bg-transparent hover:text-white active:scale-100 active:bg-transparent md:hover:bg-transparent"
           >
@@ -129,7 +147,7 @@ export function ActiveSessionsSettings() {
         </div>
 
         <p className="text-xs text-white">
-          Du kan ha max 2 aktiva sessioner samtidigt. Om du loggar in på en tredje enhet avslutas den äldsta sessionen automatiskt.
+          Du kan ha max 2 aktiva sessioner samtidigt. Om du loggar in på en tredje enhet avslutas den äldsta sessionen automatiskt. Listan uppdateras automatiskt var 30:e sekund.
         </p>
 
         {loading && sessions.length === 0 ? (

@@ -89,7 +89,7 @@ type TemplateFamily = {
   primaryTemplate: OutreachTemplate;
 };
 
-type StudioTab = 'templates' | 'automations' | 'logs';
+type StudioTab = 'templates' | 'library' | 'automations' | 'logs';
 type AutomationVisibilityFilter = 'all' | 'active' | 'paused' | 'unlinked';
 
 type PendingDeleteAction = {
@@ -300,6 +300,7 @@ export function MessageTemplatesSettings() {
   const [runningDispatch, setRunningDispatch] = useState(false);
   const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('templates');
   const templatesTabRef = useRef<HTMLButtonElement>(null);
+  const libraryTabRef = useRef<HTMLButtonElement>(null);
   const automationsTabRef = useRef<HTMLButtonElement>(null);
   const logsTabRef = useRef<HTMLButtonElement>(null);
   const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 4, width: 0 });
@@ -577,6 +578,7 @@ export function MessageTemplatesSettings() {
     const updateIndicator = () => {
       const refs = {
         templates: templatesTabRef,
+        library: libraryTabRef,
         automations: automationsTabRef,
         logs: logsTabRef,
       } as const;
@@ -1118,7 +1120,17 @@ export function MessageTemplatesSettings() {
             onClick={() => setActiveStudioTab('templates')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
-            Mallar
+            Mall
+          </button>
+          <button
+            ref={libraryTabRef}
+            type="button"
+            role="tab"
+            aria-selected={activeStudioTab === 'library'}
+            onClick={() => setActiveStudioTab('library')}
+            className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
+          >
+            Mallbibliotek
           </button>
           <button
             ref={automationsTabRef}
@@ -1142,7 +1154,7 @@ export function MessageTemplatesSettings() {
           </button>
         </div>
 
-        <TabsContent value="templates" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <TabsContent value="library" className="mt-0 min-w-0">
           <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -1174,25 +1186,29 @@ export function MessageTemplatesSettings() {
                           shape="icon"
                           className="h-8 w-8"
 
-                          onClick={() => setTemplateForm({
-                            id: template.id,
-                            name: template.name,
-                            channels: [template.channel as AutomationChannel],
-                            channelContent: {
-                              chat: {
-                                subject: template.channel === 'chat' ? template.subject ?? '' : '',
-                                body: template.channel === 'chat' ? template.body : '',
+                          onClick={() => {
+                            setTemplateForm({
+                              id: template.id,
+                              name: template.name,
+                              channels: [template.channel as AutomationChannel],
+                              channelContent: {
+                                chat: {
+                                  subject: template.channel === 'chat' ? template.subject ?? '' : '',
+                                  body: template.channel === 'chat' ? template.body : '',
+                                },
+                                email: {
+                                  subject: template.channel === 'email' ? template.subject ?? '' : '',
+                                  body: template.channel === 'email' ? template.body : '',
+                                },
+                                push: {
+                                  subject: template.channel === 'push' ? template.subject ?? '' : '',
+                                  body: template.channel === 'push' ? template.body : '',
+                                },
                               },
-                              email: {
-                                subject: template.channel === 'email' ? template.subject ?? '' : '',
-                                body: template.channel === 'email' ? template.body : '',
-                              },
-                              push: {
-                                subject: template.channel === 'push' ? template.subject ?? '' : '',
-                                body: template.channel === 'push' ? template.body : '',
-                              },
-                            },
-                          })}
+                            });
+                            setActiveTemplateChannel(template.channel as AutomationChannel);
+                            setActiveStudioTab('templates');
+                          }}
                         >
                           <Pencil className="h-3 w-3" />
                         </PillButton>
@@ -1212,7 +1228,9 @@ export function MessageTemplatesSettings() {
               </div>
             )}
           </div>
+        </TabsContent>
 
+        <TabsContent value="templates" className="mt-0 min-w-0">
           <div className="min-w-0 space-y-3 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -1418,7 +1436,7 @@ export function MessageTemplatesSettings() {
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
             ) : templateFamilies.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Skapa först en mall under Mallar.</div>
+              <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Skapa först en mall under fliken Mall.</div>
             ) : filteredTemplateFamilies.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inget stämmer med filtret just nu.</div>
             ) : (
