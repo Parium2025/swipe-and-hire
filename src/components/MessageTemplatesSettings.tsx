@@ -120,6 +120,31 @@ function InfoHint({ text }: { text: string }) {
   );
 }
 
+function VariableChips({ channelLabel, onInsert }: { channelLabel: string; onInsert: (token: string) => void }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/5 p-2.5">
+      <div className="flex items-center gap-2">
+        <p className="text-[10px] uppercase tracking-[0.16em] text-white">Variabler · {channelLabel}</p>
+        <InfoHint text="Tryck på en variabel så läggs den in i texten för just den här kanalen. Värdena fylls i automatiskt när utskicket skickas." />
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {TEMPLATE_EDITOR_VARIABLES.map((variable) => (
+          <button
+            key={variable.key}
+            type="button"
+            onPointerDown={(event) => event.preventDefault()}
+            onClick={() => onInsert(`{${variable.key}}`)}
+            className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-left text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:hover:border-white/30"
+          >
+            <span className="block text-[11px] font-medium">{variable.label}</span>
+            <span className="block text-[10px] text-white/70">{`{${variable.key}}`}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
   name: '',
@@ -733,11 +758,13 @@ export function MessageTemplatesSettings() {
       if (error) {
         toast.error('Kunde inte spara mallen');
       } else {
-        toast.success('Mall skapad');
         setSelectedTemplateFamilyKey(baseName);
+        setAutomationVisibilityFilter('all');
         setTemplateForm(EMPTY_TEMPLATE_FORM);
         setActiveTemplateChannel('push');
         await fetchStudio({ silent: true });
+        setActiveStudioTab('automations');
+        toast.success('Mall sparad — steg 2: välj när den ska skickas');
       }
     }
 
@@ -857,7 +884,7 @@ export function MessageTemplatesSettings() {
       toast.error('Kunde inte spara regeln');
     } else {
       const wasUpdate = !!automationForm.id;
-      toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel skapad');
+      toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
       if (!wasUpdate) {
         setAutomationForm(EMPTY_AUTOMATION_FORM);
       }
@@ -1128,7 +1155,7 @@ export function MessageTemplatesSettings() {
             onClick={() => setActiveStudioTab('templates')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
-            Mall
+            1 · Mall
           </button>
           <button
             ref={automationsTabRef}
@@ -1138,7 +1165,7 @@ export function MessageTemplatesSettings() {
             onClick={() => setActiveStudioTab('automations')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
-            Regler
+            2 · Regel
           </button>
           <button
             ref={logsTabRef}
@@ -1148,7 +1175,7 @@ export function MessageTemplatesSettings() {
             onClick={() => setActiveStudioTab('logs')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
-            Logg
+            3 · Logg
           </button>
         </div>
 
@@ -1233,7 +1260,7 @@ export function MessageTemplatesSettings() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-semibold text-white md:text-base">Skapa mall</h4>
+                  <h4 className="text-sm font-semibold text-white md:text-base">Steg 1 · Skapa mall</h4>
                   <InfoHint text="Här bygger du grunden för automatiska eller manuella utskick. Börja med namn, välj kanaler och skriv sedan innehåll per kanal." />
                 </div>
                 <p className="text-xs text-white md:text-sm">Använd variabler för att göra utskicken personliga.</p>
@@ -1326,59 +1353,17 @@ export function MessageTemplatesSettings() {
                           className="min-h-[120px] bg-white/5 border-white/10 text-white"
                         />
                       </div>
+
+                      <VariableChips
+                        channelLabel={getOutreachChannelLabel(channel)}
+                        onInsert={(token) =>
+                          setTemplateChannelContent(channel, 'body', `${templateForm.channelContent[channel].body}${token}`)
+                        }
+                      />
                     </div>
                   ))}
                 </div>
               )}
-            </div>
-
-            <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
-              <div className="mb-2">
-                <div className="flex items-center gap-2">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
-                  <InfoHint text="Här visar vi bara stabila variabler som fungerar i vanliga mallar. Intervjudatum, tid, längd och plats/länk hör hemma i själva bokningsflödet och fylls därifrån när en intervju skapas." />
-                </div>
-                <p className="mt-1 text-[11px] text-white">
-                  Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(
-                    templateForm.channels.includes(activeTemplateChannel)
-                      ? activeTemplateChannel
-                      : (templateForm.channels[0] ?? activeTemplateChannel),
-                  ).toLowerCase()}.
-
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {TEMPLATE_EDITOR_VARIABLES.map((variable) => (
-                  <button
-                    key={variable.key}
-                    type="button"
-                    onClick={() => {
-                      setTemplateForm((prev) => {
-                        const targetChannel = prev.channels.includes(activeTemplateChannel)
-                          ? activeTemplateChannel
-                          : prev.channels[0];
-
-                        if (!targetChannel) return prev;
-
-                        return {
-                          ...prev,
-                          channelContent: {
-                            ...prev.channelContent,
-                            [targetChannel]: {
-                              ...prev.channelContent[targetChannel],
-                              body: `${prev.channelContent[targetChannel].body}{${variable.key}}`,
-                            },
-                          },
-                        };
-                      });
-                    }}
-                    className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-left text-white transition-colors md:hover:border-white/30 md:hover:text-white"
-                  >
-                    <span className="block text-[11px] font-medium md:text-xs">{variable.label}</span>
-                    <span className="block text-[10px] text-white/70">{`{${variable.key}}`}</span>
-                  </button>
-                ))}
-              </div>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -1391,8 +1376,20 @@ export function MessageTemplatesSettings() {
           <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="mb-3 space-y-3">
               <div>
-                <h4 className="text-sm font-semibold text-white md:text-base">Regelöversikt</h4>
-                <p className="text-xs text-white md:text-sm">Välj vad du vill se och öppna en regel i dropdownen i stället för en lång lista.</p>
+                <h4 className="text-sm font-semibold text-white md:text-base">Steg 2 · Välj mall och när den ska skickas</h4>
+                <p className="text-xs text-white md:text-sm">Varje rad nedan är en av dina mallar. Statusen visar om mallen redan har en regel eller inte.</p>
+              </div>
+
+              <div className="rounded-2xl border border-white/[0.12] bg-white/5 p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-white">Så funkar det</p>
+                <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-white">
+                  <li>Skapa mallen under fliken <strong className="font-semibold">1 · Mall</strong> (texten som skickas).</li>
+                  <li>Välj mallen här och sätt när den ska skickas — spara regeln.</li>
+                  <li>Följ utskicken under fliken <strong className="font-semibold">3 · Logg</strong>.</li>
+                </ol>
+                <p className="mt-2 text-[11px] text-white">
+                  Mallar som heter t.ex. "Jobb avslutat · professionellt mejl" är Pariums färdiga startmallar från "Kom igång snabbt" — de fungerar precis som dina egna och går att ändra eller ta bort.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -1412,7 +1409,10 @@ export function MessageTemplatesSettings() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">Regel / mall</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-white">Välj mall</Label>
+                  <InfoHint text="Listan visar alla dina mallar. 'Ingen regel' betyder att mallen bara ligger sparad — 'Aktiv' betyder att den skickas automatiskt vid vald händelse." />
+                </div>
                 <Select
                   value={selectedTemplateFamilyKey ?? undefined}
                   onValueChange={setSelectedTemplateFamilyKey}
@@ -1483,8 +1483,8 @@ export function MessageTemplatesSettings() {
             ) : (
               <>
                 <div>
-                  <h4 className="text-sm font-semibold text-white md:text-base">Koppla mall till tidslinje</h4>
-                  <p className="text-xs text-white md:text-sm">Steg 1: välj mall. Steg 2: välj när den ska skickas.</p>
+                  <h4 className="text-sm font-semibold text-white md:text-base">Sätt regel på mallen</h4>
+                  <p className="text-xs text-white md:text-sm">Välj händelsen som ska trigga utskicket, sätt tiden och spara — då blir mallen aktiv.</p>
                 </div>
 
                 <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
