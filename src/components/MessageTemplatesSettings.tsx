@@ -1617,7 +1617,7 @@ export function MessageTemplatesSettings() {
 
                 <div className="space-y-2">
                   <Label className="text-white">{getDelayFieldLabel(automationForm.trigger)}</Label>
-                  <Input type="number" min={0} value={automationForm.delay_minutes} onChange={(e) => setAutomationForm((prev) => ({ ...prev, delay_minutes: Number(e.target.value) || 0 }))} className="bg-white/5 border-white/10 text-white" />
+                  <DelayField value={automationForm.delay_minutes} onChange={(next) => setAutomationForm((prev) => ({ ...prev, delay_minutes: next }))} />
                   <p className="text-[11px] text-white">{getDelayFieldHint(automationForm.trigger)}</p>
                 </div>
 
