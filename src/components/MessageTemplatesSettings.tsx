@@ -1019,7 +1019,7 @@ export function MessageTemplatesSettings() {
             <AlertDialogTitle className="text-base font-semibold text-white md:text-lg">Kom igång snabbt</AlertDialogTitle>
             <AlertDialogDescription className="space-y-3 text-sm leading-relaxed text-white">
               <p>Det här lägger in färdiga startmallar och standardregler så att ni snabbt kommer igång med Outreach Studio.</p>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-left text-white">
+              <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3 text-left text-white">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/80">Det som skapas</p>
                 <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-white">
                   <li>Färdiga mallar för chatt, e-post och push</li>
@@ -1049,7 +1049,7 @@ export function MessageTemplatesSettings() {
         </AlertDialogContentNoFocus>
       </AlertDialog>
 
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
+      <div className="overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3.5 backdrop-blur-sm">
       <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h3 className="text-sm font-semibold text-white md:text-base">Mallar, regler och utskick</h3>
@@ -1079,7 +1079,7 @@ export function MessageTemplatesSettings() {
            { label: 'Aktiva regler', value: automationGroups.filter((group) => group.automations.some((item) => item.is_enabled)).length, icon: RefreshCw },
           { label: 'Väntar på att skickas', value: logs.filter((item) => item.status === 'pending').length, icon: ScrollText },
         ].map(({ label, value, icon: Icon }) => (
-          <div key={label} className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-1.5">
+          <div key={label} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] px-2.5 py-1.5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.18em] text-white md:text-[11px]">{label}</p>
@@ -1142,7 +1142,7 @@ export function MessageTemplatesSettings() {
         </div>
 
         <TabsContent value="templates" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-          <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h4 className="text-sm font-semibold text-white md:text-base">Mallbibliotek</h4>
@@ -1157,7 +1157,7 @@ export function MessageTemplatesSettings() {
             ) : (
                 <div className="space-y-2">
                 {templates.map((template) => (
-                    <div key={template.id} className="rounded-2xl border border-white/10 bg-white/5 p-2">
+                    <div key={template.id} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
                     <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                       <div className="min-w-0 space-y-1.5">
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -1212,7 +1212,7 @@ export function MessageTemplatesSettings() {
             )}
           </div>
 
-          <div className="min-w-0 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="min-w-0 space-y-3 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -1284,7 +1284,7 @@ export function MessageTemplatesSettings() {
               ) : (
                 <div className="space-y-2">
                   {CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel)).map((channel) => (
-                    <div key={channel} className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <div key={channel} className="space-y-2 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
                       <div className="flex items-center justify-between gap-2">
                         <Label className="text-white">Kanal: {getOutreachChannelLabel(channel)}</Label>
                       </div>
@@ -1316,7 +1316,7 @@ export function MessageTemplatesSettings() {
               )}
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
               <div className="mb-2">
                 <div className="flex items-center gap-2">
                   <p className="text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
@@ -1367,7 +1367,7 @@ export function MessageTemplatesSettings() {
         </TabsContent>
 
         <TabsContent value="automations" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
-          <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="mb-3 space-y-3">
               <div>
                 <h4 className="text-sm font-semibold text-white md:text-base">Regelöversikt</h4>
@@ -1421,7 +1421,7 @@ export function MessageTemplatesSettings() {
             ) : filteredTemplateFamilies.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inget stämmer med filtret just nu.</div>
             ) : (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
                 {selectedTemplateFamily ? (
                   (() => {
                     const linkedGroup = getLinkedAutomationGroup(selectedTemplateFamily, automationGroups);
@@ -1456,7 +1456,7 @@ export function MessageTemplatesSettings() {
             )}
           </div>
 
-          <div className="min-w-0 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="min-w-0 space-y-3 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             {!selectedTemplateFamily ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Välj en mall till vänster för att koppla den till tidslinjen.</div>
             ) : (
@@ -1466,7 +1466,7 @@ export function MessageTemplatesSettings() {
                   <p className="text-xs text-white md:text-sm">Steg 1: välj mall. Steg 2: välj när den ska skickas.</p>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
                   <p className="text-xs uppercase tracking-[0.16em] text-white">Vald mall</p>
                   <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2">
                     <p className="max-w-full truncate text-sm font-semibold text-white">{selectedTemplateFamily.baseName}</p>
@@ -1500,7 +1500,7 @@ export function MessageTemplatesSettings() {
                   <p className="text-[11px] text-white">{getDelayFieldHint(automationForm.trigger)}</p>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
                   <p className="text-xs uppercase tracking-[0.16em] text-white">Kanaler som används</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {selectedTemplateFamily.channels.map((channel) => (
@@ -1509,7 +1509,7 @@ export function MessageTemplatesSettings() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] px-3 py-2.5">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-white">Aktiv direkt</p>
                     <p className="text-[11px] text-white md:text-xs [overflow-wrap:anywhere]">Stäng av om du vill spara den först och aktivera senare.</p>
@@ -1542,7 +1542,7 @@ export function MessageTemplatesSettings() {
           </div>
         </TabsContent>
 
-        <TabsContent value="logs" className="mt-0 min-w-0 rounded-2xl border border-white/10 bg-white/5 p-3">
+        <TabsContent value="logs" className="mt-0 min-w-0 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
           {loading ? (
             <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
           ) : logs.length === 0 ? (
@@ -1556,7 +1556,7 @@ export function MessageTemplatesSettings() {
                   { label: 'Misslyckat', value: logSummary.failed },
                   { label: 'Öppnat', value: logSummary.opened },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
+                  <div key={item.label} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] px-3 py-2.5">
                     <p className="text-[10px] uppercase tracking-[0.16em] text-white">{item.label}</p>
                     <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
                   </div>
@@ -1568,7 +1568,7 @@ export function MessageTemplatesSettings() {
                 const template = templates.find((item) => item.id === log.template_id);
                 const openedAt = getLogOpenedAt(log);
                 return (
-                  <div key={log.id} className="rounded-2xl border border-white/10 bg-white/5 p-2">
+                  <div key={log.id} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(log.trigger)}</span>
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(log.channel)}</span>
