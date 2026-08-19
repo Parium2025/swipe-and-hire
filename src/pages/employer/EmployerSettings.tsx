@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';
 import { MessageTemplatesSettings } from '@/components/MessageTemplatesSettings';
+import { AutoMessagesPanel } from '@/components/employer/outreach/AutoMessagesPanel';
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
@@ -118,6 +119,7 @@ const EmployerSettings = () => {
         onToggle={handleBackgroundLocationToggle}
       />
 
+      <AutoMessagesPanel />
       <MessageTemplatesSettings />
       <ActiveSessionsSettings />
       <PrivacyDataPanel showDpaLink />
