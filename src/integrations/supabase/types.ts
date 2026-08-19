@@ -3154,6 +3154,7 @@ export type Database = {
           id: string
           ip_address: string | null
           last_heartbeat_at: string
+          revoked_at: string | null
           session_token: string
           user_agent: string | null
           user_id: string
@@ -3164,6 +3165,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           last_heartbeat_at?: string
+          revoked_at?: string | null
           session_token: string
           user_agent?: string | null
           user_id: string
@@ -3174,6 +3176,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           last_heartbeat_at?: string
+          revoked_at?: string | null
           session_token?: string
           user_agent?: string | null
           user_id?: string
