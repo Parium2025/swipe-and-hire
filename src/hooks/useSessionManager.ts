@@ -28,7 +28,7 @@ const VALIDITY_CHECK_INTERVAL_MS = 30 * 1000; // 30 seconds — reduced frequenc
 const SESSION_TOKEN_LOCK = 'parium-session-token-lock';
 const SESSION_TOKEN_MUTEX_KEY = 'parium_session_token_mutex';
 
-const readSharedDomainToken = (): string | null => {
+export const readSharedDomainToken = (): string | null => {
   try {
     const prefix = `${SESSION_TOKEN_COOKIE}=`;
     const entry = document.cookie.split('; ').find((cookie) => cookie.startsWith(prefix));
@@ -493,8 +493,40 @@ export function useSessionManager(
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('online', handleOnline);
 
+    // ⚡️ Realtid: så fort en annan enhet återkallar (eller tar bort) den här
+    // sessionen får vi en push från databasen och loggar ut direkt — i stället
+    // för att vänta upp till 30 s på nästa pollning. Pollningen är kvar som
+    // säkerhetsnät om realtidskanalen skulle tappas.
+    const channel = supabase
+      .channel(`user-sessions-${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user_sessions', filter: `user_id=eq.${userId}` },
+        (payload) => {
+          if (signOutInProgress || alreadyKickedRef.current) return;
+          const token = sessionTokenRef.current;
+          if (!token) return;
+
+          const oldRow = payload.old as Record<string, unknown> | null;
+          const newRow = payload.new as Record<string, unknown> | null;
+          const affectsThisDevice =
+            newRow?.session_token === token || oldRow?.session_token === token;
+          if (!affectsThisDevice) return;
+
+          const revoked = payload.eventType === 'DELETE' || !!newRow?.revoked_at;
+          if (!revoked) return;
+
+          console.log('🚫 Realtid: sessionen återkallades från en annan enhet');
+          alreadyKickedRef.current = true;
+          registeredRef.current = false;
+          onKicked();
+        }
+      )
+      .subscribe();
+
     return () => {
       clearTimeout(validityStartDelay);
+      void supabase.removeChannel(channel);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('online', handleOnline);
       if (heartbeatIntervalRef.current) {

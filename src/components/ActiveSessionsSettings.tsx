@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PillButton } from '@/components/ui/pill-button';
 
 import { Label } from '@/components/ui/label';
+import { readSharedDomainToken } from '@/hooks/useSessionManager';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
@@ -22,11 +23,15 @@ interface SessionData {
 const SESSION_TOKEN_KEY = 'parium_session_token';
 
 function getCurrentSessionToken(): string | null {
+  // localStorage först, sedan den delade domän-cookien (fungerar även när
+  // localStorage är blockerad, t.ex. i en iframe eller privat läge).
   try {
-    return localStorage.getItem(SESSION_TOKEN_KEY);
+    const stored = localStorage.getItem(SESSION_TOKEN_KEY);
+    if (stored) return stored;
   } catch {
-    return null;
+    // ignorera
   }
+  return readSharedDomainToken();
 }
 
 /**
