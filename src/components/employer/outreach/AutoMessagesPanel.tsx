@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Loader2, MessageSquare, Mail, Smartphone, Zap } from 'lucide-react';
+import { Loader2, MessageSquare, Mail, Smartphone, Zap, Info } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,6 +16,59 @@ const CHANNEL_ICON: Record<AutoRuleChannel, typeof Mail> = {
   email: Mail,
   push: Smartphone,
 };
+
+type PreviewEntry = { channel: AutoRuleChannel; label: string; subject: string | null; body: string; edited: boolean };
+
+function TemplatePreview({ title, entries }: { title: string; entries: PreviewEntry[] }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+          onFocus={(e) => e.currentTarget.blur()}
+          aria-label={`Visa texten som skickas: ${title}`}
+          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]"
+        >
+          <Info className="h-3.5 w-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-[320px] max-w-[calc(100vw-2rem)] space-y-3 border-white/10 bg-[#0b1c3a]/95 p-4 backdrop-blur-xl"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+      >
+        <p className="text-xs font-medium uppercase tracking-wide text-white/70">Så här lyder texten</p>
+        {entries.map((entry) => {
+          const Icon = CHANNEL_ICON[entry.channel];
+          return (
+            <div key={entry.channel} className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-white">
+                <Icon className="h-3 w-3 shrink-0" />
+                <span>{entry.label}</span>
+                {entry.edited && <span className="text-[10px] text-white/60">· egen text</span>}
+              </div>
+              {entry.subject && (
+                <p className="break-words text-xs text-white">
+                  <span className="text-white/60">Ämne: </span>
+                  {entry.subject}
+                </p>
+              )}
+              <p className="whitespace-pre-line break-words text-xs text-white">{entry.body}</p>
+            </div>
+          );
+        })}
+        <p className="text-[11px] text-white/60">
+          {'{jobbtitel}, {namn} och {företag} fylls i automatiskt när utskicket skickas.'}
+        </p>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export function AutoMessagesPanel() {
   const { user, profile } = useAuth();
@@ -179,12 +233,26 @@ export function AutoMessagesPanel() {
             {AUTO_RULE_EVENTS.map((event) => {
               const delay = getDelay(event);
               const hasAnyRow = (rowsByTrigger.get(event.trigger) ?? []).length > 0;
+              const previewEntries: PreviewEntry[] = AUTO_RULE_CHANNELS.map(({ value, label }) => {
+                const config = event.templates[value];
+                const saved = templates.find((template) => template.name === config.name && template.channel === value);
+                return {
+                  channel: value,
+                  label,
+                  subject: saved ? saved.subject : config.subject,
+                  body: saved ? saved.body : config.body,
+                  edited: Boolean(saved && (saved.body !== config.body || saved.subject !== config.subject)),
+                };
+              });
 
               return (
                 <div key={event.trigger} className="rounded-xl border border-white/10 bg-white/5 p-4 md:p-3">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0 flex-1">
-                      <Label className="text-sm font-medium text-white">{event.title}</Label>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm font-medium text-white">{event.title}</Label>
+                        <TemplatePreview title={event.title} entries={previewEntries} />
+                      </div>
                       <p className="text-sm text-white">{event.description}</p>
                     </div>
 
