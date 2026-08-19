@@ -42,16 +42,21 @@ function VirtualJobGridImpl<T extends JobPosting>({
   emptyState,
 }: VirtualJobGridProps<T>) {
   return (
-    <div className={className} style={{ isolation: 'isolate' }}>
+    <div className={className} style={{ isolation: 'isolate', position: 'relative' }}>
       {tabs.map((tab) => {
         const isVisible = tab.key === activeTab;
         if (tab.jobs.length === 0) {
           return (
             <div
               key={tab.key}
-              hidden={!isVisible}
               aria-hidden={!isVisible}
-              style={{ display: isVisible ? 'block' : 'none' }}
+              {...(!isVisible ? { inert: '' } : {})}
+              style={isVisible ? undefined : {
+                position: 'absolute',
+                inset: 0,
+                visibility: 'hidden',
+                pointerEvents: 'none',
+              }}
             >
               {isVisible ? emptyState : null}
             </div>
@@ -61,14 +66,17 @@ function VirtualJobGridImpl<T extends JobPosting>({
           <div
             key={tab.key}
             className={`${gridClassName} job-card-grid-no-entry ${isVisible ? '' : 'job-panel-hidden'}`}
-            hidden={!isVisible}
             aria-hidden={!isVisible}
             {...(!isVisible ? { inert: '' } : {})}
-            // display:none + hidden + inert: browsern hoppar över paint/layout
-            // OCH Safari får inte behålla en komposit-layer som "spöke".
+            // Inaktiva paneler layoutas och rasteriseras i förväg så bilder,
+            // knappstorlekar och färger redan är klara vid flikbytet. De är
+            // samtidigt helt osynliga, inerta och borttagna ur dokumentflödet.
             style={{
-              display: isVisible ? undefined : 'none',
-              contentVisibility: isVisible ? 'visible' : 'hidden',
+              position: isVisible ? 'relative' : 'absolute',
+              inset: isVisible ? undefined : 0,
+              width: '100%',
+              visibility: isVisible ? 'visible' : 'hidden',
+              zIndex: isVisible ? 1 : 0,
               pointerEvents: isVisible ? undefined : 'none',
             }}
           >
