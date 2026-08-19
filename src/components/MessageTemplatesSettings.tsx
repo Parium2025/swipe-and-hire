@@ -1186,25 +1186,29 @@ export function MessageTemplatesSettings() {
                           shape="icon"
                           className="h-8 w-8"
 
-                          onClick={() => setTemplateForm({
-                            id: template.id,
-                            name: template.name,
-                            channels: [template.channel as AutomationChannel],
-                            channelContent: {
-                              chat: {
-                                subject: template.channel === 'chat' ? template.subject ?? '' : '',
-                                body: template.channel === 'chat' ? template.body : '',
+                          onClick={() => {
+                            setTemplateForm({
+                              id: template.id,
+                              name: template.name,
+                              channels: [template.channel as AutomationChannel],
+                              channelContent: {
+                                chat: {
+                                  subject: template.channel === 'chat' ? template.subject ?? '' : '',
+                                  body: template.channel === 'chat' ? template.body : '',
+                                },
+                                email: {
+                                  subject: template.channel === 'email' ? template.subject ?? '' : '',
+                                  body: template.channel === 'email' ? template.body : '',
+                                },
+                                push: {
+                                  subject: template.channel === 'push' ? template.subject ?? '' : '',
+                                  body: template.channel === 'push' ? template.body : '',
+                                },
                               },
-                              email: {
-                                subject: template.channel === 'email' ? template.subject ?? '' : '',
-                                body: template.channel === 'email' ? template.body : '',
-                              },
-                              push: {
-                                subject: template.channel === 'push' ? template.subject ?? '' : '',
-                                body: template.channel === 'push' ? template.body : '',
-                              },
-                            },
-                          })}
+                            });
+                            setActiveTemplateChannel(template.channel as AutomationChannel);
+                            setActiveStudioTab('templates');
+                          }}
                         >
                           <Pencil className="h-3 w-3" />
                         </PillButton>
