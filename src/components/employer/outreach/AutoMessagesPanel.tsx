@@ -42,7 +42,7 @@ function TemplatePreview({ title, entries }: { title: string; entries: PreviewEn
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
       >
-        <p className="text-xs font-medium uppercase tracking-wide text-white/70">Så här lyder texten</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-white">Så här lyder texten</p>
         {entries.map((entry) => {
           const Icon = CHANNEL_ICON[entry.channel];
           return (
@@ -50,11 +50,11 @@ function TemplatePreview({ title, entries }: { title: string; entries: PreviewEn
               <div className="flex items-center gap-1.5 text-xs font-medium text-white">
                 <Icon className="h-3 w-3 shrink-0" />
                 <span>{entry.label}</span>
-                {entry.edited && <span className="text-[10px] text-white/60">· egen text</span>}
+                {entry.edited && <span className="text-[10px] text-white">· egen text</span>}
               </div>
               {entry.subject && (
                 <p className="break-words text-xs text-white">
-                  <span className="text-white/60">Ämne: </span>
+                  <span className="text-white">Ämne: </span>
                   {entry.subject}
                 </p>
               )}
@@ -62,7 +62,7 @@ function TemplatePreview({ title, entries }: { title: string; entries: PreviewEn
             </div>
           );
         })}
-        <p className="text-[11px] text-white/60">
+        <p className="text-[11px] text-white">
           {'{jobbtitel}, {namn} och {företag} fylls i automatiskt när utskicket skickas.'}
         </p>
       </PopoverContent>
