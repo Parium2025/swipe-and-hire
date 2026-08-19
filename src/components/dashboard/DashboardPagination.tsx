@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 // Match wizard footer button styling (Tillbaka / Nästa in "Skapa annons")
 const backButtonClasses =
-  'rounded-full bg-white/5 backdrop-blur-sm border border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 [&_svg]:text-white focus:outline-none focus:ring-0 focus-visible:ring-0';
+  'rounded-full bg-white/[0.07] border border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 [&_svg]:text-white focus:outline-none focus:ring-0 focus-visible:ring-0';
 
 const nextButtonClasses =
   'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0';

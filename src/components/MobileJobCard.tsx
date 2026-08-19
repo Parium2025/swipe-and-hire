@@ -195,11 +195,11 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
       >
         <div className="flex justify-center mt-1 mb-1">
           {logoUrl ? (
-            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden shadow-lg">
               <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
             </div>
           ) : (
-            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center shadow-lg">
               <span className="text-base font-bold text-white/80 tracking-wide">{initials}</span>
             </div>
           )}
