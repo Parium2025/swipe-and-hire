@@ -25,7 +25,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 md:hover:underline active:opacity-70",
         // 🎨 Glassmorphism oval style - with touch feedback
         glass:
-          "rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:border-white/30",
+          "rounded-full bg-white/[0.07] border border-white/20 text-white [transform:translateZ(0)] [backface-visibility:hidden] focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:border-white/30",
         // Glass variant with amber accent (for save/warning actions)
         glassAmber:
           "rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-amber-500/40",
