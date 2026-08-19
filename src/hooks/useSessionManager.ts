@@ -28,7 +28,7 @@ const VALIDITY_CHECK_INTERVAL_MS = 30 * 1000; // 30 seconds — reduced frequenc
 const SESSION_TOKEN_LOCK = 'parium-session-token-lock';
 const SESSION_TOKEN_MUTEX_KEY = 'parium_session_token_mutex';
 
-const readSharedDomainToken = (): string | null => {
+export const readSharedDomainToken = (): string | null => {
   try {
     const prefix = `${SESSION_TOKEN_COOKIE}=`;
     const entry = document.cookie.split('; ').find((cookie) => cookie.startsWith(prefix));
