@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { Monitor, Smartphone, Tablet, Laptop, Globe, LogOut, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PillButton } from '@/components/ui/pill-button';
+
 import { Label } from '@/components/ui/label';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
