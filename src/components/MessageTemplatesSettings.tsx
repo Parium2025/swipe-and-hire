@@ -1432,28 +1432,9 @@ export function MessageTemplatesSettings() {
               </div>
 
               <div className="space-y-2">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label className="text-white">Filtrera listan</Label>
-                    <InfoHint text="Filtret ändrar bara vad du ser i listan nedan — det stänger inte av något." />
-                  </div>
-                  <Select value={automationVisibilityFilter} onValueChange={(value: AutomationVisibilityFilter) => setAutomationVisibilityFilter(value)}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {AUTOMATION_VISIBILITY_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-white">Vilken mall vill du sätta en regel på?</Label>
-                  <InfoHint text="Välj mallen du nyss skapade (den ligger överst med ditt namn på). Statusen efter namnet visar om den redan skickas." />
+                  <InfoHint text="Välj mallen du nyss skapade (den ligger med ditt namn på). Statusen efter namnet visar om den redan skickas." />
                 </div>
                 <Select
                   value={selectedTemplateFamilyKey ?? undefined}
@@ -1463,7 +1444,7 @@ export function MessageTemplatesSettings() {
                   <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
                     <SelectValue placeholder="Välj regel eller mall" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
                     {filteredTemplateFamilies.map((family) => {
                       const ruleState = getAutomationGroupState(getLinkedAutomationGroup(family, automationGroups));
                       return (
@@ -1475,6 +1456,7 @@ export function MessageTemplatesSettings() {
                   </SelectContent>
                 </Select>
               </div>
+
             </div>
 
             {loading ? (
