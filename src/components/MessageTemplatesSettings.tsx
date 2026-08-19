@@ -1412,17 +1412,20 @@ export function MessageTemplatesSettings() {
           <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="mb-3 space-y-3">
               <div>
-                <h4 className="text-sm font-semibold text-white md:text-base">Steg 2 · Välj mall och när den ska skickas</h4>
-                <p className="text-xs text-white md:text-sm">Varje rad nedan är en av dina mallar. Statusen visar om mallen redan har en regel eller inte.</p>
+                <h4 className="text-sm font-semibold text-white md:text-base">Steg 2 · Bestäm när mallen ska skickas</h4>
+                <p className="text-xs text-white md:text-sm">En mall är bara text. Först när du ger den en regel här skickas den — automatiskt, utan att du gör något.</p>
               </div>
 
               <div className="rounded-2xl border border-white/[0.12] bg-white/5 p-3">
                 <p className="text-xs uppercase tracking-[0.16em] text-white">Så funkar det</p>
                 <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-white">
-                  <li>Skapa mallen under fliken <strong className="font-semibold">1 · Mall</strong> (texten som skickas).</li>
-                  <li>Välj mallen här och sätt när den ska skickas — spara regeln.</li>
-                  <li>Följ utskicken under fliken <strong className="font-semibold">3 · Logg</strong>.</li>
+                  <li><strong className="font-semibold">Mall</strong> = texten (steg 1). <strong className="font-semibold">Regel</strong> = när texten skickas (steg 2).</li>
+                  <li>Välj en mall nedan, välj händelse (t.ex. "Ansökan inkommen") och tid — spara.</li>
+                  <li>Kontrollera under <strong className="font-semibold">3 · Logg</strong> att utskicket gick fram.</li>
                 </ol>
+                <p className="mt-2 text-[11px] text-white">
+                  Statusen bakom varje mall: <strong className="font-semibold">Aktiv</strong> = skickas automatiskt. <strong className="font-semibold">Pausad</strong> = regel finns men är avstängd. <strong className="font-semibold">Ingen regel</strong> = mallen ligger bara sparad och skickas aldrig.
+                </p>
                 <p className="mt-2 text-[11px] text-white">
                   Mallar som heter t.ex. "Jobb avslutat · professionellt mejl" är Pariums färdiga startmallar från "Kom igång snabbt" — de fungerar precis som dina egna och går att ändra eller ta bort.
                 </p>
@@ -1430,7 +1433,10 @@ export function MessageTemplatesSettings() {
 
               <div className="space-y-2">
                 <div className="space-y-2">
-                  <Label className="text-white">Visa</Label>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-white">Filtrera listan</Label>
+                    <InfoHint text="Filtret ändrar bara vad du ser i listan nedan — det stänger inte av något." />
+                  </div>
                   <Select value={automationVisibilityFilter} onValueChange={(value: AutomationVisibilityFilter) => setAutomationVisibilityFilter(value)}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
                       <SelectValue />
@@ -1446,8 +1452,8 @@ export function MessageTemplatesSettings() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Label className="text-white">Välj mall</Label>
-                  <InfoHint text="Listan visar alla dina mallar. 'Ingen regel' betyder att mallen bara ligger sparad — 'Aktiv' betyder att den skickas automatiskt vid vald händelse." />
+                  <Label className="text-white">Vilken mall vill du sätta en regel på?</Label>
+                  <InfoHint text="Välj mallen du nyss skapade (den ligger överst med ditt namn på). Statusen efter namnet visar om den redan skickas." />
                 </div>
                 <Select
                   value={selectedTemplateFamilyKey ?? undefined}
