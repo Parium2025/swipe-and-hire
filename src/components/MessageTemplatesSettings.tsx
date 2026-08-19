@@ -1031,7 +1031,7 @@ export function MessageTemplatesSettings() {
       return;
     }
 
-    setAutomationVisibilityFilter('unlinked');
+    setAutomationVisibilityFilter('all');
     setSelectedTemplateFamilyKey(firstUnlinkedFamily.key);
   };
 
@@ -1533,7 +1533,7 @@ export function MessageTemplatesSettings() {
                   <Label className="text-white">När ska den skickas?</Label>
                   <Select value={automationForm.trigger} onValueChange={(value: AutomationForm['trigger']) => setAutomationForm((prev) => ({ ...prev, trigger: value }))}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
                       {OUTREACH_TRIGGER_OPTIONS.filter((option) => !['manual_send', 'interview_scheduled', 'application_no_response_14d'].includes(option.value)).map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
