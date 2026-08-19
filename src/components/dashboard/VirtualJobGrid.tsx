@@ -60,7 +60,7 @@ function VirtualJobGridImpl<T extends JobPosting>({
         return (
           <div
             key={tab.key}
-            className={`${gridClassName} ${isVisible ? '' : 'job-panel-hidden'}`}
+            className={`${gridClassName} job-card-grid-no-entry ${isVisible ? '' : 'job-panel-hidden'}`}
             hidden={!isVisible}
             aria-hidden={!isVisible}
             {...(!isVisible ? { inert: '' } : {})}
