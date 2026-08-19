@@ -1351,59 +1351,17 @@ export function MessageTemplatesSettings() {
                           className="min-h-[120px] bg-white/5 border-white/10 text-white"
                         />
                       </div>
+
+                      <VariableChips
+                        channelLabel={getOutreachChannelLabel(channel)}
+                        onInsert={(token) =>
+                          setTemplateChannelContent(channel, 'body', `${templateForm.channelContent[channel].body}${token}`)
+                        }
+                      />
                     </div>
                   ))}
                 </div>
               )}
-            </div>
-
-            <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
-              <div className="mb-2">
-                <div className="flex items-center gap-2">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
-                  <InfoHint text="Här visar vi bara stabila variabler som fungerar i vanliga mallar. Intervjudatum, tid, längd och plats/länk hör hemma i själva bokningsflödet och fylls därifrån när en intervju skapas." />
-                </div>
-                <p className="mt-1 text-[11px] text-white">
-                  Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(
-                    templateForm.channels.includes(activeTemplateChannel)
-                      ? activeTemplateChannel
-                      : (templateForm.channels[0] ?? activeTemplateChannel),
-                  ).toLowerCase()}.
-
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {TEMPLATE_EDITOR_VARIABLES.map((variable) => (
-                  <button
-                    key={variable.key}
-                    type="button"
-                    onClick={() => {
-                      setTemplateForm((prev) => {
-                        const targetChannel = prev.channels.includes(activeTemplateChannel)
-                          ? activeTemplateChannel
-                          : prev.channels[0];
-
-                        if (!targetChannel) return prev;
-
-                        return {
-                          ...prev,
-                          channelContent: {
-                            ...prev.channelContent,
-                            [targetChannel]: {
-                              ...prev.channelContent[targetChannel],
-                              body: `${prev.channelContent[targetChannel].body}{${variable.key}}`,
-                            },
-                          },
-                        };
-                      });
-                    }}
-                    className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-left text-white transition-colors md:hover:border-white/30 md:hover:text-white"
-                  >
-                    <span className="block text-[11px] font-medium md:text-xs">{variable.label}</span>
-                    <span className="block text-[10px] text-white/70">{`{${variable.key}}`}</span>
-                  </button>
-                ))}
-              </div>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2">
