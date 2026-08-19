@@ -508,12 +508,10 @@ export function MessageTemplatesSettings() {
     };
   }, [user, fetchStudio]);
 
-  useEffect(() => {
-    if (templateForm.channels.length === 0) return;
-    if (!templateForm.channels.includes(activeTemplateChannel)) {
-      setActiveTemplateChannel(templateForm.channels[0]);
-    }
-  }, [templateForm.channels, activeTemplateChannel]);
+  // Aktiv kanal härleds vid användning (se effectiveTemplateChannel) i stället för att
+  // uppdateras via state när kanaler bockas i/ur – det gav en extra omrendering som
+  // syntes som en kort nedtoning av hela glaskortet.
+
 
   useEffect(() => {
     if (templateFamilies.length === 0) {
@@ -1269,15 +1267,14 @@ export function MessageTemplatesSettings() {
                       aria-pressed={checked}
                       onClick={() => {
                         toggleTemplateChannel(channel);
-                        if (!checked) setActiveTemplateChannel(channel);
                       }}
                       onKeyDown={(event) => {
                         if (event.key === 'Enter' || event.key === ' ') {
                           event.preventDefault();
                           toggleTemplateChannel(channel);
-                          if (!checked) setActiveTemplateChannel(channel);
                         }
                       }}
+
                       className={[
                         'flex h-[var(--control-height-compact)] items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-left text-xs text-white',
                         'transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none',
@@ -1342,7 +1339,12 @@ export function MessageTemplatesSettings() {
                   <InfoHint text="Här visar vi bara stabila variabler som fungerar i vanliga mallar. Intervjudatum, tid, längd och plats/länk hör hemma i själva bokningsflödet och fylls därifrån när en intervju skapas." />
                 </div>
                 <p className="mt-1 text-[11px] text-white">
-                  Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(activeTemplateChannel).toLowerCase()}.
+                  Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(
+                    templateForm.channels.includes(activeTemplateChannel)
+                      ? activeTemplateChannel
+                      : (templateForm.channels[0] ?? activeTemplateChannel),
+                  ).toLowerCase()}.
+
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
