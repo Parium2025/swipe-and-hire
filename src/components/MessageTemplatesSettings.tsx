@@ -156,8 +156,10 @@ const EMPTY_TEMPLATE_FORM: TemplateForm = {
   },
 };
 
+// Endast variabler som alltid har ett värde vid automatiska utskick.
+// {message} är borttagen — den fylls bara i vid manuella utskick och blev tom i automatiska.
 const TEMPLATE_EDITOR_VARIABLES = OUTREACH_VARIABLES.filter((variable) =>
-  ['candidate_name', 'first_name', 'company_name', 'job_title', 'message'].includes(variable.key),
+  ['candidate_name', 'first_name', 'company_name', 'job_title'].includes(variable.key),
 );
 
 const EMPTY_AUTOMATION_FORM: AutomationForm = {
