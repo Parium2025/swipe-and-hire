@@ -358,6 +358,23 @@ export function MessageTemplatesSettings() {
   const [showSeedConfirmDialog, setShowSeedConfirmDialog] = useState(false);
   const fetchRequestIdRef = useRef(0);
 
+  // Autospara utkast i mallredigeraren så inget försvinner vid omladdning.
+  useEffect(() => {
+    if (!templateDraftKey) return;
+    const hasContent =
+      templateForm.name.trim().length > 0 ||
+      CHANNEL_ORDER.some(
+        (channel) =>
+          templateForm.channelContent[channel]?.body.trim() || templateForm.channelContent[channel]?.subject.trim(),
+      );
+    if (!hasContent) {
+      try { localStorage.removeItem(templateDraftKey); } catch { /* ignore */ }
+      return;
+    }
+    safeSetItem(templateDraftKey, JSON.stringify(templateForm));
+  }, [templateForm, templateDraftKey]);
+
+
   const activeTemplatesByChannel = useMemo(() => ({
     chat: templates.filter((template) => template.channel === 'chat' && template.is_active),
     email: templates.filter((template) => template.channel === 'email' && template.is_active),
