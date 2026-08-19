@@ -758,11 +758,13 @@ export function MessageTemplatesSettings() {
       if (error) {
         toast.error('Kunde inte spara mallen');
       } else {
-        toast.success('Mall skapad');
         setSelectedTemplateFamilyKey(baseName);
+        setAutomationVisibilityFilter('all');
         setTemplateForm(EMPTY_TEMPLATE_FORM);
         setActiveTemplateChannel('push');
         await fetchStudio({ silent: true });
+        setActiveStudioTab('automations');
+        toast.success('Mall sparad — steg 2: välj när den ska skickas');
       }
     }
 
