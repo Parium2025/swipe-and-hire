@@ -39,14 +39,14 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
     name: 'Efter intervju · professionellt mejl',
     channel: 'email',
     subject: 'Tack för din intervju för {job_title}',
-    body: 'Hej {candidate_name},\n\nTack för intervjun för {job_title} hos {company_name}. Vi uppskattar din tid och återkommer när vi har nästa steg i processen.\n\nVänliga hälsningar,\n{company_name}',
+    body: 'Hej {candidate_name},\n\nTack för intervjun för {job_title} hos {company_name}. Vi uppskattar din tid och återkommer inom kort.\n\nVänliga hälsningar,\n{company_name}',
     is_active: true,
   },
   {
     name: 'Efter intervju · push',
     channel: 'push',
     subject: '{company_name}',
-    body: 'Tack för din intervju för {job_title}. Vi återkommer med nästa steg.',
+    body: 'Tack för din intervju för {job_title}. Vi återkommer inom kort.',
     is_active: true,
   },
   {
@@ -130,14 +130,14 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
     name: 'Jobb avslutat · professionellt mejl',
     channel: 'email',
     subject: 'Uppdatering kring {job_title}',
-    body: 'Hej {candidate_name},\n\nTjänsten {job_title} hos {company_name} är nu avslutad. Tack för ditt intresse och för att du sökte till oss.\n\nVänliga hälsningar,\n{company_name}',
+    body: 'Hej {candidate_name},\n\nTjänsten {job_title} hos {company_name} är nu avslutad. Tack för ditt intresse och för att du sökte till oss. Vi har valt att gå vidare med andra kandidater i den här processen.\n\nVi hoppas att du söker igen så snart nya tjänster dyker upp hos oss.\n\nVänliga hälsningar,\n{company_name}',
     is_active: true,
   },
   {
     name: 'Jobb avslutat · push',
     channel: 'push',
     subject: '{company_name}',
-    body: 'Tjänsten {job_title} är nu avslutad. Tack för din ansökan.',
+    body: 'Tjänsten {job_title} är avslutad. Tack för ditt intresse — sök gärna igen när nya tjänster dyker upp.',
     is_active: true,
   },
 ];
