@@ -1153,7 +1153,7 @@ export function MessageTemplatesSettings() {
             onClick={() => setActiveStudioTab('templates')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
-            Mall
+            1 · Mall
           </button>
           <button
             ref={automationsTabRef}
