@@ -51,6 +51,9 @@ import {
   type OutreachTrigger,
 } from '@/lib/outreach';
 import { readCachedOutreachStudio, writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
+import { safeSetItem } from '@/lib/safeStorage';
+
+const TEMPLATE_DRAFT_PREFIX = 'outreach-template-draft:';
 
 type TemplateForm = {
   id: string | null;
