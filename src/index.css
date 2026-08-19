@@ -1438,6 +1438,17 @@ All colors MUST be HSL.
   }
 }
 
+/* Respektera systemets "reducera rörelse": bubblorna fryser helt istället
+   för att loopa, vilket också tar bort den upplevda ljuspulsen bakom kort. */
+@media (prefers-reduced-motion: reduce) {
+  .circles li {
+    animation: none !important;
+    opacity: 0.35;
+  }
+}
+
+
+
 /* Swipe-animationer */
 @keyframes swipeLeft {
   0% {
