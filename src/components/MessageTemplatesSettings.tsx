@@ -1163,7 +1163,7 @@ export function MessageTemplatesSettings() {
             onClick={() => setActiveStudioTab('automations')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
-            Regler
+            2 · Regel
           </button>
           <button
             ref={logsTabRef}
