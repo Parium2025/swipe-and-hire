@@ -1260,7 +1260,7 @@ export function MessageTemplatesSettings() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-semibold text-white md:text-base">Skapa mall</h4>
+                  <h4 className="text-sm font-semibold text-white md:text-base">Steg 1 · Skapa mall</h4>
                   <InfoHint text="Här bygger du grunden för automatiska eller manuella utskick. Börja med namn, välj kanaler och skriv sedan innehåll per kanal." />
                 </div>
                 <p className="text-xs text-white md:text-sm">Använd variabler för att göra utskicken personliga.</p>
