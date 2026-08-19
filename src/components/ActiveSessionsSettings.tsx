@@ -51,9 +51,9 @@ export function ActiveSessionsSettings() {
   const [loading, setLoading] = useState(true);
   const [kickingId, setKickingId] = useState<string | null>(null);
 
-  const fetchSessions = useCallback(async () => {
+  const fetchSessions = useCallback(async (silent = false) => {
     if (!user?.id) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const { data, error } = await supabase.rpc('get_active_sessions');
       if (error) {
@@ -71,7 +71,7 @@ export function ActiveSessionsSettings() {
     } catch (err) {
       console.warn('Error fetching sessions:', err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [user?.id]);
 
@@ -80,11 +80,11 @@ export function ActiveSessionsSettings() {
 
     // Auto-uppdatera var 30:e sekund samt när fliken/fönstret blir aktivt igen
     const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') fetchSessions();
+      if (document.visibilityState === 'visible') fetchSessions(true);
     }, 30000);
 
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') fetchSessions();
+      if (document.visibilityState === 'visible') fetchSessions(true);
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
