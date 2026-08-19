@@ -63,7 +63,7 @@ function VirtualJobGridImpl<T extends JobPosting>({
             className={`${gridClassName} ${isVisible ? '' : 'job-panel-hidden'}`}
             hidden={!isVisible}
             aria-hidden={!isVisible}
-            inert={!isVisible ? '' as unknown as boolean : undefined}
+            {...(!isVisible ? { inert: '' } : {})}
             // display:none + hidden + inert: browsern hoppar över paint/layout
             // OCH Safari får inte behålla en komposit-layer som "spöke".
             style={{
