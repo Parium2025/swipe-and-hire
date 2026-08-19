@@ -1267,15 +1267,14 @@ export function MessageTemplatesSettings() {
                       aria-pressed={checked}
                       onClick={() => {
                         toggleTemplateChannel(channel);
-                        if (!checked) setActiveTemplateChannel(channel);
                       }}
                       onKeyDown={(event) => {
                         if (event.key === 'Enter' || event.key === ' ') {
                           event.preventDefault();
                           toggleTemplateChannel(channel);
-                          if (!checked) setActiveTemplateChannel(channel);
                         }
                       }}
+
                       className={[
                         'flex h-[var(--control-height-compact)] items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-left text-xs text-white',
                         'transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none',
