@@ -148,6 +148,88 @@ function VariableChips({ channelLabel, onInsert }: { channelLabel: string; onIns
   );
 }
 
+const DELAY_PRESETS = [
+  { value: 0, label: 'Direkt' },
+  { value: 15, label: '15 min' },
+  { value: 30, label: '30 min' },
+  { value: 60, label: '1 tim' },
+  { value: 120, label: '2 tim' },
+  { value: 1440, label: '1 dygn' },
+];
+
+function DelayField({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+  const [text, setText] = useState(String(value));
+
+  useEffect(() => {
+    setText((prev) => (Number(prev) === value ? prev : String(value)));
+  }, [value]);
+
+  const commit = (next: number) => {
+    const clamped = Math.max(0, Math.min(20160, Math.round(next)));
+    setText(String(clamped));
+    onChange(clamped);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onPointerDown={(event) => event.preventDefault()}
+          onClick={() => commit((Number(text) || 0) - 5)}
+          aria-label="Minska med 5 minuter"
+          className="h-10 w-10 shrink-0 rounded-xl border border-white/10 bg-white/5 text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:hover:border-white/30"
+        >
+          −
+        </button>
+        <div className="relative flex-1">
+          <Input
+            type="text"
+            inputMode="numeric"
+            value={text}
+            placeholder="0"
+            onChange={(event) => {
+              const raw = event.target.value.replace(/[^\d]/g, '');
+              setText(raw);
+              onChange(raw === '' ? 0 : Math.min(20160, Number(raw)));
+            }}
+            onFocus={(event) => event.currentTarget.select()}
+            onBlur={() => commit(Number(text) || 0)}
+            className="bg-white/5 border-white/10 text-white text-center"
+          />
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/70">min</span>
+        </div>
+        <button
+          type="button"
+          onPointerDown={(event) => event.preventDefault()}
+          onClick={() => commit((Number(text) || 0) + 5)}
+          aria-label="Öka med 5 minuter"
+          className="h-10 w-10 shrink-0 rounded-xl border border-white/10 bg-white/5 text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:hover:border-white/30"
+        >
+          +
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {DELAY_PRESETS.map((preset) => (
+          <button
+            key={preset.value}
+            type="button"
+            onPointerDown={(event) => event.preventDefault()}
+            onClick={() => commit(preset.value)}
+            className={`rounded-full border px-3 py-1 text-[11px] text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none ${
+              (Number(text) || 0) === preset.value ? 'border-white/40 bg-white/15' : 'border-white/10 bg-white/5 md:hover:border-white/30'
+            }`}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
   name: '',
@@ -1535,7 +1617,7 @@ export function MessageTemplatesSettings() {
 
                 <div className="space-y-2">
                   <Label className="text-white">{getDelayFieldLabel(automationForm.trigger)}</Label>
-                  <Input type="number" min={0} value={automationForm.delay_minutes} onChange={(e) => setAutomationForm((prev) => ({ ...prev, delay_minutes: Number(e.target.value) || 0 }))} className="bg-white/5 border-white/10 text-white" />
+                  <DelayField value={automationForm.delay_minutes} onChange={(next) => setAutomationForm((prev) => ({ ...prev, delay_minutes: next }))} />
                   <p className="text-[11px] text-white">{getDelayFieldHint(automationForm.trigger)}</p>
                 </div>
 
