@@ -219,10 +219,10 @@ const getDelayFieldHint = (trigger: OutreachTrigger) => {
 };
 
 const AUTOMATION_VISIBILITY_OPTIONS: { value: AutomationVisibilityFilter; label: string }[] = [
-  { value: 'all', label: 'Alla regler' },
-  { value: 'active', label: 'Aktiva regler' },
-  { value: 'paused', label: 'Pausade regler' },
-  { value: 'unlinked', label: 'Saknar regel' },
+  { value: 'all', label: 'Visa alla mallar' },
+  { value: 'active', label: 'Skickas automatiskt' },
+  { value: 'paused', label: 'Pausade (skickas inte)' },
+  { value: 'unlinked', label: 'Saknar regel (skickas aldrig)' },
 ];
 
 const normalizeTimelineTrigger = (trigger: OutreachTrigger): OutreachTrigger =>
