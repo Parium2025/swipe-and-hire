@@ -138,7 +138,7 @@ export function ActiveSessionsSettings() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={fetchSessions}
+            onClick={() => fetchSessions()}
             disabled={loading}
             className="h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] shrink-0 aspect-square rounded-full p-0 text-white transition-colors hover:bg-transparent hover:text-white active:scale-100 active:bg-transparent md:hover:bg-transparent"
           >
