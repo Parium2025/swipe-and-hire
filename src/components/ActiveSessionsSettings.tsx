@@ -197,17 +197,16 @@ export function ActiveSessionsSettings() {
                   </p>
                 </div>
                 {!session.is_current && (
-                  <Button
-                    variant="glass"
-                    size="sm"
+                  <PillButton
                     onClick={() => handleKickSession(session.id)}
                     disabled={kickingId === session.id}
-                    className="h-8 rounded-full px-3 text-xs text-white shrink-0"
+                    className="h-8 px-3 text-xs disabled:opacity-60"
                   >
                     <LogOut className={`h-3.5 w-3.5 mr-1 ${kickingId === session.id ? 'animate-spin' : ''}`} />
                     Logga ut
-                  </Button>
+                  </PillButton>
                 )}
+
               </div>
             ))}
           </div>
