@@ -51,6 +51,9 @@ import {
   type OutreachTrigger,
 } from '@/lib/outreach';
 import { readCachedOutreachStudio, writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
+import { safeSetItem } from '@/lib/safeStorage';
+
+const TEMPLATE_DRAFT_PREFIX = 'outreach-template-draft:';
 
 type TemplateForm = {
   id: string | null;
@@ -156,8 +159,10 @@ const EMPTY_TEMPLATE_FORM: TemplateForm = {
   },
 };
 
+// Endast variabler som alltid har ett värde vid automatiska utskick.
+// {message} är borttagen — den fylls bara i vid manuella utskick och blev tom i automatiska.
 const TEMPLATE_EDITOR_VARIABLES = OUTREACH_VARIABLES.filter((variable) =>
-  ['candidate_name', 'first_name', 'company_name', 'job_title', 'message'].includes(variable.key),
+  ['candidate_name', 'first_name', 'company_name', 'job_title'].includes(variable.key),
 );
 
 const EMPTY_AUTOMATION_FORM: AutomationForm = {
@@ -219,10 +224,10 @@ const getDelayFieldHint = (trigger: OutreachTrigger) => {
 };
 
 const AUTOMATION_VISIBILITY_OPTIONS: { value: AutomationVisibilityFilter; label: string }[] = [
-  { value: 'all', label: 'Alla regler' },
-  { value: 'active', label: 'Aktiva regler' },
-  { value: 'paused', label: 'Pausade regler' },
-  { value: 'unlinked', label: 'Saknar regel' },
+  { value: 'all', label: 'Visa alla mallar' },
+  { value: 'active', label: 'Skickas automatiskt' },
+  { value: 'paused', label: 'Pausade (skickas inte)' },
+  { value: 'unlinked', label: 'Saknar regel (skickas aldrig)' },
 ];
 
 const normalizeTimelineTrigger = (trigger: OutreachTrigger): OutreachTrigger =>
@@ -329,7 +334,21 @@ export function MessageTemplatesSettings() {
   const automationsTabRef = useRef<HTMLButtonElement>(null);
   const logsTabRef = useRef<HTMLButtonElement>(null);
   const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 4, width: 0 });
-  const [templateForm, setTemplateForm] = useState<TemplateForm>(EMPTY_TEMPLATE_FORM);
+  const templateDraftKey = user ? `${TEMPLATE_DRAFT_PREFIX}${user.id}` : null;
+  const [templateForm, setTemplateForm] = useState<TemplateForm>(() => {
+    if (!user) return EMPTY_TEMPLATE_FORM;
+    try {
+      const raw = localStorage.getItem(`${TEMPLATE_DRAFT_PREFIX}${user.id}`);
+      if (!raw) return EMPTY_TEMPLATE_FORM;
+      const parsed = JSON.parse(raw) as TemplateForm;
+      if (!parsed || typeof parsed !== 'object' || !parsed.channelContent || !Array.isArray(parsed.channels)) {
+        return EMPTY_TEMPLATE_FORM;
+      }
+      return { ...EMPTY_TEMPLATE_FORM, ...parsed, channelContent: { ...EMPTY_TEMPLATE_FORM.channelContent, ...parsed.channelContent } };
+    } catch {
+      return EMPTY_TEMPLATE_FORM;
+    }
+  });
   const [activeTemplateChannel, setActiveTemplateChannel] = useState<AutomationChannel>('push');
   const [automationForm, setAutomationForm] = useState<AutomationForm>(EMPTY_AUTOMATION_FORM);
   const [selectedTemplateFamilyKey, setSelectedTemplateFamilyKey] = useState<string | null>(null);
@@ -338,6 +357,23 @@ export function MessageTemplatesSettings() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSeedConfirmDialog, setShowSeedConfirmDialog] = useState(false);
   const fetchRequestIdRef = useRef(0);
+
+  // Autospara utkast i mallredigeraren så inget försvinner vid omladdning.
+  useEffect(() => {
+    if (!templateDraftKey) return;
+    const hasContent =
+      templateForm.name.trim().length > 0 ||
+      CHANNEL_ORDER.some(
+        (channel) =>
+          templateForm.channelContent[channel]?.body.trim() || templateForm.channelContent[channel]?.subject.trim(),
+      );
+    if (!hasContent) {
+      try { localStorage.removeItem(templateDraftKey); } catch { /* ignore */ }
+      return;
+    }
+    safeSetItem(templateDraftKey, JSON.stringify(templateForm));
+  }, [templateForm, templateDraftKey]);
+
 
   const activeTemplatesByChannel = useMemo(() => ({
     chat: templates.filter((template) => template.channel === 'chat' && template.is_active),
@@ -1263,7 +1299,7 @@ export function MessageTemplatesSettings() {
                   <h4 className="text-sm font-semibold text-white md:text-base">Steg 1 · Skapa mall</h4>
                   <InfoHint text="Här bygger du grunden för automatiska eller manuella utskick. Börja med namn, välj kanaler och skriv sedan innehåll per kanal." />
                 </div>
-                <p className="text-xs text-white md:text-sm">Använd variabler för att göra utskicken personliga.</p>
+                <p className="text-xs text-white md:text-sm">Här skriver du bara texten — när den ska skickas väljer du i steg 2. Variablerna fylls i automatiskt per kandidat. Ditt utkast sparas automatiskt, även om du laddar om sidan.</p>
               </div>
             </div>
 
@@ -1376,17 +1412,20 @@ export function MessageTemplatesSettings() {
           <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
             <div className="mb-3 space-y-3">
               <div>
-                <h4 className="text-sm font-semibold text-white md:text-base">Steg 2 · Välj mall och när den ska skickas</h4>
-                <p className="text-xs text-white md:text-sm">Varje rad nedan är en av dina mallar. Statusen visar om mallen redan har en regel eller inte.</p>
+                <h4 className="text-sm font-semibold text-white md:text-base">Steg 2 · Bestäm när mallen ska skickas</h4>
+                <p className="text-xs text-white md:text-sm">En mall är bara text. Först när du ger den en regel här skickas den — automatiskt, utan att du gör något.</p>
               </div>
 
               <div className="rounded-2xl border border-white/[0.12] bg-white/5 p-3">
                 <p className="text-xs uppercase tracking-[0.16em] text-white">Så funkar det</p>
                 <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-white">
-                  <li>Skapa mallen under fliken <strong className="font-semibold">1 · Mall</strong> (texten som skickas).</li>
-                  <li>Välj mallen här och sätt när den ska skickas — spara regeln.</li>
-                  <li>Följ utskicken under fliken <strong className="font-semibold">3 · Logg</strong>.</li>
+                  <li><strong className="font-semibold">Mall</strong> = texten (steg 1). <strong className="font-semibold">Regel</strong> = när texten skickas (steg 2).</li>
+                  <li>Välj en mall nedan, välj händelse (t.ex. "Ansökan inkommen") och tid — spara.</li>
+                  <li>Kontrollera under <strong className="font-semibold">3 · Logg</strong> att utskicket gick fram.</li>
                 </ol>
+                <p className="mt-2 text-[11px] text-white">
+                  Statusen bakom varje mall: <strong className="font-semibold">Aktiv</strong> = skickas automatiskt. <strong className="font-semibold">Pausad</strong> = regel finns men är avstängd. <strong className="font-semibold">Ingen regel</strong> = mallen ligger bara sparad och skickas aldrig.
+                </p>
                 <p className="mt-2 text-[11px] text-white">
                   Mallar som heter t.ex. "Jobb avslutat · professionellt mejl" är Pariums färdiga startmallar från "Kom igång snabbt" — de fungerar precis som dina egna och går att ändra eller ta bort.
                 </p>
@@ -1394,7 +1433,10 @@ export function MessageTemplatesSettings() {
 
               <div className="space-y-2">
                 <div className="space-y-2">
-                  <Label className="text-white">Visa</Label>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-white">Filtrera listan</Label>
+                    <InfoHint text="Filtret ändrar bara vad du ser i listan nedan — det stänger inte av något." />
+                  </div>
                   <Select value={automationVisibilityFilter} onValueChange={(value: AutomationVisibilityFilter) => setAutomationVisibilityFilter(value)}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
                       <SelectValue />
@@ -1410,8 +1452,8 @@ export function MessageTemplatesSettings() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Label className="text-white">Välj mall</Label>
-                  <InfoHint text="Listan visar alla dina mallar. 'Ingen regel' betyder att mallen bara ligger sparad — 'Aktiv' betyder att den skickas automatiskt vid vald händelse." />
+                  <Label className="text-white">Vilken mall vill du sätta en regel på?</Label>
+                  <InfoHint text="Välj mallen du nyss skapade (den ligger överst med ditt namn på). Statusen efter namnet visar om den redan skickas." />
                 </div>
                 <Select
                   value={selectedTemplateFamilyKey ?? undefined}
