@@ -1483,8 +1483,8 @@ export function MessageTemplatesSettings() {
             ) : (
               <>
                 <div>
-                  <h4 className="text-sm font-semibold text-white md:text-base">Koppla mall till tidslinje</h4>
-                  <p className="text-xs text-white md:text-sm">Steg 1: välj mall. Steg 2: välj när den ska skickas.</p>
+                  <h4 className="text-sm font-semibold text-white md:text-base">Sätt regel på mallen</h4>
+                  <p className="text-xs text-white md:text-sm">Välj händelsen som ska trigga utskicket, sätt tiden och spara — då blir mallen aktiv.</p>
                 </div>
 
                 <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
