@@ -1097,7 +1097,7 @@ export function MessageTemplatesSettings() {
       </div>
 
       <Tabs value={activeStudioTab} onValueChange={(value) => setActiveStudioTab(value as StudioTab)} className="space-y-2.5">
-        <div className="relative mx-auto flex w-fit gap-0.5 rounded-md border border-white/10 bg-white/5 p-1 backdrop-blur-[2px]" role="tablist" aria-label="Outreach sektioner">
+        <div className="relative mx-auto flex w-fit gap-0.5 rounded-md border border-white/10 bg-white/5 p-1" role="tablist" aria-label="Outreach sektioner">
           <motion.div
             className="absolute bottom-1 top-1 rounded-[5px] bg-parium-navy"
             initial={false}
