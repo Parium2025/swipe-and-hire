@@ -50,24 +50,31 @@ export function getConversationDisplayName(opts: {
  * Build a profile object for ConversationAvatar, preferring snapshot data for candidates.
  *
  * Avatar priority:
- * 1. Snapshot identity is preserved for names.
- * 2. Snapshot photo is preserved when available.
- * 3. Nothing available → undefined
+ * 1. Snapshot identity (namn) är alltid fryst.
+ * 2. Snapshot-foto används när det finns.
+ * 3. Saknas snapshot-foto (ansökan skapades innan snapshots, eller offline-kö)
+ *    faller vi tillbaka på kandidatens live-profilbild — annars visas initialer
+ *    trots att bilden finns och är åtkomlig.
+ * 4. Inget alls → undefined
  */
 export function getConversationAvatarProfile(
   snapshot: ApplicationSnapshot | undefined,
   displayMember: ConversationMember | undefined,
 ): ProfileLike | undefined {
   if (snapshot) {
+    const liveProfile = displayMember?.profile;
+    const liveImage =
+      liveProfile && liveProfile.role !== 'employer' ? liveProfile.profile_image_url || null : null;
     return {
       role: 'job_seeker' as const,
       first_name: snapshot.first_name,
       last_name: snapshot.last_name,
       company_name: null,
-      profile_image_url: snapshot.profile_image_snapshot_url || null,
+      profile_image_url: snapshot.profile_image_snapshot_url || liveImage,
       company_logo_url: null,
     };
   }
+
 
   // No snapshot — use live profile
   if (displayMember?.profile) return displayMember.profile;
