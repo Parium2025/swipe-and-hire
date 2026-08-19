@@ -298,7 +298,7 @@ export function MessageTemplatesSettings() {
   const [savingAutomation, setSavingAutomation] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [runningDispatch, setRunningDispatch] = useState(false);
-  const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('templates');
+  const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('library');
   const templatesTabRef = useRef<HTMLButtonElement>(null);
   const libraryTabRef = useRef<HTMLButtonElement>(null);
   const automationsTabRef = useRef<HTMLButtonElement>(null);
@@ -1113,16 +1113,6 @@ export function MessageTemplatesSettings() {
             }}
           />
           <button
-            ref={templatesTabRef}
-            type="button"
-            role="tab"
-            aria-selected={activeStudioTab === 'templates'}
-            onClick={() => setActiveStudioTab('templates')}
-            className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
-          >
-            Mall
-          </button>
-          <button
             ref={libraryTabRef}
             type="button"
             role="tab"
@@ -1131,6 +1121,16 @@ export function MessageTemplatesSettings() {
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
             Mallbibliotek
+          </button>
+          <button
+            ref={templatesTabRef}
+            type="button"
+            role="tab"
+            aria-selected={activeStudioTab === 'templates'}
+            onClick={() => setActiveStudioTab('templates')}
+            className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
+          >
+            Mall
           </button>
           <button
             ref={automationsTabRef}
