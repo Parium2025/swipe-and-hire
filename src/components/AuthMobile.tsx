@@ -632,7 +632,7 @@ const AuthMobile = ({
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handlePasswordReset} className="space-y-3 md:space-y-4">
+            <form onSubmit={handlePasswordReset} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && (e.target as HTMLElement)?.tagName === 'INPUT' && !loading) { e.preventDefault(); handlePasswordReset(e); } }} className="space-y-3 md:space-y-4">
               <div>
                 <Label htmlFor="newPassword" className="text-white">Nytt lösenord</Label>
                 <Input
@@ -752,7 +752,7 @@ const AuthMobile = ({
                   <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
-                    <form key="login-form" onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+                    <form key="login-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && (e.target as HTMLElement)?.tagName === 'INPUT' && !loading) { e.preventDefault(); handleSubmit(e); } }} className="space-y-3 md:space-y-4">
                   <div className="relative overflow-anchor-none">
                         <Label htmlFor="login-email" className="text-white">
                           <Mail className="h-4 w-4 inline mr-2" />
