@@ -1314,7 +1314,7 @@ export function MessageTemplatesSettings() {
     }
 
     setSendingTest(true);
-    const { error } = await supabase.functions.invoke('outreach-dispatch', {
+    const { data, error } = await supabase.functions.invoke('outreach-dispatch', {
       body: { mode: 'manual', recipientUserId: user.id, sends },
     });
     setSendingTest(false);
@@ -1324,7 +1324,24 @@ export function MessageTemplatesSettings() {
       return;
     }
 
-    toast.success('Provutskick skickat till dig själv');
+    const channelLabels: Record<string, string> = { chat: 'Chatt', email: 'E-post', push: 'Push' };
+    const results = ((data as { results?: Array<{ channel: string; status: string; error?: string }> } | null)?.results) ?? [];
+    const sent = results.filter((r) => r.status === 'sent');
+    const failed = results.filter((r) => r.status === 'failed');
+
+    if (failed.length > 0) {
+      const detail = failed.map((r) => `${channelLabels[r.channel] ?? r.channel}: ${r.error ?? 'okänt fel'}`).join(' · ');
+      if (sent.length > 0) {
+        toast.warning(`Skickat via ${sent.map((r) => channelLabels[r.channel] ?? r.channel).join(', ')}`, { description: `Misslyckades — ${detail}` });
+      } else {
+        toast.error('Provutskicket misslyckades', { description: detail });
+      }
+    } else if (sent.length > 0) {
+      toast.success(`Provutskick skickat till dig själv (${sent.map((r) => channelLabels[r.channel] ?? r.channel).join(', ')})`);
+    } else {
+      toast.info('Inget skickades — mallen saknar innehåll');
+    }
+
     await fetchStudio({ silent: true });
   };
 

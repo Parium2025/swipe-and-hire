@@ -123,11 +123,19 @@ async function buildContext(log: OutreachLog) {
 
   const candidateName = [application?.first_name, application?.last_name].filter(Boolean).join(' ') || [recipientProfile?.first_name, recipientProfile?.last_name].filter(Boolean).join(' ') || 'Kandidat';
 
+  // Sista utvägen: hämta e-post från auth-kontot (t.ex. provutskick till sig själv,
+  // där ingen ansökan finns och profiles.email kan vara tom).
+  let authEmail: string | null = null;
+  if (!application?.email && !recipientProfile?.email && log.recipient_user_id) {
+    const { data: authUser } = await admin.auth.admin.getUserById(log.recipient_user_id);
+    authEmail = authUser?.user?.email ?? null;
+  }
+
   return {
     companyName: ownerProfile?.company_name || 'Parium',
     candidateName,
     firstName: application?.first_name || recipientProfile?.first_name || 'där',
-    recipientEmail: application?.email || recipientProfile?.email || null,
+    recipientEmail: application?.email || recipientProfile?.email || authEmail || null,
     applicationId: application?.id ?? null,
     jobTitle: job?.title || (log.payload?.job_title as string | undefined) || 'din process',
     scheduledDate: formatDate(interview?.scheduled_at),
@@ -212,6 +220,12 @@ async function dispatchLog(log: OutreachLog) {
 
     if (log.channel === 'push') {
       if (!log.recipient_user_id) throw new Error('Saknar mottagare för push');
+      const { count: tokenCount } = await admin
+        .from('device_push_tokens')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', log.recipient_user_id)
+        .eq('is_active', true);
+      if (!tokenCount) throw new Error('Inga registrerade enheter för push (push fungerar bara i mobilappen)');
       const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceRoleKey}` },
@@ -241,13 +255,25 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
 
   let processedCount = 0;
   let chatConversationId: string | null = null;
+  const results: Array<{ channel: OutreachChannel; status: 'sent' | 'failed' | 'skipped'; error?: string }> = [];
   for (const row of (data ?? []) as OutreachLog[]) {
     const result = await dispatchLog(row);
-    if (!('skipped' in result)) processedCount += 1;
+    if ('skipped' in result) {
+      results.push({ channel: row.channel, status: 'skipped' });
+    } else if ('error' in result && result.error) {
+      processedCount += 1;
+      results.push({ channel: row.channel, status: 'failed', error: result.error });
+    } else {
+      processedCount += 1;
+      results.push({ channel: row.channel, status: 'sent' });
+    }
     if ('conversationId' in result && result.conversationId) chatConversationId = result.conversationId;
   }
 
-  return { processedCount, chatConversationId };
+  const sentCount = results.filter((r) => r.status === 'sent').length;
+  const failedCount = results.filter((r) => r.status === 'failed').length;
+
+  return { processedCount, sentCount, failedCount, results, chatConversationId };
 }
 
 
