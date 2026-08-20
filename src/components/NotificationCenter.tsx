@@ -221,6 +221,13 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
     });
   }, [visibleNotifications, visibleArchived]);
 
+  const unreadCount = useMemo(
+    () => merged.filter((entry) => !(entry.n as { is_read?: boolean }).is_read).length,
+    [merged],
+  );
+
+
+
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
