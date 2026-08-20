@@ -146,7 +146,43 @@ async function buildContext(log: OutreachLog) {
   };
 }
 
+/**
+ * Mottagarens egna notisinställningar väger alltid tyngst.
+ * Arbetsgivarens regel avgör OM något ska skickas – kandidaten avgör HUR
+ * (mejl/push). Chatt räknas som produktens grundfunktion och levereras alltid
+ * i inkorgen, men den in-app-notis/push som chatten triggar följer kandidatens val.
+ */
+const PREF_TYPE_BY_TRIGGER: Record<OutreachTrigger, string> = {
+  application_received: 'application_status',
+  application_no_response_14d: 'application_status',
+  interview_before: 'interview_scheduled',
+  interview_after: 'interview_scheduled',
+  interview_scheduled: 'interview_scheduled',
+  job_closed: 'job_closed',
+  manual_send: 'new_message',
+};
+
+async function recipientAllowsChannel(
+  userId: string | null,
+  trigger: OutreachTrigger,
+  channel: 'email' | 'push',
+): Promise<boolean> {
+  if (!userId) return true;
+  const prefType = PREF_TYPE_BY_TRIGGER[trigger];
+  if (!prefType) return true;
+  const { data, error } = await admin
+    .from('notification_preferences')
+    .select('is_enabled, email_enabled')
+    .eq('user_id', userId)
+    .eq('notification_type', prefType)
+    .maybeSingle();
+  // Fel eller ingen rad = default på (samma default som i UI:t).
+  if (error || !data) return true;
+  return channel === 'email' ? data.email_enabled !== false : data.is_enabled !== false;
+}
+
 async function dispatchLog(log: OutreachLog) {
+
   const template = log.template_id ? ((await admin.from('outreach_templates').select('*').eq('id', log.template_id).maybeSingle()).data as OutreachTemplate | null) : null;
   const context = await buildContext(log);
   const data = {
