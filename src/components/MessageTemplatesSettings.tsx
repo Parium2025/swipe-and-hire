@@ -197,7 +197,7 @@ function DelayField({ value, onChange }: { value: number; onChange: (value: numb
             onBlur={() => commit(Number(text) || 0)}
             className="bg-white/5 border-white/10 text-white text-center"
           />
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/70">min</span>
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white">min</span>
         </div>
         <button
           type="button"
