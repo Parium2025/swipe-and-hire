@@ -140,10 +140,21 @@ export function useNotifications() {
         }
 
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notification_preferences',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => { void fetchNotifications(); }
+      )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user]);
+  }, [user, fetchNotifications]);
+
 
   const markAsRead = useCallback(async (notificationId: string) => {
     if (!user) return;
