@@ -1383,8 +1383,13 @@ export function MessageTemplatesSettings() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-white">Parium-standard</Label>
-                  <InfoHint text="Välj exakt den originalmall du vill återställa eller lägga tillbaka. Inga andra mallar eller regler påverkas." />
+                  <InfoHint text="Parium-standarden finns alltid kvar i koden. Välj en enskild mall för att lägga tillbaka eller återställa den, eller lägg tillbaka hela standardpaketet. Egna mallar påverkas aldrig." />
                 </div>
+                <p className="text-xs text-white">
+                  {missingDefaultTemplates.length === 0
+                    ? `Alla ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar finns i biblioteket.`
+                    : `${missingDefaultTemplates.length} av ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar saknas i biblioteket.`}
+                </p>
                 <Select value={selectedDefaultTemplateName} onValueChange={setSelectedDefaultTemplateName}>
                   <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
                     <SelectValue placeholder="Välj Parium-mall" />
@@ -1396,14 +1401,25 @@ export function MessageTemplatesSettings() {
                   </SelectContent>
                 </Select>
               </div>
-              <PillButton
-                className="px-4 disabled:opacity-50"
-                disabled={restoringDefault || !selectedDefaultTemplateName}
-                onClick={() => void handleRestoreDefaultTemplate()}
-              >
-                {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                {templates.some((template) => template.name === selectedDefaultTemplateName) ? 'Återställ vald' : 'Lägg tillbaka vald'}
-              </PillButton>
+              <div className="flex flex-wrap items-center gap-2">
+                <PillButton
+                  className="px-4 disabled:opacity-50"
+                  disabled={restoringDefault || !selectedDefaultTemplateName}
+                  onClick={() => void handleRestoreDefaultTemplate()}
+                >
+                  {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                  {templates.some((template) => template.name === selectedDefaultTemplateName) ? 'Återställ vald' : 'Lägg tillbaka vald'}
+                </PillButton>
+                <PillButton
+                  className="px-4 disabled:opacity-50"
+                  disabled={restoringDefault}
+                  onClick={() => void handleRestoreAllDefaultTemplates()}
+                >
+                  {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                  Lägg tillbaka alla ({DEFAULT_OUTREACH_TEMPLATES.length})
+                </PillButton>
+              </div>
+
             </div>
 
             {loading ? (
