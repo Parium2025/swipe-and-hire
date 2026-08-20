@@ -1626,7 +1626,13 @@ export function MessageTemplatesSettings() {
                       {getAutomationGroupState(selectedAutomationGroup).label}
                     </span>
                   </div>
+                  <p className="mt-2 text-xs text-white md:text-sm">
+                    {selectedAutomationGroup
+                      ? `Kopplad till ${getOutreachTriggerLabel(selectedAutomationGroup.primary.trigger)} · ${formatAutomationDelay(selectedAutomationGroup.primary.delay_minutes)}`
+                      : 'Inte kopplad till tidslinjen ännu — välj händelse och tid nedan.'}
+                  </p>
                 </div>
+
 
                 <div className="space-y-2">
                   <Label className="text-white">Namn på regeln</Label>
