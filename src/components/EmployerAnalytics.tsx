@@ -13,6 +13,7 @@ import {
   getEmployerAnalyticsCacheKey,
   persistEmployerAnalyticsFilter,
   readEmployerAnalyticsCache,
+  readEmployerAnalyticsCacheEntry,
   readPersistedEmployerAnalyticsFilter,
   writeEmployerAnalyticsCache,
 } from '@/components/analytics/employerAnalyticsCache';
@@ -627,9 +628,9 @@ const EmployerAnalytics = memo(() => {
   const showAvgTtfaCard = avgTtfa !== null;
   const isSingleSummaryCard = showAvgTtfaCard && !showBestDayCard;
 
-  const [show, setShow] = useState(() => Boolean(cachedRawData));
+  const [show, setShow] = useState(() => Boolean(cachedOverviewEntry?.value));
   useEffect(() => {
-    if (cachedRawData) {
+    if (cachedOverviewEntry?.value) {
       setShow(true);
       return;
     }
@@ -641,7 +642,7 @@ const EmployerAnalytics = memo(() => {
 
     const t = setTimeout(() => setShow(true), 80);
     return () => clearTimeout(t);
-  }, [overviewCacheKey, cachedRawData, isLoading]);
+  }, [overviewCacheKey, cachedOverviewEntry?.value, isLoading]);
 
   if (isLoading && !show) {
     return (
