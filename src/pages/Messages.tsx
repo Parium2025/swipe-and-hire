@@ -257,13 +257,13 @@ export default function Messages() {
               <ScrollArea className="h-full">
                 <div className="p-2 space-y-1">
                   {filteredConversations.map((conv) => {
-                    const otherMembers = (conv.members || []).filter(m => m.user_id !== user?.id);
-                    const displayMember = otherMembers[0];
+                    const { displayMember, isSelf } = resolveDisplayMember(conv.members, user?.id);
                     const displayName = getConversationDisplayName({
                       isGroup: conv.is_group,
                       groupName: conv.name,
                       snapshot: conv.applicationSnapshot,
                       displayMember,
+                      isSelf,
                     });
 
                     return (

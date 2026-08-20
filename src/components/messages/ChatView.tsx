@@ -88,7 +88,7 @@ export function ChatView({
   }, []);
 
   const otherMembers = (conversation.members || []).filter(m => m.user_id !== currentUserId);
-  const displayMember = otherMembers[0];
+  const { displayMember, isSelf: isSelfConversation } = resolveDisplayMember(conversation.members, currentUserId);
 
   const snapshot = conversation.applicationSnapshot;
 
