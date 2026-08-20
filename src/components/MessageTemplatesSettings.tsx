@@ -1002,10 +1002,22 @@ export function MessageTemplatesSettings() {
     setSavingAutomation(false);
   };
 
-  const handleDeleteTemplates = async (ids: string[], successMessage = 'Mall borttagen', errorMessage = 'Kunde inte ta bort mallen') => {
+  const handleDeleteTemplates = async (requestedIds: string[], successMessage = 'Mall borttagen', errorMessage = 'Kunde inte ta bort mallen') => {
+    // Parium-standardmallar är skyddade och kan aldrig raderas.
+    const ids = requestedIds.filter((id) => {
+      const template = templates.find((item) => item.id === id);
+      return template ? !isStandardTemplate(template) : false;
+    });
+
+    if (ids.length === 0) {
+      toast.info('Parium-standardmallar kan inte tas bort');
+      return;
+    }
+
     const linkedAutomationIds = automations
       .filter((automation) => ids.includes(automation.template_id))
       .map((automation) => automation.id);
+
 
     if (linkedAutomationIds.length > 0) {
       const { error: automationError } = await supabase
