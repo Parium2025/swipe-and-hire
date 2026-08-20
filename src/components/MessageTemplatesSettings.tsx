@@ -1576,9 +1576,8 @@ export function MessageTemplatesSettings() {
                         <p className="mt-1 text-[11px] text-white md:text-xs">Låsta originalmallar. De läggs till automatiskt när du slår på en kanal under Automatiska utskick – de är alltså inga nya egna mallar.</p>
                       </div>
                     )}
+                    <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
 
-                  return (
-                    <div key={template.id} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
                     <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                       <div className="min-w-0 space-y-1.5">
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
