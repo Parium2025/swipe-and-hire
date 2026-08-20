@@ -255,13 +255,25 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
 
   let processedCount = 0;
   let chatConversationId: string | null = null;
+  const results: Array<{ channel: OutreachChannel; status: 'sent' | 'failed' | 'skipped'; error?: string }> = [];
   for (const row of (data ?? []) as OutreachLog[]) {
     const result = await dispatchLog(row);
-    if (!('skipped' in result)) processedCount += 1;
+    if ('skipped' in result) {
+      results.push({ channel: row.channel, status: 'skipped' });
+    } else if ('error' in result && result.error) {
+      processedCount += 1;
+      results.push({ channel: row.channel, status: 'failed', error: result.error });
+    } else {
+      processedCount += 1;
+      results.push({ channel: row.channel, status: 'sent' });
+    }
     if ('conversationId' in result && result.conversationId) chatConversationId = result.conversationId;
   }
 
-  return { processedCount, chatConversationId };
+  const sentCount = results.filter((r) => r.status === 'sent').length;
+  const failedCount = results.filter((r) => r.status === 'failed').length;
+
+  return { processedCount, sentCount, failedCount, results, chatConversationId };
 }
 
 
