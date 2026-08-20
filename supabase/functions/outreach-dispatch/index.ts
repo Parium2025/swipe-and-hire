@@ -310,7 +310,7 @@ async function dispatchLog(log: OutreachLog) {
 }
 
 async function processPending(filters: { ownerUserId?: string; trigger?: OutreachTrigger; interviewId?: string | null } = {}) {
-  let query = admin.from('outreach_dispatch_logs').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(30);
+  let query = admin.from('outreach_dispatch_logs').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(200);
   if (filters.ownerUserId) query = query.eq('owner_user_id', filters.ownerUserId);
   if (filters.trigger) query = query.eq('trigger', filters.trigger);
   if (filters.interviewId) query = query.eq('interview_id', filters.interviewId);
@@ -318,10 +318,19 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
   const { data, error } = await query;
   if (error) throw error;
 
+  // Respektera arbetsgivarens valda fördröjning (delay_minutes). Rader som inte
+  // är mogna ännu lämnas kvar som pending och plockas av nästa svep.
+  const now = Date.now();
+  const due = ((data ?? []) as OutreachLog[]).filter((row) => {
+    const delayMinutes = Number(getPayloadObject(row.payload).delay_minutes ?? 0);
+    if (!Number.isFinite(delayMinutes) || delayMinutes <= 0) return true;
+    return new Date(row.created_at).getTime() + delayMinutes * 60_000 <= now;
+  }).slice(0, 30);
+
   let processedCount = 0;
   let chatConversationId: string | null = null;
   const results: Array<{ channel: OutreachChannel; status: 'sent' | 'failed' | 'skipped'; error?: string }> = [];
-  for (const row of (data ?? []) as OutreachLog[]) {
+  for (const row of due) {
     const result = await dispatchLog(row);
     if ('skipped' in result) {
       results.push({ channel: row.channel, status: 'skipped' });
