@@ -1645,7 +1645,9 @@ export function MessageTemplatesSettings() {
                       </div>
                     </div>
                   </div>
+                  </div>
                   );
+
                 })}
               </div>
             )}
