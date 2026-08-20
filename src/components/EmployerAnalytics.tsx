@@ -491,24 +491,24 @@ const EmployerAnalytics = memo(() => {
     () => getEmployerAnalyticsCacheKey('advanced', user?.id, selectedDays),
     [user?.id, selectedDays],
   );
-  const cachedRawData = useMemo(
-    () => readEmployerAnalyticsCache<AnalyticsData>(overviewCacheKey),
+  const cachedOverviewEntry = useMemo(
+    () => readEmployerAnalyticsCacheEntry<AnalyticsData>(overviewCacheKey),
     [overviewCacheKey],
   );
-  const cachedAdvancedData = useMemo(
-    () => readEmployerAnalyticsCache<AdvancedAnalyticsData>(advancedCacheKey),
+  const cachedAdvancedEntry = useMemo(
+    () => readEmployerAnalyticsCacheEntry<AdvancedAnalyticsData>(advancedCacheKey),
     [advancedCacheKey],
   );
 
-  const { data: rawData, isLoading, isFetching } = useQuery({
+  const { data: rawData, isLoading, isFetching, dataUpdatedAt } = useQuery({
     queryKey: ['employer-analytics-v2', user?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
       return fetchEmployerAnalyticsOverview(user.id, selectedDays);
     },
     enabled: !!user,
-    initialData: () => cachedRawData,
-    initialDataUpdatedAt: () => 0,
+    initialData: () => cachedOverviewEntry?.value,
+    initialDataUpdatedAt: () => cachedOverviewEntry?.timestamp ?? 0,
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
@@ -520,11 +520,12 @@ const EmployerAnalytics = memo(() => {
       return fetchEmployerAnalyticsAdvanced(user.id, selectedDays);
     },
     enabled: !!user,
-    initialData: () => cachedAdvancedData,
-    initialDataUpdatedAt: () => 0,
+    initialData: () => cachedAdvancedEntry?.value,
+    initialDataUpdatedAt: () => cachedAdvancedEntry?.timestamp ?? 0,
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
+
 
   useEffect(() => {
     persistEmployerAnalyticsFilter(selectedDays);
