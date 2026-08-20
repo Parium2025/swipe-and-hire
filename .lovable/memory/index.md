@@ -28,6 +28,8 @@
 - [Mobile Ergonomics](mem://constraints/mobile-premium-ergonomics) — Touch targets, haptics, iOS-optimeringar.
 - [Destructive Actions](mem://style/destructive-action-standard) — Röda visuella element och AlertDialog-skydd.
 - [Job Status Lifecycle](mem://logic/employer-job-categorization) — Regler för Draft, Active, Expired.
+- [Arbetsgivaren äger utskicken](mem://logic/outreach-employer-control) — Allt på som standard, av betyder av, undantag för utgången annons.
+
 - [Offline Resilience](mem://infrastructure/connectivity-recovery-logic) — Reaktiv nätverkshantering.
 - [RBAC Security](mem://architecture/security-rbac-system) — Databasdriven behörighet.
 - [File Refactoring Policy](mem://constraints/no-refactoring-policy) — Komplexa filer som inte får delas upp.

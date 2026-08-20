@@ -2260,6 +2260,21 @@ export type Database = {
           },
         ]
       }
+      outreach_defaults_seeded: {
+        Row: {
+          seeded_at: string
+          user_id: string
+        }
+        Insert: {
+          seeded_at?: string
+          user_id: string
+        }
+        Update: {
+          seeded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       outreach_dispatch_logs: {
         Row: {
           automation_id: string | null

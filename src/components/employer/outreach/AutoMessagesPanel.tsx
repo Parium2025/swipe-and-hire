@@ -9,6 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import SettingsPanel from '@/components/employer/settings/SettingsPanel';
 import { AUTO_RULE_CHANNELS, AUTO_RULE_EVENTS, type AutoRuleChannel, type AutoRuleEvent } from '@/lib/outreachAutoRules';
+import { seedDefaultAutoRules } from '@/lib/outreachSeedDefaults';
+
 import type { OutreachAutomation, OutreachTemplate } from '@/lib/outreachTypes';
 
 const CHANNEL_ICON: Record<AutoRuleChannel, typeof Mail> = {
@@ -91,8 +93,23 @@ export function AutoMessagesPanel() {
   }, [user]);
 
   useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
+    if (!user) return;
+    let cancelled = false;
+    void (async () => {
+      // Standard: allt påslaget för nya arbetsgivare. Har de redan egna
+      // inställningar rör vi dem aldrig – av är av.
+      const seeded = await seedDefaultAutoRules(user.id, organizationId);
+      if (cancelled) return;
+      await fetchData();
+      if (seeded && !cancelled) {
+        toast.success('Automatiska utskick är påslagna som standard – du kan stänga av precis vad du vill.');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, organizationId, fetchData]);
+
 
   useEffect(() => {
     if (!user) return;
