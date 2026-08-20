@@ -187,7 +187,7 @@ export function SwipeableConversationItem({
               <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">
                 &quot;{conversationName}&quot;
               </span>
-              ? Du försvinner från chatten.
+              ? Konversationen försvinner från din inkorg. När båda parter har tagit bort den raderas allt innehåll permanent.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
