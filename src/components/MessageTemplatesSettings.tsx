@@ -1976,7 +1976,7 @@ export function MessageTemplatesSettings() {
                 <div className="flex flex-wrap items-center gap-2">
                   {selectedLogIds.length > 0 && (
                     <PillButton
-                      className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
+                      className="h-8 border-white/20 bg-white/10 px-3 hover:bg-white/20 hover:border-white/40"
                       onClick={() => openLogDeleteDialog(selectedLogIds, selectedLogIds.length === logs.length)}
                     >
                       <Trash2 className="h-3 w-3" />
@@ -1984,7 +1984,7 @@ export function MessageTemplatesSettings() {
                     </PillButton>
                   )}
                   <PillButton
-                    className="h-8 px-3"
+                    className="h-8 border-destructive/60 bg-destructive/30 px-3 text-white hover:bg-destructive/45 hover:border-destructive/80"
                     onClick={() => openLogDeleteDialog(logs.map((log) => log.id), true)}
                   >
                     <Trash2 className="h-3 w-3" />
@@ -1992,6 +1992,11 @@ export function MessageTemplatesSettings() {
                   </PillButton>
                 </div>
               </div>
+
+              <p className="px-1 text-[11px] text-white">
+                Loggen städas automatiskt: poster äldre än 90 dagar tas bort varje natt.
+              </p>
+
 
               <div className="space-y-2">
               {logs.map((log) => {
