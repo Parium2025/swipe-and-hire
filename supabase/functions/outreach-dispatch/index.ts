@@ -201,7 +201,15 @@ async function dispatchLog(log: OutreachLog) {
   const subject = renderTemplate(template?.subject ?? String(log.payload?.custom_subject ?? ''), data);
   const body = renderTemplate(template?.body ?? String(log.payload?.custom_body ?? ''), data);
 
-  if (!body.trim()) return { skipped: true };
+  if (!body.trim()) {
+    // Utan innehåll finns inget att skicka — markera raden som hoppad så att den
+    // inte ligger kvar som "pending" och blockerar kön i all framtid.
+    await admin.from('outreach_dispatch_logs').update({
+      status: 'skipped',
+      error_message: 'Mallen saknar innehåll',
+    }).eq('id', log.id);
+    return { skipped: true };
+  }
 
   try {
     if (log.channel === 'chat') {
