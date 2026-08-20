@@ -567,6 +567,8 @@ export function MessageTemplatesSettings() {
     const grouped = new Map<string, TemplateFamily>();
 
     templates.forEach((template) => {
+      // Parium-standardmallar ska aldrig gå att välja som regel-mall i Steg 2.
+      if (STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`)) return;
       const baseName = getTemplateFamilyName(template.name);
       const existing = grouped.get(baseName);
 
