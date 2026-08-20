@@ -82,7 +82,7 @@ type AutomationForm = {
   group_id: string | null;
   automation_ids: string[];
   name: string;
-  trigger: OutreachTrigger;
+  trigger: OutreachTrigger | '';
   channels: AutomationChannel[];
   recipient_type: 'candidate' | 'employer';
   template_ids: Partial<Record<AutomationChannel, string>>;
@@ -266,7 +266,7 @@ const EMPTY_AUTOMATION_FORM: AutomationForm = {
   group_id: null,
   automation_ids: [],
   name: '',
-  trigger: 'application_received',
+  trigger: '',
   channels: [],
   recipient_type: 'candidate',
   template_ids: {},
@@ -295,7 +295,7 @@ const getTemplateFamilyName = (name: string) => {
   return suffix ? name.slice(0, -suffix.length) : name;
 };
 
-const getDelayFieldLabel = (trigger: OutreachTrigger) => {
+const getDelayFieldLabel = (trigger: OutreachTrigger | '') => {
   switch (trigger) {
     case 'interview_before':
       return 'Minuter före intervjun';
@@ -306,7 +306,7 @@ const getDelayFieldLabel = (trigger: OutreachTrigger) => {
   }
 };
 
-const getDelayFieldHint = (trigger: OutreachTrigger) => {
+const getDelayFieldHint = (trigger: OutreachTrigger | '') => {
   switch (trigger) {
     case 'interview_before':
       return 'Exempel: 60 = skicka 1 timme innan intervjun.';
@@ -630,10 +630,11 @@ export function MessageTemplatesSettings() {
     group_id: group?.groupId ?? null,
     automation_ids: group?.automations.map((automation) => automation.id) ?? [],
     name: group?.primary.name ?? family.baseName,
+    // Tomt fält när mallen saknar sparad regel — användaren ska aktivt välja händelse.
     trigger:
       group?.primary.trigger && group.primary.trigger !== 'manual_send'
         ? normalizeTimelineTrigger(group.primary.trigger)
-        : 'application_received',
+        : '',
     channels: family.channels,
     recipient_type: 'candidate',
     template_ids: family.channels.reduce<Partial<Record<AutomationChannel, string>>>((acc, channel) => {
@@ -958,6 +959,12 @@ export function MessageTemplatesSettings() {
       return;
     }
 
+    const selectedTrigger = automationForm.trigger;
+    if (!selectedTrigger) {
+      toast.error('Välj när regeln ska skickas');
+      return;
+    }
+
     setSavingAutomation(true);
 
     const groupId = automationForm.group_id ?? crypto.randomUUID();
@@ -965,7 +972,7 @@ export function MessageTemplatesSettings() {
       owner_user_id: user.id,
       organization_id: organizationId,
       name: automationForm.name.trim(),
-      trigger: automationForm.trigger,
+      trigger: selectedTrigger,
       recipient_type: automationForm.recipient_type,
       delay_minutes: automationForm.delay_minutes,
       filters: { group_id: groupId },
@@ -1851,11 +1858,17 @@ export function MessageTemplatesSettings() {
                   <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
                     {filteredTemplateFamilies.map((family) => {
                       const linkedGroup = getLinkedAutomationGroup(family, automationGroups);
-                      const isSelectedUnsavedDraft = family.key === selectedTemplateFamilyKey && automationFormTouched;
+                      const isSelected = family.key === selectedTemplateFamilyKey;
                       const ruleState = getAutomationGroupState(linkedGroup);
+                      // Vald mall speglar formuläret direkt: "Test 1 · Ansökan inkommen".
+                      const liveLabel = isSelected && automationForm.trigger
+                        ? `${getOutreachTriggerLabel(automationForm.trigger)}${automationFormTouched ? ' (ej sparad)' : ''}`
+                        : isSelected && automationFormTouched
+                          ? 'Ej sparad'
+                          : ruleState.label;
                       return (
                         <SelectItem key={family.key} value={family.key}>
-                          {`${family.baseName} · ${isSelectedUnsavedDraft ? 'Ej sparad' : ruleState.label}`}
+                          {`${family.baseName} · ${liveLabel}`}
                         </SelectItem>
                       );
                     })}
@@ -1891,12 +1904,16 @@ export function MessageTemplatesSettings() {
                     {selectedTemplateFamily.channels.map((channel) => (
                       <span key={channel} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(channel)}</span>
                     ))}
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${automationFormTouched ? 'border-amber-400/30 bg-amber-400/15 text-white' : getAutomationGroupState(selectedAutomationGroup).badgeClassName}`}>
-                      {automationFormTouched ? 'Ej sparad' : getAutomationGroupState(selectedAutomationGroup).label}
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${automationForm.trigger ? (automationFormTouched ? 'border-amber-400/30 bg-amber-400/15 text-white' : getAutomationGroupState(selectedAutomationGroup).badgeClassName) : 'border-white/10 bg-white/5 text-white'}`}>
+                      {automationForm.trigger
+                        ? `${getOutreachTriggerLabel(automationForm.trigger)}${automationFormTouched ? ' · ej sparad' : ''}`
+                        : 'Ingen regel vald'}
                     </span>
                   </div>
                   <p className="mt-2 text-xs text-white md:text-sm">
-                    {`Skickas vid ${getOutreachTriggerLabel(automationForm.trigger)} · ${formatAutomationDelay(automationForm.delay_minutes)}`}
+                    {automationForm.trigger
+                      ? `Skickas vid ${getOutreachTriggerLabel(automationForm.trigger)} · ${formatAutomationDelay(automationForm.delay_minutes)}`
+                      : 'Välj händelse nedan för att sätta regeln.'}
                   </p>
                   {selectedAutomationGroup &&
                     (selectedAutomationGroup.primary.trigger !== automationForm.trigger ||
@@ -1919,8 +1936,8 @@ export function MessageTemplatesSettings() {
 
                 <div className="space-y-2">
                   <Label className="text-white">När ska den skickas?</Label>
-                  <Select value={automationForm.trigger} onValueChange={(value: AutomationForm['trigger']) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, trigger: value })); }}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue /></SelectTrigger>
+                  <Select value={automationForm.trigger || undefined} onValueChange={(value: AutomationForm['trigger']) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, trigger: value })); }}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue placeholder="Välj händelse" /></SelectTrigger>
                     <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
                       {OUTREACH_TRIGGER_OPTIONS.filter((option) => !['manual_send', 'interview_scheduled', 'application_no_response_14d'].includes(option.value)).map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                     </SelectContent>
@@ -1954,7 +1971,7 @@ export function MessageTemplatesSettings() {
                   <PillButton
                     className="px-4 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50"
                     onClick={handleSaveAutomation}
-                    disabled={savingAutomation || !automationFormHasAllTemplates}
+                    disabled={savingAutomation || !automationFormHasAllTemplates || !automationForm.trigger}
                   >
                     {savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                     {automationForm.id ? 'Uppdatera regel' : 'Spara regel'}
