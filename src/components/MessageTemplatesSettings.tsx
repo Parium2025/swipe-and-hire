@@ -958,6 +958,12 @@ export function MessageTemplatesSettings() {
       return;
     }
 
+    const selectedTrigger = automationForm.trigger;
+    if (!selectedTrigger) {
+      toast.error('Välj när regeln ska skickas');
+      return;
+    }
+
     setSavingAutomation(true);
 
     const groupId = automationForm.group_id ?? crypto.randomUUID();
