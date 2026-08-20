@@ -15,7 +15,7 @@ import { EmptyConversationList, EmptyChatState } from '@/components/messages/Emp
 import { MessagesTabs } from '@/components/MessagesTabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDeleteConversation } from '@/hooks/useDeleteConversation';
-import { getConversationDisplayName } from '@/lib/conversationDisplayUtils';
+import { getConversationDisplayName, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
   Plus,
@@ -257,13 +257,13 @@ export default function Messages() {
               <ScrollArea className="h-full">
                 <div className="p-2 space-y-1">
                   {filteredConversations.map((conv) => {
-                    const otherMembers = (conv.members || []).filter(m => m.user_id !== user?.id);
-                    const displayMember = otherMembers[0];
+                    const { displayMember, isSelf } = resolveDisplayMember(conv.members, user?.id);
                     const displayName = getConversationDisplayName({
                       isGroup: conv.is_group,
                       groupName: conv.name,
                       snapshot: conv.applicationSnapshot,
                       displayMember,
+                      isSelf,
                     });
 
                     return (

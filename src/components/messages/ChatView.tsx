@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { MessageBubble } from '@/components/messages/MessageBubble';
-import { getConversationDisplayName, getConversationAvatarProfile } from '@/lib/conversationDisplayUtils';
+import { getConversationDisplayName, getConversationAvatarProfile, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -88,7 +88,7 @@ export function ChatView({
   }, []);
 
   const otherMembers = (conversation.members || []).filter(m => m.user_id !== currentUserId);
-  const displayMember = otherMembers[0];
+  const { displayMember, isSelf: isSelfConversation } = resolveDisplayMember(conversation.members, currentUserId);
 
   const snapshot = conversation.applicationSnapshot;
 
@@ -522,6 +522,7 @@ export function ChatView({
     groupName: conversation.name,
     snapshot,
     displayMember,
+    isSelf: isSelfConversation,
   });
 
   // Group messages by date

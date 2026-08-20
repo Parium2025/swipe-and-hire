@@ -98,8 +98,11 @@ function hasUnknownIdentityForConversation(conv: Conversation, userId: string): 
 
   const hasSnapshotName = hasText(conv.applicationSnapshot?.first_name) || hasText(conv.applicationSnapshot?.last_name);
 
-  const otherMember = (conv.members || []).find((m) => m.user_id !== userId);
-  if (!otherMember) return true;
+  // Självkonversation (provutskick till dig själv) har ingen motpart — det är
+  // ett giltigt tillstånd, inte en trasig identitet.
+  const members = conv.members || [];
+  const otherMember = members.find((m) => m.user_id !== userId);
+  if (!otherMember) return members.some((m) => m.user_id === userId) ? false : true;
 
   const profile = otherMember.profile;
   const hasProfileName =
