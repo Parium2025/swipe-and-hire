@@ -65,20 +65,41 @@ export const SeoTruncatedText = ({
     };
   }, [fullText, measure]);
 
+  // Touch: första trycket visar hela texten, andra trycket följer länken.
+  // Utan detta åt en omslutande <Link> upp trycket och tooltipen hann aldrig visas.
+  const handleTouchClick = (event: React.MouseEvent<HTMLSpanElement>) => {
+    if (ENV.supportsHover || !ENV.isTouch || !isTruncated) return;
+    if (tappedOnceRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    tappedOnceRef.current = true;
+    setOpen(true);
+    if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
+    resetTimerRef.current = window.setTimeout(() => {
+      tappedOnceRef.current = false;
+      setOpen(false);
+    }, 2600);
+  };
+
   const text = (
     <span
       ref={ref}
       className={cn('block min-w-0 truncate text-white', className)}
       onFocus={measure}
       onMouseEnter={measure}
-      onPointerDown={() => {
-        if (!ENV.supportsHover && ENV.isTouch && isTruncated) setOpen((value) => !value);
+      onPointerDown={(event) => {
+        if (!ENV.supportsHover && ENV.isTouch && isTruncated && !tappedOnceRef.current) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
       }}
+      onClick={handleTouchClick}
       data-truncate-text
     >
       {children}
     </span>
   );
+
 
   if (!isTruncated) return text;
 
