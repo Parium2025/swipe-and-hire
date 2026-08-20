@@ -181,9 +181,9 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
     [archived]
   );
 
-  const archivedUnread = useMemo(() => visibleArchived.filter(n => !n.is_read).length, [visibleArchived]);
-  const visibleServerUnread = useMemo(() => visibleNotifications.filter(n => !n.is_read).length, [visibleNotifications]);
-  const unreadCount = visibleServerUnread + archivedUnread;
+  // Räknaren måste spegla exakt det som visas i listan (efter dedupe),
+  // annars kan badgen visa 2 medan listan bara har en rad.
+
 
   const merged = useMemo(() => {
     const a = visibleNotifications.map(n => {
@@ -220,6 +220,13 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
       return true;
     });
   }, [visibleNotifications, visibleArchived]);
+
+  const unreadCount = useMemo(
+    () => merged.filter((entry) => !(entry.n as { is_read?: boolean }).is_read).length,
+    [merged],
+  );
+
+
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
