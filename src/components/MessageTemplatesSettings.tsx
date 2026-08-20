@@ -24,7 +24,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
-  AlertTriangle,
   Bot,
   CheckCircle2,
   Info,
