@@ -77,6 +77,7 @@ export function AutoMessagesPanel() {
   const [templates, setTemplates] = useState<OutreachTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [pendingDelays, setPendingDelays] = useState<Record<string, number>>({});
 
   const fetchData = useCallback(async () => {
     if (!user) return;
