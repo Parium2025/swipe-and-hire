@@ -1906,10 +1906,19 @@ export function MessageTemplatesSettings() {
                     </span>
                   </div>
                   <p className="mt-2 text-xs text-white md:text-sm">
-                    {selectedAutomationGroup
-                      ? `Kopplad till ${getOutreachTriggerLabel(selectedAutomationGroup.primary.trigger)} · ${formatAutomationDelay(selectedAutomationGroup.primary.delay_minutes)}`
-                      : 'Inte kopplad till tidslinjen ännu — välj händelse och tid nedan.'}
+                    {`Skickas vid ${getOutreachTriggerLabel(automationForm.trigger)} · ${formatAutomationDelay(automationForm.delay_minutes)}`}
                   </p>
+                  {selectedAutomationGroup &&
+                    (selectedAutomationGroup.primary.trigger !== automationForm.trigger ||
+                      selectedAutomationGroup.primary.delay_minutes !== automationForm.delay_minutes) && (
+                      <p className="mt-1 text-[11px] text-white [overflow-wrap:anywhere]">
+                        {`Sparad regel just nu: ${getOutreachTriggerLabel(selectedAutomationGroup.primary.trigger)} · ${formatAutomationDelay(selectedAutomationGroup.primary.delay_minutes)} — spara för att uppdatera.`}
+                      </p>
+                    )}
+                  {!selectedAutomationGroup && (
+                    <p className="mt-1 text-[11px] text-white">Inte kopplad till tidslinjen ännu — spara regeln för att aktivera.</p>
+                  )}
+
                 </div>
 
 
