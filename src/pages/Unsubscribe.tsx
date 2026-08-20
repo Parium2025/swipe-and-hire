@@ -44,7 +44,7 @@ const Unsubscribe = () => {
 
         <div className="mb-3 flex items-center gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-secondary/30 bg-secondary/10">
-            <Bell className="h-4.5 w-4.5 text-secondary" />
+            <Bell className="h-[18px] w-[18px] text-secondary" />
           </span>
           <h1 className="text-2xl font-semibold text-white">Hantera dina utskick</h1>
         </div>
