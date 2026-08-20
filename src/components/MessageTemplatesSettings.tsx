@@ -97,7 +97,7 @@ type StudioTab = 'templates' | 'library' | 'automations' | 'logs';
 type AutomationVisibilityFilter = 'all' | 'active' | 'paused' | 'unlinked';
 
 type PendingDeleteAction = {
-  kind: 'template' | 'automation';
+  kind: 'template' | 'automation' | 'log';
   ids: string[];
   title: string;
   description: string;
@@ -459,6 +459,7 @@ export function MessageTemplatesSettings() {
   const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
+  const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
   const [selectedDefaultTemplateName, setSelectedDefaultTemplateName] = useState(DEFAULT_OUTREACH_TEMPLATES[0]?.name ?? '');
   const [restoringDefault, setRestoringDefault] = useState(false);
   const fetchRequestIdRef = useRef(0);
@@ -1239,6 +1240,8 @@ export function MessageTemplatesSettings() {
     try {
       if (action.kind === 'template') {
         await handleDeleteTemplates(action.ids, action.successMessage, action.errorMessage);
+      } else if (action.kind === 'log') {
+        await handleDeleteLogs(action.ids, action.successMessage, action.errorMessage);
       } else {
         await handleDeleteAutomation(action.ids, action.successMessage, action.errorMessage);
       }
