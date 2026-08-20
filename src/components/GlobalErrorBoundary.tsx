@@ -123,16 +123,19 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
         : null;
       
       return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-background">
-          <div className="max-w-md w-full rounded-lg border bg-card/80 backdrop-blur p-6 text-center">
-            <h2 className="text-lg font-semibold mb-2">Något gick fel</h2>
-            <p className="text-sm text-muted-foreground mb-4">
+        <div className="min-h-screen flex items-center justify-center p-6 bg-parium-gradient">
+          <div className="max-w-md w-full rounded-lg border border-white/15 bg-white/[0.07] backdrop-blur-md shadow-2xl p-6 sm:p-8 text-center">
+            <div className="mb-4 flex items-center justify-center gap-2">
+              <span className="text-base font-semibold text-white">Parium</span>
+            </div>
+            <h2 className="text-lg font-semibold mb-2 text-white">Något gick fel</h2>
+            <p className="text-sm text-white mb-5">
               {message}
             </p>
             {errorDetails && (
               <details className="text-left mb-4">
-                <summary className="text-xs text-muted-foreground cursor-pointer mb-1">Visa teknisk info</summary>
-                <pre className="text-[10px] leading-tight text-muted-foreground bg-muted/50 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
+                <summary className="text-xs text-white/70 cursor-pointer mb-1">Visa teknisk info</summary>
+                <pre className="text-[10px] leading-tight text-white/80 bg-white/10 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
                   {errorDetails}
                   {errorStack && `\n\n${errorStack}`}
                   {componentStack && `\n\nComponent:\n${componentStack}`}
@@ -141,13 +144,14 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
             )}
             <button
               onClick={this.handleReload}
-              className="inline-flex items-center justify-center rounded-md px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="inline-flex w-full items-center justify-center rounded-full px-4 py-2 bg-secondary text-white font-medium hover:bg-secondary/90 transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Ladda om
             </button>
           </div>
         </div>
       );
+
     }
 
     return this.props.children;
