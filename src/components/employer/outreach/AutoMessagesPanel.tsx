@@ -119,6 +119,9 @@ export function AutoMessagesPanel() {
   const getDelay = (event: AutoRuleEvent) => {
     const rows = rowsByTrigger.get(event.trigger) ?? [];
     const enabled = rows.find((row) => row.is_enabled) ?? rows[0];
+    // Tidpunkten går alltid att ställa in – även innan någon kanal är påslagen.
+    // Då sparas valet lokalt och används när första regeln skapas.
+    if (rows.length === 0) return pendingDelays[event.trigger] ?? event.defaultDelay;
     return enabled?.delay_minutes ?? event.defaultDelay;
   };
 
