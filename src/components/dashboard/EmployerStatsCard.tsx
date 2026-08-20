@@ -1,4 +1,4 @@
-import { memo, useMemo, useEffect } from 'react';
+import { memo, useMemo, useEffect, useRef } from 'react';
 import { Briefcase, Heart, UserPlus, MessageSquare } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
