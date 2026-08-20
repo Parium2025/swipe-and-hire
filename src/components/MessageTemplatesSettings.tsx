@@ -924,7 +924,7 @@ export function MessageTemplatesSettings() {
         setTemplateForm(EMPTY_TEMPLATE_FORM);
         setActiveTemplateChannel('push');
         await fetchStudio({ silent: true });
-        setActiveStudioTab('automations');
+        goToStudioTab('automations');
         toast.success('Mall sparad — steg 2: välj när den ska skickas');
       }
     }
@@ -1282,8 +1282,8 @@ export function MessageTemplatesSettings() {
         ))}
       </div>
 
-      <Tabs value={activeStudioTab} onValueChange={(value) => setActiveStudioTab(value as StudioTab)} className="space-y-2.5">
-        <div className="relative mx-auto flex w-fit gap-0.5 rounded-md border border-white/10 bg-white/5 p-1" role="tablist" aria-label="Outreach sektioner">
+      <Tabs value={activeStudioTab} onValueChange={(value) => goToStudioTab(value as StudioTab)} className="space-y-2.5">
+        <div ref={studioTabsRef} className="relative mx-auto flex w-fit gap-0.5 rounded-md border border-white/10 bg-white/5 p-1 scroll-mt-4" role="tablist" aria-label="Outreach sektioner">
           <motion.div
             className="absolute bottom-1 top-1 rounded-[5px] bg-parium-navy"
             initial={false}
@@ -1303,7 +1303,7 @@ export function MessageTemplatesSettings() {
             type="button"
             role="tab"
             aria-selected={activeStudioTab === 'library'}
-            onClick={() => setActiveStudioTab('library')}
+            onClick={() => goToStudioTab('library')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
             Mallbibliotek
@@ -1313,7 +1313,7 @@ export function MessageTemplatesSettings() {
             type="button"
             role="tab"
             aria-selected={activeStudioTab === 'templates'}
-            onClick={() => setActiveStudioTab('templates')}
+            onClick={() => goToStudioTab('templates')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
             1 · Mall
@@ -1323,7 +1323,7 @@ export function MessageTemplatesSettings() {
             type="button"
             role="tab"
             aria-selected={activeStudioTab === 'automations'}
-            onClick={() => setActiveStudioTab('automations')}
+            onClick={() => goToStudioTab('automations')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
             2 · Regel
@@ -1333,7 +1333,7 @@ export function MessageTemplatesSettings() {
             type="button"
             role="tab"
             aria-selected={activeStudioTab === 'logs'}
-            onClick={() => setActiveStudioTab('logs')}
+            onClick={() => goToStudioTab('logs')}
             className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
           >
             3 · Logg
@@ -1393,7 +1393,7 @@ export function MessageTemplatesSettings() {
                               },
                             });
                             setActiveTemplateChannel(template.channel as AutomationChannel);
-                            setActiveStudioTab('templates');
+                            goToStudioTab('templates');
                           }}
                         >
                           <Pencil className="h-3 w-3" />
