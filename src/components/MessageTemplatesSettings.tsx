@@ -31,7 +31,6 @@ import {
   Pencil,
   Plus,
   RefreshCw,
-  Rocket,
   RotateCcw,
   ScrollText,
   Send,
@@ -433,7 +432,6 @@ export function MessageTemplatesSettings() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [savingAutomation, setSavingAutomation] = useState(false);
-  const [runningDispatch, setRunningDispatch] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [testRecipients, setTestRecipients] = useState<TestRecipient[]>([]);
   const [testRecipientId, setTestRecipientId] = useState<string>('self');
@@ -1340,19 +1338,6 @@ export function MessageTemplatesSettings() {
       return;
     }
     setAutomations((prev) => prev.map((item) => (group.automations.some((automation) => automation.id === item.id) ? { ...item, is_enabled: enabled } : item)));
-  };
-
-  const handleRunDispatch = async () => {
-    setRunningDispatch(true);
-    const { data, error } = await supabase.functions.invoke('outreach-dispatch', { body: { processPending: true } });
-    if (error) {
-      toast.error('Kunde inte skicka väntande utskick');
-    } else {
-      const count = Number((data as { processedCount?: number } | null)?.processedCount ?? 0);
-      toast.success(count > 0 ? `${count} utskick skickades` : 'Inga väntande utskick');
-      await fetchStudio({ silent: true });
-    }
-    setRunningDispatch(false);
   };
 
   const handleSendTest = async () => {
