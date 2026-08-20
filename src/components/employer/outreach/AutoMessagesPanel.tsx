@@ -310,7 +310,10 @@ export function AutoMessagesPanel() {
                 };
               });
 
+              const allChannelsOn = AUTO_RULE_CHANNELS.every(({ value }) => Boolean(getRow(event, value)?.is_enabled));
+
               return (
+
                 <div key={event.trigger} className="rounded-xl border border-white/10 bg-white/5 p-4 md:p-3">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0 flex-1">
