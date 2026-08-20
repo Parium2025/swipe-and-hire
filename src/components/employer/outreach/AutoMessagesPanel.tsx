@@ -260,9 +260,10 @@ export function AutoMessagesPanel() {
           <h3 className="text-sm font-medium text-white">Automatiska utskick</h3>
         </div>
         <p className="text-sm text-white">
-          Välj vad kandidaten får automatiskt och i vilken kanal. Kandidaten kan alltid stänga av push och mejl i sina
-          egna inställningar.
+          Välj vad kandidaten får automatiskt och i vilken kanal. Chatt landar i kandidatens inkorg och visas samtidigt
+          som en notis i appen. Kandidaten kan alltid stänga av notiser, push och mejl i sina egna inställningar.
         </p>
+
 
         {loading ? (
           <div className="flex items-center justify-center py-10">
