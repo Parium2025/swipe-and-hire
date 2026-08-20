@@ -174,6 +174,26 @@ Deno.serve(async (req) => {
     let remindersSent = 0;
     const errors: string[] = [];
 
+    // Arbetsgivaren äger besluten: har de stängt av "Före intervjun" helt
+    // skickas ingenting till kandidaten – inte heller 10-minutersputten.
+    const employerAllowsCandidateReminder = new Map<string, boolean>();
+    const candidateRemindersAllowed = async (employerId: string) => {
+      if (employerAllowsCandidateReminder.has(employerId)) {
+        return employerAllowsCandidateReminder.get(employerId)!;
+      }
+      const { data } = await supabase
+        .from("outreach_automations")
+        .select("id")
+        .eq("owner_user_id", employerId)
+        .eq("trigger", "interview_before")
+        .eq("recipient_type", "candidate")
+        .eq("is_enabled", true)
+        .limit(1);
+      const allowed = (data?.length ?? 0) > 0;
+      employerAllowsCandidateReminder.set(employerId, allowed);
+      return allowed;
+    };
+
     if (upcomingInterviews && upcomingInterviews.length > 0) {
       console.log(`Found ${upcomingInterviews.length} interviews to send reminders for`);
 
@@ -192,8 +212,13 @@ Deno.serve(async (req) => {
           ? "På plats"
           : "Telefonintervju";
 
-        // Send reminder to candidate
+        // Send reminder to candidate (only if the employer keeps it enabled)
         try {
+          if (!(await candidateRemindersAllowed(interview.employer_id))) {
+            console.log(`Candidate reminder skipped – employer ${interview.employer_id} has interview_before off`);
+            throw new Error("__skip_candidate__");
+          }
+
           const candidateResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
             method: "POST",
             headers: {
