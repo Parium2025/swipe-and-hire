@@ -595,6 +595,21 @@ export function ChatView({
           )}
         </div>
 
+        {/* Tysta konversationen */}
+        <button
+          type="button"
+          onClick={() => setMuted({ conversationId: conversation.id, muted: !conversation.is_muted })}
+          disabled={isUpdatingMute}
+          aria-label={conversation.is_muted ? 'Slå på notiser för konversationen' : 'Tysta konversationen'}
+          title={conversation.is_muted ? 'Notiser är avstängda för den här chatten' : 'Tysta den här chatten'}
+          className={cn(
+            "p-2 rounded-full transition-colors disabled:opacity-50",
+            conversation.is_muted ? "bg-white/15 text-white" : "text-pure-white md:hover:bg-white/10"
+          )}
+        >
+          {conversation.is_muted ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+        </button>
+
         {/* Search toggle */}
         <button
           onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setDebouncedQuery(''); setSearchMatchIds([]); setDbSearchResultIds([]); setOlderMatchCount(0); } }}
@@ -606,6 +621,16 @@ export function ChatView({
           <Search className="h-4 w-4" />
         </button>
       </div>
+
+      {conversation.is_muted && (
+        <div className="flex items-start gap-2 border-b border-white/10 bg-white/5 px-4 py-2">
+          <BellOff className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white" />
+          <p className="min-w-0 break-words text-xs text-white">
+            Tystad — nya meddelanden hamnar här men ger ingen notis eller push.
+          </p>
+        </div>
+      )}
+
 
       {/* Search bar */}
       <AnimatePresence>
