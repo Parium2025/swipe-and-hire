@@ -1,5 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';
@@ -16,6 +17,8 @@ import EmployerLocationPanel from '@/components/employer/settings/EmployerLocati
 
 const EmployerSettings = () => {
   const { user, profile, updateProfile, updatePassword } = useAuth();
+  const location = useLocation();
+  const notificationSettingsRef = useRef<HTMLDivElement>(null);
   const [passwordData, setPasswordData] = useState({
     newPassword: '',
     confirmPassword: ''
@@ -24,6 +27,14 @@ const EmployerSettings = () => {
   const [backgroundLocationEnabled, setBackgroundLocationEnabled] = useState(false);
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
+
+  useEffect(() => {
+    if (location.hash !== '#notifications') return;
+    const frame = requestAnimationFrame(() => {
+      notificationSettingsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [location.hash]);
 
   // Load background location preference from profile
   useEffect(() => {
@@ -106,11 +117,13 @@ const EmployerSettings = () => {
         onUpdatePassword={handlePasswordUpdate}
       />
 
-      <EmployerNotificationsPanel
-        isEnabled={isEnabled}
-        toggle={toggle}
-        prefsLoading={prefsLoading}
-      />
+      <div id="notifications" ref={notificationSettingsRef} className="scroll-mt-6">
+        <EmployerNotificationsPanel
+          isEnabled={isEnabled}
+          toggle={toggle}
+          prefsLoading={prefsLoading}
+        />
+      </div>
 
       <AutoMessagesPanel />
       <MessageTemplatesSettings />

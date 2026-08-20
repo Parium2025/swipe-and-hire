@@ -117,6 +117,12 @@ type PendingDeleteAction = {
   errorMessage: string;
 };
 
+type TestRecipient = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 function InfoHint({ text }: { text: string }) {
   return (
     <Tooltip>
@@ -429,6 +435,8 @@ export function MessageTemplatesSettings() {
   const [savingAutomation, setSavingAutomation] = useState(false);
   const [runningDispatch, setRunningDispatch] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
+  const [testRecipients, setTestRecipients] = useState<TestRecipient[]>([]);
+  const [testRecipientId, setTestRecipientId] = useState<string>('self');
   const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('library');
   const templatesTabRef = useRef<HTMLButtonElement>(null);
   const libraryTabRef = useRef<HTMLButtonElement>(null);
@@ -448,6 +456,42 @@ export function MessageTemplatesSettings() {
       });
     });
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setTestRecipients([]);
+      setTestRecipientId('self');
+      return;
+    }
+
+    let cancelled = false;
+    const loadTestRecipients = async () => {
+      const { data, error } = await supabase
+        .from('job_applications')
+        .select('applicant_id, first_name, last_name, email')
+        .not('applicant_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      if (cancelled || error) return;
+      const unique = new Map<string, TestRecipient>();
+      for (const application of data ?? []) {
+        if (!application.applicant_id || unique.has(application.applicant_id)) continue;
+        const fullName = `${application.first_name ?? ''} ${application.last_name ?? ''}`.trim();
+        unique.set(application.applicant_id, {
+          id: application.applicant_id,
+          name: fullName || application.email || 'Kandidat',
+          email: application.email ?? '',
+        });
+      }
+      setTestRecipients(Array.from(unique.values()));
+    };
+
+    void loadTestRecipients();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   const templateDraftKey = user ? `${TEMPLATE_DRAFT_PREFIX}${user.id}` : null;
 
@@ -1311,8 +1355,10 @@ export function MessageTemplatesSettings() {
     setRunningDispatch(false);
   };
 
-  const handleSendTestToMyself = async () => {
+  const handleSendTest = async () => {
     if (!user || !selectedTemplateFamily) return;
+    const recipientUserId = testRecipientId === 'self' ? user.id : testRecipientId;
+    const recipient = testRecipients.find((candidate) => candidate.id === recipientUserId);
 
     const sends = selectedTemplateFamily.channels
       .map((channel) => selectedTemplateFamily.templatesByChannel[channel])
@@ -1326,7 +1372,7 @@ export function MessageTemplatesSettings() {
 
     setSendingTest(true);
     const { data, error } = await supabase.functions.invoke('outreach-dispatch', {
-      body: { mode: 'manual', recipientUserId: user.id, sends },
+      body: { mode: 'manual', recipientUserId, sends },
     });
     setSendingTest(false);
 
@@ -1348,7 +1394,8 @@ export function MessageTemplatesSettings() {
         toast.error('Provutskicket misslyckades', { description: detail });
       }
     } else if (sent.length > 0) {
-      toast.success(`Provutskick skickat till dig själv (${sent.map((r) => channelLabels[r.channel] ?? r.channel).join(', ')})`);
+      const destination = recipient ? recipient.name : 'dig själv';
+      toast.success(`Provutskick skickat till ${destination} (${sent.map((r) => channelLabels[r.channel] ?? r.channel).join(', ')})`);
     } else {
       toast.info('Inget skickades — mallen saknar innehåll');
     }
@@ -1967,6 +2014,24 @@ export function MessageTemplatesSettings() {
                   <Switch checked={automationForm.is_enabled} onCheckedChange={(checked) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, is_enabled: checked })); }} />
                 </div>
 
+                <div className="space-y-2">
+                  <Label className="text-white">Provutskick till</Label>
+                  <Select value={testRecipientId} onValueChange={setTestRecipientId}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="border-white/20">
+                      <SelectItem value="self">Mig själv</SelectItem>
+                      {testRecipients.map((recipient) => (
+                        <SelectItem key={recipient.id} value={recipient.id}>
+                          {recipient.name}{recipient.email ? ` · ${recipient.email}` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[11px] text-white">Endast kandidater som redan har sökt ett av era jobb kan väljas.</p>
+                </div>
+
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   <PillButton
                     className="px-4 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50"
@@ -1978,11 +2043,11 @@ export function MessageTemplatesSettings() {
                   </PillButton>
                   <PillButton
                     className="px-4 border-white/20 bg-white/10 hover:bg-white/20 hover:border-white/40 disabled:opacity-50"
-                    onClick={handleSendTestToMyself}
+                    onClick={handleSendTest}
                     disabled={sendingTest}
                   >
                     {sendingTest ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                    Testa till mig själv
+                    Skicka provutskick
                   </PillButton>
                   {selectedAutomationGroup && (
                     <PillButton

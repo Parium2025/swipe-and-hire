@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Bell, Mail } from "lucide-react";
+import { Bell, ChevronRight, Mail } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Tidigare låg en "Avprenumerera"-knapp här som verifierade en token direkt
@@ -9,38 +10,63 @@ import { Helmet } from "react-helmet-async";
  * notisinställningarna, så inget hinner blinka eller låsa sig i UI:t.
  */
 const Unsubscribe = () => {
+  const navigate = useNavigate();
+  const { user, profile, userRole, loading } = useAuth();
+
+  const openNotificationSettings = () => {
+    const role = (profile as { role?: string } | null)?.role ?? userRole?.role;
+    const destination = role === 'employer' ? '/settings#notifications' : '/profile#notifications';
+
+    if (user) {
+      navigate(destination);
+      return;
+    }
+
+    try {
+      sessionStorage.setItem('parium-auth-return-to', destination);
+    } catch {
+      // Navigation state below still carries the destination in this tab.
+    }
+    navigate('/auth', { state: { returnTo: destination } });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#001F3D] to-[#002a52] flex items-center justify-center px-4">
+    <main className="min-h-screen bg-parium-gradient flex items-center justify-center px-4 py-8 text-primary-foreground">
       <Helmet>
         <title>Hantera dina mejl – Parium</title>
         <meta name="description" content="Styr vilka mejl och notiser du får från Parium i dina notisinställningar." />
       </Helmet>
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-        <div className="flex items-center gap-2 mb-6">
-          <Mail className="w-5 h-5 text-[#001F3D]" />
-          <span className="font-bold text-[#001F3D] tracking-tight">Parium</span>
+      <section className="w-full max-w-md rounded-lg border border-white/15 bg-white/[0.07] p-6 shadow-2xl backdrop-blur-md sm:p-8">
+        <div className="flex items-center gap-2 mb-8">
+          <Mail className="h-5 w-5 text-secondary" />
+          <span className="font-semibold text-white">Parium</span>
         </div>
 
-        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-4">
-          <Bell className="w-6 h-6 text-[#001F3D]" />
+        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-secondary/30 bg-secondary/10">
+          <Bell className="h-6 w-6 text-secondary" />
         </div>
 
-        <h1 className="text-2xl font-bold text-[#001F3D] mb-2">Hantera dina utskick</h1>
-        <p className="text-slate-600 mb-6">
+        <h1 className="mb-3 text-2xl font-semibold text-white">Hantera dina utskick</h1>
+        <p className="mb-7 text-sm leading-6 text-white sm:text-base">
           Du väljer själv vilka mejl och notiser du vill få. Allt styrs i dina notisinställningar — slå av
           det du inte vill ha och slå på det igen när du vill.
         </p>
 
-        <Link to="/profile">
-          <Button className="w-full bg-[#001F3D] hover:bg-[#002a52] text-white">
-            Gå till notisinställningar
-          </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full rounded-full"
+          onClick={openNotificationSettings}
+          disabled={loading}
+        >
+          {loading ? 'Kontrollerar inloggning…' : 'Öppna notisinställningar'}
+          {!loading && <ChevronRight className="h-4 w-4" />}
+        </Button>
+        <Link to="/" className="mt-5 block text-center text-sm text-white underline-offset-4 hover:underline">
+          Till startsidan
         </Link>
-        <Link to="/" className="block text-center text-sm text-slate-500 mt-4 hover:underline">
-          Tillbaka till Parium
-        </Link>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

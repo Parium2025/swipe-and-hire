@@ -74,6 +74,7 @@ const Auth = () => {
   const initialRole = (location.state as any)?.role;
   const initialPlan = (location.state as any)?.plan;
   const initialSavedSearchIntent = (location.state as any)?.savedSearchIntent;
+  const initialReturnTo = (location.state as { returnTo?: unknown } | null)?.returnTo;
 
   // Persistera "Bevaka denna sökning"-intent från SEO-sidor så den överlever
   // signup/login/email-confirm-roundtrips.
@@ -677,6 +678,21 @@ const Auth = () => {
       if (pendingPlan) {
         return <Navigate to="/checkout" replace />;
       }
+      // Bevara den uttryckliga destinationen från publika kontosidor, till
+      // exempel aviseringarna från en mejllänk. Sessionslagringen gör att målet
+      // även överlever en hård omladdning på auth-sidan.
+      try {
+        const storedReturnTo = typeof window !== 'undefined'
+          ? sessionStorage.getItem('parium-auth-return-to')
+          : null;
+        const requestedReturnTo = typeof initialReturnTo === 'string' ? initialReturnTo : storedReturnTo;
+        const allowedReturnTo = requestedReturnTo === '/profile#notifications' || requestedReturnTo === '/settings#notifications';
+        if (allowedReturnTo) {
+          sessionStorage.removeItem('parium-auth-return-to');
+          const roleDestination = role === 'employer' ? '/settings#notifications' : '/profile#notifications';
+          return <Navigate to={roleDestination} replace />;
+        }
+      } catch { /* fortsätt till standarddestination */ }
       // Om användaren kom hit via "Bevaka denna sökning" på en SEO-sida:
       // skapa saved_search + slussa till returnTo. Fire-and-forget för att
       // inte blockera renderingen – Navigate sker direkt till returnTo.
