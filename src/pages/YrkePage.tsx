@@ -12,6 +12,7 @@ import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { ArrowRight, Briefcase, CheckCircle2, MapPin, Zap } from 'lucide-react';
 import { OCCUPATION_BY_SLUG } from '@/data/jobOccupations';
 import { CITIES } from '@/data/jobCities';
+import { SeoTruncatedText } from '@/components/seo/SeoTruncateLink';
 import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
 import { buildGenericOccupation } from '@/lib/genericOccupation';
 
@@ -230,7 +231,9 @@ const YrkePage = () => {
                     className="flex h-14 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-white/10 bg-white/[0.06] px-3 text-center text-sm font-medium text-white hover:bg-white/10 transition"
                   >
                     <MapPin className="h-4 w-4 shrink-0 text-white" />
-                    <span className="truncate">Jobb i {c.name}</span>
+                    <SeoTruncatedText fullText={`Jobb i ${c.name}`} className="text-white">
+                      {`Jobb i ${c.name}`}
+                    </SeoTruncatedText>
                   </Link>
                 </li>
               ))}

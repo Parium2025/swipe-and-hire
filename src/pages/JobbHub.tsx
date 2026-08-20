@@ -231,7 +231,9 @@ const JobbHub = () => {
                         text={title}
                         className="truncate text-lg font-semibold text-white"
                       />
-                      <p className="mt-1 truncate text-sm text-white">{c.county}</p>
+                      <SeoTruncatedText fullText={c.county} className="mt-1 text-sm text-white">
+                        {c.county}
+                      </SeoTruncatedText>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
                   </Link>

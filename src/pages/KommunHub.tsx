@@ -8,6 +8,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { MapPin, Search } from 'lucide-react';
 import { KOMMUNER } from '@/data/jobMunicipalities';
+import { SeoTruncatedText } from '@/components/seo/SeoTruncateLink';
 
 const CANONICAL = 'https://www.parium.se/kommuner';
 const TITLE = 'Lediga jobb i Sveriges kommuner – sök på din kommun | Parium';
