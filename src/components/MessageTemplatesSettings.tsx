@@ -25,7 +25,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
   Bot,
+  Copy,
   Info,
+
   Loader2,
   Pencil,
   Plus,
@@ -1000,10 +1002,22 @@ export function MessageTemplatesSettings() {
     setSavingAutomation(false);
   };
 
-  const handleDeleteTemplates = async (ids: string[], successMessage = 'Mall borttagen', errorMessage = 'Kunde inte ta bort mallen') => {
+  const handleDeleteTemplates = async (requestedIds: string[], successMessage = 'Mall borttagen', errorMessage = 'Kunde inte ta bort mallen') => {
+    // Parium-standardmallar är skyddade och kan aldrig raderas.
+    const ids = requestedIds.filter((id) => {
+      const template = templates.find((item) => item.id === id);
+      return template ? !isStandardTemplate(template) : false;
+    });
+
+    if (ids.length === 0) {
+      toast.info('Parium-standardmallar kan inte tas bort');
+      return;
+    }
+
     const linkedAutomationIds = automations
       .filter((automation) => ids.includes(automation.template_id))
       .map((automation) => automation.id);
+
 
     if (linkedAutomationIds.length > 0) {
       const { error: automationError } = await supabase
@@ -1104,6 +1118,11 @@ export function MessageTemplatesSettings() {
     setRestoringDefault(false);
   };
 
+  const isStandardTemplate = (template: { name: string; channel: string }) =>
+    DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel);
+
+  const customTemplates = templates.filter((template) => !isStandardTemplate(template));
+
   const missingDefaultTemplates = DEFAULT_OUTREACH_TEMPLATES.filter(
     (defaultTemplate) =>
       !templates.some(
@@ -1111,8 +1130,14 @@ export function MessageTemplatesSettings() {
       ),
   );
 
+  const restoreTargetName = missingDefaultTemplates.some((item) => item.name === selectedDefaultTemplateName)
+    ? selectedDefaultTemplateName
+    : missingDefaultTemplates[0]?.name ?? '';
+
+
+
   const handleRestoreAllDefaultTemplates = async () => {
-    if (!user) return;
+    if (!user || missingDefaultTemplates.length === 0) return;
     setRestoringDefault(true);
 
     const toInsert = missingDefaultTemplates.map((defaultTemplate) => ({
@@ -1126,42 +1151,17 @@ export function MessageTemplatesSettings() {
       organization_id: organizationId,
     }));
 
-    const existingDefaults = templates.filter((template) =>
-      DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel),
-    );
+    const { error } = await supabase.from('outreach_templates').insert(toInsert);
 
-    let failed = false;
-
-    if (toInsert.length > 0) {
-      const { error } = await supabase.from('outreach_templates').insert(toInsert);
-      if (error) failed = true;
-    }
-
-    for (const template of existingDefaults) {
-      const defaultTemplate = DEFAULT_OUTREACH_TEMPLATES.find(
-        (item) => item.name === template.name && item.channel === template.channel,
-      );
-      if (!defaultTemplate) continue;
-      const { error } = await supabase
-        .from('outreach_templates')
-        .update({
-          subject: defaultTemplate.subject,
-          body: defaultTemplate.body,
-          is_active: defaultTemplate.is_active,
-          is_default: true,
-        })
-        .eq('id', template.id);
-      if (error) failed = true;
-    }
-
-    if (failed) {
-      toast.error('Kunde inte återställa alla Parium-mallar');
+    if (error) {
+      toast.error('Kunde inte lägga tillbaka Parium-mallarna');
     } else {
-      toast.success(`${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar är återställda`);
+      toast.success(`${toInsert.length} Parium-mallar lades tillbaka`);
     }
     await fetchStudio({ silent: true });
     setRestoringDefault(false);
   };
+
 
 
   const openDeleteAutomationDialog = (group: AutomationGroup, family: TemplateFamily | null) => {
@@ -1379,23 +1379,25 @@ export function MessageTemplatesSettings() {
               </div>
             </div>
 
+            {missingDefaultTemplates.length > 0 && (
             <div className="mb-3 grid gap-2 rounded-2xl border border-white/[0.12] bg-white/5 p-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-white">Parium-standard</Label>
-                  <InfoHint text="Parium-standarden finns alltid kvar i koden. Välj en enskild mall för att lägga tillbaka eller återställa den, eller lägg tillbaka hela standardpaketet. Egna mallar påverkas aldrig." />
+                  <InfoHint text="Parium-standarden finns alltid kvar i koden. Saknas någon originalmall kan du lägga tillbaka den här. När alla finns på plats försvinner rutan. Egna mallar påverkas aldrig." />
                 </div>
                 <p className="text-xs text-white">
-                  {missingDefaultTemplates.length === 0
-                    ? `Alla ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar finns i biblioteket.`
-                    : `${missingDefaultTemplates.length} av ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar saknas i biblioteket.`}
+                  {`${missingDefaultTemplates.length} av ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar saknas i biblioteket.`}
                 </p>
-                <Select value={selectedDefaultTemplateName} onValueChange={setSelectedDefaultTemplateName}>
+                <Select
+                  value={restoreTargetName}
+                  onValueChange={setSelectedDefaultTemplateName}
+                >
                   <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
                     <SelectValue placeholder="Välj Parium-mall" />
                   </SelectTrigger>
                   <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
-                    {DEFAULT_OUTREACH_TEMPLATES.map((template) => (
+                    {missingDefaultTemplates.map((template) => (
                       <SelectItem key={`${template.channel}-${template.name}`} value={template.name}>{template.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -1404,23 +1406,26 @@ export function MessageTemplatesSettings() {
               <div className="flex flex-wrap items-center gap-2">
                 <PillButton
                   className="px-4 disabled:opacity-50"
-                  disabled={restoringDefault || !selectedDefaultTemplateName}
-                  onClick={() => void handleRestoreDefaultTemplate()}
+                  disabled={restoringDefault || !restoreTargetName}
+                  onClick={() => void handleRestoreDefaultTemplate(restoreTargetName)}
                 >
                   {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                  {templates.some((template) => template.name === selectedDefaultTemplateName) ? 'Återställ vald' : 'Lägg tillbaka vald'}
+                  Lägg tillbaka vald
                 </PillButton>
-                <PillButton
-                  className="px-4 disabled:opacity-50"
-                  disabled={restoringDefault}
-                  onClick={() => void handleRestoreAllDefaultTemplates()}
-                >
-                  {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                  Lägg tillbaka alla ({DEFAULT_OUTREACH_TEMPLATES.length})
-                </PillButton>
+                {missingDefaultTemplates.length > 1 && (
+                  <PillButton
+                    className="px-4 disabled:opacity-50"
+                    disabled={restoringDefault}
+                    onClick={() => void handleRestoreAllDefaultTemplates()}
+                  >
+                    {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                    Lägg tillbaka alla ({missingDefaultTemplates.length})
+                  </PillButton>
+                )}
               </div>
-
             </div>
+            )}
+
 
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
@@ -1428,99 +1433,133 @@ export function MessageTemplatesSettings() {
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga mallar ännu.</div>
             ) : (
                 <div className="space-y-2">
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
-                  <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
-                    <Checkbox
-                      checked={selectedTemplateIds.length === templates.length && templates.length > 0}
-                      onCheckedChange={(checked) => setSelectedTemplateIds(checked ? templates.map((template) => template.id) : [])}
-                    />
-                    Markera alla
-                  </label>
-                  {selectedTemplateIds.length > 0 && (
-                    <PillButton
-                      className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
-                      onClick={openBulkDeleteDialog}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                      Ta bort markerade ({selectedTemplateIds.length})
-                    </PillButton>
-                  )}
-                </div>
-                {templates.map((template) => (
+                {customTemplates.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
+                    <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
+                      <Checkbox
+                        checked={selectedTemplateIds.length === customTemplates.length && customTemplates.length > 0}
+                        onCheckedChange={(checked) => setSelectedTemplateIds(checked ? customTemplates.map((template) => template.id) : [])}
+                      />
+                      Markera alla egna mallar
+                    </label>
+                    {selectedTemplateIds.length > 0 && (
+                      <PillButton
+                        className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
+                        onClick={openBulkDeleteDialog}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Ta bort markerade ({selectedTemplateIds.length})
+                      </PillButton>
+                    )}
+                  </div>
+                )}
+                {templates.map((template) => {
+                  const isStandard = isStandardTemplate(template);
+                  return (
                     <div key={template.id} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
                     <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                       <div className="min-w-0 space-y-1.5">
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
-                          <Checkbox
-                            checked={selectedTemplateIds.includes(template.id)}
-                            onCheckedChange={(checked) => setSelectedTemplateIds((prev) => checked ? [...new Set([...prev, template.id])] : prev.filter((id) => id !== template.id))}
-                            aria-label={`Markera ${template.name}`}
-                          />
+                          {!isStandard && (
+                            <Checkbox
+                              checked={selectedTemplateIds.includes(template.id)}
+                              onCheckedChange={(checked) => setSelectedTemplateIds((prev) => checked ? [...new Set([...prev, template.id])] : prev.filter((id) => id !== template.id))}
+                              aria-label={`Markera ${template.name}`}
+                            />
+                          )}
                           <p className="max-w-full truncate text-sm font-semibold text-white">{template.name}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
+                          {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
                         </div>
                         {template.subject && <p className="text-[11px] text-white md:text-xs">{template.subject}</p>}
                         <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
+                        {isStandard && (
+                          <p className="text-[11px] text-white md:text-xs">Skyddad originalmall – kan inte ändras eller tas bort. Gör en kopia för att skriva egen text.</p>
+                        )}
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-1.5">
-                        {DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel) && (
+                        {isStandard ? (
                           <PillButton
-                            shape="icon"
-                            className="h-8 w-8"
-                            aria-label={`Återställ ${template.name} till Parium-standard`}
-                            title="Återställ Parium-standard"
-                            disabled={restoringDefault}
-                            onClick={() => void handleRestoreDefaultTemplate(template.name)}
+                            className="h-8 px-3"
+                            aria-label={`Skapa kopia av ${template.name}`}
+                            title="Skapa en egen kopia"
+                            onClick={() => {
+                              setTemplateForm({
+                                id: null,
+                                name: `${template.name} (kopia)`,
+                                channels: [template.channel as AutomationChannel],
+                                channelContent: {
+                                  chat: {
+                                    subject: template.channel === 'chat' ? template.subject ?? '' : '',
+                                    body: template.channel === 'chat' ? template.body : '',
+                                  },
+                                  email: {
+                                    subject: template.channel === 'email' ? template.subject ?? '' : '',
+                                    body: template.channel === 'email' ? template.body : '',
+                                  },
+                                  push: {
+                                    subject: template.channel === 'push' ? template.subject ?? '' : '',
+                                    body: template.channel === 'push' ? template.body : '',
+                                  },
+                                },
+                              });
+                              setActiveTemplateChannel(template.channel as AutomationChannel);
+                              goToStudioTab('templates');
+                            }}
                           >
-                            <RotateCcw className="h-3 w-3" />
+                            <Copy className="h-3 w-3" />
+                            Skapa kopia
                           </PillButton>
+                        ) : (
+                          <>
+                            <PillButton
+                              shape="icon"
+                              className="h-8 w-8"
+                              onClick={() => {
+                                setTemplateForm({
+                                  id: template.id,
+                                  name: template.name,
+                                  channels: [template.channel as AutomationChannel],
+                                  channelContent: {
+                                    chat: {
+                                      subject: template.channel === 'chat' ? template.subject ?? '' : '',
+                                      body: template.channel === 'chat' ? template.body : '',
+                                    },
+                                    email: {
+                                      subject: template.channel === 'email' ? template.subject ?? '' : '',
+                                      body: template.channel === 'email' ? template.body : '',
+                                    },
+                                    push: {
+                                      subject: template.channel === 'push' ? template.subject ?? '' : '',
+                                      body: template.channel === 'push' ? template.body : '',
+                                    },
+                                  },
+                                });
+                                setActiveTemplateChannel(template.channel as AutomationChannel);
+                                goToStudioTab('templates');
+                              }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </PillButton>
+
+                            <PillButton
+                              shape="icon"
+                              className="h-8 w-8 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
+                              onClick={() => openDeleteTemplateDialog(template)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </PillButton>
+                          </>
                         )}
-                        <PillButton
-                          shape="icon"
-                          className="h-8 w-8"
-
-                          onClick={() => {
-                            setTemplateForm({
-                              id: template.id,
-                              name: template.name,
-                              channels: [template.channel as AutomationChannel],
-                              channelContent: {
-                                chat: {
-                                  subject: template.channel === 'chat' ? template.subject ?? '' : '',
-                                  body: template.channel === 'chat' ? template.body : '',
-                                },
-                                email: {
-                                  subject: template.channel === 'email' ? template.subject ?? '' : '',
-                                  body: template.channel === 'email' ? template.body : '',
-                                },
-                                push: {
-                                  subject: template.channel === 'push' ? template.subject ?? '' : '',
-                                  body: template.channel === 'push' ? template.body : '',
-                                },
-                              },
-                            });
-                            setActiveTemplateChannel(template.channel as AutomationChannel);
-                            goToStudioTab('templates');
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </PillButton>
-
-                        <PillButton
-                          shape="icon"
-                          className="h-8 w-8 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
-                          onClick={() => openDeleteTemplateDialog(template)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </PillButton>
-
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
+
           </div>
         </TabsContent>
 
