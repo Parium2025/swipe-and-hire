@@ -31,7 +31,6 @@ import {
   Pencil,
   Plus,
   RefreshCw,
-  Rocket,
   RotateCcw,
   ScrollText,
   Send,
@@ -433,7 +432,6 @@ export function MessageTemplatesSettings() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [savingAutomation, setSavingAutomation] = useState(false);
-  const [runningDispatch, setRunningDispatch] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [testRecipients, setTestRecipients] = useState<TestRecipient[]>([]);
   const [testRecipientId, setTestRecipientId] = useState<string>('self');
@@ -1342,19 +1340,6 @@ export function MessageTemplatesSettings() {
     setAutomations((prev) => prev.map((item) => (group.automations.some((automation) => automation.id === item.id) ? { ...item, is_enabled: enabled } : item)));
   };
 
-  const handleRunDispatch = async () => {
-    setRunningDispatch(true);
-    const { data, error } = await supabase.functions.invoke('outreach-dispatch', { body: { processPending: true } });
-    if (error) {
-      toast.error('Kunde inte skicka väntande utskick');
-    } else {
-      const count = Number((data as { processedCount?: number } | null)?.processedCount ?? 0);
-      toast.success(count > 0 ? `${count} utskick skickades` : 'Inga väntande utskick');
-      await fetchStudio({ silent: true });
-    }
-    setRunningDispatch(false);
-  };
-
   const handleSendTest = async () => {
     if (!user || !selectedTemplateFamily) return;
     const recipientUserId = testRecipientId === 'self' ? user.id : testRecipientId;
@@ -1466,17 +1451,8 @@ export function MessageTemplatesSettings() {
           <h3 className="text-sm font-semibold text-white md:text-base">Mallar, regler och utskick</h3>
           <p className="text-xs text-white md:text-sm">Skapa meddelanden och välj när de ska skickas.</p>
         </div>
-        <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:justify-end">
-          <div className="flex items-center gap-1.5">
-            <PillButton onClick={handleRunDispatch} disabled={runningDispatch || logSummary.pending === 0} className="px-3.5 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:cursor-not-allowed disabled:opacity-40">
-              {runningDispatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Rocket className="h-3.5 w-3.5" />}
-              Skicka väntande ({logSummary.pending})
-            </PillButton>
-
-            <InfoHint text="Skickar endast utskick som redan ligger i kön. Knappen skapar inget testutskick och är därför avstängd när kön är tom." />
-          </div>
-        </div>
       </div>
+
 
       <div className="mb-3 grid gap-1.5 md:grid-cols-3">
           {[
@@ -2101,20 +2077,13 @@ export function MessageTemplatesSettings() {
                 <div className="flex flex-wrap items-center gap-2">
                   {selectedLogIds.length > 0 && (
                     <PillButton
-                      className="h-8 border-white/20 bg-white/10 px-3 hover:bg-white/20 hover:border-white/40"
+                      className="h-8 border-destructive/60 bg-destructive/30 px-3 text-white hover:bg-destructive/45 hover:border-destructive/80"
                       onClick={() => openLogDeleteDialog(selectedLogIds, selectedLogIds.length === logs.length)}
                     >
                       <Trash2 className="h-3 w-3" />
-                      Ta bort markerade ({selectedLogIds.length})
+                      Ta bort ({selectedLogIds.length})
                     </PillButton>
                   )}
-                  <PillButton
-                    className="h-8 border-destructive/60 bg-destructive/30 px-3 text-white hover:bg-destructive/45 hover:border-destructive/80"
-                    onClick={() => openLogDeleteDialog(logs.map((log) => log.id), true)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    Rensa hela loggen
-                  </PillButton>
                 </div>
               </div>
 
