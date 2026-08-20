@@ -19,6 +19,14 @@ const CHANNEL_ICON: Record<AutoRuleChannel, typeof Mail> = {
   push: Smartphone,
 };
 
+// Förklarar vad varje kanal faktiskt innebär för kandidaten.
+const CHANNEL_HINTS: { value: AutoRuleChannel; label: string; hint: string }[] = [
+  { value: 'chat', label: 'Chatt', hint: 'Landar i kandidatens inkorg och syns som notis i appen — kandidaten kan svara direkt.' },
+  { value: 'email', label: 'Mejl', hint: 'Skickas till kandidatens e-postadress.' },
+  { value: 'push', label: 'Push', hint: 'Skärmnotis i mobilappen, även när telefonen är låst.' },
+];
+
+
 type PreviewEntry = { channel: AutoRuleChannel; label: string; subject: string | null; body: string; edited: boolean };
 
 function TemplatePreview({ title, entries }: { title: string; entries: PreviewEntry[] }) {
