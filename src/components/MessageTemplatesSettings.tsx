@@ -31,12 +31,11 @@ import {
   Plus,
   RefreshCw,
   Rocket,
+  RotateCcw,
   ScrollText,
   Trash2,
-  Wand2,
 } from 'lucide-react';
 import {
-  DEFAULT_OUTREACH_AUTOMATIONS,
   DEFAULT_OUTREACH_TEMPLATES,
   getOutreachChannelLabel,
   getOutreachRecipientLabel,
@@ -414,7 +413,6 @@ export function MessageTemplatesSettings() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [savingAutomation, setSavingAutomation] = useState(false);
-  const [seeding, setSeeding] = useState(false);
   const [runningDispatch, setRunningDispatch] = useState(false);
   const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('library');
   const templatesTabRef = useRef<HTMLButtonElement>(null);
@@ -458,7 +456,9 @@ export function MessageTemplatesSettings() {
   const [automationVisibilityFilter, setAutomationVisibilityFilter] = useState<AutomationVisibilityFilter>('all');
   const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showSeedConfirmDialog, setShowSeedConfirmDialog] = useState(false);
+  const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
+  const [selectedDefaultTemplateName, setSelectedDefaultTemplateName] = useState(DEFAULT_OUTREACH_TEMPLATES[0]?.name ?? '');
+  const [restoringDefault, setRestoringDefault] = useState(false);
   const fetchRequestIdRef = useRef(0);
   // Utkastet kan inte hydreras vid första render eftersom `user` sätts asynkront.
   // Vi hydrerar när nyckeln finns och blockerar autospar innan dess, annars
@@ -793,73 +793,6 @@ export function MessageTemplatesSettings() {
     return () => window.removeEventListener('resize', updateIndicator);
   }, [activeStudioTab, templates.length, automations.length, logs.length]);
 
-  const seedDefaults = async () => {
-    if (!user) return;
-    setSeeding(true);
-
-    const existingNames = new Set(templates.map((template) => template.name));
-    const templateRows = DEFAULT_OUTREACH_TEMPLATES.filter((template) => !existingNames.has(template.name)).map((template) => ({
-      owner_user_id: user.id,
-      organization_id: organizationId,
-      name: template.name,
-      channel: template.channel,
-      subject: template.subject,
-      body: template.body,
-      is_active: template.is_active,
-      is_default: false,
-    }));
-
-    if (templateRows.length > 0) {
-      const { error } = await supabase.from('outreach_templates').insert(templateRows);
-      if (error) {
-        toast.error('Kunde inte skapa startmallarna');
-        setSeeding(false);
-        return;
-      }
-    }
-
-    const { data: freshTemplates, error: templatesError } = await supabase.from('outreach_templates').select('*');
-    if (templatesError || !freshTemplates) {
-      toast.error('Kunde inte slutföra snabbstarten');
-      setSeeding(false);
-      return;
-    }
-
-    const existingAutomationNames = new Set(automations.map((automation) => automation.name));
-    const automationRows = DEFAULT_OUTREACH_AUTOMATIONS.filter((automation) => !existingAutomationNames.has(automation.name))
-      .map((automation) => {
-        const template = freshTemplates.find((item) => item.name === automation.templateName);
-        if (!template) return null;
-        return {
-          owner_user_id: user.id,
-          organization_id: organizationId,
-          name: automation.name,
-          trigger: automation.trigger,
-          channel: automation.channel,
-          recipient_type: automation.recipient_type,
-          template_id: template.id,
-          delay_minutes: automation.delay_minutes,
-          filters: {},
-          is_enabled: true,
-        };
-      })
-      .filter(Boolean);
-
-    if (automationRows.length > 0) {
-      const { error } = await supabase.from('outreach_automations').insert(automationRows as never);
-      if (error) {
-        toast.error('Mallar skapades men reglerna kunde inte aktiveras');
-        setSeeding(false);
-        await fetchStudio({ silent: true });
-        return;
-      }
-    }
-
-    toast.success('Snabbstart aktiverad');
-    setSeeding(false);
-    await fetchStudio({ silent: true });
-  };
-
   const handleSaveTemplate = async () => {
     if (!user || !templateForm.name.trim() || templateForm.channels.length === 0) return;
 
@@ -1067,16 +1000,33 @@ export function MessageTemplatesSettings() {
     setSavingAutomation(false);
   };
 
-  const handleDeleteTemplate = async (id: string, successMessage = 'Mall borttagen', errorMessage = 'Kunde inte ta bort mallen') => {
+  const handleDeleteTemplates = async (ids: string[], successMessage = 'Mall borttagen', errorMessage = 'Kunde inte ta bort mallen') => {
+    const linkedAutomationIds = automations
+      .filter((automation) => ids.includes(automation.template_id))
+      .map((automation) => automation.id);
+
+    if (linkedAutomationIds.length > 0) {
+      const { error: automationError } = await supabase
+        .from('outreach_automations')
+        .delete()
+        .in('id', linkedAutomationIds);
+
+      if (automationError) {
+        toast.error(errorMessage);
+        return;
+      }
+    }
+
     const { error } = await supabase
       .from('outreach_templates')
       .delete()
-      .eq('id', id);
+      .in('id', ids);
 
     if (error) {
       toast.error(errorMessage);
     } else {
       toast.success(successMessage);
+      setSelectedTemplateIds((prev) => prev.filter((id) => !ids.includes(id)));
       await fetchStudio({ silent: true });
     }
   };
@@ -1096,14 +1046,62 @@ export function MessageTemplatesSettings() {
   };
 
   const openDeleteTemplateDialog = (template: OutreachTemplate) => {
+    const linkedRuleCount = automations.filter((automation) => automation.template_id === template.id).length;
     setPendingDeleteAction({
       kind: 'template',
       ids: [template.id],
       title: 'Ta bort mall',
-      description: `Är du säker på att du vill ta bort mallen "${template.name}"? Denna åtgärd går inte att ångra.`,
+      description: `Är du säker på att du vill ta bort mallen "${template.name}"?${linkedRuleCount > 0 ? ` ${linkedRuleCount} kopplad regel tas också bort.` : ''} Denna åtgärd går inte att ångra.`,
       successMessage: 'Mall borttagen',
       errorMessage: 'Kunde inte ta bort mallen',
     });
+  };
+
+  const openBulkDeleteDialog = () => {
+    if (selectedTemplateIds.length === 0) return;
+    const linkedRuleCount = automations.filter((automation) => selectedTemplateIds.includes(automation.template_id)).length;
+    setPendingDeleteAction({
+      kind: 'template',
+      ids: selectedTemplateIds,
+      title: `Ta bort ${selectedTemplateIds.length} mallar`,
+      description: `Är du säker på att du vill ta bort alla markerade mallar?${linkedRuleCount > 0 ? ` ${linkedRuleCount} kopplade regler tas också bort.` : ''} Denna åtgärd går inte att ångra.`,
+      successMessage: `${selectedTemplateIds.length} mallar borttagna`,
+      errorMessage: 'Kunde inte ta bort de markerade mallarna',
+    });
+  };
+
+  const handleRestoreDefaultTemplate = async (defaultName = selectedDefaultTemplateName) => {
+    if (!user) return;
+    const defaultTemplate = DEFAULT_OUTREACH_TEMPLATES.find((template) => template.name === defaultName);
+    if (!defaultTemplate) return;
+
+    setRestoringDefault(true);
+    const existingTemplate = templates.find(
+      (template) => template.name === defaultTemplate.name && template.channel === defaultTemplate.channel,
+    );
+    const payload = {
+      name: defaultTemplate.name,
+      channel: defaultTemplate.channel,
+      subject: defaultTemplate.subject,
+      body: defaultTemplate.body,
+      is_active: defaultTemplate.is_active,
+      is_default: true,
+    };
+    const result = existingTemplate
+      ? await supabase.from('outreach_templates').update(payload).eq('id', existingTemplate.id)
+      : await supabase.from('outreach_templates').insert({
+          ...payload,
+          owner_user_id: user.id,
+          organization_id: organizationId,
+        });
+
+    if (result.error) {
+      toast.error('Kunde inte återställa Parium-mallen');
+    } else {
+      toast.success(existingTemplate ? 'Parium-mallen återställd' : 'Parium-mallen tillagd');
+      await fetchStudio({ silent: true });
+    }
+    setRestoringDefault(false);
   };
 
   const openDeleteAutomationDialog = (group: AutomationGroup, family: TemplateFamily | null) => {
@@ -1127,7 +1125,7 @@ export function MessageTemplatesSettings() {
 
     try {
       if (action.kind === 'template') {
-        await handleDeleteTemplate(action.ids[0], action.successMessage, action.errorMessage);
+        await handleDeleteTemplates(action.ids, action.successMessage, action.errorMessage);
       } else {
         await handleDeleteAutomation(action.ids, action.successMessage, action.errorMessage);
       }
@@ -1213,42 +1211,6 @@ export function MessageTemplatesSettings() {
         </AlertDialogContentNoFocus>
       </AlertDialog>
 
-      <AlertDialog open={showSeedConfirmDialog} onOpenChange={setShowSeedConfirmDialog}>
-        <AlertDialogContentNoFocus className="w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] rounded-2xl border border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:max-w-lg sm:p-6">
-          <AlertDialogHeader className="space-y-3 text-center">
-            <AlertDialogTitle className="text-base font-semibold text-white md:text-lg">Kom igång snabbt</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3 text-sm leading-relaxed text-white">
-              <p>Det här lägger in färdiga startmallar och standardregler så att ni snabbt kommer igång med Outreach Studio.</p>
-              <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3 text-left text-white">
-                <p className="text-xs uppercase tracking-[0.16em] text-white/80">Det som skapas</p>
-                <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-white">
-                  <li>Färdiga mallar för chatt, e-post och push</li>
-                  <li>Standardregler för vanliga steg i kandidatflödet</li>
-                  <li>Allt går att redigera eller ta bort efteråt</li>
-                </ul>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 flex-row gap-2 sm:justify-center">
-            <AlertDialogCancel className="mt-0 flex-1 rounded-full border-white/20 bg-white/10 text-sm text-white transition-all duration-300 md:hover:border-white/50 md:hover:bg-white/20 md:hover:text-white">
-              Avbryt
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="default"
-              onClick={(event) => {
-                event.preventDefault();
-                setShowSeedConfirmDialog(false);
-                void seedDefaults();
-              }}
-              className="flex-1 rounded-full text-sm"
-            >
-              {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-              Fortsätt
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContentNoFocus>
-      </AlertDialog>
-
       <div className="overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3.5">
       <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
@@ -1257,19 +1219,12 @@ export function MessageTemplatesSettings() {
         </div>
         <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:justify-end">
           <div className="flex items-center gap-1.5">
-            <PillButton onClick={() => setShowSeedConfirmDialog(true)} disabled={seeding} className="px-3.5 disabled:opacity-50">
-              {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
-              Kom igång snabbt
-            </PillButton>
-            <InfoHint text="Lägger in färdiga startmallar och standardregler som ni sedan kan redigera efter företagets ton och process." />
-          </div>
-          <div className="flex items-center gap-1.5">
-            <PillButton onClick={handleRunDispatch} disabled={runningDispatch} className="px-3.5 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50">
+            <PillButton onClick={handleRunDispatch} disabled={runningDispatch || logSummary.pending === 0} className="px-3.5 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:cursor-not-allowed disabled:opacity-40">
               {runningDispatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Rocket className="h-3.5 w-3.5" />}
-              Skicka nu
+              Skicka väntande ({logSummary.pending})
             </PillButton>
 
-            <InfoHint text="Kör väntande utskick direkt. Bra vid test eller om ni vill trigga utskick manuellt utan att vänta på nästa schemalagda körning." />
+            <InfoHint text="Skickar endast utskick som redan ligger i kön. Knappen skapar inget testutskick och är därför avstängd när kön är tom." />
           </div>
         </div>
       </div>
@@ -1361,17 +1316,67 @@ export function MessageTemplatesSettings() {
               </div>
             </div>
 
+            <div className="mb-3 grid gap-2 rounded-2xl border border-white/[0.12] bg-white/5 p-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Label className="text-white">Parium-standard</Label>
+                  <InfoHint text="Välj exakt den originalmall du vill återställa eller lägga tillbaka. Inga andra mallar eller regler påverkas." />
+                </div>
+                <Select value={selectedDefaultTemplateName} onValueChange={setSelectedDefaultTemplateName}>
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
+                    <SelectValue placeholder="Välj Parium-mall" />
+                  </SelectTrigger>
+                  <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
+                    {DEFAULT_OUTREACH_TEMPLATES.map((template) => (
+                      <SelectItem key={`${template.channel}-${template.name}`} value={template.name}>{template.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <PillButton
+                className="px-4 disabled:opacity-50"
+                disabled={restoringDefault || !selectedDefaultTemplateName}
+                onClick={() => void handleRestoreDefaultTemplate()}
+              >
+                {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                {templates.some((template) => template.name === selectedDefaultTemplateName) ? 'Återställ vald' : 'Lägg tillbaka vald'}
+              </PillButton>
+            </div>
+
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
             ) : templates.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga mallar ännu.</div>
             ) : (
                 <div className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
+                  <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
+                    <Checkbox
+                      checked={selectedTemplateIds.length === templates.length && templates.length > 0}
+                      onCheckedChange={(checked) => setSelectedTemplateIds(checked ? templates.map((template) => template.id) : [])}
+                    />
+                    Markera alla
+                  </label>
+                  {selectedTemplateIds.length > 0 && (
+                    <PillButton
+                      className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
+                      onClick={openBulkDeleteDialog}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Ta bort markerade ({selectedTemplateIds.length})
+                    </PillButton>
+                  )}
+                </div>
                 {templates.map((template) => (
                     <div key={template.id} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
                     <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                       <div className="min-w-0 space-y-1.5">
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <Checkbox
+                            checked={selectedTemplateIds.includes(template.id)}
+                            onCheckedChange={(checked) => setSelectedTemplateIds((prev) => checked ? [...new Set([...prev, template.id])] : prev.filter((id) => id !== template.id))}
+                            aria-label={`Markera ${template.name}`}
+                          />
                           <p className="max-w-full truncate text-sm font-semibold text-white">{template.name}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
@@ -1380,6 +1385,18 @@ export function MessageTemplatesSettings() {
                         <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-1.5">
+                        {DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel) && (
+                          <PillButton
+                            shape="icon"
+                            className="h-8 w-8"
+                            aria-label={`Återställ ${template.name} till Parium-standard`}
+                            title="Återställ Parium-standard"
+                            disabled={restoringDefault}
+                            onClick={() => void handleRestoreDefaultTemplate(template.name)}
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                          </PillButton>
+                        )}
                         <PillButton
                           shape="icon"
                           className="h-8 w-8"
