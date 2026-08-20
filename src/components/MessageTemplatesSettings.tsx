@@ -24,8 +24,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
+  AlertTriangle,
   Bot,
-  
+  CheckCircle2,
   Info,
 
   Loader2,
@@ -544,6 +545,31 @@ export function MessageTemplatesSettings() {
       };
     });
   }, [automations]);
+
+  // Steg 2: visa tydligt vilka händelser som saknar kanal helt.
+  const triggerCoverage = useMemo(() => {
+    const triggers: OutreachAutomation['trigger'][] = [
+      'application_received',
+      'interview_before',
+      'interview_after',
+      'job_closed',
+    ];
+
+    return triggers.map((trigger) => ({
+      trigger,
+      label: getOutreachTriggerLabel(trigger),
+      channels: CHANNEL_ORDER.filter((channel) =>
+        automations.some((item) => item.trigger === trigger && item.channel === channel && item.is_enabled),
+      ),
+    }));
+  }, [automations]);
+
+  const uncoveredTriggers = useMemo(
+    () => triggerCoverage.filter((item) => item.channels.length === 0),
+    [triggerCoverage],
+  );
+
+
 
   const templateFamilies = useMemo<TemplateFamily[]>(() => {
     const grouped = new Map<string, TemplateFamily>();
