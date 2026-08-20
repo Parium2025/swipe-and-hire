@@ -23,6 +23,13 @@ export const JobSeekerNotificationSettings = () => {
           <h3 className="text-sm font-medium text-white">Aviseringar</h3>
         </div>
 
+        <p className="text-sm text-white">
+          <span className="font-medium">I appen</span> är notisklockan i menyn, <span className="font-medium">Push</span> är
+          skärmnotisen i mobilappen och <span className="font-medium">Mejl</span> går till din e-post. Chattmeddelanden från
+          arbetsgivare hamnar alltid i din inkorg — men de puffar bara om du har notiser påslagna.
+        </p>
+
+
         {/* Column headers */}
         <div className="flex items-center justify-end gap-4 pb-1 border-b border-white/10">
           <div className="flex w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
