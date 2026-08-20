@@ -3,12 +3,23 @@ import { useLocation } from 'react-router-dom';
 
 // This bridge detects Supabase auth/recovery tokens anywhere in the app
 // and forwards them to /auth so the Auth page can handle the flow.
+
+// Sidor som har EGNA ?token=-parametrar (t.ex. avprenumerationslänkar i mejl).
+// De får aldrig kapas av bryggan — annars gör vi en full sidladdning till
+// /auth, vilket ger blank skärm + splash-blink när man kommer från ett mejl.
+const OWN_TOKEN_ROUTES = new Set([
+  '/unsubscribe',
+  '/unsubscribe/',
+]);
+
 const AuthTokenBridge = () => {
   const location = useLocation();
 
   useEffect(() => {
     // Avoid loops if we are already on /auth
     if (location.pathname === '/auth') return;
+    if (OWN_TOKEN_ROUTES.has(location.pathname)) return;
+
 
     const searchParams = new URLSearchParams(window.location.search);
     const hashStr = window.location.hash.startsWith('#')
