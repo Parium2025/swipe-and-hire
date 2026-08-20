@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { isOwnerEmail } from '@/lib/ownerAccess';
+import { useIsPlatformAdmin } from '@/hooks/useIsPlatformAdmin';
+
 
 export type PlanTier = 'one_time' | 'start' | 'vaxa' | 'pro' | 'jobseeker_premium';
 export type PlanStatus = 'active' | 'expired' | 'cancelled' | 'pending';
@@ -39,7 +41,9 @@ const OWNER_PLAN: ActivePlanDetails = {
  */
 export function useHasActivePlan() {
   const { user } = useAuth();
-  const ownerBypass = isOwnerEmail(user?.email);
+  const { isPlatformAdmin, loading: adminLoading } = useIsPlatformAdmin();
+  // Ägare via e-post ELLER plattformsadmin (samma regel som databasens trigger).
+  const ownerBypass = isOwnerEmail(user?.email) || isPlatformAdmin;
 
   const query = useQuery({
     queryKey: ['active-plan', user?.id, ownerBypass],
@@ -56,7 +60,7 @@ export function useHasActivePlan() {
       const row = data?.[0];
       return row ? (row as unknown as ActivePlanDetails) : null;
     },
-    enabled: !!user,
+    enabled: !!user && !adminLoading,
     staleTime: 60_000,
   });
 
@@ -66,8 +70,9 @@ export function useHasActivePlan() {
     tier: query.data?.tier ?? null,
     expiresAt: query.data?.expires_at ?? null,
     isOwner: ownerBypass,
-    loading: query.isLoading,
+    loading: adminLoading || query.isLoading,
     refetch: query.refetch,
   };
 }
+
 
