@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, MessageSquare, Mail, Smartphone, Zap, Info, AlertTriangle } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -21,9 +21,9 @@ const CHANNEL_ICON: Record<AutoRuleChannel, typeof Mail> = {
 
 // Förklarar vad varje kanal faktiskt innebär för kandidaten.
 const CHANNEL_HINTS: { value: AutoRuleChannel; label: string; hint: string }[] = [
-  { value: 'chat', label: 'Chatt', hint: 'Meddelandet landar i kandidatens inkorg och syns som en notis i appen. Kandidaten kan svara direkt och därmed starta en dialog med er — välj bort chatt om ni inte vill öppna för svar ännu.' },
+  { value: 'chat', label: 'Chatt', hint: 'Meddelandet skickas direkt till kandidatens inkorg och visas även som en notis i appen. Kandidaten kan svara på meddelandet och påbörja en dialog med er. Om ni ännu inte vill öppna upp för direktkommunikation rekommenderas att stänga av chatt.' },
   { value: 'email', label: 'Mejl', hint: 'Skickas till kandidatens e-postadress.' },
-  { value: 'push', label: 'Push', hint: 'Kandidaten får en skärmnotis i mobilappen.' },
+  { value: 'push', label: 'Push', hint: 'Kandidaten får en skärmnotis om kandidaten har laddat ner appen.' },
 ];
 
 
@@ -81,12 +81,32 @@ function TemplatePreview({ title, entries }: { title: string; entries: PreviewEn
   );
 }
 
+const CACHE_KEY = 'parium_auto_rules_cache';
+
+type AutoRulesCache = { userId: string; automations: OutreachAutomation[]; templates: OutreachTemplate[] };
+
+function readCache(userId: string | undefined): AutoRulesCache | null {
+  if (!userId) return null;
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AutoRulesCache;
+    if (parsed?.userId !== userId) return null;
+    if (!Array.isArray(parsed.automations) || !Array.isArray(parsed.templates)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 export function AutoMessagesPanel() {
   const { user, profile } = useAuth();
   const organizationId = (profile as { organization_id?: string | null } | null)?.organization_id ?? null;
-  const [automations, setAutomations] = useState<OutreachAutomation[]>([]);
-  const [templates, setTemplates] = useState<OutreachTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Synkron hydrering från cache → panelen renderas direkt, ingen spinner vid retur.
+  const initialCache = useRef(readCache(user?.id)).current;
+  const [automations, setAutomations] = useState<OutreachAutomation[]>(initialCache?.automations ?? []);
+  const [templates, setTemplates] = useState<OutreachTemplate[]>(initialCache?.templates ?? []);
+  const [loading, setLoading] = useState(!initialCache);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [pendingDelays, setPendingDelays] = useState<Record<string, number>>({});
 
@@ -96,9 +116,19 @@ export function AutoMessagesPanel() {
       supabase.from('outreach_automations').select('*'),
       supabase.from('outreach_templates').select('*'),
     ]);
-    setAutomations((automationsRes.data as OutreachAutomation[]) ?? []);
-    setTemplates((templatesRes.data as OutreachTemplate[]) ?? []);
+    const nextAutomations = (automationsRes.data as OutreachAutomation[]) ?? [];
+    const nextTemplates = (templatesRes.data as OutreachTemplate[]) ?? [];
+    setAutomations(nextAutomations);
+    setTemplates(nextTemplates);
     setLoading(false);
+    try {
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({ userId: user.id, automations: nextAutomations, templates: nextTemplates }),
+      );
+    } catch {
+      // Ignorera quota-fel
+    }
   }, [user]);
 
   useEffect(() => {
