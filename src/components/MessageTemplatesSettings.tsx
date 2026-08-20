@@ -1216,6 +1216,9 @@ export function MessageTemplatesSettings() {
     STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
+  const standardTemplates = templates.filter((template) => isStandardTemplate(template));
+  const orderedTemplates = [...customTemplates, ...standardTemplates];
+
 
 
   const missingDefaultTemplates = DEFAULT_OUTREACH_TEMPLATES.filter(
