@@ -54,8 +54,20 @@ import {
 } from '@/lib/outreach';
 import { readCachedOutreachStudio, writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
 import { safeSetItem } from '@/lib/safeStorage';
+import { AUTO_RULE_EVENTS } from '@/lib/outreachAutoRules';
+
+// Namn+kanal för samtliga Parium-original (bibliotek + automatiska utskick).
+const STANDARD_TEMPLATE_KEYS = new Set<string>([
+  ...DEFAULT_OUTREACH_TEMPLATES.map((template) => `${template.name}::${template.channel}`),
+  ...AUTO_RULE_EVENTS.flatMap((event) =>
+    (Object.entries(event.templates) as Array<[string, { name: string }]>).map(
+      ([channel, config]) => `${config.name}::${channel}`,
+    ),
+  ),
+]);
 
 const TEMPLATE_DRAFT_PREFIX = 'outreach-template-draft:';
+
 
 type TemplateForm = {
   id: string | null;
@@ -1198,10 +1210,16 @@ export function MessageTemplatesSettings() {
     setRestoringDefault(false);
   };
 
+  // Alla Parium-original: både biblioteksmallarna och de som Automatiska utskick
+  // skapar när en kanal slås på. Dessa är låsta och räknas aldrig som "egna mallar".
   const isStandardTemplate = (template: { name: string; channel: string }) =>
-    DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel);
+    STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
+  const standardTemplates = templates.filter((template) => isStandardTemplate(template));
+  const orderedTemplates = [...customTemplates, ...standardTemplates];
+
+
 
   const missingDefaultTemplates = DEFAULT_OUTREACH_TEMPLATES.filter(
     (defaultTemplate) =>
@@ -1528,29 +1546,41 @@ export function MessageTemplatesSettings() {
             ) : (
                 <div className="space-y-2">
                 {customTemplates.length > 0 && (
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
-                    <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
-                      <Checkbox
-                        checked={selectedTemplateIds.length === customTemplates.length && customTemplates.length > 0}
-                        onCheckedChange={(checked) => setSelectedTemplateIds(checked ? customTemplates.map((template) => template.id) : [])}
-                      />
-                      Markera alla egna mallar
-                    </label>
-                    {selectedTemplateIds.length > 0 && (
-                      <PillButton
-                        className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
-                        onClick={openBulkDeleteDialog}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        Ta bort markerade ({selectedTemplateIds.length})
-                      </PillButton>
-                    )}
-                  </div>
+                  <>
+                    <p className="px-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Egna mallar ({customTemplates.length})</p>
+                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
+                      <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
+                        <Checkbox
+                          checked={selectedTemplateIds.length === customTemplates.length && customTemplates.length > 0}
+                          onCheckedChange={(checked) => setSelectedTemplateIds(checked ? customTemplates.map((template) => template.id) : [])}
+                        />
+                        Markera alla egna mallar
+                      </label>
+                      {selectedTemplateIds.length > 0 && (
+                        <PillButton
+                          className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
+                          onClick={openBulkDeleteDialog}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Ta bort markerade ({selectedTemplateIds.length})
+                        </PillButton>
+                      )}
+                    </div>
+                  </>
                 )}
-                {templates.map((template) => {
+                {orderedTemplates.map((template, index) => {
                   const isStandard = isStandardTemplate(template);
+                  const showStandardHeading = isStandard && index === customTemplates.length;
                   return (
-                    <div key={template.id} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
+                    <div key={template.id} className="contents">
+                    {showStandardHeading && (
+                      <div className="px-1 pt-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Parium-standard ({standardTemplates.length})</p>
+                        <p className="mt-1 text-[11px] text-white md:text-xs">Låsta originalmallar. De läggs till automatiskt när du slår på en kanal under Automatiska utskick – de är alltså inga nya egna mallar.</p>
+                      </div>
+                    )}
+                    <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
+
                     <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                       <div className="min-w-0 space-y-1.5">
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -1618,7 +1648,9 @@ export function MessageTemplatesSettings() {
                       </div>
                     </div>
                   </div>
+                  </div>
                   );
+
                 })}
               </div>
             )}

@@ -131,6 +131,21 @@ export function AutoMessagesPanel() {
     const existing = templates.find((template) => template.name === config.name && template.channel === channel);
     if (existing) return existing.id;
 
+    // Dubbelkolla mot databasen så vi aldrig skapar dubbletter om lokalt state är gammalt.
+    const { data: remote } = await supabase
+      .from('outreach_templates')
+      .select('*')
+      .eq('owner_user_id', user!.id)
+      .eq('name', config.name)
+      .eq('channel', channel)
+      .limit(1)
+      .maybeSingle();
+
+    if (remote) {
+      setTemplates((prev) => [...prev, remote as OutreachTemplate]);
+      return (remote as OutreachTemplate).id;
+    }
+
     const { data, error } = await supabase
       .from('outreach_templates')
       .insert({
@@ -141,6 +156,7 @@ export function AutoMessagesPanel() {
         subject: config.subject,
         body: config.body,
         is_active: true,
+        is_default: true,
       })
       .select('*')
       .single();
@@ -149,6 +165,7 @@ export function AutoMessagesPanel() {
     setTemplates((prev) => [...prev, data as OutreachTemplate]);
     return (data as OutreachTemplate).id;
   };
+
 
   const handleToggle = async (event: AutoRuleEvent, channel: AutoRuleChannel, enabled: boolean) => {
     if (!user) return;
