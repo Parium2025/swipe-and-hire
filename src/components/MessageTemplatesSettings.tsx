@@ -991,13 +991,40 @@ export function MessageTemplatesSettings() {
     if (failedResult?.error) {
       toast.error('Kunde inte spara regeln');
     } else {
+      // Endast en aktiv regeluppsättning per händelse: tidigare regler för samma händelse stängs av,
+      // så kanaler du inte kryssat i slutar skicka direkt.
+      let disabledConflicts = 0;
+      if (automationForm.is_enabled) {
+        const conflicting = automations.filter(
+          (automation) =>
+            automation.is_enabled &&
+            automation.trigger === automationForm.trigger &&
+            getAutomationGroupId(automation) !== groupId,
+        );
+
+
+        if (conflicting.length > 0) {
+          const { error: conflictError } = await supabase
+            .from('outreach_automations')
+            .update({ is_enabled: false })
+            .in('id', conflicting.map((automation) => automation.id));
+
+          if (!conflictError) disabledConflicts = conflicting.length;
+        }
+      }
+
       const wasUpdate = !!automationForm.id;
       toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
+      if (disabledConflicts > 0) {
+        toast.info(`${disabledConflicts} tidigare regel${disabledConflicts > 1 ? 'er' : ''} för samma händelse stängdes av`);
+      }
+
       if (!wasUpdate) {
         setAutomationForm(EMPTY_AUTOMATION_FORM);
       }
       await fetchStudio({ silent: true });
     }
+
 
     setSavingAutomation(false);
   };
@@ -1378,6 +1405,18 @@ export function MessageTemplatesSettings() {
                 <p className="text-xs text-white md:text-sm">Skriv färdiga meddelanden för varje kanal.</p>
               </div>
             </div>
+
+            <div className="mb-3 rounded-2xl border border-white/[0.12] bg-white/5 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white">Så fungerar biblioteket</p>
+              <ul className="mt-2 space-y-1 text-xs text-white md:text-sm">
+                <li>• Mallar märkta <span className="font-semibold">Parium-standard</span> är låsta: de kan varken ändras eller tas bort, så ni har alltid ett fungerande original att falla tillbaka på.</li>
+                <li>• Vill du ha egen text: tryck <span className="font-semibold">Skapa kopia</span> här, eller gå till <span className="font-semibold">Steg 1 · Mall</span> och skriv en ny.</li>
+                <li>• I <span className="font-semibold">Steg 2 · Regel</span> väljer du händelse (ansökan inkommen, före intervju, efter intervju, annons avslutas) och kanaler. Din regel ersätter direkt tidigare regler för samma händelse och kanal – de äldre stängs av automatiskt, så bara en regel kan skicka per händelse och kanal.</li>
+                <li>• Väljer du bara chatt fortsätter e-post och push att vara avstängda för den händelsen tills du kryssar i dem.</li>
+              </ul>
+            </div>
+
+
 
             {missingDefaultTemplates.length > 0 && (
             <div className="mb-3 grid gap-2 rounded-2xl border border-white/[0.12] bg-white/5 p-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
