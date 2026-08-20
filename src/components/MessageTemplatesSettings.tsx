@@ -1518,39 +1518,8 @@ export function MessageTemplatesSettings() {
                         )}
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-1.5">
-                        {isStandard ? (
-                          <PillButton
-                            className="h-8 px-3"
-                            aria-label={`Skapa kopia av ${template.name}`}
-                            title="Skapa en egen kopia"
-                            onClick={() => {
-                              setTemplateForm({
-                                id: null,
-                                name: `${template.name} (kopia)`,
-                                channels: [template.channel as AutomationChannel],
-                                channelContent: {
-                                  chat: {
-                                    subject: template.channel === 'chat' ? template.subject ?? '' : '',
-                                    body: template.channel === 'chat' ? template.body : '',
-                                  },
-                                  email: {
-                                    subject: template.channel === 'email' ? template.subject ?? '' : '',
-                                    body: template.channel === 'email' ? template.body : '',
-                                  },
-                                  push: {
-                                    subject: template.channel === 'push' ? template.subject ?? '' : '',
-                                    body: template.channel === 'push' ? template.body : '',
-                                  },
-                                },
-                              });
-                              setActiveTemplateChannel(template.channel as AutomationChannel);
-                              goToStudioTab('templates');
-                            }}
-                          >
-                            <Copy className="h-3 w-3" />
-                            Skapa kopia
-                          </PillButton>
-                        ) : (
+                        {isStandard ? null : (
+
                           <>
                             <PillButton
                               shape="icon"
