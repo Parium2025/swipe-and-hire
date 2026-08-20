@@ -24,9 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
-  AlertTriangle,
   Bot,
-  CheckCircle2,
   Info,
 
   Loader2,
@@ -558,28 +556,8 @@ export function MessageTemplatesSettings() {
     });
   }, [automations]);
 
-  // Steg 2: visa tydligt vilka händelser som saknar kanal helt.
-  const triggerCoverage = useMemo(() => {
-    const triggers: OutreachAutomation['trigger'][] = [
-      'application_received',
-      'interview_before',
-      'interview_after',
-      'job_closed',
-    ];
 
-    return triggers.map((trigger) => ({
-      trigger,
-      label: getOutreachTriggerLabel(trigger),
-      channels: CHANNEL_ORDER.filter((channel) =>
-        automations.some((item) => item.trigger === trigger && item.channel === channel && item.is_enabled),
-      ),
-    }));
-  }, [automations]);
 
-  const uncoveredTriggers = useMemo(
-    () => triggerCoverage.filter((item) => item.channels.length === 0),
-    [triggerCoverage],
-  );
 
 
 
@@ -1798,52 +1776,8 @@ export function MessageTemplatesSettings() {
                 </p>
               </div>
 
-              <div
-                className={`rounded-2xl border p-3 ${
-                  uncoveredTriggers.length > 0
-                    ? 'border-destructive/40 bg-destructive/15'
-                    : 'border-emerald-400/35 bg-emerald-400/10'
-                }`}
-              >
-                <div className="flex items-start gap-2">
-                  {uncoveredTriggers.length > 0 ? (
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-                  ) : (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                  )}
-                  <div className="min-w-0 space-y-2">
-                    <p className="text-sm font-semibold text-white">
-                      {uncoveredTriggers.length > 0
-                        ? `${uncoveredTriggers.length} händelse${uncoveredTriggers.length === 1 ? '' : 'r'} saknar kanal`
-                        : 'Alla händelser har minst en aktiv kanal'}
-                    </p>
-                    {uncoveredTriggers.length > 0 && (
-                      <p className="text-xs text-white [overflow-wrap:anywhere]">
-                        Kandidaten får inget meddelande alls vid dessa händelser. Slå på chatt, mejl eller push under
-                        Automatiska utskick — eller spara en regel här nedanför.
-                      </p>
-                    )}
-                    <div className="flex flex-wrap gap-1.5">
-                      {triggerCoverage.map((item) => (
-                        <span
-                          key={item.trigger}
-                          className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white ${
-                            item.channels.length === 0
-                              ? 'border-destructive/50 bg-destructive/20'
-                              : 'border-white/15 bg-white/10'
-                          }`}
-                        >
-                          {item.label}
-                          {' · '}
-                          {item.channels.length === 0
-                            ? 'ingen kanal'
-                            : item.channels.map((channel) => getOutreachChannelLabel(channel)).join(', ')}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+
+
 
 
 
@@ -1906,10 +1840,19 @@ export function MessageTemplatesSettings() {
                     </span>
                   </div>
                   <p className="mt-2 text-xs text-white md:text-sm">
-                    {selectedAutomationGroup
-                      ? `Kopplad till ${getOutreachTriggerLabel(selectedAutomationGroup.primary.trigger)} · ${formatAutomationDelay(selectedAutomationGroup.primary.delay_minutes)}`
-                      : 'Inte kopplad till tidslinjen ännu — välj händelse och tid nedan.'}
+                    {`Skickas vid ${getOutreachTriggerLabel(automationForm.trigger)} · ${formatAutomationDelay(automationForm.delay_minutes)}`}
                   </p>
+                  {selectedAutomationGroup &&
+                    (selectedAutomationGroup.primary.trigger !== automationForm.trigger ||
+                      selectedAutomationGroup.primary.delay_minutes !== automationForm.delay_minutes) && (
+                      <p className="mt-1 text-[11px] text-white [overflow-wrap:anywhere]">
+                        {`Sparad regel just nu: ${getOutreachTriggerLabel(selectedAutomationGroup.primary.trigger)} · ${formatAutomationDelay(selectedAutomationGroup.primary.delay_minutes)} — spara för att uppdatera.`}
+                      </p>
+                    )}
+                  {!selectedAutomationGroup && (
+                    <p className="mt-1 text-[11px] text-white">Inte kopplad till tidslinjen ännu — spara regeln för att aktivera.</p>
+                  )}
+
                 </div>
 
 
