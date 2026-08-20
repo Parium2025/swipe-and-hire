@@ -146,7 +146,43 @@ async function buildContext(log: OutreachLog) {
   };
 }
 
+/**
+ * Mottagarens egna notisinställningar väger alltid tyngst.
+ * Arbetsgivarens regel avgör OM något ska skickas – kandidaten avgör HUR
+ * (mejl/push). Chatt räknas som produktens grundfunktion och levereras alltid
+ * i inkorgen, men den in-app-notis/push som chatten triggar följer kandidatens val.
+ */
+const PREF_TYPE_BY_TRIGGER: Record<OutreachTrigger, string> = {
+  application_received: 'application_status',
+  application_no_response_14d: 'application_status',
+  interview_before: 'interview_scheduled',
+  interview_after: 'interview_scheduled',
+  interview_scheduled: 'interview_scheduled',
+  job_closed: 'job_closed',
+  manual_send: 'new_message',
+};
+
+async function recipientAllowsChannel(
+  userId: string | null,
+  trigger: OutreachTrigger,
+  channel: 'email' | 'push',
+): Promise<boolean> {
+  if (!userId) return true;
+  const prefType = PREF_TYPE_BY_TRIGGER[trigger];
+  if (!prefType) return true;
+  const { data, error } = await admin
+    .from('notification_preferences')
+    .select('is_enabled, email_enabled')
+    .eq('user_id', userId)
+    .eq('notification_type', prefType)
+    .maybeSingle();
+  // Fel eller ingen rad = default på (samma default som i UI:t).
+  if (error || !data) return true;
+  return channel === 'email' ? data.email_enabled !== false : data.is_enabled !== false;
+}
+
 async function dispatchLog(log: OutreachLog) {
+
   const template = log.template_id ? ((await admin.from('outreach_templates').select('*').eq('id', log.template_id).maybeSingle()).data as OutreachTemplate | null) : null;
   const context = await buildContext(log);
   const data = {
@@ -178,7 +214,15 @@ async function dispatchLog(log: OutreachLog) {
     }
 
     if (log.channel === 'email') {
+      if (!(await recipientAllowsChannel(log.recipient_user_id, log.trigger, 'email'))) {
+        await admin.from('outreach_dispatch_logs').update({
+          status: 'skipped',
+          error_message: 'Mottagaren har stängt av mejl för den här typen av notis',
+        }).eq('id', log.id);
+        return { skipped: true };
+      }
       if (!context.recipientEmail) throw new Error('Kandidaten saknar e-postadress');
+
       const trackingUrl = `${supabaseUrl}/functions/v1/outreach-open-track?logId=${encodeURIComponent(log.id)}`;
       const emailSubject = subject || `Meddelande från ${context.companyName}`;
 
@@ -220,6 +264,13 @@ async function dispatchLog(log: OutreachLog) {
 
     if (log.channel === 'push') {
       if (!log.recipient_user_id) throw new Error('Saknar mottagare för push');
+      if (!(await recipientAllowsChannel(log.recipient_user_id, log.trigger, 'push'))) {
+        await admin.from('outreach_dispatch_logs').update({
+          status: 'skipped',
+          error_message: 'Mottagaren har stängt av push för den här typen av notis',
+        }).eq('id', log.id);
+        return { skipped: true };
+      }
       const { count: tokenCount } = await admin
         .from('device_push_tokens')
         .select('id', { count: 'exact', head: true })
@@ -229,8 +280,14 @@ async function dispatchLog(log: OutreachLog) {
       const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceRoleKey}` },
-        body: JSON.stringify({ recipient_id: log.recipient_user_id, title: subject || context.companyName, body }),
+        body: JSON.stringify({
+          recipient_id: log.recipient_user_id,
+          title: subject || context.companyName,
+          body,
+          notification_type: PREF_TYPE_BY_TRIGGER[log.trigger],
+        }),
       });
+
       if (!response.ok) throw new Error(await response.text());
       await admin.from('outreach_dispatch_logs').update({ status: 'sent', sent_at: new Date().toISOString(), error_message: null }).eq('id', log.id);
       return {};
