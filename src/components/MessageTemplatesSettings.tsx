@@ -409,6 +409,7 @@ export function MessageTemplatesSettings() {
   const libraryTabRef = useRef<HTMLButtonElement>(null);
   const automationsTabRef = useRef<HTMLButtonElement>(null);
   const logsTabRef = useRef<HTMLButtonElement>(null);
+  const studioTabsRef = useRef<HTMLDivElement>(null);
   const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 4, width: 0 });
   const templateDraftKey = user ? `${TEMPLATE_DRAFT_PREFIX}${user.id}` : null;
   const [templateForm, setTemplateForm] = useState<TemplateForm>(() => {
