@@ -411,7 +411,21 @@ export function MessageTemplatesSettings() {
   const logsTabRef = useRef<HTMLButtonElement>(null);
   const studioTabsRef = useRef<HTMLDivElement>(null);
   const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 4, width: 0 });
+  /**
+   * Byter flik och håller flikraden i vy — annars hamnar man kvar längst ner
+   * på sidan när nästa steg är kortare än det förra.
+   */
+  const goToStudioTab = useCallback((tab: StudioTab) => {
+    setActiveStudioTab(tab);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        studioTabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }, []);
+
   const templateDraftKey = user ? `${TEMPLATE_DRAFT_PREFIX}${user.id}` : null;
+
   const [templateForm, setTemplateForm] = useState<TemplateForm>(() => {
     if (!user) return EMPTY_TEMPLATE_FORM;
     try {
