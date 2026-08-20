@@ -9,6 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import SettingsPanel from '@/components/employer/settings/SettingsPanel';
 import { AUTO_RULE_CHANNELS, AUTO_RULE_EVENTS, type AutoRuleChannel, type AutoRuleEvent } from '@/lib/outreachAutoRules';
+import { seedDefaultAutoRules } from '@/lib/outreachSeedDefaults';
+
 import type { OutreachAutomation, OutreachTemplate } from '@/lib/outreachTypes';
 
 const CHANNEL_ICON: Record<AutoRuleChannel, typeof Mail> = {
