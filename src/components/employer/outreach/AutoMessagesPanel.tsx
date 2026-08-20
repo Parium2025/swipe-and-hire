@@ -289,7 +289,7 @@ export function AutoMessagesPanel() {
                     <span className="text-xs text-white">{event.delayLabel}</span>
                     <Select
                       value={String(delay)}
-                      disabled={!hasAnyRow || busyKey === `${event.trigger}-delay`}
+                      disabled={busyKey === `${event.trigger}-delay`}
                       onValueChange={(value) => void handleDelayChange(event, Number(value))}
                     >
                       <SelectTrigger className="h-8 w-[180px] border-white/10 bg-white/5 text-xs text-white [&>svg]:text-white">
