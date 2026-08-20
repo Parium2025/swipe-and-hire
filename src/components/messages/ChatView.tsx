@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { MessageBubble } from '@/components/messages/MessageBubble';
-import { getConversationDisplayName, getConversationAvatarProfile } from '@/lib/conversationDisplayUtils';
+import { getConversationDisplayName, getConversationAvatarProfile, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

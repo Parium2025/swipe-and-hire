@@ -15,7 +15,7 @@ import { EmptyConversationList, EmptyChatState } from '@/components/messages/Emp
 import { MessagesTabs } from '@/components/MessagesTabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDeleteConversation } from '@/hooks/useDeleteConversation';
-import { getConversationDisplayName } from '@/lib/conversationDisplayUtils';
+import { getConversationDisplayName, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
   Plus,
