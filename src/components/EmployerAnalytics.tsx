@@ -480,7 +480,7 @@ const formatDuration = (seconds: number): string => {
 
 /* ─── Main component ─── */
 const EmployerAnalytics = memo(() => {
-  const { user } = useAuth();
+  const { user, organization } = useAuth();
   const queryClient = useQueryClient();
   const [selectedDays, setSelectedDays] = useState<number | null>(() => readPersistedEmployerAnalyticsFilter());
   const overviewCacheKey = useMemo(
@@ -735,7 +735,11 @@ const EmployerAnalytics = memo(() => {
         </div>
         <div>
           <h2 className="text-xl font-semibold text-white tracking-tight">Rekryteringsanalys</h2>
-          <p className="text-sm text-white">Insikter för alla dina annonser</p>
+          <p className="text-sm text-white">
+            {organization?.name
+              ? `Insikter för alla annonser i ${organization.name}`
+              : 'Insikter för alla dina annonser'}
+          </p>
         </div>
       </div>
 
