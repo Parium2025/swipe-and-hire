@@ -752,7 +752,7 @@ const AuthMobile = ({
                   <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
-                    <form key="login-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && (e.target as HTMLElement)?.tagName === 'INPUT' && !loading) { e.preventDefault(); handleSubmit(e); } }} className="space-y-3 md:space-y-4">
+                    <form key="login-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && (e.target as HTMLElement)?.tagName === 'INPUT' && !loading) { e.preventDefault(); e.currentTarget.requestSubmit(); } }} className="space-y-3 md:space-y-4">
                   <div className="relative overflow-anchor-none">
                         <Label htmlFor="login-email" className="text-white">
                           <Mail className="h-4 w-4 inline mr-2" />
@@ -768,6 +768,7 @@ const AuthMobile = ({
                           name="auth-email"
                           autoComplete="email"
                           inputMode="email"
+                           enterKeyHint="next"
                           spellCheck={false}
                           autoCapitalize="none"
                           className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
@@ -788,6 +789,7 @@ const AuthMobile = ({
                             required
                             name="auth-password"
                             autoComplete="current-password"
+                             enterKeyHint="go"
                             className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
                           />
                           <button
