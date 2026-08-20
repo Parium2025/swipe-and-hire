@@ -129,13 +129,16 @@ export function useNotifications() {
         },
         (payload) => {
           const newNotif = payload.new as AppNotification;
+          if (mutedTypesRef.current.has(newNotif.type)) return;
           setNotifications(prev => {
+            if (prev.some((n) => n.id === newNotif.id)) return prev;
             const updated = [newNotif, ...prev];
             setCache(user.id, updated);
             return updated;
           });
           setUnreadCount(prev => prev + 1);
         }
+
       )
       .subscribe();
 
