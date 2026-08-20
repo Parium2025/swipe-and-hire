@@ -1297,6 +1297,35 @@ export function MessageTemplatesSettings() {
     setRunningDispatch(false);
   };
 
+  const handleSendTestToMyself = async () => {
+    if (!user || !selectedTemplateFamily) return;
+
+    const sends = selectedTemplateFamily.channels
+      .map((channel) => selectedTemplateFamily.templatesByChannel[channel])
+      .filter(Boolean)
+      .map((template) => ({ channel: template!.channel, templateId: template!.id }));
+
+    if (sends.length === 0) {
+      toast.error('Mallen saknar kanaler att testa');
+      return;
+    }
+
+    setSendingTest(true);
+    const { error } = await supabase.functions.invoke('outreach-dispatch', {
+      body: { mode: 'manual', recipientUserId: user.id, sends },
+    });
+    setSendingTest(false);
+
+    if (error) {
+      toast.error('Kunde inte skicka provutskicket');
+      return;
+    }
+
+    toast.success('Provutskick skickat till dig själv');
+    await fetchStudio({ silent: true });
+  };
+
+
   const handleCreateAutomationShortcut = () => {
     const firstUnlinkedFamily = templateFamilies.find((family) => !getLinkedAutomationGroup(family, automationGroups));
 
