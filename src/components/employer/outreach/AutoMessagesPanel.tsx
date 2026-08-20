@@ -260,9 +260,25 @@ export function AutoMessagesPanel() {
           <h3 className="text-sm font-medium text-white">Automatiska utskick</h3>
         </div>
         <p className="text-sm text-white">
-          Välj vad kandidaten får automatiskt och i vilken kanal. Chatt landar i kandidatens inkorg och visas samtidigt
-          som en notis i appen. Kandidaten kan alltid stänga av notiser, push och mejl i sina egna inställningar.
+          Välj vad kandidaten får automatiskt och i vilken kanal. Kandidaten kan alltid stänga av notiser, push och mejl
+          i sina egna inställningar.
         </p>
+
+        <ul className="space-y-1.5 rounded-xl border border-white/10 bg-white/5 p-3">
+          {CHANNEL_HINTS.map(({ value, label, hint }) => {
+            const Icon = CHANNEL_ICON[value];
+            return (
+              <li key={value} className="flex items-start gap-2 text-xs text-white">
+                <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span className="min-w-0 break-words">
+                  <span className="font-medium">{label}:</span> {hint}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+
+
 
 
         {loading ? (
