@@ -1190,24 +1190,27 @@ export function MessageTemplatesSettings() {
           <AlertDialogFooter className="mt-4 flex-row gap-2 sm:justify-center">
             <AlertDialogCancel
               disabled={isDeleting}
+              onPointerDown={(event) => event.preventDefault()}
               onClick={() => setPendingDeleteAction(null)}
-              className="mt-0 flex-1 rounded-full border-white/20 bg-white/10 text-sm text-white transition-all duration-300 md:hover:border-white/50 md:hover:bg-white/20 md:hover:text-white"
+              className="mt-0 flex-1 rounded-full border-white/20 bg-white/10 text-sm text-white outline-none transition-colors duration-200 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 [-webkit-tap-highlight-color:transparent] md:hover:border-white/50 md:hover:bg-white/20 md:hover:text-white"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructiveSoft"
               disabled={isDeleting}
+              onPointerDown={(event) => event.preventDefault()}
               onClick={(event) => {
                 event.preventDefault();
                 void handleConfirmDelete();
               }}
-              className="flex-1 rounded-full text-sm"
+              className="flex-1 rounded-full text-sm outline-none transition-colors duration-200 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 [-webkit-tap-highlight-color:transparent]"
             >
               {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
+
         </AlertDialogContentNoFocus>
       </AlertDialog>
 
