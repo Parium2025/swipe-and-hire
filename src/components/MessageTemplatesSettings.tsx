@@ -1362,23 +1362,25 @@ export function MessageTemplatesSettings() {
               </div>
             </div>
 
+            {missingDefaultTemplates.length > 0 && (
             <div className="mb-3 grid gap-2 rounded-2xl border border-white/[0.12] bg-white/5 p-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-white">Parium-standard</Label>
-                  <InfoHint text="Parium-standarden finns alltid kvar i koden. Välj en enskild mall för att lägga tillbaka eller återställa den, eller lägg tillbaka hela standardpaketet. Egna mallar påverkas aldrig." />
+                  <InfoHint text="Parium-standarden finns alltid kvar i koden. Saknas någon originalmall kan du lägga tillbaka den här. När alla finns på plats försvinner rutan. Egna mallar påverkas aldrig." />
                 </div>
                 <p className="text-xs text-white">
-                  {missingDefaultTemplates.length === 0
-                    ? `Alla ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar finns i biblioteket.`
-                    : `${missingDefaultTemplates.length} av ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar saknas i biblioteket.`}
+                  {`${missingDefaultTemplates.length} av ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar saknas i biblioteket.`}
                 </p>
-                <Select value={selectedDefaultTemplateName} onValueChange={setSelectedDefaultTemplateName}>
+                <Select
+                  value={restoreTargetName}
+                  onValueChange={setSelectedDefaultTemplateName}
+                >
                   <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
                     <SelectValue placeholder="Välj Parium-mall" />
                   </SelectTrigger>
                   <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
-                    {DEFAULT_OUTREACH_TEMPLATES.map((template) => (
+                    {missingDefaultTemplates.map((template) => (
                       <SelectItem key={`${template.channel}-${template.name}`} value={template.name}>{template.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -1387,23 +1389,26 @@ export function MessageTemplatesSettings() {
               <div className="flex flex-wrap items-center gap-2">
                 <PillButton
                   className="px-4 disabled:opacity-50"
-                  disabled={restoringDefault || !selectedDefaultTemplateName}
-                  onClick={() => void handleRestoreDefaultTemplate()}
+                  disabled={restoringDefault || !restoreTargetName}
+                  onClick={() => void handleRestoreDefaultTemplate(restoreTargetName)}
                 >
                   {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                  {templates.some((template) => template.name === selectedDefaultTemplateName) ? 'Återställ vald' : 'Lägg tillbaka vald'}
+                  Lägg tillbaka vald
                 </PillButton>
-                <PillButton
-                  className="px-4 disabled:opacity-50"
-                  disabled={restoringDefault}
-                  onClick={() => void handleRestoreAllDefaultTemplates()}
-                >
-                  {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                  Lägg tillbaka alla ({DEFAULT_OUTREACH_TEMPLATES.length})
-                </PillButton>
+                {missingDefaultTemplates.length > 1 && (
+                  <PillButton
+                    className="px-4 disabled:opacity-50"
+                    disabled={restoringDefault}
+                    onClick={() => void handleRestoreAllDefaultTemplates()}
+                  >
+                    {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                    Lägg tillbaka alla ({missingDefaultTemplates.length})
+                  </PillButton>
+                )}
               </div>
-
             </div>
+            )}
+
 
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
