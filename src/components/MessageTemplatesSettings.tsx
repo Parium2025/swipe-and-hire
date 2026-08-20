@@ -1558,7 +1558,7 @@ export function MessageTemplatesSettings() {
                   <>
                     <p className="px-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Egna mallar ({customTemplates.length})</p>
                     <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
-                      <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
+                      <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-white">
                         <Checkbox
                           checked={selectedTemplateIds.length === customTemplates.length && customTemplates.length > 0}
                           onCheckedChange={(checked) => setSelectedTemplateIds(checked ? customTemplates.map((template) => template.id) : [])}
