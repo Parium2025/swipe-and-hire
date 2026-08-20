@@ -82,7 +82,7 @@ type AutomationForm = {
   group_id: string | null;
   automation_ids: string[];
   name: string;
-  trigger: OutreachTrigger;
+  trigger: OutreachTrigger | '';
   channels: AutomationChannel[];
   recipient_type: 'candidate' | 'employer';
   template_ids: Partial<Record<AutomationChannel, string>>;
@@ -266,7 +266,7 @@ const EMPTY_AUTOMATION_FORM: AutomationForm = {
   group_id: null,
   automation_ids: [],
   name: '',
-  trigger: 'application_received',
+  trigger: '',
   channels: [],
   recipient_type: 'candidate',
   template_ids: {},
@@ -295,7 +295,7 @@ const getTemplateFamilyName = (name: string) => {
   return suffix ? name.slice(0, -suffix.length) : name;
 };
 
-const getDelayFieldLabel = (trigger: OutreachTrigger) => {
+const getDelayFieldLabel = (trigger: OutreachTrigger | '') => {
   switch (trigger) {
     case 'interview_before':
       return 'Minuter före intervjun';
@@ -306,7 +306,7 @@ const getDelayFieldLabel = (trigger: OutreachTrigger) => {
   }
 };
 
-const getDelayFieldHint = (trigger: OutreachTrigger) => {
+const getDelayFieldHint = (trigger: OutreachTrigger | '') => {
   switch (trigger) {
     case 'interview_before':
       return 'Exempel: 60 = skicka 1 timme innan intervjun.';
