@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Loader2, MessageSquare, Mail, Smartphone, Zap, Info } from 'lucide-react';
+import { Loader2, MessageSquare, Mail, Smartphone, Zap, Info, AlertTriangle } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -18,6 +18,14 @@ const CHANNEL_ICON: Record<AutoRuleChannel, typeof Mail> = {
   email: Mail,
   push: Smartphone,
 };
+
+// Förklarar vad varje kanal faktiskt innebär för kandidaten.
+const CHANNEL_HINTS: { value: AutoRuleChannel; label: string; hint: string }[] = [
+  { value: 'chat', label: 'Chatt', hint: 'Landar i kandidatens inkorg och syns som notis i appen — kandidaten kan svara direkt.' },
+  { value: 'email', label: 'Mejl', hint: 'Skickas till kandidatens e-postadress.' },
+  { value: 'push', label: 'Push', hint: 'Skärmnotis i mobilappen, även när telefonen är låst.' },
+];
+
 
 type PreviewEntry = { channel: AutoRuleChannel; label: string; subject: string | null; body: string; edited: boolean };
 
@@ -260,9 +268,25 @@ export function AutoMessagesPanel() {
           <h3 className="text-sm font-medium text-white">Automatiska utskick</h3>
         </div>
         <p className="text-sm text-white">
-          Välj vad kandidaten får automatiskt och i vilken kanal. Chatt landar i kandidatens inkorg och visas samtidigt
-          som en notis i appen. Kandidaten kan alltid stänga av notiser, push och mejl i sina egna inställningar.
+          Välj vad kandidaten får automatiskt och i vilken kanal. Kandidaten kan alltid stänga av notiser, push och mejl
+          i sina egna inställningar.
         </p>
+
+        <ul className="space-y-1.5 rounded-xl border border-white/10 bg-white/5 p-3">
+          {CHANNEL_HINTS.map(({ value, label, hint }) => {
+            const Icon = CHANNEL_ICON[value];
+            return (
+              <li key={value} className="flex items-start gap-2 text-xs text-white">
+                <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span className="min-w-0 break-words">
+                  <span className="font-medium">{label}:</span> {hint}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+
+
 
 
         {loading ? (
@@ -286,7 +310,10 @@ export function AutoMessagesPanel() {
                 };
               });
 
+              const allChannelsOn = AUTO_RULE_CHANNELS.every(({ value }) => Boolean(getRow(event, value)?.is_enabled));
+
               return (
+
                 <div key={event.trigger} className="rounded-xl border border-white/10 bg-white/5 p-4 md:p-3">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0 flex-1">
@@ -320,8 +347,18 @@ export function AutoMessagesPanel() {
                     </div>
                   </div>
 
+                  {allChannelsOn && (
+                    <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 p-2.5">
+                      <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
+                      <p className="min-w-0 break-words text-xs text-white">
+                        Kandidaten nås på tre ställen samtidigt. Vill du hålla nere bruset kan du t.ex. köra chatt + push.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="mt-3 flex items-center gap-3">
                     <span className="text-xs text-white">{event.delayLabel}</span>
+
                     <Select
                       value={String(delay)}
                       disabled={busyKey === `${event.trigger}-delay`}
