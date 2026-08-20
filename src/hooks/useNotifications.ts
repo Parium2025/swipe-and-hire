@@ -50,9 +50,25 @@ export function useNotifications() {
     }
   }, [user]);
 
+  // Typer där användaren själv stängt av in-app-notiser. Raden finns kvar i
+  // databasen (push/mejl styrs separat), men klockan ska hållas tyst.
+  const mutedTypesRef = useRef<Set<string>>(new Set());
+
+  const loadMutedTypes = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('notification_preferences')
+      .select('notification_type, in_app_enabled')
+      .eq('user_id', user.id);
+    mutedTypesRef.current = new Set(
+      (data ?? []).filter((p) => p.in_app_enabled === false).map((p) => p.notification_type)
+    );
+  }, [user]);
+
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
     try {
+      await loadMutedTypes();
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
@@ -60,14 +76,17 @@ export function useNotifications() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      const items = (data || []) as AppNotification[];
+      const items = ((data || []) as AppNotification[]).filter(
+        (n) => !mutedTypesRef.current.has(n.type)
+      );
       setNotifications(items);
       setUnreadCount(items.filter(n => !n.is_read).length);
       setCache(user.id, items);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     }
-  }, [user]);
+  }, [user, loadMutedTypes]);
+
 
   // Fetch on mount
   useEffect(() => {
