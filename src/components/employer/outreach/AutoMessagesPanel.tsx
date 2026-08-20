@@ -347,14 +347,28 @@ export function AutoMessagesPanel() {
                     </div>
                   </div>
 
-                  {allChannelsOn && (
-                    <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 p-2.5">
-                      <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
-                      <p className="min-w-0 break-words text-xs text-white">
-                        Kandidaten nås på tre ställen samtidigt. Vill du hålla nere bruset kan du t.ex. köra chatt + push.
-                      </p>
-                    </div>
-                  )}
+                  {(() => {
+                    const activeHints = CHANNEL_HINTS.filter(({ value }) => Boolean(getRow(event, value)?.is_enabled));
+                    if (activeHints.length === 0) return null;
+                    return (
+                      <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 p-2.5">
+                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
+                        <div className="min-w-0 space-y-1">
+                          {activeHints.map(({ value, label, hint }) => (
+                            <p key={value} className="min-w-0 break-words text-xs text-white">
+                              <span className="font-medium">{label}:</span> {hint}
+                            </p>
+                          ))}
+                          {allChannelsOn && (
+                            <p className="min-w-0 break-words text-xs text-white">
+                              Kandidaten nås på tre ställen samtidigt. Vill du hålla nere bruset kan du t.ex. köra chatt + push.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
 
                   <div className="mt-3 flex items-center gap-3">
                     <span className="text-xs text-white">{event.delayLabel}</span>
