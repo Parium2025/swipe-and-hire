@@ -60,6 +60,8 @@ export function ChatView({
   const { getReactionsForMessage, toggleReaction } = useMessageReactions(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
+  const { setMuted, isUpdating: isUpdatingMute } = useMuteConversation();
+
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
