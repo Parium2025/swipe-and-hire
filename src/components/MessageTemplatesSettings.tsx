@@ -24,8 +24,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
+  AlertTriangle,
   Bot,
-  
+  CheckCircle2,
   Info,
 
   Loader2,
@@ -544,6 +545,31 @@ export function MessageTemplatesSettings() {
       };
     });
   }, [automations]);
+
+  // Steg 2: visa tydligt vilka händelser som saknar kanal helt.
+  const triggerCoverage = useMemo(() => {
+    const triggers: OutreachAutomation['trigger'][] = [
+      'application_received',
+      'interview_before',
+      'interview_after',
+      'job_closed',
+    ];
+
+    return triggers.map((trigger) => ({
+      trigger,
+      label: getOutreachTriggerLabel(trigger),
+      channels: CHANNEL_ORDER.filter((channel) =>
+        automations.some((item) => item.trigger === trigger && item.channel === channel && item.is_enabled),
+      ),
+    }));
+  }, [automations]);
+
+  const uncoveredTriggers = useMemo(
+    () => triggerCoverage.filter((item) => item.channels.length === 0),
+    [triggerCoverage],
+  );
+
+
 
   const templateFamilies = useMemo<TemplateFamily[]>(() => {
     const grouped = new Map<string, TemplateFamily>();
@@ -1740,6 +1766,55 @@ export function MessageTemplatesSettings() {
                 </p>
               </div>
 
+              <div
+                className={`rounded-2xl border p-3 ${
+                  uncoveredTriggers.length > 0
+                    ? 'border-destructive/40 bg-destructive/15'
+                    : 'border-emerald-400/35 bg-emerald-400/10'
+                }`}
+              >
+                <div className="flex items-start gap-2">
+                  {uncoveredTriggers.length > 0 ? (
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                  ) : (
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                  )}
+                  <div className="min-w-0 space-y-2">
+                    <p className="text-sm font-semibold text-white">
+                      {uncoveredTriggers.length > 0
+                        ? `${uncoveredTriggers.length} händelse${uncoveredTriggers.length === 1 ? '' : 'r'} saknar kanal`
+                        : 'Alla händelser har minst en aktiv kanal'}
+                    </p>
+                    {uncoveredTriggers.length > 0 && (
+                      <p className="text-xs text-white [overflow-wrap:anywhere]">
+                        Kandidaten får inget meddelande alls vid dessa händelser. Slå på chatt, mejl eller push under
+                        Automatiska utskick — eller spara en regel här nedanför.
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {triggerCoverage.map((item) => (
+                        <span
+                          key={item.trigger}
+                          className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white ${
+                            item.channels.length === 0
+                              ? 'border-destructive/50 bg-destructive/20'
+                              : 'border-white/15 bg-white/10'
+                          }`}
+                        >
+                          {item.label}
+                          {' · '}
+                          {item.channels.length === 0
+                            ? 'ingen kanal'
+                            : item.channels.map((channel) => getOutreachChannelLabel(channel)).join(', ')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-white">Vilken mall vill du sätta en regel på?</Label>
@@ -1901,7 +1976,7 @@ export function MessageTemplatesSettings() {
                 <div className="flex flex-wrap items-center gap-2">
                   {selectedLogIds.length > 0 && (
                     <PillButton
-                      className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
+                      className="h-8 border-white/20 bg-white/10 px-3 hover:bg-white/20 hover:border-white/40"
                       onClick={() => openLogDeleteDialog(selectedLogIds, selectedLogIds.length === logs.length)}
                     >
                       <Trash2 className="h-3 w-3" />
@@ -1909,7 +1984,7 @@ export function MessageTemplatesSettings() {
                     </PillButton>
                   )}
                   <PillButton
-                    className="h-8 px-3"
+                    className="h-8 border-destructive/60 bg-destructive/30 px-3 text-white hover:bg-destructive/45 hover:border-destructive/80"
                     onClick={() => openLogDeleteDialog(logs.map((log) => log.id), true)}
                   >
                     <Trash2 className="h-3 w-3" />
@@ -1917,6 +1992,11 @@ export function MessageTemplatesSettings() {
                   </PillButton>
                 </div>
               </div>
+
+              <p className="px-1 text-[11px] text-white">
+                Loggen städas automatiskt: poster äldre än 90 dagar tas bort varje natt.
+              </p>
+
 
               <div className="space-y-2">
               {logs.map((log) => {
