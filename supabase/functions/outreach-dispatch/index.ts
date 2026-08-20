@@ -214,7 +214,15 @@ async function dispatchLog(log: OutreachLog) {
     }
 
     if (log.channel === 'email') {
+      if (!(await recipientAllowsChannel(log.recipient_user_id, log.trigger, 'email'))) {
+        await admin.from('outreach_dispatch_logs').update({
+          status: 'skipped',
+          error_message: 'Mottagaren har stängt av mejl för den här typen av notis',
+        }).eq('id', log.id);
+        return { skipped: true };
+      }
       if (!context.recipientEmail) throw new Error('Kandidaten saknar e-postadress');
+
       const trackingUrl = `${supabaseUrl}/functions/v1/outreach-open-track?logId=${encodeURIComponent(log.id)}`;
       const emailSubject = subject || `Meddelande från ${context.companyName}`;
 
