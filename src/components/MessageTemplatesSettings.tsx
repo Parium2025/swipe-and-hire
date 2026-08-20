@@ -1890,6 +1890,34 @@ export function MessageTemplatesSettings() {
                 ))}
               </div>
 
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
+                <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
+                  <Checkbox
+                    checked={selectedLogIds.length === logs.length && logs.length > 0}
+                    onCheckedChange={(checked) => setSelectedLogIds(checked ? logs.map((log) => log.id) : [])}
+                  />
+                  Markera alla ({logs.length})
+                </label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {selectedLogIds.length > 0 && (
+                    <PillButton
+                      className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
+                      onClick={() => openLogDeleteDialog(selectedLogIds, selectedLogIds.length === logs.length)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Ta bort markerade ({selectedLogIds.length})
+                    </PillButton>
+                  )}
+                  <PillButton
+                    className="h-8 px-3"
+                    onClick={() => openLogDeleteDialog(logs.map((log) => log.id), true)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Rensa hela loggen
+                  </PillButton>
+                </div>
+              </div>
+
               <div className="space-y-2">
               {logs.map((log) => {
                 const template = templates.find((item) => item.id === log.template_id);
@@ -1897,6 +1925,11 @@ export function MessageTemplatesSettings() {
                 return (
                   <div key={log.id} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <Checkbox
+                        checked={selectedLogIds.includes(log.id)}
+                        onCheckedChange={(checked) => setSelectedLogIds((prev) => checked ? [...new Set([...prev, log.id])] : prev.filter((id) => id !== log.id))}
+                        aria-label="Markera loggpost"
+                      />
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(log.trigger)}</span>
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(log.channel)}</span>
                       <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${getLogStatusBadgeClassName(log.status)}`}>{getLogStatusLabel(log)}</span>
