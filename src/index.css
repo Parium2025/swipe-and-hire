@@ -2140,11 +2140,34 @@ video::-webkit-media-controls {
     font-size: clamp(1.95rem, 9vw, 2.6rem) !important;
   }
 }
+/* Stor mobil / liten tablet — nowrap-rubriken måste krympa med bredden,
+   annars klipps sista ordet ("väntar!") mot högerkanten. */
+@media (min-width: 481px) and (max-width: 767px) {
+  .landing-h2.landing-h2--single-line {
+    font-size: clamp(2rem, 6.4vw, 3rem) !important;
+  }
+}
+/* iPad portrait: basregeln (9.5vw) är för bred för en rad utan radbrytning. */
+@media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
+  .landing-h2.landing-h2--single-line {
+    font-size: min(5.4vw, 3.6rem) !important;
+  }
+}
 @media (min-width: 900px) and (max-width: 1180px) and (orientation: landscape) {
   .landing-h2.landing-h2--single-line {
     font-size: clamp(3.25rem, 6.4vw, 4.75rem) !important;
   }
 }
+/* Stor desktop: containern slutar växa vid ~54rem, så rubriken måste ha ett
+   tak — annars sticker sista ordet utanför textblocket på 1920px och uppåt. */
+@media (min-width: 1441px) {
+  .landing-h2.landing-h2--single-line {
+    font-size: min(5.4vw, 78px) !important;
+  }
+}
+
+
+
 
 /* Descenders ska aldrig klippas i SplitHeadline */
 .landing-h2 .split-headline-word { padding-bottom: 0.22em; }
