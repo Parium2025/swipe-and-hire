@@ -428,6 +428,7 @@ export function MessageTemplatesSettings() {
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [savingAutomation, setSavingAutomation] = useState(false);
   const [runningDispatch, setRunningDispatch] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
   const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('library');
   const templatesTabRef = useRef<HTMLButtonElement>(null);
   const libraryTabRef = useRef<HTMLButtonElement>(null);
