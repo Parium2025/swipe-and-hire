@@ -238,7 +238,7 @@ export function AutoMessagesPanel() {
           <div className="space-y-3">
             {AUTO_RULE_EVENTS.map((event) => {
               const delay = getDelay(event);
-              const hasAnyRow = (rowsByTrigger.get(event.trigger) ?? []).length > 0;
+              
               const previewEntries: PreviewEntry[] = AUTO_RULE_CHANNELS.map(({ value, label }) => {
                 const config = event.templates[value];
                 const saved = templates.find((template) => template.name === config.name && template.channel === value);
