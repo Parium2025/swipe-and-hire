@@ -43,6 +43,18 @@ export const SeoTruncatedText = ({
   const ref = useRef<HTMLSpanElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const [open, setOpen] = useState(false);
+  const tappedOnceRef = useRef(false);
+  const resetTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!open) tappedOnceRef.current = false;
+  }, [open]);
+
+  useEffect(() => () => {
+    if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
+  }, []);
+
+
 
   const measure = useCallback(() => {
     const el = ref.current;
