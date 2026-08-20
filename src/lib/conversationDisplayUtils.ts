@@ -94,3 +94,21 @@ export function getMessageSenderName(profile: ProfileLike | undefined): string {
   if (profile.role === 'employer' && hasText(profile.company_name)) return profile.company_name!;
   return buildFullName(profile.first_name, profile.last_name) || 'Okänd';
 }
+
+/**
+ * Resolve which member represents the "other side" of a conversation.
+ *
+ * En konversation som bara har dig själv som medlem (provutskick via
+ * Utskicksstudion) har ingen motpart — då används ditt eget medlemskap så att
+ * raden renderas normalt i stället för som en evig skelettplatshållare.
+ */
+export function resolveDisplayMember(
+  members: ConversationMember[] | undefined,
+  currentUserId: string | undefined,
+): { displayMember: ConversationMember | undefined; isSelf: boolean } {
+  const all = members || [];
+  const others = all.filter((m) => m.user_id !== currentUserId);
+  if (others.length > 0) return { displayMember: others[0], isSelf: false };
+  const self = all.find((m) => m.user_id === currentUserId);
+  return { displayMember: self, isSelf: !!self };
+}
