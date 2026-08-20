@@ -1072,6 +1072,32 @@ export function MessageTemplatesSettings() {
     }
   };
 
+  const handleDeleteLogs = async (ids: string[], successMessage = 'Loggpost borttagen', errorMessage = 'Kunde inte rensa loggen') => {
+    if (ids.length === 0) return;
+    const { error } = await supabase.from('outreach_dispatch_logs').delete().in('id', ids);
+
+    if (error) {
+      toast.error(errorMessage);
+    } else {
+      toast.success(successMessage);
+      setSelectedLogIds((prev) => prev.filter((id) => !ids.includes(id)));
+      setLogs((prev) => prev.filter((log) => !ids.includes(log.id)));
+      await fetchStudio({ silent: true });
+    }
+  };
+
+  const openLogDeleteDialog = (ids: string[], allSelected: boolean) => {
+    if (ids.length === 0) return;
+    setPendingDeleteAction({
+      kind: 'log',
+      ids,
+      title: allSelected ? 'Rensa loggen' : `Ta bort ${ids.length} loggposter`,
+      description: `Är du säker på att du vill ta bort ${ids.length} ${ids.length === 1 ? 'loggpost' : 'loggposter'}? Redan skickade meddelanden påverkas inte – bara historiken här. Denna åtgärd går inte att ångra.`,
+      successMessage: `${ids.length} ${ids.length === 1 ? 'loggpost' : 'loggposter'} borttagna`,
+      errorMessage: 'Kunde inte rensa loggen',
+    });
+  };
+
   const handleDeleteAutomation = async (ids: string[], successMessage = 'Regel borttagen', errorMessage = 'Kunde inte ta bort regeln') => {
     const { error } = await supabase
       .from('outreach_automations')
