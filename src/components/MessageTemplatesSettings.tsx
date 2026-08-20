@@ -1858,11 +1858,17 @@ export function MessageTemplatesSettings() {
                   <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
                     {filteredTemplateFamilies.map((family) => {
                       const linkedGroup = getLinkedAutomationGroup(family, automationGroups);
-                      const isSelectedUnsavedDraft = family.key === selectedTemplateFamilyKey && automationFormTouched;
+                      const isSelected = family.key === selectedTemplateFamilyKey;
                       const ruleState = getAutomationGroupState(linkedGroup);
+                      // Vald mall speglar formuläret direkt: "Test 1 · Ansökan inkommen".
+                      const liveLabel = isSelected && automationForm.trigger
+                        ? `${getOutreachTriggerLabel(automationForm.trigger)}${automationFormTouched ? ' (ej sparad)' : ''}`
+                        : isSelected && automationFormTouched
+                          ? 'Ej sparad'
+                          : ruleState.label;
                       return (
                         <SelectItem key={family.key} value={family.key}>
-                          {`${family.baseName} · ${isSelectedUnsavedDraft ? 'Ej sparad' : ruleState.label}`}
+                          {`${family.baseName} · ${liveLabel}`}
                         </SelectItem>
                       );
                     })}
