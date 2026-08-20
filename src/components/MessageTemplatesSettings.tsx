@@ -1904,12 +1904,16 @@ export function MessageTemplatesSettings() {
                     {selectedTemplateFamily.channels.map((channel) => (
                       <span key={channel} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(channel)}</span>
                     ))}
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${automationFormTouched ? 'border-amber-400/30 bg-amber-400/15 text-white' : getAutomationGroupState(selectedAutomationGroup).badgeClassName}`}>
-                      {automationFormTouched ? 'Ej sparad' : getAutomationGroupState(selectedAutomationGroup).label}
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${automationForm.trigger ? (automationFormTouched ? 'border-amber-400/30 bg-amber-400/15 text-white' : getAutomationGroupState(selectedAutomationGroup).badgeClassName) : 'border-white/10 bg-white/5 text-white'}`}>
+                      {automationForm.trigger
+                        ? `${getOutreachTriggerLabel(automationForm.trigger)}${automationFormTouched ? ' · ej sparad' : ''}`
+                        : 'Ingen regel vald'}
                     </span>
                   </div>
                   <p className="mt-2 text-xs text-white md:text-sm">
-                    {`Skickas vid ${getOutreachTriggerLabel(automationForm.trigger)} · ${formatAutomationDelay(automationForm.delay_minutes)}`}
+                    {automationForm.trigger
+                      ? `Skickas vid ${getOutreachTriggerLabel(automationForm.trigger)} · ${formatAutomationDelay(automationForm.delay_minutes)}`
+                      : 'Välj händelse nedan för att sätta regeln.'}
                   </p>
                   {selectedAutomationGroup &&
                     (selectedAutomationGroup.primary.trigger !== automationForm.trigger ||
