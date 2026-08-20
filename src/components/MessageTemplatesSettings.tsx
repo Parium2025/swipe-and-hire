@@ -1104,6 +1104,66 @@ export function MessageTemplatesSettings() {
     setRestoringDefault(false);
   };
 
+  const missingDefaultTemplates = DEFAULT_OUTREACH_TEMPLATES.filter(
+    (defaultTemplate) =>
+      !templates.some(
+        (template) => template.name === defaultTemplate.name && template.channel === defaultTemplate.channel,
+      ),
+  );
+
+  const handleRestoreAllDefaultTemplates = async () => {
+    if (!user) return;
+    setRestoringDefault(true);
+
+    const toInsert = missingDefaultTemplates.map((defaultTemplate) => ({
+      name: defaultTemplate.name,
+      channel: defaultTemplate.channel,
+      subject: defaultTemplate.subject,
+      body: defaultTemplate.body,
+      is_active: defaultTemplate.is_active,
+      is_default: true,
+      owner_user_id: user.id,
+      organization_id: organizationId,
+    }));
+
+    const existingDefaults = templates.filter((template) =>
+      DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel),
+    );
+
+    let failed = false;
+
+    if (toInsert.length > 0) {
+      const { error } = await supabase.from('outreach_templates').insert(toInsert);
+      if (error) failed = true;
+    }
+
+    for (const template of existingDefaults) {
+      const defaultTemplate = DEFAULT_OUTREACH_TEMPLATES.find(
+        (item) => item.name === template.name && item.channel === template.channel,
+      );
+      if (!defaultTemplate) continue;
+      const { error } = await supabase
+        .from('outreach_templates')
+        .update({
+          subject: defaultTemplate.subject,
+          body: defaultTemplate.body,
+          is_active: defaultTemplate.is_active,
+          is_default: true,
+        })
+        .eq('id', template.id);
+      if (error) failed = true;
+    }
+
+    if (failed) {
+      toast.error('Kunde inte återställa alla Parium-mallar');
+    } else {
+      toast.success(`${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar är återställda`);
+    }
+    await fetchStudio({ silent: true });
+    setRestoringDefault(false);
+  };
+
+
   const openDeleteAutomationDialog = (group: AutomationGroup, family: TemplateFamily | null) => {
     const ruleName = family?.baseName ?? group.primary.name;
 
