@@ -97,7 +97,7 @@ type StudioTab = 'templates' | 'library' | 'automations' | 'logs';
 type AutomationVisibilityFilter = 'all' | 'active' | 'paused' | 'unlinked';
 
 type PendingDeleteAction = {
-  kind: 'template' | 'automation';
+  kind: 'template' | 'automation' | 'log';
   ids: string[];
   title: string;
   description: string;
@@ -459,6 +459,7 @@ export function MessageTemplatesSettings() {
   const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
+  const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
   const [selectedDefaultTemplateName, setSelectedDefaultTemplateName] = useState(DEFAULT_OUTREACH_TEMPLATES[0]?.name ?? '');
   const [restoringDefault, setRestoringDefault] = useState(false);
   const fetchRequestIdRef = useRef(0);
@@ -1072,6 +1073,32 @@ export function MessageTemplatesSettings() {
     }
   };
 
+  const handleDeleteLogs = async (ids: string[], successMessage = 'Loggpost borttagen', errorMessage = 'Kunde inte rensa loggen') => {
+    if (ids.length === 0) return;
+    const { error } = await supabase.from('outreach_dispatch_logs').delete().in('id', ids);
+
+    if (error) {
+      toast.error(errorMessage);
+    } else {
+      toast.success(successMessage);
+      setSelectedLogIds((prev) => prev.filter((id) => !ids.includes(id)));
+      setLogs((prev) => prev.filter((log) => !ids.includes(log.id)));
+      await fetchStudio({ silent: true });
+    }
+  };
+
+  const openLogDeleteDialog = (ids: string[], allSelected: boolean) => {
+    if (ids.length === 0) return;
+    setPendingDeleteAction({
+      kind: 'log',
+      ids,
+      title: allSelected ? 'Rensa loggen' : `Ta bort ${ids.length} loggposter`,
+      description: `Är du säker på att du vill ta bort ${ids.length} ${ids.length === 1 ? 'loggpost' : 'loggposter'}? Redan skickade meddelanden påverkas inte – bara historiken här. Denna åtgärd går inte att ångra.`,
+      successMessage: `${ids.length} ${ids.length === 1 ? 'loggpost' : 'loggposter'} borttagna`,
+      errorMessage: 'Kunde inte rensa loggen',
+    });
+  };
+
   const handleDeleteAutomation = async (ids: string[], successMessage = 'Regel borttagen', errorMessage = 'Kunde inte ta bort regeln') => {
     const { error } = await supabase
       .from('outreach_automations')
@@ -1213,6 +1240,8 @@ export function MessageTemplatesSettings() {
     try {
       if (action.kind === 'template') {
         await handleDeleteTemplates(action.ids, action.successMessage, action.errorMessage);
+      } else if (action.kind === 'log') {
+        await handleDeleteLogs(action.ids, action.successMessage, action.errorMessage);
       } else {
         await handleDeleteAutomation(action.ids, action.successMessage, action.errorMessage);
       }
@@ -1861,6 +1890,34 @@ export function MessageTemplatesSettings() {
                 ))}
               </div>
 
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
+                <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
+                  <Checkbox
+                    checked={selectedLogIds.length === logs.length && logs.length > 0}
+                    onCheckedChange={(checked) => setSelectedLogIds(checked ? logs.map((log) => log.id) : [])}
+                  />
+                  Markera alla ({logs.length})
+                </label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {selectedLogIds.length > 0 && (
+                    <PillButton
+                      className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
+                      onClick={() => openLogDeleteDialog(selectedLogIds, selectedLogIds.length === logs.length)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Ta bort markerade ({selectedLogIds.length})
+                    </PillButton>
+                  )}
+                  <PillButton
+                    className="h-8 px-3"
+                    onClick={() => openLogDeleteDialog(logs.map((log) => log.id), true)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Rensa hela loggen
+                  </PillButton>
+                </div>
+              </div>
+
               <div className="space-y-2">
               {logs.map((log) => {
                 const template = templates.find((item) => item.id === log.template_id);
@@ -1868,6 +1925,11 @@ export function MessageTemplatesSettings() {
                 return (
                   <div key={log.id} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <Checkbox
+                        checked={selectedLogIds.includes(log.id)}
+                        onCheckedChange={(checked) => setSelectedLogIds((prev) => checked ? [...new Set([...prev, log.id])] : prev.filter((id) => id !== log.id))}
+                        aria-label="Markera loggpost"
+                      />
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(log.trigger)}</span>
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(log.channel)}</span>
                       <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${getLogStatusBadgeClassName(log.status)}`}>{getLogStatusLabel(log)}</span>

@@ -112,6 +112,9 @@ const EmployerSettings = () => {
         prefsLoading={prefsLoading}
       />
 
+      <AutoMessagesPanel />
+      <MessageTemplatesSettings />
+
       <EmployerLocationPanel
         isNativeApp={isNativeApp}
         backgroundLocationEnabled={backgroundLocationEnabled}
@@ -119,8 +122,6 @@ const EmployerSettings = () => {
         onToggle={handleBackgroundLocationToggle}
       />
 
-      <AutoMessagesPanel />
-      <MessageTemplatesSettings />
       <ActiveSessionsSettings />
       <PrivacyDataPanel showDpaLink />
       <TeamManagement />

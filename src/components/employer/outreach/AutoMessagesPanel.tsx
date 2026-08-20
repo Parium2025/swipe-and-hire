@@ -77,6 +77,7 @@ export function AutoMessagesPanel() {
   const [templates, setTemplates] = useState<OutreachTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [pendingDelays, setPendingDelays] = useState<Record<string, number>>({});
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -119,6 +120,9 @@ export function AutoMessagesPanel() {
   const getDelay = (event: AutoRuleEvent) => {
     const rows = rowsByTrigger.get(event.trigger) ?? [];
     const enabled = rows.find((row) => row.is_enabled) ?? rows[0];
+    // Tidpunkten går alltid att ställa in – även innan någon kanal är påslagen.
+    // Då sparas valet lokalt och används när första regeln skapas.
+    if (rows.length === 0) return pendingDelays[event.trigger] ?? event.defaultDelay;
     return enabled?.delay_minutes ?? event.defaultDelay;
   };
 
@@ -196,7 +200,9 @@ export function AutoMessagesPanel() {
 
   const handleDelayChange = async (event: AutoRuleEvent, value: number) => {
     const rows = rowsByTrigger.get(event.trigger) ?? [];
+    setPendingDelays((prev) => ({ ...prev, [event.trigger]: value }));
     if (rows.length === 0) return;
+
 
     setBusyKey(`${event.trigger}-delay`);
     const { error } = await supabase
@@ -232,7 +238,7 @@ export function AutoMessagesPanel() {
           <div className="space-y-3">
             {AUTO_RULE_EVENTS.map((event) => {
               const delay = getDelay(event);
-              const hasAnyRow = (rowsByTrigger.get(event.trigger) ?? []).length > 0;
+              
               const previewEntries: PreviewEntry[] = AUTO_RULE_CHANNELS.map(({ value, label }) => {
                 const config = event.templates[value];
                 const saved = templates.find((template) => template.name === config.name && template.channel === value);
@@ -283,7 +289,7 @@ export function AutoMessagesPanel() {
                     <span className="text-xs text-white">{event.delayLabel}</span>
                     <Select
                       value={String(delay)}
-                      disabled={!hasAnyRow || busyKey === `${event.trigger}-delay`}
+                      disabled={busyKey === `${event.trigger}-delay`}
                       onValueChange={(value) => void handleDelayChange(event, Number(value))}
                     >
                       <SelectTrigger className="h-8 w-[180px] border-white/10 bg-white/5 text-xs text-white [&>svg]:text-white">
