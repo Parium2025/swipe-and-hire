@@ -1,7 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { getConversationDisplayName, getConversationAvatarProfile, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
-import { Briefcase } from 'lucide-react';
+import { Briefcase, BellOff } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
