@@ -26,8 +26,10 @@ export const JobSeekerNotificationSettings = () => {
         <p className="text-sm text-white">
           <span className="font-medium">I appen</span> är notisklockan i menyn, <span className="font-medium">Push</span> är
           skärmnotisen i mobilappen och <span className="font-medium">Mejl</span> går till din e-post. Chattmeddelanden från
-          arbetsgivare hamnar alltid i din inkorg — men de puffar bara om du har notiser påslagna.
+          arbetsgivare hamnar alltid i din inkorg — men de puffar bara om du har notiser påslagna. Du kan tysta eller radera
+          en enskild konversation direkt i chatten.
         </p>
+
 
 
         {/* Column headers */}

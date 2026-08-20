@@ -70,6 +70,9 @@ export interface Conversation {
   members: ConversationMember[];
   last_message?: ConversationMessage;
   unread_count: number;
+  /** True när den inloggade användaren har tystat konversationen (inga notiser, men den syns i inkorgen). */
+  is_muted?: boolean;
+
   job?: {
     title: string;
   };
@@ -312,10 +315,11 @@ export function useConversations() {
       // First get all conversation IDs where user is a member
       const { data: memberships, error: memberError } = await supabase
         .from('conversation_members')
-        .select('conversation_id, last_read_at')
+        .select('conversation_id, last_read_at, muted_at')
         .eq('user_id', user.id);
 
       if (memberError) throw memberError;
+
       if (!memberships || memberships.length === 0) {
         // Avoid flash-to-empty on transient backend hiccups.
         const previous = queryClient.getQueryData<Conversation[]>(['conversations', user.id]);
@@ -328,6 +332,10 @@ export function useConversations() {
       }
 
       const conversationIds = memberships.map(m => m.conversation_id);
+      const mutedIds = new Set(
+        memberships.filter((m) => (m as { muted_at?: string | null }).muted_at).map((m) => m.conversation_id),
+      );
+
 
       // Fetch conversations with job info
       const { data: conversations, error: convError } = await supabase
@@ -455,6 +463,8 @@ export function useConversations() {
           members,
           last_message: lastMessageMap.get(conv.id),
           unread_count: unreadCounts.get(conv.id) || 0,
+          is_muted: mutedIds.has(conv.id),
+
           // Include frozen profile snapshot from application if available
           applicationSnapshot: conv.application_id
             ? applicationSnapshotMap.get(conv.application_id)

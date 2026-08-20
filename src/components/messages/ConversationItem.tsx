@@ -1,7 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { getConversationDisplayName, getConversationAvatarProfile, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
-import { Briefcase } from 'lucide-react';
+import { Briefcase, BellOff } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -111,9 +111,11 @@ export function ConversationItem({
           )}>
             {displayName}
           </span>
-          <span className="text-pure-white text-xs flex-shrink-0">
+          <span className="text-pure-white text-xs flex-shrink-0 flex items-center gap-1">
+            {conversation.is_muted && <BellOff className="h-3 w-3" aria-label="Tystad" />}
             {formatTime(conversation.last_message_at)}
           </span>
+
         </div>
 
         {(snapshot?.job_title || conversation.job?.title) && (

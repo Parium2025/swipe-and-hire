@@ -21,10 +21,11 @@ const CHANNEL_ICON: Record<AutoRuleChannel, typeof Mail> = {
 
 // Förklarar vad varje kanal faktiskt innebär för kandidaten.
 const CHANNEL_HINTS: { value: AutoRuleChannel; label: string; hint: string }[] = [
-  { value: 'chat', label: 'Chatt', hint: 'Landar i kandidatens inkorg och syns som notis i appen — kandidaten kan svara direkt.' },
+  { value: 'chat', label: 'Chatt', hint: 'Meddelandet landar i kandidatens inkorg och syns som en notis i appen. Kandidaten kan svara direkt och därmed starta en dialog med er — välj bort chatt om ni inte vill öppna för svar ännu.' },
   { value: 'email', label: 'Mejl', hint: 'Skickas till kandidatens e-postadress.' },
-  { value: 'push', label: 'Push', hint: 'Skärmnotis i mobilappen, även när telefonen är låst.' },
+  { value: 'push', label: 'Push', hint: 'Kandidaten får en skärmnotis i mobilappen.' },
 ];
+
 
 
 type PreviewEntry = { channel: AutoRuleChannel; label: string; subject: string | null; body: string; edited: boolean };
