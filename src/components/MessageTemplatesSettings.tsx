@@ -433,10 +433,43 @@ export function MessageTemplatesSettings() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSeedConfirmDialog, setShowSeedConfirmDialog] = useState(false);
   const fetchRequestIdRef = useRef(0);
+  // Utkastet kan inte hydreras vid första render eftersom `user` sätts asynkront.
+  // Vi hydrerar när nyckeln finns och blockerar autospar innan dess, annars
+  // skulle det tomma formuläret radera ett sparat utkast direkt vid omladdning.
+  const draftHydratedRef = useRef(false);
+  const [draftHydrated, setDraftHydrated] = useState(false);
+
+  useEffect(() => {
+    if (!templateDraftKey || draftHydratedRef.current) return;
+    draftHydratedRef.current = true;
+    try {
+      const raw = localStorage.getItem(templateDraftKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as TemplateForm;
+        if (parsed && typeof parsed === 'object' && parsed.channelContent && Array.isArray(parsed.channels)) {
+          setTemplateForm((prev) => {
+            const prevTouched =
+              prev.name.trim().length > 0 ||
+              CHANNEL_ORDER.some(
+                (channel) =>
+                  prev.channelContent[channel]?.body.trim() || prev.channelContent[channel]?.subject.trim(),
+              );
+            if (prevTouched) return prev;
+            return {
+              ...EMPTY_TEMPLATE_FORM,
+              ...parsed,
+              channelContent: { ...EMPTY_TEMPLATE_FORM.channelContent, ...parsed.channelContent },
+            };
+          });
+        }
+      }
+    } catch { /* ignore */ }
+    setDraftHydrated(true);
+  }, [templateDraftKey]);
 
   // Autospara utkast i mallredigeraren så inget försvinner vid omladdning.
   useEffect(() => {
-    if (!templateDraftKey) return;
+    if (!templateDraftKey || !draftHydrated) return;
     const hasContent =
       templateForm.name.trim().length > 0 ||
       CHANNEL_ORDER.some(
@@ -448,7 +481,8 @@ export function MessageTemplatesSettings() {
       return;
     }
     safeSetItem(templateDraftKey, JSON.stringify(templateForm));
-  }, [templateForm, templateDraftKey]);
+  }, [templateForm, templateDraftKey, draftHydrated]);
+
 
 
   const activeTemplatesByChannel = useMemo(() => ({
