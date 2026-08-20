@@ -467,6 +467,7 @@ export function MessageTemplatesSettings() {
   });
   const [activeTemplateChannel, setActiveTemplateChannel] = useState<AutomationChannel>('push');
   const [automationForm, setAutomationForm] = useState<AutomationForm>(EMPTY_AUTOMATION_FORM);
+  const [automationFormTouched, setAutomationFormTouched] = useState(false);
   const [selectedTemplateFamilyKey, setSelectedTemplateFamilyKey] = useState<string | null>(null);
   const [automationVisibilityFilter, setAutomationVisibilityFilter] = useState<AutomationVisibilityFilter>('all');
   const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
@@ -756,10 +757,12 @@ export function MessageTemplatesSettings() {
   useEffect(() => {
     if (!selectedTemplateFamily) {
       setAutomationForm(EMPTY_AUTOMATION_FORM);
+      setAutomationFormTouched(false);
       return;
     }
 
     setAutomationForm(buildAutomationFormFromFamily(selectedTemplateFamily, selectedAutomationGroup));
+    setAutomationFormTouched(false);
   }, [selectedTemplateFamily, selectedAutomationGroup]);
 
   useEffect(() => {
@@ -1036,6 +1039,7 @@ export function MessageTemplatesSettings() {
 
       const wasUpdate = !!automationForm.id;
       toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
+      setAutomationFormTouched(false);
       if (disabledConflicts > 0) {
         toast.info(`${disabledConflicts} tidigare regel${disabledConflicts > 1 ? 'er' : ''} för samma händelse stängdes av`);
       }
@@ -1846,10 +1850,12 @@ export function MessageTemplatesSettings() {
                   </SelectTrigger>
                   <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
                     {filteredTemplateFamilies.map((family) => {
-                      const ruleState = getAutomationGroupState(getLinkedAutomationGroup(family, automationGroups));
+                      const linkedGroup = getLinkedAutomationGroup(family, automationGroups);
+                      const isSelectedUnsavedDraft = family.key === selectedTemplateFamilyKey && automationFormTouched;
+                      const ruleState = getAutomationGroupState(linkedGroup);
                       return (
                         <SelectItem key={family.key} value={family.key}>
-                          {`${family.baseName} · ${ruleState.label}`}
+                          {`${family.baseName} · ${isSelectedUnsavedDraft ? 'Ej sparad' : ruleState.label}`}
                         </SelectItem>
                       );
                     })}
@@ -1885,8 +1891,8 @@ export function MessageTemplatesSettings() {
                     {selectedTemplateFamily.channels.map((channel) => (
                       <span key={channel} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(channel)}</span>
                     ))}
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${getAutomationGroupState(selectedAutomationGroup).badgeClassName}`}>
-                      {getAutomationGroupState(selectedAutomationGroup).label}
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${automationFormTouched ? 'border-amber-400/30 bg-amber-400/15 text-white' : getAutomationGroupState(selectedAutomationGroup).badgeClassName}`}>
+                      {automationFormTouched ? 'Ej sparad' : getAutomationGroupState(selectedAutomationGroup).label}
                     </span>
                   </div>
                   <p className="mt-2 text-xs text-white md:text-sm">
@@ -1908,12 +1914,12 @@ export function MessageTemplatesSettings() {
 
                 <div className="space-y-2">
                   <Label className="text-white">Namn på regeln</Label>
-                  <Input value={automationForm.name} onChange={(e) => setAutomationForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
+                  <Input value={automationForm.name} onChange={(e) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, name: e.target.value })); }} className="bg-white/5 border-white/10 text-white" />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-white">När ska den skickas?</Label>
-                  <Select value={automationForm.trigger} onValueChange={(value: AutomationForm['trigger']) => setAutomationForm((prev) => ({ ...prev, trigger: value }))}>
+                  <Select value={automationForm.trigger} onValueChange={(value: AutomationForm['trigger']) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, trigger: value })); }}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue /></SelectTrigger>
                     <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
                       {OUTREACH_TRIGGER_OPTIONS.filter((option) => !['manual_send', 'interview_scheduled', 'application_no_response_14d'].includes(option.value)).map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
@@ -1923,7 +1929,7 @@ export function MessageTemplatesSettings() {
 
                 <div className="space-y-2">
                   <Label className="text-white">{getDelayFieldLabel(automationForm.trigger)}</Label>
-                  <DelayField value={automationForm.delay_minutes} onChange={(next) => setAutomationForm((prev) => ({ ...prev, delay_minutes: next }))} />
+                  <DelayField value={automationForm.delay_minutes} onChange={(next) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, delay_minutes: next })); }} />
                   <p className="text-[11px] text-white">{getDelayFieldHint(automationForm.trigger)}</p>
                 </div>
 
@@ -1941,7 +1947,7 @@ export function MessageTemplatesSettings() {
                     <p className="text-sm font-medium text-white">Aktiv direkt</p>
                     <p className="text-[11px] text-white md:text-xs [overflow-wrap:anywhere]">Stäng av om du vill spara den först och aktivera senare.</p>
                   </div>
-                  <Switch checked={automationForm.is_enabled} onCheckedChange={(checked) => setAutomationForm((prev) => ({ ...prev, is_enabled: checked }))} />
+                  <Switch checked={automationForm.is_enabled} onCheckedChange={(checked) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, is_enabled: checked })); }} />
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-2">
@@ -1972,7 +1978,7 @@ export function MessageTemplatesSettings() {
                   )}
                 </div>
                 <p className="text-center text-[11px] text-white">
-                  Provutskicket går bara till dig själv i mallens kanaler — inga kandidater berörs.
+                  Du kan testa direkt utan att spara. Provutskicket går bara till dig själv och aktiverar inte regeln.
                 </p>
 
 
