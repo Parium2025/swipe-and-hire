@@ -991,16 +991,17 @@ export function MessageTemplatesSettings() {
     if (failedResult?.error) {
       toast.error('Kunde inte spara regeln');
     } else {
-      // Endast en aktiv regel per händelse + kanal: stäng av tidigare regler som krockar.
+      // Endast en aktiv regeluppsättning per händelse: tidigare regler för samma händelse stängs av,
+      // så kanaler du inte kryssat i slutar skicka direkt.
       let disabledConflicts = 0;
       if (automationForm.is_enabled) {
         const conflicting = automations.filter(
           (automation) =>
             automation.is_enabled &&
             automation.trigger === automationForm.trigger &&
-            automationForm.channels.includes(automation.channel as AutomationChannel) &&
             getAutomationGroupId(automation) !== groupId,
         );
+
 
         if (conflicting.length > 0) {
           const { error: conflictError } = await supabase
