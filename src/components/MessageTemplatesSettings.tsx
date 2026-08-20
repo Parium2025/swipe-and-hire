@@ -1934,6 +1934,14 @@ export function MessageTemplatesSettings() {
                     {savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                     {automationForm.id ? 'Uppdatera regel' : 'Spara regel'}
                   </PillButton>
+                  <PillButton
+                    className="px-4 border-white/20 bg-white/10 hover:bg-white/20 hover:border-white/40 disabled:opacity-50"
+                    onClick={handleSendTestToMyself}
+                    disabled={sendingTest}
+                  >
+                    {sendingTest ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    Testa till mig själv
+                  </PillButton>
                   {selectedAutomationGroup && (
                     <PillButton
                       className="px-4 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
@@ -1944,6 +1952,10 @@ export function MessageTemplatesSettings() {
                     </PillButton>
                   )}
                 </div>
+                <p className="text-center text-[11px] text-white">
+                  Provutskicket går bara till dig själv i mallens kanaler — inga kandidater berörs.
+                </p>
+
 
               </>
             )}
