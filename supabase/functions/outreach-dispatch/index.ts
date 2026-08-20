@@ -23,6 +23,7 @@ type OutreachLog = {
   recipient_user_id: string | null;
   interview_id: string | null;
   job_id: string | null;
+  automation_id: string | null;
   payload: Record<string, unknown> | null;
   created_at: string;
 };
@@ -182,6 +183,22 @@ async function recipientAllowsChannel(
 }
 
 async function dispatchLog(log: OutreachLog) {
+  // Arbetsgivarens val väger alltid tyngst: har regeln stängts av (eller tagits
+  // bort) efter att raden köades ska inget skickas — inte ens en fördröjd rad.
+  if (log.automation_id) {
+    const { data: automation } = await admin
+      .from('outreach_automations')
+      .select('is_enabled')
+      .eq('id', log.automation_id)
+      .maybeSingle();
+    if (!automation || automation.is_enabled === false) {
+      await admin.from('outreach_dispatch_logs').update({
+        status: 'skipped',
+        error_message: 'Regeln stängdes av innan utskicket hann skickas',
+      }).eq('id', log.id);
+      return { skipped: true };
+    }
+  }
 
   const template = log.template_id ? ((await admin.from('outreach_templates').select('*').eq('id', log.template_id).maybeSingle()).data as OutreachTemplate | null) : null;
   const context = await buildContext(log);
