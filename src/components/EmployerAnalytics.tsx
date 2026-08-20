@@ -642,7 +642,7 @@ const EmployerAnalytics = memo(() => {
 
     const t = setTimeout(() => setShow(true), 80);
     return () => clearTimeout(t);
-  }, [overviewCacheKey, cachedOverviewEntry?.value, isLoading]);
+  }, [overviewCacheKey, cachedOverviewEntry, isLoading]);
 
   if (isLoading && !show) {
     return (
@@ -742,6 +742,13 @@ const EmployerAnalytics = memo(() => {
               ? `Insikter för alla annonser i ${organization.name}`
               : 'Insikter för alla dina annonser'}
           </p>
+          {dataUpdatedAt > 0 && (
+            <p className="text-[11px] text-white/80">
+              {isFetching
+                ? 'Uppdaterar…'
+                : `Uppdaterad ${new Date(dataUpdatedAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}`}
+            </p>
+          )}
         </div>
       </div>
 
