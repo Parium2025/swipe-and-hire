@@ -197,7 +197,7 @@ function DelayField({ value, onChange }: { value: number; onChange: (value: numb
             onBlur={() => commit(Number(text) || 0)}
             className="bg-white/5 border-white/10 text-white text-center"
           />
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/70">min</span>
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white">min</span>
         </div>
         <button
           type="button"
@@ -224,11 +224,12 @@ function DelayField({ value, onChange }: { value: number; onChange: (value: numb
           </button>
         ))}
       </div>
+      {(Number(text) || 0) >= 60 && (
+        <p className="text-[11px] text-white">Motsvarar {formatAutomationDelay(Number(text) || 0)}</p>
+      )}
     </div>
   );
 }
-
-
 
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
@@ -349,7 +350,18 @@ const matchesAutomationVisibilityFilter = (group: AutomationGroup | null, filter
   return getAutomationGroupState(group).key === filter;
 };
 
-const formatAutomationDelay = (minutes: number) => (minutes === 0 ? 'Direkt' : `${minutes} min`);
+const formatAutomationDelay = (minutes: number) => {
+  if (!minutes || minutes <= 0) return 'Direkt';
+  if (minutes < 60) return `${minutes} min`;
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const mins = minutes % 60;
+  const parts: string[] = [];
+  if (days) parts.push(`${days} dygn`);
+  if (hours) parts.push(`${hours} tim`);
+  if (mins) parts.push(`${mins} min`);
+  return parts.join(' ');
+};
 
 const getLogPayload = (log: OutreachDispatchLog) => {
   if (!log.payload || typeof log.payload !== 'object' || Array.isArray(log.payload)) return null;
@@ -1585,45 +1597,12 @@ export function MessageTemplatesSettings() {
             </div>
 
             {loading ? (
-              <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
+              <div className="flex items-center justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
             ) : templateFamilies.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Skapa först en mall under fliken Mall.</div>
             ) : filteredTemplateFamilies.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inget stämmer med filtret just nu.</div>
-            ) : (
-              <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
-                {selectedTemplateFamily ? (
-                  (() => {
-                    const linkedGroup = getLinkedAutomationGroup(selectedTemplateFamily, automationGroups);
-                    const ruleState = getAutomationGroupState(linkedGroup);
-
-                    return (
-                      <div className="space-y-2">
-                        <div className="flex min-w-0 flex-wrap items-center gap-2">
-                          <p className="max-w-full truncate text-sm font-semibold text-white">{selectedTemplateFamily.baseName}</p>
-                          {selectedTemplateFamily.channels.map((channel) => (
-                            <span key={channel} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(channel)}</span>
-                          ))}
-                          <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${ruleState.badgeClassName}`}>{ruleState.label}</span>
-                        </div>
-                        <p className="text-xs text-white md:text-sm">
-                          {linkedGroup
-                            ? `Kopplad till ${getOutreachTriggerLabel(linkedGroup.primary.trigger)}`
-                            : 'Inte kopplad till tidslinjen ännu'}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-white">
-                          <span>{linkedGroup ? formatAutomationDelay(linkedGroup.primary.delay_minutes) : 'Ingen tid vald ännu'}</span>
-                          <span>•</span>
-                          <span className={ruleState.key === 'active' ? 'text-green-300' : 'text-white'}>{ruleState.label}</span>
-                        </div>
-                      </div>
-                    );
-                  })()
-                ) : (
-                  <p className="text-sm text-white">Välj en regel i dropdownen för att visa detaljerna här.</p>
-                )}
-              </div>
-            )}
+            ) : null}
           </div>
 
           <div className="min-w-0 space-y-3 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
@@ -1647,7 +1626,13 @@ export function MessageTemplatesSettings() {
                       {getAutomationGroupState(selectedAutomationGroup).label}
                     </span>
                   </div>
+                  <p className="mt-2 text-xs text-white md:text-sm">
+                    {selectedAutomationGroup
+                      ? `Kopplad till ${getOutreachTriggerLabel(selectedAutomationGroup.primary.trigger)} · ${formatAutomationDelay(selectedAutomationGroup.primary.delay_minutes)}`
+                      : 'Inte kopplad till tidslinjen ännu — välj händelse och tid nedan.'}
+                  </p>
                 </div>
+
 
                 <div className="space-y-2">
                   <Label className="text-white">Namn på regeln</Label>
