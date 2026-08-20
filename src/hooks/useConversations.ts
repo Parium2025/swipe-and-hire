@@ -315,10 +315,11 @@ export function useConversations() {
       // First get all conversation IDs where user is a member
       const { data: memberships, error: memberError } = await supabase
         .from('conversation_members')
-        .select('conversation_id, last_read_at')
+        .select('conversation_id, last_read_at, muted_at')
         .eq('user_id', user.id);
 
       if (memberError) throw memberError;
+
       if (!memberships || memberships.length === 0) {
         // Avoid flash-to-empty on transient backend hiccups.
         const previous = queryClient.getQueryData<Conversation[]>(['conversations', user.id]);
