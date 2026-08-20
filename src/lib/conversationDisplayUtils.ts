@@ -27,10 +27,14 @@ export function getConversationDisplayName(opts: {
   groupName: string | null;
   snapshot: ApplicationSnapshot | undefined;
   displayMember: ConversationMember | undefined;
+  isSelf?: boolean;
 }): string {
-  const { isGroup, groupName, snapshot, displayMember } = opts;
+  const { isGroup, groupName, snapshot, displayMember, isSelf } = opts;
 
   if (isGroup && groupName) return groupName;
+
+  // Provutskick till dig själv — konversationen har bara dig som medlem.
+  if (isSelf) return 'Du (provutskick)';
 
   // Snapshot is immutable per application context.
   // If snapshot exists, never leak updated live profile identity into conversation UI.
