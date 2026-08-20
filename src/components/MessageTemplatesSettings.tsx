@@ -1016,8 +1016,9 @@ export function MessageTemplatesSettings() {
       const wasUpdate = !!automationForm.id;
       toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
       if (disabledConflicts > 0) {
-        toast.info(`${disabledConflicts} tidigare regel${disabledConflicts > 1 ? 'er' : ''} för samma händelse och kanal stängdes av`);
+        toast.info(`${disabledConflicts} tidigare regel${disabledConflicts > 1 ? 'er' : ''} för samma händelse stängdes av`);
       }
+
       if (!wasUpdate) {
         setAutomationForm(EMPTY_AUTOMATION_FORM);
       }
