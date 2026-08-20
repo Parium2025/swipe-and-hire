@@ -1104,12 +1104,18 @@ export function MessageTemplatesSettings() {
     setRestoringDefault(false);
   };
 
+  const isStandardTemplate = (template: { name: string; channel: string }) =>
+    DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel);
+
+  const customTemplates = templates.filter((template) => !isStandardTemplate(template));
+
   const missingDefaultTemplates = DEFAULT_OUTREACH_TEMPLATES.filter(
     (defaultTemplate) =>
       !templates.some(
         (template) => template.name === defaultTemplate.name && template.channel === defaultTemplate.channel,
       ),
   );
+
 
   const handleRestoreAllDefaultTemplates = async () => {
     if (!user) return;
