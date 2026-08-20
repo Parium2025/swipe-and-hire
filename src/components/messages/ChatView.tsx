@@ -522,6 +522,7 @@ export function ChatView({
     groupName: conversation.name,
     snapshot,
     displayMember,
+    isSelf: isSelfConversation,
   });
 
   // Group messages by date
