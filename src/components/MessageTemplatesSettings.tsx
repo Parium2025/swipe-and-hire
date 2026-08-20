@@ -1118,6 +1118,11 @@ export function MessageTemplatesSettings() {
       ),
   );
 
+  const restoreTargetName = missingDefaultTemplates.some((item) => item.name === selectedDefaultTemplateName)
+    ? selectedDefaultTemplateName
+    : missingDefaultTemplates[0]?.name ?? '';
+
+
 
   const handleRestoreAllDefaultTemplates = async () => {
     if (!user || missingDefaultTemplates.length === 0) return;
