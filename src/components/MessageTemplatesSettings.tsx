@@ -1466,17 +1466,8 @@ export function MessageTemplatesSettings() {
           <h3 className="text-sm font-semibold text-white md:text-base">Mallar, regler och utskick</h3>
           <p className="text-xs text-white md:text-sm">Skapa meddelanden och välj när de ska skickas.</p>
         </div>
-        <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:justify-end">
-          <div className="flex items-center gap-1.5">
-            <PillButton onClick={handleRunDispatch} disabled={runningDispatch || logSummary.pending === 0} className="px-3.5 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:cursor-not-allowed disabled:opacity-40">
-              {runningDispatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Rocket className="h-3.5 w-3.5" />}
-              Skicka väntande ({logSummary.pending})
-            </PillButton>
-
-            <InfoHint text="Skickar endast utskick som redan ligger i kön. Knappen skapar inget testutskick och är därför avstängd när kön är tom." />
-          </div>
-        </div>
       </div>
+
 
       <div className="mb-3 grid gap-1.5 md:grid-cols-3">
           {[
