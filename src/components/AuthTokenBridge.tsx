@@ -20,12 +20,25 @@ const AuthTokenBridge = () => {
     if (location.pathname === '/auth') return;
     if (OWN_TOKEN_ROUTES.has(location.pathname)) return;
 
-
     const searchParams = new URLSearchParams(window.location.search);
     const hashStr = window.location.hash.startsWith('#')
       ? window.location.hash.slice(1)
       : '';
     const hash = new URLSearchParams(hashStr);
+
+    // Säkerhetsnät vid klientnavigering: äldre avprenumerationslänkar kan
+    // ligga på roten med en fristående 64-teckens token.
+    const legacyUnsubscribeToken = searchParams.get('token') || '';
+    if (
+      !searchParams.get('type') &&
+      !searchParams.get('token_hash') &&
+      !hash.get('access_token') &&
+      !hash.get('refresh_token') &&
+      /^[a-f0-9]{64}$/i.test(legacyUnsubscribeToken)
+    ) {
+      window.location.replace(`/unsubscribe?token=${encodeURIComponent(legacyUnsubscribeToken)}`);
+      return;
+    }
 
     // Hash tokens
     const accessTokenHash = hash.get('access_token');
