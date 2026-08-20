@@ -245,10 +245,15 @@ Deno.serve(async (req) => {
             remindersSent++;
           }
         } catch (err) {
-          console.error(`Error sending reminder to candidate ${interview.applicant_id}:`, err);
-          const message = err instanceof Error ? err.message : 'Unknown error';
-          errors.push(`Candidate ${interview.applicant_id}: ${message}`);
+          if ((err as { skip?: boolean })?.skip) {
+            // Avstängt av arbetsgivaren – inget fel, bara tyst.
+          } else {
+            console.error(`Error sending reminder to candidate ${interview.applicant_id}:`, err);
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            errors.push(`Candidate ${interview.applicant_id}: ${message}`);
+          }
         }
+
 
         // Send reminder to employer
         try {
