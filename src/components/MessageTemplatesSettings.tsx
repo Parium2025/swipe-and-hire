@@ -1514,7 +1514,7 @@ export function MessageTemplatesSettings() {
                         {template.subject && <p className="text-[11px] text-white md:text-xs">{template.subject}</p>}
                         <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
                         {isStandard && (
-                          <p className="text-[11px] text-white md:text-xs">Skyddad originalmall – kan inte ändras eller tas bort. Gör en kopia för att skriva egen text.</p>
+                          <p className="text-[11px] text-white md:text-xs">Skyddad originalmall – kan inte ändras eller tas bort. Vill du ha egen text skapar du en ny mall i Steg 1.</p>
                         )}
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-1.5">
