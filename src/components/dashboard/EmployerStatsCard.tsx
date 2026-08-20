@@ -1,4 +1,4 @@
-import { memo, useMemo, useEffect } from 'react';
+import { memo, useMemo, useEffect, useRef } from 'react';
 import { Briefcase, Heart, UserPlus, MessageSquare } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
@@ -89,10 +89,25 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   const savedFavoritesCount = dashStats?.saved_favorites ?? cachedStats['saved_favorites'] ?? 0;
   const unreadMessagesCount = dashStats?.unread_messages ?? cachedStats['unread_messages'] ?? 0;
 
+  const jobIdsRef = useRef<string[]>(activeJobIds);
+  jobIdsRef.current = activeJobIds;
+
   useEffect(() => {
     if (!user?.id) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    // Koalescera händelser – annars triggar all aktivitet på plattformen en refetch-storm.
     const invalidateStats = () => {
-      queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+      if (timer) return;
+      timer = setTimeout(() => {
+        timer = null;
+        queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+      }, 1200);
+    };
+    // Bara ansökningar på våra egna annonser är relevanta.
+    const onApplication = (payload: { new?: Record<string, unknown>; old?: Record<string, unknown> }) => {
+      const jobId = (payload.new?.job_id ?? payload.old?.job_id) as string | undefined;
+      if (jobId && jobIdsRef.current.length > 0 && !jobIdsRef.current.includes(jobId)) return;
+      invalidateStats();
     };
     const msgChannel = supabase
       .channel(`employer-conv-messages-${user.id}`)
@@ -101,7 +116,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       )
       // "Nya ansökningar" ska tickas upp live, inte först vid fliksbyte.
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' },
-        invalidateStats
+        onApplication
       )
       .subscribe();
     const handleVisibility = () => {
@@ -110,10 +125,12 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     document.addEventListener('visibilitychange', handleVisibility);
     // Realtime + visibility-trigger ersätter polling – ingen 60s-interval behövs
     return () => {
+      if (timer) clearTimeout(timer);
       supabase.removeChannel(msgChannel);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [user?.id, queryClient]);
+
 
   const activeJobsCount = activeJobIds.length;
   useEffect(() => {
