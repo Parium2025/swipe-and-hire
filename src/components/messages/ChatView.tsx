@@ -4,6 +4,8 @@ import { useConversationMessages, type Conversation, type ConversationMessage } 
 import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
+import { useMuteConversation } from '@/hooks/useMuteConversation';
+
 import { getIsOnline } from '@/lib/connectivityManager';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
