@@ -34,6 +34,7 @@ import {
   Rocket,
   RotateCcw,
   ScrollText,
+  Send,
   Trash2,
 } from 'lucide-react';
 import {
