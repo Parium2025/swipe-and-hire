@@ -349,7 +349,18 @@ const matchesAutomationVisibilityFilter = (group: AutomationGroup | null, filter
   return getAutomationGroupState(group).key === filter;
 };
 
-const formatAutomationDelay = (minutes: number) => (minutes === 0 ? 'Direkt' : `${minutes} min`);
+const formatAutomationDelay = (minutes: number) => {
+  if (!minutes || minutes <= 0) return 'Direkt';
+  if (minutes < 60) return `${minutes} min`;
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const mins = minutes % 60;
+  const parts: string[] = [];
+  if (days) parts.push(`${days} dygn`);
+  if (hours) parts.push(`${hours} tim`);
+  if (mins) parts.push(`${mins} min`);
+  return parts.join(' ');
+};
 
 const getLogPayload = (log: OutreachDispatchLog) => {
   if (!log.payload || typeof log.payload !== 'object' || Array.isArray(log.payload)) return null;
