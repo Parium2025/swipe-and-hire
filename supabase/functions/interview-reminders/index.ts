@@ -213,11 +213,14 @@ Deno.serve(async (req) => {
           : "Telefonintervju";
 
         // Send reminder to candidate (only if the employer keeps it enabled)
+        const candidateReminderAllowed = await candidateRemindersAllowed(interview.employer_id);
+        if (!candidateReminderAllowed) {
+          console.log(`Candidate reminder skipped – employer ${interview.employer_id} has interview_before off`);
+        }
         try {
-          if (!(await candidateRemindersAllowed(interview.employer_id))) {
-            console.log(`Candidate reminder skipped – employer ${interview.employer_id} has interview_before off`);
-            throw new Error("__skip_candidate__");
-          }
+          if (!candidateReminderAllowed) throw { skip: true };
+
+
 
           const candidateResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
             method: "POST",
