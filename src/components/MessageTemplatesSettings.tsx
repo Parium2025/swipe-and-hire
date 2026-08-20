@@ -1120,7 +1120,7 @@ export function MessageTemplatesSettings() {
 
 
   const handleRestoreAllDefaultTemplates = async () => {
-    if (!user) return;
+    if (!user || missingDefaultTemplates.length === 0) return;
     setRestoringDefault(true);
 
     const toInsert = missingDefaultTemplates.map((defaultTemplate) => ({
@@ -1134,42 +1134,17 @@ export function MessageTemplatesSettings() {
       organization_id: organizationId,
     }));
 
-    const existingDefaults = templates.filter((template) =>
-      DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel),
-    );
+    const { error } = await supabase.from('outreach_templates').insert(toInsert);
 
-    let failed = false;
-
-    if (toInsert.length > 0) {
-      const { error } = await supabase.from('outreach_templates').insert(toInsert);
-      if (error) failed = true;
-    }
-
-    for (const template of existingDefaults) {
-      const defaultTemplate = DEFAULT_OUTREACH_TEMPLATES.find(
-        (item) => item.name === template.name && item.channel === template.channel,
-      );
-      if (!defaultTemplate) continue;
-      const { error } = await supabase
-        .from('outreach_templates')
-        .update({
-          subject: defaultTemplate.subject,
-          body: defaultTemplate.body,
-          is_active: defaultTemplate.is_active,
-          is_default: true,
-        })
-        .eq('id', template.id);
-      if (error) failed = true;
-    }
-
-    if (failed) {
-      toast.error('Kunde inte återställa alla Parium-mallar');
+    if (error) {
+      toast.error('Kunde inte lägga tillbaka Parium-mallarna');
     } else {
-      toast.success(`${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar är återställda`);
+      toast.success(`${toInsert.length} Parium-mallar lades tillbaka`);
     }
     await fetchStudio({ silent: true });
     setRestoringDefault(false);
   };
+
 
 
   const openDeleteAutomationDialog = (group: AutomationGroup, family: TemplateFamily | null) => {
