@@ -264,6 +264,13 @@ async function dispatchLog(log: OutreachLog) {
 
     if (log.channel === 'push') {
       if (!log.recipient_user_id) throw new Error('Saknar mottagare för push');
+      if (!(await recipientAllowsChannel(log.recipient_user_id, log.trigger, 'push'))) {
+        await admin.from('outreach_dispatch_logs').update({
+          status: 'skipped',
+          error_message: 'Mottagaren har stängt av push för den här typen av notis',
+        }).eq('id', log.id);
+        return { skipped: true };
+      }
       const { count: tokenCount } = await admin
         .from('device_push_tokens')
         .select('id', { count: 'exact', head: true })
@@ -273,8 +280,14 @@ async function dispatchLog(log: OutreachLog) {
       const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceRoleKey}` },
-        body: JSON.stringify({ recipient_id: log.recipient_user_id, title: subject || context.companyName, body }),
+        body: JSON.stringify({
+          recipient_id: log.recipient_user_id,
+          title: subject || context.companyName,
+          body,
+          notification_type: PREF_TYPE_BY_TRIGGER[log.trigger],
+        }),
       });
+
       if (!response.ok) throw new Error(await response.text());
       await admin.from('outreach_dispatch_logs').update({ status: 'sent', sent_at: new Date().toISOString(), error_message: null }).eq('id', log.id);
       return {};
