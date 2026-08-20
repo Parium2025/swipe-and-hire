@@ -123,11 +123,19 @@ async function buildContext(log: OutreachLog) {
 
   const candidateName = [application?.first_name, application?.last_name].filter(Boolean).join(' ') || [recipientProfile?.first_name, recipientProfile?.last_name].filter(Boolean).join(' ') || 'Kandidat';
 
+  // Sista utvägen: hämta e-post från auth-kontot (t.ex. provutskick till sig själv,
+  // där ingen ansökan finns och profiles.email kan vara tom).
+  let authEmail: string | null = null;
+  if (!application?.email && !recipientProfile?.email && log.recipient_user_id) {
+    const { data: authUser } = await admin.auth.admin.getUserById(log.recipient_user_id);
+    authEmail = authUser?.user?.email ?? null;
+  }
+
   return {
     companyName: ownerProfile?.company_name || 'Parium',
     candidateName,
     firstName: application?.first_name || recipientProfile?.first_name || 'där',
-    recipientEmail: application?.email || recipientProfile?.email || null,
+    recipientEmail: application?.email || recipientProfile?.email || authEmail || null,
     applicationId: application?.id ?? null,
     jobTitle: job?.title || (log.payload?.job_title as string | undefined) || 'din process',
     scheduledDate: formatDate(interview?.scheduled_at),
