@@ -70,6 +70,9 @@ export interface Conversation {
   members: ConversationMember[];
   last_message?: ConversationMessage;
   unread_count: number;
+  /** True när den inloggade användaren har tystat konversationen (inga notiser, men den syns i inkorgen). */
+  is_muted?: boolean;
+
   job?: {
     title: string;
   };
