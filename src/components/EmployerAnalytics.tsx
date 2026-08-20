@@ -146,12 +146,12 @@ InlineInfoTooltip.displayName = 'InlineInfoTooltip';
 const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
   current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string;
 }) => {
-  const diff = previous > 0
-    ? Math.round(((current - previous) / previous) * 100)
-    : (current > 0 ? current * 100 : 0);
-  const isUp = diff > 0;
-  const isDown = diff < 0;
-  const isFlat = diff === 0;
+  // Från 0 går det inte att räkna procent — visa "Nytt" i stället för vilseledande tal.
+  const isNew = previous === 0 && current > 0;
+  const diff = previous > 0 ? Math.round(((current - previous) / previous) * 100) : 0;
+  const isUp = isNew || diff > 0;
+  const isDown = !isNew && diff < 0;
+  const isFlat = !isNew && diff === 0;
 
   return (
     <div className="flex-1 min-w-0 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-center">
@@ -170,12 +170,13 @@ const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
           isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
         }`}>
           {isUp ? <TrendingUp className="h-3 w-3" /> : isDown ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
-          {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
+          {isNew ? 'Nytt' : isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
         </span>
       )}
     </div>
   );
 });
+
 TrendPill.displayName = 'TrendPill';
 
 /* ─── Circular gauge ─── */
