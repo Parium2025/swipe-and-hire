@@ -53,6 +53,12 @@ function redirectAuthTokensIfNeeded() {
   // Only redirect when not already on /auth
   if (pathname === '/auth') return false;
 
+  // Sidor med EGNA ?token=-parametrar (avprenumerationslänkar i mejl) får
+  // aldrig kapas hit — annars blir det en extra full sidladdning till /auth
+  // med blank skärm och splash-blink direkt från inkorgen.
+  if (pathname === '/unsubscribe' || pathname === '/unsubscribe/') return false;
+
+
   const search = new URLSearchParams(location.search);
   const hashStr = location.hash.startsWith('#') ? location.hash.slice(1) : '';
   const hash = new URLSearchParams(hashStr);
