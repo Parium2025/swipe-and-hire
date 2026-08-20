@@ -54,8 +54,20 @@ import {
 } from '@/lib/outreach';
 import { readCachedOutreachStudio, writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
 import { safeSetItem } from '@/lib/safeStorage';
+import { AUTO_RULE_EVENTS } from '@/lib/outreachAutoRules';
+
+// Namn+kanal för samtliga Parium-original (bibliotek + automatiska utskick).
+const STANDARD_TEMPLATE_KEYS = new Set<string>([
+  ...DEFAULT_OUTREACH_TEMPLATES.map((template) => `${template.name}::${template.channel}`),
+  ...AUTO_RULE_EVENTS.flatMap((event) =>
+    (Object.entries(event.templates) as Array<[string, { name: string }]>).map(
+      ([channel, config]) => `${config.name}::${channel}`,
+    ),
+  ),
+]);
 
 const TEMPLATE_DRAFT_PREFIX = 'outreach-template-draft:';
+
 
 type TemplateForm = {
   id: string | null;
