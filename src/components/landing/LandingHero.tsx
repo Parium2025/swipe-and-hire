@@ -230,8 +230,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       >
         {/* Heading must sit below the chin in the hero image on all devices */}
         <div
-          className="absolute left-1/2 flex w-full max-w-[min(92vw,80rem)] -translate-x-1/2 flex-col items-center px-5 sm:px-6 md:px-12 lg:px-24 top-[max(11rem,min(52svh,calc(100svh-21rem)))] md:top-[max(12rem,min(60svh,calc(100svh-19rem)))]"
+          className="absolute left-1/2 flex w-full max-w-[min(92vw,80rem)] -translate-x-1/2 flex-col items-center px-5 sm:px-6 md:px-12 lg:px-24 top-[max(11rem,min(52svh,calc(100svh-21rem)))] md:top-[max(12rem,min(60svh,calc(100svh-19rem)))] [@media(max-height:450px)_and_(orientation:landscape)]:top-[max(3.5rem,calc(100svh-15rem))]"
         >
+
           <div className="flex w-full flex-col items-center gap-1.5 sm:gap-2">
             <motion.h1
               id="landing-hero-heading"
@@ -257,7 +258,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
           {/* CTAs */}
           <motion.div
-            className="pointer-events-auto mt-6 md:mt-9 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 md:gap-5"
+            className="pointer-events-auto mt-6 md:mt-9 [@media(max-height:450px)_and_(orientation:landscape)]:mt-4 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 md:gap-5"
             initial="hidden"
             animate="show"
             variants={{
