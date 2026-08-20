@@ -37,10 +37,11 @@ const Unsubscribe = () => {
         <meta name="description" content="Styr vilka mejl och notiser du får från Parium i dina notisinställningar." />
       </Helmet>
       <section className="w-full max-w-md rounded-lg border border-white/15 bg-white/[0.07] p-6 shadow-2xl backdrop-blur-md sm:p-8">
-        <div className="flex items-center gap-2 mb-8">
-          <Mail className="h-5 w-5 text-secondary" />
-          <span className="font-semibold text-white">Parium</span>
+        <div className="mb-8 flex items-center justify-center gap-2">
+          <Mail className="h-5 w-5 shrink-0 text-secondary" />
+          <span className="font-semibold leading-none text-white">Parium</span>
         </div>
+
 
         <div className="mb-3 flex items-center gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-secondary/30 bg-secondary/10">
