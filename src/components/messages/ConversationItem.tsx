@@ -111,9 +111,11 @@ export function ConversationItem({
           )}>
             {displayName}
           </span>
-          <span className="text-pure-white text-xs flex-shrink-0">
+          <span className="text-pure-white text-xs flex-shrink-0 flex items-center gap-1">
+            {conversation.is_muted && <BellOff className="h-3 w-3" aria-label="Tystad" />}
             {formatTime(conversation.last_message_at)}
           </span>
+
         </div>
 
         {(snapshot?.job_title || conversation.job?.title) && (
