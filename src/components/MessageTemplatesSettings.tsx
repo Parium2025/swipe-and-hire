@@ -2077,20 +2077,13 @@ export function MessageTemplatesSettings() {
                 <div className="flex flex-wrap items-center gap-2">
                   {selectedLogIds.length > 0 && (
                     <PillButton
-                      className="h-8 border-white/20 bg-white/10 px-3 hover:bg-white/20 hover:border-white/40"
+                      className="h-8 border-destructive/60 bg-destructive/30 px-3 text-white hover:bg-destructive/45 hover:border-destructive/80"
                       onClick={() => openLogDeleteDialog(selectedLogIds, selectedLogIds.length === logs.length)}
                     >
                       <Trash2 className="h-3 w-3" />
-                      Ta bort markerade ({selectedLogIds.length})
+                      Ta bort ({selectedLogIds.length})
                     </PillButton>
                   )}
-                  <PillButton
-                    className="h-8 border-destructive/60 bg-destructive/30 px-3 text-white hover:bg-destructive/45 hover:border-destructive/80"
-                    onClick={() => openLogDeleteDialog(logs.map((log) => log.id), true)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    Rensa hela loggen
-                  </PillButton>
                 </div>
               </div>
 
