@@ -674,7 +674,7 @@ const AuthTablet = ({
                   <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
-                    <form key="login-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && (e.target as HTMLElement)?.tagName === 'INPUT' && !loading) { e.preventDefault(); handleSubmit(e); } }} className="space-y-4">
+                    <form key="login-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && (e.target as HTMLElement)?.tagName === 'INPUT' && !loading) { e.preventDefault(); e.currentTarget.requestSubmit(); } }} className="space-y-4">
                       <div className="relative">
                         <Label htmlFor="login-email" className="text-white">
                           <Mail className="h-4 w-4 inline mr-2" />
@@ -690,6 +690,7 @@ const AuthTablet = ({
                           name="auth-email"
                           autoComplete="email"
                           inputMode="email"
+                           enterKeyHint="next"
                           spellCheck={false}
                           autoCapitalize="none"
                           className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
@@ -710,6 +711,7 @@ const AuthTablet = ({
                             required
                             name="auth-password"
                             autoComplete="current-password"
+                             enterKeyHint="go"
                             className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                           />
                           <button
