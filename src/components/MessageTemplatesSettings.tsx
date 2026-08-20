@@ -630,10 +630,11 @@ export function MessageTemplatesSettings() {
     group_id: group?.groupId ?? null,
     automation_ids: group?.automations.map((automation) => automation.id) ?? [],
     name: group?.primary.name ?? family.baseName,
+    // Tomt fält när mallen saknar sparad regel — användaren ska aktivt välja händelse.
     trigger:
       group?.primary.trigger && group.primary.trigger !== 'manual_send'
         ? normalizeTimelineTrigger(group.primary.trigger)
-        : 'application_received',
+        : '',
     channels: family.channels,
     recipient_type: 'candidate',
     template_ids: family.channels.reduce<Partial<Record<AutomationChannel, string>>>((acc, channel) => {
@@ -971,7 +972,7 @@ export function MessageTemplatesSettings() {
       owner_user_id: user.id,
       organization_id: organizationId,
       name: automationForm.name.trim(),
-      trigger: automationForm.trigger,
+      trigger: selectedTrigger,
       recipient_type: automationForm.recipient_type,
       delay_minutes: automationForm.delay_minutes,
       filters: { group_id: groupId },
