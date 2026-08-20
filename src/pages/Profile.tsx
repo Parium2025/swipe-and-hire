@@ -355,12 +355,21 @@ const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const notificationSettingsRef = useRef<HTMLDivElement>(null);
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const isDiscardingChangesRef = useRef(false);
   const didInitProfileRef = useRef(false);
   const { enqueueProfileUpdate } = useOfflineProfileQueue(user?.id);
   const { enqueue: enqueueMediaForLater } = useOfflineMediaQueue(user?.id);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (location.hash !== '#notifications') return;
+    const frame = requestAnimationFrame(() => {
+      notificationSettingsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [location.hash]);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -2534,7 +2543,7 @@ const Profile = () => {
       </div>
 
       {/* Notification Settings */}
-      <div className="responsive-container mt-8">
+      <div id="notifications" ref={notificationSettingsRef} className="responsive-container mt-8 scroll-mt-6">
         <JobSeekerNotificationSettings />
       </div>
 
