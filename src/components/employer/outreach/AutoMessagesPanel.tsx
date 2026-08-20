@@ -200,7 +200,9 @@ export function AutoMessagesPanel() {
 
   const handleDelayChange = async (event: AutoRuleEvent, value: number) => {
     const rows = rowsByTrigger.get(event.trigger) ?? [];
+    setPendingDelays((prev) => ({ ...prev, [event.trigger]: value }));
     if (rows.length === 0) return;
+
 
     setBusyKey(`${event.trigger}-delay`);
     const { error } = await supabase
