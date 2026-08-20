@@ -100,10 +100,14 @@ async function ensureConversation(ownerUserId: string, recipientUserId: string, 
   }).select('id').single();
   if (error || !conversation) throw error ?? new Error('Kunde inte skapa konversation');
 
-  await admin.from('conversation_members').upsert([
-    { conversation_id: conversation.id, user_id: ownerUserId, is_admin: true },
-    { conversation_id: conversation.id, user_id: recipientUserId, is_admin: false },
-  ], { onConflict: 'conversation_id,user_id' });
+  const members = ownerUserId === recipientUserId
+    ? [{ conversation_id: conversation.id, user_id: ownerUserId, is_admin: true }]
+    : [
+        { conversation_id: conversation.id, user_id: ownerUserId, is_admin: true },
+        { conversation_id: conversation.id, user_id: recipientUserId, is_admin: false },
+      ];
+
+  await admin.from('conversation_members').upsert(members, { onConflict: 'conversation_id,user_id' });
 
   return conversation.id;
 }

@@ -34,6 +34,7 @@ import {
   Rocket,
   RotateCcw,
   ScrollText,
+  Send,
   Trash2,
 } from 'lucide-react';
 import {
@@ -427,6 +428,7 @@ export function MessageTemplatesSettings() {
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [savingAutomation, setSavingAutomation] = useState(false);
   const [runningDispatch, setRunningDispatch] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
   const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('library');
   const templatesTabRef = useRef<HTMLButtonElement>(null);
   const libraryTabRef = useRef<HTMLButtonElement>(null);
@@ -1296,6 +1298,35 @@ export function MessageTemplatesSettings() {
     setRunningDispatch(false);
   };
 
+  const handleSendTestToMyself = async () => {
+    if (!user || !selectedTemplateFamily) return;
+
+    const sends = selectedTemplateFamily.channels
+      .map((channel) => selectedTemplateFamily.templatesByChannel[channel])
+      .filter(Boolean)
+      .map((template) => ({ channel: template!.channel, templateId: template!.id }));
+
+    if (sends.length === 0) {
+      toast.error('Mallen saknar kanaler att testa');
+      return;
+    }
+
+    setSendingTest(true);
+    const { error } = await supabase.functions.invoke('outreach-dispatch', {
+      body: { mode: 'manual', recipientUserId: user.id, sends },
+    });
+    setSendingTest(false);
+
+    if (error) {
+      toast.error('Kunde inte skicka provutskicket');
+      return;
+    }
+
+    toast.success('Provutskick skickat till dig själv');
+    await fetchStudio({ silent: true });
+  };
+
+
   const handleCreateAutomationShortcut = () => {
     const firstUnlinkedFamily = templateFamilies.find((family) => !getLinkedAutomationGroup(family, automationGroups));
 
@@ -1903,6 +1934,14 @@ export function MessageTemplatesSettings() {
                     {savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                     {automationForm.id ? 'Uppdatera regel' : 'Spara regel'}
                   </PillButton>
+                  <PillButton
+                    className="px-4 border-white/20 bg-white/10 hover:bg-white/20 hover:border-white/40 disabled:opacity-50"
+                    onClick={handleSendTestToMyself}
+                    disabled={sendingTest}
+                  >
+                    {sendingTest ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    Testa till mig själv
+                  </PillButton>
                   {selectedAutomationGroup && (
                     <PillButton
                       className="px-4 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
@@ -1913,6 +1952,10 @@ export function MessageTemplatesSettings() {
                     </PillButton>
                   )}
                 </div>
+                <p className="text-center text-[11px] text-white">
+                  Provutskicket går bara till dig själv i mallens kanaler — inga kandidater berörs.
+                </p>
+
 
               </>
             )}
