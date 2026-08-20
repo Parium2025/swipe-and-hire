@@ -50,18 +50,31 @@ function redirectAuthTokensIfNeeded() {
   const { location } = window;
   const pathname = location.pathname;
 
-  // Only redirect when not already on /auth
-  if (pathname === '/auth') return false;
-
   // Sidor med EGNA ?token=-parametrar (avprenumerationslänkar i mejl) får
   // aldrig kapas hit — annars blir det en extra full sidladdning till /auth
   // med blank skärm och splash-blink direkt från inkorgen.
   if (pathname === '/unsubscribe' || pathname === '/unsubscribe/') return false;
 
-
   const search = new URLSearchParams(location.search);
   const hashStr = location.hash.startsWith('#') ? location.hash.slice(1) : '';
   const hash = new URLSearchParams(hashStr);
+
+  // Äldre utskick länkar till /?token=<64 hex> eller /auth?token=<64 hex>.
+  // Identifiera dem synkront före React och auth-splashen hinner starta.
+  const legacyUnsubscribeToken = search.get('token') || '';
+  if (
+    !search.get('type') &&
+    !search.get('token_hash') &&
+    !hash.get('access_token') &&
+    !hash.get('refresh_token') &&
+    /^[a-f0-9]{64}$/i.test(legacyUnsubscribeToken)
+  ) {
+    location.replace(`${location.origin}/unsubscribe?token=${encodeURIComponent(legacyUnsubscribeToken)}`);
+    return true;
+  }
+
+  // Only redirect when not already on /auth
+  if (pathname === '/auth') return false;
 
   const type = hash.get('type') || search.get('type');
   const token = hash.get('token') || search.get('token');
