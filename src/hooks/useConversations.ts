@@ -332,6 +332,10 @@ export function useConversations() {
       }
 
       const conversationIds = memberships.map(m => m.conversation_id);
+      const mutedIds = new Set(
+        memberships.filter((m) => (m as { muted_at?: string | null }).muted_at).map((m) => m.conversation_id),
+      );
+
 
       // Fetch conversations with job info
       const { data: conversations, error: convError } = await supabase
