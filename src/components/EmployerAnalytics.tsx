@@ -13,6 +13,7 @@ import {
   getEmployerAnalyticsCacheKey,
   persistEmployerAnalyticsFilter,
   readEmployerAnalyticsCache,
+  readEmployerAnalyticsCacheEntry,
   readPersistedEmployerAnalyticsFilter,
   writeEmployerAnalyticsCache,
 } from '@/components/analytics/employerAnalyticsCache';
@@ -491,24 +492,24 @@ const EmployerAnalytics = memo(() => {
     () => getEmployerAnalyticsCacheKey('advanced', user?.id, selectedDays),
     [user?.id, selectedDays],
   );
-  const cachedRawData = useMemo(
-    () => readEmployerAnalyticsCache<AnalyticsData>(overviewCacheKey),
+  const cachedOverviewEntry = useMemo(
+    () => readEmployerAnalyticsCacheEntry<AnalyticsData>(overviewCacheKey),
     [overviewCacheKey],
   );
-  const cachedAdvancedData = useMemo(
-    () => readEmployerAnalyticsCache<AdvancedAnalyticsData>(advancedCacheKey),
+  const cachedAdvancedEntry = useMemo(
+    () => readEmployerAnalyticsCacheEntry<AdvancedAnalyticsData>(advancedCacheKey),
     [advancedCacheKey],
   );
 
-  const { data: rawData, isLoading, isFetching } = useQuery({
+  const { data: rawData, isLoading, isFetching, dataUpdatedAt } = useQuery({
     queryKey: ['employer-analytics-v2', user?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
       return fetchEmployerAnalyticsOverview(user.id, selectedDays);
     },
     enabled: !!user,
-    initialData: () => cachedRawData,
-    initialDataUpdatedAt: () => 0,
+    initialData: () => cachedOverviewEntry?.value,
+    initialDataUpdatedAt: () => cachedOverviewEntry?.timestamp ?? 0,
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
@@ -520,11 +521,12 @@ const EmployerAnalytics = memo(() => {
       return fetchEmployerAnalyticsAdvanced(user.id, selectedDays);
     },
     enabled: !!user,
-    initialData: () => cachedAdvancedData,
-    initialDataUpdatedAt: () => 0,
+    initialData: () => cachedAdvancedEntry?.value,
+    initialDataUpdatedAt: () => cachedAdvancedEntry?.timestamp ?? 0,
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
+
 
   useEffect(() => {
     persistEmployerAnalyticsFilter(selectedDays);
@@ -626,9 +628,9 @@ const EmployerAnalytics = memo(() => {
   const showAvgTtfaCard = avgTtfa !== null;
   const isSingleSummaryCard = showAvgTtfaCard && !showBestDayCard;
 
-  const [show, setShow] = useState(() => Boolean(cachedRawData));
+  const [show, setShow] = useState(() => Boolean(cachedOverviewEntry?.value));
   useEffect(() => {
-    if (cachedRawData) {
+    if (cachedOverviewEntry?.value) {
       setShow(true);
       return;
     }
@@ -640,7 +642,7 @@ const EmployerAnalytics = memo(() => {
 
     const t = setTimeout(() => setShow(true), 80);
     return () => clearTimeout(t);
-  }, [overviewCacheKey, cachedRawData, isLoading]);
+  }, [overviewCacheKey, cachedOverviewEntry, isLoading]);
 
   if (isLoading && !show) {
     return (
@@ -740,6 +742,13 @@ const EmployerAnalytics = memo(() => {
               ? `Insikter för alla annonser i ${organization.name}`
               : 'Insikter för alla dina annonser'}
           </p>
+          {dataUpdatedAt > 0 && (
+            <p className="text-[11px] text-white/80">
+              {isFetching
+                ? 'Uppdaterar…'
+                : `Uppdaterad ${new Date(dataUpdatedAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}`}
+            </p>
+          )}
         </div>
       </div>
 

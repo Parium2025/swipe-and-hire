@@ -26,7 +26,13 @@ export const getEmployerAnalyticsCacheKey = (
   days?: number | null,
 ) => `${EMPLOYER_ANALYTICS_CACHE_PREFIX}:${scope}:${userId ?? 'guest'}:${days ?? 'all'}`;
 
-export const readEmployerAnalyticsCache = <T,>(key: string): T | undefined => {
+/** Statistik äldre än detta kastas — vi visar hellre skelett än gamla siffror. */
+export const EMPLOYER_ANALYTICS_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+
+export const readEmployerAnalyticsCacheEntry = <T,>(
+  key: string,
+  maxAgeMs: number = EMPLOYER_ANALYTICS_CACHE_TTL_MS,
+): { value: T; timestamp: number } | undefined => {
   if (typeof window === 'undefined') return undefined;
 
   try {
@@ -34,11 +40,27 @@ export const readEmployerAnalyticsCache = <T,>(key: string): T | undefined => {
     if (!raw) return undefined;
 
     const parsed = JSON.parse(raw) as T | PersistedAnalyticsCacheEntry<T>;
-    return isPersistedEntry<T>(parsed) ? parsed.value : parsed;
+    if (!isPersistedEntry<T>(parsed)) {
+      // Äldre format utan tidsstämpel — kan inte valideras, kasta det.
+      window.localStorage.removeItem(key);
+      return undefined;
+    }
+
+    const timestamp = Number(parsed.timestamp);
+    if (!Number.isFinite(timestamp) || Date.now() - timestamp > maxAgeMs) {
+      window.localStorage.removeItem(key);
+      return undefined;
+    }
+
+    return { value: parsed.value, timestamp };
   } catch {
     return undefined;
   }
 };
+
+export const readEmployerAnalyticsCache = <T,>(key: string, maxAgeMs?: number): T | undefined =>
+  readEmployerAnalyticsCacheEntry<T>(key, maxAgeMs)?.value;
+
 
 export const writeEmployerAnalyticsCache = <T,>(key: string, value: T) => {
   if (typeof window === 'undefined') return false;
