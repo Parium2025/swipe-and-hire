@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
-import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
+import { SeoTruncateLink, SeoTruncatedText } from '@/components/seo/SeoTruncateLink';
 import SeoEmptyResultCTA from '@/components/seo/SeoEmptyResultCTA';
 import SeoSearchBox from '@/components/seo/SeoSearchBox';
 import { syncBrowserChrome } from '@/lib/browserChrome';
