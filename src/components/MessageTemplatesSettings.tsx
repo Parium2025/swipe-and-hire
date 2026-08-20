@@ -1428,99 +1428,133 @@ export function MessageTemplatesSettings() {
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga mallar ännu.</div>
             ) : (
                 <div className="space-y-2">
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
-                  <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
-                    <Checkbox
-                      checked={selectedTemplateIds.length === templates.length && templates.length > 0}
-                      onCheckedChange={(checked) => setSelectedTemplateIds(checked ? templates.map((template) => template.id) : [])}
-                    />
-                    Markera alla
-                  </label>
-                  {selectedTemplateIds.length > 0 && (
-                    <PillButton
-                      className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
-                      onClick={openBulkDeleteDialog}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                      Ta bort markerade ({selectedTemplateIds.length})
-                    </PillButton>
-                  )}
-                </div>
-                {templates.map((template) => (
+                {customTemplates.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
+                    <label className="flex cursor-pointer items-center gap-2 px-1 text-xs font-medium text-white">
+                      <Checkbox
+                        checked={selectedTemplateIds.length === customTemplates.length && customTemplates.length > 0}
+                        onCheckedChange={(checked) => setSelectedTemplateIds(checked ? customTemplates.map((template) => template.id) : [])}
+                      />
+                      Markera alla egna mallar
+                    </label>
+                    {selectedTemplateIds.length > 0 && (
+                      <PillButton
+                        className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
+                        onClick={openBulkDeleteDialog}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Ta bort markerade ({selectedTemplateIds.length})
+                      </PillButton>
+                    )}
+                  </div>
+                )}
+                {templates.map((template) => {
+                  const isStandard = isStandardTemplate(template);
+                  return (
                     <div key={template.id} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
                     <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                       <div className="min-w-0 space-y-1.5">
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
-                          <Checkbox
-                            checked={selectedTemplateIds.includes(template.id)}
-                            onCheckedChange={(checked) => setSelectedTemplateIds((prev) => checked ? [...new Set([...prev, template.id])] : prev.filter((id) => id !== template.id))}
-                            aria-label={`Markera ${template.name}`}
-                          />
+                          {!isStandard && (
+                            <Checkbox
+                              checked={selectedTemplateIds.includes(template.id)}
+                              onCheckedChange={(checked) => setSelectedTemplateIds((prev) => checked ? [...new Set([...prev, template.id])] : prev.filter((id) => id !== template.id))}
+                              aria-label={`Markera ${template.name}`}
+                            />
+                          )}
                           <p className="max-w-full truncate text-sm font-semibold text-white">{template.name}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
+                          {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
                         </div>
                         {template.subject && <p className="text-[11px] text-white md:text-xs">{template.subject}</p>}
                         <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
+                        {isStandard && (
+                          <p className="text-[11px] text-white md:text-xs">Skyddad originalmall – kan inte ändras eller tas bort. Gör en kopia för att skriva egen text.</p>
+                        )}
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-1.5">
-                        {DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel) && (
+                        {isStandard ? (
                           <PillButton
-                            shape="icon"
-                            className="h-8 w-8"
-                            aria-label={`Återställ ${template.name} till Parium-standard`}
-                            title="Återställ Parium-standard"
-                            disabled={restoringDefault}
-                            onClick={() => void handleRestoreDefaultTemplate(template.name)}
+                            className="h-8 px-3"
+                            aria-label={`Skapa kopia av ${template.name}`}
+                            title="Skapa en egen kopia"
+                            onClick={() => {
+                              setTemplateForm({
+                                id: null,
+                                name: `${template.name} (kopia)`,
+                                channels: [template.channel as AutomationChannel],
+                                channelContent: {
+                                  chat: {
+                                    subject: template.channel === 'chat' ? template.subject ?? '' : '',
+                                    body: template.channel === 'chat' ? template.body : '',
+                                  },
+                                  email: {
+                                    subject: template.channel === 'email' ? template.subject ?? '' : '',
+                                    body: template.channel === 'email' ? template.body : '',
+                                  },
+                                  push: {
+                                    subject: template.channel === 'push' ? template.subject ?? '' : '',
+                                    body: template.channel === 'push' ? template.body : '',
+                                  },
+                                },
+                              });
+                              setActiveTemplateChannel(template.channel as AutomationChannel);
+                              goToStudioTab('templates');
+                            }}
                           >
-                            <RotateCcw className="h-3 w-3" />
+                            <Copy className="h-3 w-3" />
+                            Skapa kopia
                           </PillButton>
+                        ) : (
+                          <>
+                            <PillButton
+                              shape="icon"
+                              className="h-8 w-8"
+                              onClick={() => {
+                                setTemplateForm({
+                                  id: template.id,
+                                  name: template.name,
+                                  channels: [template.channel as AutomationChannel],
+                                  channelContent: {
+                                    chat: {
+                                      subject: template.channel === 'chat' ? template.subject ?? '' : '',
+                                      body: template.channel === 'chat' ? template.body : '',
+                                    },
+                                    email: {
+                                      subject: template.channel === 'email' ? template.subject ?? '' : '',
+                                      body: template.channel === 'email' ? template.body : '',
+                                    },
+                                    push: {
+                                      subject: template.channel === 'push' ? template.subject ?? '' : '',
+                                      body: template.channel === 'push' ? template.body : '',
+                                    },
+                                  },
+                                });
+                                setActiveTemplateChannel(template.channel as AutomationChannel);
+                                goToStudioTab('templates');
+                              }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </PillButton>
+
+                            <PillButton
+                              shape="icon"
+                              className="h-8 w-8 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
+                              onClick={() => openDeleteTemplateDialog(template)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </PillButton>
+                          </>
                         )}
-                        <PillButton
-                          shape="icon"
-                          className="h-8 w-8"
-
-                          onClick={() => {
-                            setTemplateForm({
-                              id: template.id,
-                              name: template.name,
-                              channels: [template.channel as AutomationChannel],
-                              channelContent: {
-                                chat: {
-                                  subject: template.channel === 'chat' ? template.subject ?? '' : '',
-                                  body: template.channel === 'chat' ? template.body : '',
-                                },
-                                email: {
-                                  subject: template.channel === 'email' ? template.subject ?? '' : '',
-                                  body: template.channel === 'email' ? template.body : '',
-                                },
-                                push: {
-                                  subject: template.channel === 'push' ? template.subject ?? '' : '',
-                                  body: template.channel === 'push' ? template.body : '',
-                                },
-                              },
-                            });
-                            setActiveTemplateChannel(template.channel as AutomationChannel);
-                            goToStudioTab('templates');
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </PillButton>
-
-                        <PillButton
-                          shape="icon"
-                          className="h-8 w-8 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
-                          onClick={() => openDeleteTemplateDialog(template)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </PillButton>
-
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
+
           </div>
         </TabsContent>
 
