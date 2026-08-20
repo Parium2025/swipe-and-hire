@@ -1198,10 +1198,13 @@ export function MessageTemplatesSettings() {
     setRestoringDefault(false);
   };
 
+  // Alla Parium-original: både biblioteksmallarna och de som Automatiska utskick
+  // skapar när en kanal slås på. Dessa är låsta och räknas aldrig som "egna mallar".
   const isStandardTemplate = (template: { name: string; channel: string }) =>
-    DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel);
+    STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
+
 
   const missingDefaultTemplates = DEFAULT_OUTREACH_TEMPLATES.filter(
     (defaultTemplate) =>
