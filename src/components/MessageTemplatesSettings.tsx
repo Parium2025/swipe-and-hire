@@ -25,7 +25,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
   Bot,
-  Copy,
+  
   Info,
 
   Loader2,
@@ -1410,7 +1410,7 @@ export function MessageTemplatesSettings() {
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white">Så fungerar biblioteket</p>
               <ul className="mt-2 space-y-1 text-xs text-white md:text-sm">
                 <li>• Mallar märkta <span className="font-semibold">Parium-standard</span> är låsta: de kan varken ändras eller tas bort, så ni har alltid ett fungerande original att falla tillbaka på.</li>
-                <li>• Vill du ha egen text: tryck <span className="font-semibold">Skapa kopia</span> här, eller gå till <span className="font-semibold">Steg 1 · Mall</span> och skriv en ny.</li>
+                <li>• Vill du ha egen text: gå till <span className="font-semibold">Steg 1 · Mall</span> och skriv en ny.</li>
                 <li>• I <span className="font-semibold">Steg 2 · Regel</span> väljer du händelse (ansökan inkommen, före intervju, efter intervju, annons avslutas) och kanaler. Din regel ersätter direkt tidigare regler för samma händelse och kanal – de äldre stängs av automatiskt, så bara en regel kan skicka per händelse och kanal.</li>
                 <li>• Väljer du bara chatt fortsätter e-post och push att vara avstängda för den händelsen tills du kryssar i dem.</li>
               </ul>
@@ -1514,43 +1514,12 @@ export function MessageTemplatesSettings() {
                         {template.subject && <p className="text-[11px] text-white md:text-xs">{template.subject}</p>}
                         <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
                         {isStandard && (
-                          <p className="text-[11px] text-white md:text-xs">Skyddad originalmall – kan inte ändras eller tas bort. Gör en kopia för att skriva egen text.</p>
+                          <p className="text-[11px] text-white md:text-xs">Skyddad originalmall – kan inte ändras eller tas bort. Vill du ha egen text skapar du en ny mall i Steg 1.</p>
                         )}
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-1.5">
-                        {isStandard ? (
-                          <PillButton
-                            className="h-8 px-3"
-                            aria-label={`Skapa kopia av ${template.name}`}
-                            title="Skapa en egen kopia"
-                            onClick={() => {
-                              setTemplateForm({
-                                id: null,
-                                name: `${template.name} (kopia)`,
-                                channels: [template.channel as AutomationChannel],
-                                channelContent: {
-                                  chat: {
-                                    subject: template.channel === 'chat' ? template.subject ?? '' : '',
-                                    body: template.channel === 'chat' ? template.body : '',
-                                  },
-                                  email: {
-                                    subject: template.channel === 'email' ? template.subject ?? '' : '',
-                                    body: template.channel === 'email' ? template.body : '',
-                                  },
-                                  push: {
-                                    subject: template.channel === 'push' ? template.subject ?? '' : '',
-                                    body: template.channel === 'push' ? template.body : '',
-                                  },
-                                },
-                              });
-                              setActiveTemplateChannel(template.channel as AutomationChannel);
-                              goToStudioTab('templates');
-                            }}
-                          >
-                            <Copy className="h-3 w-3" />
-                            Skapa kopia
-                          </PillButton>
-                        ) : (
+                        {isStandard ? null : (
+
                           <>
                             <PillButton
                               shape="icon"
