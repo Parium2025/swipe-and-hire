@@ -8,6 +8,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { MapPin, Search } from 'lucide-react';
 import { KOMMUNER } from '@/data/jobMunicipalities';
+import { SeoTruncatedText } from '@/components/seo/SeoTruncateLink';
 
 const CANONICAL = 'https://www.parium.se/kommuner';
 const TITLE = 'Lediga jobb i Sveriges kommuner – sök på din kommun | Parium';
@@ -156,7 +157,10 @@ const KommunHub = () => {
                       className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm font-medium text-white hover:bg-white/10 transition"
                     >
                       <MapPin className="h-4 w-4 text-white/70" aria-hidden="true" />
-                      <span className="truncate">{k.name}</span>
+                      <SeoTruncatedText fullText={k.name} className="text-white">
+                        {k.name}
+                      </SeoTruncatedText>
+
                     </Link>
                   </li>
                 ))}
