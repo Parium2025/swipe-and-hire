@@ -1936,8 +1936,8 @@ export function MessageTemplatesSettings() {
 
                 <div className="space-y-2">
                   <Label className="text-white">När ska den skickas?</Label>
-                  <Select value={automationForm.trigger} onValueChange={(value: AutomationForm['trigger']) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, trigger: value })); }}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue /></SelectTrigger>
+                  <Select value={automationForm.trigger || undefined} onValueChange={(value: AutomationForm['trigger']) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, trigger: value })); }}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue placeholder="Välj händelse" /></SelectTrigger>
                     <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
                       {OUTREACH_TRIGGER_OPTIONS.filter((option) => !['manual_send', 'interview_scheduled', 'application_no_response_14d'].includes(option.value)).map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                     </SelectContent>
