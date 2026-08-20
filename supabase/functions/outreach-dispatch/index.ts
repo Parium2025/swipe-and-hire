@@ -220,6 +220,12 @@ async function dispatchLog(log: OutreachLog) {
 
     if (log.channel === 'push') {
       if (!log.recipient_user_id) throw new Error('Saknar mottagare för push');
+      const { count: tokenCount } = await admin
+        .from('device_push_tokens')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', log.recipient_user_id)
+        .eq('is_active', true);
+      if (!tokenCount) throw new Error('Inga registrerade enheter för push (push fungerar bara i mobilappen)');
       const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceRoleKey}` },
