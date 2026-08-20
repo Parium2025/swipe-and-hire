@@ -1104,6 +1104,66 @@ export function MessageTemplatesSettings() {
     setRestoringDefault(false);
   };
 
+  const missingDefaultTemplates = DEFAULT_OUTREACH_TEMPLATES.filter(
+    (defaultTemplate) =>
+      !templates.some(
+        (template) => template.name === defaultTemplate.name && template.channel === defaultTemplate.channel,
+      ),
+  );
+
+  const handleRestoreAllDefaultTemplates = async () => {
+    if (!user) return;
+    setRestoringDefault(true);
+
+    const toInsert = missingDefaultTemplates.map((defaultTemplate) => ({
+      name: defaultTemplate.name,
+      channel: defaultTemplate.channel,
+      subject: defaultTemplate.subject,
+      body: defaultTemplate.body,
+      is_active: defaultTemplate.is_active,
+      is_default: true,
+      owner_user_id: user.id,
+      organization_id: organizationId,
+    }));
+
+    const existingDefaults = templates.filter((template) =>
+      DEFAULT_OUTREACH_TEMPLATES.some((item) => item.name === template.name && item.channel === template.channel),
+    );
+
+    let failed = false;
+
+    if (toInsert.length > 0) {
+      const { error } = await supabase.from('outreach_templates').insert(toInsert);
+      if (error) failed = true;
+    }
+
+    for (const template of existingDefaults) {
+      const defaultTemplate = DEFAULT_OUTREACH_TEMPLATES.find(
+        (item) => item.name === template.name && item.channel === template.channel,
+      );
+      if (!defaultTemplate) continue;
+      const { error } = await supabase
+        .from('outreach_templates')
+        .update({
+          subject: defaultTemplate.subject,
+          body: defaultTemplate.body,
+          is_active: defaultTemplate.is_active,
+          is_default: true,
+        })
+        .eq('id', template.id);
+      if (error) failed = true;
+    }
+
+    if (failed) {
+      toast.error('Kunde inte återställa alla Parium-mallar');
+    } else {
+      toast.success(`${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar är återställda`);
+    }
+    await fetchStudio({ silent: true });
+    setRestoringDefault(false);
+  };
+
+
   const openDeleteAutomationDialog = (group: AutomationGroup, family: TemplateFamily | null) => {
     const ruleName = family?.baseName ?? group.primary.name;
 
@@ -1190,24 +1250,27 @@ export function MessageTemplatesSettings() {
           <AlertDialogFooter className="mt-4 flex-row gap-2 sm:justify-center">
             <AlertDialogCancel
               disabled={isDeleting}
+              onPointerDown={(event) => event.preventDefault()}
               onClick={() => setPendingDeleteAction(null)}
-              className="mt-0 flex-1 rounded-full border-white/20 bg-white/10 text-sm text-white transition-all duration-300 md:hover:border-white/50 md:hover:bg-white/20 md:hover:text-white"
+              className="mt-0 flex-1 rounded-full border-white/20 bg-white/10 text-sm text-white outline-none transition-colors duration-200 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 [-webkit-tap-highlight-color:transparent] md:hover:border-white/50 md:hover:bg-white/20 md:hover:text-white"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructiveSoft"
               disabled={isDeleting}
+              onPointerDown={(event) => event.preventDefault()}
               onClick={(event) => {
                 event.preventDefault();
                 void handleConfirmDelete();
               }}
-              className="flex-1 rounded-full text-sm"
+              className="flex-1 rounded-full text-sm outline-none transition-colors duration-200 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 [-webkit-tap-highlight-color:transparent]"
             >
               {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
+
         </AlertDialogContentNoFocus>
       </AlertDialog>
 
@@ -1320,8 +1383,13 @@ export function MessageTemplatesSettings() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-white">Parium-standard</Label>
-                  <InfoHint text="Välj exakt den originalmall du vill återställa eller lägga tillbaka. Inga andra mallar eller regler påverkas." />
+                  <InfoHint text="Parium-standarden finns alltid kvar i koden. Välj en enskild mall för att lägga tillbaka eller återställa den, eller lägg tillbaka hela standardpaketet. Egna mallar påverkas aldrig." />
                 </div>
+                <p className="text-xs text-white">
+                  {missingDefaultTemplates.length === 0
+                    ? `Alla ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar finns i biblioteket.`
+                    : `${missingDefaultTemplates.length} av ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar saknas i biblioteket.`}
+                </p>
                 <Select value={selectedDefaultTemplateName} onValueChange={setSelectedDefaultTemplateName}>
                   <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
                     <SelectValue placeholder="Välj Parium-mall" />
@@ -1333,14 +1401,25 @@ export function MessageTemplatesSettings() {
                   </SelectContent>
                 </Select>
               </div>
-              <PillButton
-                className="px-4 disabled:opacity-50"
-                disabled={restoringDefault || !selectedDefaultTemplateName}
-                onClick={() => void handleRestoreDefaultTemplate()}
-              >
-                {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                {templates.some((template) => template.name === selectedDefaultTemplateName) ? 'Återställ vald' : 'Lägg tillbaka vald'}
-              </PillButton>
+              <div className="flex flex-wrap items-center gap-2">
+                <PillButton
+                  className="px-4 disabled:opacity-50"
+                  disabled={restoringDefault || !selectedDefaultTemplateName}
+                  onClick={() => void handleRestoreDefaultTemplate()}
+                >
+                  {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                  {templates.some((template) => template.name === selectedDefaultTemplateName) ? 'Återställ vald' : 'Lägg tillbaka vald'}
+                </PillButton>
+                <PillButton
+                  className="px-4 disabled:opacity-50"
+                  disabled={restoringDefault}
+                  onClick={() => void handleRestoreAllDefaultTemplates()}
+                >
+                  {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                  Lägg tillbaka alla ({DEFAULT_OUTREACH_TEMPLATES.length})
+                </PillButton>
+              </div>
+
             </div>
 
             {loading ? (
