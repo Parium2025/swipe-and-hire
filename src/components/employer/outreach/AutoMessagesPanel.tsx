@@ -91,8 +91,23 @@ export function AutoMessagesPanel() {
   }, [user]);
 
   useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
+    if (!user) return;
+    let cancelled = false;
+    void (async () => {
+      // Standard: allt påslaget för nya arbetsgivare. Har de redan egna
+      // inställningar rör vi dem aldrig – av är av.
+      const seeded = await seedDefaultAutoRules(user.id, organizationId);
+      if (cancelled) return;
+      await fetchData();
+      if (seeded && !cancelled) {
+        toast.success('Automatiska utskick är påslagna som standard – du kan stänga av precis vad du vill.');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, organizationId, fetchData]);
+
 
   useEffect(() => {
     if (!user) return;
