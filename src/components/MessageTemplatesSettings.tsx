@@ -991,13 +991,38 @@ export function MessageTemplatesSettings() {
     if (failedResult?.error) {
       toast.error('Kunde inte spara regeln');
     } else {
+      // Endast en aktiv regel per händelse + kanal: stäng av tidigare regler som krockar.
+      let disabledConflicts = 0;
+      if (automationForm.is_enabled) {
+        const conflicting = automations.filter(
+          (automation) =>
+            automation.is_enabled &&
+            automation.trigger === automationForm.trigger &&
+            automationForm.channels.includes(automation.channel as AutomationChannel) &&
+            getAutomationGroupId(automation) !== groupId,
+        );
+
+        if (conflicting.length > 0) {
+          const { error: conflictError } = await supabase
+            .from('outreach_automations')
+            .update({ is_enabled: false })
+            .in('id', conflicting.map((automation) => automation.id));
+
+          if (!conflictError) disabledConflicts = conflicting.length;
+        }
+      }
+
       const wasUpdate = !!automationForm.id;
       toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
+      if (disabledConflicts > 0) {
+        toast.info(`${disabledConflicts} tidigare regel${disabledConflicts > 1 ? 'er' : ''} för samma händelse och kanal stängdes av`);
+      }
       if (!wasUpdate) {
         setAutomationForm(EMPTY_AUTOMATION_FORM);
       }
       await fetchStudio({ silent: true });
     }
+
 
     setSavingAutomation(false);
   };
