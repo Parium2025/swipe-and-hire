@@ -25,7 +25,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
   Bot,
-  Copy,
+  
   Info,
 
   Loader2,
