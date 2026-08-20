@@ -224,11 +224,12 @@ function DelayField({ value, onChange }: { value: number; onChange: (value: numb
           </button>
         ))}
       </div>
+      {(Number(text) || 0) >= 60 && (
+        <p className="text-[11px] text-white">Motsvarar {formatAutomationDelay(Number(text) || 0)}</p>
+      )}
     </div>
   );
 }
-
-
 
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
