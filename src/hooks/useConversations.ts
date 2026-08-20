@@ -463,6 +463,8 @@ export function useConversations() {
           members,
           last_message: lastMessageMap.get(conv.id),
           unread_count: unreadCounts.get(conv.id) || 0,
+          is_muted: mutedIds.has(conv.id),
+
           // Include frozen profile snapshot from application if available
           applicationSnapshot: conv.application_id
             ? applicationSnapshotMap.get(conv.application_id)
