@@ -29,14 +29,17 @@ const EmployerSettings = () => {
   const [backgroundLocationEnabled, setBackgroundLocationEnabled] = useState(false);
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
+  const [openSection, setOpenSection] = useState<string>('konto');
 
   useEffect(() => {
     if (location.hash !== '#notifications') return;
+    setOpenSection('notifications');
     const frame = requestAnimationFrame(() => {
       notificationSettingsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
     });
     return () => cancelAnimationFrame(frame);
   }, [location.hash]);
+
 
   // Load background location preference from profile
   useEffect(() => {
