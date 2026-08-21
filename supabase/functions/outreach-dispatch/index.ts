@@ -362,12 +362,25 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
   };
 
   const [immediate, delayed] = await Promise.all([buildQuery(false), buildQuery(true)]);
-  if (immediate.error) throw immediate.error;
-  if (delayed.error) throw delayed.error;
 
   const now = Date.now();
-  const rows = [...((immediate.data ?? []) as OutreachLog[]), ...((delayed.data ?? []) as OutreachLog[])];
+  let rows: OutreachLog[];
+  if (immediate.error || delayed.error) {
+    // Skulle det delade fönstret av någon anledning inte gå att köra faller vi
+    // tillbaka på ett enkelt svep — utskicken ska aldrig stanna av.
+    console.error('Delad kö-fråga misslyckades, faller tillbaka', immediate.error ?? delayed.error);
+    let fallback = admin.from('outreach_dispatch_logs').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(200);
+    if (filters.ownerUserId) fallback = fallback.eq('owner_user_id', filters.ownerUserId);
+    if (filters.trigger) fallback = fallback.eq('trigger', filters.trigger);
+    if (filters.interviewId) fallback = fallback.eq('interview_id', filters.interviewId);
+    const { data, error } = await fallback;
+    if (error) throw error;
+    rows = (data ?? []) as OutreachLog[];
+  } else {
+    rows = [...((immediate.data ?? []) as OutreachLog[]), ...((delayed.data ?? []) as OutreachLog[])];
+  }
   const due = rows.filter((row) => isDue(row, now)).slice(0, 30);
+
 
 
   let processedCount = 0;
