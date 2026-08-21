@@ -1362,7 +1362,7 @@ export function MessageTemplatesSettings() {
     setSendingTest(false);
 
     if (error) {
-      toast.error('Kunde inte skicka provutskicket');
+      toast.info('Provutskicket kunde inte skickas — se detaljer i Logg');
       return;
     }
 
@@ -1371,19 +1371,15 @@ export function MessageTemplatesSettings() {
     const sent = results.filter((r) => r.status === 'sent');
     const failed = results.filter((r) => r.status === 'failed');
 
-    if (failed.length > 0) {
-      const detail = failed.map((r) => `${channelLabels[r.channel] ?? r.channel}: ${r.error ?? 'okänt fel'}`).join(' · ');
-      if (sent.length > 0) {
-        toast.warning(`Skickat via ${sent.map((r) => channelLabels[r.channel] ?? r.channel).join(', ')}`, { description: `Misslyckades — ${detail}` });
-      } else {
-        toast.error('Provutskicket misslyckades', { description: detail });
-      }
-    } else if (sent.length > 0) {
+    if (sent.length > 0) {
       const destination = recipient ? recipient.name : 'dig själv';
       toast.success(`Provutskick skickat till ${destination} (${sent.map((r) => channelLabels[r.channel] ?? r.channel).join(', ')})`);
+    } else if (failed.length > 0) {
+      toast.info('Provutskicket gick inte igenom — se detaljer i Logg');
     } else {
       toast.info('Inget skickades — mallen saknar innehåll');
     }
+
 
     await fetchStudio({ silent: true });
   };
