@@ -381,11 +381,14 @@ const DELAY_APPLIES_AT_DISPATCH: Record<OutreachTrigger, boolean> = {
 };
 
 const isDue = (row: OutreachLog, now: number) => {
+  // Rader som väntar på ett tyst omförsök styrs enbart av next_attempt_at.
+  if (row.next_attempt_at) return new Date(row.next_attempt_at).getTime() <= now;
   if (!DELAY_APPLIES_AT_DISPATCH[row.trigger]) return true;
   const delayMinutes = Number(getPayloadObject(row.payload).delay_minutes ?? 0);
   if (!Number.isFinite(delayMinutes) || delayMinutes <= 0) return true;
   return new Date(row.created_at).getTime() + delayMinutes * 60_000 <= now;
 };
+
 
 async function processPending(filters: { ownerUserId?: string; trigger?: OutreachTrigger; interviewId?: string | null } = {}) {
   const buildQuery = (delayed: boolean) => {
