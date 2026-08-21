@@ -397,6 +397,12 @@ const getLogStatusLabel = (log: OutreachDispatchLog) => {
   switch (log.status) {
     case 'pending':
       return 'Väntar';
+    case 'retrying': {
+      const attempts = (log as { attempt_count?: number | null }).attempt_count ?? 1;
+      return `Försöker igen (${attempts}/3)`;
+    }
+    case 'skipped':
+      return 'Hoppades över';
     case 'failed':
       return 'Misslyckat';
     case 'opened':
@@ -658,7 +664,7 @@ export function MessageTemplatesSettings() {
 
   const logSummary = useMemo(() => logs.reduce(
     (acc, log) => {
-      if (log.status === 'pending') acc.pending += 1;
+      if (log.status === 'pending' || log.status === 'retrying') acc.pending += 1;
       if (log.status === 'failed') acc.failed += 1;
       if (isDeliveredLog(log)) acc.delivered += 1;
       if (log.status === 'opened' || Boolean(getLogOpenedAt(log))) acc.opened += 1;
@@ -1454,7 +1460,7 @@ export function MessageTemplatesSettings() {
           {[
           { label: 'Mallar', value: templates.length, icon: Bot },
            { label: 'Aktiva regler', value: automationGroups.filter((group) => group.automations.some((item) => item.is_enabled)).length, icon: RefreshCw },
-          { label: 'Väntar på att skickas', value: logs.filter((item) => item.status === 'pending').length, icon: ScrollText },
+          { label: 'Väntar på att skickas', value: logs.filter((item) => item.status === 'pending' || item.status === 'retrying').length, icon: ScrollText },
         ].map(({ label, value, icon: Icon }) => (
           <div key={label} className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] px-2.5 py-1.5">
             <div className="flex items-center justify-between">
