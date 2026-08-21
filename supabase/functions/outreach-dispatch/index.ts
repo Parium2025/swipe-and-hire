@@ -319,9 +319,31 @@ async function dispatchLog(log: OutreachLog) {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Okänt fel';
-    await admin.from('outreach_dispatch_logs').update({ status: 'failed', error_message: message }).eq('id', log.id);
+    const attempts = (log.attempt_count ?? 0) + 1;
+
+    // Tyst omförsök: bara vid tillfälliga fel (nät, timeout, 5xx, rate limit).
+    // Permanenta fel (saknad adress, ingen enhet, avstängd notis) försöker vi
+    // aldrig igen — de blir "Misslyckades" direkt och syns i Logg.
+    if (isTransientError(message) && attempts < MAX_ATTEMPTS) {
+      const nextAt = new Date(Date.now() + RETRY_BACKOFF_MINUTES[attempts - 1] * 60_000).toISOString();
+      await admin.from('outreach_dispatch_logs').update({
+        status: 'retrying',
+        attempt_count: attempts,
+        next_attempt_at: nextAt,
+        error_message: `Försöker igen (${attempts}/${MAX_ATTEMPTS}): ${message}`,
+      }).eq('id', log.id);
+      return { retrying: true as const, error: message };
+    }
+
+    await admin.from('outreach_dispatch_logs').update({
+      status: 'failed',
+      attempt_count: attempts,
+      next_attempt_at: null,
+      error_message: message,
+    }).eq('id', log.id);
     return { error: message };
   }
+
 
   return {};
 }
