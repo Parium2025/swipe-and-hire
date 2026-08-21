@@ -165,11 +165,11 @@ export function AutoMessagesPanel() {
   const rowsByTrigger = useMemo(() => {
     const map = new Map<string, OutreachAutomation[]>();
     automations.forEach((automation) => {
-      const key = automation.trigger === 'application_no_response_14d' ? 'job_closed' : automation.trigger;
-      map.set(key, [...(map.get(key) ?? []), automation]);
+      map.set(automation.trigger, [...(map.get(automation.trigger) ?? []), automation]);
     });
     return map;
   }, [automations]);
+
 
   const getRow = (event: AutoRuleEvent, channel: AutoRuleChannel) =>
     (rowsByTrigger.get(event.trigger) ?? []).find((automation) => automation.channel === channel) ?? null;
