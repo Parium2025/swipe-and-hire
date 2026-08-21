@@ -113,8 +113,8 @@ export function AutoMessagesPanel() {
   const fetchData = useCallback(async () => {
     if (!user) return;
     const [automationsRes, templatesRes] = await Promise.all([
-      supabase.from('outreach_automations').select('*'),
-      supabase.from('outreach_templates').select('*'),
+      supabase.from('outreach_automations').select('*').eq('owner_user_id', user.id),
+      supabase.from('outreach_templates').select('*').eq('owner_user_id', user.id),
     ]);
     const nextAutomations = (automationsRes.data as OutreachAutomation[]) ?? [];
     const nextTemplates = (templatesRes.data as OutreachTemplate[]) ?? [];
@@ -130,6 +130,7 @@ export function AutoMessagesPanel() {
       // Ignorera quota-fel
     }
   }, [user]);
+
 
   useEffect(() => {
     if (!user) return;
@@ -164,11 +165,11 @@ export function AutoMessagesPanel() {
   const rowsByTrigger = useMemo(() => {
     const map = new Map<string, OutreachAutomation[]>();
     automations.forEach((automation) => {
-      const key = automation.trigger === 'application_no_response_14d' ? 'job_closed' : automation.trigger;
-      map.set(key, [...(map.get(key) ?? []), automation]);
+      map.set(automation.trigger, [...(map.get(automation.trigger) ?? []), automation]);
     });
     return map;
   }, [automations]);
+
 
   const getRow = (event: AutoRuleEvent, channel: AutoRuleChannel) =>
     (rowsByTrigger.get(event.trigger) ?? []).find((automation) => automation.channel === channel) ?? null;
