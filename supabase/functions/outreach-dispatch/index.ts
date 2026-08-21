@@ -353,7 +353,7 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
     // 500 kandidater när en annons stängs med 1 dygns fördröjning) aldrig kan
     // svälta ut nya ansökningsbekräftelser.
     query = delayed
-      ? query.not('payload->>delay_minutes', 'in', '("0",0)')
+      ? query.not('payload->>delay_minutes', 'is', null).neq('payload->>delay_minutes', '0')
       : query.or('payload->>delay_minutes.is.null,payload->>delay_minutes.eq.0');
     if (filters.ownerUserId) query = query.eq('owner_user_id', filters.ownerUserId);
     if (filters.trigger) query = query.eq('trigger', filters.trigger);
