@@ -9,6 +9,8 @@ import { AutoMessagesPanel } from '@/components/employer/outreach/AutoMessagesPa
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+
 
 import EmployerAccountEmailPanel from '@/components/employer/settings/EmployerAccountEmailPanel';
 import EmployerPasswordPanel from '@/components/employer/settings/EmployerPasswordPanel';
