@@ -392,7 +392,7 @@ const isDue = (row: OutreachLog, now: number) => {
 
 async function processPending(filters: { ownerUserId?: string; trigger?: OutreachTrigger; interviewId?: string | null } = {}) {
   const buildQuery = (delayed: boolean) => {
-    let query = admin.from('outreach_dispatch_logs').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(200);
+    let query = admin.from('outreach_dispatch_logs').select('*').in('status', ['pending', 'retrying']).order('created_at', { ascending: true }).limit(200);
     // Direktutskick får ett eget fönster så att en stor fördröjd batch (t.ex.
     // 500 kandidater när en annons stängs med 1 dygns fördröjning) aldrig kan
     // svälta ut nya ansökningsbekräftelser.
@@ -413,7 +413,7 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
     // Skulle det delade fönstret av någon anledning inte gå att köra faller vi
     // tillbaka på ett enkelt svep — utskicken ska aldrig stanna av.
     console.error('Delad kö-fråga misslyckades, faller tillbaka', immediate.error ?? delayed.error);
-    let fallback = admin.from('outreach_dispatch_logs').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(200);
+    let fallback = admin.from('outreach_dispatch_logs').select('*').in('status', ['pending', 'retrying']).order('created_at', { ascending: true }).limit(200);
     if (filters.ownerUserId) fallback = fallback.eq('owner_user_id', filters.ownerUserId);
     if (filters.trigger) fallback = fallback.eq('trigger', filters.trigger);
     if (filters.interviewId) fallback = fallback.eq('interview_id', filters.interviewId);
@@ -429,11 +429,14 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
 
   let processedCount = 0;
   let chatConversationId: string | null = null;
-  const results: Array<{ channel: OutreachChannel; status: 'sent' | 'failed' | 'skipped'; error?: string }> = [];
+  const results: Array<{ channel: OutreachChannel; status: 'sent' | 'failed' | 'skipped' | 'retrying'; error?: string }> = [];
   for (const row of due) {
     const result = await dispatchLog(row);
     if ('skipped' in result) {
       results.push({ channel: row.channel, status: 'skipped' });
+    } else if ('retrying' in result && result.retrying) {
+      // Tyst omförsök — inget syns för användaren, bara i Logg.
+      results.push({ channel: row.channel, status: 'retrying', error: result.error });
     } else if ('error' in result && result.error) {
       processedCount += 1;
       results.push({ channel: row.channel, status: 'failed', error: result.error });
