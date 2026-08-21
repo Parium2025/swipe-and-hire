@@ -185,7 +185,23 @@ async function recipientAllowsChannel(
   return channel === 'email' ? data.email_enabled !== false : data.is_enabled !== false;
 }
 
+// Tysta omförsök vid tillfälliga fel: 1 min → 5 min → 30 min, max 3 försök.
+const MAX_ATTEMPTS = 3;
+const RETRY_BACKOFF_MINUTES = [1, 5, 30];
+
+const TRANSIENT_PATTERNS = [
+  'timeout', 'timed out', 'network', 'fetch failed', 'econn', 'socket',
+  'temporarily', 'rate limit', 'too many requests', '429',
+  '500', '502', '503', '504', 'gateway', 'unavailable', 'internal error',
+];
+
+const isTransientError = (message: string) => {
+  const lower = message.toLowerCase();
+  return TRANSIENT_PATTERNS.some((pattern) => lower.includes(pattern));
+};
+
 async function dispatchLog(log: OutreachLog) {
+
   // Arbetsgivarens val väger alltid tyngst: har regeln stängts av (eller tagits
   // bort) efter att raden köades ska inget skickas — inte ens en fördröjd rad.
   if (log.automation_id) {
