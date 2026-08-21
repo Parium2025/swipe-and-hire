@@ -9,6 +9,8 @@ import { AutoMessagesPanel } from '@/components/employer/outreach/AutoMessagesPa
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+
 
 import EmployerAccountEmailPanel from '@/components/employer/settings/EmployerAccountEmailPanel';
 import EmployerPasswordPanel from '@/components/employer/settings/EmployerPasswordPanel';
@@ -27,14 +29,17 @@ const EmployerSettings = () => {
   const [backgroundLocationEnabled, setBackgroundLocationEnabled] = useState(false);
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
+  const [openSection, setOpenSection] = useState<string>('konto');
 
   useEffect(() => {
     if (location.hash !== '#notifications') return;
+    setOpenSection('notifications');
     const frame = requestAnimationFrame(() => {
       notificationSettingsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
     });
     return () => cancelAnimationFrame(frame);
   }, [location.hash]);
+
 
   // Load background location preference from profile
   useEffect(() => {
@@ -103,44 +108,96 @@ const EmployerSettings = () => {
     }
   };
 
+  const sections: { value: string; label: string; content: React.ReactNode }[] = [
+    {
+      value: 'konto',
+      label: 'Konto & säkerhet',
+      content: (
+        <div className="space-y-8">
+          <EmployerAccountEmailPanel email={user?.email || ''} />
+          <EmployerPasswordPanel
+            passwordData={passwordData}
+            setPasswordData={setPasswordData}
+            onUpdatePassword={handlePasswordUpdate}
+          />
+          <ActiveSessionsSettings />
+        </div>
+      ),
+    },
+    {
+      value: 'notifications',
+      label: 'Aviseringar & plats',
+      content: (
+        <div className="space-y-8">
+          <EmployerNotificationsPanel
+            isEnabled={isEnabled}
+            toggle={toggle}
+            prefsLoading={prefsLoading}
+          />
+          <EmployerLocationPanel
+            isNativeApp={isNativeApp}
+            backgroundLocationEnabled={backgroundLocationEnabled}
+            savingBackgroundLocation={savingBackgroundLocation}
+            onToggle={handleBackgroundLocationToggle}
+          />
+        </div>
+      ),
+    },
+    {
+      value: 'utskick',
+      label: 'Automatiska utskick & mallar',
+      content: (
+        <div className="space-y-8">
+          <AutoMessagesPanel />
+          <MessageTemplatesSettings />
+        </div>
+      ),
+    },
+    {
+      value: 'integritet',
+      label: 'Dina uppgifter & integritet',
+      content: <PrivacyDataPanel showDpaLink />,
+    },
+    {
+      value: 'team',
+      label: 'Teamet',
+      content: <TeamManagement />,
+    },
+  ];
+
   return (
-    <div className="space-y-8 responsive-container animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+    <div className="space-y-4 responsive-container animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Inställningar</h1>
       </div>
 
-      <EmployerAccountEmailPanel email={user?.email || ''} />
-
-      <EmployerPasswordPanel
-        passwordData={passwordData}
-        setPasswordData={setPasswordData}
-        onUpdatePassword={handlePasswordUpdate}
-      />
-
-      <div id="notifications" ref={notificationSettingsRef} className="scroll-mt-6">
-        <EmployerNotificationsPanel
-          isEnabled={isEnabled}
-          toggle={toggle}
-          prefsLoading={prefsLoading}
-        />
-      </div>
-
-      <AutoMessagesPanel />
-      <MessageTemplatesSettings />
-
-      <EmployerLocationPanel
-        isNativeApp={isNativeApp}
-        backgroundLocationEnabled={backgroundLocationEnabled}
-        savingBackgroundLocation={savingBackgroundLocation}
-        onToggle={handleBackgroundLocationToggle}
-      />
-
-      <ActiveSessionsSettings />
-      <PrivacyDataPanel showDpaLink />
-      <TeamManagement />
-
+      <Accordion
+        type="single"
+        collapsible
+        value={openSection}
+        onValueChange={setOpenSection}
+        className="space-y-4"
+      >
+        {sections.map((section) => (
+          <AccordionItem
+            key={section.value}
+            value={section.value}
+            id={section.value}
+            ref={section.value === 'notifications' ? notificationSettingsRef : undefined}
+            className="border-0 scroll-mt-6"
+          >
+            <AccordionTrigger className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-6 md:px-4 py-4 text-sm font-medium text-white no-underline hover:no-underline hover:bg-white/10 transition-colors data-[state=open]:rounded-b-none">
+              {section.label}
+            </AccordionTrigger>
+            <AccordionContent className="pb-0 pt-4">
+              {section.content}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </div>
   );
 };
+
 
 export default EmployerSettings;
