@@ -26,6 +26,9 @@ type OutreachLog = {
   automation_id: string | null;
   payload: Record<string, unknown> | null;
   created_at: string;
+  attempt_count?: number | null;
+  next_attempt_at?: string | null;
+
 };
 
 const corsHeaders = {
@@ -182,7 +185,23 @@ async function recipientAllowsChannel(
   return channel === 'email' ? data.email_enabled !== false : data.is_enabled !== false;
 }
 
+// Tysta omförsök vid tillfälliga fel: 1 min → 5 min → 30 min, max 3 försök.
+const MAX_ATTEMPTS = 3;
+const RETRY_BACKOFF_MINUTES = [1, 5, 30];
+
+const TRANSIENT_PATTERNS = [
+  'timeout', 'timed out', 'network', 'fetch failed', 'econn', 'socket',
+  'temporarily', 'rate limit', 'too many requests', '429',
+  '500', '502', '503', '504', 'gateway', 'unavailable', 'internal error',
+];
+
+const isTransientError = (message: string) => {
+  const lower = message.toLowerCase();
+  return TRANSIENT_PATTERNS.some((pattern) => lower.includes(pattern));
+};
+
 async function dispatchLog(log: OutreachLog) {
+
   // Arbetsgivarens val väger alltid tyngst: har regeln stängts av (eller tagits
   // bort) efter att raden köades ska inget skickas — inte ens en fördröjd rad.
   if (log.automation_id) {
@@ -319,9 +338,31 @@ async function dispatchLog(log: OutreachLog) {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Okänt fel';
-    await admin.from('outreach_dispatch_logs').update({ status: 'failed', error_message: message }).eq('id', log.id);
+    const attempts = (log.attempt_count ?? 0) + 1;
+
+    // Tyst omförsök: bara vid tillfälliga fel (nät, timeout, 5xx, rate limit).
+    // Permanenta fel (saknad adress, ingen enhet, avstängd notis) försöker vi
+    // aldrig igen — de blir "Misslyckades" direkt och syns i Logg.
+    if (isTransientError(message) && attempts < MAX_ATTEMPTS) {
+      const nextAt = new Date(Date.now() + RETRY_BACKOFF_MINUTES[attempts - 1] * 60_000).toISOString();
+      await admin.from('outreach_dispatch_logs').update({
+        status: 'retrying',
+        attempt_count: attempts,
+        next_attempt_at: nextAt,
+        error_message: `Försöker igen (${attempts}/${MAX_ATTEMPTS}): ${message}`,
+      }).eq('id', log.id);
+      return { retrying: true as const, error: message };
+    }
+
+    await admin.from('outreach_dispatch_logs').update({
+      status: 'failed',
+      attempt_count: attempts,
+      next_attempt_at: null,
+      error_message: message,
+    }).eq('id', log.id);
     return { error: message };
   }
+
 
   return {};
 }
@@ -340,15 +381,18 @@ const DELAY_APPLIES_AT_DISPATCH: Record<OutreachTrigger, boolean> = {
 };
 
 const isDue = (row: OutreachLog, now: number) => {
+  // Rader som väntar på ett tyst omförsök styrs enbart av next_attempt_at.
+  if (row.next_attempt_at) return new Date(row.next_attempt_at).getTime() <= now;
   if (!DELAY_APPLIES_AT_DISPATCH[row.trigger]) return true;
   const delayMinutes = Number(getPayloadObject(row.payload).delay_minutes ?? 0);
   if (!Number.isFinite(delayMinutes) || delayMinutes <= 0) return true;
   return new Date(row.created_at).getTime() + delayMinutes * 60_000 <= now;
 };
 
+
 async function processPending(filters: { ownerUserId?: string; trigger?: OutreachTrigger; interviewId?: string | null } = {}) {
   const buildQuery = (delayed: boolean) => {
-    let query = admin.from('outreach_dispatch_logs').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(200);
+    let query = admin.from('outreach_dispatch_logs').select('*').in('status', ['pending', 'retrying']).order('created_at', { ascending: true }).limit(200);
     // Direktutskick får ett eget fönster så att en stor fördröjd batch (t.ex.
     // 500 kandidater när en annons stängs med 1 dygns fördröjning) aldrig kan
     // svälta ut nya ansökningsbekräftelser.
@@ -369,7 +413,7 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
     // Skulle det delade fönstret av någon anledning inte gå att köra faller vi
     // tillbaka på ett enkelt svep — utskicken ska aldrig stanna av.
     console.error('Delad kö-fråga misslyckades, faller tillbaka', immediate.error ?? delayed.error);
-    let fallback = admin.from('outreach_dispatch_logs').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(200);
+    let fallback = admin.from('outreach_dispatch_logs').select('*').in('status', ['pending', 'retrying']).order('created_at', { ascending: true }).limit(200);
     if (filters.ownerUserId) fallback = fallback.eq('owner_user_id', filters.ownerUserId);
     if (filters.trigger) fallback = fallback.eq('trigger', filters.trigger);
     if (filters.interviewId) fallback = fallback.eq('interview_id', filters.interviewId);
@@ -385,11 +429,14 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
 
   let processedCount = 0;
   let chatConversationId: string | null = null;
-  const results: Array<{ channel: OutreachChannel; status: 'sent' | 'failed' | 'skipped'; error?: string }> = [];
+  const results: Array<{ channel: OutreachChannel; status: 'sent' | 'failed' | 'skipped' | 'retrying'; error?: string }> = [];
   for (const row of due) {
     const result = await dispatchLog(row);
     if ('skipped' in result) {
       results.push({ channel: row.channel, status: 'skipped' });
+    } else if ('retrying' in result && result.retrying) {
+      // Tyst omförsök — inget syns för användaren, bara i Logg.
+      results.push({ channel: row.channel, status: 'retrying', error: result.error });
     } else if ('error' in result && result.error) {
       processedCount += 1;
       results.push({ channel: row.channel, status: 'failed', error: result.error });

@@ -2280,6 +2280,7 @@ export type Database = {
       }
       outreach_dispatch_logs: {
         Row: {
+          attempt_count: number
           automation_id: string | null
           channel: Database["public"]["Enums"]["outreach_channel"]
           conversation_id: string | null
@@ -2288,6 +2289,7 @@ export type Database = {
           id: string
           interview_id: string | null
           job_id: string | null
+          next_attempt_at: string | null
           organization_id: string | null
           owner_user_id: string
           payload: Json
@@ -2299,6 +2301,7 @@ export type Database = {
           trigger: Database["public"]["Enums"]["outreach_trigger"]
         }
         Insert: {
+          attempt_count?: number
           automation_id?: string | null
           channel: Database["public"]["Enums"]["outreach_channel"]
           conversation_id?: string | null
@@ -2307,6 +2310,7 @@ export type Database = {
           id?: string
           interview_id?: string | null
           job_id?: string | null
+          next_attempt_at?: string | null
           organization_id?: string | null
           owner_user_id: string
           payload?: Json
@@ -2318,6 +2322,7 @@ export type Database = {
           trigger: Database["public"]["Enums"]["outreach_trigger"]
         }
         Update: {
+          attempt_count?: number
           automation_id?: string | null
           channel?: Database["public"]["Enums"]["outreach_channel"]
           conversation_id?: string | null
@@ -2326,6 +2331,7 @@ export type Database = {
           id?: string
           interview_id?: string | null
           job_id?: string | null
+          next_attempt_at?: string | null
           organization_id?: string | null
           owner_user_id?: string
           payload?: Json
