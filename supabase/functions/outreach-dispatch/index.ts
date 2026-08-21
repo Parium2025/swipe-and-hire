@@ -26,6 +26,9 @@ type OutreachLog = {
   automation_id: string | null;
   payload: Record<string, unknown> | null;
   created_at: string;
+  attempt_count?: number | null;
+  next_attempt_at?: string | null;
+
 };
 
 const corsHeaders = {
