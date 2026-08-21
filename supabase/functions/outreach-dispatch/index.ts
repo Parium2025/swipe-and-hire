@@ -326,23 +326,49 @@ async function dispatchLog(log: OutreachLog) {
   return {};
 }
 
+// Intervjuspåren köas redan vid rätt tidpunkt av `interview-reminders`
+// (X minuter FÖRE/EFTER intervjun). Att vänta delay_minutes en gång till här
+// skulle skicka påminnelsen efter intervjun — därför är de undantagna.
+const DELAY_APPLIES_AT_DISPATCH: Record<OutreachTrigger, boolean> = {
+  application_received: true,
+  application_no_response_14d: true,
+  job_closed: true,
+  interview_scheduled: true,
+  manual_send: false,
+  interview_before: false,
+  interview_after: false,
+};
+
+const isDue = (row: OutreachLog, now: number) => {
+  if (!DELAY_APPLIES_AT_DISPATCH[row.trigger]) return true;
+  const delayMinutes = Number(getPayloadObject(row.payload).delay_minutes ?? 0);
+  if (!Number.isFinite(delayMinutes) || delayMinutes <= 0) return true;
+  return new Date(row.created_at).getTime() + delayMinutes * 60_000 <= now;
+};
+
 async function processPending(filters: { ownerUserId?: string; trigger?: OutreachTrigger; interviewId?: string | null } = {}) {
-  let query = admin.from('outreach_dispatch_logs').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(200);
-  if (filters.ownerUserId) query = query.eq('owner_user_id', filters.ownerUserId);
-  if (filters.trigger) query = query.eq('trigger', filters.trigger);
-  if (filters.interviewId) query = query.eq('interview_id', filters.interviewId);
+  const buildQuery = (delayed: boolean) => {
+    let query = admin.from('outreach_dispatch_logs').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(200);
+    // Direktutskick får ett eget fönster så att en stor fördröjd batch (t.ex.
+    // 500 kandidater när en annons stängs med 1 dygns fördröjning) aldrig kan
+    // svälta ut nya ansökningsbekräftelser.
+    query = delayed
+      ? query.not('payload->>delay_minutes', 'in', '("0",0)')
+      : query.or('payload->>delay_minutes.is.null,payload->>delay_minutes.eq.0');
+    if (filters.ownerUserId) query = query.eq('owner_user_id', filters.ownerUserId);
+    if (filters.trigger) query = query.eq('trigger', filters.trigger);
+    if (filters.interviewId) query = query.eq('interview_id', filters.interviewId);
+    return query;
+  };
 
-  const { data, error } = await query;
-  if (error) throw error;
+  const [immediate, delayed] = await Promise.all([buildQuery(false), buildQuery(true)]);
+  if (immediate.error) throw immediate.error;
+  if (delayed.error) throw delayed.error;
 
-  // Respektera arbetsgivarens valda fördröjning (delay_minutes). Rader som inte
-  // är mogna ännu lämnas kvar som pending och plockas av nästa svep.
   const now = Date.now();
-  const due = ((data ?? []) as OutreachLog[]).filter((row) => {
-    const delayMinutes = Number(getPayloadObject(row.payload).delay_minutes ?? 0);
-    if (!Number.isFinite(delayMinutes) || delayMinutes <= 0) return true;
-    return new Date(row.created_at).getTime() + delayMinutes * 60_000 <= now;
-  }).slice(0, 30);
+  const rows = [...((immediate.data ?? []) as OutreachLog[]), ...((delayed.data ?? []) as OutreachLog[])];
+  const due = rows.filter((row) => isDue(row, now)).slice(0, 30);
+
 
   let processedCount = 0;
   let chatConversationId: string | null = null;
