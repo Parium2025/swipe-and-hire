@@ -70,9 +70,13 @@ const TEMPLATE_DRAFT_PREFIX = 'outreach-template-draft:';
 type TemplateForm = {
   id: string | null;
   name: string;
+  /** Händelsen mallen hör till. En egen mall per händelse + kanal (max 12 slots). */
+  trigger: AutoRuleTrigger | '';
   channels: AutomationChannel[];
   channelContent: Record<AutomationChannel, { subject: string; body: string }>;
 };
+
+type AutoRuleTrigger = (typeof AUTO_RULE_EVENTS)[number]['trigger'];
 
 type AutomationChannel = 'chat' | 'email' | 'push';
 
@@ -305,6 +309,7 @@ function DelayField({ value, onChange }: { value: number; onChange: (value: numb
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
   name: '',
+  trigger: '',
   channels: ['push'],
   channelContent: {
     chat: { subject: '', body: '' },
@@ -938,6 +943,10 @@ export function MessageTemplatesSettings() {
   const handleSaveTemplate = async () => {
     if (!user || !templateForm.name.trim() || templateForm.channels.length === 0) return;
 
+    if (!templateForm.trigger) {
+      toast.error('Välj vilken händelse mallen gäller');
+      return;
+    }
 
     const selectedChannels = CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel));
     const missingBody = selectedChannels.some((channel) => !templateForm.channelContent[channel].body.trim());
@@ -947,98 +956,66 @@ export function MessageTemplatesSettings() {
       return;
     }
 
-    // Dubblettskydd: samma namn + kanal får bara finnas en gång, annars blir det
-    // lätt två mallar för samma sak och risk för dubbla utskick.
-    const nameToCheck = templateForm.name.trim().toLowerCase();
-    const editedTemplate = templateForm.id ? templates.find((template) => template.id === templateForm.id) : undefined;
-    const editedBaseName = editedTemplate?.name.trim().toLowerCase().replace(/\s·\s.*$/, '');
-    const isKeepingCurrentName = Boolean(editedTemplate && editedBaseName === nameToCheck.replace(/\s·\s.*$/, ''));
-    const duplicate = isKeepingCurrentName
-      ? undefined
-      : templates.find(
-          (template) =>
-            template.id !== templateForm.id &&
-            template.name.trim().toLowerCase().replace(/\s·\s.*$/, '') === nameToCheck.replace(/\s·\s.*$/, '') &&
-            selectedChannels.includes(template.channel as AutomationChannel),
-        );
-
-    if (duplicate) {
-      toast.error(`Du har redan en mall som heter "${duplicate.name}" för ${getOutreachChannelLabel(duplicate.channel)}. Byt namn eller redigera den befintliga.`);
-      return;
-    }
-
     setSavingTemplate(true);
 
+    const trigger = templateForm.trigger as AutoRuleTrigger;
     const baseName = templateForm.name.trim();
-    const createPayload = (channel: AutomationChannel, name: string) => ({
+    const buildPayload = (channel: AutomationChannel, name: string) => ({
       owner_user_id: user.id,
       organization_id: organizationId,
       name,
       channel,
+      trigger,
       subject: channel === 'chat' ? null : templateForm.channelContent[channel].subject.trim() || null,
       body: templateForm.channelContent[channel].body.trim(),
       is_active: true,
+      is_default: false,
     });
 
-    if (templateForm.id) {
-      const [primaryChannel, ...extraChannels] = selectedChannels;
-      const { error: updateError } = await supabase
-        .from('outreach_templates')
-        .update(createPayload(primaryChannel, baseName))
-        .eq('id', templateForm.id);
+    // En egen mall per händelse + kanal (max 4 händelser × 3 kanaler = 12).
+    // Finns redan en mall i sloten skrivs den över istället för att skapa en dubblett.
+    let failed = false;
 
-      if (updateError) {
-        toast.error('Kunde inte uppdatera mallen');
-        setSavingTemplate(false);
-        return;
-      }
+    for (const channel of selectedChannels) {
+      const name = selectedChannels.length > 1 ? `${baseName} · ${getOutreachChannelLabel(channel)}` : baseName;
+      const payload = buildPayload(channel, name);
 
-      if (extraChannels.length > 0) {
-        const extraRows = extraChannels.map((channel) => ({
-          ...createPayload(channel, `${baseName} · ${getOutreachChannelLabel(channel)}`),
-          is_default: false,
-        }));
+      const slotOwner = templates.find(
+        (template) =>
+          !isStandardTemplate(template) &&
+          template.channel === channel &&
+          (template.trigger ?? null) === trigger,
+      );
+      const targetId =
+        slotOwner?.id ??
+        (templateForm.id && templates.some((t) => t.id === templateForm.id && t.channel === channel)
+          ? templateForm.id
+          : null);
 
-        const { error: insertError } = await supabase.from('outreach_templates').insert(extraRows);
-        if (insertError) {
-          toast.error('Mallen uppdaterades, men kopior kunde inte skapas för alla kanaler');
-          setSavingTemplate(false);
-          await fetchStudio({ silent: true });
-          return;
-        }
-      }
-
-      setSelectedTemplateFamilyKey(baseName);
-      setAutomationVisibilityFilter('all');
-      resetTemplateEditor();
-
-      await fetchStudio({ silent: true });
-      goToStudioTab('automations');
-      toast.success('Mall uppdaterad — steg 2: välj när den ska skickas');
-
-    } else {
-      const rows = selectedChannels.map((channel) => ({
-        ...createPayload(
-          channel,
-          selectedChannels.length > 1 ? `${baseName} · ${getOutreachChannelLabel(channel)}` : baseName,
-        ),
-        is_default: false,
-      }));
-
-      const { error } = await supabase.from('outreach_templates').insert(rows);
+      const { error } = targetId
+        ? await supabase.from('outreach_templates').update(payload).eq('id', targetId)
+        : await supabase.from('outreach_templates').insert(payload);
 
       if (error) {
-        toast.error('Kunde inte spara mallen');
-      } else {
-        setSelectedTemplateFamilyKey(baseName);
-        setAutomationVisibilityFilter('all');
-        resetTemplateEditor();
-
-        await fetchStudio({ silent: true });
-        goToStudioTab('automations');
-        toast.success('Mall sparad — steg 2: välj när den ska skickas');
+        failed = true;
+        break;
       }
     }
+
+    if (failed) {
+      toast.error('Kunde inte spara mallen');
+      setSavingTemplate(false);
+      await fetchStudio({ silent: true });
+      return;
+    }
+
+    setSelectedTemplateFamilyKey(baseName);
+    setAutomationVisibilityFilter('all');
+    resetTemplateEditor();
+
+    await fetchStudio({ silent: true });
+    goToStudioTab('automations');
+    toast.success('Mall sparad — steg 2: välj när den ska skickas');
 
     setSavingTemplate(false);
   };
@@ -1770,8 +1747,13 @@ export function MessageTemplatesSettings() {
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
-                          {!isStandard && orderedTemplates.filter((t) => t.name === template.name && t.channel === template.channel).length > 1 && (
-                            <span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-amber-200">Dubblett</span>
+                          {!isStandard && template.trigger && (
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">
+                              {AUTO_RULE_EVENTS.find((event) => event.trigger === template.trigger)?.title ?? getOutreachTriggerLabel(template.trigger)}
+                            </span>
+                          )}
+                          {!isStandard && !template.trigger && (
+                            <span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-amber-200">Ingen händelse</span>
                           )}
 
                         </div>
@@ -1835,6 +1817,7 @@ export function MessageTemplatesSettings() {
                                 setTemplateForm({
                                   id: template.id,
                                   name: template.name,
+                                  trigger: (template.trigger as AutoRuleTrigger | null) ?? '',
                                   channels: [template.channel as AutomationChannel],
                                   channelContent: {
                                     chat: {
@@ -1898,6 +1881,42 @@ export function MessageTemplatesSettings() {
                 <InfoHint text="Ge mallen ett tydligt namn som gör det lätt att förstå när den ska användas, till exempel 'Intervju bokad' eller 'Avslutad annons'." />
               </div>
               <Input value={templateForm.name} onChange={(e) => setTemplateForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Label className="text-white">Händelse</Label>
+                <InfoHint text="Varje händelse kan ha en egen mall per kanal – totalt max 12. Väljer du en händelse och kanal där du redan har en egen mall skrivs den mallen över, så det aldrig blir dubbletter." />
+              </div>
+              <Select
+                value={templateForm.trigger || undefined}
+                onValueChange={(value) => setTemplateForm((prev) => ({ ...prev, trigger: value as AutoRuleTrigger }))}
+              >
+                <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                  <SelectValue placeholder="Välj händelse" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AUTO_RULE_EVENTS.map((event) => (
+                    <SelectItem key={event.trigger} value={event.trigger}>
+                      {event.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {templateForm.trigger && (
+                <p className="text-[11px] text-white md:text-xs">
+                  {CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel)).some((channel) =>
+                    templates.some(
+                      (template) =>
+                        !isStandardTemplate(template) &&
+                        template.channel === channel &&
+                        (template.trigger ?? null) === templateForm.trigger,
+                    ),
+                  )
+                    ? 'Du har redan en egen mall för den här händelsen och kanalen – den skrivs över när du sparar.'
+                    : 'Mallen ersätter Parium-standard för den här händelsen och kanalen.'}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

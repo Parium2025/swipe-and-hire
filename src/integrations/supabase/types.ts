@@ -2400,6 +2400,7 @@ export type Database = {
           organization_id: string | null
           owner_user_id: string
           subject: string | null
+          trigger: Database["public"]["Enums"]["outreach_trigger"] | null
           updated_at: string
         }
         Insert: {
@@ -2414,6 +2415,7 @@ export type Database = {
           organization_id?: string | null
           owner_user_id: string
           subject?: string | null
+          trigger?: Database["public"]["Enums"]["outreach_trigger"] | null
           updated_at?: string
         }
         Update: {
@@ -2428,6 +2430,7 @@ export type Database = {
           organization_id?: string | null
           owner_user_id?: string
           subject?: string | null
+          trigger?: Database["public"]["Enums"]["outreach_trigger"] | null
           updated_at?: string
         }
         Relationships: [
