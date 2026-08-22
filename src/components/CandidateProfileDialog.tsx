@@ -102,6 +102,8 @@ export const CandidateProfileDialog = ({
   onNavigateNext,
   candidateIndex,
   candidateTotal,
+  adjacentMedia,
+
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const { hasTeam } = useTeamMembers();
