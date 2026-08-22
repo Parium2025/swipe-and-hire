@@ -374,9 +374,13 @@ export const CandidateProfileDialog = ({
                         >
                           <span className="truncate flex-1 min-w-0 text-left">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
                           <div className="flex items-center gap-1.5 shrink-0">
-                            <span className="text-xs text-white">
-                              {allApplications ? `${allApplications.length} jobb` : '1 jobb'}
-                            </span>
+                            {allApplications ? (
+                              <span className="text-xs text-white">
+                                {allApplications.length} jobb
+                              </span>
+                            ) : (
+                              <span className="h-3 w-12 rounded bg-white/15 animate-pulse" aria-hidden />
+                            )}
                             {hasMultipleApplications ? (
                               <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
                             ) : (
@@ -416,7 +420,7 @@ export const CandidateProfileDialog = ({
                               }`}
                             >
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm text-white leading-snug break-words">{app.job_title || 'Okänt jobb'}</p>
+                                <p className="text-sm text-white leading-snug break-words line-clamp-2">{app.job_title || 'Okänt jobb'}</p>
                                 <p className="text-xs text-white mt-0.5">Sökte {formatTimeAgo(app.applied_at)}</p>
                               </div>
                               {isActive && <Check className="h-4 w-4 text-white shrink-0 mt-0.5" />}
