@@ -251,6 +251,8 @@ export function useNotifications() {
       .from('notifications')
       .delete()
       .eq('user_id', user.id);
+
+    void broadcastRef.current?.send({ type: 'broadcast', event: 'local_clear', payload: {} });
   }, [user]);
 
   return {
