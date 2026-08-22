@@ -936,18 +936,33 @@ export function ChatView({
       {/* Pending file preview */}
       {pendingFile && (
         <div className="px-4 py-2 border-t border-white/10 flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex-1 min-w-0">
-            <Paperclip className="h-3.5 w-3.5 text-pure-white flex-shrink-0" />
-            <span className="text-sm text-pure-white truncate">{pendingFile.name}</span>
-            <span className="text-pure-white text-xs flex-shrink-0">
-              {pendingFile.size >= 1024 * 1024
-                ? `${(pendingFile.size / (1024 * 1024)).toFixed(1)} MB`
-                : `${(pendingFile.size / 1024).toFixed(0)} KB`}
-            </span>
+          <div className="flex flex-col gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex-1 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <Paperclip className="h-3.5 w-3.5 text-pure-white flex-shrink-0" />
+              <span className="text-sm text-pure-white truncate">{pendingFile.name}</span>
+              <span className="text-pure-white text-xs flex-shrink-0">
+                {pendingFile.size >= 1024 * 1024
+                  ? `${(pendingFile.size / (1024 * 1024)).toFixed(1)} MB`
+                  : `${(pendingFile.size / 1024).toFixed(0)} KB`}
+              </span>
+            </div>
+            {uploadProgress !== null && (
+              <div className="flex items-center gap-2">
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-blue-400 transition-[width] duration-200"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-pure-white tabular-nums">{uploadProgress}%</span>
+              </div>
+            )}
           </div>
           <button
             onClick={() => setPendingFile(null)}
-            className="p-1.5 rounded-full md:hover:bg-white/10 text-pure-white"
+            disabled={uploadingFile}
+            className="p-1.5 rounded-full md:hover:bg-white/10 text-pure-white disabled:opacity-40"
+            aria-label="Ta bort bilaga"
           >
             <X className="h-4 w-4" />
           </button>
