@@ -1273,10 +1273,16 @@ export function MessageTemplatesSettings() {
     STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
-  // Kanaler där arbetsgivaren redan har en egen aktiv mall — där behövs inte
-  // Parium-standarden visas, den ligger kvar i koden och används som fallback.
+  // Kanaler där arbetsgivaren har en egen aktiv mall SOM ÄR KOPPLAD till en påslagen regel.
+  // Först då ersätter den egna mallen Parium-standarden. Inaktiverar eller tar du bort
+  // mallen – eller stänger av regeln – kommer standardmallen tillbaka automatiskt.
+  const activeRuleTemplateIds = new Set(
+    automations.filter((automation) => automation.is_enabled).map((automation) => automation.template_id),
+  );
   const coveredChannels = new Set(
-    customTemplates.filter((template) => template.is_active).map((template) => template.channel),
+    customTemplates
+      .filter((template) => template.is_active && activeRuleTemplateIds.has(template.id))
+      .map((template) => template.channel),
   );
   const standardTemplates = templates.filter(
     (template) => isStandardTemplate(template) && !coveredChannels.has(template.channel),
