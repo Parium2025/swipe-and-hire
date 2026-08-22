@@ -324,6 +324,13 @@ export const CandidateProfileDialog = ({
   const displayApp = activeApplication || application;
   const initials = `${displayApp.first_name?.[0] || ''}${displayApp.last_name?.[0] || ''}`.toUpperCase();
   const isProfileVideo = displayApp.is_profile_video && displayApp.video_url;
+  // Kandidaten har media i databasen men den signerade URL:en är ännu inte löst.
+  // Då får vi INTE falla tillbaka på initialer — det ger en synlig "FA"-blink.
+  const mediaPending =
+    (!!displayApp.profile_image_url || !!isProfileVideo) &&
+    !profileImageUrl &&
+    !profileThumbUrl &&
+    !(isProfileVideo && videoUrl);
   // Visa aldrig en preliminär siffra: när listan fortfarande hämtas och vi bara
   // har den klickade ansökan vet vi inte antalet ännu — då hålls badgen dold i
   // stället för att blinka "1 jobb" och sedan hoppa till t.ex. "14 jobb".
