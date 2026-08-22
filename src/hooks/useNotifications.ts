@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { safeReadArrayCache } from '@/lib/safeStorage';
+import { toastArchive } from '@/lib/toastArchive';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface AppNotification {
   id: string;
@@ -53,6 +55,7 @@ export function useNotifications() {
   // Typer där användaren själv stängt av in-app-notiser. Raden finns kvar i
   // databasen (push/mejl styrs separat), men klockan ska hållas tyst.
   const mutedTypesRef = useRef<Set<string>>(new Set());
+  const broadcastRef = useRef<RealtimeChannel | null>(null);
 
   const loadMutedTypes = useCallback(async () => {
     if (!user) return;
@@ -143,6 +146,44 @@ export function useNotifications() {
       .on(
         'postgres_changes',
         {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const updatedNotif = payload.new as AppNotification;
+          setNotifications(prev => {
+            const updated = prev.map(n => (n.id === updatedNotif.id ? { ...n, ...updatedNotif } : n));
+            setCache(user.id, updated);
+            setUnreadCount(updated.filter(n => !n.is_read).length);
+            return updated;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'notifications',
+        },
+        (payload) => {
+          const removed = payload.old as Partial<AppNotification>;
+          if (!removed?.id) return;
+          if (removed.user_id && removed.user_id !== user.id) return;
+          setNotifications(prev => {
+            if (!prev.some(n => n.id === removed.id)) return prev;
+            const updated = prev.filter(n => n.id !== removed.id);
+            setCache(user.id, updated);
+            setUnreadCount(updated.filter(n => !n.is_read).length);
+            return updated;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
           event: '*',
           schema: 'public',
           table: 'notification_preferences',
@@ -150,9 +191,14 @@ export function useNotifications() {
         },
         () => { void fetchNotifications(); }
       )
+      // Lokala toast-notiser lever i localStorage per enhet – synka rensning
+      // och "markera alla lästa" mellan användarens enheter via broadcast.
+      .on('broadcast', { event: 'local_clear' }, () => { toastArchive.clear(); })
+      .on('broadcast', { event: 'local_read_all' }, () => { toastArchive.markAllAsRead(); })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    broadcastRef.current = channel;
+    return () => { broadcastRef.current = null; supabase.removeChannel(channel); };
   }, [user, fetchNotifications]);
 
 
@@ -190,6 +236,8 @@ export function useNotifications() {
       .update({ is_read: true })
       .eq('user_id', user.id)
       .eq('is_read', false);
+
+    void broadcastRef.current?.send({ type: 'broadcast', event: 'local_read_all', payload: {} });
   }, [user]);
 
   const clearAll = useCallback(async () => {
@@ -203,6 +251,8 @@ export function useNotifications() {
       .from('notifications')
       .delete()
       .eq('user_id', user.id);
+
+    void broadcastRef.current?.send({ type: 'broadcast', event: 'local_clear', payload: {} });
   }, [user]);
 
   return {
