@@ -933,8 +933,8 @@ export function MessageTemplatesSettings() {
 
       toast.success('Mall uppdaterad');
         setSelectedTemplateFamilyKey(baseName);
-      setTemplateForm(EMPTY_TEMPLATE_FORM);
-      setActiveTemplateChannel('push');
+      resetTemplateEditor();
+
       await fetchStudio({ silent: true });
     } else {
       const rows = selectedChannels.map((channel) => ({
