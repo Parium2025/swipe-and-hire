@@ -109,6 +109,7 @@ export function ChatView({
   // Search state
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [searchMatchIds, setSearchMatchIds] = useState<string[]>([]);
   const [searchIndex, setSearchIndex] = useState(0);
@@ -669,7 +670,8 @@ export function ChatView({
 
         {/* Search toggle */}
         <button
-          onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setDebouncedQuery(''); setSearchMatchIds([]); setDbSearchResultIds([]); setOlderMatchCount(0); } }}
+          onClick={() => { if (showSearch) { closeSearch(); } else { setShowSearch(true); } }}
+
           className={cn(
             "p-2 rounded-full transition-colors",
             showSearch ? "bg-white/15 text-white" : "text-pure-white md:hover:bg-white/10"
