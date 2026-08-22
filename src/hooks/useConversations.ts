@@ -1131,12 +1131,13 @@ export function useCreateConversation() {
 
         const myConvIds = myMemberships?.map(m => m.conversation_id) || [];
 
-        if (myConvIds.length > 0) {
+        if (myConvIds.length > 0 && !isInternal) {
           const { data: existingByCandidate } = await supabase
             .from('conversations')
             .select('id, application_id')
             .eq('candidate_id', candidateId)
             .not('candidate_id', 'is', null)
+            .eq('kind', 'job')
             .in('id', myConvIds)
             .order('updated_at', { ascending: false })
             .limit(1)
@@ -1153,6 +1154,28 @@ export function useCreateConversation() {
             }
           }
         }
+
+        // Intern 1-1: återanvänd befintlig kollegatråd i stället för att skapa dubbletter.
+        if (myConvIds.length > 0 && isInternal) {
+          const { data: internalCandidates } = await supabase
+            .from('conversations')
+            .select('id, conversation_members(user_id)')
+            .eq('kind', 'internal')
+            .eq('is_group', false)
+            .in('id', myConvIds)
+            .order('updated_at', { ascending: false });
+
+          const match = (internalCandidates || []).find((c) => {
+            const ids = ((c as any).conversation_members || []).map((m: any) => m.user_id).sort();
+            const wanted = [user.id, memberIds[0]].sort();
+            return ids.length === 2 && ids[0] === wanted[0] && ids[1] === wanted[1];
+          });
+
+          if (match) {
+            conversationId = match.id;
+            isExisting = true;
+          }
+        }
       }
 
       // Create new conversation if none exists
@@ -1162,9 +1185,12 @@ export function useCreateConversation() {
           .insert({
             name: isGroup ? name : null,
             is_group: isGroup,
-            job_id: jobId,
-            application_id: applicationId,
-            candidate_id: isGroup ? null : candidateId, // Set candidate_id for 1-1 chats
+            job_id: isInternal ? null : jobId,
+            application_id: isInternal ? null : applicationId,
+            // candidate_id sätts bara för kandidatchattar — aldrig för kollegor
+            candidate_id: isGroup || isInternal ? null : candidateId,
+            kind,
+            organization_id: organizationId,
             created_by: user.id,
           })
           .select()
