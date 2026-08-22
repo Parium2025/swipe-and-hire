@@ -732,8 +732,10 @@ export type Database = {
           id: string
           is_group: boolean
           job_id: string | null
+          kind: Database["public"]["Enums"]["conversation_kind"]
           last_message_at: string | null
           name: string | null
+          organization_id: string | null
           updated_at: string
         }
         Insert: {
@@ -744,8 +746,10 @@ export type Database = {
           id?: string
           is_group?: boolean
           job_id?: string | null
+          kind?: Database["public"]["Enums"]["conversation_kind"]
           last_message_at?: string | null
           name?: string | null
+          organization_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -756,8 +760,10 @@ export type Database = {
           id?: string
           is_group?: boolean
           job_id?: string | null
+          kind?: Database["public"]["Enums"]["conversation_kind"]
           last_message_at?: string | null
           name?: string | null
+          organization_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -773,6 +779,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -4174,6 +4187,7 @@ export type Database = {
       }
     }
     Enums: {
+      conversation_kind: "job" | "internal"
       outreach_channel: "chat" | "email" | "push"
       outreach_recipient: "candidate" | "employer"
       outreach_trigger:
@@ -4317,6 +4331,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      conversation_kind: ["job", "internal"],
       outreach_channel: ["chat", "email", "push"],
       outreach_recipient: ["candidate", "employer"],
       outreach_trigger: [
