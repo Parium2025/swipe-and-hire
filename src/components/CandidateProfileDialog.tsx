@@ -183,11 +183,13 @@ export const CandidateProfileDialog = ({
       .map((m) => m?.profile_image_url)
       .filter((p): p is string => !!p);
     if (paths.length === 0) return;
+    // Ingen fördröjning: pilnavigeringen kan ske inom några hundra ms, och
+    // grannbilderna måste vara nedladdade OCH avkodade innan dess.
     const id = window.setTimeout(() => {
       paths.forEach((p) => {
         void prefetchMediaUrl(p, 'profile-image', MEDIA_URL_TTL).catch(() => {});
       });
-    }, 150);
+    }, 0);
     return () => window.clearTimeout(id);
   }, [open, adjacentMedia]);
 
