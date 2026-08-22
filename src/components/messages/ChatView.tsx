@@ -423,6 +423,7 @@ export function ChatView({
     try {
       // 🚀 Resilient upload med retry + exponential backoff
       const { uploadWithRetry } = await import('@/lib/uploadWithProgress');
+      setUploadProgress(0);
       await uploadWithRetry({
         bucket: 'message-attachments',
         path,
@@ -432,8 +433,11 @@ export function ChatView({
         // Bilagor är oföränderliga (unik sökväg per fil) → ett års cache gör
         // att samma video aldrig hämtas två gånger av samma mottagare.
         cacheControl: '31536000',
+        onProgress: (p) => setUploadProgress(Math.round(p.percent ?? 0)),
       });
+      setUploadProgress(null);
     } catch (error) {
+      setUploadProgress(null);
       console.error('Upload error:', error);
       toast.error('Kunde inte ladda upp filen');
       return null;
