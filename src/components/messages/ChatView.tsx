@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
+import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType } from '@/lib/chatFileTypes';
 import { useConversationMessages, type Conversation, type ConversationMessage } from '@/hooks/useConversations';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
@@ -369,8 +370,9 @@ export function ChatView({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error('Filen är för stor (max 50 MB)');
+    const check = validateAttachment(file);
+    if (!check.ok) {
+      toast.error(check.error!, check.description ? { description: check.description } : undefined);
       return;
     }
 
@@ -382,7 +384,9 @@ export function ChatView({
   const uploadFile = async (file: File): Promise<{ url: string; type: string; name: string } | null> => {
     let payload: Blob = file;
     let ext = file.name.split('.').pop() || 'bin';
-    let contentType = file.type || 'application/octet-stream';
+    // Härled MIME-typ från filändelsen när webbläsaren inte kan (HEIC, Pages,
+    // gamla Office-format) — annars avvisar serverkontrollen filen.
+    let contentType = resolveContentType(file) ?? file.type ?? '';
 
     // 🎬 Videor i chatten går genom exakt samma kedja som profilvideor:
     // längdgräns → 720p H.264 i enheten → blockera om filen inte går att
@@ -1001,7 +1005,7 @@ export function ChatView({
             type="file"
             onChange={handleFileSelect}
             className="hidden"
-            accept="image/*,video/*,audio/*,.heic,.heif,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv,.mp3,.m4a,.aac,.wav,.ogg,.opus,.pdf,.doc,.docx,.rtf,.odt,.odp,.ods,.pages,.numbers,.key,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md,.json,.zip,.rar,.7z"
+            accept={ATTACHMENT_ACCEPT}
           />
 
           <Textarea

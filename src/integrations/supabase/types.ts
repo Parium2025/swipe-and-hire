@@ -3841,6 +3841,10 @@ export type Database = {
         Args: { _counts: number[]; _job_ids: string[] }
         Returns: undefined
       }
+      is_allowed_attachment_path: {
+        Args: { object_name: string }
+        Returns: boolean
+      }
       is_blocked_pair: { Args: { _a: string; _b: string }; Returns: boolean }
       is_conversation_admin: {
         Args: { p_conversation_id: string }
