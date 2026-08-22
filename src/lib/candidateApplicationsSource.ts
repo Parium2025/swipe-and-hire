@@ -35,7 +35,7 @@ const APPLICATION_COLUMNS = `
   id, job_id, applicant_id, first_name, last_name, email, phone,
   location, bio, cv_url, age, employment_status, work_schedule,
   availability, custom_answers, questions_snapshot, status, applied_at, updated_at,
-  profile_image_snapshot_url, video_snapshot_url
+  profile_image_snapshot_url, video_snapshot_url, candidate_profile_label
 `;
 
 interface CachedEnvelope {
