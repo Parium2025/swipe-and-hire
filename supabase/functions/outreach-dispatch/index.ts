@@ -349,6 +349,7 @@ async function dispatchLog(log: OutreachLog) {
         status: 'retrying',
         attempt_count: attempts,
         next_attempt_at: nextAt,
+        locked_until: null,
         error_message: `Försöker igen (${attempts}/${MAX_ATTEMPTS}): ${message}`,
       }).eq('id', log.id);
       return { retrying: true as const, error: message };
@@ -391,39 +392,33 @@ const isDue = (row: OutreachLog, now: number) => {
 
 
 async function processPending(filters: { ownerUserId?: string; trigger?: OutreachTrigger; interviewId?: string | null } = {}) {
-  const buildQuery = (delayed: boolean) => {
-    let query = admin.from('outreach_dispatch_logs').select('*').in('status', ['pending', 'retrying']).order('created_at', { ascending: true }).limit(200);
-    // Direktutskick får ett eget fönster så att en stor fördröjd batch (t.ex.
-    // 500 kandidater när en annons stängs med 1 dygns fördröjning) aldrig kan
-    // svälta ut nya ansökningsbekräftelser.
-    query = delayed
-      ? query.not('payload->>delay_minutes', 'is', null).neq('payload->>delay_minutes', '0')
-      : query.or('payload->>delay_minutes.is.null,payload->>delay_minutes.eq.0');
-    if (filters.ownerUserId) query = query.eq('owner_user_id', filters.ownerUserId);
-    if (filters.trigger) query = query.eq('trigger', filters.trigger);
-    if (filters.interviewId) query = query.eq('interview_id', filters.interviewId);
-    return query;
-  };
+  // Atomiskt "claim": databasen låser raderna (FOR UPDATE SKIP LOCKED) och sätter
+  // locked_until, så två samtidiga körningar (cron + manuell knapp) aldrig kan
+  // plocka och skicka samma rad två gånger.
+  const { data: claimed, error: claimError } = await admin.rpc('claim_outreach_dispatch', {
+    p_owner_user_id: filters.ownerUserId ?? null,
+    p_trigger: filters.trigger ?? null,
+    p_interview_id: filters.interviewId ?? null,
+    p_limit: 30,
+  });
 
-  const [immediate, delayed] = await Promise.all([buildQuery(false), buildQuery(true)]);
-
-  const now = Date.now();
-  let rows: OutreachLog[];
-  if (immediate.error || delayed.error) {
-    // Skulle det delade fönstret av någon anledning inte gå att köra faller vi
-    // tillbaka på ett enkelt svep — utskicken ska aldrig stanna av.
-    console.error('Delad kö-fråga misslyckades, faller tillbaka', immediate.error ?? delayed.error);
+  let due: OutreachLog[];
+  if (claimError) {
+    // Skulle låsfunktionen inte gå att köra faller vi tillbaka på ett enkelt
+    // svep — utskicken ska aldrig stanna av.
+    console.error('claim_outreach_dispatch misslyckades, faller tillbaka', claimError);
     let fallback = admin.from('outreach_dispatch_logs').select('*').in('status', ['pending', 'retrying']).order('created_at', { ascending: true }).limit(200);
     if (filters.ownerUserId) fallback = fallback.eq('owner_user_id', filters.ownerUserId);
     if (filters.trigger) fallback = fallback.eq('trigger', filters.trigger);
     if (filters.interviewId) fallback = fallback.eq('interview_id', filters.interviewId);
     const { data, error } = await fallback;
     if (error) throw error;
-    rows = (data ?? []) as OutreachLog[];
+    const now = Date.now();
+    due = ((data ?? []) as OutreachLog[]).filter((row) => isDue(row, now)).slice(0, 30);
   } else {
-    rows = [...((immediate.data ?? []) as OutreachLog[]), ...((delayed.data ?? []) as OutreachLog[])];
+    due = (claimed ?? []) as OutreachLog[];
   }
-  const due = rows.filter((row) => isDue(row, now)).slice(0, 30);
+
 
 
 
