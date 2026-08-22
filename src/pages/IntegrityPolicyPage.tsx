@@ -386,6 +386,18 @@ export default function IntegrityPolicyPage() {
                 säkerhetsstandard.
               </p>
               <p className="mt-4">
+                <strong>Meddelanden i chatten:</strong> chatten är krypterad i vila och
+                under överföring, men den är inte totalsträckskrypterad (end-to-end).
+                Det innebär att Parium tekniskt kan komma åt innehållet. Vi läser inte
+                dina meddelanden rutinmässigt. Åtkomst sker endast när det är
+                nödvändigt av säkerhetsskäl — till exempel vid utredning av misstänkt
+                spam, trakasserier, bedrägeri eller missbruk av tjänsten, vid
+                felsökning av ett rapporterat tekniskt fel, eller när lag kräver det.
+                Sådan åtkomst är begränsad till särskilt behörig personal och loggas.
+                Du kan när som helst blockera en motpart, och då stoppas alla
+                meddelanden mellan er direkt.
+              </p>
+              <p className="mt-4">
                 Om det trots våra åtgärder skulle ske en personuppgiftsincident
                 kommer vi att anmäla det till Integritetsskyddsmyndigheten inom 72
                 timmar och, om incidenten innebär hög risk för dig, informera dig
