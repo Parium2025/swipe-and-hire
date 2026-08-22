@@ -1001,7 +1001,7 @@ export function ChatView({
             type="file"
             onChange={handleFileSelect}
             className="hidden"
-            accept="image/*,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv,.pdf,.doc,.docx,.rtf,.odt,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip"
+            accept="image/*,video/*,audio/*,.heic,.heif,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv,.mp3,.m4a,.aac,.wav,.ogg,.opus,.pdf,.doc,.docx,.rtf,.odt,.odp,.ods,.pages,.numbers,.key,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md,.json,.zip,.rar,.7z"
           />
 
           <Textarea
