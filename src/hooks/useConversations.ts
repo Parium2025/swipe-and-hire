@@ -1082,6 +1082,7 @@ export function useCreateConversation() {
       jobId = null,
       applicationId = null,
       initialMessage,
+      kind = 'job',
     }: {
       memberIds: string[];
       name?: string;
@@ -1089,8 +1090,28 @@ export function useCreateConversation() {
       jobId?: string | null;
       applicationId?: string | null;
       initialMessage?: string;
+      /** 'internal' = kollegachatt inom organisationen (aldrig kopplad till kandidat/annons). */
+      kind?: ConversationKind;
     }) => {
       if (!user) throw new Error('Not authenticated');
+
+      const isInternal = kind === 'internal';
+
+      // Interna samtal kräver organisation — hämtas en gång och används både
+      // för att hitta befintlig tråd och för att skapa en ny.
+      let organizationId: string | null = null;
+      if (isInternal) {
+        const { data: roleRow } = await supabase
+          .from('user_roles')
+          .select('organization_id')
+          .eq('user_id', user.id)
+          .not('organization_id', 'is', null)
+          .maybeSingle();
+        organizationId = roleRow?.organization_id ?? null;
+        if (!organizationId) {
+          throw new Error('Du tillhör ingen organisation — interna chattar kräver ett team.');
+        }
+      }
 
       const candidateId = memberIds[0]; // The job seeker
       let conversationId: string | null = null;
