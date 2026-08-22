@@ -78,7 +78,10 @@ interface CandidateProfileDialogProps {
   onNavigateNext?: () => void;
   candidateIndex?: number;
   candidateTotal?: number;
+  /** Intilliggande kandidater (föregående/nästa) för förladdning av porträtt. */
+  adjacentMedia?: Array<{ profile_image_url?: string | null } | null | undefined>;
 }
+
 
 export const CandidateProfileDialog = ({
   application,
