@@ -141,6 +141,22 @@ const JobApplication = () => {
     });
   };
 
+  // Håll vald profil i synk om den ändras eller raderas i ett annat fönster.
+  useEffect(() => {
+    if (!selectedProfile) return;
+    const fresh = candidateProfiles.find(p => p.id === selectedProfile.id);
+    if (!fresh) {
+      setSelectedProfile(null);
+      setFormData(prev => (prev.cvUrl === selectedProfile.cv_url ? { ...prev, cvUrl: '' } : prev));
+      return;
+    }
+    if (fresh !== selectedProfile && JSON.stringify(fresh) !== JSON.stringify(selectedProfile)) {
+      setSelectedProfile(fresh);
+    }
+  }, [candidateProfiles, selectedProfile]);
+
+
+
 
 
   // Restore draft on mount
@@ -311,23 +327,25 @@ const JobApplication = () => {
     setSubmitting(true);
 
     // Build the application payload
-    // Ögonblicksbild: vald kandidatprofil vinner, annars kontots vanliga profil.
+    // Ögonblicksbild: har användaren valt en kandidatprofil gäller exakt den profilens
+    // media (tomt = tomt). Annars används kontots vanliga profil.
     let profileImageSnapshot: string | null = selectedProfile?.profile_image_url || null;
     let videoSnapshot: string | null = selectedProfile?.video_url || null;
 
-    if (getIsOnline() && (!profileImageSnapshot || !videoSnapshot)) {
+    if (!selectedProfile && getIsOnline()) {
       try {
         const { data: currentProfile } = await supabase
           .from('profiles')
           .select('profile_image_url, video_url')
           .eq('user_id', user.id)
           .single();
-        profileImageSnapshot = profileImageSnapshot || currentProfile?.profile_image_url || null;
-        videoSnapshot = videoSnapshot || currentProfile?.video_url || null;
+        profileImageSnapshot = currentProfile?.profile_image_url || null;
+        videoSnapshot = currentProfile?.video_url || null;
       } catch {
         // Continue without snapshot — not critical
       }
     }
+
 
 
     const applicationPayload = {
