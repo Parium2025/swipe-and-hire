@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchAllPages } from '@/lib/fetchAllPages';
+
 
 /**
  * 🚇 Delad query för "vilka jobb har jag sökt".
