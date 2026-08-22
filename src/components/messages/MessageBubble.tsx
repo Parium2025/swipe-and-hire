@@ -133,16 +133,17 @@ export function MessageBubble({
   const hasAttachment = message.attachment_url && message.attachment_type;
 
   const renderAttachment = () => {
-    if (!hasAttachment) return null;
+    if (!hasAttachment || !attachmentUrl) return null;
 
     const isImage = message.attachment_type?.startsWith('image/');
     const isVideo = message.attachment_type?.startsWith('video/');
+    const isAudio = message.attachment_type?.startsWith('audio/');
 
     if (isImage) {
       return (
         <div className="mt-2 rounded-lg overflow-hidden max-w-[240px]">
           <img
-            src={message.attachment_url!}
+            src={attachmentUrl}
             alt={message.attachment_name || 'Bild'}
             className="w-full h-auto rounded-lg bg-white/5"
             loading="lazy"
@@ -160,7 +161,7 @@ export function MessageBubble({
       return (
         <div className="mt-2 rounded-lg overflow-hidden max-w-[240px]">
           <video
-            src={message.attachment_url!}
+            src={attachmentUrl}
             className="w-full h-auto rounded-lg bg-white/5"
             style={{ aspectRatio: '16/9', objectFit: 'cover' }}
             preload="metadata"
@@ -179,10 +180,25 @@ export function MessageBubble({
       );
     }
 
+    if (isAudio) {
+      return (
+        <div className="mt-2 max-w-[260px]">
+          <audio src={attachmentUrl} controls preload="metadata" className="w-full">
+            <track kind="captions" />
+          </audio>
+          {message.attachment_name && (
+            <p className="text-pure-white text-xs mt-1 truncate px-1">
+              {message.attachment_name}
+            </p>
+          )}
+        </div>
+      );
+    }
+
     // File attachment (PDF, docs, etc.)
     return (
       <a
-        href={message.attachment_url!}
+        href={attachmentUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 md:hover:bg-white/10 transition-colors min-h-touch"
