@@ -127,6 +127,9 @@ const USER_SCOPED: { table: string; column: string }[] = [
   { table: 'jobseeker_notes', column: 'user_id' },
   { table: 'user_onboarding_state', column: 'user_id' },
   { table: 'profile_cv_summaries', column: 'user_id' },
+  // Kandidatprofiler (CV/video/bild-varianter). Cascade finns via auth.users,
+  // men vi raderar explicit så att inget ligger kvar om auth-steget hoppas över.
+  { table: 'candidate_profiles', column: 'user_id' },
   { table: 'user_data_consents', column: 'user_id' },
   // OBS: consent_records raderas INTE här. Raden pseudonymiseras i steg 8
   // nedan (e-post nollas) så att beviset för accepterade villkor finns kvar
