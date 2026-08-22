@@ -388,6 +388,10 @@ export function useSessionManager(
     const timeSinceRegistration = Date.now() - lastRegisteredAtRef.current;
     if (timeSinceRegistration < 10_000) return; // 10s grace after register
 
+    // Skip while no valid auth token exists — an anon RPC call is rejected by the DB
+    const validityTokenOk = await ensureFreshToken();
+    if (!validityTokenOk) return;
+
     try {
       const { data: isValid, error } = await supabase.rpc('is_session_valid', {
         p_session_token: token,
