@@ -1906,13 +1906,14 @@ export function MessageTemplatesSettings() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="text-white">Händelse</Label>
+                <RequiredMark filled={Boolean(templateForm.trigger)} />
                 <InfoHint text="Varje händelse kan ha en egen mall per kanal – totalt max 12. Väljer du en händelse och kanal där du redan har en egen mall skrivs den mallen över, så det aldrig blir dubbletter." />
               </div>
               <Select
                 value={templateForm.trigger || undefined}
                 onValueChange={(value) => setTemplateForm((prev) => ({ ...prev, trigger: value as AutoRuleTrigger }))}
               >
-                <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                <SelectTrigger className={`bg-white/5 text-white ${templateForm.trigger ? 'border-white/10' : 'border-red-400/40'}`}>
                   <SelectValue placeholder="Välj händelse" />
                 </SelectTrigger>
                 <SelectContent>
