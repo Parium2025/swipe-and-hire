@@ -78,6 +78,8 @@ export function CandidatesTable({
   onContinueLoading,
   loadedCount = 0,
   onRatingUpdate,
+  onServerSortChange,
+
 }: CandidatesTableProps) {
   const deviceType = useDevice();
   const isMobile = deviceType === 'mobile';
