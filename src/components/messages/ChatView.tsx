@@ -677,7 +677,7 @@ export function ChatView({
               className="text-destructive focus:text-destructive"
             >
               <ShieldBan className="mr-2 h-4 w-4" />
-              Blockera & radera permanent
+              Blockera användaren
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -687,11 +687,11 @@ export function ChatView({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmAction === 'block' ? 'Blockera och radera permanent?' : 'Radera chatten?'}
+              {confirmAction === 'block' ? 'Blockera användaren?' : 'Radera chatten?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmAction === 'block'
-                ? 'Konversationen tas bort ur din inkorg och inga meddelanden kan längre skickas mellan er — varken chatt, notis eller push. Du kan häva blockeringen senare i inställningarna.'
+                ? 'Inga meddelanden, notiser eller push kan längre nå dig från den här personen — chatten försvinner ur din inkorg. Du kan häva blockeringen när som helst i inställningarna.'
                 : 'Konversationen försvinner ur din inkorg. Motparten kan fortfarande skriva, och då dyker chatten upp igen.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -715,7 +715,7 @@ export function ChatView({
                 onBack();
               }}
             >
-              {confirmAction === 'block' ? 'Blockera permanent' : 'Radera'}
+              {confirmAction === 'block' ? 'Blockera' : 'Radera'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

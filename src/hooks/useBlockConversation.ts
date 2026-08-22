@@ -82,8 +82,8 @@ export function useBlockConversation() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['conversations'] });
       void queryClient.invalidateQueries({ queryKey: ['conversation-blocks'] });
-      toast.success('Blockerad och permanent borttagen', {
-        description: 'Inga fler meddelanden kan skickas mellan er. Du kan häva blockeringen i inställningarna.',
+      toast.success('Användaren är blockerad', {
+        description: 'Inget når fram till dig från den här personen. Du kan häva blockeringen i inställningarna.',
       });
     },
     onError: (error: Error) => {
