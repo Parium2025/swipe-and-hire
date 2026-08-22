@@ -299,6 +299,10 @@ export function useSessionManager(
     const token = sessionTokenRef.current;
     if (!token || !userId || signOutInProgress) return;
 
+    // Skip while no valid auth token exists — an anon RPC call is rejected by the DB
+    const heartbeatTokenOk = await ensureFreshToken();
+    if (!heartbeatTokenOk) return;
+
     try {
       const { data: isValid } = await supabase.rpc('heartbeat_session', {
         p_session_token: token,
@@ -383,6 +387,10 @@ export function useSessionManager(
     // Grace period: skip validity check right after registration (mobile wake-up scenario)
     const timeSinceRegistration = Date.now() - lastRegisteredAtRef.current;
     if (timeSinceRegistration < 10_000) return; // 10s grace after register
+
+    // Skip while no valid auth token exists — an anon RPC call is rejected by the DB
+    const validityTokenOk = await ensureFreshToken();
+    if (!validityTokenOk) return;
 
     try {
       const { data: isValid, error } = await supabase.rpc('is_session_valid', {
