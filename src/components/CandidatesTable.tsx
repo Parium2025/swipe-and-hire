@@ -28,6 +28,7 @@ import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
+import { useCandidateRowMediaWarmup } from '@/hooks/useCandidateRowMediaWarmup';
 import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
 import { PillButton } from '@/components/ui/pill-button';
 import {
@@ -100,6 +101,9 @@ export function CandidatesTable({
   
   // ── Extracted hooks ──────────────────────────────────
   useBulkMessageSync();
+  // Förvärm porträtt + video i dialogstorlek för ALLA rader på sidan, så att
+  // varje kandidatbyte (klick eller pilnavigering) visar media direkt.
+  useCandidateRowMediaWarmup(applications);
   const { readCache, fetchForApplicant, writeCache, prefetchSingle } = useCandidateBatchPrefetch(applications);
 
   // Bulk selection state
@@ -908,6 +912,7 @@ export function CandidatesTable({
         candidateTotal={sortedApplications.length}
         candidateRating={selectedApplication ? getDisplayRating(selectedApplication) : undefined}
         onRatingChange={onRatingUpdate && selectedApplication ? (rating) => onRatingUpdate(selectedApplication.applicant_id, rating) : undefined}
+        adjacentMedia={adjacentCandidateMedia}
       />
 
       {isTouchDevice && (
