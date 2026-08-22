@@ -3510,6 +3510,13 @@ export type Database = {
         Args: { p_recruiter_id: string }
         Returns: number
       }
+      count_my_candidates_per_list: {
+        Args: never
+        Returns: {
+          candidate_count: number
+          list_id: string
+        }[]
+      }
       count_search_jobs: {
         Args: {
           p_category?: string
