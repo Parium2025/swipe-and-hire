@@ -1814,10 +1814,17 @@ export function MessageTemplatesSettings() {
                               shape="icon"
                               className="h-8 w-8"
                               onClick={() => {
+                                // Äldre mallar saknar händelse (kolumnen är ny). Härled den från
+                                // regeln som använder mallen, annars faller vi tillbaka på ansökan.
+                                const inferredTrigger =
+                                  (template.trigger as AutoRuleTrigger | null) ??
+                                  (automations.find((automation) => automation.template_id === template.id)
+                                    ?.trigger as AutoRuleTrigger | undefined) ??
+                                  ('application_received' as AutoRuleTrigger);
                                 setTemplateForm({
                                   id: template.id,
                                   name: template.name,
-                                  trigger: (template.trigger as AutoRuleTrigger | null) ?? '',
+                                  trigger: inferredTrigger,
                                   channels: [template.channel as AutomationChannel],
                                   channelContent: {
                                     chat: {
