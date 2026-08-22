@@ -826,6 +826,8 @@ const MyCandidates = () => {
         onNavigateNext={handleNavigateNext}
         candidateIndex={candidateNavIndex}
         candidateTotal={candidateNavTotal}
+        adjacentMedia={adjacentCandidateMedia}
+
       />
 
       {/* Remove Confirmation Dialog */}
