@@ -160,8 +160,26 @@ export const CandidateProfileDialog = ({
   }, [activeApplication?.job_id]);
 
   const profileImageUrl = useProfileImageUrl(activeApplication?.profile_image_url);
+  const profileThumbUrl = useProfileThumbUrl(activeApplication?.profile_image_url);
   const videoUrl = useVideoUrl(activeApplication?.video_url);
   const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
+
+  // Förladda intilliggande kandidaters porträtt (och video-URL) i bakgrunden
+  // så pil-navigeringen känns omedelbar istället för att ladda om varje gång.
+  useEffect(() => {
+    if (!open) return;
+    const paths = (adjacentMedia ?? [])
+      .map((m) => m?.profile_image_url)
+      .filter((p): p is string => !!p);
+    if (paths.length === 0) return;
+    const id = window.setTimeout(() => {
+      paths.forEach((p) => {
+        void prefetchMediaUrl(p, 'profile-image', MEDIA_URL_TTL, PROFILE_DIALOG_TRANSFORM).catch(() => {});
+      });
+    }, 150);
+    return () => window.clearTimeout(id);
+  }, [open, adjacentMedia]);
+
 
   const notesHook = useCandidateNotes({
     applicantId: activeApplication?.applicant_id || application?.applicant_id || null,
