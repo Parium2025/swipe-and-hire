@@ -1943,9 +1943,10 @@ export function MessageTemplatesSettings() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="text-white">Kanaler</Label>
+                <RequiredMark filled={templateForm.channels.length > 0} />
                 <InfoHint text="Välj var meddelandet ska kunna skickas. Om du väljer flera kanaler skapas en version per kanal som du kan anpassa separat." />
               </div>
-              <p className="text-[11px] text-white">Välj flera kanaler så dupliceras mallen automatiskt per kanal.</p>
+              <p className="text-[11px] text-white">Väljer du flera kanaler kopieras texten automatiskt till de tomma kanalerna — du kan sedan justera varje kanal för sig.</p>
               <div className="grid gap-2 sm:grid-cols-3">
                 {OUTREACH_CHANNEL_OPTIONS.map((option) => {
                   const channel = option.value as AutomationChannel;
