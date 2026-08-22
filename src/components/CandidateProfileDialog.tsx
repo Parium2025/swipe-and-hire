@@ -424,7 +424,7 @@ export const CandidateProfileDialog = ({
                   )}
                 </div>
               ) : (
-                <div className="mt-2 w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2.5">
+                <div aria-busy={loadingApplications} className="mt-2 w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2.5">
                   <p className="text-sm text-white break-words">{displayApp.job_title}</p>
                 </div>
               )}
