@@ -271,7 +271,7 @@ export default function Messages() {
             {blockedUsers.length > 0 && (
               <div className="mb-3 rounded-xl border border-white/10 bg-white/5 p-3">
                 <p className="mb-2 text-xs font-semibold text-white">
-                  Blockerade ({blockedUsers.length}) — inga meddelanden kan skickas mellan er
+                  Blockerade ({blockedUsers.length}) — deras meddelanden når dig inte
                 </p>
                 <div className="flex flex-col gap-1.5">
                   {blockedUsers.map((block) => (

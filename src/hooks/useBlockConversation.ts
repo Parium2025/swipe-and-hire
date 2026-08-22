@@ -32,7 +32,8 @@ export function useBlockedUsers() {
     queryFn: async (): Promise<BlockedUser[]> => {
       const { data, error } = await supabase
         .from('conversation_blocks')
-        .select('id, blocked_id, conversation_id, reason, created_at')
+        .select('id, blocked_id, conversation_id, reason, created_at, released_at')
+        .is('released_at', null)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return (data || []) as BlockedUser[];
@@ -64,18 +65,22 @@ export function useBlockConversation() {
           blocked_id,
           conversation_id: conversationId,
           reason: reason?.trim() || null,
+          created_at: new Date().toISOString(),
+          released_at: null,
         })),
         { onConflict: 'blocker_id,blocked_id' }
       );
       if (blockError) throw blockError;
 
-      // Ta bort konversationen ur din inkorg i samma svep.
-      const { error: leaveError } = await supabase
+      // Tyst spärr: du stannar kvar som medlem (så historiken finns kvar när du
+      // häver blockeringen), men konversationen döljs i inkorgen och tystas så
+      // att inga notiser eller push kan nå dig under tiden.
+      const { error: muteError } = await supabase
         .from('conversation_members')
-        .delete()
+        .update({ muted_at: new Date().toISOString() })
         .eq('conversation_id', conversationId)
         .eq('user_id', user.id);
-      if (leaveError) throw leaveError;
+      if (muteError) throw muteError;
 
       return conversationId;
     },
@@ -95,17 +100,23 @@ export function useBlockConversation() {
   const unblockMutation = useMutation({
     mutationFn: async (blockedId: string) => {
       if (!user) throw new Error('Not authenticated');
+      // Behåll raden med släpptidpunkt — då kan vi märka ut vad som skrevs
+      // medan blockeringen var aktiv.
       const { error } = await supabase
         .from('conversation_blocks')
-        .delete()
+        .update({ released_at: new Date().toISOString() })
         .eq('blocker_id', user.id)
-        .eq('blocked_id', blockedId);
+        .eq('blocked_id', blockedId)
+        .is('released_at', null);
       if (error) throw error;
       return blockedId;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['conversation-blocks'] });
-      toast.success('Blockeringen är hävd');
+      void queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      toast.success('Blockeringen är hävd', {
+        description: 'Chatten är tillbaka i inkorgen med allt som skrevs under tiden.',
+      });
     },
     onError: (error: Error) => {
       console.error('Failed to unblock:', error);

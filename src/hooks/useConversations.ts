@@ -449,8 +449,20 @@ export function useConversations() {
         unreadCounts.set(s.conversation_id, Number(s.unread_count) || 0);
       });
 
+      // Tyst spärr: konversationer med aktivt blockerade motparter döljs helt.
+      const { data: activeBlocks } = await supabase
+        .from('conversation_blocks')
+        .select('blocked_id')
+        .is('released_at', null);
+      const blockedUserIds = new Set((activeBlocks || []).map((b) => b.blocked_id));
+      const hiddenConversationIds = new Set(
+        (allMembers || [])
+          .filter((m) => m.user_id !== user.id && blockedUserIds.has(m.user_id))
+          .map((m) => m.conversation_id),
+      );
+
       // Build final conversation objects
-      const result = conversations.map((conv) => {
+      const result = conversations.filter((c) => !hiddenConversationIds.has(c.id)).map((conv) => {
         const members = (allMembers || [])
           .filter((m) => m.conversation_id === conv.id)
           .map((m) => ({

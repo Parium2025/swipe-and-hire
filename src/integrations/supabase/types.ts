@@ -573,6 +573,7 @@ export type Database = {
           created_at: string
           id: string
           reason: string | null
+          released_at: string | null
         }
         Insert: {
           blocked_id: string
@@ -581,6 +582,7 @@ export type Database = {
           created_at?: string
           id?: string
           reason?: string | null
+          released_at?: string | null
         }
         Update: {
           blocked_id?: string
@@ -589,6 +591,7 @@ export type Database = {
           created_at?: string
           id?: string
           reason?: string | null
+          released_at?: string | null
         }
         Relationships: [
           {
