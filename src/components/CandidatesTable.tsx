@@ -28,6 +28,7 @@ import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
+import { useCandidateRowMediaWarmup } from '@/hooks/useCandidateRowMediaWarmup';
 import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
 import { PillButton } from '@/components/ui/pill-button';
 import {
@@ -100,6 +101,9 @@ export function CandidatesTable({
   
   // ── Extracted hooks ──────────────────────────────────
   useBulkMessageSync();
+  // Förvärm porträtt + video i dialogstorlek för ALLA rader på sidan, så att
+  // varje kandidatbyte (klick eller pilnavigering) visar media direkt.
+  useCandidateRowMediaWarmup(applications);
   const { readCache, fetchForApplicant, writeCache, prefetchSingle } = useCandidateBatchPrefetch(applications);
 
   // Bulk selection state
@@ -530,6 +534,16 @@ export function CandidatesTable({
     });
   }, [applications, sortField, sortDirection, getDisplayRating]);
 
+  // Grannkandidaternas porträtt (±3) förladdas så pilnavigeringen blir omedelbar.
+  const adjacentCandidateMedia = useMemo(() => {
+    if (!selectedApplicationId) return undefined;
+    const idx = sortedApplications.findIndex(a => a.id === selectedApplicationId);
+    if (idx < 0) return undefined;
+    return sortedApplications
+      .slice(Math.max(0, idx - 3), idx + 4)
+      .map(a => ({ profile_image_url: a.profile_image_url }));
+  }, [sortedApplications, selectedApplicationId]);
+
   // Navigate to prev/next candidate in the sorted list (lightbox-style arrows)
   const handleNavigatePrev = useMemo(() => {
     if (!selectedApplicationId) return undefined;
@@ -796,6 +810,11 @@ export function CandidatesTable({
                                 Träff i anteckning
                               </span>
                             )}
+                            {application.match_source === 'answer' && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[10px] text-white font-medium">
+                                Träff i svar
+                              </span>
+                            )}
 
                           </div>
                           {application.phone && <div className="text-sm text-white">{application.phone}</div>}
@@ -903,6 +922,7 @@ export function CandidatesTable({
         candidateTotal={sortedApplications.length}
         candidateRating={selectedApplication ? getDisplayRating(selectedApplication) : undefined}
         onRatingChange={onRatingUpdate && selectedApplication ? (rating) => onRatingUpdate(selectedApplication.applicant_id, rating) : undefined}
+        adjacentMedia={adjacentCandidateMedia}
       />
 
       {isTouchDevice && (
