@@ -1897,6 +1897,7 @@ export function MessageTemplatesSettings() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="text-white">Namn</Label>
+                <RequiredMark filled={Boolean(templateForm.name.trim())} />
                 <InfoHint text="Ge mallen ett tydligt namn som gör det lätt att förstå när den ska användas, till exempel 'Intervju bokad' eller 'Avslutad annons'." />
               </div>
               <Input value={templateForm.name} onChange={(e) => setTemplateForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
