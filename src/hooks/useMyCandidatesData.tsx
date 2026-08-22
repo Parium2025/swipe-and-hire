@@ -305,8 +305,6 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
         const lastItem = searchResults[searchResults.length - 1];
         const nextCursor = searchResults.length === PAGE_SIZE ? lastItem.updated_at : null;
 
-          .filter((path): path is string => typeof path === 'string' && path.trim() !== '');
-
 
 
         return { items, nextCursor };
