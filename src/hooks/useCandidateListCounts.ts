@@ -13,21 +13,19 @@ export const useCandidateListCounts = (enabled = true) => {
     queryKey: ['candidate-list-counts', user?.id],
     queryFn: async () => {
       if (!user) return {} as Record<string, number>;
-      const { data, error } = await supabase
-        .from('my_candidates')
-        .select('list_id, applicant_id')
-        .eq('recruiter_id', user.id);
+      // Räknas i databasen. Att hämta hem raderna och räkna i klienten
+      // kapades tyst vid 1000 rader och gav fel siffror på stora konton.
+      const { data, error } = await supabase.rpc('count_my_candidates_per_list');
       if (error) throw error;
 
-      const seen = new Map<string, Set<string>>();
-      for (const row of data || []) {
-        if (!row.list_id) continue;
-        const set = seen.get(row.list_id) ?? new Set<string>();
-        set.add(row.applicant_id);
-        seen.set(row.list_id, set);
-      }
-      return Object.fromEntries([...seen].map(([id, set]) => [id, set.size]));
+      return Object.fromEntries(
+        (data || []).map((row: { list_id: string; candidate_count: number }) => [
+          row.list_id,
+          Number(row.candidate_count) || 0,
+        ]),
+      ) as Record<string, number>;
     },
+
     enabled: enabled && !!user,
     staleTime: 30 * 1000,
   });
