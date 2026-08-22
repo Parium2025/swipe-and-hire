@@ -595,7 +595,8 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
     if (!user) return;
 
     const channel = supabase
-      .channel('my-candidates-team-sync')
+      .channel(`my-candidates-team-sync:${instanceId}`)
+
       .on(
         'postgres_changes',
         {
