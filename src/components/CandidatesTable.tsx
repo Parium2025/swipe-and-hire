@@ -534,6 +534,16 @@ export function CandidatesTable({
     });
   }, [applications, sortField, sortDirection, getDisplayRating]);
 
+  // Grannkandidaternas porträtt (±3) förladdas så pilnavigeringen blir omedelbar.
+  const adjacentCandidateMedia = useMemo(() => {
+    if (!selectedApplicationId) return undefined;
+    const idx = sortedApplications.findIndex(a => a.id === selectedApplicationId);
+    if (idx < 0) return undefined;
+    return sortedApplications
+      .slice(Math.max(0, idx - 3), idx + 4)
+      .map(a => ({ profile_image_url: a.profile_image_url }));
+  }, [sortedApplications, selectedApplicationId]);
+
   // Navigate to prev/next candidate in the sorted list (lightbox-style arrows)
   const handleNavigatePrev = useMemo(() => {
     if (!selectedApplicationId) return undefined;
