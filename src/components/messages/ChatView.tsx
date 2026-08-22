@@ -109,6 +109,7 @@ export function ChatView({
   // Search state
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [searchMatchIds, setSearchMatchIds] = useState<string[]>([]);
   const [searchIndex, setSearchIndex] = useState(0);
@@ -161,6 +162,16 @@ export function ChatView({
   }, [conversation.id, conversation.unread_count, markAsRead]);
 
   // Reset scroll tracking when switching conversation
+  /** Stänger sökfältet och nollställer alla träffar. */
+  const closeSearch = useCallback(() => {
+    setShowSearch(false);
+    setSearchQuery('');
+    setDebouncedQuery('');
+    setSearchMatchIds([]);
+    setDbSearchResultIds([]);
+    setOlderMatchCount(0);
+  }, []);
+
   useEffect(() => {
     isNearBottomRef.current = true;
     prevMessageCountRef.current = 0;
@@ -669,7 +680,8 @@ export function ChatView({
 
         {/* Search toggle */}
         <button
-          onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setDebouncedQuery(''); setSearchMatchIds([]); setDbSearchResultIds([]); setOlderMatchCount(0); } }}
+          onClick={() => { if (showSearch) { closeSearch(); } else { setShowSearch(true); } }}
+
           className={cn(
             "p-2 rounded-full transition-colors",
             showSearch ? "bg-white/15 text-white" : "text-pure-white md:hover:bg-white/10"
@@ -768,15 +780,9 @@ export function ChatView({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    setShowSearch(false);
-                    setSearchQuery('');
-                    setDebouncedQuery('');
-                    setSearchMatchIds([]);
-                    setDbSearchResultIds([]);
-                    setOlderMatchCount(0);
-                  }
+                  if (e.key === 'Escape') closeSearch();
                 }}
+
                 placeholder="Sök efter meddelanden & filer..."
                 className="h-8 bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white text-sm"
                 autoFocus
@@ -806,7 +812,17 @@ export function ChatView({
               {!searchingDb && searchMatchIds.length === 0 && olderMatchCount > 0 && (
                 <span className="text-pure-white text-xs whitespace-nowrap">{olderMatchCount} i äldre</span>
               )}
+              {/* Stäng sökfältet — samma effekt som Escape eller sökikonen i headern */}
+              <button
+                type="button"
+                onClick={closeSearch}
+                aria-label="Stäng sökfältet"
+                className="p-1.5 rounded-full text-pure-white md:hover:bg-white/10 active:scale-95 transition flex-shrink-0"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
+
           </motion.div>
         )}
       </AnimatePresence>
