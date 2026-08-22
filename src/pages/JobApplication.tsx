@@ -337,6 +337,8 @@ const JobApplication = () => {
       cv_url: formData.cvUrl,
       profile_image_snapshot_url: profileImageSnapshot,
       video_snapshot_url: videoSnapshot,
+      candidate_profile_label: selectedProfile?.label ?? null,
+
       custom_answers: {
         driversLicense: formData.driversLicense,
         hasOwnCar: formData.hasOwnCar,
