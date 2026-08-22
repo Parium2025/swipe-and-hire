@@ -20,6 +20,9 @@ import FileUpload from '@/components/FileUpload';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { useApplicationQuota } from '@/hooks/useApplicationQuota';
 import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
+import CandidateProfilePicker from '@/components/candidateProfiles/CandidateProfilePicker';
+import { useCandidateProfiles, type CandidateProfile } from '@/hooks/useCandidateProfiles';
+
 
 // Draft key for localStorage
 const JOB_APPLICATION_DRAFT_PREFIX = 'parium_draft_job-application-';
