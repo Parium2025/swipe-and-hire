@@ -325,8 +325,9 @@ export const MyCandidatesHeader = ({
               );
               
               if (!isTruncated) {
-                return <React.Fragment key={stage}>{buttonContent}</React.Fragment>;
+                return buttonContent;
               }
+
               
               return (
                 <TooltipProvider key={stage} delayDuration={300}>
