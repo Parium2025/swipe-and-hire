@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { safeReadArrayCache } from '@/lib/safeStorage';
+import { toastArchive } from '@/lib/toastArchive';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface AppNotification {
   id: string;
