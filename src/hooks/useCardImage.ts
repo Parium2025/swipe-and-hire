@@ -119,7 +119,7 @@ export function useCardImage(
   // placeholder om blob-fetchen aldrig avslutades.)
   const displayUrl = transformFailed && originalUrl
     ? originalUrl
-    : (cachedBlobUrl || loadedBlobUrl || resolvedUrl);
+    : (cachedBlobUrl || resolvedUrl);
 
   // 🚀 Proaktiv decode: så fort vi har en URL, dekoda bitmapen off-main-thread.
   // Eliminerar "decode-blinken" när ett kort re-mountas efter scroll — bilden
