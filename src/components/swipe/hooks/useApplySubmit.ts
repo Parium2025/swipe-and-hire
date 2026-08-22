@@ -59,17 +59,25 @@ export function useApplySubmit({
       // 📸 Snapshot: frys frågorna som visas för kandidaten precis nu.
       // Arbetsgivaren kommer alltid se exakt dessa frågor + svar, även om
       // frågorna senare ändras. Nya sökande får de nya frågorna.
-      const [profileRes, questionsRes] = await Promise.all([
+      const [profileRes, questionsRes, candidateProfileRes] = await Promise.all([
         supabase.rpc('get_my_profile'),
         supabase
           .from('job_questions')
           .select('id, question_text, question_type, options, is_required, order_index')
           .eq('job_id', jobId)
           .order('order_index'),
+        // 📌 Standardprofilen (av jobbsökarens sparade kandidatprofiler) vinner i snabbansökan.
+        supabase
+          .from('candidate_profiles')
+          .select('label, cv_url, video_url, profile_image_url')
+          .eq('user_id', userId)
+          .eq('is_default', true)
+          .maybeSingle(),
       ]);
       const profileRows = profileRes.data;
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
       const questionsSnapshot = questionsRes.data ?? [];
+      const candidateProfile = candidateProfileRes.data ?? null;
 
       let age: number | null = null;
       if (profile?.birth_date) {
@@ -87,11 +95,12 @@ export function useApplySubmit({
         location: profile?.home_location || profile?.location || null,
         age,
         bio: profile?.bio || null,
-        cv_url: profile?.cv_url || null,
+        cv_url: candidateProfile?.cv_url || profile?.cv_url || null,
         availability: profile?.availability || null,
         employment_status: profile?.employment_type || null,
-        profile_image_snapshot_url: profile?.profile_image_url || null,
-        video_snapshot_url: profile?.video_url || null,
+        profile_image_snapshot_url: candidateProfile?.profile_image_url || profile?.profile_image_url || null,
+        video_snapshot_url: candidateProfile?.video_url || profile?.video_url || null,
+        candidate_profile_label: candidateProfile?.label ?? null,
         custom_answers: answers,
         questions_snapshot: questionsSnapshot,
         status: 'pending',
@@ -117,7 +126,7 @@ export function useApplySubmit({
         })
         .catch((e) => console.error('❌ Confirmation email network error:', e));
 
-      if (profile?.cv_url) {
+      if (candidateProfile?.cv_url || profile?.cv_url) {
         supabase.functions
           .invoke('generate-cv-summary', {
             body: { applicant_id: userId, job_id: jobId },
