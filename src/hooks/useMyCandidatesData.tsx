@@ -556,6 +556,15 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
         jobs.push(prefetchMediaUrl(vid, 'profile-video'));
       }
     }
+    // Förvärm full-size porträtt för de översta raderna → profil-dialogen
+    // öppnas med bilden på plats (aldrig initialer eller tom cirkel).
+    for (const c of candidates.slice(0, 12)) {
+      const img = typeof c.profile_image_url === 'string' ? c.profile_image_url.trim() : '';
+      if (img && !warmedMediaRef.current.has(`f:${img}`)) {
+        warmedMediaRef.current.add(`f:${img}`);
+        jobs.push(prefetchMediaUrl(img, 'profile-image', 86400));
+      }
+    }
     if (jobs.length > 0) void Promise.allSettled(jobs);
   }, [candidates]);
 
