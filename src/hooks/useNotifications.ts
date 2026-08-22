@@ -236,6 +236,8 @@ export function useNotifications() {
       .update({ is_read: true })
       .eq('user_id', user.id)
       .eq('is_read', false);
+
+    void broadcastRef.current?.send({ type: 'broadcast', event: 'local_read_all', payload: {} });
   }, [user]);
 
   const clearAll = useCallback(async () => {
