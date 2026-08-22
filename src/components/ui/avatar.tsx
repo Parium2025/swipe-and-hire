@@ -135,14 +135,18 @@ const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarFallbackProps>(
     const context = React.useContext(AvatarContext);
     const [showFallback, setShowFallback] = React.useState(!delayMs);
     
-    // Delay showing fallback if delayMs is set
+    // Återställ alltid synligheten när bildläget ändras. Utan else-grenen låg
+    // föregående kandidats 1,2 s-fördröjning kvar när nästa kandidat saknade
+    // bild, vilket gjorde att initialerna kom sent trots delayMs={0}.
     React.useEffect(() => {
       if (delayMs && delayMs > 0) {
+        setShowFallback(false);
         const timeout = setTimeout(() => {
           setShowFallback(true);
         }, delayMs);
         return () => clearTimeout(timeout);
       }
+      setShowFallback(true);
     }, [delayMs]);
     
     // Don't show fallback if image is already loaded

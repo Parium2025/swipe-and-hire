@@ -344,7 +344,7 @@ export const CandidateProfileDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus hideClose className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] w-screen h-[100dvh] md:w-[min(950px,calc(100vw-3rem))] md:h-auto md:rounded-lg rounded-none border-0 md:border flex flex-col data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 data-[state=closed]:!slide-out-to-left-0 data-[state=closed]:!slide-out-to-top-0 data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.97] data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-[0.97] duration-300">
+      <DialogContentNoFocus hideClose className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] w-screen h-[100dvh] md:w-[min(950px,calc(100vw-3rem))] md:h-auto md:rounded-lg rounded-none border-0 md:border flex flex-col data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 data-[state=closed]:!slide-out-to-left-0 data-[state=closed]:!slide-out-to-top-0 data-[state=open]:!fade-in-0 data-[state=open]:!zoom-in-100 data-[state=closed]:!fade-out-0 data-[state=closed]:!zoom-out-100 !duration-0">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
@@ -419,8 +419,9 @@ export const CandidateProfileDialog = ({
                 </div>
               )}
 
-              {hasMultipleApplications ? (
-                <div className="mt-2 relative w-full min-w-0">
+              <div className="mt-2 relative w-full min-w-0">
+                {hasMultipleApplications ? (
+                  <>
                   <TooltipProvider delayDuration={400}>
                     <Tooltip open={jobTitleTruncated ? undefined : false}>
                       <TooltipTrigger asChild>
@@ -447,7 +448,7 @@ export const CandidateProfileDialog = ({
                   </TooltipProvider>
 
 
-                  {hasMultipleApplications && jobDropdownOpen && (
+                    {jobDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setJobDropdownOpen(false)} />
                       <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-50 w-[calc(100%+1rem)] max-w-sm rounded-lg border border-white/20 bg-slate-900/95 backdrop-blur-xl shadow-xl overflow-hidden">
@@ -482,13 +483,15 @@ export const CandidateProfileDialog = ({
                       </div>
                     </div>
                     </>
-                  )}
-                </div>
-              ) : (
-                <div aria-busy={loadingApplications} className="mt-2 w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2.5">
-                  <p className="text-sm text-white break-words">{displayApp.job_title}</p>
-                </div>
-              )}
+                    )}
+                  </>
+                ) : (
+                  <div aria-busy={loadingApplications} className="w-full min-w-0 flex items-center rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white">
+                    <span className="min-w-0 flex-1 text-left break-words">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
+                    {loadingApplications && <span className="sr-only">Hämtar kandidatens övriga ansökningar</span>}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
