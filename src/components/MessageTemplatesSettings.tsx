@@ -1713,7 +1713,7 @@ export function MessageTemplatesSettings() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <p
-                              className="cursor-pointer break-words text-xs text-white md:text-sm"
+                              className="cursor-pointer break-words text-xs text-white/80"
                               style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
                             >
                               {(template.body ?? '').replace(/\s+/g, ' ').trim()}
