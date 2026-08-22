@@ -41,23 +41,8 @@ export const ProfileActions = ({
   if (variant === 'my-candidates') {
     return (
       <div className="pt-4 border-t border-white/20 space-y-3">
-        {quickActions.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-center text-[10px] font-medium uppercase tracking-[0.18em] text-white/70">Snabbutskick</p>
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {quickActions.map((action) => (
-                <Button
-                  key={action.key}
-                  onClick={action.onClick}
-                  variant={action.variant}
-                  className="h-8 px-3 text-[11px] md:h-9 md:text-sm"
-                >
-                  {action.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
+
+
 
         <div className="flex justify-center gap-1">
           <Button onClick={onSendMessage} variant="glassPurple" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
