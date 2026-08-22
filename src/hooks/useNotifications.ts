@@ -188,9 +188,14 @@ export function useNotifications() {
         },
         () => { void fetchNotifications(); }
       )
+      // Lokala toast-notiser lever i localStorage per enhet – synka rensning
+      // och "markera alla lästa" mellan användarens enheter via broadcast.
+      .on('broadcast', { event: 'local_clear' }, () => { toastArchive.clear(); })
+      .on('broadcast', { event: 'local_read_all' }, () => { toastArchive.markAllAsRead(); })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    broadcastRef.current = channel;
+    return () => { broadcastRef.current = null; supabase.removeChannel(channel); };
   }, [user, fetchNotifications]);
 
 
