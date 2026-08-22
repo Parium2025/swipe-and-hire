@@ -305,23 +305,24 @@ const JobApplication = () => {
     setSubmitting(true);
 
     // Build the application payload
-    // Try to get profile snapshot if online, otherwise use null
-    let profileImageSnapshot: string | null = null;
-    let videoSnapshot: string | null = null;
+    // Ögonblicksbild: vald kandidatprofil vinner, annars kontots vanliga profil.
+    let profileImageSnapshot: string | null = selectedProfile?.profile_image_url || null;
+    let videoSnapshot: string | null = selectedProfile?.video_url || null;
 
-    if (getIsOnline()) {
+    if (getIsOnline() && (!profileImageSnapshot || !videoSnapshot)) {
       try {
         const { data: currentProfile } = await supabase
           .from('profiles')
           .select('profile_image_url, video_url')
           .eq('user_id', user.id)
           .single();
-        profileImageSnapshot = currentProfile?.profile_image_url || null;
-        videoSnapshot = currentProfile?.video_url || null;
+        profileImageSnapshot = profileImageSnapshot || currentProfile?.profile_image_url || null;
+        videoSnapshot = videoSnapshot || currentProfile?.video_url || null;
       } catch {
         // Continue without snapshot — not critical
       }
     }
+
 
     const applicationPayload = {
       job_id: job.id,
