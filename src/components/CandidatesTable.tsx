@@ -29,6 +29,7 @@ import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSe
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
 import { useCandidateRowMediaWarmup } from '@/hooks/useCandidateRowMediaWarmup';
+import { useCandidateRowDetailsWarmup } from '@/hooks/useCandidateRowDetailsWarmup';
 import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
 import { PillButton } from '@/components/ui/pill-button';
 import {
@@ -104,6 +105,8 @@ export function CandidatesTable({
   // Förvärm porträtt + video i dialogstorlek för ALLA rader på sidan, så att
   // varje kandidatbyte (klick eller pilnavigering) visar media direkt.
   useCandidateRowMediaWarmup(applications);
+  // Anteckningar + aktivitetslogg för hela sidan, batchat (ej bara hover).
+  useCandidateRowDetailsWarmup(applications);
   const { readCache, fetchForApplicant, writeCache, prefetchSingle } = useCandidateBatchPrefetch(applications);
 
   // Bulk selection state
