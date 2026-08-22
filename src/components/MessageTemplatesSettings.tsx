@@ -2256,7 +2256,7 @@ export function MessageTemplatesSettings() {
                   <PillButton
                     className="px-4 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50"
                     onClick={handleSaveAutomation}
-                    disabled={savingAutomation || !automationFormHasAllTemplates || !automationForm.trigger}
+                    disabled={savingAutomation || !automationFormHasAllTemplates || !automationForm.trigger || !automationForm.name.trim()}
                   >
                     {savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                     {automationForm.id ? 'Uppdatera regel' : 'Spara regel'}
