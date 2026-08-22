@@ -265,6 +265,20 @@ export const CandidateProfileDialog = ({
     return () => window.removeEventListener('keydown', handler);
   }, [open, onNavigatePrev, onNavigateNext]);
 
+  // Tooltip visas endast när jobbtiteln faktiskt trunkeras
+  const jobTitleRef = useRef<HTMLSpanElement | null>(null);
+  const [jobTitleTruncated, setJobTitleTruncated] = useState(false);
+  useEffect(() => {
+    const el = jobTitleRef.current;
+    if (!el) { setJobTitleTruncated(false); return; }
+    const measure = () => setJobTitleTruncated(el.scrollWidth > el.clientWidth + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open, activeApplication?.job_title, application?.job_title, allApplications?.length]);
+
+
   if (!application) return null;
 
   const displayApp = activeApplication || application;
