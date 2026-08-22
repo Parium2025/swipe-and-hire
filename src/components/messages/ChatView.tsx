@@ -715,7 +715,7 @@ export function ChatView({
                 onBack();
               }}
             >
-              {confirmAction === 'block' ? 'Blockera permanent' : 'Radera'}
+              {confirmAction === 'block' ? 'Blockera' : 'Radera'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
