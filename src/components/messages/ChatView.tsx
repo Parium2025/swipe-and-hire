@@ -486,6 +486,10 @@ export function ChatView({
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
   }, []);
 
+  // Sant bara när texten i redigeringsläget skiljer sig från originalet.
+  const hasUnsavedEdit =
+    !!editingMessageId && newMessage.trim() !== editOriginalContent.trim() && newMessage.trim().length > 0;
+
   const handleSend = async () => {
     if ((!newMessage.trim() && !pendingFile) || sending) return;
 
