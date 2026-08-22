@@ -83,6 +83,12 @@ const JobApplication = () => {
   const { quota, refresh: refreshQuota } = useApplicationQuota();
   const [draftRestored, setDraftRestored] = useState(false);
   const [initialFormData, setInitialFormData] = useState<any>(null);
+
+  // Flera kandidatprofiler: välj vilken profil (CV/video/bild) som följer med ansökan.
+  const { profiles: candidateProfiles } = useCandidateProfiles(user?.id);
+  const [selectedProfile, setSelectedProfile] = useState<CandidateProfile | null>(null);
+  const [profilePicked, setProfilePicked] = useState(false);
+
   
   // Form data
   const [formData, setFormData] = useState({
