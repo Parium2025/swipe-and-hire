@@ -40,6 +40,7 @@ export interface QueuedApplication {
     cv_url: string;
     profile_image_snapshot_url: string | null;
     video_snapshot_url: string | null;
+    candidate_profile_label?: string | null;
     custom_answers: Record<string, any>;
   };
   emailPayload: {
