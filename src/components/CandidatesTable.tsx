@@ -147,15 +147,8 @@ export function CandidatesTable({
   const [teamDialogOpen, setTeamDialogOpen] = useState(false);
   const [selectedApplicationForTeam, setSelectedApplicationForTeam] = useState<ApplicationData | null>(null);
 
-  // Preload CV summaries
-  useCvSummaryPreloader(
-    applications.map(app => ({
-      applicant_id: app.applicant_id,
-      application_id: app.id,
-      job_id: app.job_id,
-      cv_url: app.cv_url,
-    }))
-  );
+  // (CV-sammanfattningar ingår nu i den samlade förvärmningspipelinen ovan)
+
 
   // Prefetch candidate data on hover
   const handlePrefetchCandidate = useCallback((application: ApplicationData) => {
