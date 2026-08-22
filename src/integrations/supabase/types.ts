@@ -398,6 +398,48 @@ export type Database = {
           },
         ]
       }
+      candidate_profiles: {
+        Row: {
+          created_at: string
+          cv_filename: string | null
+          cv_url: string | null
+          id: string
+          is_default: boolean
+          label: string
+          profile_image_url: string | null
+          sort_order: number
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          cv_filename?: string | null
+          cv_url?: string | null
+          id?: string
+          is_default?: boolean
+          label: string
+          profile_image_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          cv_filename?: string | null
+          cv_url?: string | null
+          id?: string
+          is_default?: boolean
+          label?: string
+          profile_image_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       candidate_ratings: {
         Row: {
           applicant_id: string
@@ -1410,6 +1452,7 @@ export type Database = {
           applied_at: string | null
           availability: string | null
           bio: string | null
+          candidate_profile_label: string | null
           cover_letter: string | null
           created_at: string
           custom_answers: Json | null
@@ -1437,6 +1480,7 @@ export type Database = {
           applied_at?: string | null
           availability?: string | null
           bio?: string | null
+          candidate_profile_label?: string | null
           cover_letter?: string | null
           created_at?: string
           custom_answers?: Json | null
@@ -1464,6 +1508,7 @@ export type Database = {
           applied_at?: string | null
           availability?: string | null
           bio?: string | null
+          candidate_profile_label?: string | null
           cover_letter?: string | null
           created_at?: string
           custom_answers?: Json | null
