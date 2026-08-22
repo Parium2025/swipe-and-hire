@@ -521,7 +521,7 @@ export function MessageTemplatesSettings() {
   const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
-  const [expandedTemplateIds, setExpandedTemplateIds] = useState<string[]>([]);
+  
 
   const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
   const [selectedDefaultTemplateName, setSelectedDefaultTemplateName] = useState(DEFAULT_OUTREACH_TEMPLATES[0]?.name ?? '');
@@ -1700,7 +1700,7 @@ export function MessageTemplatesSettings() {
                               aria-label={`Markera ${template.name}`}
                             />
                           )}
-                          <p className="max-w-full truncate text-sm font-semibold text-white">{template.name}</p>
+                          <p className="max-w-full truncate text-base font-semibold text-white">{template.name}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
@@ -1710,35 +1710,24 @@ export function MessageTemplatesSettings() {
 
                         </div>
                         {template.subject && <p className="break-words text-[11px] text-white md:text-xs">{template.subject}</p>}
-                        {(() => {
-                          const rawBody = template.body ?? '';
-                          const isExpanded = expandedTemplateIds.includes(template.id);
-                          // Förhandsvisning: slå ihop radbrytningar så de två synliga raderna
-                          // alltid innehåller riktig text (inte "Tjenare," + tom rad).
-                          const previewBody = rawBody.replace(/\s+/g, ' ').trim();
-                          const canExpand = rawBody.trim() !== previewBody || previewBody.length > 90;
-                          return (
-                            <>
-                              <p
-                                className="break-words text-xs text-white md:text-sm"
-                                style={isExpanded
-                                  ? { whiteSpace: 'pre-wrap' }
-                                  : { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
-                              >
-                                {isExpanded ? rawBody : previewBody}
-                              </p>
-                              {canExpand && (
-                                <button
-                                  type="button"
-                                  className="text-[11px] font-medium text-white underline underline-offset-2 md:text-xs"
-                                  onClick={() => setExpandedTemplateIds((prev) => prev.includes(template.id) ? prev.filter((id) => id !== template.id) : [...prev, template.id])}
-                                >
-                                  {isExpanded ? 'Visa mindre' : 'Visa hela texten'}
-                                </button>
-                              )}
-                            </>
-                          );
-                        })()}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p
+                              className="cursor-pointer break-words text-xs text-white/80"
+                              style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                            >
+                              {(template.body ?? '').replace(/\s+/g, ' ').trim()}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="top"
+                            align="start"
+                            sideOffset={8}
+                            className="max-w-[280px] border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md"
+                          >
+                            <p className="whitespace-pre-wrap text-xs leading-relaxed text-white">{template.body ?? ''}</p>
+                          </TooltipContent>
+                        </Tooltip>
 
 
                         {isStandard && (
