@@ -141,6 +141,22 @@ const JobApplication = () => {
     });
   };
 
+  // Håll vald profil i synk om den ändras eller raderas i ett annat fönster.
+  useEffect(() => {
+    if (!selectedProfile) return;
+    const fresh = candidateProfiles.find(p => p.id === selectedProfile.id);
+    if (!fresh) {
+      setSelectedProfile(null);
+      setFormData(prev => (prev.cvUrl === selectedProfile.cv_url ? { ...prev, cvUrl: '' } : prev));
+      return;
+    }
+    if (fresh !== selectedProfile && JSON.stringify(fresh) !== JSON.stringify(selectedProfile)) {
+      setSelectedProfile(fresh);
+    }
+  }, [candidateProfiles, selectedProfile]);
+
+
+
 
 
   // Restore draft on mount
