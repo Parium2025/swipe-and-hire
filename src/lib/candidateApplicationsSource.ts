@@ -102,6 +102,35 @@ let jobScopeCache: { userId: string; at: number; scope: JobScope } | null = null
 let jobScopeInFlight: { userId: string; promise: Promise<JobScope> } | null = null;
 const JOB_SCOPE_TTL_MS = 60 * 1000;
 
+// PostgREST returnerar max 1000 rader per anrop. Utan paginering trunkeras
+// resultatet tyst så fort ett konto passerar 1000 annonser/ansökningar.
+const PAGE_ROWS = 1000;
+/** Max antal job_id per `in()`-filter så URL:en inte spränger längdgränsen. */
+const JOB_ID_CHUNK = 250;
+/** Hård säkerhetsspärr så en trasig query aldrig kan loopa i evighet. */
+const MAX_ROWS = 50000;
+
+async function fetchAllPages<T>(
+  build: (from: number, to: number) => PromiseLike<{ data: any; error: any }>,
+): Promise<T[]> {
+  const out: T[] = [];
+  for (let from = 0; from < MAX_ROWS; from += PAGE_ROWS) {
+    const { data, error } = await build(from, from + PAGE_ROWS - 1);
+    if (error) throw error;
+    const rows = (data || []) as T[];
+    out.push(...rows);
+    if (rows.length < PAGE_ROWS) break;
+  }
+  return out;
+}
+
+const chunk = <T,>(arr: T[], size: number): T[][] => {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+};
+
+
 export function invalidateCandidateJobScope() {
   jobScopeCache = null;
   jobScopeInFlight = null;
