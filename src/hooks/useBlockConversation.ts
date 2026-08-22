@@ -65,18 +65,22 @@ export function useBlockConversation() {
           blocked_id,
           conversation_id: conversationId,
           reason: reason?.trim() || null,
+          created_at: new Date().toISOString(),
+          released_at: null,
         })),
         { onConflict: 'blocker_id,blocked_id' }
       );
       if (blockError) throw blockError;
 
-      // Ta bort konversationen ur din inkorg i samma svep.
-      const { error: leaveError } = await supabase
+      // Tyst spärr: du stannar kvar som medlem (så historiken finns kvar när du
+      // häver blockeringen), men konversationen döljs i inkorgen och tystas så
+      // att inga notiser eller push kan nå dig under tiden.
+      const { error: muteError } = await supabase
         .from('conversation_members')
-        .delete()
+        .update({ muted_at: new Date().toISOString() })
         .eq('conversation_id', conversationId)
         .eq('user_id', user.id);
-      if (leaveError) throw leaveError;
+      if (muteError) throw muteError;
 
       return conversationId;
     },
