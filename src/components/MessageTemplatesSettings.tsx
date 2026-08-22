@@ -952,6 +952,25 @@ export function MessageTemplatesSettings() {
     }
   };
 
+  // Steg 1 är komplett först när namn, händelse, minst en kanal och all text finns.
+  const templateSelectedChannels = CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel));
+  const templateFormComplete =
+    Boolean(templateForm.name.trim()) &&
+    Boolean(templateForm.trigger) &&
+    templateSelectedChannels.length > 0 &&
+    templateSelectedChannels.every((channel) => Boolean(templateForm.channelContent[channel].body.trim()));
+  // "Uppdatera mall" bara när sloten (händelse + kanal) redan har en egen mall.
+  const templateSlotExists =
+    Boolean(templateForm.trigger) &&
+    templateSelectedChannels.some((channel) =>
+      templates.some(
+        (template) =>
+          !isStandardTemplate(template) &&
+          template.channel === channel &&
+          (template.trigger ?? null) === templateForm.trigger,
+      ),
+    );
+
   const handleSaveTemplate = async () => {
     if (!user || !templateForm.name.trim() || templateForm.channels.length === 0) return;
 
