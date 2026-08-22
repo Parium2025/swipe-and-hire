@@ -1,7 +1,7 @@
 import { useCandidateActivities, CandidateActivity } from '@/hooks/useCandidateActivities';
 import { formatDistanceToNow, format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Star, StickyNote, Edit3, Activity, UserPlus, CalendarPlus, CalendarClock, CalendarX, MoveRight } from 'lucide-react';
+import { Star, StickyNote, Edit3, Activity, UserPlus, CalendarPlus, CalendarClock, CalendarX, MoveRight, FileText, MessageSquare } from 'lucide-react';
 import { STAGE_CONFIG } from '@/hooks/useMyCandidatesData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
@@ -29,6 +29,10 @@ const getActivityIcon = (type: string) => {
       return CalendarClock;
     case 'interview_cancelled':
       return CalendarX;
+    case 'application_submitted':
+      return FileText;
+    case 'candidate_contacted':
+      return MessageSquare;
     default:
       return Activity;
   }
@@ -82,6 +86,21 @@ const getActivityDescription = (activity: CandidateActivity) => {
           <span className="text-white">{stageLabel(activity.old_value)}</span>
           <span className="text-white"> till </span>
           <span className="text-white">{stageLabel(activity.new_value)}</span>
+        </span>
+      );
+    case 'application_submitted':
+      return (
+        <span>
+          <span className="font-medium text-white">Kandidaten</span>
+          <span className="text-white"> sökte tjänsten </span>
+          <span className="text-white">{activity.new_value || 'ett jobb'}</span>
+        </span>
+      );
+    case 'candidate_contacted':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> kontaktade kandidaten</span>
         </span>
       );
     case 'note_added':
