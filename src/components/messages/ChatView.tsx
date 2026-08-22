@@ -366,8 +366,10 @@ export function ChatView({
   };
 
   // File upload
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    // Reset input direkt så samma fil kan väljas igen efter ett avvisande
+    e.target.value = '';
     if (!file) return;
 
     const check = validateAttachment(file);
@@ -376,10 +378,17 @@ export function ChatView({
       return;
     }
 
+    // 🔬 Innehållskontroll: läser filens första byte och avvisar filer vars
+    // innehåll inte matchar ändelsen (t.ex. virus.exe omdöpt till rapport.pdf).
+    const contentCheck = await inspectFileContent(file);
+    if (!contentCheck.ok) {
+      toast.error(contentCheck.error!, contentCheck.description ? { description: contentCheck.description } : undefined);
+      return;
+    }
+
     setPendingFile(file);
-    // Reset input so same file can be selected again
-    e.target.value = '';
   };
+
 
   const uploadFile = async (file: File): Promise<{ url: string; type: string; name: string } | null> => {
     let payload: Blob = file;
