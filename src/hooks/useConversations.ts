@@ -1025,8 +1025,16 @@ export function useConversationMessages(conversationId: string | null) {
         ['conversation-messages', conversationId],
         (old) => old?.filter(m => m.id !== tempId) || []
       );
+      // Blockerad relation → meddelandet sparas aldrig. Var tydlig i stället för generiskt fel.
+      const message = error instanceof Error ? error.message : String((error as { message?: string })?.message ?? '');
+      if (message.includes('CONVERSATION_BLOCKED')) {
+        toast.error('Meddelandet kunde inte skickas', {
+          description: 'Konversationen är blockerad. Inga meddelanden levereras mellan er.',
+        });
+      }
       throw error;
     }
+
   }, [conversationId, user, markAsRead, queryClient]);
 
   return {
