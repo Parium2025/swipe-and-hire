@@ -897,10 +897,14 @@ export function MessageTemplatesSettings() {
     // Dubblettskydd: samma namn + kanal får bara finnas en gång, annars blir det
     // lätt två mallar för samma sak och risk för dubbla utskick.
     const nameToCheck = templateForm.name.trim().toLowerCase();
-    const duplicate = templateForm.id
+    const editedTemplate = templateForm.id ? templates.find((template) => template.id === templateForm.id) : undefined;
+    const editedBaseName = editedTemplate?.name.trim().toLowerCase().replace(/\s·\s.*$/, '');
+    const isKeepingCurrentName = Boolean(editedTemplate && editedBaseName === nameToCheck.replace(/\s·\s.*$/, ''));
+    const duplicate = isKeepingCurrentName
       ? undefined
       : templates.find(
           (template) =>
+            template.id !== templateForm.id &&
             template.name.trim().toLowerCase().replace(/\s·\s.*$/, '') === nameToCheck.replace(/\s·\s.*$/, '') &&
             selectedChannels.includes(template.channel as AutomationChannel),
         );
