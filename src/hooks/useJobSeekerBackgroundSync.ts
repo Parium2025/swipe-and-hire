@@ -6,6 +6,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { preloadWeatherLocation } from './useWeather';
 import { MY_APPLICATIONS_SELECT } from './myApplicationsShared';
+import { fetchAllPages } from '@/lib/fetchAllPages';
+
 
 const SAVED_JOBS_CACHE_KEY = 'job_seeker_saved_jobs_';
 const MY_APPLICATIONS_CACHE_KEY = 'job_seeker_applications_';
@@ -86,10 +88,18 @@ export const useJobSeekerBackgroundSync = () => {
   const preloadSavedJobs = useCallback(async (userId: string) => {
     const cacheKey = SAVED_JOBS_CACHE_KEY + userId;
 
-    const { data, error } = await supabase
-      .from('saved_jobs')
-      .select('job_id, created_at')
-      .eq('user_id', userId);
+    // Paginerat — sparade jobb kan passera 1000 utan att raderna får försvinna.
+    const { data, error } = await fetchAllPages<{ job_id: string; created_at: string }>((from, to) =>
+      supabase
+        .from('saved_jobs')
+        .select('job_id, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .order('job_id', { ascending: false })
+        .range(from, to),
+    )
+      .then((rows) => ({ data: rows, error: null as any }))
+      .catch((err) => ({ data: null as any, error: err }));
 
     if (!error && data) {
       const jobIds = new Set(data.map(item => item.job_id));

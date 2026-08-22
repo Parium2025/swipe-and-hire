@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useCallback, useRef } from 'react';
 import { imageCache } from '@/lib/imageCache';
+import { fetchAllPages } from '@/lib/fetchAllPages';
+
 import {
   MY_APPLICATIONS_SELECT,
   type MyApplication as Application,
@@ -95,15 +97,17 @@ export function useMyApplicationsCache() {
     queryFn: async () => {
       if (!user) return [];
 
-      const { data, error } = await supabase
-        .from('job_applications')
-        .select(MY_APPLICATIONS_SELECT)
-        .eq('applicant_id', user.id)
-        .order('applied_at', { ascending: false });
+      // Paginerat — utan detta kapades listan tyst vid 1000 ansökningar.
+      const apps = (await fetchAllPages<any>((from, to) =>
+        supabase
+          .from('job_applications')
+          .select(MY_APPLICATIONS_SELECT)
+          .eq('applicant_id', user.id)
+          .order('applied_at', { ascending: false })
+          .order('id', { ascending: false })
+          .range(from, to),
+      )) as Application[];
 
-      if (error) throw error;
-      
-      const apps = (data || []) as Application[];
 
       // Debounced write to localStorage (batches bursts from realtime)
       writeCacheDebounced(user.id, apps);
