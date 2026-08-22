@@ -349,6 +349,7 @@ async function dispatchLog(log: OutreachLog) {
         status: 'retrying',
         attempt_count: attempts,
         next_attempt_at: nextAt,
+        locked_until: null,
         error_message: `Försöker igen (${attempts}/${MAX_ATTEMPTS}): ${message}`,
       }).eq('id', log.id);
       return { retrying: true as const, error: message };
