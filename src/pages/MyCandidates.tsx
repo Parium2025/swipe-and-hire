@@ -537,6 +537,18 @@ const MyCandidates = () => {
     return (filteredCandidatesByStage[selectedCandidate.stage] || []).length;
   }, [selectedCandidate, filteredCandidatesByStage]);
 
+  // Grannkandidaternas porträtt förladdas så pilnavigeringen blir omedelbar.
+  const adjacentCandidateMedia = useMemo(() => {
+    if (!selectedCandidate) return undefined;
+    const stageCandidates = filteredCandidatesByStage[selectedCandidate.stage] || [];
+    const idx = stageCandidates.findIndex(c => c.id === selectedCandidate.id);
+    if (idx < 0) return undefined;
+    return [stageCandidates[idx - 1], stageCandidates[idx + 1], stageCandidates[idx - 2], stageCandidates[idx + 2]]
+      .filter(Boolean)
+      .map(c => ({ profile_image_url: c!.profile_image_url }));
+  }, [selectedCandidate, filteredCandidatesByStage]);
+
+
   /** Map MyCandidateData → ApplicationData for CandidateSwipeViewer / Dialog */
   const mapCandidateToAppData = useCallback((c: MyCandidateData): ApplicationData => ({
     id: c.application_id,
@@ -814,6 +826,8 @@ const MyCandidates = () => {
         onNavigateNext={handleNavigateNext}
         candidateIndex={candidateNavIndex}
         candidateTotal={candidateNavTotal}
+        adjacentMedia={adjacentCandidateMedia}
+
       />
 
       {/* Remove Confirmation Dialog */}

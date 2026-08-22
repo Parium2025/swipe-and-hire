@@ -9,7 +9,9 @@ import type { StageSettings } from '@/hooks/useStageSettings';
 import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useMediaUrl, prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { AVATAR_TRANSFORM, PROFILE_DIALOG_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
+
 import ProfileVideo from '@/components/ProfileVideo';
 import { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -43,12 +45,19 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/comp
 import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
 
 function useProfileImageUrl(path: string | null | undefined) {
-  return useMediaUrl(path, 'profile-image');
+  return useMediaUrl(path, 'profile-image', MEDIA_URL_TTL, PROFILE_DIALOG_TRANSFORM);
+}
+
+// Den lilla listavataren är i princip alltid redan cachad → används som
+// omedelbar placeholder så porträttet aldrig "blinkar in" vid kandidatbyte.
+function useProfileThumbUrl(path: string | null | undefined) {
+  return useMediaUrl(path, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
 }
 
 function useVideoUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-video');
 }
+
 
 interface CandidateProfileDialogProps {
   application: ApplicationData | null;
@@ -69,7 +78,10 @@ interface CandidateProfileDialogProps {
   onNavigateNext?: () => void;
   candidateIndex?: number;
   candidateTotal?: number;
+  /** Intilliggande kandidater (föregående/nästa) för förladdning av porträtt. */
+  adjacentMedia?: Array<{ profile_image_url?: string | null } | null | undefined>;
 }
+
 
 export const CandidateProfileDialog = ({
   application,
@@ -90,6 +102,8 @@ export const CandidateProfileDialog = ({
   onNavigateNext,
   candidateIndex,
   candidateTotal,
+  adjacentMedia,
+
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const { hasTeam } = useTeamMembers();
@@ -151,8 +165,26 @@ export const CandidateProfileDialog = ({
   }, [activeApplication?.job_id]);
 
   const profileImageUrl = useProfileImageUrl(activeApplication?.profile_image_url);
+  const profileThumbUrl = useProfileThumbUrl(activeApplication?.profile_image_url);
   const videoUrl = useVideoUrl(activeApplication?.video_url);
   const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
+
+  // Förladda intilliggande kandidaters porträtt (och video-URL) i bakgrunden
+  // så pil-navigeringen känns omedelbar istället för att ladda om varje gång.
+  useEffect(() => {
+    if (!open) return;
+    const paths = (adjacentMedia ?? [])
+      .map((m) => m?.profile_image_url)
+      .filter((p): p is string => !!p);
+    if (paths.length === 0) return;
+    const id = window.setTimeout(() => {
+      paths.forEach((p) => {
+        void prefetchMediaUrl(p, 'profile-image', MEDIA_URL_TTL, PROFILE_DIALOG_TRANSFORM).catch(() => {});
+      });
+    }, 150);
+    return () => window.clearTimeout(id);
+  }, [open, adjacentMedia]);
+
 
   const notesHook = useCandidateNotes({
     applicantId: activeApplication?.applicant_id || application?.applicant_id || null,
@@ -354,13 +386,23 @@ export const CandidateProfileDialog = ({
             <div className="relative">
               {isProfileVideo && videoUrl ? (
                 <div className="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
-                  <ProfileVideo videoUrl={videoUrl} coverImageUrl={profileImageUrl || undefined} userInitials={initials} className="w-full h-full" showCountdown={true} countdownVariant="circle" showProgressBar={false} />
+                  <ProfileVideo videoUrl={videoUrl} coverImageUrl={profileImageUrl || profileThumbUrl || undefined} userInitials={initials} className="w-full h-full" showCountdown={true} countdownVariant="circle" showProgressBar={false} />
                 </div>
               ) : (
                 <Avatar className="w-24 h-24 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
+                  {/* Cachad listavatar visas direkt medan högupplösta porträttet hämtas */}
+                  {!profileImageUrl && profileThumbUrl && (
+                    <AvatarImage
+                      src={profileThumbUrl}
+                      alt=""
+                      aria-hidden
+                      className="object-cover blur-[1px] scale-105"
+                    />
+                  )}
                   <AvatarImage src={profileImageUrl || ''} alt={`${displayApp.first_name} ${displayApp.last_name}`} className="object-cover" />
                   <AvatarFallback className="bg-white/10 text-white text-2xl md:text-5xl font-semibold" delayMs={1200}>{initials}</AvatarFallback>
                 </Avatar>
+
               )}
             </div>
 

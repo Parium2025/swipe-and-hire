@@ -22,6 +22,17 @@ export const PROFILE_IMAGE_TRANSFORM: ImageTransformOptions = {
   resize: 'cover',
 };
 
+/**
+ * Stora runda porträttet i kandidatprofilen (192px CSS → 2x = 384).
+ * Egen konstant så prefetch och render delar cache-nyckel.
+ */
+export const PROFILE_DIALOG_TRANSFORM: ImageTransformOptions = {
+  width: 400,
+  height: 400,
+  resize: 'cover',
+};
+
+
 /** Standard-livslängd på signerade URL:er (24h). */
 export const MEDIA_URL_TTL = 86400;
 
