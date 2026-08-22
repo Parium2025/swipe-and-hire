@@ -566,6 +566,30 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
     return Array.from(seen.values());
   }, [data]);
 
+  // Signera avatar-/videomedia direkt för de rader som faktiskt visas.
+  // Nätverkssvaret gör redan detta, men när listan kommer från localStorage
+  // (instant-load) finns inget svar att haka på — då hann korten annars visa
+  // en tom platta ~en halv sekund innan bilden dök upp.
+  const warmedMediaRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (candidates.length === 0) return;
+    const jobs: Array<Promise<unknown>> = [];
+    for (const c of candidates) {
+      const img = typeof c.profile_image_url === 'string' ? c.profile_image_url.trim() : '';
+      if (img && !warmedMediaRef.current.has(`i:${img}`)) {
+        warmedMediaRef.current.add(`i:${img}`);
+        jobs.push(prefetchMediaUrl(img, 'profile-image', 86400, AVATAR_TRANSFORM));
+      }
+      const vid = c.is_profile_video && typeof c.video_url === 'string' ? c.video_url.trim() : '';
+      if (vid && !warmedMediaRef.current.has(`v:${vid}`)) {
+        warmedMediaRef.current.add(`v:${vid}`);
+        jobs.push(prefetchMediaUrl(vid, 'profile-video'));
+      }
+    }
+    if (jobs.length > 0) void Promise.allSettled(jobs);
+  }, [candidates]);
+
+
   // Real-time subscription for my_candidates changes (all users for team sync)
   useEffect(() => {
     if (!user) return;
