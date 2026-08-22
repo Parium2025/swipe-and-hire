@@ -486,6 +486,10 @@ export function ChatView({
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
   }, []);
 
+  // Sant bara när texten i redigeringsläget skiljer sig från originalet.
+  const hasUnsavedEdit =
+    !!editingMessageId && newMessage.trim() !== editOriginalContent.trim() && newMessage.trim().length > 0;
+
   const handleSend = async () => {
     if ((!newMessage.trim() && !pendingFile) || sending) return;
 
@@ -1031,11 +1035,19 @@ export function ChatView({
             size="icon"
             aria-label={editingMessageId ? "Spara ändring" : "Skicka meddelande"}
             onClick={handleSend}
-            disabled={(!newMessage.trim() && !pendingFile) || sending}
-            className={cn(
-              "h-11 w-11 flex-shrink-0",
+            disabled={
               editingMessageId
-                ? "bg-emerald-500/20 border-emerald-500/40 hover:bg-emerald-500/30"
+                ? !hasUnsavedEdit || sending
+                : (!newMessage.trim() && !pendingFile) || sending
+            }
+            className={cn(
+              "h-11 w-11 flex-shrink-0 transition-all duration-200",
+              editingMessageId
+                // Bocken lyser upp först när något faktiskt har ändrats — suddar
+                // man tillbaka till originaltexten slocknar den igen.
+                ? hasUnsavedEdit
+                  ? "bg-emerald-500 border-emerald-400 text-white hover:bg-emerald-400 shadow-[0_0_16px_hsl(var(--primary)/0)] shadow-emerald-500/40 scale-100"
+                  : "bg-emerald-500/10 border-emerald-500/20 opacity-50"
                 : "bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
             )}
           >
