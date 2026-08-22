@@ -359,11 +359,7 @@ export function useMediaUrl(
       retryCountRef.current = 0;
       setUrl(freshSignedUrl);
       if (shouldWarmBlobCache(mediaType)) {
-        imageCache.loadImage(freshSignedUrl)
-          .then(blobUrl => {
-            if (mountedRef.current) setUrl(blobUrl);
-          })
-          .catch(() => {});
+        imageCache.loadImage(freshSignedUrl).catch(() => {});
       }
     };
 
