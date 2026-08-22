@@ -102,11 +102,10 @@ export function CandidatesTable({
   
   // ── Extracted hooks ──────────────────────────────────
   useBulkMessageSync();
-  // Förvärm porträtt + video i dialogstorlek för ALLA rader på sidan, så att
-  // varje kandidatbyte (klick eller pilnavigering) visar media direkt.
-  useCandidateRowMediaWarmup(applications);
-  // Anteckningar + aktivitetslogg för hela sidan, batchat (ej bara hover).
-  useCandidateRowDetailsWarmup(applications);
+  // EN samlad förvärmningspipeline för hela sidan:
+  // text (anteckningar/aktivitet) → media (porträtt/video) → CV-sammanfattningar.
+  useCandidatePageWarmup(applications);
+
   const { readCache, fetchForApplicant, writeCache, prefetchSingle } = useCandidateBatchPrefetch(applications);
 
   // Bulk selection state
