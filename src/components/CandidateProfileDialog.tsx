@@ -10,7 +10,7 @@ import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl, prefetchMediaUrl } from '@/hooks/useMediaUrl';
-import { AVATAR_TRANSFORM, PROFILE_DIALOG_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
+import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 
 import ProfileVideo from '@/components/ProfileVideo';
 import { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
@@ -45,7 +45,9 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/comp
 import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
 
 function useProfileImageUrl(path: string | null | undefined) {
-  return useMediaUrl(path, 'profile-image', MEDIA_URL_TTL, PROFILE_DIALOG_TRANSFORM);
+  // Ingen transform: porträttet renderas stort (192px CSS, upp till 3x på retina)
+  // och ska alltid ha originalkvalitet. Komprimering här syntes tydligt.
+  return useMediaUrl(path, 'profile-image', MEDIA_URL_TTL);
 }
 
 // Den lilla listavataren är i princip alltid redan cachad → används som
@@ -179,7 +181,7 @@ export const CandidateProfileDialog = ({
     if (paths.length === 0) return;
     const id = window.setTimeout(() => {
       paths.forEach((p) => {
-        void prefetchMediaUrl(p, 'profile-image', MEDIA_URL_TTL, PROFILE_DIALOG_TRANSFORM).catch(() => {});
+        void prefetchMediaUrl(p, 'profile-image', MEDIA_URL_TTL).catch(() => {});
       });
     }, 150);
     return () => window.clearTimeout(id);
