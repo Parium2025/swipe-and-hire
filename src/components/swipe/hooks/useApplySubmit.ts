@@ -78,6 +78,9 @@ export function useApplySubmit({
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
       const questionsSnapshot = questionsRes.data ?? [];
       const candidateProfile = candidateProfileRes.data ?? null;
+      const snapshotCvUrl = candidateProfile
+        ? candidateProfile.cv_url ?? null
+        : profile?.cv_url || null;
 
       let age: number | null = null;
       if (profile?.birth_date) {
