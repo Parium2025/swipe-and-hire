@@ -394,8 +394,9 @@ export default function IntegrityPolicyPage() {
                 spam, trakasserier, bedrägeri eller missbruk av tjänsten, vid
                 felsökning av ett rapporterat tekniskt fel, eller när lag kräver det.
                 Sådan åtkomst är begränsad till särskilt behörig personal och loggas.
-                Du kan när som helst blockera en motpart, och då stoppas alla
-                meddelanden mellan er direkt.
+                Du kan när som helst blockera en motpart. Då når inget från den
+                personen dig — varken chatt, notis eller push — förrän du själv
+                häver blockeringen.
               </p>
               <p className="mt-4">
                 Om det trots våra åtgärder skulle ske en personuppgiftsincident
