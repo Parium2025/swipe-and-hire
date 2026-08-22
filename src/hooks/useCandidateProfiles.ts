@@ -91,7 +91,8 @@ export function useCandidateProfiles(userId?: string) {
         video_url: input.video_url ?? null,
         profile_image_url: input.profile_image_url ?? null,
         is_default: makeDefault,
-        sort_order: profiles.length,
+        // Undvik kollisioner efter borttagning: alltid högsta sort_order + 1.
+        sort_order: profiles.reduce((max, p) => Math.max(max, p.sort_order ?? 0), -1) + 1,
       })
       .select('*')
       .single();
