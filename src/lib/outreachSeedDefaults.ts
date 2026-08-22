@@ -2,9 +2,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { AUTO_RULE_CHANNELS, AUTO_RULE_EVENTS, type AutoRuleChannel } from '@/lib/outreachAutoRules';
 
 /**
- * 🔛 STANDARD = ALLT PÅSLAGET
+ * 🔛 STANDARD = MEJL + PUSH PÅSLAGET, CHATT AVSTÄNGT
  *
- * Nya arbetsgivare ska ha alla automatiska utskick påslagna från start.
+ * Nya arbetsgivare får mejl och push påslaget från start. Chatt är avstängt
+ * som standard – den öppnar för dialog och ska vara ett aktivt val.
  * Sedan äger arbetsgivaren beslutet helt själv – stänger de av något så
  * skickas ingenting i den kanalen, och vi slår aldrig på det igen.
  *
@@ -103,7 +104,7 @@ async function runSeed(userId: string, organizationId: string | null): Promise<b
           template_id: id,
           delay_minutes: event.defaultDelay,
           filters: { group_id: groupId },
-          is_enabled: true,
+          is_enabled: channel !== 'chat',
         });
       }
     }
