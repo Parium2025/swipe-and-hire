@@ -1880,6 +1880,42 @@ export function MessageTemplatesSettings() {
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
+                <Label className="text-white">Händelse</Label>
+                <InfoHint text="Varje händelse kan ha en egen mall per kanal – totalt max 12. Väljer du en händelse och kanal där du redan har en egen mall skrivs den mallen över, så det aldrig blir dubbletter." />
+              </div>
+              <Select
+                value={templateForm.trigger || undefined}
+                onValueChange={(value) => setTemplateForm((prev) => ({ ...prev, trigger: value as AutoRuleTrigger }))}
+              >
+                <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                  <SelectValue placeholder="Välj händelse" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AUTO_RULE_EVENTS.map((event) => (
+                    <SelectItem key={event.trigger} value={event.trigger}>
+                      {event.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {templateForm.trigger && (
+                <p className="text-[11px] text-white md:text-xs">
+                  {CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel)).some((channel) =>
+                    templates.some(
+                      (template) =>
+                        !isStandardTemplate(template) &&
+                        template.channel === channel &&
+                        (template.trigger ?? null) === templateForm.trigger,
+                    ),
+                  )
+                    ? 'Du har redan en egen mall för den här händelsen och kanalen – den skrivs över när du sparar.'
+                    : 'Mallen ersätter Parium-standard för den här händelsen och kanalen.'}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
                 <Label className="text-white">Kanaler</Label>
                 <InfoHint text="Välj var meddelandet ska kunna skickas. Om du väljer flera kanaler skapas en version per kanal som du kan anpassa separat." />
               </div>
