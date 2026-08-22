@@ -135,7 +135,7 @@ export function useApplySubmit({
         })
         .catch((e) => console.error('❌ Confirmation email network error:', e));
 
-      if (candidateProfile?.cv_url || profile?.cv_url) {
+      if (snapshotCvUrl) {
         supabase.functions
           .invoke('generate-cv-summary', {
             body: { applicant_id: userId, job_id: jobId },
