@@ -2,7 +2,7 @@ import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButton
 import { cn } from '@/lib/utils';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Briefcase, User, Activity, StickyNote, ChevronDown, ChevronLeft, ChevronRight, X, Check } from 'lucide-react';
+import { User, Activity, StickyNote, ChevronDown, ChevronLeft, ChevronRight, X, Check } from 'lucide-react';
 import { ShareCandidateDialog } from '@/components/ShareCandidateDialog';
 import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
@@ -271,7 +271,6 @@ export const CandidateProfileDialog = ({
   const initials = `${displayApp.first_name?.[0] || ''}${displayApp.last_name?.[0] || ''}`.toUpperCase();
   const isProfileVideo = displayApp.is_profile_video && displayApp.video_url;
   const hasMultipleApplications = !!allApplications && allApplications.length > 1;
-  const showJobSelectorShell = loadingApplications || hasMultipleApplications;
 
   const notesPanelProps = {
     notes: notesHook.notes,
@@ -362,7 +361,7 @@ export const CandidateProfileDialog = ({
                 </div>
               )}
 
-              {showJobSelectorShell ? (
+              {hasMultipleApplications ? (
                 <div className="mt-2 relative w-full min-w-0">
                   <TooltipProvider delayDuration={400}>
                     <Tooltip>
@@ -374,18 +373,10 @@ export const CandidateProfileDialog = ({
                         >
                           <span className="truncate flex-1 min-w-0 text-left">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
                           <div className="flex items-center gap-1.5 shrink-0">
-                            {allApplications ? (
-                              <span className="text-xs text-white">
-                                {allApplications.length} jobb
-                              </span>
-                            ) : (
-                              <span className="h-3 w-12 rounded bg-white/15 animate-pulse" aria-hidden />
-                            )}
-                            {hasMultipleApplications ? (
-                              <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
-                            ) : (
-                              <Briefcase className="h-4 w-4 text-white/60" />
-                            )}
+                            <span className="text-xs text-white">
+                              {allApplications?.length ?? 0} jobb
+                            </span>
+                            <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
                           </div>
                         </button>
                       </TooltipTrigger>
