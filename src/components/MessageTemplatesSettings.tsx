@@ -1760,21 +1760,13 @@ export function MessageTemplatesSettings() {
                               aria-label={`Markera ${template.name}`}
                             />
                           )}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="min-w-0 flex-[1_1_12rem] cursor-default">
-                                <span className="block truncate text-base font-semibold text-white">{template.name}</span>
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              align="start"
-                              sideOffset={8}
-                              className="max-w-[280px] border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md"
-                            >
-                              <p className="whitespace-pre-wrap text-base font-semibold text-white">{template.name}</p>
-                            </TooltipContent>
-                          </Tooltip>
+                          <TruncatedTooltip
+                            as="span"
+                            full={template.name}
+                            className="block min-w-0 flex-[1_1_12rem] cursor-default truncate text-base font-semibold text-white"
+                          >
+                            {template.name}
+                          </TruncatedTooltip>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
