@@ -93,6 +93,7 @@ export function ChatView({
   const [sending, setSending] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   // Edit state
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editOriginalContent, setEditOriginalContent] = useState('');
