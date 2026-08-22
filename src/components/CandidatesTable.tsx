@@ -55,7 +55,7 @@ interface CandidatesTableProps {
   loadedCount?: number;
   onRatingUpdate?: (applicantId: string, rating: number) => void;
   /** Serversidig sortering — utan denna sorteras bara de sidor som redan hämtats */
-  onServerSortChange?: (sort: 'applied_at' | 'oldest' | 'name' | 'rating') => void;
+  onServerSortChange?: (sort: 'applied_at' | 'oldest' | 'name' | 'rating' | 'last_active' | 'last_active_oldest') => void;
 }
 
 
