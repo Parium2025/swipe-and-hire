@@ -64,6 +64,12 @@ const STANDARD_TEMPLATE_KEYS = new Set<string>([
   ),
 ]);
 
+// Alla Parium-original: både biblioteksmallarna och de som Automatiska utskick
+// skapar när en kanal slås på. Dessa är låsta och räknas aldrig som "egna mallar".
+function isStandardTemplate(template: { name: string; channel: string }) {
+  return STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
+}
+
 const TEMPLATE_DRAFT_PREFIX = 'outreach-template-draft:';
 
 
@@ -1350,10 +1356,7 @@ export function MessageTemplatesSettings() {
     setRestoringDefault(false);
   };
 
-  // Alla Parium-original: både biblioteksmallarna och de som Automatiska utskick
-  // skapar när en kanal slås på. Dessa är låsta och räknas aldrig som "egna mallar".
-  const isStandardTemplate = (template: { name: string; channel: string }) =>
-    STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
+  // (isStandardTemplate är definierad på modulnivå, se ovan)
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
   // Kanaler där arbetsgivaren har en egen aktiv mall SOM ÄR KOPPLAD till en påslagen regel.
