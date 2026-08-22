@@ -2027,15 +2027,32 @@ export function MessageTemplatesSettings() {
 
                       {channel !== 'chat' && (
                         <div className="space-y-2">
-                          <Label className="text-white">Rubrik</Label>
+                          <div className="flex items-center justify-between gap-2">
+                            <Label className="text-white">Rubrik</Label>
+                            <span
+                              className={`text-[11px] tabular-nums ${
+                                templateForm.channelContent[channel].subject.length > 60
+                                  ? 'text-amber-300'
+                                  : 'text-white/50'
+                              }`}
+                            >
+                              {templateForm.channelContent[channel].subject.length}/60
+                            </span>
+                          </div>
                           <Input
                             value={templateForm.channelContent[channel].subject}
                             onFocus={() => setActiveTemplateChannel(channel)}
                             onChange={(e) => setTemplateChannelContent(channel, 'subject', e.target.value)}
                             className="bg-white/5 border-white/10 text-white"
                           />
+                          {templateForm.channelContent[channel].subject.length > 60 && (
+                            <p className="text-[11px] leading-snug text-amber-300/90">
+                              Längre rubriker kapas i mottagarens inkorgslista. Hela rubriken skickas, men håll den gärna under 60 tecken.
+                            </p>
+                          )}
                         </div>
                       )}
+
 
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
