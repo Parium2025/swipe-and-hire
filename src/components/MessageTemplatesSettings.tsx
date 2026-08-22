@@ -70,9 +70,13 @@ const TEMPLATE_DRAFT_PREFIX = 'outreach-template-draft:';
 type TemplateForm = {
   id: string | null;
   name: string;
+  /** Händelsen mallen hör till. En egen mall per händelse + kanal (max 12 slots). */
+  trigger: AutoRuleTrigger | '';
   channels: AutomationChannel[];
   channelContent: Record<AutomationChannel, { subject: string; body: string }>;
 };
+
+type AutoRuleTrigger = (typeof AUTO_RULE_EVENTS)[number]['trigger'];
 
 type AutomationChannel = 'chat' | 'email' | 'push';
 
