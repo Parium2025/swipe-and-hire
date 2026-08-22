@@ -897,12 +897,17 @@ export function MessageTemplatesSettings() {
     // Dubblettskydd: samma namn + kanal får bara finnas en gång, annars blir det
     // lätt två mallar för samma sak och risk för dubbla utskick.
     const nameToCheck = templateForm.name.trim().toLowerCase();
-    const duplicate = templates.find(
-      (template) =>
-        template.id !== templateForm.id &&
-        template.name.trim().toLowerCase().replace(/\s·\s.*$/, '') === nameToCheck.replace(/\s·\s.*$/, '') &&
-        selectedChannels.includes(template.channel as AutomationChannel),
-    );
+    const editedTemplate = templateForm.id ? templates.find((template) => template.id === templateForm.id) : undefined;
+    const editedBaseName = editedTemplate?.name.trim().toLowerCase().replace(/\s·\s.*$/, '');
+    const isKeepingCurrentName = Boolean(editedTemplate && editedBaseName === nameToCheck.replace(/\s·\s.*$/, ''));
+    const duplicate = isKeepingCurrentName
+      ? undefined
+      : templates.find(
+          (template) =>
+            template.id !== templateForm.id &&
+            template.name.trim().toLowerCase().replace(/\s·\s.*$/, '') === nameToCheck.replace(/\s·\s.*$/, '') &&
+            selectedChannels.includes(template.channel as AutomationChannel),
+        );
 
     if (duplicate) {
       toast.error(`Du har redan en mall som heter "${duplicate.name}" för ${getOutreachChannelLabel(duplicate.channel)}. Byt namn eller redigera den befintliga.`);
@@ -1704,7 +1709,7 @@ export function MessageTemplatesSettings() {
                           )}
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="min-w-0 flex-[1_1_12rem] cursor-help">
+                              <span className="min-w-0 flex-[1_1_12rem] cursor-default">
                                 <span className="block truncate text-base font-semibold text-white">{template.name}</span>
                               </span>
                             </TooltipTrigger>
@@ -1737,7 +1742,7 @@ export function MessageTemplatesSettings() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <p
-                                      className="cursor-help break-words text-[11px] text-white md:text-xs"
+                                      className="cursor-default break-words text-[11px] text-white md:text-xs"
                                       style={isExpanded ? undefined : collapsedTextStyle}
                                     >
                                       {normalizedSubject}
