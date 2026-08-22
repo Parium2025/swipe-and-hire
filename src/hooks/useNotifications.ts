@@ -143,6 +143,44 @@ export function useNotifications() {
       .on(
         'postgres_changes',
         {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const updatedNotif = payload.new as AppNotification;
+          setNotifications(prev => {
+            const updated = prev.map(n => (n.id === updatedNotif.id ? { ...n, ...updatedNotif } : n));
+            setCache(user.id, updated);
+            setUnreadCount(updated.filter(n => !n.is_read).length);
+            return updated;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'notifications',
+        },
+        (payload) => {
+          const removed = payload.old as Partial<AppNotification>;
+          if (!removed?.id) return;
+          if (removed.user_id && removed.user_id !== user.id) return;
+          setNotifications(prev => {
+            if (!prev.some(n => n.id === removed.id)) return prev;
+            const updated = prev.filter(n => n.id !== removed.id);
+            setCache(user.id, updated);
+            setUnreadCount(updated.filter(n => !n.is_read).length);
+            return updated;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
           event: '*',
           schema: 'public',
           table: 'notification_preferences',
