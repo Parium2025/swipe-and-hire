@@ -59,7 +59,7 @@ export function mapRawToApplicationData(
     status: raw.status,
     applied_at: raw.applied_at || '',
     updated_at: raw.updated_at,
-    job_title: opts.jobTitle || 'Okänt jobb',
+    job_title: clampJobTitle(opts.jobTitle) || 'Okänt jobb',
     profile_image_url: raw.profile_image_snapshot_url || opts.fallbackProfileImageUrl || null,
     video_url: raw.video_snapshot_url || opts.fallbackVideoUrl || null,
     is_profile_video: opts.fallbackIsProfileVideo ?? null,
