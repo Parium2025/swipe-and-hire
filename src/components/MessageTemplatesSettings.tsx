@@ -1704,18 +1704,42 @@ export function MessageTemplatesSettings() {
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
+                          {!isStandard && orderedTemplates.filter((t) => t.name === template.name && t.channel === template.channel).length > 1 && (
+                            <span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-amber-200">Dubblett</span>
+                          )}
+
                         </div>
                         {template.subject && <p className="break-words text-[11px] text-white md:text-xs">{template.subject}</p>}
-                        <p className={`whitespace-pre-wrap break-words text-xs text-white md:text-sm ${expandedTemplateIds.includes(template.id) ? '' : 'line-clamp-2'}`}>{template.body}</p>
-                        {((template.body?.length ?? 0) > 90 || (template.body ?? '').includes('\n')) && (
-                          <button
-                            type="button"
-                            className="text-[11px] font-medium text-white underline underline-offset-2 md:text-xs"
-                            onClick={() => setExpandedTemplateIds((prev) => prev.includes(template.id) ? prev.filter((id) => id !== template.id) : [...prev, template.id])}
-                          >
-                            {expandedTemplateIds.includes(template.id) ? 'Visa mindre' : 'Visa hela texten'}
-                          </button>
-                        )}
+                        {(() => {
+                          const rawBody = template.body ?? '';
+                          const isExpanded = expandedTemplateIds.includes(template.id);
+                          // Förhandsvisning: slå ihop radbrytningar så de två synliga raderna
+                          // alltid innehåller riktig text (inte "Tjenare," + tom rad).
+                          const previewBody = rawBody.replace(/\s+/g, ' ').trim();
+                          const canExpand = rawBody.trim() !== previewBody || previewBody.length > 90;
+                          return (
+                            <>
+                              <p
+                                className="break-words text-xs text-white md:text-sm"
+                                style={isExpanded
+                                  ? { whiteSpace: 'pre-wrap' }
+                                  : { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                              >
+                                {isExpanded ? rawBody : previewBody}
+                              </p>
+                              {canExpand && (
+                                <button
+                                  type="button"
+                                  className="text-[11px] font-medium text-white underline underline-offset-2 md:text-xs"
+                                  onClick={() => setExpandedTemplateIds((prev) => prev.includes(template.id) ? prev.filter((id) => id !== template.id) : [...prev, template.id])}
+                                >
+                                  {isExpanded ? 'Visa mindre' : 'Visa hela texten'}
+                                </button>
+                              )}
+                            </>
+                          );
+                        })()}
+
 
                         {isStandard && (
                           <p className="text-[11px] text-white md:text-xs">Skyddad originalmall – kan inte ändras eller tas bort. Vill du ha egen text skapar du en ny mall i Steg 1.</p>
