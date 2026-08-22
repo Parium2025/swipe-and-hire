@@ -1,25 +1,22 @@
 import { motion } from 'framer-motion';
 import { useRef, useState, useLayoutEffect } from 'react';
-import { User, Users } from 'lucide-react';
+import { Briefcase, Users } from 'lucide-react';
 
-type ConversationTab = 'all' | 'candidates' | 'colleagues';
+export type ConversationTab = 'candidates' | 'colleagues';
 
 interface MessagesTabsProps {
   activeTab: ConversationTab;
   onTabChange: (tab: ConversationTab) => void;
-  totalUnreadCount: number;
   candidateUnread: number;
   colleagueUnread: number;
 }
 
-export function MessagesTabs({ 
-  activeTab, 
-  onTabChange, 
-  totalUnreadCount,
+export function MessagesTabs({
+  activeTab,
+  onTabChange,
   candidateUnread,
-  colleagueUnread 
+  colleagueUnread,
 }: MessagesTabsProps) {
-  const allRef = useRef<HTMLButtonElement>(null);
   const candidatesRef = useRef<HTMLButtonElement>(null);
   const colleaguesRef = useRef<HTMLButtonElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 0 });
@@ -27,11 +24,10 @@ export function MessagesTabs({
   useLayoutEffect(() => {
     const updateIndicator = () => {
       const refs: Record<ConversationTab, React.RefObject<HTMLButtonElement | null>> = {
-        all: allRef,
         candidates: candidatesRef,
         colleagues: colleaguesRef,
       };
-      
+
       const button = refs[activeTab]?.current;
       if (button) {
         setIndicatorStyle({
@@ -44,7 +40,7 @@ export function MessagesTabs({
     updateIndicator();
     window.addEventListener('resize', updateIndicator);
     return () => window.removeEventListener('resize', updateIndicator);
-  }, [activeTab, totalUnreadCount, candidateUnread, colleagueUnread]);
+  }, [activeTab, candidateUnread, colleagueUnread]);
 
   return (
     <div className="relative flex bg-white/5 backdrop-blur-[2px] rounded-lg p-1 border border-white/10 mb-3 gap-0.5 flex-shrink-0">
@@ -57,35 +53,21 @@ export function MessagesTabs({
           width: indicatorStyle.width,
         }}
         transition={{
-          type: "spring",
+          type: 'spring',
           stiffness: 300,
           damping: 35,
           mass: 0.8,
         }}
       />
-      
-      {/* Buttons */}
-      <button
-        ref={allRef}
-        type="button"
-        onClick={() => onTabChange('all')}
-        className="relative z-10 flex-1 py-1.5 px-3 rounded-md text-xs font-medium text-pure-white transition-colors whitespace-nowrap"
-      >
-        Alla
-        {totalUnreadCount > 0 && (
-          <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-blue-500/30 rounded-full">
-            {totalUnreadCount}
-          </span>
-        )}
-      </button>
+
       <button
         ref={candidatesRef}
         type="button"
         onClick={() => onTabChange('candidates')}
         className="relative z-10 flex-1 py-1.5 px-3 rounded-md text-xs font-medium text-pure-white transition-colors whitespace-nowrap flex items-center justify-center gap-1.5"
       >
-        <User className="h-3 w-3" />
-        Kandidater
+        <Briefcase className="h-3 w-3" />
+        Jobb
         {candidateUnread > 0 && (
           <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/40 rounded-full">
             {candidateUnread}

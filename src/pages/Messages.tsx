@@ -12,7 +12,7 @@ import { ConversationItem } from '@/components/messages/ConversationItem';
 import { SwipeableConversationItem } from '@/components/messages/SwipeableConversationItem';
 import { ChatView } from '@/components/messages/ChatView';
 import { EmptyConversationList, EmptyChatState } from '@/components/messages/EmptyStates';
-import { MessagesTabs } from '@/components/MessagesTabs';
+import { MessagesTabs, type ConversationTab } from '@/components/MessagesTabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDeleteConversation } from '@/hooks/useDeleteConversation';
 import { useBlockConversation, useBlockedUsers } from '@/hooks/useBlockConversation';
@@ -29,7 +29,16 @@ import { EmployerMessagesSkeleton } from '@/components/employer/EmployerPageSkel
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 
-type ConversationTab = 'all' | 'candidates' | 'colleagues';
+const TAB_STORAGE_KEY = 'parium:messages:tab';
+
+function readStoredTab(): ConversationTab | null {
+  try {
+    const value = localStorage.getItem(TAB_STORAGE_KEY);
+    return value === 'candidates' || value === 'colleagues' ? value : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function Messages() {
   const { user, userRole } = useAuth();
@@ -91,8 +100,18 @@ export default function Messages() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [showNewConversation, setShowNewConversation] = useState(false);
-  const [activeTab, setActiveTab] = useState<ConversationTab>(hasTeam ? 'all' : 'candidates');
+  const [activeTab, setActiveTab] = useState<ConversationTab>(() => readStoredTab() ?? 'candidates');
+
+  const handleTabChange = (tab: ConversationTab) => {
+    setActiveTab(tab);
+    try {
+      localStorage.setItem(TAB_STORAGE_KEY, tab);
+    } catch {
+      /* privat läge — ignorera */
+    }
+  };
   const deepLinkHandled = useRef(false);
+  const tabSwipeStartX = useRef<number | null>(null);
   const isMobile = useIsMobile();
 
   // Handle deep-link: /messages?conversation=<id>
@@ -118,17 +137,28 @@ export default function Messages() {
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
-  // Categorize conversations
+  // Kategorisering: databasens `kind` är facit. Äldre samtal saknar värdet
+  // och faller tillbaka på rollerna hos övriga deltagare.
   const categorizeConversation = (conv: Conversation): 'candidates' | 'colleagues' => {
+    if (conv.kind === 'internal') return 'colleagues';
     const otherMembers = (conv.members || []).filter(m => m.user_id !== user?.id);
     const roles = otherMembers.map(m => m.profile?.role).filter(Boolean);
     if (roles.includes('job_seeker')) return 'candidates';
-    if (roles.includes('employer')) return 'colleagues';
+    if (roles.includes('employer') && !conv.candidate_id && !conv.application_id) return 'colleagues';
     return 'candidates';
   };
 
   const candidateConversations = conversations.filter(c => categorizeConversation(c) === 'candidates');
   const colleagueConversations = conversations.filter(c => categorizeConversation(c) === 'colleagues');
+
+  // Öppnas ett samtal från annan flik (deep-link/ny chatt) — hoppa dit automatiskt
+  // så att listan aldrig ser tom ut medan chatten är öppen.
+  useEffect(() => {
+    if (!hasTeam || !selectedConversation) return;
+    const category = categorizeConversation(selectedConversation);
+    setActiveTab((prev) => (prev === category ? prev : category));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedConversation?.id, hasTeam]);
 
   const candidateUnread = candidateConversations.reduce((sum, c) => sum + c.unread_count, 0);
   const colleagueUnread = colleagueConversations.reduce((sum, c) => sum + c.unread_count, 0);
@@ -250,13 +280,24 @@ export default function Messages() {
         )}>
           <div className="flex-shrink-0">
             {hasTeam ? (
-              <MessagesTabs
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                totalUnreadCount={totalUnreadCount}
-                candidateUnread={candidateUnread}
-                colleagueUnread={colleagueUnread}
-              />
+              <div
+                onTouchStart={(e) => { tabSwipeStartX.current = e.touches[0].clientX; }}
+                onTouchEnd={(e) => {
+                  const start = tabSwipeStartX.current;
+                  tabSwipeStartX.current = null;
+                  if (start === null) return;
+                  const delta = e.changedTouches[0].clientX - start;
+                  if (Math.abs(delta) < 50) return;
+                  handleTabChange(delta < 0 ? 'colleagues' : 'candidates');
+                }}
+              >
+                <MessagesTabs
+                  activeTab={activeTab}
+                  onTabChange={handleTabChange}
+                  candidateUnread={candidateUnread}
+                  colleagueUnread={colleagueUnread}
+                />
+              </div>
             ) : null}
 
             <div className="relative mb-3">

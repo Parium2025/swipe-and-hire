@@ -158,7 +158,12 @@ export function NewConversationDialog({
       
       // Resolve actual user IDs (candidates store userId separately from their unique key)
       const memberUserIds = selectedContactObjects.map(c => c.userId || c.id);
-      
+
+      // Enbart kollegor → intern chatt. Blandat urval hamnar alltid i jobbspåret.
+      const isInternal =
+        selectedContactObjects.length > 0 &&
+        selectedContactObjects.every(c => c.type === 'colleague');
+
       const result = await createConversation.mutateAsync({
         memberIds: memberUserIds,
         name: isGroup ? groupName.trim() || undefined : undefined,
@@ -166,6 +171,7 @@ export function NewConversationDialog({
         initialMessage: initialMessage.trim() || undefined,
         applicationId: applicationId || null,
         jobId: jobId || null,
+        kind: isInternal ? 'internal' : 'job',
       });
 
       toast.success(result.isExisting ? 'Konversation öppnad' : 'Konversation skapad!');
