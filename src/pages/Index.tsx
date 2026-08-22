@@ -372,6 +372,8 @@ const CandidatesContent = () => {
             onContinueLoading={continueLoading}
             loadedCount={loadedCount}
             onRatingUpdate={(applicantId, rating) => updateRating.mutate({ applicantId, rating })}
+            onServerSortChange={setSortBy}
+
           />
         )}
       </div>
