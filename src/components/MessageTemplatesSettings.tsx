@@ -758,12 +758,15 @@ export function MessageTemplatesSettings() {
     group_id: group?.groupId ?? null,
     automation_ids: group?.automations.map((automation) => automation.id) ?? [],
     name: group?.primary.name ?? family.baseName,
-    // Tomt fält när mallen saknar sparad regel — användaren ska aktivt välja händelse.
+    // Sparad regel vinner. Annars ärvs händelsen från mallen (steg 1) så värdet följer med hit.
     trigger:
       group?.primary.trigger && group.primary.trigger !== 'manual_send'
         ? normalizeTimelineTrigger(group.primary.trigger)
-        : '',
+        : family.primaryTemplate.trigger && family.primaryTemplate.trigger !== 'manual_send'
+          ? normalizeTimelineTrigger(family.primaryTemplate.trigger as OutreachTrigger)
+          : '',
     channels: family.channels,
+
     recipient_type: 'candidate',
     template_ids: family.channels.reduce<Partial<Record<AutomationChannel, string>>>((acc, channel) => {
       const template = family.templatesByChannel[channel];
