@@ -1700,7 +1700,7 @@ export function MessageTemplatesSettings() {
                               aria-label={`Markera ${template.name}`}
                             />
                           )}
-                          <p className="max-w-full truncate text-sm font-semibold text-white">{template.name}</p>
+                          <p className="max-w-full truncate text-base font-semibold text-white">{template.name}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
