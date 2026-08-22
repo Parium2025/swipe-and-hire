@@ -270,12 +270,24 @@ export default function Messages() {
         )}>
           <div className="flex-shrink-0">
             {hasTeam ? (
-              <MessagesTabs
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-                candidateUnread={candidateUnread}
-                colleagueUnread={colleagueUnread}
-              />
+              <div
+                onTouchStart={(e) => { tabSwipeStartX.current = e.touches[0].clientX; }}
+                onTouchEnd={(e) => {
+                  const start = tabSwipeStartX.current;
+                  tabSwipeStartX.current = null;
+                  if (start === null) return;
+                  const delta = e.changedTouches[0].clientX - start;
+                  if (Math.abs(delta) < 50) return;
+                  handleTabChange(delta < 0 ? 'colleagues' : 'candidates');
+                }}
+              >
+                <MessagesTabs
+                  activeTab={activeTab}
+                  onTabChange={handleTabChange}
+                  candidateUnread={candidateUnread}
+                  colleagueUnread={colleagueUnread}
+                />
+              </div>
             ) : null}
 
             <div className="relative mb-3">
