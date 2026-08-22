@@ -17,6 +17,8 @@ import { prefetchCandidateNotes } from '@/hooks/useCandidateNotes';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMyCandidateApplications } from '@/hooks/useMyCandidateApplications';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { useBulkCandidateOps } from '@/hooks/useBulkCandidateOps';
 import { useCandidateLists, useActiveCandidateList, useTeamCandidateLists } from '@/hooks/useCandidateLists';
 import { CandidateListsDialog } from '@/pages/myCandidates/CandidateListsDialog';
@@ -543,11 +545,46 @@ const MyCandidates = () => {
     const stageCandidates = filteredCandidatesByStage[selectedCandidate.stage] || [];
     const idx = stageCandidates.findIndex(c => c.id === selectedCandidate.id);
     if (idx < 0) return undefined;
-    return [stageCandidates[idx - 1], stageCandidates[idx + 1], stageCandidates[idx - 2], stageCandidates[idx + 2]]
+    return [
+      stageCandidates[idx - 1], stageCandidates[idx + 1],
+      stageCandidates[idx - 2], stageCandidates[idx + 2],
+      stageCandidates[idx - 3], stageCandidates[idx + 3],
+    ]
       .filter(Boolean)
       .map(c => ({ profile_image_url: c!.profile_image_url }));
   }, [selectedCandidate, filteredCandidatesByStage]);
 
+
+  // Förladda porträtten i ORIGINALKVALITET när webbläsaren är idle.
+  // Ger samma omedelbara känsla som en komprimerad variant, utan kvalitetstapp.
+  // Hoppas över på sparläge/långsam uppkoppling.
+  useEffect(() => {
+    const conn = (navigator as any)?.connection;
+    if (conn?.saveData) return;
+    if (conn?.effectiveType && !/4g/.test(conn.effectiveType)) return;
+
+    const paths = Object.values(filteredCandidatesByStage)
+      .flat()
+      .map((c: any) => c?.profile_image_url)
+      .filter((p): p is string => !!p)
+      .slice(0, 24);
+    if (paths.length === 0) return;
+
+    let cancelled = false;
+    const run = async () => {
+      for (const path of paths) {
+        if (cancelled) return;
+        await prefetchMediaUrl(path, 'profile-image', MEDIA_URL_TTL).catch(() => {});
+      }
+    };
+    const ric = (window as any).requestIdleCallback as undefined | ((cb: () => void, o?: any) => number);
+    const handle = ric ? ric(() => void run(), { timeout: 3000 }) : window.setTimeout(() => void run(), 800);
+    return () => {
+      cancelled = true;
+      const cic = (window as any).cancelIdleCallback;
+      if (ric && cic) cic(handle); else window.clearTimeout(handle as number);
+    };
+  }, [filteredCandidatesByStage]);
 
   /** Map MyCandidateData → ApplicationData for CandidateSwipeViewer / Dialog */
   const mapCandidateToAppData = useCallback((c: MyCandidateData): ApplicationData => ({
