@@ -102,6 +102,35 @@ let jobScopeCache: { userId: string; at: number; scope: JobScope } | null = null
 let jobScopeInFlight: { userId: string; promise: Promise<JobScope> } | null = null;
 const JOB_SCOPE_TTL_MS = 60 * 1000;
 
+// PostgREST returnerar max 1000 rader per anrop. Utan paginering trunkeras
+// resultatet tyst så fort ett konto passerar 1000 annonser/ansökningar.
+const PAGE_ROWS = 1000;
+/** Max antal job_id per `in()`-filter så URL:en inte spränger längdgränsen. */
+const JOB_ID_CHUNK = 250;
+/** Hård säkerhetsspärr så en trasig query aldrig kan loopa i evighet. */
+const MAX_ROWS = 50000;
+
+async function fetchAllPages<T>(
+  build: (from: number, to: number) => PromiseLike<{ data: any; error: any }>,
+): Promise<T[]> {
+  const out: T[] = [];
+  for (let from = 0; from < MAX_ROWS; from += PAGE_ROWS) {
+    const { data, error } = await build(from, from + PAGE_ROWS - 1);
+    if (error) throw error;
+    const rows = (data || []) as T[];
+    out.push(...rows);
+    if (rows.length < PAGE_ROWS) break;
+  }
+  return out;
+}
+
+const chunk = <T,>(arr: T[], size: number): T[][] => {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+};
+
+
 export function invalidateCandidateJobScope() {
   jobScopeCache = null;
   jobScopeInFlight = null;
@@ -134,18 +163,21 @@ async function loadJobScope(userId: string): Promise<JobScope> {
     }
   }
 
-  const { data: jobs, error } = await supabase
-    .from('job_postings')
-    .select('id, title')
-    .in('employer_id', employerIds);
-
-  if (error) throw error;
+  const jobs = await fetchAllPages<{ id: string; title: string }>((from, to) =>
+    supabase
+      .from('job_postings')
+      .select('id, title')
+      .in('employer_id', employerIds)
+      .order('id', { ascending: true })
+      .range(from, to),
+  );
 
   return {
-    jobIds: (jobs || []).map((j) => j.id),
-    titleById: new Map((jobs || []).map((j) => [j.id, j.title as string])),
+    jobIds: jobs.map((j) => j.id),
+    titleById: new Map(jobs.map((j) => [j.id, j.title as string])),
   };
 }
+
 
 export async function getCandidateJobScope(userId: string): Promise<JobScope> {
   if (jobScopeCache && jobScopeCache.userId === userId && Date.now() - jobScopeCache.at < JOB_SCOPE_TTL_MS) {
@@ -185,13 +217,20 @@ export async function fetchApplicationsForApplicant(
   const scope = await getCandidateJobScope(userId);
   if (scope.jobIds.length === 0) return [];
 
-  const { data, error } = await supabase
-    .from('job_applications')
-    .select(APPLICATION_COLUMNS)
-    .eq('applicant_id', applicantId)
-    .in('job_id', scope.jobIds);
+  const data: any[] = [];
+  for (const jobIds of chunk(scope.jobIds, JOB_ID_CHUNK)) {
+    const rows = await fetchAllPages<any>((from, to) =>
+      supabase
+        .from('job_applications')
+        .select(APPLICATION_COLUMNS)
+        .eq('applicant_id', applicantId)
+        .in('job_id', jobIds)
+        .order('id', { ascending: true })
+        .range(from, to),
+    );
+    data.push(...rows);
+  }
 
-  if (error) throw error;
 
   const mapped = (data || []).map((app: any) =>
     mapRawToApplicationData(app, {
@@ -220,21 +259,23 @@ export async function fetchApplicationsForApplicants(
   const scope = await getCandidateJobScope(userId);
   if (scope.jobIds.length === 0) return result;
 
-  const CHUNK_SIZE = 200;
   const rows: any[] = [];
 
-  for (let i = 0; i < applicantIds.length; i += CHUNK_SIZE) {
-    const chunk = applicantIds.slice(i, i + CHUNK_SIZE);
-    const { data, error } = await supabase
-      .from('job_applications')
-      .select(APPLICATION_COLUMNS)
-      .in('applicant_id', chunk)
-      .in('job_id', scope.jobIds)
-      .limit(1000);
-
-    if (error) throw error;
-    if (data) rows.push(...data);
+  for (const applicantChunk of chunk(applicantIds, 200)) {
+    for (const jobIds of chunk(scope.jobIds, JOB_ID_CHUNK)) {
+      const page = await fetchAllPages<any>((from, to) =>
+        supabase
+          .from('job_applications')
+          .select(APPLICATION_COLUMNS)
+          .in('applicant_id', applicantChunk)
+          .in('job_id', jobIds)
+          .order('id', { ascending: true })
+          .range(from, to),
+      );
+      rows.push(...page);
+    }
   }
+
 
   const grouped = new Map<string, any[]>();
   for (const row of rows) {
