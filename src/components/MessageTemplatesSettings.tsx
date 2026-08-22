@@ -868,8 +868,19 @@ export function MessageTemplatesSettings() {
     return () => window.removeEventListener('resize', updateIndicator);
   }, [activeStudioTab, templates.length, automations.length, logs.length]);
 
+  // Efter sparad/uppdaterad mall ska redigeraren vara helt blank —
+  // inklusive det autosparade utkastet, annars kommer texten tillbaka.
+  const resetTemplateEditor = () => {
+    setTemplateForm(EMPTY_TEMPLATE_FORM);
+    setActiveTemplateChannel('push');
+    if (templateDraftKey) {
+      try { localStorage.removeItem(templateDraftKey); } catch { /* ignore */ }
+    }
+  };
+
   const handleSaveTemplate = async () => {
     if (!user || !templateForm.name.trim() || templateForm.channels.length === 0) return;
+
 
     const selectedChannels = CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel));
     const missingBody = selectedChannels.some((channel) => !templateForm.channelContent[channel].body.trim());
@@ -922,8 +933,8 @@ export function MessageTemplatesSettings() {
 
       toast.success('Mall uppdaterad');
         setSelectedTemplateFamilyKey(baseName);
-      setTemplateForm(EMPTY_TEMPLATE_FORM);
-      setActiveTemplateChannel('push');
+      resetTemplateEditor();
+
       await fetchStudio({ silent: true });
     } else {
       const rows = selectedChannels.map((channel) => ({
@@ -941,8 +952,8 @@ export function MessageTemplatesSettings() {
       } else {
         setSelectedTemplateFamilyKey(baseName);
         setAutomationVisibilityFilter('all');
-        setTemplateForm(EMPTY_TEMPLATE_FORM);
-        setActiveTemplateChannel('push');
+        resetTemplateEditor();
+
         await fetchStudio({ silent: true });
         goToStudioTab('automations');
         toast.success('Mall sparad — steg 2: välj när den ska skickas');
