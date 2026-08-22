@@ -134,18 +134,21 @@ async function loadJobScope(userId: string): Promise<JobScope> {
     }
   }
 
-  const { data: jobs, error } = await supabase
-    .from('job_postings')
-    .select('id, title')
-    .in('employer_id', employerIds);
-
-  if (error) throw error;
+  const jobs = await fetchAllPages<{ id: string; title: string }>((from, to) =>
+    supabase
+      .from('job_postings')
+      .select('id, title')
+      .in('employer_id', employerIds)
+      .order('id', { ascending: true })
+      .range(from, to),
+  );
 
   return {
-    jobIds: (jobs || []).map((j) => j.id),
-    titleById: new Map((jobs || []).map((j) => [j.id, j.title as string])),
+    jobIds: jobs.map((j) => j.id),
+    titleById: new Map(jobs.map((j) => [j.id, j.title as string])),
   };
 }
+
 
 export async function getCandidateJobScope(userId: string): Promise<JobScope> {
   if (jobScopeCache && jobScopeCache.userId === userId && Date.now() - jobScopeCache.at < JOB_SCOPE_TTL_MS) {
