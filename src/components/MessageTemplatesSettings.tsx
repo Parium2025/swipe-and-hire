@@ -200,9 +200,9 @@ function InfoHint({ text }: { text: string }) {
 
 function VariableChips({ channelLabel, onInsert }: { channelLabel: string; onInsert: (token: string) => void }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-2.5">
+    <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2.5">
       <div className="flex items-center gap-2">
-        <p className="text-[10px] uppercase tracking-[0.16em] text-white">Variabler · {channelLabel}</p>
+        <p className="text-[10px] uppercase tracking-[0.16em] text-white/70">Variabler · {channelLabel}</p>
         <InfoHint text="Tryck på en variabel så läggs den in i texten för just den här kanalen. Värdena fylls i automatiskt när utskicket skickas." />
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
@@ -212,10 +212,10 @@ function VariableChips({ channelLabel, onInsert }: { channelLabel: string; onIns
             type="button"
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => onInsert(`{${variable.key}}`)}
-            className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-left text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:hover:border-white/30"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.06] py-1 pl-2.5 pr-1.5 text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:transition-colors md:duration-150 md:hover:border-white/25 md:hover:bg-white/[0.1]"
           >
-            <span className="block text-[11px] font-medium">{variable.label}</span>
-            <span className="block text-[10px] text-white/70">{`{${variable.key}}`}</span>
+            <span className="text-[11px] font-medium leading-none text-white">{variable.label}</span>
+            <span className="rounded-full bg-white/10 px-1.5 py-0.5 font-mono text-[9.5px] leading-none text-white/75">{`{${variable.key}}`}</span>
           </button>
         ))}
       </div>
@@ -1814,10 +1814,17 @@ export function MessageTemplatesSettings() {
                               shape="icon"
                               className="h-8 w-8"
                               onClick={() => {
+                                // Äldre mallar saknar händelse (kolumnen är ny). Härled den från
+                                // regeln som använder mallen, annars faller vi tillbaka på ansökan.
+                                const inferredTrigger =
+                                  (template.trigger as AutoRuleTrigger | null) ??
+                                  (automations.find((automation) => automation.template_id === template.id)
+                                    ?.trigger as AutoRuleTrigger | undefined) ??
+                                  ('application_received' as AutoRuleTrigger);
                                 setTemplateForm({
                                   id: template.id,
                                   name: template.name,
-                                  trigger: (template.trigger as AutoRuleTrigger | null) ?? '',
+                                  trigger: inferredTrigger,
                                   channels: [template.channel as AutomationChannel],
                                   channelContent: {
                                     chat: {
