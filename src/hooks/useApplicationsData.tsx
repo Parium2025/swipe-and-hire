@@ -2,6 +2,7 @@ import { useInfiniteQuery, useQueryClient, useMutation } from '@tanstack/react-q
 import { safeSetItem, safeReadJsonCache } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { smartSearchCandidates } from '@/lib/smartSearch';
@@ -384,6 +385,20 @@ export const useApplicationsData = (
 
 
 
+       // Ansökans snapshot (den kandidatprofil som faktiskt användes vid ansökan).
+       // RPC:n returnerar inte dessa kolumner, så vi hämtar dem för sidans rader.
+       const snapshotById = new Map<string, any>();
+       {
+         const ids = baseData.map((item: any) => item.id);
+         if (ids.length > 0) {
+           const { data: snapRows } = await supabase
+             .from('job_applications')
+             .select('id, candidate_profile_label, profile_image_snapshot_url, video_snapshot_url')
+             .in('id', ids);
+           (snapRows || []).forEach((row: any) => snapshotById.set(row.id, row));
+         }
+       }
+
        // Fetch profile media (image, video, is_profile_video, last_active_at) via secure BATCH RPC function
        // This is a single call instead of N calls - critical for scalability with 10M+ users
        const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
@@ -462,9 +477,14 @@ export const useApplicationsData = (
 
        // Transform data: RPC returnerar redan job_title/job_occupation/rating
        const items = baseData.map((item: any) => {
-         const media =
+         const liveMedia =
            profileMediaMap[item.applicant_id] ||
            ({ profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null } as const);
+         const snap = snapshotById.get(item.id);
+         const media = resolveCandidateMedia(
+           { ...(snap || {}), applied_at: item.applied_at },
+           liveMedia,
+         );
 
          const activityLastActive = activityMap[item.applicant_id]?.last_active_at ?? null;
          const rating = ratingsMap[item.applicant_id] ?? item.rating ?? null;
@@ -477,7 +497,7 @@ export const useApplicationsData = (
            video_url: media.video_url,
            is_profile_video: media.is_profile_video,
            // Prefer activity RPC to stay 1:1 med "Mina kandidater"
-           last_active_at: activityLastActive ?? media.last_active_at,
+           last_active_at: activityLastActive ?? liveMedia.last_active_at,
            viewed_at: item.viewed_at,
            rating,
            total_count: undefined,

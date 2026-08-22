@@ -5,6 +5,7 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { clampJobTitle } from '@/lib/jobTitle';
+import { resolveCandidateMedia } from '@/lib/candidateMedia';
 
 /**
  * Shared hook for prefetching applications data.
@@ -29,7 +30,9 @@ export const usePrefetchApplications = () => {
           .select(`
             id, job_id, applicant_id, first_name, last_name, email, phone, location,
             bio, cv_url, age, employment_status, work_schedule, availability,
-            custom_answers, status, applied_at, updated_at, job_postings!inner(title)
+            custom_answers, status, applied_at, updated_at,
+            candidate_profile_label, profile_image_snapshot_url, video_snapshot_url,
+            job_postings!inner(title)
           `)
           .order('applied_at', { ascending: false })
           .range(from, to);
@@ -65,9 +68,7 @@ export const usePrefetchApplications = () => {
         });
 
         const items = baseData.map((item: any) => {
-          const media = profileMediaMap[item.applicant_id] || {
-            profile_image_url: null, video_url: null, is_profile_video: null,
-          };
+          const media = resolveCandidateMedia(item, profileMediaMap[item.applicant_id]);
           return {
             ...item,
             job_title: clampJobTitle(item.job_postings?.title) || 'Okänt jobb',

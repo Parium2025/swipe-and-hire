@@ -1,3 +1,4 @@
+import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import type { ApplicationSnapshot, ConversationMember } from '@/hooks/useConversations';
 import type { ConversationProfileData as ProfileLike } from '@/types/conversation';
 
@@ -56,9 +57,9 @@ export function getConversationDisplayName(opts: {
  * Avatar priority:
  * 1. Snapshot identity (namn) är alltid fryst.
  * 2. Snapshot-foto används när det finns.
- * 3. Saknas snapshot-foto (ansökan skapades innan snapshots, eller offline-kö)
- *    faller vi tillbaka på kandidatens live-profilbild — annars visas initialer
- *    trots att bilden finns och är åtkomlig.
+ * 3. Saknas snapshot-foto på en ansökan från snapshot-eran (t.ex. kandidatprofil
+ *    utan bild) visas initialer — kontots livebild får aldrig läcka in.
+ *    Endast äldre ansökningar utan snapshot faller tillbaka på live-profilbilden.
  * 4. Inget alls → undefined
  */
 export function getConversationAvatarProfile(
@@ -74,7 +75,8 @@ export function getConversationAvatarProfile(
       first_name: snapshot.first_name,
       last_name: snapshot.last_name,
       company_name: null,
-      profile_image_url: snapshot.profile_image_snapshot_url || liveImage,
+      profile_image_url: resolveCandidateMedia(snapshot, { profile_image_url: liveImage })
+        .profile_image_url,
       company_logo_url: null,
     };
   }

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { useAuth } from '@/hooks/useAuth';
 import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
@@ -83,6 +84,9 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
           availability,
           custom_answers,
           questions_snapshot,
+          candidate_profile_label,
+          profile_image_snapshot_url,
+          video_snapshot_url,
           status,
           applied_at,
           viewed_at,
@@ -145,7 +149,7 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
       // Combine the data
       const result: MyCandidateData[] = myCandidates.map(mc => {
         const app = appMap.get(mc.application_id);
-        const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null };
+        const media = resolveCandidateMedia(app as any, profileMediaMap[mc.applicant_id]);
         const activity = activityMap[mc.applicant_id] || { latest_application_at: null, last_active_at: null };
 
         return {

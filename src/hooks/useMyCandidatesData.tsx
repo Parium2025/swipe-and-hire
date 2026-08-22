@@ -12,6 +12,7 @@ import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { clampJobTitle } from '@/lib/jobTitle';
+import { resolveCandidateMedia } from '@/lib/candidateMedia';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -208,6 +209,7 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
           .select(`
             id, applicant_id, first_name, last_name, email, phone, location, bio,
             cv_url, age, employment_status, work_schedule, availability, custom_answers, questions_snapshot,
+            candidate_profile_label, profile_image_snapshot_url, video_snapshot_url,
             status, applied_at, viewed_at, job_postings!inner(title)
           `)
           .in('id', applicationIds);
@@ -258,7 +260,8 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
         // Combine data
         const items: MyCandidateData[] = searchResults.map((mc: any) => {
           const app = appMap.get(mc.application_id);
-          const media = profileMediaMap[mc.applicant_id] || {};
+          const liveMedia = profileMediaMap[mc.applicant_id] || {};
+          const media = resolveCandidateMedia(app as any, liveMedia);
           const activity = activityMap[mc.applicant_id] || {};
 
           return {
@@ -287,13 +290,13 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
             questions_snapshot: app?.questions_snapshot || null,
             status: app?.status || 'pending',
             job_title: clampJobTitle((app?.job_postings as any)?.title) || null,
-            profile_image_url: media.profile_image_url || null,
-            video_url: media.video_url || null,
-            is_profile_video: media.is_profile_video || null,
+            profile_image_url: media.profile_image_url,
+            video_url: media.video_url,
+            is_profile_video: media.is_profile_video,
             applied_at: app?.applied_at || null,
             viewed_at: app?.viewed_at || null,
             latest_application_at: activity.latest_application_at || null,
-            last_active_at: (activity.last_active_at ?? media.last_active_at) || null,
+            last_active_at: (activity.last_active_at ?? (liveMedia as any).last_active_at) || null,
           };
         });
 
@@ -368,6 +371,9 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
           availability,
           custom_answers,
           questions_snapshot,
+          candidate_profile_label,
+          profile_image_snapshot_url,
+          video_snapshot_url,
           status,
           applied_at,
           viewed_at,
@@ -438,7 +444,8 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
       // Combine the data
       const items: MyCandidateData[] = myCandidates.map(mc => {
         const app = appMap.get(mc.application_id);
-        const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null };
+        const liveMedia = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null };
+        const media = resolveCandidateMedia(app as any, liveMedia);
         const activity = activityMap[mc.applicant_id] || { latest_application_at: null, last_active_at: null };
 
         return {
@@ -473,7 +480,7 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
           applied_at: app?.applied_at || null,
           viewed_at: app?.viewed_at || null,
           latest_application_at: activity.latest_application_at,
-          last_active_at: activity.last_active_at ?? media.last_active_at,
+          last_active_at: activity.last_active_at ?? liveMedia.last_active_at,
         };
       });
 

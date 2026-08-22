@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
@@ -145,6 +146,9 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       work_schedule,
       availability,
       custom_answers,
+      candidate_profile_label,
+      profile_image_snapshot_url,
+      video_snapshot_url,
       status,
       applied_at,
       updated_at,
@@ -209,7 +213,8 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
 
   // Bygg items
   const items = baseData.map((item: any) => {
-    const media = profileMediaMap[item.applicant_id] || {};
+    const liveMedia = profileMediaMap[item.applicant_id] || {};
+    const media = resolveCandidateMedia(item, liveMedia);
     const activity = activityMap[item.applicant_id] || {};
     const rating = ratingsMap[item.applicant_id] ?? null;
 
@@ -217,10 +222,10 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       ...item,
       job_title: clampJobTitle(item.job_postings?.title) || 'Okänt jobb',
       job_occupation: item.job_postings?.occupation || null,
-      profile_image_url: media.profile_image_url || null,
-      video_url: media.video_url || null,
+      profile_image_url: media.profile_image_url,
+      video_url: media.video_url,
       is_profile_video: media.is_profile_video || false,
-      last_active_at: activity.last_active_at || media.last_active_at || null,
+      last_active_at: activity.last_active_at || liveMedia.last_active_at || null,
       latest_application_at: activity.latest_application_at || item.applied_at,
       rating,
       job_postings: undefined,
@@ -324,6 +329,7 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
     .select(`
       id, applicant_id, first_name, last_name, email, phone, location, bio,
       cv_url, age, employment_status, work_schedule, availability, custom_answers,
+      candidate_profile_label, profile_image_snapshot_url, video_snapshot_url,
       status, applied_at, viewed_at, job_postings!inner(title)
     `)
     .in('id', applicationIds);
@@ -367,7 +373,8 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
   // Bygg items
   const rawItems = myCandidates.map((mc) => {
     const app = appMap.get(mc.application_id);
-    const media = profileMediaMap[mc.applicant_id] || {};
+    const liveMedia = profileMediaMap[mc.applicant_id] || {};
+    const media = resolveCandidateMedia(app as any, liveMedia);
     const activity = activityMap[mc.applicant_id] || {};
 
     return {
@@ -397,10 +404,10 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
       applied_at: app?.applied_at || null,
       viewed_at: app?.viewed_at || null,
       job_title: clampJobTitle((app as any)?.job_postings?.title) || 'Okänt jobb',
-      profile_image_url: media.profile_image_url || null,
-      video_url: media.video_url || null,
+      profile_image_url: media.profile_image_url,
+      video_url: media.video_url,
       is_profile_video: media.is_profile_video || false,
-      last_active_at: activity.last_active_at || media.last_active_at || null,
+      last_active_at: activity.last_active_at || liveMedia.last_active_at || null,
       latest_application_at: activity.latest_application_at || app?.applied_at,
     };
   });
