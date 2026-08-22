@@ -521,6 +521,8 @@ export function MessageTemplatesSettings() {
   const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
+  const [expandedTemplateIds, setExpandedTemplateIds] = useState<string[]>([]);
+
   const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
   const [selectedDefaultTemplateName, setSelectedDefaultTemplateName] = useState(DEFAULT_OUTREACH_TEMPLATES[0]?.name ?? '');
   const [restoringDefault, setRestoringDefault] = useState(false);
@@ -1271,8 +1273,16 @@ export function MessageTemplatesSettings() {
     STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
-  const standardTemplates = templates.filter((template) => isStandardTemplate(template));
+  // Kanaler där arbetsgivaren redan har en egen aktiv mall — där behövs inte
+  // Parium-standarden visas, den ligger kvar i koden och används som fallback.
+  const coveredChannels = new Set(
+    customTemplates.filter((template) => template.is_active).map((template) => template.channel),
+  );
+  const standardTemplates = templates.filter(
+    (template) => isStandardTemplate(template) && !coveredChannels.has(template.channel),
+  );
   const orderedTemplates = [...customTemplates, ...standardTemplates];
+
 
 
 
@@ -1674,8 +1684,18 @@ export function MessageTemplatesSettings() {
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
                         </div>
-                        {template.subject && <p className="text-[11px] text-white md:text-xs">{template.subject}</p>}
-                        <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
+                        {template.subject && <p className="break-words text-[11px] text-white md:text-xs">{template.subject}</p>}
+                        <p className={`whitespace-pre-wrap break-words text-xs text-white md:text-sm ${expandedTemplateIds.includes(template.id) ? '' : 'line-clamp-2'}`}>{template.body}</p>
+                        {(template.body?.length ?? 0) > 120 && (
+                          <button
+                            type="button"
+                            className="text-[11px] font-medium text-white underline underline-offset-2 md:text-xs"
+                            onClick={() => setExpandedTemplateIds((prev) => prev.includes(template.id) ? prev.filter((id) => id !== template.id) : [...prev, template.id])}
+                          >
+                            {expandedTemplateIds.includes(template.id) ? 'Visa mindre' : 'Visa hela texten'}
+                          </button>
+                        )}
+
                         {isStandard && (
                           <p className="text-[11px] text-white md:text-xs">Skyddad originalmall – kan inte ändras eller tas bort. Vill du ha egen text skapar du en ny mall i Steg 1.</p>
                         )}
