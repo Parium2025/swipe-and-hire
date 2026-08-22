@@ -116,6 +116,27 @@ const JobApplication = () => {
     customAnswers: {} as Record<string, any>
   });
 
+  // Förvälj standardprofilen (en gång) och fyll i dess CV.
+  useEffect(() => {
+    if (profilePicked || candidateProfiles.length === 0) return;
+    const preferred = candidateProfiles.find(p => p.is_default) ?? null;
+    setProfilePicked(true);
+    if (preferred) {
+      setSelectedProfile(preferred);
+      if (preferred.cv_url) {
+        setFormData(prev => (prev.cvUrl ? prev : { ...prev, cvUrl: preferred.cv_url as string }));
+      }
+    }
+  }, [candidateProfiles, profilePicked]);
+
+  const handleProfileSelect = (profile: CandidateProfile | null) => {
+    setProfilePicked(true);
+    setSelectedProfile(profile);
+    setFormData(prev => ({ ...prev, cvUrl: profile?.cv_url || '' }));
+  };
+
+
+
   // Restore draft on mount
   useEffect(() => {
     if (jobId && !draftRestored) {
