@@ -1784,24 +1784,13 @@ export function MessageTemplatesSettings() {
                           return (
                             <div className="space-y-1">
                               {normalizedSubject && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <p
-                                      className="cursor-default break-words text-[11px] text-white md:text-xs"
-                                      style={isExpanded ? undefined : collapsedTextStyle}
-                                    >
-                                      {normalizedSubject}
-                                    </p>
-                                  </TooltipTrigger>
-                                  <TooltipContent
-                                    side="top"
-                                    align="start"
-                                    sideOffset={8}
-                                    className="max-w-[min(420px,calc(100vw-2rem))] border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md"
-                                  >
-                                    <p className="whitespace-pre-wrap text-xs leading-relaxed text-white">{template.subject}</p>
-                                  </TooltipContent>
-                                </Tooltip>
+                                <TruncatedTooltip
+                                  full={template.subject ?? ''}
+                                  className="cursor-default break-words text-[11px] text-white md:text-xs"
+                                  style={isExpanded ? undefined : collapsedTextStyle}
+                                >
+                                  {normalizedSubject}
+                                </TruncatedTooltip>
                               )}
                               <p
                                 className="break-words text-xs text-white"
