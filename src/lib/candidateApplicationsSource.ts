@@ -17,7 +17,14 @@ import type { ApplicationData } from '@/hooks/useApplicationsData';
  */
 
 const CACHE_PREFIX = 'candidate_apps_cache_v3_';
+/** Hur länge cachen räknas som *färsk* (ingen ny hämtning behövs). */
 const CACHE_TTL_MS = 60 * 1000;
+/**
+ * Hur länge cachen får *visas* medan en ny hämtning pågår
+ * (stale-while-revalidate). Utan detta försvann "X jobb"-badgen efter 60 s och
+ * blinkade tillbaka när svaret kom — nu ritas rätt siffra direkt.
+ */
+const CACHE_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
 // Städa bort de två gamla, nu oanvända cacheformaten en gång per session så att
 // de inte ligger kvar och äter lagringsutrymme hos befintliga användare.
@@ -52,6 +59,10 @@ const isValidEnvelope = (value: unknown): value is CachedEnvelope => {
 export const candidateAppsCacheKey = (userId: string | undefined, applicantId: string) =>
   `${CACHE_PREFIX}${userId || 'anon'}_${applicantId}`;
 
+/**
+ * Läser cachen för visning. Returnerar även äldre (stale) data upp till
+ * CACHE_MAX_AGE_MS — anroparen hämtar alltid färskt i bakgrunden ändå.
+ */
 export function readCandidateApplicationsCache(
   userId: string | undefined,
   applicantId: string,
@@ -60,11 +71,22 @@ export function readCandidateApplicationsCache(
   const key = candidateAppsCacheKey(userId, applicantId);
   const env = safeReadJsonCache<CachedEnvelope>(key, isValidEnvelope);
   if (!env || env.items.length === 0) return null;
-  if (Date.now() - env.cachedAt > CACHE_TTL_MS) {
+  if (Date.now() - env.cachedAt > CACHE_MAX_AGE_MS) {
     try { localStorage.removeItem(key); } catch { /* ignore */ }
     return null;
   }
   return env.items;
+}
+
+/** True när cachen är färsk nog att slippa en ny hämtning (prefetch-beslut). */
+export function isCandidateApplicationsCacheFresh(
+  userId: string | undefined,
+  applicantId: string,
+): boolean {
+  if (!applicantId || typeof window === 'undefined') return false;
+  const env = safeReadJsonCache<CachedEnvelope>(candidateAppsCacheKey(userId, applicantId), isValidEnvelope);
+  if (!env || env.items.length === 0) return false;
+  return Date.now() - env.cachedAt <= CACHE_TTL_MS;
 }
 
 export function writeCandidateApplicationsCache(
