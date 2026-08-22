@@ -108,7 +108,10 @@ export function useCardImage(
     imageCache
       .loadImage(resolvedUrl)
       .then((blobUrl) => {
-        if (!cancelled) setLoadedBlobUrl(blobUrl);
+        // Byt ALDRIG src på en bild som redan ritats (raw → blob tvingar en
+        // omladdning som syns som ett ryck). Blobben ligger kvar i cachen och
+        // plockas upp synkront (cachedBlobUrl) vid nästa montering.
+        if (!cancelled && !resolvedUrl) setLoadedBlobUrl(blobUrl);
       })
       .catch(() => {
         // Blob-fetch misslyckades → tillåt fallback till raw URL,
