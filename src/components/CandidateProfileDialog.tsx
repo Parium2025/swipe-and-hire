@@ -43,12 +43,19 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/comp
 import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
 
 function useProfileImageUrl(path: string | null | undefined) {
-  return useMediaUrl(path, 'profile-image');
+  return useMediaUrl(path, 'profile-image', MEDIA_URL_TTL, PROFILE_DIALOG_TRANSFORM);
+}
+
+// Den lilla listavataren är i princip alltid redan cachad → används som
+// omedelbar placeholder så porträttet aldrig "blinkar in" vid kandidatbyte.
+function useProfileThumbUrl(path: string | null | undefined) {
+  return useMediaUrl(path, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
 }
 
 function useVideoUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-video');
 }
+
 
 interface CandidateProfileDialogProps {
   application: ApplicationData | null;
