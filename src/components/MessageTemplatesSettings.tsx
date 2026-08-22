@@ -758,13 +758,12 @@ export function MessageTemplatesSettings() {
     group_id: group?.groupId ?? null,
     automation_ids: group?.automations.map((automation) => automation.id) ?? [],
     name: group?.primary.name ?? family.baseName,
-    // Sparad regel vinner. Annars ärvs händelsen från mallen (steg 1) så värdet följer med hit.
+    // Händelsen sitter ALLTID på mallen. Regeln får aldrig ha en annan trigger än sin mall —
+    // annars kan man t.ex. spara en "ansökan inkommen"-mall men trigga den på "annonsen avslutas".
     trigger:
-      group?.primary.trigger && group.primary.trigger !== 'manual_send'
-        ? normalizeTimelineTrigger(group.primary.trigger)
-        : family.primaryTemplate.trigger && family.primaryTemplate.trigger !== 'manual_send'
-          ? normalizeTimelineTrigger(family.primaryTemplate.trigger as OutreachTrigger)
-          : '',
+      family.primaryTemplate.trigger && family.primaryTemplate.trigger !== 'manual_send'
+        ? normalizeTimelineTrigger(family.primaryTemplate.trigger as OutreachTrigger)
+        : '',
     channels: family.channels,
 
     recipient_type: 'candidate',
@@ -1115,7 +1114,10 @@ export function MessageTemplatesSettings() {
       return;
     }
 
-    const selectedTrigger = automationForm.trigger;
+    // Trigger hämtas alltid från mallen så den aldrig kan avvika från regeln.
+    const selectedTrigger = selectedTemplateFamily?.primaryTemplate.trigger
+      ? normalizeTimelineTrigger(selectedTemplateFamily.primaryTemplate.trigger as OutreachTrigger)
+      : automationForm.trigger;
     if (!selectedTrigger) {
       toast.error('Välj när regeln ska skickas');
       return;
@@ -2194,16 +2196,24 @@ export function MessageTemplatesSettings() {
                   <div className="flex items-center gap-2">
                     <Label className="text-white">När ska den skickas?</Label>
                     <RequiredMark filled={Boolean(automationForm.trigger)} />
-                    <InfoHint text="Händelsen hämtas automatiskt från mallen du valde i steg 1. Du kan ändra den här om regeln ska trigga på något annat – mallen är bara texten, regeln bestämmer när." />
+                    <InfoHint text="Händelsen låses till mallen du valde i steg 1. Mall och regel hänger alltid ihop – du kan inte skicka en ansökan-text när annonsen stängs." />
                   </div>
-                  <Select value={automationForm.trigger || undefined} onValueChange={(value: AutomationForm['trigger']) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, trigger: value })); }}>
-                    <SelectTrigger className={`bg-white/5 text-white [&>svg]:text-white ${automationForm.trigger ? 'border-white/10' : 'border-red-400/40'}`}><SelectValue placeholder="Välj händelse" /></SelectTrigger>
-                    <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
-                      {OUTREACH_TRIGGER_OPTIONS.filter((option) => !['manual_send', 'interview_scheduled', 'application_no_response_14d'].includes(option.value)).map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  {selectedTemplateFamily.primaryTemplate.trigger && !selectedAutomationGroup && (
-                    <p className="text-[11px] text-white">Hämtad från mallen: {getOutreachTriggerLabel(selectedTemplateFamily.primaryTemplate.trigger as OutreachTrigger)}.</p>
+                  <div
+                    className="flex min-h-[40px] items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 text-white"
+                  >
+                    <span className="text-sm">
+                      {automationForm.trigger
+                        ? getOutreachTriggerLabel(automationForm.trigger)
+                        : 'Välj händelse i mallen först'}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/80">
+                      Från mall
+                    </span>
+                  </div>
+                  {selectedTemplateFamily.primaryTemplate.trigger && (
+                    <p className="text-[11px] text-white">
+                      Låst till mallen: {getOutreachTriggerLabel(selectedTemplateFamily.primaryTemplate.trigger as OutreachTrigger)}.
+                    </p>
                   )}
                 </div>
 
