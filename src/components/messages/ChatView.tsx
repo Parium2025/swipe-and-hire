@@ -53,6 +53,9 @@ import {
   Check,
   Bell,
   BellOff,
+  MoreVertical,
+  Trash2,
+  ShieldBan,
 } from 'lucide-react';
 
 import { format, isToday, isYesterday } from 'date-fns';
@@ -82,6 +85,9 @@ export function ChatView({
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
   const { setMuted, isUpdating: isUpdatingMute } = useMuteConversation();
+  const { deleteConversation, isDeleting } = useDeleteConversation();
+  const { blockConversation, isBlocking } = useBlockConversation();
+  const [confirmAction, setConfirmAction] = useState<'delete' | 'block' | null>(null);
 
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
