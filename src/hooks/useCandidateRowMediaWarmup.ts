@@ -67,18 +67,20 @@ export function useCandidateRowMediaWarmup(rows: RowWithMedia[] | undefined, ena
 
     let idleId: number | undefined;
     let timeoutId: number | undefined;
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      idleId = (window as unknown as {
-        requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number;
-      }).requestIdleCallback(start, { timeout: 600 });
+    const ric = (globalThis as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    }).requestIdleCallback;
+    if (typeof ric === 'function') {
+      idleId = ric(start, { timeout: 600 });
     } else {
       timeoutId = window.setTimeout(start, 200);
     }
 
     return () => {
       cancelled = true;
-      if (idleId !== undefined && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
-        (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+      const w = globalThis as unknown as { cancelIdleCallback?: (id: number) => void };
+      if (idleId !== undefined && typeof w.cancelIdleCallback === 'function') {
+        w.cancelIdleCallback(idleId);
       }
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
