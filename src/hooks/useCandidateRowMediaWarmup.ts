@@ -21,8 +21,17 @@ interface RowWithMedia {
  *  - Max 4 samtidiga hämtningar så synliga avatarer aldrig köas bort
  *  - Hoppas helt över på sparläge/2G
  */
+// Skyddsräcken vid stora volymer: listan kan innehålla hundratals rader efter
+// upprepad "fortsätt ladda". Utan tak skulle vi signera och ladda ner varje
+// video i hela listan — ren bortkastad bandbredd.
+const MAX_NEW_ROWS_PER_RUN = 30;
+const MAX_WARMED_IMAGES = 200;
+const MAX_WARMED_VIDEOS = 60;
+
 export function useCandidateRowMediaWarmup(rows: RowWithMedia[] | undefined, enabled = true) {
   const warmedRef = useRef<Set<string>>(new Set());
+  const imageCountRef = useRef(0);
+  const videoCountRef = useRef(0);
 
   useEffect(() => {
     if (!enabled || !rows || rows.length === 0) return;
@@ -32,22 +41,35 @@ export function useCandidateRowMediaWarmup(rows: RowWithMedia[] | undefined, ena
     }).connection;
     if (conn?.saveData) return;
     if (conn?.effectiveType && /(^|-)2g$/.test(conn.effectiveType)) return;
+    const slowish = conn?.effectiveType === '3g';
 
     const warmed = warmedRef.current;
     const tasks: Array<() => Promise<unknown>> = [];
+    let newRows = 0;
 
     for (const row of rows) {
+      if (newRows >= MAX_NEW_ROWS_PER_RUN) break;
+      let touched = false;
+
       const img = row?.profile_image_url?.trim();
-      if (img && !warmed.has(`full:${img}`)) {
+      if (img && !warmed.has(`full:${img}`) && imageCountRef.current < MAX_WARMED_IMAGES) {
         warmed.add(`full:${img}`);
+        imageCountRef.current += 1;
+        touched = true;
         tasks.push(() => prefetchMediaUrl(img, 'profile-image', MEDIA_URL_TTL).catch(() => {}));
       }
+
       const vid = row?.video_url?.trim();
-      if (vid && !warmed.has(`vid:${vid}`)) {
+      if (vid && !warmed.has(`vid:${vid}`) && !slowish && videoCountRef.current < MAX_WARMED_VIDEOS) {
         warmed.add(`vid:${vid}`);
+        videoCountRef.current += 1;
+        touched = true;
         tasks.push(() => prefetchMediaUrl(vid, 'profile-video').catch(() => {}));
       }
+
+      if (touched) newRows += 1;
     }
+
 
     if (tasks.length === 0) return;
 
