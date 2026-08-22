@@ -100,17 +100,23 @@ export function useBlockConversation() {
   const unblockMutation = useMutation({
     mutationFn: async (blockedId: string) => {
       if (!user) throw new Error('Not authenticated');
+      // Behåll raden med släpptidpunkt — då kan vi märka ut vad som skrevs
+      // medan blockeringen var aktiv.
       const { error } = await supabase
         .from('conversation_blocks')
-        .delete()
+        .update({ released_at: new Date().toISOString() })
         .eq('blocker_id', user.id)
-        .eq('blocked_id', blockedId);
+        .eq('blocked_id', blockedId)
+        .is('released_at', null);
       if (error) throw error;
       return blockedId;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['conversation-blocks'] });
-      toast.success('Blockeringen är hävd');
+      void queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      toast.success('Blockeringen är hävd', {
+        description: 'Chatten är tillbaka i inkorgen med allt som skrevs under tiden.',
+      });
     },
     onError: (error: Error) => {
       console.error('Failed to unblock:', error);
