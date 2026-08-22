@@ -24,12 +24,18 @@ export function useAppliedJobIds() {
     queryKey: ['applied-job-ids', user?.id],
     queryFn: async (): Promise<Set<string>> => {
       if (!user) return new Set();
-      const { data } = await supabase
-        .from('job_applications')
-        .select('job_id')
-        .eq('applicant_id', user.id);
-      return new Set((data || []).map(a => a.job_id));
+      // Paginerat: en jobbsökare kan ha hur många ansökningar som helst.
+      const rows = await fetchAllPages<{ job_id: string }>((from, to) =>
+        supabase
+          .from('job_applications')
+          .select('job_id')
+          .eq('applicant_id', user.id)
+          .order('id', { ascending: true })
+          .range(from, to),
+      );
+      return new Set(rows.map((a) => a.job_id));
     },
+
     enabled: !!user,
     staleTime: 60_000,
     gcTime: Infinity,
