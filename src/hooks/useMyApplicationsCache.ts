@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useCallback, useRef } from 'react';
 import { imageCache } from '@/lib/imageCache';
+import { fetchAllPages } from '@/lib/fetchAllPages';
+
 import {
   MY_APPLICATIONS_SELECT,
   type MyApplication as Application,
