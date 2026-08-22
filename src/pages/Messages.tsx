@@ -151,6 +151,15 @@ export default function Messages() {
   const candidateConversations = conversations.filter(c => categorizeConversation(c) === 'candidates');
   const colleagueConversations = conversations.filter(c => categorizeConversation(c) === 'colleagues');
 
+  // Öppnas ett samtal från annan flik (deep-link/ny chatt) — hoppa dit automatiskt
+  // så att listan aldrig ser tom ut medan chatten är öppen.
+  useEffect(() => {
+    if (!hasTeam || !selectedConversation) return;
+    const category = categorizeConversation(selectedConversation);
+    setActiveTab((prev) => (prev === category ? prev : category));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedConversation?.id, hasTeam]);
+
   const candidateUnread = candidateConversations.reduce((sum, c) => sum + c.unread_count, 0);
   const colleagueUnread = colleagueConversations.reduce((sum, c) => sum + c.unread_count, 0);
 
