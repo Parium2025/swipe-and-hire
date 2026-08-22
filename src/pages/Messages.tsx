@@ -29,7 +29,16 @@ import { EmployerMessagesSkeleton } from '@/components/employer/EmployerPageSkel
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 
-type ConversationTab = 'all' | 'candidates' | 'colleagues';
+const TAB_STORAGE_KEY = 'parium:messages:tab';
+
+function readStoredTab(): ConversationTab | null {
+  try {
+    const value = localStorage.getItem(TAB_STORAGE_KEY);
+    return value === 'candidates' || value === 'colleagues' ? value : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function Messages() {
   const { user, userRole } = useAuth();
