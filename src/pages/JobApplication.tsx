@@ -882,11 +882,21 @@ const JobApplication = () => {
                 </div>
               </div>
 
+              {/* Val av kandidatprofil (visas bara om användaren har sparade profiler) */}
+              {candidateProfiles.length > 0 && (
+                <CandidateProfilePicker
+                  profiles={candidateProfiles}
+                  selectedId={selectedProfile?.id ?? null}
+                  onSelect={handleProfileSelect}
+                />
+              )}
+
               {/* CV Upload */}
               <div>
                 <Label className="text-gray-900 font-medium block mb-2">
-                  Ladda upp CV <span className="text-red-500">*</span>
+                  {selectedProfile?.cv_url ? 'CV från vald profil' : 'Ladda upp CV'} <span className="text-red-500">*</span>
                 </Label>
+
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
                   <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-600">
