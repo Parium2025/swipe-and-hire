@@ -359,11 +359,7 @@ export function useMediaUrl(
       retryCountRef.current = 0;
       setUrl(freshSignedUrl);
       if (shouldWarmBlobCache(mediaType)) {
-        imageCache.loadImage(freshSignedUrl)
-          .then(blobUrl => {
-            if (mountedRef.current) setUrl(blobUrl);
-          })
-          .catch(() => {});
+        imageCache.loadImage(freshSignedUrl).catch(() => {});
       }
     };
 
@@ -416,14 +412,11 @@ export function useMediaUrl(
           setUrl(signedUrl);
         }
 
-        // Ladda blob i bakgrunden för ännu snabbare framtida laddning
+        // Värm blob-cachen i bakgrunden — men byt ALDRIG src på ett redan
+        // visat element. Ett src-byte signed → blob tvingar webbläsaren att
+        // ladda om bilden, vilket syns som en "blixt" vid kallstart.
         if (shouldWarmBlobCache(mediaType)) {
           imageCache.loadImage(signedUrl)
-            .then(blobUrl => {
-              if (mountedRef.current) {
-                setUrl(blobUrl);
-              }
-            })
             .catch(() => {
               void refreshSignedUrl().catch(() => {});
             });
@@ -457,11 +450,26 @@ export async function prefetchMediaUrl(
 ): Promise<void> {
   if (!storagePath) return;
 
+  // Ladda + avkoda bilden helt, så att första målningen aldrig kostar en
+  // dekodning (det är den som syns som ett ryck vid kallstart).
+  const decodeFully = async (src: string) => {
+    if (typeof window === 'undefined' || typeof Image === 'undefined') return;
+    try {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = src;
+      if (typeof img.decode === 'function') await img.decode();
+    } catch {
+      /* dekodning är best-effort */
+    }
+  };
+
   // Om vi redan har en cached signed URL (eller blob) → bara säkerställ blob
   const cached = getCachedUrlSync(storagePath, mediaType, transform);
   if (cached) {
-    if (shouldWarmBlobCache(mediaType) && !cached.startsWith('blob:')) {
-      await imageCache.loadImage(cached).catch(() => {});
+    if (shouldWarmBlobCache(mediaType)) {
+      if (!cached.startsWith('blob:')) await imageCache.loadImage(cached).catch(() => {});
+      await decodeFully(cached);
     }
     return;
   }
@@ -474,6 +482,7 @@ export async function prefetchMediaUrl(
     // Preloada till blob-cache (så UI kan visa direkt)
     if (shouldWarmBlobCache(mediaType)) {
       await imageCache.loadImage(signedUrl).catch(() => {});
+      await decodeFully(signedUrl);
     }
   } finally {
     // no-op: promise cleanup happens inside getOrCreateSignedUrlLoad
