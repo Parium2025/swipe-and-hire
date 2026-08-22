@@ -217,13 +217,20 @@ export async function fetchApplicationsForApplicant(
   const scope = await getCandidateJobScope(userId);
   if (scope.jobIds.length === 0) return [];
 
-  const { data, error } = await supabase
-    .from('job_applications')
-    .select(APPLICATION_COLUMNS)
-    .eq('applicant_id', applicantId)
-    .in('job_id', scope.jobIds);
+  const data: any[] = [];
+  for (const jobIds of chunk(scope.jobIds, JOB_ID_CHUNK)) {
+    const rows = await fetchAllPages<any>((from, to) =>
+      supabase
+        .from('job_applications')
+        .select(APPLICATION_COLUMNS)
+        .eq('applicant_id', applicantId)
+        .in('job_id', jobIds)
+        .order('id', { ascending: true })
+        .range(from, to),
+    );
+    data.push(...rows);
+  }
 
-  if (error) throw error;
 
   const mapped = (data || []).map((app: any) =>
     mapRawToApplicationData(app, {
