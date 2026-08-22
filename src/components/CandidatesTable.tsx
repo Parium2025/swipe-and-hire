@@ -215,7 +215,9 @@ export function CandidatesTable({
     };
 
     fetchAllApplications();
-  }, [selectedApplication?.applicant_id, selectedApplication?.id, user?.id, dialogOpen, fetchForApplicant, readCache, writeCache]);
+    // Nyckeln är kandidaten — inte den enskilda ansökan. Att byta mellan två
+    // ansökningar från samma person ska inte trigga en ny hämtning.
+  }, [selectedApplication?.applicant_id, user?.id, dialogOpen, fetchForApplicant, readCache, writeCache]);
 
   const handleRowClick = useCallback((application: ApplicationData) => {
     // On touch devices: open TikTok-style swipe viewer
