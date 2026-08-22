@@ -12,7 +12,7 @@ import { ConversationItem } from '@/components/messages/ConversationItem';
 import { SwipeableConversationItem } from '@/components/messages/SwipeableConversationItem';
 import { ChatView } from '@/components/messages/ChatView';
 import { EmptyConversationList, EmptyChatState } from '@/components/messages/EmptyStates';
-import { MessagesTabs } from '@/components/MessagesTabs';
+import { MessagesTabs, type ConversationTab } from '@/components/MessagesTabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDeleteConversation } from '@/hooks/useDeleteConversation';
 import { useBlockConversation, useBlockedUsers } from '@/hooks/useBlockConversation';
