@@ -100,7 +100,16 @@ export default function Messages() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [showNewConversation, setShowNewConversation] = useState(false);
-  const [activeTab, setActiveTab] = useState<ConversationTab>(hasTeam ? 'all' : 'candidates');
+  const [activeTab, setActiveTab] = useState<ConversationTab>(() => readStoredTab() ?? 'candidates');
+
+  const handleTabChange = (tab: ConversationTab) => {
+    setActiveTab(tab);
+    try {
+      localStorage.setItem(TAB_STORAGE_KEY, tab);
+    } catch {
+      /* privat läge — ignorera */
+    }
+  };
   const deepLinkHandled = useRef(false);
   const isMobile = useIsMobile();
 
