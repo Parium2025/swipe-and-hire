@@ -758,12 +758,15 @@ export function MessageTemplatesSettings() {
     group_id: group?.groupId ?? null,
     automation_ids: group?.automations.map((automation) => automation.id) ?? [],
     name: group?.primary.name ?? family.baseName,
-    // Tomt fält när mallen saknar sparad regel — användaren ska aktivt välja händelse.
+    // Sparad regel vinner. Annars ärvs händelsen från mallen (steg 1) så värdet följer med hit.
     trigger:
       group?.primary.trigger && group.primary.trigger !== 'manual_send'
         ? normalizeTimelineTrigger(group.primary.trigger)
-        : '',
+        : family.primaryTemplate.trigger && family.primaryTemplate.trigger !== 'manual_send'
+          ? normalizeTimelineTrigger(family.primaryTemplate.trigger as OutreachTrigger)
+          : '',
     channels: family.channels,
+
     recipient_type: 'candidate',
     template_ids: family.channels.reduce<Partial<Record<AutomationChannel, string>>>((acc, channel) => {
       const template = family.templatesByChannel[channel];
@@ -2179,25 +2182,40 @@ export function MessageTemplatesSettings() {
 
 
                 <div className="space-y-2">
-                  <Label className="text-white">Namn på regeln</Label>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-white">Namn på regeln</Label>
+                    <RequiredMark filled={Boolean(automationForm.name.trim())} />
+                    <InfoHint text="Namnet syns bara för er internt i listan över regler." />
+                  </div>
                   <Input value={automationForm.name} onChange={(e) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, name: e.target.value })); }} className="bg-white/5 border-white/10 text-white" />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white">När ska den skickas?</Label>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-white">När ska den skickas?</Label>
+                    <RequiredMark filled={Boolean(automationForm.trigger)} />
+                    <InfoHint text="Händelsen hämtas automatiskt från mallen du valde i steg 1. Du kan ändra den här om regeln ska trigga på något annat – mallen är bara texten, regeln bestämmer när." />
+                  </div>
                   <Select value={automationForm.trigger || undefined} onValueChange={(value: AutomationForm['trigger']) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, trigger: value })); }}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue placeholder="Välj händelse" /></SelectTrigger>
+                    <SelectTrigger className={`bg-white/5 text-white [&>svg]:text-white ${automationForm.trigger ? 'border-white/10' : 'border-red-400/40'}`}><SelectValue placeholder="Välj händelse" /></SelectTrigger>
                     <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
                       {OUTREACH_TRIGGER_OPTIONS.filter((option) => !['manual_send', 'interview_scheduled', 'application_no_response_14d'].includes(option.value)).map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  {selectedTemplateFamily.primaryTemplate.trigger && !selectedAutomationGroup && (
+                    <p className="text-[11px] text-white">Hämtad från mallen: {getOutreachTriggerLabel(selectedTemplateFamily.primaryTemplate.trigger as OutreachTrigger)}.</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white">{getDelayFieldLabel(automationForm.trigger)}</Label>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-white">{getDelayFieldLabel(automationForm.trigger)}</Label>
+                    <InfoHint text="Tiden sätts bara här på regeln, inte i mallen. Ändrar du den syns den direkt i Automatiska utskick." />
+                  </div>
                   <DelayField value={automationForm.delay_minutes} onChange={(next) => { setAutomationFormTouched(true); setAutomationForm((prev) => ({ ...prev, delay_minutes: next })); }} />
                   <p className="text-[11px] text-white">{getDelayFieldHint(automationForm.trigger)}</p>
                 </div>
+
 
                 <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
                   <p className="text-xs uppercase tracking-[0.16em] text-white">Kanaler som används</p>
@@ -2238,7 +2256,7 @@ export function MessageTemplatesSettings() {
                   <PillButton
                     className="px-4 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50"
                     onClick={handleSaveAutomation}
-                    disabled={savingAutomation || !automationFormHasAllTemplates || !automationForm.trigger}
+                    disabled={savingAutomation || !automationFormHasAllTemplates || !automationForm.trigger || !automationForm.name.trim()}
                   >
                     {savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                     {automationForm.id ? 'Uppdatera regel' : 'Spara regel'}
