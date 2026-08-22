@@ -265,6 +265,20 @@ export const CandidateProfileDialog = ({
     return () => window.removeEventListener('keydown', handler);
   }, [open, onNavigatePrev, onNavigateNext]);
 
+  // Tooltip visas endast när jobbtiteln faktiskt trunkeras
+  const jobTitleRef = useRef<HTMLSpanElement | null>(null);
+  const [jobTitleTruncated, setJobTitleTruncated] = useState(false);
+  useEffect(() => {
+    const el = jobTitleRef.current;
+    if (!el) { setJobTitleTruncated(false); return; }
+    const measure = () => setJobTitleTruncated(el.scrollWidth > el.clientWidth + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open, activeApplication?.job_title, application?.job_title, allApplications?.length]);
+
+
   if (!application) return null;
 
   const displayApp = activeApplication || application;
@@ -364,14 +378,14 @@ export const CandidateProfileDialog = ({
               {hasMultipleApplications ? (
                 <div className="mt-2 relative w-full min-w-0">
                   <TooltipProvider delayDuration={400}>
-                    <Tooltip>
+                    <Tooltip open={jobTitleTruncated ? undefined : false}>
                       <TooltipTrigger asChild>
                         <button
                           type="button"
                           onClick={() => hasMultipleApplications && setJobDropdownOpen(prev => !prev)}
                           className="w-full min-w-0 flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
                         >
-                          <span className="truncate flex-1 min-w-0 text-left">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
+                          <span ref={jobTitleRef} className="truncate flex-1 min-w-0 text-left">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
                           <div className="flex items-center gap-1.5 shrink-0">
                             <span className="text-xs text-white">
                               {allApplications?.length ?? 0} jobb
@@ -380,11 +394,14 @@ export const CandidateProfileDialog = ({
                           </div>
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-[min(90vw,28rem)] whitespace-normal break-words leading-snug">
-                        {displayApp.job_title || application?.job_title || 'Okänt jobb'}
-                      </TooltipContent>
+                      {jobTitleTruncated && (
+                        <TooltipContent side="bottom" className="max-w-[min(90vw,28rem)] whitespace-normal break-words leading-snug">
+                          {displayApp.job_title || application?.job_title || 'Okänt jobb'}
+                        </TooltipContent>
+                      )}
                     </Tooltip>
                   </TooltipProvider>
+
 
                   {hasMultipleApplications && jobDropdownOpen && (
                     <>
