@@ -3957,6 +3957,7 @@ export type Database = {
       }
       normalize_job_text: { Args: { t: string }; Returns: string }
       parium_norm: { Args: { t: string }; Returns: string }
+      parium_synonyms: { Args: { _tok: string }; Returns: string[] }
       purge_completed_deletion_rows: { Args: never; Returns: number }
       purge_old_email_dlq: { Args: never; Returns: number }
       purge_old_outreach_logs: { Args: never; Returns: number }
