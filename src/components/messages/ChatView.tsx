@@ -384,7 +384,9 @@ export function ChatView({
   const uploadFile = async (file: File): Promise<{ url: string; type: string; name: string } | null> => {
     let payload: Blob = file;
     let ext = file.name.split('.').pop() || 'bin';
-    let contentType = file.type || 'application/octet-stream';
+    // Härled MIME-typ från filändelsen när webbläsaren inte kan (HEIC, Pages,
+    // gamla Office-format) — annars avvisar serverkontrollen filen.
+    let contentType = resolveContentType(file) ?? file.type ?? '';
 
     // 🎬 Videor i chatten går genom exakt samma kedja som profilvideor:
     // längdgräns → 720p H.264 i enheten → blockera om filen inte går att
