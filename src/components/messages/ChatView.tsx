@@ -5,6 +5,25 @@ import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
 import { useMuteConversation } from '@/hooks/useMuteConversation';
+import { useDeleteConversation } from '@/hooks/useDeleteConversation';
+import { useBlockConversation } from '@/hooks/useBlockConversation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
 
 import { getIsOnline } from '@/lib/connectivityManager';
 import { supabase } from '@/integrations/supabase/client';
