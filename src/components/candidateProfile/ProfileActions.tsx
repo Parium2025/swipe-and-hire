@@ -124,18 +124,8 @@ export const ProfileActions = ({
 
   return (
     <div className="border-t border-white/15 pt-4 mt-4 space-y-3">
-      {quickActions.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-center text-[10px] font-medium uppercase tracking-[0.18em] text-white/70">Snabbutskick</p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {quickActions.map((action) => (
-              <Button key={action.key} onClick={action.onClick} variant={action.variant} size="sm">
-                {action.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
+
+
 
       <div className="flex flex-wrap justify-center gap-2">
         <Button onClick={onSendMessage} variant="glassPurple" size="default">
