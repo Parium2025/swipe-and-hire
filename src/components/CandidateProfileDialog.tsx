@@ -391,7 +391,7 @@ export const CandidateProfileDialog = ({
                   <ProfileVideo videoUrl={videoUrl} coverImageUrl={profileImageUrl || profileThumbUrl || undefined} userInitials={initials} className="w-full h-full" showCountdown={true} countdownVariant="circle" showProgressBar={false} />
                 </div>
               ) : (
-                <Avatar className="w-24 h-24 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
+                <Avatar key={displayApp.id} className="w-24 h-24 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
                   {/* Cachad listavatar visas direkt medan högupplösta porträttet hämtas */}
                   {!profileImageUrl && profileThumbUrl && (
                     <AvatarImage
