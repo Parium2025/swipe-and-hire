@@ -931,11 +931,14 @@ export function MessageTemplatesSettings() {
         }
       }
 
-      toast.success('Mall uppdaterad');
-        setSelectedTemplateFamilyKey(baseName);
+      setSelectedTemplateFamilyKey(baseName);
+      setAutomationVisibilityFilter('all');
       resetTemplateEditor();
 
       await fetchStudio({ silent: true });
+      goToStudioTab('automations');
+      toast.success('Mall uppdaterad — steg 2: välj när den ska skickas');
+
     } else {
       const rows = selectedChannels.map((channel) => ({
         ...createPayload(
