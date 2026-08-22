@@ -232,12 +232,13 @@ export function ChatView({
 
     (async () => {
       try {
-        // Sanitize: strip PostgREST .or() syntax chars AND escape ILIKE wildcards
-        const sanitized = debouncedQuery
-          .replace(/[,().\\]/g, '')   // PostgREST syntax
+        // Escapa ILIKE-wildcards men behåll tecken som punkt, komma och parenteser —
+        // värdet citeras i .or() så PostgREST-syntaxen inte krockar med innehållet.
+        const escaped = debouncedQuery
+          .replace(/\\/g, '\\\\')     // backslash först
           .replace(/%/g, '\\%')       // ILIKE wildcard
           .replace(/_/g, '\\_');      // ILIKE single-char wildcard
-        if (!sanitized.trim()) {
+        if (!escaped.trim()) {
           if (!cancelled) {
             setDbSearchResultIds([]);
             setSearchMatchIds([]);
@@ -245,13 +246,15 @@ export function ChatView({
           }
           return;
         }
-        const pattern = `%${sanitized}%`;
+        // Citerat värde: dubbelcitat inuti måste escapas för PostgREST.
+        const pattern = `"%${escaped.replace(/"/g, '\\"')}%"`;
         const { data, error } = await supabase
           .from('conversation_messages')
           .select('id')
           .eq('conversation_id', conversation.id)
           .eq('is_system_message', false)
           .or(`content.ilike.${pattern},attachment_name.ilike.${pattern}`)
+
           .order('created_at', { ascending: true });
 
         if (cancelled) return;
