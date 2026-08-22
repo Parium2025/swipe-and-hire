@@ -565,6 +565,41 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          conversation_id: string | null
+          created_at: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_blocks_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_members: {
         Row: {
           conversation_id: string
@@ -3790,6 +3825,7 @@ export type Database = {
         Args: { _counts: number[]; _job_ids: string[] }
         Returns: undefined
       }
+      is_blocked_pair: { Args: { _a: string; _b: string }; Returns: boolean }
       is_conversation_admin: {
         Args: { p_conversation_id: string }
         Returns: boolean

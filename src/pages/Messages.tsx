@@ -15,6 +15,9 @@ import { EmptyConversationList, EmptyChatState } from '@/components/messages/Emp
 import { MessagesTabs } from '@/components/MessagesTabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDeleteConversation } from '@/hooks/useDeleteConversation';
+import { useBlockConversation, useBlockedUsers } from '@/hooks/useBlockConversation';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 import { getConversationDisplayName, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
@@ -58,6 +61,30 @@ export default function Messages() {
   }, [isLoading, conversations.length]);
 
   const { deleteConversation, isDeleting } = useDeleteConversation();
+  const { data: blockedUsers = [] } = useBlockedUsers();
+  const { unblockUser, isUnblocking } = useBlockConversation();
+  const blockedIds = blockedUsers.map((b) => b.blocked_id);
+  const { data: blockedNames = {} } = useQuery({
+    queryKey: ['blocked-user-names', blockedIds.join(',')],
+    enabled: blockedIds.length > 0,
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<Record<string, string>> => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, company_name, role')
+        .in('user_id', blockedIds);
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data || []).forEach((p) => {
+        const name =
+          p.role === 'employer' && p.company_name
+            ? p.company_name
+            : `${p.first_name || ''} ${p.last_name || ''}`.trim();
+        map[p.user_id] = name || 'Användare';
+      });
+      return map;
+    },
+  });
   const { hasTeam } = useTeamMembers();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -240,7 +267,33 @@ export default function Messages() {
                 className="bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white"
               />
             </div>
+
+            {blockedUsers.length > 0 && (
+              <div className="mb-3 rounded-xl border border-white/10 bg-white/5 p-3">
+                <p className="mb-2 text-xs font-semibold text-white">
+                  Blockerade ({blockedUsers.length}) — inga meddelanden kan skickas mellan er
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {blockedUsers.map((block) => (
+                    <div key={block.id} className="flex items-center justify-between gap-2">
+                      <span className="min-w-0 break-words text-xs text-white">
+                        {blockedNames[block.blocked_id] || 'Användare'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => unblockUser(block.blocked_id)}
+                        disabled={isUnblocking}
+                        className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-xs text-white transition-colors disabled:opacity-50 md:hover:bg-white/20"
+                      >
+                        Häv
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+
 
           {/* Conversation list */}
           <div className="relative flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10">

@@ -5,6 +5,25 @@ import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
 import { useMuteConversation } from '@/hooks/useMuteConversation';
+import { useDeleteConversation } from '@/hooks/useDeleteConversation';
+import { useBlockConversation } from '@/hooks/useBlockConversation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
 
 import { getIsOnline } from '@/lib/connectivityManager';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,6 +53,9 @@ import {
   Check,
   Bell,
   BellOff,
+  MoreVertical,
+  Trash2,
+  ShieldBan,
 } from 'lucide-react';
 
 import { format, isToday, isYesterday } from 'date-fns';
@@ -63,6 +85,9 @@ export function ChatView({
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
   const { setMuted, isUpdating: isUpdatingMute } = useMuteConversation();
+  const { deleteConversation, isDeleting } = useDeleteConversation();
+  const { blockConversation, isBlocking } = useBlockConversation();
+  const [confirmAction, setConfirmAction] = useState<'delete' | 'block' | null>(null);
 
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -630,7 +655,72 @@ export function ChatView({
         >
           <Search className="h-4 w-4" />
         </button>
+
+        {/* Fler åtgärder: radera / blockera permanent */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Fler alternativ för konversationen"
+              className="p-2 rounded-full text-pure-white transition-colors md:hover:bg-white/10"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuItem onSelect={() => setConfirmAction('delete')}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Radera chatten
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => setConfirmAction('block')}
+              className="text-destructive focus:text-destructive"
+            >
+              <ShieldBan className="mr-2 h-4 w-4" />
+              Blockera & radera permanent
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
+
+      <AlertDialog open={confirmAction !== null} onOpenChange={(open) => !open && setConfirmAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction === 'block' ? 'Blockera och radera permanent?' : 'Radera chatten?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction === 'block'
+                ? 'Konversationen tas bort ur din inkorg och inga meddelanden kan längre skickas mellan er — varken chatt, notis eller push. Du kan häva blockeringen senare i inställningarna.'
+                : 'Konversationen försvinner ur din inkorg. Motparten kan fortfarande skriva, och då dyker chatten upp igen.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isDeleting || isBlocking}
+              className={confirmAction === 'block' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : undefined}
+              onClick={() => {
+                if (confirmAction === 'block') {
+                  blockConversation({
+                    conversationId: conversation.id,
+                    userIds: conversation.members
+                      .map((m) => m.user_id)
+                      .filter((id) => id !== currentUserId),
+                  });
+                } else {
+                  deleteConversation(conversation.id);
+                }
+                setConfirmAction(null);
+                onBack();
+              }}
+            >
+              {confirmAction === 'block' ? 'Blockera permanent' : 'Radera'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       {conversation.is_muted && (
         <div className="flex items-start gap-2 border-b border-white/10 bg-white/5 px-4 py-2">

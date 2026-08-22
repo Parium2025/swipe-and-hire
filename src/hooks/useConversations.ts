@@ -594,7 +594,59 @@ export function useConversations() {
           }, 400);
         }
       )
+      // 🔄 Multi-device-synk: läsmarkering, tystning och borttagning av
+      //    egna medlemsrader speglas direkt på alla inloggade enheter.
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversation_members',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const row = payload.new as {
+            conversation_id?: string;
+            last_read_at?: string | null;
+            muted_at?: string | null;
+          };
+          if (!row?.conversation_id) return;
+
+          queryClient.setQueryData<Conversation[]>(['conversations', user.id], (prev) => {
+            if (!prev) return prev;
+            return prev.map((conv) => {
+              if (conv.id !== row.conversation_id) return conv;
+              const lastMessageAt = conv.last_message?.created_at || conv.last_message_at;
+              const isRead =
+                !!row.last_read_at &&
+                (!lastMessageAt || new Date(row.last_read_at) >= new Date(lastMessageAt));
+              return {
+                ...conv,
+                is_muted: !!row.muted_at,
+                unread_count: isRead ? 0 : conv.unread_count,
+              };
+            });
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'conversation_members',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const row = payload.old as { conversation_id?: string };
+          if (!row?.conversation_id) return;
+          queryClient.setQueryData<Conversation[]>(['conversations', user.id], (prev) =>
+            prev ? prev.filter((conv) => conv.id !== row.conversation_id) : prev
+          );
+        }
+      )
       .subscribe();
+
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -973,8 +1025,16 @@ export function useConversationMessages(conversationId: string | null) {
         ['conversation-messages', conversationId],
         (old) => old?.filter(m => m.id !== tempId) || []
       );
+      // Blockerad relation → meddelandet sparas aldrig. Var tydlig i stället för generiskt fel.
+      const message = error instanceof Error ? error.message : String((error as { message?: string })?.message ?? '');
+      if (message.includes('CONVERSATION_BLOCKED')) {
+        toast.error('Meddelandet kunde inte skickas', {
+          description: 'Konversationen är blockerad. Inga meddelanden levereras mellan er.',
+        });
+      }
       throw error;
     }
+
   }, [conversationId, user, markAsRead, queryClient]);
 
   return {
