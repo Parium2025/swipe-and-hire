@@ -162,6 +162,16 @@ export function ChatView({
   }, [conversation.id, conversation.unread_count, markAsRead]);
 
   // Reset scroll tracking when switching conversation
+  /** Stänger sökfältet och nollställer alla träffar. */
+  const closeSearch = useCallback(() => {
+    setShowSearch(false);
+    setSearchQuery('');
+    setDebouncedQuery('');
+    setSearchMatchIds([]);
+    setDbSearchResultIds([]);
+    setOlderMatchCount(0);
+  }, []);
+
   useEffect(() => {
     isNearBottomRef.current = true;
     prevMessageCountRef.current = 0;
