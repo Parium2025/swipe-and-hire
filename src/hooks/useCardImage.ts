@@ -136,7 +136,6 @@ export function useCardImage(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
       if (e.currentTarget.src.startsWith('blob:')) {
         if (resolvedUrl) imageCache.evict(resolvedUrl);
-        setBlobFailed(true);
         return;
       }
       // Transformerad URL kunde inte renderas → visa originalbilden istället
