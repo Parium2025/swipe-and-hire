@@ -442,7 +442,10 @@ export function useMediaUrl(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storagePath, mediaType, expiresInSeconds, cachedUrl, transformKey, retryNonce]);
 
-  return url;
+  // Effekten ovan rensar state efter render. Returnera därför aldrig den
+  // föregående kandidatens URL ens under den första painten när den nya
+  // posten uttryckligen saknar media.
+  return storagePath ? url : null;
 }
 
 // Prefetch/prime: seed signed-url cache + blob-cache så avatars kan vara "bam" när man öppnar /candidates
