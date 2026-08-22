@@ -448,9 +448,8 @@ export function CandidatesTable({
   }, [selectedRecipientApplications, user, onSelectionModeChange, queryClient]);
 
   // --- Sorting ---
-  // Sorteringen körs i databasen (hela listan), inte bara på de sidor som råkar
-  // vara nedladdade. "Senaste aktivitet" saknar serversortering och sorterar
-  // därför fortfarande de inlästa raderna.
+  // All sortering körs i databasen (hela listan), inte bara på de sidor som
+  // råkar vara nedladdade — inklusive "Senaste aktivitet".
   const applyServerSort = useCallback(
     (field: SortField, direction: SortDirection) => {
       if (!onServerSortChange) return;
@@ -458,6 +457,9 @@ export function CandidatesTable({
       if (field === 'rating' && direction) return onServerSortChange('rating');
       if (field === 'applied_at' && direction) {
         return onServerSortChange(direction === 'asc' ? 'oldest' : 'applied_at');
+      }
+      if (field === 'last_active_at' && direction) {
+        return onServerSortChange(direction === 'asc' ? 'last_active_oldest' : 'last_active');
       }
       onServerSortChange('applied_at');
     },
@@ -473,7 +475,7 @@ export function CandidatesTable({
     }
     setSortField(nextField);
     setSortDirection(nextDirection);
-    if (field !== 'last_active_at') applyServerSort(nextField, nextDirection);
+    applyServerSort(nextField, nextDirection);
   }, [sortField, sortDirection, applyServerSort]);
 
 
