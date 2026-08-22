@@ -299,6 +299,10 @@ export function useSessionManager(
     const token = sessionTokenRef.current;
     if (!token || !userId || signOutInProgress) return;
 
+    // Skip while no valid auth token exists — an anon RPC call is rejected by the DB
+    const heartbeatTokenOk = await ensureFreshToken();
+    if (!heartbeatTokenOk) return;
+
     try {
       const { data: isValid } = await supabase.rpc('heartbeat_session', {
         p_session_token: token,
