@@ -416,14 +416,11 @@ export function useMediaUrl(
           setUrl(signedUrl);
         }
 
-        // Ladda blob i bakgrunden för ännu snabbare framtida laddning
+        // Värm blob-cachen i bakgrunden — men byt ALDRIG src på ett redan
+        // visat element. Ett src-byte signed → blob tvingar webbläsaren att
+        // ladda om bilden, vilket syns som en "blixt" vid kallstart.
         if (shouldWarmBlobCache(mediaType)) {
           imageCache.loadImage(signedUrl)
-            .then(blobUrl => {
-              if (mountedRef.current) {
-                setUrl(blobUrl);
-              }
-            })
             .catch(() => {
               void refreshSignedUrl().catch(() => {});
             });
