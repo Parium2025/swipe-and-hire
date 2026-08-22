@@ -59,6 +59,10 @@ const isValidEnvelope = (value: unknown): value is CachedEnvelope => {
 export const candidateAppsCacheKey = (userId: string | undefined, applicantId: string) =>
   `${CACHE_PREFIX}${userId || 'anon'}_${applicantId}`;
 
+/**
+ * Läser cachen för visning. Returnerar även äldre (stale) data upp till
+ * CACHE_MAX_AGE_MS — anroparen hämtar alltid färskt i bakgrunden ändå.
+ */
 export function readCandidateApplicationsCache(
   userId: string | undefined,
   applicantId: string,
@@ -67,11 +71,22 @@ export function readCandidateApplicationsCache(
   const key = candidateAppsCacheKey(userId, applicantId);
   const env = safeReadJsonCache<CachedEnvelope>(key, isValidEnvelope);
   if (!env || env.items.length === 0) return null;
-  if (Date.now() - env.cachedAt > CACHE_TTL_MS) {
+  if (Date.now() - env.cachedAt > CACHE_MAX_AGE_MS) {
     try { localStorage.removeItem(key); } catch { /* ignore */ }
     return null;
   }
   return env.items;
+}
+
+/** True när cachen är färsk nog att slippa en ny hämtning (prefetch-beslut). */
+export function isCandidateApplicationsCacheFresh(
+  userId: string | undefined,
+  applicantId: string,
+): boolean {
+  if (!applicantId || typeof window === 'undefined') return false;
+  const env = safeReadJsonCache<CachedEnvelope>(candidateAppsCacheKey(userId, applicantId), isValidEnvelope);
+  if (!env || env.items.length === 0) return false;
+  return Date.now() - env.cachedAt <= CACHE_TTL_MS;
 }
 
 export function writeCandidateApplicationsCache(
