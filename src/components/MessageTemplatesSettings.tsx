@@ -952,8 +952,8 @@ export function MessageTemplatesSettings() {
       } else {
         setSelectedTemplateFamilyKey(baseName);
         setAutomationVisibilityFilter('all');
-        setTemplateForm(EMPTY_TEMPLATE_FORM);
-        setActiveTemplateChannel('push');
+        resetTemplateEditor();
+
         await fetchStudio({ silent: true });
         goToStudioTab('automations');
         toast.success('Mall sparad — steg 2: välj när den ska skickas');
