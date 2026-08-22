@@ -100,6 +100,7 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
         const byApplicant = new Map<string, CandidateActivity[]>();
         for (const id of pending) byApplicant.set(id, []);
         for (const a of activities || []) {
+          if (a.activity_type === 'stage_changed') continue;
           const list = byApplicant.get(a.applicant_id);
           if (!list || list.length >= 50) continue;
           list.push({

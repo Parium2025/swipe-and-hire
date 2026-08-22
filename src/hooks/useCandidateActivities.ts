@@ -62,6 +62,7 @@ async function fetchActivitiesQueryFn(applicantId: string): Promise<CandidateAct
     .from('candidate_activities')
     .select('*')
     .eq('applicant_id', applicantId)
+    .neq('activity_type', 'stage_changed')
     .order('created_at', { ascending: false })
     .limit(50);
 
