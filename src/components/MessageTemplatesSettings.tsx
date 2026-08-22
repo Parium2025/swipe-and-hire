@@ -1704,7 +1704,9 @@ export function MessageTemplatesSettings() {
                           )}
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <p className="max-w-full cursor-pointer truncate text-base font-semibold text-white">{template.name}</p>
+                              <span className="min-w-0 flex-[1_1_12rem] cursor-help">
+                                <span className="block truncate text-base font-semibold text-white">{template.name}</span>
+                              </span>
                             </TooltipTrigger>
                             <TooltipContent
                               side="top"
@@ -1723,16 +1725,37 @@ export function MessageTemplatesSettings() {
                           )}
 
                         </div>
-                        {template.subject && <p className="break-words text-[11px] text-white md:text-xs">{template.subject}</p>}
                         {(() => {
                           const isExpanded = expandedTemplateIds.has(template.id);
                           const normalizedBody = (template.body ?? '').replace(/\s+/g, ' ').trim();
-                          const needsExpand = normalizedBody.length > 90 || (template.body ?? '').includes('\n');
+                          const normalizedSubject = (template.subject ?? '').replace(/\s+/g, ' ').trim();
+                          const needsExpand = normalizedBody.length > 90 || (template.body ?? '').includes('\n') || normalizedSubject.length > 90;
+                          const collapsedTextStyle = { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as const;
                           return (
                             <div className="space-y-1">
+                              {normalizedSubject && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <p
+                                      className="cursor-help break-words text-[11px] text-white md:text-xs"
+                                      style={isExpanded ? undefined : collapsedTextStyle}
+                                    >
+                                      {normalizedSubject}
+                                    </p>
+                                  </TooltipTrigger>
+                                  <TooltipContent
+                                    side="top"
+                                    align="start"
+                                    sideOffset={8}
+                                    className="max-w-[min(420px,calc(100vw-2rem))] border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md"
+                                  >
+                                    <p className="whitespace-pre-wrap text-xs leading-relaxed text-white">{template.subject}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
                               <p
                                 className="break-words text-xs text-white"
-                                style={isExpanded ? undefined : { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                                style={isExpanded ? undefined : collapsedTextStyle}
                               >
                                 {normalizedBody}
                               </p>
@@ -1747,7 +1770,7 @@ export function MessageTemplatesSettings() {
                                       return next;
                                     });
                                   }}
-                                  className="text-xs text-white/70 underline-offset-2 hover:text-white hover:underline"
+                                  className="text-xs text-white underline-offset-2 hover:underline"
                                 >
                                   {isExpanded ? 'Visa mindre' : 'Visa hela texten'}
                                 </button>
