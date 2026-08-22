@@ -897,25 +897,42 @@ const JobApplication = () => {
                   {selectedProfile?.cv_url ? 'CV från vald profil' : 'Ladda upp CV'} <span className="text-red-500">*</span>
                 </Label>
 
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
-                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">
-                    Dra en fil hit eller <span className="text-blue-600 underline">ladda upp den</span>
-                  </p>
-                  <FileUpload
-                    questionType="document"
-                    acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain']}
-                    maxFileSize={50 * 1024 * 1024}
-                    onFileUploaded={(url, fileName) => {
-                      handleInputChange('cvUrl', url);
-                      toast({
-                        title: "CV uppladdad",
-                        description: `${fileName} har laddats upp`
-                      });
-                    }}
-                    onFileRemoved={() => handleInputChange('cvUrl', '')}
-                  />
-                </div>
+                {selectedProfile?.cv_url && formData.cvUrl === selectedProfile.cv_url ? (
+                  <div className="flex items-center gap-3 rounded-lg border border-gray-300 bg-gray-50 p-4">
+                    <FileText className="h-5 w-5 shrink-0 text-gray-500" />
+                    <span className="min-w-0 flex-1 break-words text-sm text-gray-900">
+                      {selectedProfile.cv_filename || 'CV från profilen'} ({selectedProfile.label})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange('cvUrl', '')}
+                      className="shrink-0 text-sm text-blue-600 underline"
+                    >
+                      Byt CV
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-600">
+                      Dra en fil hit eller <span className="text-blue-600 underline">ladda upp den</span>
+                    </p>
+                    <FileUpload
+                      questionType="document"
+                      acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain']}
+                      maxFileSize={50 * 1024 * 1024}
+                      onFileUploaded={(url, fileName) => {
+                        handleInputChange('cvUrl', url);
+                        toast({
+                          title: "CV uppladdad",
+                          description: `${fileName} har laddats upp`
+                        });
+                      }}
+                      onFileRemoved={() => handleInputChange('cvUrl', '')}
+                    />
+                  </div>
+                )}
+
               </div>
 
               {/* Additional Documents */}
