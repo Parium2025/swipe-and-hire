@@ -3,6 +3,7 @@ import { fetchCachedProfile, readPersistentCache, writePersistentCache } from '@
 import { measurePerformance } from '@/lib/realtimePerformance';
 import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { useAuth } from '@/hooks/useAuth';
 
 // Types for criterion results
@@ -181,20 +182,21 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
 
   // Combine all data
   return applicationsData.map((app) => {
-    const media = mediaByApplicant.get(app.applicant_id) || { profile_image_url: null, video_url: null, is_profile_video: false, city: null };
+    const liveMedia = mediaByApplicant.get(app.applicant_id) || { profile_image_url: null, video_url: null, is_profile_video: false, city: null };
+    const media = resolveCandidateMedia(app as any, liveMedia);
     const evalId = evaluationByApplicant.get(app.applicant_id);
     const criterionResults = evalId ? resultsByEvaluation.get(evalId) || [] : [];
     const activity = activityByApplicant.get(app.applicant_id);
 
     return {
       ...app,
-      profile_image_url: media.profile_image_url || null,
-      video_url: media.video_url || null,
+      profile_image_url: media.profile_image_url,
+      video_url: media.video_url,
       is_profile_video: media.is_profile_video || false,
       rating: ratingsByApplicant.get(app.applicant_id) || 0,
       criterionResults,
       last_active_at: activity?.last_active_at || null,
-      city: media.city || null,
+      city: liveMedia.city || null,
     } as JobApplication;
   });
 }
