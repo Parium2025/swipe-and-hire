@@ -122,6 +122,59 @@ type TestRecipient = {
   email: string;
 };
 
+/** Visar tooltip endast när innehållet faktiskt är avklippt (overflow). */
+function TruncatedTooltip({
+  full,
+  className,
+  style,
+  children,
+  as = 'p',
+}: {
+  full: string;
+  className?: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+  as?: 'p' | 'span';
+}) {
+  const ref = useRef<HTMLElement | null>(null);
+  const [overflowing, setOverflowing] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => {
+      setOverflowing(el.scrollHeight - el.clientHeight > 1 || el.scrollWidth - el.clientWidth > 1);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [full, style, className]);
+
+  const Tag = as as any;
+  const node = (
+    <Tag ref={ref as any} className={className} style={style}>
+      {children}
+    </Tag>
+  );
+
+  if (!overflowing) return node;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{node}</TooltipTrigger>
+      <TooltipContent
+        side="top"
+        align="start"
+        sideOffset={8}
+        className="max-w-[min(420px,calc(100vw-2rem))] border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md"
+      >
+        <p className="whitespace-pre-wrap text-xs leading-relaxed text-white">{full}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function InfoHint({ text }: { text: string }) {
   return (
     <Tooltip>
@@ -1707,21 +1760,13 @@ export function MessageTemplatesSettings() {
                               aria-label={`Markera ${template.name}`}
                             />
                           )}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="min-w-0 flex-[1_1_12rem] cursor-default">
-                                <span className="block truncate text-base font-semibold text-white">{template.name}</span>
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              align="start"
-                              sideOffset={8}
-                              className="max-w-[280px] border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md"
-                            >
-                              <p className="whitespace-pre-wrap text-base font-semibold text-white">{template.name}</p>
-                            </TooltipContent>
-                          </Tooltip>
+                          <TruncatedTooltip
+                            as="span"
+                            full={template.name}
+                            className="block min-w-0 flex-[1_1_12rem] cursor-default truncate text-base font-semibold text-white"
+                          >
+                            {template.name}
+                          </TruncatedTooltip>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
@@ -1739,24 +1784,13 @@ export function MessageTemplatesSettings() {
                           return (
                             <div className="space-y-1">
                               {normalizedSubject && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <p
-                                      className="cursor-default break-words text-[11px] text-white md:text-xs"
-                                      style={isExpanded ? undefined : collapsedTextStyle}
-                                    >
-                                      {normalizedSubject}
-                                    </p>
-                                  </TooltipTrigger>
-                                  <TooltipContent
-                                    side="top"
-                                    align="start"
-                                    sideOffset={8}
-                                    className="max-w-[min(420px,calc(100vw-2rem))] border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md"
-                                  >
-                                    <p className="whitespace-pre-wrap text-xs leading-relaxed text-white">{template.subject}</p>
-                                  </TooltipContent>
-                                </Tooltip>
+                                <TruncatedTooltip
+                                  full={template.subject ?? ''}
+                                  className="cursor-default break-words text-[11px] text-white md:text-xs"
+                                  style={isExpanded ? undefined : collapsedTextStyle}
+                                >
+                                  {normalizedSubject}
+                                </TruncatedTooltip>
                               )}
                               <p
                                 className="break-words text-xs text-white"
