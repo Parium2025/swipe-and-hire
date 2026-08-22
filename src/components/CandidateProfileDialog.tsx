@@ -324,6 +324,13 @@ export const CandidateProfileDialog = ({
   const displayApp = activeApplication || application;
   const initials = `${displayApp.first_name?.[0] || ''}${displayApp.last_name?.[0] || ''}`.toUpperCase();
   const isProfileVideo = displayApp.is_profile_video && displayApp.video_url;
+  // Kandidaten har media i databasen men den signerade URL:en är ännu inte löst.
+  // Då får vi INTE falla tillbaka på initialer — det ger en synlig "FA"-blink.
+  const mediaPending =
+    (!!displayApp.profile_image_url || !!isProfileVideo) &&
+    !profileImageUrl &&
+    !profileThumbUrl &&
+    !(isProfileVideo && videoUrl);
   // Visa aldrig en preliminär siffra: när listan fortfarande hämtas och vi bara
   // har den klickade ansökan vet vi inte antalet ännu — då hålls badgen dold i
   // stället för att blinka "1 jobb" och sedan hoppa till t.ex. "14 jobb".
@@ -402,6 +409,14 @@ export const CandidateProfileDialog = ({
                 <div className="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
                   <ProfileVideo videoUrl={videoUrl} coverImageUrl={profileImageUrl || profileThumbUrl || undefined} userInitials={initials} className="w-full h-full" showCountdown={true} countdownVariant="circle" showProgressBar={false} />
                 </div>
+              ) : mediaPending ? (
+                // Kandidaten HAR media men URL:en är inte klar ännu. Visa aldrig
+                // initialer här — då hinner man se "FA" innan porträttet/videon
+                // dyker upp. En neutral cirkel håller layouten still istället.
+                <div
+                  className="w-24 h-24 md:w-48 md:h-48 rounded-full border-4 border-white/20 shadow-xl bg-white/10"
+                  aria-hidden
+                />
               ) : (
                 <Avatar key={displayApp.id} className="w-24 h-24 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
                   {/* Cachad listavatar visas direkt medan högupplösta porträttet hämtas */}
