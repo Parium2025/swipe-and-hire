@@ -1730,7 +1730,7 @@ export function MessageTemplatesSettings() {
                           const normalizedBody = (template.body ?? '').replace(/\s+/g, ' ').trim();
                           const normalizedSubject = (template.subject ?? '').replace(/\s+/g, ' ').trim();
                           const needsExpand = normalizedBody.length > 90 || (template.body ?? '').includes('\n') || normalizedSubject.length > 90;
-                          const collapsedTextStyle = { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' };
+                          const collapsedTextStyle = { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as const;
                           return (
                             <div className="space-y-1">
                               {normalizedSubject && (
