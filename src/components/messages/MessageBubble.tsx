@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useTouchCapable } from '@/hooks/useInputCapability';
+import { useAttachmentUrl } from '@/lib/attachmentUrl';
 import type { ConversationMessage } from '@/hooks/useConversations';
 import type { GroupedReaction } from '@/hooks/useMessageReactions';
 
