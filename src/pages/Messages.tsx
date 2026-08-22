@@ -15,6 +15,8 @@ import { EmptyConversationList, EmptyChatState } from '@/components/messages/Emp
 import { MessagesTabs } from '@/components/MessagesTabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDeleteConversation } from '@/hooks/useDeleteConversation';
+import { useBlockConversation, useBlockedUsers } from '@/hooks/useBlockConversation';
+import { useQuery } from '@tanstack/react-query';
 import { getConversationDisplayName, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
@@ -58,6 +60,30 @@ export default function Messages() {
   }, [isLoading, conversations.length]);
 
   const { deleteConversation, isDeleting } = useDeleteConversation();
+  const { data: blockedUsers = [] } = useBlockedUsers();
+  const { unblockUser, isUnblocking } = useBlockConversation();
+  const blockedIds = blockedUsers.map((b) => b.blocked_id);
+  const { data: blockedNames = {} } = useQuery({
+    queryKey: ['blocked-user-names', blockedIds.join(',')],
+    enabled: blockedIds.length > 0,
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<Record<string, string>> => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, company_name, role')
+        .in('user_id', blockedIds);
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data || []).forEach((p) => {
+        const name =
+          p.role === 'employer' && p.company_name
+            ? p.company_name
+            : `${p.first_name || ''} ${p.last_name || ''}`.trim();
+        map[p.user_id] = name || 'Användare';
+      });
+      return map;
+    },
+  });
   const { hasTeam } = useTeamMembers();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
