@@ -430,11 +430,42 @@ const JobApplication = () => {
       });
 
       navigate('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting application:', error);
 
-      // 🔄 FALLBACK: If online submit fails (e.g. network dropped mid-request),
-      // queue it for automatic retry
+      const code = String(error?.code ?? '');
+      const msg = String(error?.message ?? '');
+
+      // 🔒 Serverns kvot-trigger — visa paywall, köa aldrig (skulle nekas igen).
+      if (msg.includes('application_quota_exceeded')) {
+        refreshQuota();
+        setShowLimitDialog(true);
+        return;
+      }
+
+      // Redan skickad ansökan — behandla som klar, köa inte.
+      if (code === '23505') {
+        clearMyApplicationsLocalCache();
+        queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
+        toast({ title: 'Du har redan sökt det här jobbet' });
+        if (jobId) clearJobApplicationDraft(jobId);
+        setHasUnsavedChanges(false);
+        navigate('/dashboard');
+        return;
+      }
+
+      // Behörighets-/valideringsfel går inte över av sig självt — köa inte.
+      if (code === '42501' || code.startsWith('23')) {
+        toast({
+          title: 'Kunde inte skicka ansökan',
+          description: msg || 'Försök igen',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // 🔄 FALLBACK: Äkta nätverksfel — köa för automatiskt återförsök.
       enqueueApplication({
         jobId: job.id,
         jobTitle: job.title,
@@ -454,6 +485,7 @@ const JobApplication = () => {
       }
       setHasUnsavedChanges(false);
       navigate('/dashboard');
+
     } finally {
       setSubmitting(false);
     }
