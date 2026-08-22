@@ -677,7 +677,7 @@ export function ChatView({
               className="text-destructive focus:text-destructive"
             >
               <ShieldBan className="mr-2 h-4 w-4" />
-              Blockera & radera permanent
+              Blockera användaren
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
