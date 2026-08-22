@@ -472,8 +472,6 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
       const lastItem = myCandidates[myCandidates.length - 1];
       const nextCursor = myCandidates.length === PAGE_SIZE ? lastItem.updated_at : null;
 
-        .filter((path): path is string => typeof path === 'string' && path.trim() !== '');
-
 
 
       // 🔥 Cache first page for instant-load on next visit (only for non-search)
