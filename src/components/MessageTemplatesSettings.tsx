@@ -198,11 +198,23 @@ function InfoHint({ text }: { text: string }) {
   );
 }
 
+/** Röd asterisk tills fältet är ifyllt — då blir den kritvit. */
+function RequiredMark({ filled }: { filled: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={`text-sm leading-none ${filled ? 'text-white' : 'text-red-400'}`}
+    >
+      *
+    </span>
+  );
+}
+
 function VariableChips({ channelLabel, onInsert }: { channelLabel: string; onInsert: (token: string) => void }) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2.5">
       <div className="flex items-center gap-2">
-        <p className="text-[10px] uppercase tracking-[0.16em] text-white/70">Variabler · {channelLabel}</p>
+        <p className="text-[10px] uppercase tracking-[0.16em] text-white">Variabler · {channelLabel}</p>
         <InfoHint text="Tryck på en variabel så läggs den in i texten för just den här kanalen. Värdena fylls i automatiskt när utskicket skickas." />
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
@@ -212,7 +224,7 @@ function VariableChips({ channelLabel, onInsert }: { channelLabel: string; onIns
             type="button"
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => onInsert(`{${variable.key}}`)}
-            className="group inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.06] py-1 pl-2.5 pr-1.5 text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:transition-colors md:duration-150 md:hover:border-white/25 md:hover:bg-white/[0.1]"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-transparent bg-white/[0.06] py-1 pl-2.5 pr-1.5 text-white [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:transition-colors md:duration-150 md:hover:border-white/25 md:hover:bg-white/[0.1]"
           >
             <span className="text-[11px] font-medium leading-none text-white">{variable.label}</span>
             <span className="rounded-full bg-white/10 px-1.5 py-0.5 font-mono text-[9.5px] leading-none text-white/75">{`{${variable.key}}`}</span>
@@ -939,6 +951,25 @@ export function MessageTemplatesSettings() {
       try { localStorage.removeItem(templateDraftKey); } catch { /* ignore */ }
     }
   };
+
+  // Steg 1 är komplett först när namn, händelse, minst en kanal och all text finns.
+  const templateSelectedChannels = CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel));
+  const templateFormComplete =
+    Boolean(templateForm.name.trim()) &&
+    Boolean(templateForm.trigger) &&
+    templateSelectedChannels.length > 0 &&
+    templateSelectedChannels.every((channel) => Boolean(templateForm.channelContent[channel].body.trim()));
+  // "Uppdatera mall" bara när sloten (händelse + kanal) redan har en egen mall.
+  const templateSlotExists =
+    Boolean(templateForm.trigger) &&
+    templateSelectedChannels.some((channel) =>
+      templates.some(
+        (template) =>
+          !isStandardTemplate(template) &&
+          template.channel === channel &&
+          (template.trigger ?? null) === templateForm.trigger,
+      ),
+    );
 
   const handleSaveTemplate = async () => {
     if (!user || !templateForm.name.trim() || templateForm.channels.length === 0) return;
@@ -1885,6 +1916,7 @@ export function MessageTemplatesSettings() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="text-white">Namn</Label>
+                <RequiredMark filled={Boolean(templateForm.name.trim())} />
                 <InfoHint text="Ge mallen ett tydligt namn som gör det lätt att förstå när den ska användas, till exempel 'Intervju bokad' eller 'Avslutad annons'." />
               </div>
               <Input value={templateForm.name} onChange={(e) => setTemplateForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
@@ -1893,13 +1925,14 @@ export function MessageTemplatesSettings() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="text-white">Händelse</Label>
+                <RequiredMark filled={Boolean(templateForm.trigger)} />
                 <InfoHint text="Varje händelse kan ha en egen mall per kanal – totalt max 12. Väljer du en händelse och kanal där du redan har en egen mall skrivs den mallen över, så det aldrig blir dubbletter." />
               </div>
               <Select
                 value={templateForm.trigger || undefined}
                 onValueChange={(value) => setTemplateForm((prev) => ({ ...prev, trigger: value as AutoRuleTrigger }))}
               >
-                <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                <SelectTrigger className={`bg-white/5 text-white ${templateForm.trigger ? 'border-white/10' : 'border-red-400/40'}`}>
                   <SelectValue placeholder="Välj händelse" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1929,9 +1962,10 @@ export function MessageTemplatesSettings() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="text-white">Kanaler</Label>
+                <RequiredMark filled={templateForm.channels.length > 0} />
                 <InfoHint text="Välj var meddelandet ska kunna skickas. Om du väljer flera kanaler skapas en version per kanal som du kan anpassa separat." />
               </div>
-              <p className="text-[11px] text-white">Välj flera kanaler så dupliceras mallen automatiskt per kanal.</p>
+              <p className="text-[11px] text-white">Väljer du flera kanaler kopieras texten automatiskt till de tomma kanalerna — du kan sedan justera varje kanal för sig.</p>
               <div className="grid gap-2 sm:grid-cols-3">
                 {OUTREACH_CHANNEL_OPTIONS.map((option) => {
                   const channel = option.value as AutomationChannel;
@@ -1996,7 +2030,10 @@ export function MessageTemplatesSettings() {
                       )}
 
                       <div className="space-y-2">
-                        <Label className="text-white">Innehåll</Label>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-white">Innehåll</Label>
+                          <RequiredMark filled={Boolean(templateForm.channelContent[channel].body.trim())} />
+                        </div>
                         <Textarea
                           value={templateForm.channelContent[channel].body}
                           onFocus={() => setActiveTemplateChannel(channel)}
@@ -2018,7 +2055,7 @@ export function MessageTemplatesSettings() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <PillButton className="px-4 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50" onClick={handleSaveTemplate} disabled={savingTemplate}>{savingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{templateForm.id ? 'Uppdatera mall' : 'Spara mall'}</PillButton>
+              <PillButton className="px-4 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50" onClick={handleSaveTemplate} disabled={savingTemplate || !templateFormComplete}>{savingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{templateSlotExists ? 'Uppdatera mall' : 'Skapa mall'}</PillButton>
             </div>
           </div>
         </TabsContent>
