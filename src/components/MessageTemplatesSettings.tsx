@@ -892,6 +892,21 @@ export function MessageTemplatesSettings() {
       return;
     }
 
+    // Dubblettskydd: samma namn + kanal får bara finnas en gång, annars blir det
+    // lätt två mallar för samma sak och risk för dubbla utskick.
+    const nameToCheck = templateForm.name.trim().toLowerCase();
+    const duplicate = templates.find(
+      (template) =>
+        template.id !== templateForm.id &&
+        template.name.trim().toLowerCase().replace(/\s·\s.*$/, '') === nameToCheck.replace(/\s·\s.*$/, '') &&
+        selectedChannels.includes(template.channel as AutomationChannel),
+    );
+
+    if (duplicate) {
+      toast.error(`Du har redan en mall som heter "${duplicate.name}" för ${getOutreachChannelLabel(duplicate.channel)}. Byt namn eller redigera den befintliga.`);
+      return;
+    }
+
     setSavingTemplate(true);
 
     const baseName = templateForm.name.trim();
