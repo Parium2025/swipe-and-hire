@@ -28,8 +28,8 @@ import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
-import { useCandidateRowMediaWarmup } from '@/hooks/useCandidateRowMediaWarmup';
-import { useCandidateRowDetailsWarmup } from '@/hooks/useCandidateRowDetailsWarmup';
+import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
+
 import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
 import { PillButton } from '@/components/ui/pill-button';
 import {
