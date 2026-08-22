@@ -59,17 +59,25 @@ export function useApplySubmit({
       // 📸 Snapshot: frys frågorna som visas för kandidaten precis nu.
       // Arbetsgivaren kommer alltid se exakt dessa frågor + svar, även om
       // frågorna senare ändras. Nya sökande får de nya frågorna.
-      const [profileRes, questionsRes] = await Promise.all([
+      const [profileRes, questionsRes, candidateProfileRes] = await Promise.all([
         supabase.rpc('get_my_profile'),
         supabase
           .from('job_questions')
           .select('id, question_text, question_type, options, is_required, order_index')
           .eq('job_id', jobId)
           .order('order_index'),
+        // 📌 Standardprofilen (av jobbsökarens sparade kandidatprofiler) vinner i snabbansökan.
+        supabase
+          .from('candidate_profiles')
+          .select('label, cv_url, video_url, profile_image_url')
+          .eq('user_id', userId)
+          .eq('is_default', true)
+          .maybeSingle(),
       ]);
       const profileRows = profileRes.data;
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
       const questionsSnapshot = questionsRes.data ?? [];
+      const candidateProfile = candidateProfileRes.data ?? null;
 
       let age: number | null = null;
       if (profile?.birth_date) {
