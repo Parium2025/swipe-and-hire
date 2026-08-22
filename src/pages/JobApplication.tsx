@@ -131,8 +131,14 @@ const JobApplication = () => {
 
   const handleProfileSelect = (profile: CandidateProfile | null) => {
     setProfilePicked(true);
+    const previousProfileCv = selectedProfile?.cv_url ?? null;
     setSelectedProfile(profile);
-    setFormData(prev => ({ ...prev, cvUrl: profile?.cv_url || '' }));
+    setFormData(prev => {
+      // Byt bara ut CV:t om det kom från en profil – ett manuellt uppladdat CV behålls.
+      const cameFromProfile = !prev.cvUrl || prev.cvUrl === previousProfileCv;
+      if (profile?.cv_url) return { ...prev, cvUrl: profile.cv_url };
+      return cameFromProfile ? { ...prev, cvUrl: '' } : prev;
+    });
   };
 
 
