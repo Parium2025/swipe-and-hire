@@ -1114,7 +1114,10 @@ export function MessageTemplatesSettings() {
       return;
     }
 
-    const selectedTrigger = automationForm.trigger;
+    // Trigger hämtas alltid från mallen så den aldrig kan avvika från regeln.
+    const selectedTrigger = selectedTemplateFamily?.primaryTemplate.trigger
+      ? normalizeTimelineTrigger(selectedTemplateFamily.primaryTemplate.trigger as OutreachTrigger)
+      : automationForm.trigger;
     if (!selectedTrigger) {
       toast.error('Välj när regeln ska skickas');
       return;
