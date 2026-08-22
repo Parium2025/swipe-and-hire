@@ -272,8 +272,7 @@ export default function Messages() {
             {hasTeam ? (
               <MessagesTabs
                 activeTab={activeTab}
-                onTabChange={setActiveTab}
-                totalUnreadCount={totalUnreadCount}
+                onTabChange={handleTabChange}
                 candidateUnread={candidateUnread}
                 colleagueUnread={colleagueUnread}
               />
