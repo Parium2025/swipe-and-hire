@@ -259,21 +259,23 @@ export async function fetchApplicationsForApplicants(
   const scope = await getCandidateJobScope(userId);
   if (scope.jobIds.length === 0) return result;
 
-  const CHUNK_SIZE = 200;
   const rows: any[] = [];
 
-  for (let i = 0; i < applicantIds.length; i += CHUNK_SIZE) {
-    const chunk = applicantIds.slice(i, i + CHUNK_SIZE);
-    const { data, error } = await supabase
-      .from('job_applications')
-      .select(APPLICATION_COLUMNS)
-      .in('applicant_id', chunk)
-      .in('job_id', scope.jobIds)
-      .limit(1000);
-
-    if (error) throw error;
-    if (data) rows.push(...data);
+  for (const applicantChunk of chunk(applicantIds, 200)) {
+    for (const jobIds of chunk(scope.jobIds, JOB_ID_CHUNK)) {
+      const page = await fetchAllPages<any>((from, to) =>
+        supabase
+          .from('job_applications')
+          .select(APPLICATION_COLUMNS)
+          .in('applicant_id', applicantChunk)
+          .in('job_id', jobIds)
+          .order('id', { ascending: true })
+          .range(from, to),
+      );
+      rows.push(...page);
+    }
   }
+
 
   const grouped = new Map<string, any[]>();
   for (const row of rows) {
