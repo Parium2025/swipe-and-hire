@@ -56,7 +56,7 @@ interface CandidatesTableProps {
   loadedCount?: number;
   onRatingUpdate?: (applicantId: string, rating: number) => void;
   /** Serversidig sortering — utan denna sorteras bara de sidor som redan hämtats */
-  onServerSortChange?: (sort: 'applied_at' | 'oldest' | 'name' | 'rating' | 'last_active' | 'last_active_oldest') => void;
+  onServerSortChange?: (sort: 'applied_at' | 'oldest' | 'name' | 'name_desc' | 'rating' | 'rating_asc' | 'last_active' | 'last_active_oldest') => void;
 }
 
 
@@ -459,8 +459,8 @@ export function CandidatesTable({
   const applyServerSort = useCallback(
     (field: SortField, direction: SortDirection) => {
       if (!onServerSortChange) return;
-      if (field === 'name' && direction) return onServerSortChange('name');
-      if (field === 'rating' && direction) return onServerSortChange('rating');
+      if (field === 'name' && direction) return onServerSortChange(direction === 'asc' ? 'name' : 'name_desc');
+      if (field === 'rating' && direction) return onServerSortChange(direction === 'asc' ? 'rating_asc' : 'rating');
       if (field === 'applied_at' && direction) {
         return onServerSortChange(direction === 'asc' ? 'oldest' : 'applied_at');
       }

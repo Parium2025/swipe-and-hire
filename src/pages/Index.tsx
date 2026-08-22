@@ -111,7 +111,7 @@ const CandidatesContent = () => {
 
   // Sorteringen körs serversidigt så att den gäller hela kandidatlistan,
   // inte bara de sidor som redan hämtats.
-  const [sortBy, setSortBy] = useState<'applied_at' | 'oldest' | 'name' | 'rating' | 'last_active' | 'last_active_oldest'>('applied_at');
+  const [sortBy, setSortBy] = useState<'applied_at' | 'oldest' | 'name' | 'name_desc' | 'rating' | 'rating_asc' | 'last_active' | 'last_active_oldest'>('applied_at');
 
   const { 
     applications, 
