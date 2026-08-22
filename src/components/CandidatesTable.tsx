@@ -11,7 +11,7 @@ import { AddToColleagueListDialog, type CandidateToAdd } from './AddToColleagueL
 import { useCandidateLists } from '@/hooks/useCandidateLists';
 import { UserPlus, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
+
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -28,8 +28,8 @@ import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
-import { useCandidateRowMediaWarmup } from '@/hooks/useCandidateRowMediaWarmup';
-import { useCandidateRowDetailsWarmup } from '@/hooks/useCandidateRowDetailsWarmup';
+import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
+
 import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
 import { PillButton } from '@/components/ui/pill-button';
 import {
@@ -102,11 +102,10 @@ export function CandidatesTable({
   
   // ── Extracted hooks ──────────────────────────────────
   useBulkMessageSync();
-  // Förvärm porträtt + video i dialogstorlek för ALLA rader på sidan, så att
-  // varje kandidatbyte (klick eller pilnavigering) visar media direkt.
-  useCandidateRowMediaWarmup(applications);
-  // Anteckningar + aktivitetslogg för hela sidan, batchat (ej bara hover).
-  useCandidateRowDetailsWarmup(applications);
+  // EN samlad förvärmningspipeline för hela sidan:
+  // text (anteckningar/aktivitet) → media (porträtt/video) → CV-sammanfattningar.
+  useCandidatePageWarmup(applications);
+
   const { readCache, fetchForApplicant, writeCache, prefetchSingle } = useCandidateBatchPrefetch(applications);
 
   // Bulk selection state
@@ -147,15 +146,8 @@ export function CandidatesTable({
   const [teamDialogOpen, setTeamDialogOpen] = useState(false);
   const [selectedApplicationForTeam, setSelectedApplicationForTeam] = useState<ApplicationData | null>(null);
 
-  // Preload CV summaries
-  useCvSummaryPreloader(
-    applications.map(app => ({
-      applicant_id: app.applicant_id,
-      application_id: app.id,
-      job_id: app.job_id,
-      cv_url: app.cv_url,
-    }))
-  );
+  // (CV-sammanfattningar ingår nu i den samlade förvärmningspipelinen ovan)
+
 
   // Prefetch candidate data on hover
   const handlePrefetchCandidate = useCallback((application: ApplicationData) => {
