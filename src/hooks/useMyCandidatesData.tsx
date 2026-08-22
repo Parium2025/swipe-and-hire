@@ -305,14 +305,6 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
         const lastItem = searchResults[searchResults.length - 1];
         const nextCursor = searchResults.length === PAGE_SIZE ? lastItem.updated_at : null;
 
-        const allImagePaths = items
-          .map((item) => item.profile_image_url)
-          .filter((path): path is string => typeof path === 'string' && path.trim() !== '');
-        const imagePaths = allImagePaths.slice(0, 12);
-        // Endast signering (ingen nedladdning) → billigt, kör hela sidan
-        const videoPaths = items
-          .filter((item) => item.is_profile_video && item.video_url)
-          .map((item) => item.video_url)
           .filter((path): path is string => typeof path === 'string' && path.trim() !== '');
 
 
