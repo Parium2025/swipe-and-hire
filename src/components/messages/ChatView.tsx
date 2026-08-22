@@ -691,7 +691,7 @@ export function ChatView({
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmAction === 'block'
-                ? 'Inga meddelanden, notiser eller push kan längre nå dig från den här personen — chatten försvinner ur din inkorg. Du kan häva blockeringen när som helst i inställningarna.'
+                ? 'Personen kan fortsätta skriva, men inget når dig — ingen chatt, notis eller push. Chatten döljs i din inkorg. När du häver blockeringen kommer chatten tillbaka och du kan läsa allt som skrevs under tiden.'
                 : 'Konversationen försvinner ur din inkorg. Motparten kan fortfarande skriva, och då dyker chatten upp igen.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
