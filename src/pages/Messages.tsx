@@ -127,17 +127,11 @@ export default function Messages() {
 
   const filteredConversations = getConversationsForTab().filter(conv => {
     if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-
-    if (conv.name?.toLowerCase().includes(query)) return true;
+    // Alla sökord måste finnas någonstans — ordningen spelar ingen roll
+    // ("andits fredrik" hittar "Fredrik Andits").
+    const terms = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
 
     const snapshot = conv.applicationSnapshot;
-    if (snapshot) {
-      const snapshotName = `${snapshot.first_name || ''} ${snapshot.last_name || ''}`.trim().toLowerCase();
-      if (snapshotName.includes(query)) return true;
-      if (snapshot.job_title?.toLowerCase().includes(query)) return true;
-    }
-
     const memberNames = conv.members
       .filter(m => m.user_id !== user?.id)
       .map(m => {
@@ -146,15 +140,20 @@ export default function Messages() {
         if (p.role === 'employer' && p.company_name) return p.company_name;
         return `${p.first_name || ''} ${p.last_name || ''}`;
       })
-      .join(' ')
-      .toLowerCase();
+      .join(' ');
 
-    if (memberNames.includes(query)) return true;
-    if (conv.job?.title?.toLowerCase().includes(query)) return true;
-    if (conv.last_message?.content.toLowerCase().includes(query)) return true;
+    const haystack = [
+      conv.name || '',
+      snapshot ? `${snapshot.first_name || ''} ${snapshot.last_name || ''}` : '',
+      snapshot?.job_title || '',
+      memberNames,
+      conv.job?.title || '',
+      conv.last_message?.content || '',
+    ].join(' ').toLowerCase();
 
-    return false;
+    return terms.every(term => haystack.includes(term));
   });
+
 
   const showEmptyConversationList = filteredConversations.length === 0;
   const showEmptyChatState = !selectedConversation;
