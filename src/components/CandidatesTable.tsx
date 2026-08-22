@@ -54,7 +54,10 @@ interface CandidatesTableProps {
   onContinueLoading?: () => void;
   loadedCount?: number;
   onRatingUpdate?: (applicantId: string, rating: number) => void;
+  /** Serversidig sortering — utan denna sorteras bara de sidor som redan hämtats */
+  onServerSortChange?: (sort: 'applied_at' | 'oldest' | 'name' | 'rating') => void;
 }
+
 
 const statusConfig = {
   pending: { label: 'Ny', className: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
