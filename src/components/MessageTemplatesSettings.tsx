@@ -1940,7 +1940,7 @@ export function MessageTemplatesSettings() {
                 value={templateForm.trigger || undefined}
                 onValueChange={(value) => setTemplateForm((prev) => ({ ...prev, trigger: value as AutoRuleTrigger }))}
               >
-                <SelectTrigger className={`bg-white/5 text-white ${templateForm.trigger ? 'border-white/10' : 'border-red-400/40'}`}>
+                <SelectTrigger className="bg-white/5 text-white border-white/10">
                   <SelectValue placeholder="Välj händelse" />
                 </SelectTrigger>
                 <SelectContent>
