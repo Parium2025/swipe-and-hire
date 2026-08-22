@@ -322,7 +322,13 @@ export const CandidateProfileDialog = ({
   const displayApp = activeApplication || application;
   const initials = `${displayApp.first_name?.[0] || ''}${displayApp.last_name?.[0] || ''}`.toUpperCase();
   const isProfileVideo = displayApp.is_profile_video && displayApp.video_url;
-  const hasMultipleApplications = !!allApplications && allApplications.length > 1;
+  // Visa aldrig en preliminär siffra: när listan fortfarande hämtas och vi bara
+  // har den klickade ansökan vet vi inte antalet ännu — då hålls badgen dold i
+  // stället för att blinka "1 jobb" och sedan hoppa till t.ex. "14 jobb".
+  const hasMultipleApplications =
+    !!allApplications &&
+    allApplications.length > 1 &&
+    !(loadingApplications && allApplications.length <= 1);
 
   const notesPanelProps = {
     notes: notesHook.notes,
