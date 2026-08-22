@@ -1702,7 +1702,19 @@ export function MessageTemplatesSettings() {
                               aria-label={`Markera ${template.name}`}
                             />
                           )}
-                          <p className="max-w-full truncate text-base font-semibold text-white">{template.name}</p>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <p className="max-w-full cursor-pointer truncate text-base font-semibold text-white">{template.name}</p>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              align="start"
+                              sideOffset={8}
+                              className="max-w-[280px] border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md"
+                            >
+                              <p className="whitespace-pre-wrap text-base font-semibold text-white">{template.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
@@ -1712,24 +1724,38 @@ export function MessageTemplatesSettings() {
 
                         </div>
                         {template.subject && <p className="break-words text-[11px] text-white md:text-xs">{template.subject}</p>}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <p
-                              className="cursor-pointer break-words text-xs text-white/80"
-                              style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
-                            >
-                              {(template.body ?? '').replace(/\s+/g, ' ').trim()}
-                            </p>
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="top"
-                            align="start"
-                            sideOffset={8}
-                            className="max-w-[280px] border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md"
-                          >
-                            <p className="whitespace-pre-wrap text-xs leading-relaxed text-white">{template.body ?? ''}</p>
-                          </TooltipContent>
-                        </Tooltip>
+                        {(() => {
+                          const isExpanded = expandedTemplateIds.has(template.id);
+                          const normalizedBody = (template.body ?? '').replace(/\s+/g, ' ').trim();
+                          const needsExpand = normalizedBody.length > 90 || (template.body ?? '').includes('\n');
+                          return (
+                            <div className="space-y-1">
+                              <p
+                                className="break-words text-xs text-white"
+                                style={isExpanded ? undefined : { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                              >
+                                {normalizedBody}
+                              </p>
+                              {needsExpand && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setExpandedTemplateIds((prev) => {
+                                      const next = new Set(prev);
+                                      if (next.has(template.id)) next.delete(template.id);
+                                      else next.add(template.id);
+                                      return next;
+                                    });
+                                  }}
+                                  className="text-xs text-white/70 underline-offset-2 hover:text-white hover:underline"
+                                >
+                                  {isExpanded ? 'Visa mindre' : 'Visa hela texten'}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()}
+
 
 
                         {isStandard && (
