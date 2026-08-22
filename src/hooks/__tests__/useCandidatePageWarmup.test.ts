@@ -25,6 +25,8 @@ vi.mock('@/hooks/useCvSummaryPreloader', () => ({
 
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
 
+const last = <T,>(arr: T[]): T | undefined => arr[arr.length - 1];
+
 const rows = [
   { id: 'a1', applicant_id: 'u1', job_id: 'j1', cv_url: 'cv1.pdf', profile_image_url: 'p1.jpg' },
   { id: 'a2', applicant_id: 'u2', job_id: 'j1', cv_url: null, profile_image_url: null },
@@ -43,20 +45,20 @@ describe('useCandidatePageWarmup', () => {
     renderHook(() => useCandidatePageWarmup(rows));
 
     // Steg 1: text på, media av, inga CV-rader
-    expect(calls.details.at(-1)).toBe(true);
-    expect(calls.media.at(-1)).toBe(false);
-    expect(calls.cv.at(-1)).toBe(0);
+    expect(last(calls.details)).toBe(true);
+    expect(last(calls.media)).toBe(false);
+    expect(last(calls.cv)).toBe(0);
 
     act(() => {
       vi.advanceTimersByTime(300);
     });
-    expect(calls.media.at(-1)).toBe(true);
-    expect(calls.cv.at(-1)).toBe(0);
+    expect(last(calls.media)).toBe(true);
+    expect(last(calls.cv)).toBe(0);
 
     act(() => {
       vi.advanceTimersByTime(1000);
     });
-    expect(calls.cv.at(-1)).toBe(2);
+    expect(last(calls.cv)).toBe(2);
   });
 
   it('gör ingenting när pipelinen är avstängd', () => {
@@ -66,7 +68,7 @@ describe('useCandidatePageWarmup', () => {
     });
     expect(calls.details.every((v) => v === false)).toBe(true);
     expect(calls.media.every((v) => v === false)).toBe(true);
-    expect(calls.cv.at(-1)).toBe(0);
+    expect(last(calls.cv)).toBe(0);
   });
 
   it('hoppar över AI-steget när cvSummaries är av', () => {
@@ -74,7 +76,7 @@ describe('useCandidatePageWarmup', () => {
     act(() => {
       vi.advanceTimersByTime(2000);
     });
-    expect(calls.media.at(-1)).toBe(true);
-    expect(calls.cv.at(-1)).toBe(0);
+    expect(last(calls.media)).toBe(true);
+    expect(last(calls.cv)).toBe(0);
   });
 });
