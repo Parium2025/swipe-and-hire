@@ -32,7 +32,8 @@ export function useBlockedUsers() {
     queryFn: async (): Promise<BlockedUser[]> => {
       const { data, error } = await supabase
         .from('conversation_blocks')
-        .select('id, blocked_id, conversation_id, reason, created_at')
+        .select('id, blocked_id, conversation_id, reason, created_at, released_at')
+        .is('released_at', null)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return (data || []) as BlockedUser[];
