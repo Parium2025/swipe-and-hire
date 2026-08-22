@@ -53,6 +53,8 @@ export function MessageBubble({
   const isTemp = message.id.startsWith('temp-');
   const canEdit = isOwn && !isTemp && !message.is_system_message && !!onEdit;
   const edited = isEdited(message);
+  // Signerade bilagelänkar förnyas automatiskt så att gamla filer aldrig dör.
+  const attachmentUrl = useAttachmentUrl(message.attachment_url);
 
   const openEmojiPicker = useCallback(() => {
     if (!onToggleReaction || isTemp) return;
