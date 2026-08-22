@@ -6,6 +6,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { preloadWeatherLocation } from './useWeather';
 import { MY_APPLICATIONS_SELECT } from './myApplicationsShared';
+import { fetchAllPages } from '@/lib/fetchAllPages';
+
 
 const SAVED_JOBS_CACHE_KEY = 'job_seeker_saved_jobs_';
 const MY_APPLICATIONS_CACHE_KEY = 'job_seeker_applications_';
