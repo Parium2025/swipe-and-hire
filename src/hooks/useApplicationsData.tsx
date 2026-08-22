@@ -7,6 +7,7 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { smartSearchCandidates } from '@/lib/smartSearch';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
+import { clampJobTitle } from '@/lib/jobTitle';
 
 export interface ApplicationData {
   id: string;
@@ -470,7 +471,7 @@ export const useApplicationsData = (
 
          return {
            ...item,
-           job_title: item.job_title || 'Okänt jobb',
+           job_title: clampJobTitle(item.job_title) || 'Okänt jobb',
            job_occupation: item.job_occupation || null,
            profile_image_url: media.profile_image_url,
            video_url: media.video_url,

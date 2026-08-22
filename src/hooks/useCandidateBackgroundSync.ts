@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
+import { clampJobTitle } from '@/lib/jobTitle';
 
 const PAGE_SIZE = 50; // Större batch för att ha mer data redo
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
@@ -214,7 +215,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
 
     return {
       ...item,
-      job_title: item.job_postings?.title || 'Okänt jobb',
+      job_title: clampJobTitle(item.job_postings?.title) || 'Okänt jobb',
       job_occupation: item.job_postings?.occupation || null,
       profile_image_url: media.profile_image_url || null,
       video_url: media.video_url || null,
@@ -395,7 +396,7 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
       status: app?.status || null,
       applied_at: app?.applied_at || null,
       viewed_at: app?.viewed_at || null,
-      job_title: (app as any)?.job_postings?.title || 'Okänt jobb',
+      job_title: clampJobTitle((app as any)?.job_postings?.title) || 'Okänt jobb',
       profile_image_url: media.profile_image_url || null,
       video_url: media.video_url || null,
       is_profile_video: media.is_profile_video || false,

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
+import { clampJobTitle } from '@/lib/jobTitle';
 
 /**
  * Shared hook for prefetching applications data.
@@ -69,7 +70,7 @@ export const usePrefetchApplications = () => {
           };
           return {
             ...item,
-            job_title: item.job_postings?.title || 'Okänt jobb',
+            job_title: clampJobTitle(item.job_postings?.title) || 'Okänt jobb',
             profile_image_url: media.profile_image_url,
             video_url: media.video_url,
             is_profile_video: media.is_profile_video,
