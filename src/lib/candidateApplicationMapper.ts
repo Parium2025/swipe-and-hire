@@ -1,4 +1,5 @@
 import type { ApplicationData } from '@/hooks/useApplicationsData';
+import { clampJobTitle } from '@/lib/jobTitle';
 
 /**
  * Maps a raw job_applications row (with optional joined job title) into
