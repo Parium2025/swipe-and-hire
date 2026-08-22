@@ -1271,8 +1271,16 @@ export function MessageTemplatesSettings() {
     STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
-  const standardTemplates = templates.filter((template) => isStandardTemplate(template));
+  // Kanaler där arbetsgivaren redan har en egen aktiv mall — där behövs inte
+  // Parium-standarden visas, den ligger kvar i koden och används som fallback.
+  const coveredChannels = new Set(
+    customTemplates.filter((template) => template.is_active).map((template) => template.channel),
+  );
+  const standardTemplates = templates.filter(
+    (template) => isStandardTemplate(template) && !coveredChannels.has(template.channel),
+  );
   const orderedTemplates = [...customTemplates, ...standardTemplates];
+
 
 
 
