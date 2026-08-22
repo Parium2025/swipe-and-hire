@@ -1692,7 +1692,7 @@ export function MessageTemplatesSettings() {
                         </div>
                         {template.subject && <p className="break-words text-[11px] text-white md:text-xs">{template.subject}</p>}
                         <p className={`whitespace-pre-wrap break-words text-xs text-white md:text-sm ${expandedTemplateIds.includes(template.id) ? '' : 'line-clamp-2'}`}>{template.body}</p>
-                        {(template.body?.length ?? 0) > 120 && (
+                        {((template.body?.length ?? 0) > 90 || (template.body ?? '').includes('\n')) && (
                           <button
                             type="button"
                             className="text-[11px] font-medium text-white underline underline-offset-2 md:text-xs"
