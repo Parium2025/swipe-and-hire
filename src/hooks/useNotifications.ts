@@ -55,6 +55,7 @@ export function useNotifications() {
   // Typer där användaren själv stängt av in-app-notiser. Raden finns kvar i
   // databasen (push/mejl styrs separat), men klockan ska hållas tyst.
   const mutedTypesRef = useRef<Set<string>>(new Set());
+  const broadcastRef = useRef<RealtimeChannel | null>(null);
 
   const loadMutedTypes = useCallback(async () => {
     if (!user) return;
