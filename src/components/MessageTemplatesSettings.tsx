@@ -2055,7 +2055,7 @@ export function MessageTemplatesSettings() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <PillButton className="px-4 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50" onClick={handleSaveTemplate} disabled={savingTemplate}>{savingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{templateForm.id ? 'Uppdatera mall' : 'Spara mall'}</PillButton>
+              <PillButton className="px-4 border-primary/40 bg-primary/25 hover:bg-primary/35 hover:border-primary/60 disabled:opacity-50" onClick={handleSaveTemplate} disabled={savingTemplate || !templateFormComplete}>{savingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{templateSlotExists ? 'Uppdatera mall' : 'Skapa mall'}</PillButton>
             </div>
           </div>
         </TabsContent>
