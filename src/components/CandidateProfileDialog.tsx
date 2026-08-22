@@ -9,7 +9,9 @@ import type { StageSettings } from '@/hooks/useStageSettings';
 import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useMediaUrl, prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { AVATAR_TRANSFORM, PROFILE_DIALOG_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
+
 import ProfileVideo from '@/components/ProfileVideo';
 import { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
