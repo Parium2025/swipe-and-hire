@@ -371,6 +371,9 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
           availability,
           custom_answers,
           questions_snapshot,
+          candidate_profile_label,
+          profile_image_snapshot_url,
+          video_snapshot_url,
           status,
           applied_at,
           viewed_at,
@@ -477,7 +480,7 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
           applied_at: app?.applied_at || null,
           viewed_at: app?.viewed_at || null,
           latest_application_at: activity.latest_application_at,
-          last_active_at: activity.last_active_at ?? media.last_active_at,
+          last_active_at: activity.last_active_at ?? liveMedia.last_active_at,
         };
       });
 
