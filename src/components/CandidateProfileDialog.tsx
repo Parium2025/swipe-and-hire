@@ -292,7 +292,6 @@ export const CandidateProfileDialog = ({
   };
 
   const candidateName = `${displayApp.first_name || ''} ${displayApp.last_name || ''}`.trim() || 'Kandidat';
-  const quickActions: never[] = [];
 
 
   return (
@@ -464,7 +463,6 @@ export const CandidateProfileDialog = ({
             stageOrder={stageOrder}
             stageConfig={stageConfig}
             onStageChange={onStageChange}
-            quickActions={quickActions}
           />
           </div>
 
