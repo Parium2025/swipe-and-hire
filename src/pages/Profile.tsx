@@ -43,6 +43,8 @@ import { useCachedImage } from '@/hooks/useCachedImage';
 import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificationSettings';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
+import CandidateProfilesManager from '@/components/candidateProfiles/CandidateProfilesManager';
+
 
 import { fetchPriority } from '@/lib/fetchPriority';
 
@@ -2489,6 +2491,10 @@ const Profile = () => {
 
                   {/* CV Summary Section */}
                   <CvSummarySection userId={user?.id} cvUrl={cvUrl || (profile as any)?.cv_url} refreshKey={cvSummaryRefreshKey} />
+
+                  {/* Flera kandidatprofiler (max 3) */}
+                  <CandidateProfilesManager userId={user?.id} />
+
                 </>
               )}
 

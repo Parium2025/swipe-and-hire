@@ -14,12 +14,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Upload, Send } from 'lucide-react';
+import { ArrowLeft, Upload, Send, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import FileUpload from '@/components/FileUpload';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { useApplicationQuota } from '@/hooks/useApplicationQuota';
 import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
+import CandidateProfilePicker from '@/components/candidateProfiles/CandidateProfilePicker';
+import { useCandidateProfiles, type CandidateProfile } from '@/hooks/useCandidateProfiles';
+
 
 // Draft key for localStorage
 const JOB_APPLICATION_DRAFT_PREFIX = 'parium_draft_job-application-';
@@ -80,6 +83,12 @@ const JobApplication = () => {
   const { quota, refresh: refreshQuota } = useApplicationQuota();
   const [draftRestored, setDraftRestored] = useState(false);
   const [initialFormData, setInitialFormData] = useState<any>(null);
+
+  // Flera kandidatprofiler: välj vilken profil (CV/video/bild) som följer med ansökan.
+  const { profiles: candidateProfiles } = useCandidateProfiles(user?.id);
+  const [selectedProfile, setSelectedProfile] = useState<CandidateProfile | null>(null);
+  const [profilePicked, setProfilePicked] = useState(false);
+
   
   // Form data
   const [formData, setFormData] = useState({
@@ -106,6 +115,27 @@ const JobApplication = () => {
     // Custom questions answers
     customAnswers: {} as Record<string, any>
   });
+
+  // Förvälj standardprofilen (en gång) och fyll i dess CV.
+  useEffect(() => {
+    if (profilePicked || candidateProfiles.length === 0) return;
+    const preferred = candidateProfiles.find(p => p.is_default) ?? null;
+    setProfilePicked(true);
+    if (preferred) {
+      setSelectedProfile(preferred);
+      if (preferred.cv_url) {
+        setFormData(prev => (prev.cvUrl ? prev : { ...prev, cvUrl: preferred.cv_url as string }));
+      }
+    }
+  }, [candidateProfiles, profilePicked]);
+
+  const handleProfileSelect = (profile: CandidateProfile | null) => {
+    setProfilePicked(true);
+    setSelectedProfile(profile);
+    setFormData(prev => ({ ...prev, cvUrl: profile?.cv_url || '' }));
+  };
+
+
 
   // Restore draft on mount
   useEffect(() => {
@@ -275,23 +305,24 @@ const JobApplication = () => {
     setSubmitting(true);
 
     // Build the application payload
-    // Try to get profile snapshot if online, otherwise use null
-    let profileImageSnapshot: string | null = null;
-    let videoSnapshot: string | null = null;
+    // Ögonblicksbild: vald kandidatprofil vinner, annars kontots vanliga profil.
+    let profileImageSnapshot: string | null = selectedProfile?.profile_image_url || null;
+    let videoSnapshot: string | null = selectedProfile?.video_url || null;
 
-    if (getIsOnline()) {
+    if (getIsOnline() && (!profileImageSnapshot || !videoSnapshot)) {
       try {
         const { data: currentProfile } = await supabase
           .from('profiles')
           .select('profile_image_url, video_url')
           .eq('user_id', user.id)
           .single();
-        profileImageSnapshot = currentProfile?.profile_image_url || null;
-        videoSnapshot = currentProfile?.video_url || null;
+        profileImageSnapshot = profileImageSnapshot || currentProfile?.profile_image_url || null;
+        videoSnapshot = videoSnapshot || currentProfile?.video_url || null;
       } catch {
         // Continue without snapshot — not critical
       }
     }
+
 
     const applicationPayload = {
       job_id: job.id,
@@ -306,6 +337,8 @@ const JobApplication = () => {
       cv_url: formData.cvUrl,
       profile_image_snapshot_url: profileImageSnapshot,
       video_snapshot_url: videoSnapshot,
+      candidate_profile_label: selectedProfile?.label ?? null,
+
       custom_answers: {
         driversLicense: formData.driversLicense,
         hasOwnCar: formData.hasOwnCar,
@@ -849,30 +882,57 @@ const JobApplication = () => {
                 </div>
               </div>
 
+              {/* Val av kandidatprofil (visas bara om användaren har sparade profiler) */}
+              {candidateProfiles.length > 0 && (
+                <CandidateProfilePicker
+                  profiles={candidateProfiles}
+                  selectedId={selectedProfile?.id ?? null}
+                  onSelect={handleProfileSelect}
+                />
+              )}
+
               {/* CV Upload */}
               <div>
                 <Label className="text-gray-900 font-medium block mb-2">
-                  Ladda upp CV <span className="text-red-500">*</span>
+                  {selectedProfile?.cv_url ? 'CV från vald profil' : 'Ladda upp CV'} <span className="text-red-500">*</span>
                 </Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
-                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">
-                    Dra en fil hit eller <span className="text-blue-600 underline">ladda upp den</span>
-                  </p>
-                  <FileUpload
-                    questionType="document"
-                    acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain']}
-                    maxFileSize={50 * 1024 * 1024}
-                    onFileUploaded={(url, fileName) => {
-                      handleInputChange('cvUrl', url);
-                      toast({
-                        title: "CV uppladdad",
-                        description: `${fileName} har laddats upp`
-                      });
-                    }}
-                    onFileRemoved={() => handleInputChange('cvUrl', '')}
-                  />
-                </div>
+
+                {selectedProfile?.cv_url && formData.cvUrl === selectedProfile.cv_url ? (
+                  <div className="flex items-center gap-3 rounded-lg border border-gray-300 bg-gray-50 p-4">
+                    <FileText className="h-5 w-5 shrink-0 text-gray-500" />
+                    <span className="min-w-0 flex-1 break-words text-sm text-gray-900">
+                      {selectedProfile.cv_filename || 'CV från profilen'} ({selectedProfile.label})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange('cvUrl', '')}
+                      className="shrink-0 text-sm text-blue-600 underline"
+                    >
+                      Byt CV
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-600">
+                      Dra en fil hit eller <span className="text-blue-600 underline">ladda upp den</span>
+                    </p>
+                    <FileUpload
+                      questionType="document"
+                      acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain']}
+                      maxFileSize={50 * 1024 * 1024}
+                      onFileUploaded={(url, fileName) => {
+                        handleInputChange('cvUrl', url);
+                        toast({
+                          title: "CV uppladdad",
+                          description: `${fileName} har laddats upp`
+                        });
+                      }}
+                      onFileRemoved={() => handleInputChange('cvUrl', '')}
+                    />
+                  </div>
+                )}
+
               </div>
 
               {/* Additional Documents */}

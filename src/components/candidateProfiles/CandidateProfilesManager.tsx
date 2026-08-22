@@ -1,0 +1,185 @@
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Users, Plus, Star, Pencil, Trash2, FileText, Video, Image as ImageIcon } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useCandidateProfiles, MAX_CANDIDATE_PROFILES, type CandidateProfile, type CandidateProfileInput } from '@/hooks/useCandidateProfiles';
+import CandidateProfileEditor from './CandidateProfileEditor';
+
+interface Props {
+  userId?: string;
+}
+
+/** "Mina profiler" – upp till 3 varianter av CV, video och bild att välja mellan vid ansökan. */
+export function CandidateProfilesManager({ userId }: Props) {
+  const { toast } = useToast();
+  const {
+    profiles, loading, canCreateMore,
+    createProfile, updateProfile, deleteProfile, setDefaultProfile,
+  } = useCandidateProfiles(userId);
+
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editing, setEditing] = useState<CandidateProfile | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<CandidateProfile | null>(null);
+
+  const openNew = () => { setEditing(null); setEditorOpen(true); };
+  const openEdit = (p: CandidateProfile) => { setEditing(p); setEditorOpen(true); };
+
+  const handleSave = async (input: CandidateProfileInput) => {
+    setSaving(true);
+    const res = editing
+      ? await updateProfile(editing.id, input)
+      : await createProfile(input);
+    setSaving(false);
+
+    if ('error' in res && res.error) {
+      toast({ title: 'Kunde inte spara', description: res.error, variant: 'destructive' });
+      return;
+    }
+    setEditorOpen(false);
+    toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
+  };
+
+  const handleDelete = async () => {
+    if (!pendingDelete) return;
+    const res = await deleteProfile(pendingDelete.id);
+    setPendingDelete(null);
+    if ('error' in res && res.error) {
+      toast({ title: 'Kunde inte ta bort', description: res.error, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Profil borttagen' });
+  };
+
+  return (
+    <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-white" />
+          <Label className="text-base font-medium text-white">Mina profiler</Label>
+        </div>
+        <span className="text-xs text-white/60">{profiles.length}/{MAX_CANDIDATE_PROFILES}</span>
+      </div>
+
+      <p className="text-sm text-white">
+        Skapa upp till {MAX_CANDIDATE_PROFILES} profiler med olika CV, video och bild. När du söker ett jobb väljer du
+        vilken profil som ska skickas med – arbetsgivaren ser alltid exakt den versionen.
+      </p>
+
+      {!loading && profiles.length === 0 && (
+        <p className="text-sm text-white/70">
+          Du har inga extra profiler ännu. Ansökningar använder ditt vanliga CV och din vanliga video.
+        </p>
+      )}
+
+      <div className="space-y-2">
+        {profiles.map((p) => (
+          <div
+            key={p.id}
+            className="rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-sm"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="break-words text-sm font-medium text-white">{p.label}</span>
+                  {p.is_default && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] text-white">
+                      <Star className="h-3 w-3 fill-current" /> Standard
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-3 text-[12px] text-white/70">
+                  <span className={`inline-flex items-center gap-1 ${p.cv_url ? 'text-white' : ''}`}>
+                    <FileText className="h-3.5 w-3.5" /> {p.cv_url ? 'CV' : 'Inget CV'}
+                  </span>
+                  <span className={`inline-flex items-center gap-1 ${p.video_url ? 'text-white' : ''}`}>
+                    <Video className="h-3.5 w-3.5" /> {p.video_url ? 'Video' : 'Ingen video'}
+                  </span>
+                  <span className={`inline-flex items-center gap-1 ${p.profile_image_url ? 'text-white' : ''}`}>
+                    <ImageIcon className="h-3.5 w-3.5" /> {p.profile_image_url ? 'Bild' : 'Ingen bild'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-1">
+                {!p.is_default && (
+                  <button
+                    type="button"
+                    title="Gör till standard"
+                    onClick={() => setDefaultProfile(p.id)}
+                    className="rounded-full border border-white/15 bg-white/5 p-2 text-white transition-colors md:hover:bg-white/10"
+                  >
+                    <Star className="h-4 w-4" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  title="Redigera"
+                  onClick={() => openEdit(p)}
+                  className="rounded-full border border-white/15 bg-white/5 p-2 text-white transition-colors md:hover:bg-white/10"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  title="Ta bort"
+                  onClick={() => setPendingDelete(p)}
+                  className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!bg-destructive/30"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        disabled={!canCreateMore}
+        onClick={openNew}
+        className="w-full border-white/20 bg-white/5 text-white md:hover:bg-white/10"
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        {canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}
+      </Button>
+
+      <CandidateProfileEditor
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        profile={editing}
+        saving={saving}
+        onSave={handleSave}
+      />
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ta bort profilen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingDelete?.label} tas bort permanent. Ansökningar du redan skickat påverkas inte – de behåller sin
+              egen kopia av CV, video och bild.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+export default CandidateProfilesManager;
