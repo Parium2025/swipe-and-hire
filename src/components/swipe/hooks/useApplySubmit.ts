@@ -78,6 +78,9 @@ export function useApplySubmit({
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
       const questionsSnapshot = questionsRes.data ?? [];
       const candidateProfile = candidateProfileRes.data ?? null;
+      const snapshotCvUrl = candidateProfile
+        ? candidateProfile.cv_url ?? null
+        : profile?.cv_url || null;
 
       let age: number | null = null;
       if (profile?.birth_date) {
@@ -95,11 +98,17 @@ export function useApplySubmit({
         location: profile?.home_location || profile?.location || null,
         age,
         bio: profile?.bio || null,
-        cv_url: candidateProfile?.cv_url || profile?.cv_url || null,
+        // 📌 Finns en kandidatprofil gäller EXAKT den — tomt är tomt.
+        // Kontots media används bara när ingen kandidatprofil är vald.
+        cv_url: snapshotCvUrl,
         availability: profile?.availability || null,
         employment_status: profile?.employment_type || null,
-        profile_image_snapshot_url: candidateProfile?.profile_image_url || profile?.profile_image_url || null,
-        video_snapshot_url: candidateProfile?.video_url || profile?.video_url || null,
+        profile_image_snapshot_url: candidateProfile
+          ? candidateProfile.profile_image_url ?? null
+          : profile?.profile_image_url || null,
+        video_snapshot_url: candidateProfile
+          ? candidateProfile.video_url ?? null
+          : profile?.video_url || null,
         candidate_profile_label: candidateProfile?.label ?? null,
         custom_answers: answers,
         questions_snapshot: questionsSnapshot,
@@ -126,7 +135,7 @@ export function useApplySubmit({
         })
         .catch((e) => console.error('❌ Confirmation email network error:', e));
 
-      if (candidateProfile?.cv_url || profile?.cv_url) {
+      if (snapshotCvUrl) {
         supabase.functions
           .invoke('generate-cv-summary', {
             body: { applicant_id: userId, job_id: jobId },
