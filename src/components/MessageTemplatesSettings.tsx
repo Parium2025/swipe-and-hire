@@ -2011,7 +2011,10 @@ export function MessageTemplatesSettings() {
                       )}
 
                       <div className="space-y-2">
-                        <Label className="text-white">Innehåll</Label>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-white">Innehåll</Label>
+                          <RequiredMark filled={Boolean(templateForm.channelContent[channel].body.trim())} />
+                        </div>
                         <Textarea
                           value={templateForm.channelContent[channel].body}
                           onFocus={() => setActiveTemplateChannel(channel)}
