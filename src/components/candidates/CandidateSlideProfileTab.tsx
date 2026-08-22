@@ -227,26 +227,8 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
 
       {/* Action buttons — identical to desktop ProfileActions my-candidates variant */}
       <div className="w-full min-w-0">
-        {MANUAL_OUTREACH_ACTIONS.filter((action) => outreachManualActions.hasAction(action.key)).length > 0 && (
-          <div className="mb-2 space-y-2">
-            <p className="text-center text-[10px] font-medium uppercase tracking-[0.18em] text-white/70">Snabbutskick</p>
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {MANUAL_OUTREACH_ACTIONS.filter((action) => outreachManualActions.hasAction(action.key)).map((action) => (
-                <Button
-                  key={action.key}
-                  onClick={() => {
-                    setSendMessagePreset(action.key);
-                    setSendMessageOpen(true);
-                  }}
-                  variant={action.buttonVariant}
-                  size="sm"
-                >
-                  {action.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
+
+
 
         <div className="flex justify-center gap-1">
           <Button
