@@ -521,7 +521,7 @@ export function MessageTemplatesSettings() {
   const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
-  const [expandedTemplateIds, setExpandedTemplateIds] = useState<string[]>([]);
+  
 
   const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
   const [selectedDefaultTemplateName, setSelectedDefaultTemplateName] = useState(DEFAULT_OUTREACH_TEMPLATES[0]?.name ?? '');
