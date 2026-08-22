@@ -6,6 +6,7 @@ import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { createBulletproofChannel } from '@/lib/bulletproofChannel';
+import { clampJobTitle } from '@/lib/jobTitle';
 
 const JOBS_CACHE_KEY = 'parium_employer_jobs_v3_';
 const INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
@@ -171,7 +172,7 @@ export const useEmployerBackgroundSync = () => {
           bio: app?.bio || null,
           cv_url: app?.cv_url || null,
           status: app?.status || 'pending',
-          job_title: (app?.job_postings as any)?.title || null,
+          job_title: clampJobTitle((app?.job_postings as any)?.title) || null,
           applied_at: app?.applied_at || null,
         };
       });

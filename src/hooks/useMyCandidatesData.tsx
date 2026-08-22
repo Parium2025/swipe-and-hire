@@ -11,6 +11,7 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
+import { clampJobTitle } from '@/lib/jobTitle';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -285,7 +286,7 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
             custom_answers: app?.custom_answers || null,
             questions_snapshot: app?.questions_snapshot || null,
             status: app?.status || 'pending',
-            job_title: (app?.job_postings as any)?.title || null,
+            job_title: clampJobTitle((app?.job_postings as any)?.title) || null,
             profile_image_url: media.profile_image_url || null,
             video_url: media.video_url || null,
             is_profile_video: media.is_profile_video || null,
@@ -465,7 +466,7 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
           custom_answers: app?.custom_answers || null,
           questions_snapshot: app?.questions_snapshot || null,
           status: app?.status || 'pending',
-          job_title: (app?.job_postings as any)?.title || null,
+          job_title: clampJobTitle((app?.job_postings as any)?.title) || null,
           profile_image_url: media.profile_image_url,
           video_url: media.video_url,
           is_profile_video: media.is_profile_video,

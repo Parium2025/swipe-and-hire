@@ -54,6 +54,7 @@ import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/My
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { clampJobTitle } from '@/lib/jobTitle';
 
 
 const MyCandidates = () => {
@@ -556,7 +557,7 @@ const MyCandidates = () => {
     status: c.status,
     applied_at: c.applied_at || c.created_at,
     updated_at: c.updated_at,
-    job_title: c.job_title || 'Okänt jobb',
+    job_title: clampJobTitle(c.job_title) || 'Okänt jobb',
     profile_image_url: c.profile_image_url,
     video_url: c.video_url,
     is_profile_video: c.is_profile_video,
