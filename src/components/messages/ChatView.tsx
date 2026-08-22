@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
-import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType } from '@/lib/chatFileTypes';
+import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType, inspectFileContent } from '@/lib/chatFileTypes';
 import { useConversationMessages, type Conversation, type ConversationMessage } from '@/hooks/useConversations';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
@@ -366,8 +366,10 @@ export function ChatView({
   };
 
   // File upload
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    // Reset input direkt så samma fil kan väljas igen efter ett avvisande
+    e.target.value = '';
     if (!file) return;
 
     const check = validateAttachment(file);
@@ -376,10 +378,17 @@ export function ChatView({
       return;
     }
 
+    // 🔬 Innehållskontroll: läser filens första byte och avvisar filer vars
+    // innehåll inte matchar ändelsen (t.ex. virus.exe omdöpt till rapport.pdf).
+    const contentCheck = await inspectFileContent(file);
+    if (!contentCheck.ok) {
+      toast.error(contentCheck.error!, contentCheck.description ? { description: contentCheck.description } : undefined);
+      return;
+    }
+
     setPendingFile(file);
-    // Reset input so same file can be selected again
-    e.target.value = '';
   };
+
 
   const uploadFile = async (file: File): Promise<{ url: string; type: string; name: string } | null> => {
     let payload: Blob = file;
@@ -890,11 +899,20 @@ export function ChatView({
                       <div
                         key={msg.id}
                         id={`msg-${msg.id}`}
+                        // ⚡ Native virtualisering: webbläsaren hoppar över
+                        // layout/målning för bubblor utanför skärmen, men
+                        // behåller elementet så att sökning och scroll-till-
+                        // meddelande fortsätter fungera exakt som förut.
+                        style={{
+                          contentVisibility: 'auto',
+                          containIntrinsicSize: 'auto 72px',
+                        } as React.CSSProperties}
                         className={cn(
                           "transition-colors rounded-lg",
                           isSearchHighlighted && "bg-yellow-500/10 ring-1 ring-yellow-500/30 p-1 -m-1"
                         )}
                       >
+
                         <MessageBubble
                           message={resolvedMessage}
                           isOwn={isOwnMsg}

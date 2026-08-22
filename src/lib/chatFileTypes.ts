@@ -156,3 +156,125 @@ export const ATTACHMENT_ACCEPT = [
   'video/*',
   'audio/*',
 ].join(',');
+
+/* ------------------------------------------------------------------ *
+ * 🔬 INNEHÅLLSKONTROLL (magic bytes)
+ *
+ * Filändelsen kan ljuga: någon kan döpa om virus.exe till rapport.pdf.
+ * Därför läser vi de första byten i filen och jämför med det som
+ * ändelsen påstår. Körbara filer blockeras alltid, oavsett namn.
+ * ------------------------------------------------------------------ */
+
+function bytesStartWith(bytes: Uint8Array, sig: number[], offset = 0): boolean {
+  for (let i = 0; i < sig.length; i++) {
+    if (bytes[offset + i] !== sig[i]) return false;
+  }
+  return true;
+}
+
+/** Signaturer för körbara filer/skript — blockeras alltid. */
+const EXECUTABLE_SIGNATURES: { name: string; sig: number[]; offset?: number }[] = [
+  { name: 'Windows-program', sig: [0x4d, 0x5a] }, // MZ
+  { name: 'Linux-program', sig: [0x7f, 0x45, 0x4c, 0x46] }, // ELF
+  { name: 'macOS-program', sig: [0xcf, 0xfa, 0xed, 0xfe] }, // Mach-O 64
+  { name: 'macOS-program', sig: [0xce, 0xfa, 0xed, 0xfe] }, // Mach-O 32
+  { name: 'macOS-program', sig: [0xca, 0xfe, 0xba, 0xbe] }, // Universal binary / Java class
+  { name: 'Skriptfil', sig: [0x23, 0x21] }, // #!
+];
+
+/** Förväntade signaturer per filändelse. Saknas ändelsen görs ingen kontroll. */
+const EXPECTED_SIGNATURES: Record<string, number[][]> = {
+  pdf: [[0x25, 0x50, 0x44, 0x46]], // %PDF
+  png: [[0x89, 0x50, 0x4e, 0x47]],
+  jpg: [[0xff, 0xd8, 0xff]],
+  jpeg: [[0xff, 0xd8, 0xff]],
+  gif: [[0x47, 0x49, 0x46, 0x38]],
+  bmp: [[0x42, 0x4d]],
+  flac: [[0x66, 0x4c, 0x61, 0x43]],
+  mp3: [[0x49, 0x44, 0x33], [0xff, 0xfb], [0xff, 0xf3], [0xff, 0xf2]],
+  ogg: [[0x4f, 0x67, 0x67, 0x53]],
+  oga: [[0x4f, 0x67, 0x67, 0x53]],
+  opus: [[0x4f, 0x67, 0x67, 0x53]],
+  // ZIP-baserade format (Office, OpenDocument, Apple iWork)
+  docx: [[0x50, 0x4b, 0x03, 0x04]],
+  xlsx: [[0x50, 0x4b, 0x03, 0x04]],
+  pptx: [[0x50, 0x4b, 0x03, 0x04]],
+  odt: [[0x50, 0x4b, 0x03, 0x04]],
+  ods: [[0x50, 0x4b, 0x03, 0x04]],
+  odp: [[0x50, 0x4b, 0x03, 0x04]],
+  pages: [[0x50, 0x4b, 0x03, 0x04]],
+  numbers: [[0x50, 0x4b, 0x03, 0x04]],
+  key: [[0x50, 0x4b, 0x03, 0x04]],
+  zip: [[0x50, 0x4b, 0x03, 0x04], [0x50, 0x4b, 0x05, 0x06], [0x50, 0x4b, 0x07, 0x08]],
+  rar: [[0x52, 0x61, 0x72, 0x21]],
+  '7z': [[0x37, 0x7a, 0xbc, 0xaf]],
+  gz: [[0x1f, 0x8b]],
+  // Gamla Office-format (OLE Compound File)
+  doc: [[0xd0, 0xcf, 0x11, 0xe0]],
+  xls: [[0xd0, 0xcf, 0x11, 0xe0]],
+  ppt: [[0xd0, 0xcf, 0x11, 0xe0]],
+};
+
+/** Format där signaturen ligger på en annan position än början av filen. */
+const OFFSET_SIGNATURES: Record<string, { sig: number[]; offset: number }[]> = {
+  mp4: [{ sig: [0x66, 0x74, 0x79, 0x70], offset: 4 }], // ....ftyp
+  m4v: [{ sig: [0x66, 0x74, 0x79, 0x70], offset: 4 }],
+  m4a: [{ sig: [0x66, 0x74, 0x79, 0x70], offset: 4 }],
+  mov: [{ sig: [0x66, 0x74, 0x79, 0x70], offset: 4 }],
+  heic: [{ sig: [0x66, 0x74, 0x79, 0x70], offset: 4 }],
+  heif: [{ sig: [0x66, 0x74, 0x79, 0x70], offset: 4 }],
+  avif: [{ sig: [0x66, 0x74, 0x79, 0x70], offset: 4 }],
+  webp: [{ sig: [0x57, 0x45, 0x42, 0x50], offset: 8 }], // RIFF....WEBP
+  wav: [{ sig: [0x57, 0x41, 0x56, 0x45], offset: 8 }], // RIFF....WAVE
+  avi: [{ sig: [0x41, 0x56, 0x49, 0x20], offset: 8 }],
+};
+
+/**
+ * Läser filens första byte och avgör om innehållet stämmer med ändelsen.
+ * Körs innan uppladdning — kompletterar serverns ändelsekontroll.
+ */
+export async function inspectFileContent(file: File): Promise<FileValidationResult> {
+  const ext = getExtension(file.name);
+  let bytes: Uint8Array;
+
+  try {
+    const buffer = await file.slice(0, 32).arrayBuffer();
+    bytes = new Uint8Array(buffer);
+  } catch {
+    // Kan vi inte läsa filen låter vi ändelsekontrollen på servern avgöra.
+    return { ok: true };
+  }
+
+  for (const exe of EXECUTABLE_SIGNATURES) {
+    if (bytesStartWith(bytes, exe.sig)) {
+      // ZIP och Java-class delar signatur med universal binaries i vissa fall —
+      // men ZIP fångas av PK-signaturen ovan, så här är det ett riktigt program.
+      return {
+        ok: false,
+        error: 'Filen ser ut att vara ett program',
+        description: `Innehållet identifieras som ${exe.name.toLowerCase()} och kan inte skickas i chatten, oavsett filnamn.`,
+      };
+    }
+  }
+
+  const expected = EXPECTED_SIGNATURES[ext];
+  if (expected && !expected.some((sig) => bytesStartWith(bytes, sig))) {
+    return {
+      ok: false,
+      error: 'Filen matchar inte sin filändelse',
+      description: `Innehållet ser inte ut att vara en giltig .${ext}-fil. Spara om filen och försök igen.`,
+    };
+  }
+
+  const offsetSigs = OFFSET_SIGNATURES[ext];
+  if (offsetSigs && !offsetSigs.some(({ sig, offset }) => bytesStartWith(bytes, sig, offset))) {
+    return {
+      ok: false,
+      error: 'Filen matchar inte sin filändelse',
+      description: `Innehållet ser inte ut att vara en giltig .${ext}-fil. Spara om filen och försök igen.`,
+    };
+  }
+
+  return { ok: true };
+}
+
