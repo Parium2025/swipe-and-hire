@@ -8,7 +8,7 @@ import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeView
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
+import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useColleagueCandidates } from '@/hooks/useColleagueCandidates';
 import { useColleagueStageSettings } from '@/hooks/useColleagueStageSettings';
