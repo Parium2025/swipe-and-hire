@@ -380,7 +380,7 @@ export function AutoMessagesPanel() {
                           ))}
                           {allChannelsOn && (
                             <p className="min-w-0 break-words text-xs text-white">
-                              Kandidaten nås på tre ställen samtidigt. Vill du hålla nere bruset kan du t.ex. köra chatt + push.
+                              Kandidaten nås på tre ställen samtidigt. Vill du hålla nere bruset räcker oftast mejl + push (standard).
                             </p>
                           )}
                         </div>
