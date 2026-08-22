@@ -892,6 +892,21 @@ export function MessageTemplatesSettings() {
       return;
     }
 
+    // Dubblettskydd: samma namn + kanal får bara finnas en gång, annars blir det
+    // lätt två mallar för samma sak och risk för dubbla utskick.
+    const nameToCheck = templateForm.name.trim().toLowerCase();
+    const duplicate = templates.find(
+      (template) =>
+        template.id !== templateForm.id &&
+        template.name.trim().toLowerCase().replace(/\s·\s.*$/, '') === nameToCheck.replace(/\s·\s.*$/, '') &&
+        selectedChannels.includes(template.channel as AutomationChannel),
+    );
+
+    if (duplicate) {
+      toast.error(`Du har redan en mall som heter "${duplicate.name}" för ${getOutreachChannelLabel(duplicate.channel)}. Byt namn eller redigera den befintliga.`);
+      return;
+    }
+
     setSavingTemplate(true);
 
     const baseName = templateForm.name.trim();
@@ -1273,10 +1288,16 @@ export function MessageTemplatesSettings() {
     STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
-  // Kanaler där arbetsgivaren redan har en egen aktiv mall — där behövs inte
-  // Parium-standarden visas, den ligger kvar i koden och används som fallback.
+  // Kanaler där arbetsgivaren har en egen aktiv mall SOM ÄR KOPPLAD till en påslagen regel.
+  // Först då ersätter den egna mallen Parium-standarden. Inaktiverar eller tar du bort
+  // mallen – eller stänger av regeln – kommer standardmallen tillbaka automatiskt.
+  const activeRuleTemplateIds = new Set(
+    automations.filter((automation) => automation.is_enabled).map((automation) => automation.template_id),
+  );
   const coveredChannels = new Set(
-    customTemplates.filter((template) => template.is_active).map((template) => template.channel),
+    customTemplates
+      .filter((template) => template.is_active && activeRuleTemplateIds.has(template.id))
+      .map((template) => template.channel),
   );
   const standardTemplates = templates.filter(
     (template) => isStandardTemplate(template) && !coveredChannels.has(template.channel),
@@ -1686,7 +1707,7 @@ export function MessageTemplatesSettings() {
                         </div>
                         {template.subject && <p className="break-words text-[11px] text-white md:text-xs">{template.subject}</p>}
                         <p className={`whitespace-pre-wrap break-words text-xs text-white md:text-sm ${expandedTemplateIds.includes(template.id) ? '' : 'line-clamp-2'}`}>{template.body}</p>
-                        {(template.body?.length ?? 0) > 120 && (
+                        {((template.body?.length ?? 0) > 90 || (template.body ?? '').includes('\n')) && (
                           <button
                             type="button"
                             className="text-[11px] font-medium text-white underline underline-offset-2 md:text-xs"
