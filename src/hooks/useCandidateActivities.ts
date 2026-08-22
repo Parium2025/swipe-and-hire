@@ -12,7 +12,9 @@ export type ActivityType =
   | 'added_to_pipeline'
   | 'interview_scheduled'
   | 'interview_rescheduled'
-  | 'interview_cancelled';
+  | 'interview_cancelled'
+  | 'application_submitted'
+  | 'candidate_contacted';
 
 export interface CandidateActivity {
   id: string;
