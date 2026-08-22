@@ -12,7 +12,7 @@ import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { SendMessageDialog } from '@/components/SendMessageDialog';
 import { toast } from 'sonner';
 import { useOutreachManualActions } from '@/hooks/useOutreachManualActions';
-import { MANUAL_OUTREACH_ACTIONS, type ManualOutreachActionKey } from '@/lib/outreachManualActions';
+import { type ManualOutreachActionKey } from '@/lib/outreachManualActions';
 import { SectionCard, SectionLabel, employmentStatusLabels, workScheduleLabels, availabilityLabels } from './CandidateSlideConstants';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import type { CandidateSummaryCacheValue } from '@/components/candidateProfile/candidateProfileCache';
