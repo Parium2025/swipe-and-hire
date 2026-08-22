@@ -305,6 +305,7 @@ function DelayField({ value, onChange }: { value: number; onChange: (value: numb
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
   name: '',
+  trigger: '',
   channels: ['push'],
   channelContent: {
     chat: { subject: '', body: '' },
