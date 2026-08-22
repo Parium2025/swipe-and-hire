@@ -111,6 +111,7 @@ export default function Messages() {
     }
   };
   const deepLinkHandled = useRef(false);
+  const tabSwipeStartX = useRef<number | null>(null);
   const isMobile = useIsMobile();
 
   // Handle deep-link: /messages?conversation=<id>
