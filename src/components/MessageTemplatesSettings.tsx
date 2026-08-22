@@ -1840,6 +1840,7 @@ export function MessageTemplatesSettings() {
                                 setTemplateForm({
                                   id: template.id,
                                   name: template.name,
+                                  trigger: (template.trigger as AutoRuleTrigger | null) ?? '',
                                   channels: [template.channel as AutomationChannel],
                                   channelContent: {
                                     chat: {
