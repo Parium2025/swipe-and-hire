@@ -54,7 +54,10 @@ interface CandidatesTableProps {
   onContinueLoading?: () => void;
   loadedCount?: number;
   onRatingUpdate?: (applicantId: string, rating: number) => void;
+  /** Serversidig sortering — utan denna sorteras bara de sidor som redan hämtats */
+  onServerSortChange?: (sort: 'applied_at' | 'oldest' | 'name' | 'rating') => void;
 }
+
 
 const statusConfig = {
   pending: { label: 'Ny', className: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
@@ -75,6 +78,8 @@ export function CandidatesTable({
   onContinueLoading,
   loadedCount = 0,
   onRatingUpdate,
+  onServerSortChange,
+
 }: CandidatesTableProps) {
   const deviceType = useDevice();
   const isMobile = deviceType === 'mobile';
@@ -443,16 +448,34 @@ export function CandidatesTable({
   }, [selectedRecipientApplications, user, onSelectionModeChange, queryClient]);
 
   // --- Sorting ---
+  // Sorteringen körs i databasen (hela listan), inte bara på de sidor som råkar
+  // vara nedladdade. "Senaste aktivitet" saknar serversortering och sorterar
+  // därför fortfarande de inlästa raderna.
+  const applyServerSort = useCallback(
+    (field: SortField, direction: SortDirection) => {
+      if (!onServerSortChange) return;
+      if (field === 'name' && direction) return onServerSortChange('name');
+      if (field === 'rating' && direction) return onServerSortChange('rating');
+      if (field === 'applied_at' && direction) {
+        return onServerSortChange(direction === 'asc' ? 'oldest' : 'applied_at');
+      }
+      onServerSortChange('applied_at');
+    },
+    [onServerSortChange],
+  );
+
   const handleSort = useCallback((field: SortField) => {
+    let nextField: SortField = field;
+    let nextDirection: SortDirection = 'desc';
     if (sortField === field) {
-      if (sortDirection === 'desc') setSortDirection('asc');
-      else if (sortDirection === 'asc') { setSortField(null); setSortDirection(null); }
-      else setSortDirection('desc');
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
+      if (sortDirection === 'desc') nextDirection = 'asc';
+      else if (sortDirection === 'asc') { nextField = null; nextDirection = null; }
     }
-  }, [sortField, sortDirection]);
+    setSortField(nextField);
+    setSortDirection(nextDirection);
+    if (field !== 'last_active_at') applyServerSort(nextField, nextDirection);
+  }, [sortField, sortDirection, applyServerSort]);
+
 
   // --- Team info helpers ---
   const getTeamInfo = useCallback((appId: string) => {

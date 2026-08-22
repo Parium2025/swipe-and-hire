@@ -109,6 +109,10 @@ const CandidatesContent = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Sorteringen körs serversidigt så att den gäller hela kandidatlistan,
+  // inte bara de sidor som redan hämtats.
+  const [sortBy, setSortBy] = useState<'applied_at' | 'oldest' | 'name' | 'rating'>('applied_at');
+
   const { 
     applications, 
     stats, 
@@ -125,7 +129,8 @@ const CandidatesContent = () => {
     updateRating,
     totalCount,
     totalCountCapped,
-  } = useApplicationsData(debouncedSearch, { questionFilters });
+  } = useApplicationsData(debouncedSearch, { questionFilters, sortBy });
+
 
   // Medan en ny sökning väntar/hämtas visar vi INTE ett nytt tomläge — annars
   // blinkar "Inga kandidater än" förbi när man rensar filter.
@@ -367,6 +372,8 @@ const CandidatesContent = () => {
             onContinueLoading={continueLoading}
             loadedCount={loadedCount}
             onRatingUpdate={(applicantId, rating) => updateRating.mutate({ applicantId, rating })}
+            onServerSortChange={setSortBy}
+
           />
         )}
       </div>
