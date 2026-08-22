@@ -796,6 +796,11 @@ export function CandidatesTable({
                                 Träff i anteckning
                               </span>
                             )}
+                            {application.match_source === 'answer' && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[10px] text-white font-medium">
+                                Träff i svar
+                              </span>
+                            )}
 
                           </div>
                           {application.phone && <div className="text-sm text-white">{application.phone}</div>}
