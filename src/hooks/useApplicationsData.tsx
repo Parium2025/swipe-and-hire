@@ -40,7 +40,7 @@ export interface ApplicationData {
   rating?: number | null;
   city?: string | null;
   /** Varför kandidaten matchade sökningen: profil, CV-text eller anteckning. */
-  match_source?: 'profile' | 'cv' | 'note' | null;
+  match_source?: 'profile' | 'cv' | 'note' | 'answer' | null;
   /** True när kandidatens konto har raderats — ansökan finns kvar som dokumentation. */
   account_deleted?: boolean;
 }
