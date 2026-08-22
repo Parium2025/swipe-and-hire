@@ -5,6 +5,7 @@ import {
   writeCandidateApplicationsCache,
   fetchApplicationsForApplicant,
   fetchApplicationsForApplicants,
+  isCandidateApplicationsCacheFresh,
 } from '@/lib/candidateApplicationsSource';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
@@ -50,7 +51,7 @@ export function useCandidateBatchPrefetch(applications: ApplicationData[]) {
   const prefetchSingle = useCallback(
     (application: ApplicationData) => {
       if (!userId || !application.applicant_id) return;
-      if (readCache(application.applicant_id)?.length) return;
+      if (isCandidateApplicationsCacheFresh(userId, application.applicant_id)) return;
       if (prefetchInFlightRef.current.has(application.applicant_id)) return;
 
       prefetchInFlightRef.current.add(application.applicant_id);
@@ -92,7 +93,7 @@ export function useCandidateBatchPrefetch(applications: ApplicationData[]) {
     for (const app of applications) {
       if (!app.applicant_id) continue;
       if (uncachedApplicants.has(app.applicant_id)) continue;
-      if (readCache(app.applicant_id)?.length) continue;
+      if (isCandidateApplicationsCacheFresh(userId, app.applicant_id)) continue;
       uncachedApplicants.set(app.applicant_id, app);
     }
 
@@ -123,7 +124,7 @@ export function useCandidateBatchPrefetch(applications: ApplicationData[]) {
       } catch (err) {
         console.error('[BatchPrefetch] Error:', err);
       }
-    }, 500);
+    }, 120);
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
