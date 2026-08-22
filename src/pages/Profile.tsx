@@ -2489,6 +2489,10 @@ const Profile = () => {
 
                   {/* CV Summary Section */}
                   <CvSummarySection userId={user?.id} cvUrl={cvUrl || (profile as any)?.cv_url} refreshKey={cvSummaryRefreshKey} />
+
+                  {/* Flera kandidatprofiler (max 3) */}
+                  <CandidateProfilesManager userId={user?.id} />
+
                 </>
               )}
 
