@@ -257,6 +257,26 @@ Deno.serve(async (req) => {
       }
     }
 
+    // === TYST SPÄRR: mottagaren har blockerat avsändaren ===
+    const senderId = (data as Record<string, unknown> | undefined)?.sender_id as string | undefined
+      ?? (!isServiceRole ? callerSub ?? undefined : undefined);
+    if (senderId && senderId !== recipient_id) {
+      const { data: blocks } = await supabase
+        .from('conversation_blocks')
+        .select('id')
+        .eq('blocker_id', recipient_id)
+        .eq('blocked_id', senderId)
+        .is('released_at', null)
+        .limit(1);
+      if (blocks && blocks.length > 0) {
+        console.log(`Push skipped — recipient ${recipient_id} has blocked sender`);
+        return new Response(
+          JSON.stringify({ success: true, sent: 0, skipped: 'blocked' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // === RESPEKTERA ANVÄNDARENS NOTISINSTÄLLNINGAR ===
     // Härled notistyp från payload eller data.type och kolla push-växeln.
     const rawType = payload.notification_type ?? data?.type ?? null;
