@@ -206,8 +206,10 @@ const MyCandidates = () => {
 
   const fetchCandidates = refetchCandidates;
 
-  // Preload CV summaries
-  useCvSummaryPreloader(displayedCandidates);
+  // EN samlad förvärmningspipeline (samma som /candidates):
+  // text → media (porträtt/video) → CV-sammanfattningar.
+  useCandidatePageWarmup(displayedCandidates);
+
 
   // Group candidates by stage
   const candidatesByStage = useMemo(() => {
