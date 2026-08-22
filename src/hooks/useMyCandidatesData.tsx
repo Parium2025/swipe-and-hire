@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, useId } from 'react';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -149,6 +149,8 @@ function updateMyCandidatesCache(
 
 export function useMyCandidatesData(searchQuery: string = '', listId: string | null = null) {
   const { user } = useAuth();
+  const instanceId = useId();
+
   const queryClient = useQueryClient();
 
   // Stable query key for optimistic updates (must match useInfiniteQuery key exactly)
@@ -595,7 +597,8 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
     if (!user) return;
 
     const channel = supabase
-      .channel('my-candidates-team-sync')
+      .channel(`my-candidates-team-sync:${instanceId}`)
+
       .on(
         'postgres_changes',
         {
