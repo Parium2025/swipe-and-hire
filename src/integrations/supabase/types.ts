@@ -3455,48 +3455,6 @@ export type Database = {
       }
     }
     Functions: {
-      __tmp_search_check: {
-        Args: {
-          p_count_cap?: number
-          p_cursor_applied_at?: string
-          p_cursor_id?: string
-          p_filters?: Json
-          p_limit?: number
-          p_offset?: number
-          p_search?: string
-          p_sort?: string
-          p_status?: string
-          p_with_count?: boolean
-        }
-        Returns: {
-          account_deleted: boolean
-          age: number
-          applicant_id: string
-          applied_at: string
-          availability: string
-          bio: string
-          custom_answers: Json
-          cv_url: string
-          email: string
-          employment_status: string
-          first_name: string
-          id: string
-          job_id: string
-          job_occupation: string
-          job_title: string
-          last_name: string
-          location: string
-          match_source: string
-          phone: string
-          questions_snapshot: Json
-          rating: number
-          status: string
-          total_count: number
-          updated_at: string
-          viewed_at: string
-          work_schedule: string
-        }[]
-      }
       auth_email_registered: {
         Args: { _email: string }
         Returns: {

@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.__tmp_search_check(text, jsonb, text, text, integer, integer, boolean, timestamptz, uuid, integer);
