@@ -292,30 +292,7 @@ export const CandidateProfileDialog = ({
   };
 
   const candidateName = `${displayApp.first_name || ''} ${displayApp.last_name || ''}`.trim() || 'Kandidat';
-  const quickActions = [
-    outreachManualActions.hasAction('progress')
-      ? {
-          key: 'progress' as const,
-          label: 'Gå vidare',
-          variant: outreachManualActions.groups.progress.action.buttonVariant,
-          onClick: () => {
-            setSendMessagePreset('progress');
-            setSendMessageOpen(true);
-          },
-        }
-      : null,
-    outreachManualActions.hasAction('rejection')
-      ? {
-          key: 'rejection' as const,
-          label: 'Avslag',
-          variant: outreachManualActions.groups.rejection.action.buttonVariant,
-          onClick: () => {
-            setSendMessagePreset('rejection');
-            setSendMessageOpen(true);
-          },
-        }
-      : null,
-  ].filter(Boolean);
+
 
   return (
     <>
@@ -486,7 +463,6 @@ export const CandidateProfileDialog = ({
             stageOrder={stageOrder}
             stageConfig={stageConfig}
             onStageChange={onStageChange}
-            quickActions={quickActions}
           />
           </div>
 
