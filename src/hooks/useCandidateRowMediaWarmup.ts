@@ -77,7 +77,7 @@ export function useCandidateRowMediaWarmup(rows: RowWithMedia[] | undefined, ena
 
     return () => {
       cancelled = true;
-      if (idleId !== undefined && 'cancelIdleCallback' in window) {
+      if (idleId !== undefined && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
         (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
       }
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
