@@ -758,13 +758,12 @@ export function MessageTemplatesSettings() {
     group_id: group?.groupId ?? null,
     automation_ids: group?.automations.map((automation) => automation.id) ?? [],
     name: group?.primary.name ?? family.baseName,
-    // Sparad regel vinner. Annars ärvs händelsen från mallen (steg 1) så värdet följer med hit.
+    // Händelsen sitter ALLTID på mallen. Regeln får aldrig ha en annan trigger än sin mall —
+    // annars kan man t.ex. spara en "ansökan inkommen"-mall men trigga den på "annonsen avslutas".
     trigger:
-      group?.primary.trigger && group.primary.trigger !== 'manual_send'
-        ? normalizeTimelineTrigger(group.primary.trigger)
-        : family.primaryTemplate.trigger && family.primaryTemplate.trigger !== 'manual_send'
-          ? normalizeTimelineTrigger(family.primaryTemplate.trigger as OutreachTrigger)
-          : '',
+      family.primaryTemplate.trigger && family.primaryTemplate.trigger !== 'manual_send'
+        ? normalizeTimelineTrigger(family.primaryTemplate.trigger as OutreachTrigger)
+        : '',
     channels: family.channels,
 
     recipient_type: 'candidate',
