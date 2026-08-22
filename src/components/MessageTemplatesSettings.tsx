@@ -868,8 +868,19 @@ export function MessageTemplatesSettings() {
     return () => window.removeEventListener('resize', updateIndicator);
   }, [activeStudioTab, templates.length, automations.length, logs.length]);
 
+  // Efter sparad/uppdaterad mall ska redigeraren vara helt blank —
+  // inklusive det autosparade utkastet, annars kommer texten tillbaka.
+  const resetTemplateEditor = () => {
+    setTemplateForm(EMPTY_TEMPLATE_FORM);
+    setActiveTemplateChannel('push');
+    if (templateDraftKey) {
+      try { localStorage.removeItem(templateDraftKey); } catch { /* ignore */ }
+    }
+  };
+
   const handleSaveTemplate = async () => {
     if (!user || !templateForm.name.trim() || templateForm.channels.length === 0) return;
+
 
     const selectedChannels = CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel));
     const missingBody = selectedChannels.some((channel) => !templateForm.channelContent[channel].body.trim());
