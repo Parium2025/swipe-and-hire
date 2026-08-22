@@ -79,8 +79,6 @@ export function useCardImage(
     [resolvedUrl]
   );
 
-  const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
-  const [blobFailed, setBlobFailed] = useState(false);
   // Bild-CDN:en kan neka transformering (t.ex. mycket stora original) → fall
   // tillbaka på originalbilden så att kortet aldrig blir tomt.
   const [transformFailed, setTransformFailed] = useState(false);
@@ -95,36 +93,22 @@ export function useCardImage(
     return appendVersionToUrl(data?.publicUrl || null, version);
   }, [normalizedRawPath, bucket, version]);
 
-  // Steg 3: Async ladda till blob-cache OM inte redan i cache.
-  // Notera: setState körs bara när bilden faktiskt levereras → ingen extra
-  // re-render under tab-switch om cachen är varm.
+  // Steg 3: Fyll blob-cachen i bakgrunden OM bilden inte redan finns där.
+  // Vi byter ALDRIG src på en bild som redan ritats (raw → blob tvingar en
+  // omladdning som syns som ett ryck) — blobben plockas upp synkront
+  // (cachedBlobUrl) vid nästa montering istället.
   useEffect(() => {
-    if (!resolvedUrl || cachedBlobUrl) {
-      if (loadedBlobUrl !== null) setLoadedBlobUrl(null);
-      return;
-    }
-    setBlobFailed(false);
+    if (!resolvedUrl || cachedBlobUrl) return;
     let cancelled = false;
     imageCache
       .loadImage(resolvedUrl)
-      .then((blobUrl) => {
-        // Byt ALDRIG src på en bild som redan ritats (raw → blob tvingar en
-        // omladdning som syns som ett ryck). Blobben ligger kvar i cachen och
-        // plockas upp synkront (cachedBlobUrl) vid nästa montering.
-        if (!cancelled && !resolvedUrl) setLoadedBlobUrl(blobUrl);
-      })
       .catch(() => {
-        // Blob-fetch misslyckades → tillåt fallback till raw URL,
-        // och till originalbilden om transformeringen nekades.
-        if (!cancelled) {
-          setBlobFailed(true);
-          if (originalUrl && resolvedUrl !== originalUrl) setTransformFailed(true);
-        }
+        // Transformeringen nekades → visa originalbilden istället.
+        if (!cancelled && originalUrl && resolvedUrl !== originalUrl) setTransformFailed(true);
       });
     return () => {
       cancelled = true;
     };
-    // loadedBlobUrl avsiktligt utelämnad: vi vill inte rerenda kedjan
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedUrl, cachedBlobUrl]);
 
@@ -135,7 +119,7 @@ export function useCardImage(
   // placeholder om blob-fetchen aldrig avslutades.)
   const displayUrl = transformFailed && originalUrl
     ? originalUrl
-    : (cachedBlobUrl || loadedBlobUrl || resolvedUrl);
+    : (cachedBlobUrl || resolvedUrl);
 
   // 🚀 Proaktiv decode: så fort vi har en URL, dekoda bitmapen off-main-thread.
   // Eliminerar "decode-blinken" när ett kort re-mountas efter scroll — bilden
@@ -152,7 +136,6 @@ export function useCardImage(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
       if (e.currentTarget.src.startsWith('blob:')) {
         if (resolvedUrl) imageCache.evict(resolvedUrl);
-        setBlobFailed(true);
         return;
       }
       // Transformerad URL kunde inte renderas → visa originalbilden istället

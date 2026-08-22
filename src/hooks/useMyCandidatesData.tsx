@@ -305,24 +305,6 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
         const lastItem = searchResults[searchResults.length - 1];
         const nextCursor = searchResults.length === PAGE_SIZE ? lastItem.updated_at : null;
 
-        const allImagePaths = items
-          .map((item) => item.profile_image_url)
-          .filter((path): path is string => typeof path === 'string' && path.trim() !== '');
-        const imagePaths = allImagePaths.slice(0, 12);
-        // Endast signering (ingen nedladdning) → billigt, kör hela sidan
-        const videoPaths = items
-          .filter((item) => item.is_profile_video && item.video_url)
-          .map((item) => item.video_url)
-          .filter((path): path is string => typeof path === 'string' && path.trim() !== '');
-
-        // Matcha CandidateAvatar (40px, 2x retina) + förladda full-size för profil-dialog (instant open, ingen FA-fallback)
-        setTimeout(() => {
-          void Promise.allSettled([
-            ...allImagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400, AVATAR_TRANSFORM)),
-            ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400)),
-            ...videoPaths.map((path) => prefetchMediaUrl(path, 'profile-video')),
-          ]);
-        }, 0);
 
 
         return { items, nextCursor };
@@ -490,24 +472,6 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
       const lastItem = myCandidates[myCandidates.length - 1];
       const nextCursor = myCandidates.length === PAGE_SIZE ? lastItem.updated_at : null;
 
-      const allImagePaths = items
-        .map((item) => item.profile_image_url)
-        .filter((path): path is string => typeof path === 'string' && path.trim() !== '');
-      const imagePaths = allImagePaths.slice(0, 12);
-      // Endast signering (ingen nedladdning) → billigt, kör hela sidan
-      const videoPaths = items
-        .filter((item) => item.is_profile_video && item.video_url)
-        .map((item) => item.video_url)
-        .filter((path): path is string => typeof path === 'string' && path.trim() !== '');
-
-      // Matcha CandidateAvatar (40px, 2x retina) + förladda full-size för profil-dialog (instant open, ingen FA-fallback)
-      setTimeout(() => {
-        void Promise.allSettled([
-          ...allImagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400, AVATAR_TRANSFORM)),
-          ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400)),
-          ...videoPaths.map((path) => prefetchMediaUrl(path, 'profile-video')),
-        ]);
-      }, 0);
 
 
       // 🔥 Cache first page for instant-load on next visit (only for non-search)
@@ -588,6 +552,15 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
         jobs.push(prefetchMediaUrl(vid, 'profile-video'));
       }
     }
+    // Förvärm full-size porträtt för de översta raderna → profil-dialogen
+    // öppnas med bilden på plats (aldrig initialer eller tom cirkel).
+    for (const c of candidates.slice(0, 12)) {
+      const img = typeof c.profile_image_url === 'string' ? c.profile_image_url.trim() : '';
+      if (img && !warmedMediaRef.current.has(`f:${img}`)) {
+        warmedMediaRef.current.add(`f:${img}`);
+        jobs.push(prefetchMediaUrl(img, 'profile-image', 86400));
+      }
+    }
     if (jobs.length > 0) void Promise.allSettled(jobs);
   }, [candidates]);
 
@@ -662,7 +635,7 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
     if (!user) return;
 
     const profilesChannel = supabase
-      .channel('candidate-activity-profiles')
+      .channel(`candidate-activity-profiles:${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -697,7 +670,7 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
       .subscribe();
 
     const applicationsChannel = supabase
-      .channel('candidate-activity-applications')
+      .channel(`candidate-activity-applications:${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -743,7 +716,7 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
     if (!user) return;
 
     const ratingsChannel = supabase
-      .channel('candidate-ratings-sync')
+      .channel(`candidate-ratings-sync:${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -777,7 +750,7 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
       .subscribe();
 
     const notesChannel = supabase
-      .channel('candidate-notes-sync')
+      .channel(`candidate-notes-sync:${instanceId}`)
       .on(
         'postgres_changes',
         {
