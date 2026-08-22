@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
-import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType } from '@/lib/chatFileTypes';
+import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType, inspectFileContent } from '@/lib/chatFileTypes';
 import { useConversationMessages, type Conversation, type ConversationMessage } from '@/hooks/useConversations';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
@@ -899,11 +899,20 @@ export function ChatView({
                       <div
                         key={msg.id}
                         id={`msg-${msg.id}`}
+                        // ⚡ Native virtualisering: webbläsaren hoppar över
+                        // layout/målning för bubblor utanför skärmen, men
+                        // behåller elementet så att sökning och scroll-till-
+                        // meddelande fortsätter fungera exakt som förut.
+                        style={{
+                          contentVisibility: 'auto',
+                          containIntrinsicSize: 'auto 72px',
+                        } as React.CSSProperties}
                         className={cn(
                           "transition-colors rounded-lg",
                           isSearchHighlighted && "bg-yellow-500/10 ring-1 ring-yellow-500/30 p-1 -m-1"
                         )}
                       >
+
                         <MessageBubble
                           message={resolvedMessage}
                           isOwn={isOwnMsg}
