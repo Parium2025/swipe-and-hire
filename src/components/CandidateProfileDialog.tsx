@@ -402,6 +402,14 @@ export const CandidateProfileDialog = ({
                 <div className="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
                   <ProfileVideo videoUrl={videoUrl} coverImageUrl={profileImageUrl || profileThumbUrl || undefined} userInitials={initials} className="w-full h-full" showCountdown={true} countdownVariant="circle" showProgressBar={false} />
                 </div>
+              ) : mediaPending ? (
+                // Kandidaten HAR media men URL:en är inte klar ännu. Visa aldrig
+                // initialer här — då hinner man se "FA" innan porträttet/videon
+                // dyker upp. En neutral cirkel håller layouten still istället.
+                <div
+                  className="w-24 h-24 md:w-48 md:h-48 rounded-full border-4 border-white/20 shadow-xl bg-white/10"
+                  aria-hidden
+                />
               ) : (
                 <Avatar key={displayApp.id} className="w-24 h-24 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
                   {/* Cachad listavatar visas direkt medan högupplösta porträttet hämtas */}
