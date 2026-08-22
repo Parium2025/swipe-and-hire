@@ -370,8 +370,9 @@ export function ChatView({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error('Filen är för stor (max 50 MB)');
+    const check = validateAttachment(file);
+    if (!check.ok) {
+      toast.error(check.error!, check.description ? { description: check.description } : undefined);
       return;
     }
 
