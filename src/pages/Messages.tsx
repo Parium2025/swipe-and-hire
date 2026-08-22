@@ -136,12 +136,14 @@ export default function Messages() {
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
-  // Categorize conversations
+  // Kategorisering: databasens `kind` är facit. Äldre samtal saknar värdet
+  // och faller tillbaka på rollerna hos övriga deltagare.
   const categorizeConversation = (conv: Conversation): 'candidates' | 'colleagues' => {
+    if (conv.kind === 'internal') return 'colleagues';
     const otherMembers = (conv.members || []).filter(m => m.user_id !== user?.id);
     const roles = otherMembers.map(m => m.profile?.role).filter(Boolean);
     if (roles.includes('job_seeker')) return 'candidates';
-    if (roles.includes('employer')) return 'colleagues';
+    if (roles.includes('employer') && !conv.candidate_id && !conv.application_id) return 'colleagues';
     return 'candidates';
   };
 
