@@ -11,7 +11,7 @@ import { AddToColleagueListDialog, type CandidateToAdd } from './AddToColleagueL
 import { useCandidateLists } from '@/hooks/useCandidateLists';
 import { UserPlus, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
+
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
