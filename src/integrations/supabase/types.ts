@@ -2289,6 +2289,7 @@ export type Database = {
           id: string
           interview_id: string | null
           job_id: string | null
+          locked_until: string | null
           next_attempt_at: string | null
           organization_id: string | null
           owner_user_id: string
@@ -2310,6 +2311,7 @@ export type Database = {
           id?: string
           interview_id?: string | null
           job_id?: string | null
+          locked_until?: string | null
           next_attempt_at?: string | null
           organization_id?: string | null
           owner_user_id: string
@@ -2331,6 +2333,7 @@ export type Database = {
           id?: string
           interview_id?: string | null
           job_id?: string | null
+          locked_until?: string | null
           next_attempt_at?: string | null
           organization_id?: string | null
           owner_user_id?: string
@@ -3394,6 +3397,42 @@ export type Database = {
       claim_admin_alert: {
         Args: { _alert_key: string; _cooldown_minutes?: number }
         Returns: boolean
+      }
+      claim_outreach_dispatch: {
+        Args: {
+          p_interview_id?: string
+          p_limit?: number
+          p_owner_user_id?: string
+          p_trigger?: Database["public"]["Enums"]["outreach_trigger"]
+        }
+        Returns: {
+          attempt_count: number
+          automation_id: string | null
+          channel: Database["public"]["Enums"]["outreach_channel"]
+          conversation_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          interview_id: string | null
+          job_id: string | null
+          locked_until: string | null
+          next_attempt_at: string | null
+          organization_id: string | null
+          owner_user_id: string
+          payload: Json
+          recipient_email: string | null
+          recipient_user_id: string | null
+          sent_at: string | null
+          status: string
+          template_id: string | null
+          trigger: Database["public"]["Enums"]["outreach_trigger"]
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "outreach_dispatch_logs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       cleanup_stale_sessions: { Args: never; Returns: number }
       complete_cv_analysis: {
