@@ -149,6 +149,8 @@ function updateMyCandidatesCache(
 
 export function useMyCandidatesData(searchQuery: string = '', listId: string | null = null) {
   const { user } = useAuth();
+  const instanceId = useId();
+
   const queryClient = useQueryClient();
 
   // Stable query key for optimistic updates (must match useInfiniteQuery key exactly)
