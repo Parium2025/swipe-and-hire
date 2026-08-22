@@ -57,6 +57,8 @@ export interface ConversationMessage {
   };
 }
 
+export type ConversationKind = 'job' | 'internal';
+
 export interface Conversation {
   id: string;
   name: string | null;
@@ -64,6 +66,9 @@ export interface Conversation {
   job_id: string | null;
   application_id: string | null; // Current job context - updates when switching jobs
   candidate_id: string | null; // The job seeker user ID - one conversation per candidate
+  /** 'job' = kandidatchatt, 'internal' = kollegachatt inom organisationen. */
+  kind?: ConversationKind;
+  organization_id?: string | null;
   created_by: string;
   created_at: string;
   last_message_at: string | null;
