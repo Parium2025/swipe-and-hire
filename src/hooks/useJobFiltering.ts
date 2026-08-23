@@ -50,7 +50,19 @@ export type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'act
 
 const validSortOptions: SortOption[] = ['newest', 'oldest', 'title-asc', 'title-desc', 'active-first', 'expired-first', 'draft-first'];
 
-export const useJobFiltering = (jobs: FilterableJob[]) => {
+export interface UseJobFilteringOptions {
+  /**
+   * 'personal' = bara mina egna annonser (t.ex. /my-jobs).
+   * Utan detta kunde serversökningen (som alltid söker i hela organisationen)
+   * returnera kollegors annonser i den personliga vyn.
+   */
+  scope?: 'personal' | 'organization';
+  /** Inloggad användares id – används för att låsa serversöket till 'personal'. */
+  ownerId?: string | null;
+}
+
+export const useJobFiltering = (jobs: FilterableJob[], options: UseJobFilteringOptions = {}) => {
+  const { scope = 'organization', ownerId = null } = options;
   const [searchParams] = useSearchParams();
   const sortFromUrl = searchParams.get('sort');
   const initialSort: SortOption = sortFromUrl && validSortOptions.includes(sortFromUrl as SortOption) 
