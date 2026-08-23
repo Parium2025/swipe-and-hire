@@ -242,7 +242,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   </Button>
                 </ActionTip>
               )}
-              {!hideActions && isExpired && onRepublish && (
+              {!hideActions && isExpired && isOwner && onRepublish && (
                 <ActionTip label="Återpublicera annons">
                   <Button
                     size="sm"
