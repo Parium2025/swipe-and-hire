@@ -275,12 +275,17 @@ const Dashboard = memo(() => {
     const expiredCount = serverCounts?.expired ?? expiredJobs.length;
     const totalViews = serverStats?.total_views ?? filteredStats.totalViews;
     const totalApplications = serverStats?.total_applications ?? filteredStats.totalApplications;
+    // Under laddning: server-siffrorna (SWR-seedade från localStorage) är alltid
+    // sannare än sessionStorage-fallbacken. "Annonser" = aktiva + utgångna, så
+    // fallbacken måste vara dashboard-totalen — inte antalet aktiva.
+    const seeded = !!serverCounts;
+    const seededStats = !!serverStats;
     return [
-      { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : totalJobs, loading: false, isLoading },
+      { icon: Briefcase, title: 'Annonser', value: isLoading && !seeded ? preloadedEmployerDashboardJobs : totalJobs, loading: false, isLoading },
       {
         icon: TrendingUp,
         title: 'Aktiva',
-        value: isLoading ? preloadedEmployerActiveJobs : activeCount,
+        value: isLoading && !seeded ? preloadedEmployerActiveJobs : activeCount,
         loading: false,
         isLoading,
         onClick: () => goToTab('active'),
