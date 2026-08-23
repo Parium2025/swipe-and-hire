@@ -123,14 +123,15 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   }, [user?.id, queryClient]);
 
 
-  const activeJobsCount = activeJobIds.length;
+  const activeJobsCount = serverCounts?.active ?? 0;
   useEffect(() => {
-    if (!jobsLoading && activeJobsCount > 0) {
-      writeEmployerCachedStat(user?.id, 'active_jobs', activeJobsCount);
+    if (!countsLoading && serverCounts) {
+      writeEmployerCachedStat(user?.id, 'active_jobs', serverCounts.active);
     }
-  }, [activeJobsCount, jobsLoading, user?.id]);
+  }, [serverCounts, countsLoading, user?.id]);
 
-  const displayActiveJobs = jobsLoading ? (cachedStats['active_jobs'] ?? 0) : activeJobsCount;
+  const displayActiveJobs = serverCounts ? activeJobsCount : (cachedStats['active_jobs'] ?? 0);
+
 
   const statsArray: StatData[] = useMemo(() => [
     { icon: Briefcase, label: 'Aktiva annonser', value: displayActiveJobs, description: 'Mina aktiva jobbannonser', link: '/my-jobs?sort=active-first', emptyHint: 'Skapa din första annons' },
