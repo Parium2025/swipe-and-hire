@@ -15,6 +15,8 @@ export interface StatusColumnProps {
   /** Serverside-total för steget. Kan vara högre än `applications.length`
    *  medan bakgrundsladdningen fortfarande strömmar in sidor. */
   stageTotal?: number | null;
+  /** true medan bakgrundsladdningen fortfarande hämtar sidor. */
+  isStreaming?: boolean;
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
   onPrefetch?: (app: JobApplication) => void;
