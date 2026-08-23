@@ -434,18 +434,18 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
           <div className="flex flex-wrap gap-2 mt-3 justify-center">
             {hasMore && (
               <button
-                onClick={() => setVisibleCount(prev => Math.min(prev + step, enrichedTtfa.length))}
-                className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
-              >
-                Visa fler ({enrichedTtfa.length - visibleCount} kvar)
-              </button>
-            )}
-            {hasMore && (
-              <button
                 onClick={() => setVisibleCount(enrichedTtfa.length)}
                 className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
               >
                 Visa alla ({enrichedTtfa.length})
+              </button>
+            )}
+            {hasMore && (
+              <button
+                onClick={() => setVisibleCount(prev => Math.min(prev + step, enrichedTtfa.length))}
+                className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+              >
+                Visa fler ({enrichedTtfa.length - visibleCount} kvar)
               </button>
             )}
             {canStepBack && (
