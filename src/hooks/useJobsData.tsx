@@ -121,10 +121,23 @@ function writeJobsCache(userId: string, scope: string, orgId: string | null, job
 }
 
 /**
+ * 🪦 Tombstones: annonser som raderats i den här fliken. En bakgrundsström som
+ * redan hunnit läsa raden innan raderingen får aldrig skriva tillbaka den i
+ * sin auktoritativa slutskrivning ("ghost job").
+ */
+const deletedJobIds = new Set<string>();
+const DELETED_TTL_MS = 5 * 60 * 1000;
+
+const dropDeleted = <T extends { id: string }>(rows: T[]): T[] =>
+  deletedJobIds.size === 0 ? rows : rows.filter((r) => !deletedJobIds.has(r.id));
+
+/**
  * Tar bort en annons ur localStorage-cachen direkt vid radering, så den aldrig
  * kan "blinka tillbaka" vid en omladdning innan servern hunnit svara.
  */
 export function removeJobFromJobsCache(userId: string, jobId: string): void {
+  deletedJobIds.add(jobId);
+  setTimeout(() => deletedJobIds.delete(jobId), DELETED_TTL_MS);
   for (const scope of ['personal', 'organization']) {
     const key = cacheKeyFor(userId, scope);
     try {
@@ -139,6 +152,7 @@ export function removeJobFromJobsCache(userId: string, jobId: string): void {
     }
   }
 }
+
 
 
 export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
