@@ -23,6 +23,7 @@ import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
+import { useCandidateRowProfileWarmup } from '@/hooks/useCandidateRowProfileWarmup';
 import { formatTimeAgo } from '@/lib/date';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -169,6 +170,11 @@ export const CandidateProfileDialog = ({
     if (!selected || selected.applicant_id !== application?.applicant_id) return application;
     return selected;
   }, [allApplications, selectedApplicationId, application]);
+
+  // En kandidat kan ha flera ansökningar med olika jobb, frågesnapshots och CV.
+  // Sidans rad-warmup känner bara till den synliga ansökan, så värm resten så
+  // snart kandidatens kompletta ansökningslista finns tillgänglig.
+  useCandidateRowProfileWarmup(allApplications, open && !!allApplications?.length);
 
   useLayoutEffect(() => {
     const snapshot = getQuestionSnapshot(activeApplication);
