@@ -128,8 +128,10 @@ function writeJobsCache(userId: string, scope: string, orgId: string | null, job
 const deletedJobIds = new Set<string>();
 const DELETED_TTL_MS = 5 * 60 * 1000;
 
-const dropDeleted = <T extends { id: string }>(rows: T[]): T[] =>
+export const dropDeletedJobs = <T extends { id: string }>(rows: T[]): T[] =>
   deletedJobIds.size === 0 ? rows : rows.filter((r) => !deletedJobIds.has(r.id));
+
+const dropDeleted = dropDeletedJobs;
 
 /**
  * Tar bort en annons ur localStorage-cachen direkt vid radering, så den aldrig
