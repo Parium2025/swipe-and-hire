@@ -260,8 +260,10 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
 
   // Word-level gibberish detection — ANY gibberish word flags the input
   // (one real word + gibberish = still not a valid criterion)
-  if (words.length >= 1) {
-    const gibberishWords = words.filter(w => w.length >= 3 && isGibberishWord(w));
+  // Uses the original casing so acronyms (SQL, HLR, YKB) are recognised.
+  const originalWords = trimmed.split(/\s+/).filter(w => w.length > 0);
+  if (originalWords.length >= 1) {
+    const gibberishWords = originalWords.filter(w => w.length >= 3 && isGibberishWord(w));
     if (gibberishWords.length > 0) {
       return { isValid: false, reason: 'Formulera ett tydligt krav utan oläsbara ord.' };
     }
