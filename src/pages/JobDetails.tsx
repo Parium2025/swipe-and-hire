@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useDragScroll } from '@/hooks/useDragScroll';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { usePullToDismiss } from '@/hooks/usePullToDismiss';
 import { useAuth } from '@/hooks/useAuth';
@@ -63,7 +62,6 @@ const JobDetails = () => {
   const useMobileView = isTouchDevice || device === 'mobile';
 
   const { setStageCount } = useKanbanLayout();
-  const dragScrollRef = useDragScroll<HTMLDivElement>();
   const pageRef = useRef<HTMLDivElement>(null);
 
   const handleBack = useCallback(() => {
