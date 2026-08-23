@@ -968,9 +968,25 @@ interface JobReviewMap {
 interface RealtimeJobPosting extends Partial<SearchJob> {
   id: string;
   deleted_at?: string | null;
+  published_at?: string | null;
 }
 
-const isRealtimeJobVisible = (job?: RealtimeJobPosting | null) => Boolean(job?.is_active && !job?.deleted_at);
+/**
+ * Måste spegla samma regel som `search_jobs`-RPC:n: publicerad, aktiv, ej
+ * raderad OCH ej utgången. Utan expires_at-kontrollen blev en annons som
+ * gick ut medan jobbsökaren hade listan öppen kvar i listan tills nästa
+ * refetch — sökningen och realtidsströmmen hade två olika sanningar.
+ */
+const isRealtimeJobVisible = (job?: RealtimeJobPosting | null) => {
+  if (!job?.is_active || job?.deleted_at) return false;
+  const expiresAt = job.expires_at;
+  if (job.published_at && expiresAt) {
+    const ts = new Date(expiresAt).getTime();
+    if (!Number.isNaN(ts) && ts < Date.now()) return false;
+  }
+  return true;
+};
+
 
 function useCompanyReviews(employerIds: string[]) {
   return useQuery({
