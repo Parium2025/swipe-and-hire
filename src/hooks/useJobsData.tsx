@@ -98,16 +98,22 @@ function readJobsCache(userId: string, scope: string, orgId: string | null): Job
 
 function writeJobsCache(userId: string, scope: string, orgId: string | null, jobs: JobPosting[]): void {
   const key = cacheKeyFor(userId, scope);
+  // 🔥 SCALE: Cachen får ALDRIG innehålla en trunkerad lista — då visar UI:t
+  // "4 av 34". Är datasetet större än vad som ryms i localStorage skippar vi
+  // cachen helt och hämtar färskt istället.
+  if (jobs.length > 500) {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return;
+  }
   const cached: CachedJobs = {
-    // 🔥 SCALE: 500 jobb täcker 99% av alla orgs utan att spränga 5MB-quotan.
-    // safeStorage evictar äldre cache-entries automatiskt om vi ändå når taket.
-    jobs: jobs.slice(0, 500),
+    jobs,
     scope,
     orgId,
     timestamp: Date.now(),
   };
   safeSetItem(key, JSON.stringify(cached));
 }
+
 
 export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
   const { user, profile } = useAuth();
