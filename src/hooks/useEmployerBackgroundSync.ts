@@ -8,7 +8,6 @@ import { updateLastSyncTime } from '@/lib/draftUtils';
 import { createBulletproofChannel } from '@/lib/bulletproofChannel';
 import { clampJobTitle } from '@/lib/jobTitle';
 
-const JOBS_CACHE_KEY = 'parium_employer_jobs_v3_';
 const INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_';
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
@@ -59,32 +58,36 @@ export const useEmployerBackgroundSync = () => {
 
   // 📋 Preload arbetsgivarens jobb (alltid hämta färsk data - realtime synkar)
   const preloadJobs = useCallback(async (userId: string, orgId: string | null) => {
-    const cacheKey = JOBS_CACHE_KEY + userId;
+    // useJobsData äger den kompletta jobb-cachen. Den här bakgrundssynken får
+    // aldrig skriva sin begränsade 18-raders preload till samma queryKey:
+    // då ersätts t.ex. 48 laddade annonser med 14 aktiva + 4 utgångna, medan
+    // serverräknaren fortfarande korrekt visar 34 utgångna.
+    const PAGE_SIZE = 1000;
+    const HARD_CAP = 2_000;
+    const jobs: any[] = [];
 
-    const { data, error } = await supabase
-      .from('job_postings')
-      .select(`
-        *,
-        employer_profile:profiles!job_postings_employer_id_fkey (
-          first_name,
-          last_name
-        )
-      `)
-      .eq('employer_id', userId)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-      .limit(INITIAL_PAGE_SIZE);
+    for (let from = 0; from < HARD_CAP; from += PAGE_SIZE) {
+      const { data, error } = await supabase
+          .from('job_postings')
+          .select(`
+            *,
+            employer_profile:profiles!job_postings_employer_id_fkey (
+              first_name,
+              last_name
+            )
+          `)
+          .eq('employer_id', userId)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .range(from, Math.min(from + PAGE_SIZE - 1, HARD_CAP - 1));
 
-    if (!error && data) {
-      safeSetItem(cacheKey, JSON.stringify({
-        jobs: data,
-        scope: 'personal',
-        orgId,
-        timestamp: Date.now(),
-      }));
-      
-      queryClient.setQueryData(['jobs', 'personal', orgId, userId], data);
+      if (error) throw error;
+      const batch = data ?? [];
+      jobs.push(...batch);
+      if (batch.length < PAGE_SIZE) break;
     }
+
+    queryClient.setQueryData(['jobs', 'personal', orgId, userId], jobs);
   }, [queryClient]);
 
   // 📅 Preload arbetsgivarens intervjuer (alltid hämta färsk data - realtime synkar)
