@@ -373,7 +373,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
             <h3 className="min-w-0 text-sm font-medium leading-tight text-white [overflow-wrap:anywhere]">
               Tid till första ansökan per annons
             </h3>
-            <InlineInfoTooltip content="Visar hur snabbt varje annons fick sin första ansökan. Baren representerar antal ansökningar — längre bar = fler ansökningar." />
+            <InlineInfoTooltip content="Visar hur snabbt varje annons fick sin första ansökan, räknat från publiceringstillfället (inte när utkastet skapades). Baren representerar antal ansökningar — längre bar = fler ansökningar." />
         </div>
         <div className="space-y-2">
           {visible.map((t, i) => {
