@@ -12,6 +12,9 @@ export interface StatusColumnProps {
   jobId: string;
   status: string;
   applications: JobApplication[];
+  /** Serverside-total för steget. Kan vara högre än `applications.length`
+   *  medan bakgrundsladdningen fortfarande strömmar in sidor. */
+  stageTotal?: number | null;
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
   onPrefetch?: (app: JobApplication) => void;
@@ -37,6 +40,7 @@ export const StatusColumn = memo(({
   jobId,
   status, 
   applications, 
+  stageTotal,
   onOpenProfile, 
   onMarkAsViewed, 
   onPrefetch,
@@ -52,6 +56,9 @@ export const StatusColumn = memo(({
   onMoveCandidatesAndDelete,
   stageIndex = 0,
 }: StatusColumnProps) => {
+  const displayCount = Math.max(stageTotal ?? 0, applications.length);
+  const isStreaming = applications.length < displayCount;
+
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
