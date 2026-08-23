@@ -565,7 +565,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
           onTouchMove={stageSwipeHandlers.onTouchMove}
           onTouchEnd={stageSwipeHandlers.onTouchEnd}
         >
-          <ScrollArea className="overscroll-contain touch-pan-y h-full" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
+          <ScrollArea
+            className="overscroll-contain touch-pan-y h-full"
+            style={{ maxHeight: 'calc(100dvh - 340px)' }}
+            /* capture: scroll-eventet kommer från Radix inre viewport och bubblar inte */
+            onScrollCapture={handleListScroll}
+          >
             <div className="flex flex-col gap-2">
               {currentCandidates.length === 0 ? (
                 <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center">
