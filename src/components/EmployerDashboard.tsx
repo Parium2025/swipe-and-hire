@@ -590,8 +590,8 @@ const EmployerDashboard = memo(() => {
           { label: 'Utkast', value: draftCount, cacheKey: 'emp_draft_jobs', onClick: () => goToTab('draft'), ariaLabel: 'Visa utkast' },
         ],
       },
-      { icon: Eye, title: 'Visningar', value: loading ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading: loading, cacheKey: 'emp_total_views' },
-      { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : totalApps, loading: false, isLoading: loading, cacheKey: 'emp_total_apps', onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
+      { icon: Eye, title: 'Visningar', value: loading && !seededStats ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading: loading, cacheKey: 'emp_total_views' },
+      { icon: Users, title: 'Ansökningar', value: loading && !seededStats ? preloadedEmployerTotalApplications : totalApps, loading: false, isLoading: loading, cacheKey: 'emp_total_apps', onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
     ];
   }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
