@@ -184,7 +184,8 @@ function NotificationItem({
         </div>
       </div>
 
-    </motion.button>
+    </motion.div>
+
   );
 }
 
