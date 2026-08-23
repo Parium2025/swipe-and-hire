@@ -337,6 +337,7 @@ const App = () => {
             <TooltipProvider delayDuration={0}>
               <Toaster />
               <AppFailureMonitor />
+              <CriteriaEvalProgress />
               <BrowserRouter>
                 <AppShell showHeader={showHeader} />
               </BrowserRouter>
