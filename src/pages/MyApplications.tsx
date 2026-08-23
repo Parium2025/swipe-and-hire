@@ -352,16 +352,17 @@ const MyApplications = () => {
                 <AlertTriangle className="h-4 w-4 text-white" />
               </div>
               <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
-                Ta bort ansökan
+                Dölj ansökan
               </AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {applicationToRemove && (
                 <>
-                  Är du säker på att du vill ta bort din ansökan för <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{applicationToRemove.title}"</span>? Denna åtgärd går inte att ångra.
+                  Vill du dölja din ansökan för <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{applicationToRemove.title}"</span> i din lista? Ansökan tas bort från din vy men finns kvar hos arbetsgivaren, och du kan inte söka samma jobb igen.
                 </>
               )}
             </AlertDialogDescription>
+
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
             <AlertDialogCancel 
