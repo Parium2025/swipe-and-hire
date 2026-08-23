@@ -569,6 +569,7 @@ const JobDetails = () => {
           <MobileCandidateView
             jobId={jobId || ''}
             applications={applications}
+            stageTotals={stageTotals}
             stages={activeStages}
             stageSettings={stageSettings}
             criteriaCount={criteriaCount}
