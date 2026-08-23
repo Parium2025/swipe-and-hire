@@ -173,9 +173,14 @@ const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, republishMode = false }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const isDraft = job ? !job.is_active : false;
-  // Utgången annons: aktiv i databasen men passerat utgångsdatum
-  const isExpired = !!job?.is_active && !!(job as any)?.expires_at && new Date((job as any).expires_at).getTime() <= Date.now();
+  // ⚠️ Använd SAMMA statusdefinition som listan/dashboarden (src/lib/jobStatus.ts).
+  // Tidigare räknades "utkast" som enbart `!is_active` — men en utgången annons
+  // avaktiveras (is_active = false) när den löper ut. Den togs därför för ett
+  // utkast här, vilket (a) skrev om `created_at` till nu och raderade annonsens
+  // verkliga ålder, och (b) hoppade över `republish_job` som är den enda vägen
+  // förbi dubblett-/cooldown-spärren vid återpublicering.
+  const isExpired = job ? isEmployerJobExpired(job) : false;
+  const isDraft = job ? isEmployerJobDraft(job) : false;
   // Publiceringsläge: utkast som publiceras, eller utgången annons som återpubliceras efter redigering
   const publishMode = isDraft || republishMode || isExpired;
   const [isInitializing, setIsInitializing] = useState(true);
