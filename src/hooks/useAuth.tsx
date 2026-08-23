@@ -1994,103 +1994,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     
     try {
-      // Hämta organization_id för användaren (om de tillhör en)
-      const { data: userRole } = await supabase
-        .from('user_roles')
-        .select('organization_id')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .not('organization_id', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      const orgId = userRole?.organization_id;
-      
-      let orgJobs: { id: string; is_active: boolean | null; views_count: number | null; applications_count: number | null; employer_id: string; created_at: string; expires_at: string | null }[] = [];
-      
-      if (orgId) {
-        // Hämta alla user_ids i organisationen
-        const { data: orgUsers } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('organization_id', orgId)
-          .eq('is_active', true);
-        
-        const userIds = orgUsers?.map(u => u.user_id) || [user.id];
-        
-        // Hämta alla jobb för organisationen (inkl. created_at och expires_at för utgångsfiltrering)
-        const { data } = await supabase
-          .from('job_postings')
-          .select('id, is_active, views_count, applications_count, employer_id, created_at, expires_at')
-          .in('employer_id', userIds)
-          .is('deleted_at', null);
-        
-        orgJobs = data || [];
-      } else {
-        // Ingen organisation - hämta bara egna jobb
-        const { data } = await supabase
-          .from('job_postings')
-          .select('id, is_active, views_count, applications_count, employer_id, created_at, expires_at')
-          .eq('employer_id', user.id)
-          .is('deleted_at', null);
-        
-        orgJobs = data || [];
-      }
-      
-      // Helper för att kolla om ett jobb är utgånget (samma logik som jobStatus.ts)
-      const isJobExpired = (job: { is_active: boolean | null; expires_at: string | null }): boolean => {
-        if (!job.expires_at) return false; // Inget utgångsdatum = inte utgånget
-        return !Number.isNaN(new Date(job.expires_at).getTime()) && new Date(job.expires_at) < new Date();
-      };
+      // 🔒 SKALA + SANNING: tidigare laddades hela organisationens annonslista ner
+      // (kapades vid 1 000 rader av PostgREST) och status räknades om lokalt med en
+      // egen kopia av reglerna som saknade published_at — utkast kunde därför
+      // hamna bland "utgångna" i sidomenyns siffror. Nu räknar databasen med exakt
+      // samma regler som listan och flikarna använder.
+      const [personalCountsRes, orgCountsRes, orgStatsRes, candidatesRes] = await Promise.all([
+        supabase.rpc('get_employer_jobs_counts', { p_scope: 'personal' }),
+        supabase.rpc('get_employer_jobs_counts', { p_scope: 'organization' }),
+        supabase.rpc('get_employer_dashboard_stats', { p_scope: 'organization' }),
+        supabase.rpc('count_distinct_candidates_scoped', { p_scope: 'organization' }),
+      ]);
 
-      const isJobDraft = (job: { is_active: boolean | null; expires_at: string | null }): boolean => {
-        if (job.is_active) return false;
-        return !isJobExpired(job);
-      };
-      
-      // Mina annonser = användarens EGNA jobb (personal scope, samma som Mina Annonser-sidan)
-      const personalJobs = orgJobs.filter(j => j.employer_id === user.id);
-      const myJobsCount = personalJobs.length;
+      const personalCounts = (personalCountsRes.data ?? {}) as { total?: number };
+      const orgCounts = (orgCountsRes.data ?? {}) as { active?: number; expired?: number };
+      const orgStats = (orgStatsRes.data ?? {}) as { total_views?: number; total_applications?: number };
+
+      // Mina annonser = användarens EGNA annonser (samma scope som sidan)
+      const myJobsCount = Number(personalCounts.total) || 0;
       setPreloadedEmployerMyJobs(myJobsCount);
       try { sessionStorage.setItem(EMPLOYER_MY_JOBS_CACHE_KEY, String(myJobsCount)); } catch {}
-      
-      // Aktiva annonser (org-scope, exkludera utgångna och utkast)
-      const activeJobs = orgJobs.filter(j => j.is_active && !isJobExpired(j));
-      const activeCount = activeJobs.length;
+
+      const activeCount = Number(orgCounts.active) || 0;
       setPreloadedEmployerActiveJobs(activeCount);
       try { sessionStorage.setItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, String(activeCount)); } catch {}
-      
-      // Dashboard jobb (org-scope: aktiva + utgångna, exkl utkast)
-      const expiredJobs = orgJobs.filter(j => isJobExpired(j));
-      const dashboardCount = activeJobs.length + expiredJobs.length;
+
+      // Dashboard = aktiva + utgångna (utkast exkluderas)
+      const expiredCount = Number(orgCounts.expired) || 0;
+      const dashboardCount = activeCount + expiredCount;
       setPreloadedEmployerDashboardJobs(dashboardCount);
       try { sessionStorage.setItem(EMPLOYER_DASHBOARD_JOBS_CACHE_KEY, String(dashboardCount)); } catch {}
-      
-      // Totala visningar (bara från aktiva, icke-utgångna jobb)
-      const totalViews = activeJobs.reduce((sum, j) => sum + (j.views_count || 0), 0);
+
+      // Samma definition som Dashboard-korten → inget hopp när serversvaret landar
+      const totalViews = Number(orgStats.total_views) || 0;
       setPreloadedEmployerTotalViews(totalViews);
       try { sessionStorage.setItem(EMPLOYER_TOTAL_VIEWS_CACHE_KEY, String(totalViews)); } catch {}
-      
-      // Totala ansökningar (bara från aktiva, icke-utgångna jobb)
-      const totalApplications = activeJobs.reduce((sum, j) => sum + (j.applications_count || 0), 0);
+
+      const totalApplications = Number(orgStats.total_applications) || 0;
       setPreloadedEmployerTotalApplications(totalApplications);
       try { sessionStorage.setItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, String(totalApplications)); } catch {}
 
-      console.log('[EmployerStats] Personal jobs:', myJobsCount, '| Org active:', activeCount, '| Org expired:', expiredJobs.length, '| Dashboard total:', dashboardCount);
-      
-      // Hämta antal unika kandidater (distinct applicant_id)
-      const jobIds = orgJobs.map(j => j.id);
-      if (jobIds.length > 0) {
-        const { data: distinctCount } = await supabase.rpc('count_distinct_candidates', { p_job_ids: jobIds });
-        
-        const candidatesCount = distinctCount || 0;
-        setPreloadedEmployerCandidates(candidatesCount);
-        try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, String(candidatesCount)); } catch {}
-      } else {
-        setPreloadedEmployerCandidates(0);
-        try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, '0'); } catch {}
-      }
+      // Unika kandidater — räknas serverside, inga annons-id:n skickas upp
+      const candidatesCount = typeof candidatesRes.data === 'number' ? candidatesRes.data : 0;
+      setPreloadedEmployerCandidates(candidatesCount);
+      try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, String(candidatesCount)); } catch {}
+
       
       // Hämta antal olästa meddelanden via aggregerad RPC.
       // 🔥 SCALED: Ett enda anrop istället för N+1 (en count-query per konversation).
