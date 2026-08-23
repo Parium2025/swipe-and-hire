@@ -17,7 +17,6 @@ import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
 
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
-import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { useJobStageSettings, DEFAULT_JOB_STAGE_KEYS } from '@/hooks/useJobStageSettings';
 import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsData';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
@@ -682,7 +681,7 @@ const JobDetails = () => {
                     stageConfig={config}
                     totalStageCount={activeStages.length}
                     stageIndex={stageIndex}
-                    columnSlots={activeStages.length + (activeStages.length < 8 ? 1 : 0)}
+                    columnSlots={activeStages.length}
                     criteriaCount={criteriaCount}
                     isSelectionMode={isSelectionMode}
                     selectedApplicationIds={selectedApplicationIds}
@@ -693,23 +692,6 @@ const JobDetails = () => {
                   />
                 );
               })}
-              {activeStages.length < 8 && (
-                <div
-                  className="flex-none flex flex-col h-full min-w-0"
-                  style={{ width: `calc((100% - ${(activeStages.length) * 0.75}rem) / ${activeStages.length + 1})` }}
-                >
-                  <CreateJobStageDialog 
-                    jobId={jobId || ''}
-                    currentStageCount={activeStages.length}
-                    trigger={
-                      <button className="w-full rounded-md px-2 py-1.5 mb-2 ring-1 ring-inset ring-white/10 bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 text-white text-xs font-medium flex-shrink-0">
-                        <Plus className="h-3.5 w-3.5" />
-                        Nytt steg
-                      </button>
-                    }
-                  />
-                </div>
-              )}
             </div>
 
             <DragOverlay modifiers={[snapCenterToCursor]} dropAnimation={null}>

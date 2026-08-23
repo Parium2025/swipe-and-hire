@@ -3,7 +3,6 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
-import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import { SortableApplicationCard } from './ApplicationCard';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
@@ -68,7 +67,7 @@ export const StatusColumn = memo(({
   // (lokal flytt sker direkt, serverns totaler hinner efter någon sekund).
   const isStreaming = Boolean(isStreamingPages) && applications.length < displayCount;
 
-  const [liveColor, setLiveColor] = useState<string | null>(null);
+  const [liveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -196,19 +195,9 @@ export const StatusColumn = memo(({
               <Sparkles className="h-3.5 w-3.5" />
             </button>
           )}
-          <div className="ml-auto">
-            <JobStageSettingsMenu 
-              jobId={jobId}
-              stageKey={status}
-              candidateCount={displayCount}
-              totalStageCount={totalStageCount}
-              targetStageKey={targetStageKey}
-              targetStageLabel={targetStageLabel}
-              onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
-              onLiveColorChange={setLiveColor}
-              stageIndex={stageIndex}
-            />
-          </div>
+          {/* Stegen i en jobbannons är låsta standardsteg – de kan inte byggas
+              om, döpas om eller raderas här. Vill man ha egna steg används
+              "Mina kandidater". */}
         </div>
       </div>
 
@@ -224,7 +213,7 @@ export const StatusColumn = memo(({
         >
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
-              <div className="rounded-md bg-white/10 ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
+              <div className="rounded-md bg-white/10 ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white">
                 Släpp här
               </div>
             </div>
