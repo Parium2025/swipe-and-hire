@@ -941,6 +941,11 @@ export function useMyCandidatesData(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      // Räknarna i listmenyn och kollegevyn måste följa med – bulk-borttagning
+      // gjorde detta, den enskilda missade det och siffrorna hängde kvar.
+      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
       toast.success('Kandidat borttagen från din lista');
     },
     onError: (err, id, context) => {
