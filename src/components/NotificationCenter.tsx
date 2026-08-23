@@ -116,9 +116,12 @@ function NotificationItem({
   const bodyTruncated = useTruncation(bodyRef);
   const [expanded, setExpanded] = useState(false);
   const canExpand = titleTruncated || bodyTruncated || expanded;
+  const reportable = isReportable(true, notification.title, notification.body) && !route;
 
   return (
-    <motion.button
+    <motion.div
+      role="button"
+      tabIndex={0}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
@@ -129,7 +132,15 @@ function NotificationItem({
         if (route) { onNavigate(route); return; }
         if (canExpand) setExpanded(v => !v);
       }}
-      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg ${
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (!notification.is_read) onRead(notification.id);
+          if (route) { onNavigate(route); return; }
+          if (canExpand) setExpanded(v => !v);
+        }
+      }}
+      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg cursor-pointer ${
         notification.is_read 
           ? 'opacity-60 hover:bg-white/5' 
           : 'hover:bg-white/10 bg-white/5'
@@ -156,8 +167,23 @@ function NotificationItem({
               {expanded ? 'Visa mindre' : 'Visa mer'}
             </span>
           )}
+          {reportable && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!notification.is_read) onRead(notification.id);
+                onNavigate(supportReportRoute(notification.title, notification.body));
+              }}
+              className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+            >
+              <Flag className="h-2.5 w-2.5" strokeWidth={2} />
+              Rapportera
+            </button>
+          )}
         </div>
       </div>
+
     </motion.button>
   );
 }
