@@ -191,7 +191,7 @@ export const CandidateProfileDialog = ({
     }
     setJobQuestions({});
     setQuestionsLoading(true);
-  }, [activeApplication?.job_id]);
+  }, [activeApplication?.id, activeApplication?.job_id]);
 
   const profileImageUrl = useProfileImageUrl(activeApplication?.profile_image_url);
   const profileThumbUrl = useProfileThumbUrl(activeApplication?.profile_image_url);

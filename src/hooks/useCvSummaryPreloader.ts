@@ -94,8 +94,10 @@ export const useCvSummaryPreloader = (candidates: CandidateWithCv[]) => {
             return false;
           }
 
-          // Ingen sammanfattning finns alls → behöver genereras
-          return !existingKeyPoints;
+          // Ingen verifierat aktuell sammanfattning finns. Äldre jobbspecifika
+          // rader utan source_cv_url får inte stoppa warmup: dialogen betraktar
+          // dem som inaktuella och skulle annars börja generera först vid öppning.
+          return true;
         });
 
         // Generera sammanfattningar i bakgrunden (max 3 samtidigt).
