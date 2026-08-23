@@ -95,7 +95,7 @@ export const StageColumn = ({
     // Ladda nästa sida i god tid — 600 px innan botten — så att nya kort redan
     // ligger på plats när användaren når dem.
     if (hasMoreRef.current && el.scrollTop + el.clientHeight >= el.scrollHeight - 600) {
-      loadMoreRef.current?.();
+      loadMoreRef.current?.(stageRef.current);
     }
   }, []);
 
