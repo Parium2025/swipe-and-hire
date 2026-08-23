@@ -267,7 +267,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         });
       };
 
-      const merged = mergeWithCache(first);
+      const merged = dropDeleted(mergeWithCache(first));
 
       if (first.length < FIRST_PAGE) {
         writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, merged);
