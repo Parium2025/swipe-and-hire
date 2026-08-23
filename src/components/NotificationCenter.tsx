@@ -47,6 +47,54 @@ function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>) {
   return truncated;
 }
 
+// Notiser saknar ofta en explicit route i metadata (t.ex. chattnotiser som bara
+// bär conversation_id). Här härleds målet så att varje notis alltid går att klicka på.
+function resolveRoute(type: string, metadata?: Record<string, unknown> | null): string | undefined {
+  const explicit = typeof metadata?.route === 'string' ? metadata.route : undefined;
+  if (explicit) return explicit;
+
+  const conversationId = metadata?.conversation_id;
+  if (typeof conversationId === 'string' && conversationId) {
+    return `/messages?conversation=${conversationId}`;
+  }
+
+  const jobId = typeof metadata?.job_id === 'string' ? metadata.job_id : undefined;
+
+  switch (type) {
+    case 'message':
+    case 'new_message':
+      return '/messages';
+    case 'new_application':
+      return jobId ? `/job-details/${jobId}` : '/candidates';
+    case 'application_status':
+      return '/my-applications';
+    case 'interview_scheduled':
+    case 'interview_reminder':
+      return '/my-candidates';
+    case 'job_expired':
+    case 'job_closed':
+      return '/my-jobs';
+    case 'saved_search_match':
+      return '/search-jobs';
+    case 'saved_job_expiring':
+      return '/saved-jobs';
+    default:
+      return undefined;
+  }
+}
+
+// Notiser som handlar om AI-problem ska kunna rapporteras direkt till supporten.
+const REPORTABLE_PATTERN = /\bai\b|utvärder|kriteri|analys|sammanfattning/i;
+
+function isReportable(kindIsError: boolean, title: string, body?: string | null): boolean {
+  return kindIsError && REPORTABLE_PATTERN.test(`${title} ${body ?? ''}`);
+}
+
+function supportReportRoute(title: string, body?: string | null): string {
+  const message = `Jag vill rapportera ett problem med AI-funktionen.\n\nNotis: ${title}${body ? `\nDetaljer: ${body}` : ''}\nTidpunkt: ${new Date().toLocaleString('sv-SE')}\n\nBeskriv gärna vad du gjorde när det hände:\n`;
+  return `/support?category=technical&message=${encodeURIComponent(message)}`;
+}
+
 function NotificationItem({ 
   notification, 
   onRead, 
@@ -58,7 +106,8 @@ function NotificationItem({
 }) {
   const Icon = typeIcons[notification.type] || Bell;
   const colorClass = typeColors[notification.type] || 'text-white';
-  const route = notification.metadata?.route as string | undefined;
+  const route = resolveRoute(notification.type, notification.metadata as Record<string, unknown> | null);
+
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: sv });
 
   const titleRef = useRef<HTMLSpanElement>(null);
