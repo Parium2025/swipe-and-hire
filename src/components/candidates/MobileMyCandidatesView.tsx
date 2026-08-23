@@ -290,6 +290,9 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   renderActionBar,
   onPrefetch,
   onMarkAsViewed,
+  stageCounts,
+  hasMoreInStage,
+  onLoadMore,
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
