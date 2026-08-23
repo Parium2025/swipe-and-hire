@@ -173,7 +173,7 @@ export const MyCandidatesHeader = ({
               </DropdownMenuItem>
 
               {hasTeam && teamMembers.length > 0 && (
-                <DropdownMenuGroup>
+                <DropdownMenuGroup className="[&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10">
                   <DropdownMenuSeparator className="bg-white/10 my-1" />
                   <DropdownMenuLabel className="px-2.5 py-1.5 text-xs font-medium text-white/70">Kollegors listor</DropdownMenuLabel>
                   {teamMembers.map(member => {
