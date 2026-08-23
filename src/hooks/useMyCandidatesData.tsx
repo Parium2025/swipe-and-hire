@@ -116,11 +116,14 @@ async function fetchSearchPage(
   stage: string,
   cursor: StageCursor,
 ): Promise<RawMyCandidateRow[]> {
-  const { data, error } = await supabase.rpc('search_my_candidates', {
+  // Generated backend types lag behind migrations in the local editor; keep
+  // the composite cursor explicit so bulk moves cannot skip equal timestamps.
+  const { data, error } = await (supabase.rpc as any)('search_my_candidates', {
     p_recruiter_id: userId,
     p_search_query: searchQuery,
     p_limit: PAGE_SIZE,
     p_cursor_updated_at: cursor?.updated_at ?? null,
+    p_cursor_id: cursor?.id ?? null,
     p_list_id: listId,
     p_stage: stage === ALL_STAGES ? null : stage,
   });

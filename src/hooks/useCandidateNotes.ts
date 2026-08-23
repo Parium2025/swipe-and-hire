@@ -62,9 +62,10 @@ export function prefetchCandidateNotes(applicantId: string | null | undefined): 
 interface UseCandidateNotesOptions {
   applicantId: string | null;
   jobId: string | null;
+  enabled?: boolean;
 }
 
-export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptions) {
+export function useCandidateNotes({ applicantId, jobId, enabled = true }: UseCandidateNotesOptions) {
   const { user } = useAuth();
   const { logActivity, deleteNoteActivities } = useCandidateActivities(applicantId);
 
@@ -122,7 +123,7 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
 
   // ─── Realtime: keep notes in sync across colleagues/devices ─────
   useEffect(() => {
-    if (!applicantId || !user) return;
+    if (!enabled || !applicantId || !user) return;
     const channel = supabase
       .channel(`candidate-notes-${applicantId}`)
       .on(
@@ -132,7 +133,7 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [applicantId, user?.id, refreshInBackground]);
+  }, [enabled, applicantId, user?.id, refreshInBackground]);
 
   // ─── Helpers to persist optimistic changes ──────────────────────
   const persistOptimistic = useCallback((id: string, updated: CandidateNote[]) => {
