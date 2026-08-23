@@ -17,7 +17,6 @@ import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
 
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
-import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { useJobStageSettings, DEFAULT_JOB_STAGE_KEYS } from '@/hooks/useJobStageSettings';
 import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsData';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
