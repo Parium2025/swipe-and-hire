@@ -12,6 +12,9 @@ export interface StatusColumnProps {
   jobId: string;
   status: string;
   applications: JobApplication[];
+  /** Serverside-total för steget. Kan vara högre än `applications.length`
+   *  medan bakgrundsladdningen fortfarande strömmar in sidor. */
+  stageTotal?: number | null;
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
   onPrefetch?: (app: JobApplication) => void;
@@ -37,6 +40,7 @@ export const StatusColumn = memo(({
   jobId,
   status, 
   applications, 
+  stageTotal,
   onOpenProfile, 
   onMarkAsViewed, 
   onPrefetch,
@@ -52,6 +56,9 @@ export const StatusColumn = memo(({
   onMoveCandidatesAndDelete,
   stageIndex = 0,
 }: StatusColumnProps) => {
+  const displayCount = Math.max(stageTotal ?? 0, applications.length);
+  const isStreaming = applications.length < displayCount;
+
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
@@ -166,8 +173,9 @@ export const StatusColumn = memo(({
             className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}88` }}
           >
-            {applications.length}
+            {displayCount}
           </span>
+
           {onOpenCriteriaDialog && (
             <button
               onClick={onOpenCriteriaDialog}
@@ -231,12 +239,18 @@ export const StatusColumn = memo(({
 
           {bottomSpacer > 0 && <div data-spacer="bottom" style={{ height: bottomSpacer }} />}
 
+          {isStreaming && (
+            <div className="py-2 text-center text-[10px] text-white/70">
+              Laddar {applications.length} av {displayCount}…
+            </div>
+          )}
 
-          {applications.length === 0 && !isOver && (
+          {displayCount === 0 && !isOver && (
             <div className="py-8 text-center text-xs text-white">
               Inga kandidater i detta steg
             </div>
           )}
+
         </div>
 
         {canScrollDown && (

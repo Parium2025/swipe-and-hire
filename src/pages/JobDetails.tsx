@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
 import { prefetchCandidateNotes } from '@/hooks/useCandidateNotes';
 import { getIsOnline } from '@/lib/connectivityManager';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
@@ -87,18 +87,22 @@ const JobDetails = () => {
   const { 
     job, 
     applications, 
+    stageTotals,
+    totalApplications,
+    isLoadingMore,
     isLoading: dataLoading, 
     updateApplicationLocally, 
     updateJobLocally,
     refetch 
   } = useJobDetailsData(jobId);
+
   
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map());
-  const myCandidatesApplicantIdsRef = useRef<string>('');
+  
+
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
   
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
@@ -116,9 +120,12 @@ const JobDetails = () => {
 
   // Samma deterministiska förvärmning som /candidates och /my-candidates:
   // text → media (porträtt/video) → CV-sammanfattningar.
+  // Vi förvärmer de första 120 raderna — resten värms när man scrollar/öppnar.
+  // Utan taket skulle en annons med 1 000 sökande dra ner 1 000 porträtt direkt.
+  const WARMUP_LIMIT = 120;
   const warmupRows = useMemo(
     () =>
-      applications.map((a) => ({
+      applications.slice(0, WARMUP_LIMIT).map((a) => ({
         id: a.id,
         application_id: a.id,
         applicant_id: a.applicant_id,
@@ -134,29 +141,33 @@ const JobDetails = () => {
 
 
 
-  // Load my_candidates map for rating updates — only re-fetch when applicant IDs actually change
-  useEffect(() => {
-    if (!user || applications.length === 0) return;
-    
-    const applicantIds = applications.map(a => a.applicant_id).sort();
-    const idsHash = applicantIds.join(',');
-    if (idsHash === myCandidatesApplicantIdsRef.current) return;
-    myCandidatesApplicantIdsRef.current = idsHash;
-    
-    const loadMyCandidatesMap = async () => {
-      const { data } = await supabase
-        .from('my_candidates')
-        .select('id, applicant_id')
-        .eq('recruiter_id', user.id)
-        .in('applicant_id', applicantIds);
-      
-      const candidateIdsMap = new Map<string, string>();
-      (data || []).forEach(mc => candidateIdsMap.set(mc.applicant_id, mc.id));
-      setMyCandidatesMap(candidateIdsMap);
-    };
-    
-    loadMyCandidatesMap();
-  }, [user, applications]);
+
+  // Karta över vilka sökande som redan ligger i en kandidatlista. Ligger i
+  // React Query så realtidshändelser på my_candidates kan invalidera den.
+  const applicantIdsKey = useMemo(
+    () => applications.map(a => a.applicant_id).sort().join(','),
+    [applications]
+  );
+  const { data: myCandidatesMap = new Map<string, string>() } = useQuery({
+    queryKey: ['job-my-candidates-map', jobId, applicantIdsKey],
+    enabled: !!user && applications.length > 0,
+    staleTime: 60 * 1000,
+    gcTime: Infinity,
+    queryFn: async () => {
+      const ids = applicantIdsKey.split(',').filter(Boolean);
+      const map = new Map<string, string>();
+      for (let i = 0; i < ids.length; i += 200) {
+        const { data } = await supabase
+          .from('my_candidates')
+          .select('id, applicant_id')
+          .eq('recruiter_id', user!.id)
+          .in('applicant_id', ids.slice(i, i + 200));
+        (data || []).forEach(mc => map.set(mc.applicant_id, mc.id));
+      }
+      return map;
+    },
+  });
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -408,6 +419,27 @@ const JobDetails = () => {
     return (applicationsByStatus[currentNavigationStage] || []).length;
   }, [currentNavigationStage, applicationsByStatus]);
 
+  // Förvärm grannarna i steget när en profil är öppen, så att pilarna
+  // ("nästa kandidat") visar bild/video/CV direkt i stället för att ladda.
+  const neighborWarmupRows = useMemo(() => {
+    if (!selectedApplication || !currentNavigationStage) return [];
+    const stageApps = applicationsByStatus[currentNavigationStage] || [];
+    const idx = stageApps.findIndex(a => a.id === selectedApplication.id);
+    if (idx < 0) return [];
+    return stageApps.slice(Math.max(0, idx - 3), idx + 4).map((a) => ({
+      id: a.id,
+      application_id: a.id,
+      applicant_id: a.applicant_id,
+      job_id: jobId ?? null,
+      cv_url: a.cv_url ?? null,
+      profile_image_url: a.profile_image_url ?? null,
+      video_url: a.video_url ?? null,
+      is_profile_video: a.is_profile_video ?? null,
+    }));
+  }, [selectedApplication, currentNavigationStage, applicationsByStatus, jobId]);
+  useCandidatePageWarmup(neighborWarmupRows);
+
+
   const getDisplayRating = useCallback((app: ApplicationData) => {
     return app.rating || 0;
   }, []);
@@ -547,7 +579,7 @@ const JobDetails = () => {
           jobId={jobId!}
           job={job}
           employerProfileImageUrl={employerProfileImageUrl}
-          applicationsCount={applications.length}
+          applicationsCount={totalApplications ?? applications.length}
           activeStagesLength={activeStages.length}
           isSelectionMode={isSelectionMode}
           canToggleStatus={!!user?.id && job.employer_id === user.id}
@@ -562,6 +594,7 @@ const JobDetails = () => {
           <MobileCandidateView
             jobId={jobId || ''}
             applications={applications}
+            stageTotals={stageTotals}
             stages={activeStages}
             stageSettings={stageSettings}
             criteriaCount={criteriaCount}
@@ -621,6 +654,7 @@ const JobDetails = () => {
                     jobId={jobId || ''}
                     status={status}
                     applications={applicationsByStatus[status] || []}
+                    stageTotal={stageTotals ? stageTotals[status] ?? 0 : null}
                     onOpenProfile={handleOpenProfile}
                     onMarkAsViewed={markApplicationAsViewed}
                     onPrefetch={handlePrefetchCandidate}
