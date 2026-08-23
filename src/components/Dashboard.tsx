@@ -45,7 +45,7 @@ const Dashboard = memo(() => {
   // Server-side truth — skalar till 10k+ jobb utan klient-belastning
   const { data: serverCounts } = useEmployerJobsCounts('organization');
   const { data: serverStats } = useEmployerDashboardStats('organization');
-  const { profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
+  const { profile, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
   
   const [showContent, setShowContent] = useState(() => !isLoading);
