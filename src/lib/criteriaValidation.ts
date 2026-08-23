@@ -171,12 +171,25 @@ const COMMON_SWEDISH_WORDS = new Set([
  * Check if a single word looks like gibberish (not a real word).
  * Uses vowel ratio, consonant clusters, and a known-word allowlist.
  */
-function isGibberishWord(word: string): boolean {
+function isGibberishWord(rawWord: string): boolean {
+  // Strip surrounding punctuation (e.g. "körkort," → "körkort")
+  const word = rawWord.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
   if (word.length <= 2) return false; // Too short to judge
-  
-  // If it's a known common word, it's not gibberish
+
+  // Known common word → not gibberish
   if (COMMON_SWEDISH_WORDS.has(word.toLowerCase())) return false;
-  
+
+  // Acronyms and certifications are legitimate criteria: SQL, HLR, ADR, CNC, YKB, IT, ISO
+  if (/^[A-ZÅÄÖ0-9]{2,6}$/.test(word)) return false;
+
+  // Tokens containing digits are usually concrete requirements (B2, ISO9001, 2+)
+  if (/\d/.test(word)) return false;
+
+  // Hyphenated compounds are judged part by part (HLR-certifikat, B-körkort)
+  if (word.includes('-')) {
+    return word.split('-').some(part => part.length >= 3 && isGibberishWord(part));
+  }
+
   const vowels = word.match(/[aeiouåäöy]/gi) || [];
   const vowelRatio = vowels.length / word.length;
   
