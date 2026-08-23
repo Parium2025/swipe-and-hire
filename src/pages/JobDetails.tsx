@@ -183,13 +183,8 @@ const JobDetails = () => {
       toast('Offline', { description: 'Du måste vara online för att uppdatera betyg' });
       return;
     }
+    if (!user) return;
 
-    const myCandidateId = myCandidatesMap.get(applicantId);
-    if (!myCandidateId) {
-      toast('Info', { description: 'Lägg först till kandidaten i din lista för att ge betyg' });
-      return;
-    }
-    
     updateApplicationLocally(
       applications.find(a => a.applicant_id === applicantId)?.id || '',
       { rating: newRating }
@@ -197,15 +192,33 @@ const JobDetails = () => {
     if (selectedApplication?.applicant_id === applicantId) {
       setSelectedApplication(prev => prev ? { ...prev, rating: newRating } : null);
     }
-    
+
     try {
-      const { error } = await supabase.from('my_candidates').update({ rating: newRating }).eq('id', myCandidateId);
+      // Betyget är per kandidat och lever i candidate_ratings — samma källa som
+      // Mina kandidater. Kandidaten behöver alltså inte ligga i en lista först.
+      const { error } = await supabase
+        .from('candidate_ratings')
+        .upsert(
+          { recruiter_id: user.id, applicant_id: applicantId, rating: newRating },
+          { onConflict: 'recruiter_id,applicant_id' }
+        );
       if (error) throw error;
+
+      // Håll ev. listrader i synk så att kortet visar samma sak överallt.
+      const myCandidateId = myCandidatesMap.get(applicantId);
+      if (myCandidateId) {
+        await supabase
+          .from('my_candidates')
+          .update({ rating: newRating })
+          .eq('recruiter_id', user.id)
+          .eq('applicant_id', applicantId);
+      }
     } catch {
       toast.error('Fel', { description: 'Kunde inte uppdatera betyg' });
       refetch();
     }
-  }, [myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch]);
+  }, [user, myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch]);
+
 
   const markApplicationAsViewed = useCallback(async (applicationId: string) => {
     updateApplicationLocally(applicationId, { viewed_at: new Date().toISOString() });
