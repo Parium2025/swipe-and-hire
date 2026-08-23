@@ -9,10 +9,12 @@ interface ToastOptions {
   variant?: "default" | "destructive" | "success" | "warning";
   action?: React.ReactNode;
   duration?: number;
+  /** Gör notisen klickbar i notiscentret – navigerar hit vid klick. */
+  route?: string;
 }
 
 // Wrapper-funktion som matchar det gamla API:t men använder Sonner
-function toast({ title, description, variant, action, duration }: ToastOptions) {
+function toast({ title, description, variant, action, duration, route }: ToastOptions) {
   const message = title || description || "";
   const options: ExternalToast = {
     description: title ? description : undefined,
@@ -20,7 +22,8 @@ function toast({ title, description, variant, action, duration }: ToastOptions) 
     // Skicka bara med duration när den faktiskt är satt — annars skriver
     // undefined över våra centrala visningstider i sonner.tsx.
     ...(duration !== undefined ? { duration } : {}),
-  };
+    ...(route ? { route } : {}),
+  } as ExternalToast;
 
   if (variant === "destructive") {
     return sonnerToast.error(message, options);

@@ -209,7 +209,7 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     syncInProgress.current = false;
 
     if (syncedCount > 0) {
-      toast.success(`${syncedCount} ${syncedCount === 1 ? 'meddelande skickat' : 'meddelanden skickade'}`);
+      toast.success(`${syncedCount} ${syncedCount === 1 ? 'meddelande skickat' : 'meddelanden skickade'}`, { route: '/messages' } as Parameters<typeof toast.success>[1]);
     }
   }, [userId]);
 

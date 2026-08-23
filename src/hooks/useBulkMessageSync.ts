@@ -130,7 +130,7 @@ export function useBulkMessageSync() {
         saveBulkQueue(remaining);
 
         if (sent > 0) {
-          toast.success(`${sent} köat meddelande${sent !== 1 ? 'n' : ''} skickat`);
+          toast.success(`${sent} köat meddelande${sent !== 1 ? 'n' : ''} skickat`, { route: '/messages' } as Parameters<typeof toast.success>[1]);
           queryClient.invalidateQueries({ queryKey: ['conversations'] });
         }
       } finally {

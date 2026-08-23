@@ -196,7 +196,7 @@ export function SendMessageDialog({
         conversationId = result.id;
       }
 
-      toast.success(`Meddelande skickat till ${recipientName}`);
+      toast.success(`Meddelande skickat till ${recipientName}`, { route: '/messages' } as Parameters<typeof toast.success>[1]);
       setMessage('');
       clearMessageDraft();
       setSelectedChannels(['chat']);

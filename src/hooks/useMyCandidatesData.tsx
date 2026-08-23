@@ -751,7 +751,7 @@ export function useMyCandidatesData(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
-      toast.success('Kandidat tillagd i din lista');
+      toast.success('Kandidat tillagd i din lista', { route: '/my-candidates' } as Parameters<typeof toast.success>[1]);
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Kunde inte lägga till kandidaten');

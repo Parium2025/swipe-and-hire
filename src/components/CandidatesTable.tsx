@@ -436,7 +436,7 @@ export function CandidatesTable({
     setBulkProgress(null);
 
     if (successCount > 0) {
-      toast.success(`Meddelande skickat till ${successCount} kandidat${successCount !== 1 ? 'er' : ''}`);
+      toast.success(`Meddelande skickat till ${successCount} kandidat${successCount !== 1 ? 'er' : ''}`, { route: '/messages' } as Parameters<typeof toast.success>[1]);
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     }
 
