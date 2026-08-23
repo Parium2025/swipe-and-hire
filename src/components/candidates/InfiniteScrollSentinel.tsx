@@ -18,7 +18,9 @@ export function InfiniteScrollSentinel({ onIntersect, isLoading }: InfiniteScrol
           onIntersect();
         }
       },
-      { rootMargin: '200px' }
+      // 800 px marginal — nästa sida hämtas och hydreras (bild/video/betyg)
+      // långt innan raderna når skärmen, precis som kolumnerna i Mina kandidater.
+      { rootMargin: '800px' }
     );
 
     const sentinel = sentinelRef.current;
