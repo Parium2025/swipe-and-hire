@@ -63,6 +63,15 @@ export const StatusColumn = memo(({
     id: status,
   });
 
+  // ── Virtualisering (aktiveras först vid stora kolumner) ──
+  const VIRTUALIZE_THRESHOLD = 60;
+  const OVERSCAN = 10;
+  const GAP = 6; // space-y-1.5
+  const [itemHeight, setItemHeight] = useState(56);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const isVirtual = applications.length > VIRTUALIZE_THRESHOLD;
+
   const checkScroll = useCallback(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
@@ -73,11 +82,55 @@ export const StatusColumn = memo(({
     
     setCanScrollUp(hasScrollableContent && !isAtTop);
     setCanScrollDown(hasScrollableContent && !isAtBottom);
+    setScrollTop(el.scrollTop);
+    setViewportHeight(el.clientHeight);
+  }, []);
+
+  // Scroll-eventet kan komma flera gånger per bildruta — mät en gång per bildruta.
+  const rafRef = useRef<number | null>(null);
+  const onScrollThrottled = useCallback(() => {
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      checkScroll();
+    });
+  }, [checkScroll]);
+
+  useEffect(() => () => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
   }, []);
 
   useEffect(() => {
     checkScroll();
   }, [applications.length, checkScroll]);
+
+  useLayoutEffect(() => {
+    if (!isVirtual) return;
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const card = Array.from(el.children).find(
+      (child) => !(child as HTMLElement).dataset.spacer && (child as HTMLElement).offsetHeight > 20
+    ) as HTMLElement | undefined;
+    const h = card?.offsetHeight;
+    if (h && Math.abs(h - itemHeight) > 1) setItemHeight(h);
+  });
+
+  const pitch = itemHeight + GAP;
+  const { startIndex, endIndex } = useMemo(() => {
+    if (!isVirtual) return { startIndex: 0, endIndex: applications.length };
+    const vh = viewportHeight || 600;
+    const start = Math.max(0, Math.floor(scrollTop / pitch) - OVERSCAN);
+    const visible = Math.ceil(vh / pitch) + OVERSCAN * 2;
+    return { startIndex: start, endIndex: Math.min(applications.length, start + visible) };
+  }, [isVirtual, applications.length, scrollTop, viewportHeight, pitch]);
+
+  const visibleApplications = isVirtual ? applications.slice(startIndex, endIndex) : applications;
+  const topSpacer = isVirtual && startIndex > 0 ? startIndex * pitch - GAP : 0;
+  const bottomSpacer =
+    isVirtual && endIndex < applications.length ? (applications.length - endIndex) * pitch - GAP : 0;
+
+  // dnd-kit behöver bara känna till de kort som faktiskt är monterade.
+  const sortableIds = useMemo(() => visibleApplications.map((a) => a.id), [visibleApplications]);
 
   // Listen for resize to update scroll indicators
   useEffect(() => {
@@ -88,6 +141,7 @@ export const StatusColumn = memo(({
     ro.observe(el);
     return () => ro.disconnect();
   }, [checkScroll]);
+
 
   return (
     <div 
