@@ -235,7 +235,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         {showDeleteButton && (
           <button
             onClick={handleDeleteClick}
-            aria-label="Ta bort ansökan"
+            aria-label="Dölj ansökan i din lista"
             className="absolute top-2.5 right-2.5 flex h-9 w-9 items-center justify-center rounded-full border-0 bg-red-500/80 text-white md:hover:!bg-red-500/80 md:hover:!text-white"
           >
             <Trash2 className="h-4 w-4 text-white" />

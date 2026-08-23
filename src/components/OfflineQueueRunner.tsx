@@ -19,6 +19,7 @@ import { useOfflineApplicationQueue } from '@/hooks/useOfflineApplicationQueue';
 import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
 import { useOfflineProfileQueue } from '@/hooks/useOfflineProfileQueue';
 import { useOfflineSavedJobsQueue } from '@/hooks/useOfflineSavedJobsQueue';
+import { useOfflineApplicationHideQueue } from '@/hooks/useOfflineApplicationHideQueue';
 
 export function OfflineQueueRunner() {
   const { user } = useAuth();
@@ -30,9 +31,11 @@ export function OfflineQueueRunner() {
 
   // localStorage-köer (strukturerad data) — nu med global flush
   useOfflineApplicationQueue(userId);
+  useOfflineApplicationHideQueue(userId);
   useOfflineMessageQueue(userId);
   useOfflineProfileQueue(userId);
   useOfflineSavedJobsQueue(userId);
+
 
   return null;
 }

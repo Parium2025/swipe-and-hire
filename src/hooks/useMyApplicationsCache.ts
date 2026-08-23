@@ -4,6 +4,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useCallback, useRef } from 'react';
 import { imageCache } from '@/lib/imageCache';
 import { fetchAllPages } from '@/lib/fetchAllPages';
+import { getIsOnline } from '@/lib/connectivityManager';
+import { enqueueHide, dequeueHide, pushHide, getQueuedHiddenIds } from '@/lib/applicationHideQueue';
+
 
 import {
   MY_APPLICATIONS_SELECT,
@@ -98,21 +101,28 @@ export function useMyApplicationsCache() {
       if (!user) return [];
 
       // Paginerat — utan detta kapades listan tyst vid 1000 ansökningar.
-      const apps = (await fetchAllPages<any>((from, to) =>
+      const rows = (await fetchAllPages<any>((from, to) =>
         supabase
           .from('job_applications')
           .select(MY_APPLICATIONS_SELECT)
           .eq('applicant_id', user.id)
+          .is('hidden_by_applicant_at', null)
           .order('applied_at', { ascending: false })
           .order('id', { ascending: false })
           .range(from, to),
       )) as Application[];
 
+      // Åtgärder som ännu inte synkats (offline) döljs lokalt direkt
+      const pendingHidden = new Set(getQueuedHiddenIds(user.id));
+      const apps = pendingHidden.size
+        ? rows.filter(a => !pendingHidden.has(a.id))
+        : rows;
 
       // Debounced write to localStorage (batches bursts from realtime)
       writeCacheDebounced(user.id, apps);
 
       return apps;
+
     },
     enabled: !!user,
     staleTime: 0,
@@ -237,32 +247,34 @@ export function useMyApplicationsCache() {
   }, [user, queryClient]);
 
 
-  // Optimistic delete function
-  const deleteApplication = useCallback(async (applicationId: string) => {
+  // Dölj ansökan (aldrig hard delete — arbetsgivaren behåller ansökan).
+  // Offline: åtgärden köas och replayas när nätet är tillbaka.
+  const hideApplication = useCallback(async (applicationId: string) => {
     if (!user) return;
+    const hiddenAt = Date.now();
 
-    // Optimistic update
+    // Optimistisk uppdatering
     queryClient.setQueryData(['my-applications', user.id], (old: Application[] | undefined) => {
       const updated = old?.filter(app => app.id !== applicationId) || [];
       writeCache(user.id, updated);
       return updated;
     });
 
-    try {
-      const { error } = await supabase
-        .from('job_applications')
-        .delete()
-        .eq('id', applicationId)
-        .eq('applicant_id', user.id);
+    // Köa direkt — tas bort ur kön så fort servern bekräftat
+    enqueueHide(applicationId, user.id);
 
-      if (error) throw error;
-      
-      // Invalidate the count query
+    if (!getIsOnline()) {
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
-    } catch (err) {
-      // Revert on error
-      queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-      throw err;
+      return;
+    }
+
+    const ok = await pushHide(applicationId, user.id, hiddenAt);
+    if (ok) {
+      dequeueHide(applicationId, user.id);
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+    } else {
+      // Ligger kvar i kön och flushas av OfflineQueueRunner
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
     }
   }, [user, queryClient]);
 
@@ -271,6 +283,9 @@ export function useMyApplicationsCache() {
     isLoading,
     error,
     refetch,
-    deleteApplication,
+    hideApplication,
+    /** @deprecated Jobbsökare kan inte radera ansökningar — döljer endast i egen vy. */
+    deleteApplication: hideApplication,
   };
 }
+

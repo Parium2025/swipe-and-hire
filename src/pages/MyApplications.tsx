@@ -27,6 +27,8 @@ import {
   Loader2,
   Video,
   Trash2,
+  EyeOff,
+
   AlertTriangle,
   Calendar
 } from 'lucide-react';
@@ -118,7 +120,7 @@ const MyApplications = () => {
   const { interviews, isLoading: interviewsLoading } = useCandidateInterviews();
 
   // Use cached applications hook for instant load + realtime sync
-  const { applications, isLoading, error, deleteApplication } = useMyApplicationsCache();
+  const { applications, isLoading, error, hideApplication } = useMyApplicationsCache();
 
   // Tab state (persisted in URL like SavedJobs)
   type TabValue = 'active' | 'expired';
@@ -173,19 +175,22 @@ const MyApplications = () => {
 
   const confirmRemoveApplication = async () => {
     if (!applicationToRemove) return;
-    
+
     const applicationId = applicationToRemove.id;
     setApplicationToRemove(null);
-    
+
     try {
-      await deleteApplication(applicationId);
+      await hideApplication(applicationId);
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
-      toast.success('Ansökan borttagen');
+      toast.success('Ansökan dold i din lista', {
+        description: 'Arbetsgivaren har kvar din ansökan.',
+      });
     } catch (err) {
-      console.error('Error removing application:', err);
-      toast.error('Kunde inte ta bort ansökan');
+      console.error('Error hiding application:', err);
+      toast.error('Kunde inte dölja ansökan');
     }
   };
+
 
   if (!showContent || isLoading) {
     return <MyApplicationsSkeleton activeTab={activeTab} />;
@@ -349,16 +354,17 @@ const MyApplications = () => {
                 <AlertTriangle className="h-4 w-4 text-white" />
               </div>
               <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
-                Ta bort ansökan
+                Dölj ansökan
               </AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {applicationToRemove && (
                 <>
-                  Är du säker på att du vill ta bort din ansökan för <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{applicationToRemove.title}"</span>? Denna åtgärd går inte att ångra.
+                  Vill du dölja din ansökan för <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{applicationToRemove.title}"</span> i din lista? Ansökan tas bort från din vy men finns kvar hos arbetsgivaren, och du kan inte söka samma jobb igen.
                 </>
               )}
             </AlertDialogDescription>
+
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
             <AlertDialogCancel 
@@ -374,8 +380,9 @@ const MyApplications = () => {
               variant="destructiveSoft"
               className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
             >
-              <Trash2 className="h-4 w-4 mr-1.5" />
-              Ta bort
+              <EyeOff className="h-4 w-4 mr-1.5" />
+              Dölj
+
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContentNoFocus>
