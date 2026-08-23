@@ -127,8 +127,16 @@ export function SelectionCriteriaDialog({
         .order('order_index');
 
       if (error) throw error;
-      
-      const loadedCriteria = data || [];
+
+      const rows = data || [];
+      // Garbage-collect empty, never-activated rows left behind by an aborted session
+      const orphanIds = rows
+        .filter(c => !c.is_active && !c.title?.trim() && !c.prompt?.trim())
+        .map(c => c.id);
+      if (orphanIds.length > 0) {
+        supabase.from('job_criteria').delete().in('id', orphanIds).then(() => {});
+      }
+      const loadedCriteria = rows.filter(c => !orphanIds.includes(c.id));
       setCriteria(loadedCriteria);
       
       const newDrafts: Record<string, { title: string; prompt: string }> = {};
