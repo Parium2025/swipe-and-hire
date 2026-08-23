@@ -151,33 +151,23 @@ export function SelectionCriteriaDialog({
     }
   };
 
-  const buildValidationMessage = (title: string, prompt: string) => {
-    const displayTitle = title.trim() || 'Fyll i vad personen har skrivit i titeln';
-    const displayPrompt = prompt.trim() || 'Fyll i vad personen har skrivit i titeln';
-    return `Titeln "${displayTitle}" och AI-instruktionen "${displayPrompt}" är otydliga och kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.`;
-  };
+  const DISCRIMINATION_MESSAGE =
+    'Kriteriet kan uppfattas som kopplat till en skyddad diskrimineringsgrund. Formulera om det så att det beskriver ett konkret krav för tjänsten.';
 
   const validateInput = (id: string, title: string, prompt: string) => {
-    const msg = buildValidationMessage(title, prompt);
-
-    const titleCheck = checkForDiscrimination(title);
-    if (titleCheck.isDiscriminatory) {
-      setValidationErrors(prev => ({ ...prev, [id]: msg }));
+    const setError = (message: string) => {
+      setValidationErrors(prev => ({ ...prev, [id]: message }));
       return false;
-    }
+    };
 
-    const promptCheck = checkForDiscrimination(prompt);
-    if (promptCheck.isDiscriminatory) {
-      setValidationErrors(prev => ({ ...prev, [id]: msg }));
-      return false;
-    }
+    if (checkForDiscrimination(title).isDiscriminatory) return setError(DISCRIMINATION_MESSAGE);
+    if (checkForDiscrimination(prompt).isDiscriminatory) return setError(DISCRIMINATION_MESSAGE);
 
     const promptQuality = checkInputQuality(prompt);
     if (!promptQuality.isValid) {
-      setValidationErrors(prev => ({ ...prev, [id]: msg }));
-      return false;
+      return setError(promptQuality.reason || 'Formulera ett tydligt kriterium.');
     }
-    
+
     setValidationErrors(prev => {
       const next = { ...prev };
       delete next[id];
