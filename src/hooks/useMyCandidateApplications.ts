@@ -25,8 +25,14 @@ export function useMyCandidateApplications(
 ) {
   const { user } = useAuth();
   const userId = user?.id;
-  const [allApplications, setAllApplications] = useState<ApplicationData[]>([]);
+  // Cachen läses SYNKRONT vid första render. Tidigare låg läsningen i effekten
+  // nedan, vilket gav en första målning utan "X jobb"-badge — den poppade in
+  // en frame senare trots att svaret redan fanns lokalt.
+  const [allApplications, setAllApplications] = useState<ApplicationData[]>(() =>
+    applicantId && dialogOpen ? (readCandidateApplicationsCache(userId, applicantId) ?? []) : []
+  );
   const [loading, setLoading] = useState(false);
+
 
   const readCache = useCallback(
     (aid: string) => readCandidateApplicationsCache(userId, aid),
