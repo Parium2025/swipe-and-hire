@@ -490,7 +490,15 @@ const MyCandidates = () => {
   // Prefetching
   const handlePrefetchCandidate = useCallback((candidate: MyCandidateData) => {
     if (!user || !candidate.applicant_id) return;
-    
+
+    // Full-size porträtt + video signeras/avkodas redan vid hover. Listan
+    // förvärmer bara de översta raderna, så utan detta visade en kandidat
+    // långt ner i kolumnen (t.ex. rad 5 000) en tom cirkel när dialogen öppnas.
+    const img = typeof candidate.profile_image_url === 'string' ? candidate.profile_image_url.trim() : '';
+    if (img) void prefetchMediaUrl(img, 'profile-image', MEDIA_URL_TTL).catch(() => {});
+    const vid = candidate.is_profile_video && typeof candidate.video_url === 'string' ? candidate.video_url.trim() : '';
+    if (vid) void prefetchMediaUrl(vid, 'profile-video', MEDIA_URL_TTL).catch(() => {});
+
     prefetchCandidateActivities(queryClient, candidate.applicant_id, user.id);
     prefetchCandidateNotes(candidate.applicant_id);
     
@@ -507,6 +515,7 @@ const MyCandidates = () => {
       staleTime: 30 * 1000,
     });
   }, [user, queryClient]);
+
 
   const handleDialogClose = () => {
     setDialogOpen(false);
