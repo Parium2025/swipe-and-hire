@@ -3571,6 +3571,10 @@ export type Database = {
         Args: { p_job_ids: string[] }
         Returns: number
       }
+      count_distinct_candidates_scoped: {
+        Args: { p_scope?: string }
+        Returns: number
+      }
       count_distinct_my_candidates: {
         Args: { p_recruiter_id: string }
         Returns: number
@@ -3835,6 +3839,7 @@ export type Database = {
         Args: { p_days_back?: number; p_user_id: string }
         Returns: Json
       }
+      get_job_market_counts: { Args: never; Returns: Json }
       get_jobseeker_dashboard_stats: {
         Args: { p_user_id: string }
         Returns: Json
