@@ -173,19 +173,22 @@ const MyApplications = () => {
 
   const confirmRemoveApplication = async () => {
     if (!applicationToRemove) return;
-    
+
     const applicationId = applicationToRemove.id;
     setApplicationToRemove(null);
-    
+
     try {
-      await deleteApplication(applicationId);
+      await hideApplication(applicationId);
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
-      toast.success('Ansökan borttagen');
+      toast.success('Ansökan dold i din lista', {
+        description: 'Arbetsgivaren har kvar din ansökan.',
+      });
     } catch (err) {
-      console.error('Error removing application:', err);
-      toast.error('Kunde inte ta bort ansökan');
+      console.error('Error hiding application:', err);
+      toast.error('Kunde inte dölja ansökan');
     }
   };
+
 
   if (!showContent || isLoading) {
     return <MyApplicationsSkeleton activeTab={activeTab} />;
