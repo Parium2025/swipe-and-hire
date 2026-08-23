@@ -80,8 +80,9 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   const savedFavoritesCount = dashStats?.saved_favorites ?? cachedStats['saved_favorites'] ?? 0;
   const unreadMessagesCount = dashStats?.unread_messages ?? cachedStats['unread_messages'] ?? 0;
 
-  const jobIdsRef = useRef<string[]>(activeJobIds);
-  jobIdsRef.current = activeJobIds;
+  // Serverfunktionen avgör själv vilka annonser som räknas — vi behöver inte
+  // längre hålla en lokal id-lista för att filtrera realtime-händelser.
+
 
   useEffect(() => {
     if (!user?.id) return;
