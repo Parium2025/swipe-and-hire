@@ -459,8 +459,10 @@ const EmployerDashboard = memo(() => {
     const activeCount = serverCounts?.active ?? activeJobs.length;
     const expiredCount = serverCounts?.expired ?? expiredJobsCount;
     const draftCount = serverCounts?.draft ?? draftJobsCount;
-    const totalViews = serverStats?.total_views ?? activeJobs.reduce((s, j) => s + j.views_count, 0);
-    const totalApps = serverStats?.total_applications ?? activeJobs.reduce((s, j) => s + j.applications_count, 0);
+    // Fallback = livstidstotal över ALLA annonser, samma definition som servern.
+    const totalViews = serverStats?.total_views ?? jobs.reduce((s, j) => s + (j.views_count || 0), 0);
+    const totalApps = serverStats?.total_applications ?? jobs.reduce((s, j) => s + (j.applications_count || 0), 0);
+
     return [
       { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs' },
       {

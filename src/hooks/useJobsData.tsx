@@ -301,6 +301,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         invalidateStatsTimer = null;
         queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
         queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
       }, 3000);
     };
 
@@ -412,6 +413,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     // realtime-eventet hann fram (upp till 3s debounce) — eller inte alls.
     queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
     queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
   };
 
   // Get unique recruiters from jobs

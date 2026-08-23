@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.get_employer_dashboard_stats(uuid, uuid[]);
