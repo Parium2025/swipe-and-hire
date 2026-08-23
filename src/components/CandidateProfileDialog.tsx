@@ -182,15 +182,23 @@ export const CandidateProfileDialog = ({
     const paths = (adjacentMedia ?? [])
       .map((m) => m?.profile_image_url)
       .filter((p): p is string => !!p);
-    if (paths.length === 0) return;
+    const videos = (adjacentMedia ?? [])
+      .map((m) => m?.video_url)
+      .filter((v): v is string => !!v);
+    if (paths.length === 0 && videos.length === 0) return;
     // Ingen fördröjning: pilnavigeringen kan ske inom några hundra ms, och
     // grannbilderna måste vara nedladdade OCH avkodade innan dess.
     const id = window.setTimeout(() => {
       paths.forEach((p) => {
         void prefetchMediaUrl(p, 'profile-image', MEDIA_URL_TTL).catch(() => {});
       });
+      // Videokandidater visar annars en tom cirkel medan URL:en signeras.
+      videos.forEach((v) => {
+        void prefetchMediaUrl(v, 'profile-video', MEDIA_URL_TTL).catch(() => {});
+      });
     }, 0);
     return () => window.clearTimeout(id);
+
   }, [open, adjacentMedia]);
 
 
