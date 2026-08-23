@@ -4198,6 +4198,7 @@ export type Database = {
       }
       search_my_candidates: {
         Args: {
+          p_cursor_id?: string
           p_cursor_updated_at?: string
           p_limit?: number
           p_list_id?: string
