@@ -194,18 +194,18 @@ function isGibberishWord(rawWord: string): boolean {
 
   const vowels = word.match(/[aeiouåäöy]/gi) || [];
   const vowelRatio = vowels.length / word.length;
-  
+
   // Real words typically have 25-70% vowels. Below 20% in 3+ char word = suspicious
   if (word.length >= 3 && vowelRatio < 0.2) return true;
-  
-  // Check for 3+ consecutive consonants (uncommon in Swedish, very common in gibberish)
-  // Exception: common Swedish clusters like "str", "skr", "spr"
-  const stripped = word.toLowerCase().replace(/^(str|skr|spr|sch)/, '');
-  if (/[^aeiouåäöy]{3,}/i.test(stripped)) return true;
-  
-  // Check for unlikely character sequences (double+ uncommon consonants)
-  if (/([qwxz]){1,}|([^aeiouåäöy])\2{2,}/i.test(word)) return true;
-  
+
+  // Konsonantkluster: svenska sammansättningar har massor av legitima 3-kluster
+  // ("årsredovisning" → rsr, "arbetsplats" → tspl, "verkstadsteknik" → dst).
+  // Bara riktigt osannolika kluster (5+ i rad) räknas som gibberish.
+  if (/[^aeiouåäöy]{5,}/i.test(word.toLowerCase())) return true;
+
+  // Check for unlikely character sequences (triple+ repeated consonant)
+  if (/([^aeiouåäöy])\1{2,}/i.test(word)) return true;
+
   return false;
 }
 

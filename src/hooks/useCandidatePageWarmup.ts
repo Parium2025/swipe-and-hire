@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCandidateRowMediaWarmup } from '@/hooks/useCandidateRowMediaWarmup';
 import { useCandidateRowDetailsWarmup } from '@/hooks/useCandidateRowDetailsWarmup';
+import { useCandidateRowProfileWarmup } from '@/hooks/useCandidateRowProfileWarmup';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 
 /**
@@ -71,6 +72,9 @@ export function useCandidatePageWarmup(
 
   // Steg 1 — text
   useCandidateRowDetailsWarmup(rows as { applicant_id?: string | null }[] | undefined, enabled && stage >= 1);
+
+  // Steg 1 — profildata som annars visar spinner: frågor, AI-sammanfattning, CV-länk
+  useCandidateRowProfileWarmup(rows, enabled && stage >= 1);
 
   // Steg 2 — media
   useCandidateRowMediaWarmup(rows, enabled && stage >= 2);
