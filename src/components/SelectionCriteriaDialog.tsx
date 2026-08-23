@@ -111,6 +111,19 @@ export function SelectionCriteriaDialog({
     });
   }, [open, criteria, drafts, jobId, queryClient]);
 
+  // Re-score candidates once, after the dialog closes, if an active criterion was removed
+  useEffect(() => {
+    if (open || !needsReevalRef.current) return;
+    needsReevalRef.current = false;
+
+    const remainingActive = criteria.filter(c => c.is_active && c.title?.trim() && c.prompt?.trim());
+    if (remainingActive.length === 0 || candidates.length === 0) return;
+
+    evaluateAllCandidates.mutate({ jobId, candidates });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+
   useEffect(() => {
     if (!jobId) return;
     if (open) {
