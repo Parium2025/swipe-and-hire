@@ -313,7 +313,7 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
     <div>
       <div className="flex items-baseline justify-between mb-2">
         <span className="text-2xl font-bold text-white tabular-nums">{totalViews}</span>
-        <span className="text-[11px] text-white">totalt under perioden</span>
+        <span className="text-[11px] text-white">unika besökare under perioden</span>
       </div>
       <svg width="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
         <defs>
@@ -862,7 +862,24 @@ const EmployerAnalytics = memo(() => {
       {dailyViews.length > 1 && (
         <Card className="bg-white/5 border-white/10 overflow-hidden">
           <CardContent className="p-5">
-            <h3 className="text-sm font-medium text-white mb-3">Visningar per dag</h3>
+            <div className="flex items-center gap-1.5 mb-3">
+              <h3 className="text-sm font-medium text-white">Visningar per dag</h3>
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="shrink-0 text-white hover:text-white/80 transition-colors">
+                      <Info className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[280px]">
+                    <p className="text-xs leading-relaxed">
+                      Unika besökare: samma person räknas bara en gång per annons, oavsett hur många gånger den öppnas.
+                      Visningar från dig och dina kollegor räknas aldrig med.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <DailySparkline data={dailyViews} />
           </CardContent>
         </Card>
