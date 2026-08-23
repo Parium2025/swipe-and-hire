@@ -748,20 +748,43 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <MobileJobCard
-                    job={job}
-                    onEdit={handleEditJob}
-                    onDelete={handleDeleteClick}
-                    onEditDraft={handleEditDraft}
-                    onPrefetch={prefetchJob}
-                    onRepublish={handleRepublishClick}
-                    cardIndex={idx}
-                    collapsible
-                    expanded={expandAll}
-                  />
-
+                  <div className="relative">
+                    <MobileJobCard
+                      job={job}
+                      onEdit={handleEditJob}
+                      onDelete={handleDeleteClick}
+                      onEditDraft={handleEditDraft}
+                      onPrefetch={prefetchJob}
+                      onRepublish={handleRepublishClick}
+                      cardIndex={idx}
+                      collapsible
+                      expanded={expandAll}
+                    />
+                    {selectionMode && bulkSelectable && (
+                      <button
+                        type="button"
+                        onClick={() => toggleSelected(job.id)}
+                        aria-pressed={selectedIds.has(job.id)}
+                        aria-label={`${selectedIds.has(job.id) ? 'Avmarkera' : 'Markera'} ${job.title}`}
+                        className={`absolute inset-0 z-20 flex items-start justify-end rounded-2xl p-3 transition-colors ${
+                          selectedIds.has(job.id) ? 'bg-primary/25 ring-2 ring-white/70' : 'bg-black/25 hover:bg-black/15'
+                        }`}
+                      >
+                        <span
+                          className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
+                            selectedIds.has(job.id)
+                              ? 'bg-white border-white'
+                              : 'bg-white/15 border-white/60 backdrop-blur-sm'
+                          }`}
+                        >
+                          {selectedIds.has(job.id) && <Check className="h-4 w-4 text-primary" />}
+                        </span>
+                      </button>
+                    )}
+                  </div>
                 </CardErrorBoundary>
               )}
+
             />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </>
