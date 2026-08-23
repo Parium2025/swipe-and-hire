@@ -212,16 +212,23 @@ const Dashboard = memo(() => {
   // 🔥 HÅL #2: Pre-warma BARA aktuell + nästa sida (~40 bilder), inte alla
   // tusentals. Tidigare prewarm av 5k bilder mättade nätverket och evictade
   // sin egen cache i imageCache.ts. Nu: smart, bounded, alltid relevant.
+  // 🔑 URL:erna måste byggas EXAKT som korten renderar dem (600x400 q75 cover
+  // för bilden, 64x64 q80 contain för logon, plus `?v=`-versionen). Tidigare
+  // förvärmdes originalbilden — varje kort blev då en cache-MISS och laddade
+  // ner flera MB i onödan ovanpå den transformerade bilden.
   const prewarmEntries = useMemo(() => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize * 2; // current + next page
     const currentBucket = activeTab === 'expired' ? tabBuckets.expired : tabBuckets.active;
     const window = currentBucket.slice(start, end);
-    const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
+    const entries: Array<{ path?: string | null; bucket?: 'job-images' | 'company-logos' }> = [];
     for (const job of window) {
-      const j = job as { job_image_url?: string | null; company_logo_url?: string | null };
-      if (j.job_image_url) entries.push({ path: j.job_image_url, bucket: 'job-images' });
-      if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
+      const j = job as any;
+      const v = getImageVersion(j);
+      const cardUrl = buildCardImageUrl(j.job_image_url ?? j.job_image_desktop_url ?? null, 'job-images', v, { width: 600, height: 400, quality: 75, resize: 'cover' });
+      if (cardUrl) entries.push({ path: cardUrl });
+      const logoUrl = buildCardImageUrl(j.company_logo_url ?? null, 'company-logos', v, { width: 64, height: 64, quality: 80, resize: 'contain' });
+      if (logoUrl) entries.push({ path: logoUrl });
     }
     return entries;
   }, [tabBuckets, activeTab, page, pageSize]);
