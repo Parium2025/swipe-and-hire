@@ -256,7 +256,7 @@ export const StatusColumn = memo(({
             </div>
           )}
 
-          {displayCount === 0 && !isOver && (
+          {applications.length === 0 && !isStreaming && !isOver && (
             <div className="py-8 text-center text-xs text-white">
               Inga kandidater i detta steg
             </div>
