@@ -1117,7 +1117,18 @@ All colors MUST be HSL.
     width: 100%;
     max-width: none;
     content-visibility: visible;
+    /* Identisk höjd på alla kort i samma rad: sträck griditemet och låt
+       innehållet fylla ut, så inga 1px-glapp uppstår vid subpixel-rendering. */
+    align-self: stretch;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
+
+  .job-card-grid .job-card-mobile-shell > .job-card-mobile-body {
+    flex: 1 1 auto;
+  }
+
 
   /* Same optimization for desktop search/employer cards */
   .job-card-desktop-body {
@@ -1189,7 +1200,9 @@ All colors MUST be HSL.
        samma object-position % olika mycket. */
     aspect-ratio: var(--job-media-aspect, 2 / 1);
     height: auto;
+    flex: none;
   }
+
 
   .job-card-mobile-body {
     padding: var(--job-card-mobile-content-padding);
