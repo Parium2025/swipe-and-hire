@@ -30,7 +30,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import { useEvaluateAllCandidates } from '@/hooks/useCriteriaResults';
 import { useStartCriteriaEvalRun } from '@/hooks/useCriteriaEvalRun';
 import { checkDiscriminationWithAI, checkInputQuality } from '@/lib/criteriaValidation';
 
@@ -66,7 +65,6 @@ export function SelectionCriteriaDialog({
   const [criteria, setCriteria] = useState<JobCriterion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const evaluateAllCandidates = useEvaluateAllCandidates();
   const startEvalRun = useStartCriteriaEvalRun();
   const queryClient = useQueryClient();
   
