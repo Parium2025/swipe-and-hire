@@ -17,6 +17,8 @@ import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
+import { buildCardImageUrl } from '@/hooks/useCardImage';
+import { getImageVersion } from '@/lib/imageTransforms';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
@@ -43,7 +45,7 @@ const Dashboard = memo(() => {
   // Server-side truth — skalar till 10k+ jobb utan klient-belastning
   const { data: serverCounts } = useEmployerJobsCounts('organization');
   const { data: serverStats } = useEmployerDashboardStats('organization');
-  const { profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
+  const { profile, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
   
   const [showContent, setShowContent] = useState(() => !isLoading);
@@ -212,16 +214,23 @@ const Dashboard = memo(() => {
   // 🔥 HÅL #2: Pre-warma BARA aktuell + nästa sida (~40 bilder), inte alla
   // tusentals. Tidigare prewarm av 5k bilder mättade nätverket och evictade
   // sin egen cache i imageCache.ts. Nu: smart, bounded, alltid relevant.
+  // 🔑 URL:erna måste byggas EXAKT som korten renderar dem (600x400 q75 cover
+  // för bilden, 64x64 q80 contain för logon, plus `?v=`-versionen). Tidigare
+  // förvärmdes originalbilden — varje kort blev då en cache-MISS och laddade
+  // ner flera MB i onödan ovanpå den transformerade bilden.
   const prewarmEntries = useMemo(() => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize * 2; // current + next page
     const currentBucket = activeTab === 'expired' ? tabBuckets.expired : tabBuckets.active;
     const window = currentBucket.slice(start, end);
-    const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
+    const entries: Array<{ path?: string | null; bucket?: 'job-images' | 'company-logos' }> = [];
     for (const job of window) {
-      const j = job as { job_image_url?: string | null; company_logo_url?: string | null };
-      if (j.job_image_url) entries.push({ path: j.job_image_url, bucket: 'job-images' });
-      if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
+      const j = job as any;
+      const v = getImageVersion(j);
+      const cardUrl = buildCardImageUrl(j.job_image_url ?? j.job_image_desktop_url ?? null, 'job-images', v, { width: 600, height: 400, quality: 75, resize: 'cover' });
+      if (cardUrl) entries.push({ path: cardUrl });
+      const logoUrl = buildCardImageUrl(j.company_logo_url ?? null, 'company-logos', v, { width: 64, height: 64, quality: 80, resize: 'contain' });
+      if (logoUrl) entries.push({ path: logoUrl });
     }
     return entries;
   }, [tabBuckets, activeTab, page, pageSize]);
@@ -266,22 +275,27 @@ const Dashboard = memo(() => {
     const expiredCount = serverCounts?.expired ?? expiredJobs.length;
     const totalViews = serverStats?.total_views ?? filteredStats.totalViews;
     const totalApplications = serverStats?.total_applications ?? filteredStats.totalApplications;
+    // Under laddning: server-siffrorna (SWR-seedade från localStorage) är alltid
+    // sannare än sessionStorage-fallbacken. "Annonser" = aktiva + utgångna, så
+    // fallbacken måste vara dashboard-totalen — inte antalet aktiva.
+    const seeded = !!serverCounts;
+    const seededStats = !!serverStats;
     return [
-      { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : totalJobs, loading: false, isLoading },
+      { icon: Briefcase, title: 'Annonser', value: isLoading && !seeded ? preloadedEmployerDashboardJobs : totalJobs, loading: false, isLoading },
       {
         icon: TrendingUp,
         title: 'Aktiva',
-        value: isLoading ? preloadedEmployerActiveJobs : activeCount,
+        value: isLoading && !seeded ? preloadedEmployerActiveJobs : activeCount,
         loading: false,
         isLoading,
         onClick: () => goToTab('active'),
         ariaLabel: 'Visa aktiva annonser',
         subItems: [{ label: 'Utgångna', value: expiredCount, onClick: () => goToTab('expired'), ariaLabel: 'Visa utgångna annonser' }],
       },
-      { icon: Eye, title: 'Visningar', value: isLoading ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading },
-      { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : totalApplications, loading: false, isLoading, onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
+      { icon: Eye, title: 'Visningar', value: isLoading && !seededStats ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading },
+      { icon: Users, title: 'Ansökningar', value: isLoading && !seededStats ? preloadedEmployerTotalApplications : totalApplications, loading: false, isLoading, onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
     ];
-  }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
+  }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
   if (!initialLoadDone) {
     return <EmployerDashboardSkeleton showDrafts={false} titleWidthClass="w-28" />;

@@ -11,6 +11,7 @@ import { formatDateShortSv, getTimeRemaining, formatExpirationDateTime } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
+import { getImageVersion } from '@/lib/imageTransforms';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 import { getCompanyInitials } from '@/lib/companyInitials';
@@ -92,8 +93,13 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
 
   // Centraliserad bild-hantering — eliminerar 4 hooks per kort
   // 🚀 Transform: kortbild ~600x400 (5-10× mindre filer), logo ~64px
-  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images', undefined, { width: 600, height: 400, quality: 75, resize: 'cover' });
-  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', undefined, { width: 64, height: 64, quality: 80, resize: 'contain' });
+  // 🔑 Version (image_updated_at) krävs — annars ligger kollegans gamla bild
+  // kvar i cachen efter en redigering. Desktop-URL:en är fallback för äldre
+  // annonser som saknar dedikerad kortbild (samma regel som MobileJobCard).
+  const imageVersion = getImageVersion(job as any);
+  const cardImageSource = job.job_image_url ?? (job as any).job_image_desktop_url ?? null;
+  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 

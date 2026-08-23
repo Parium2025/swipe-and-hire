@@ -567,12 +567,19 @@ const EmployerDashboard = memo(() => {
     const totalViews = serverStats?.total_views ?? jobs.reduce((s, j) => s + (j.views_count || 0), 0);
     const totalApps = serverStats?.total_applications ?? jobs.reduce((s, j) => s + (j.applications_count || 0), 0);
 
+    // ⚠️ De förladdade sessionStorage-siffrorna är ORGANISATIONS-scopade
+    // (aktiva/visningar/ansökningar för hela företaget). Den här sidan visar
+    // MINA annonser. Så fort de personliga server-siffrorna finns (de seedas
+    // direkt från localStorage) använder vi dem — annars hoppade siffran ner
+    // från företagets totaler till mina egna när listan blev klar.
+    const seeded = !!serverCounts;
+    const seededStats = !!serverStats;
     return [
-      { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs' },
+      { icon: Briefcase, title: 'Annonser', value: loading && !seeded ? preloadedEmployerMyJobs : totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs' },
       {
         icon: TrendingUp,
         title: 'Aktiva',
-        value: loading ? preloadedEmployerActiveJobs : activeCount,
+        value: loading && !seeded ? preloadedEmployerActiveJobs : activeCount,
         loading: false,
         isLoading: loading,
         cacheKey: 'emp_active_jobs',
@@ -583,8 +590,8 @@ const EmployerDashboard = memo(() => {
           { label: 'Utkast', value: draftCount, cacheKey: 'emp_draft_jobs', onClick: () => goToTab('draft'), ariaLabel: 'Visa utkast' },
         ],
       },
-      { icon: Eye, title: 'Visningar', value: loading ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading: loading, cacheKey: 'emp_total_views' },
-      { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : totalApps, loading: false, isLoading: loading, cacheKey: 'emp_total_apps', onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
+      { icon: Eye, title: 'Visningar', value: loading && !seededStats ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading: loading, cacheKey: 'emp_total_views' },
+      { icon: Users, title: 'Ansökningar', value: loading && !seededStats ? preloadedEmployerTotalApplications : totalApps, loading: false, isLoading: loading, cacheKey: 'emp_total_apps', onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
     ];
   }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
