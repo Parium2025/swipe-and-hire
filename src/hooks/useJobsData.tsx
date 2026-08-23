@@ -121,10 +121,25 @@ function writeJobsCache(userId: string, scope: string, orgId: string | null, job
 }
 
 /**
+ * 🪦 Tombstones: annonser som raderats i den här fliken. En bakgrundsström som
+ * redan hunnit läsa raden innan raderingen får aldrig skriva tillbaka den i
+ * sin auktoritativa slutskrivning ("ghost job").
+ */
+const deletedJobIds = new Set<string>();
+const DELETED_TTL_MS = 5 * 60 * 1000;
+
+export const dropDeletedJobs = <T extends { id: string }>(rows: T[]): T[] =>
+  deletedJobIds.size === 0 ? rows : rows.filter((r) => !deletedJobIds.has(r.id));
+
+const dropDeleted = dropDeletedJobs;
+
+/**
  * Tar bort en annons ur localStorage-cachen direkt vid radering, så den aldrig
  * kan "blinka tillbaka" vid en omladdning innan servern hunnit svara.
  */
 export function removeJobFromJobsCache(userId: string, jobId: string): void {
+  deletedJobIds.add(jobId);
+  setTimeout(() => deletedJobIds.delete(jobId), DELETED_TTL_MS);
   for (const scope of ['personal', 'organization']) {
     const key = cacheKeyFor(userId, scope);
     try {
@@ -139,6 +154,7 @@ export function removeJobFromJobsCache(userId: string, jobId: string): void {
     }
   }
 }
+
 
 
 export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
@@ -253,7 +269,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         });
       };
 
-      const merged = mergeWithCache(first);
+      const merged = dropDeleted(mergeWithCache(first));
 
       if (first.length < FIRST_PAGE) {
         writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, merged);
@@ -297,12 +313,13 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           const commit = (rows: JobPosting[]) => {
             if (!isCurrent()) return;
             queryClient.setQueryData(queryKey, (prev: JobPosting[] | undefined) => {
-              if (!prev || prev.length === 0) return rows;
+              if (!prev || prev.length === 0) return dropDeleted(rows);
               const byId = new Map(prev.map((j) => [j.id, j] as const));
               for (const row of rows) if (!byId.has(row.id)) byId.set(row.id, row);
-              return Array.from(byId.values());
+              return dropDeleted(Array.from(byId.values()));
             });
           };
+
 
           // eslint-disable-next-line no-constant-condition
           while (true) {
@@ -321,9 +338,12 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           // bara här — ersätter vi listan rakt av. Det rensar bort rader som
           // raderats på servern medan fliken varit stängd.
           if (isCurrent()) {
-            queryClient.setQueryData(queryKey, all);
-            writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, all);
+            // 🪦 Rader som raderats medan strömmen rullade får aldrig återuppstå.
+            const finalRows = dropDeleted(all);
+            queryClient.setQueryData(queryKey, finalRows);
+            writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, finalRows);
           }
+
         } catch {
           // Tyst fel — realtime/refetch återställer, första sidan visas ändå
         } finally {

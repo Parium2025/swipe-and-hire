@@ -3,6 +3,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from './useAuth';
+import { dropDeletedJobs } from '@/hooks/useJobsData';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { createBulletproofChannel } from '@/lib/bulletproofChannel';
@@ -97,7 +98,7 @@ export const useEmployerBackgroundSync = () => {
       cursor = { created_at: last.created_at, id: last.id };
     }
 
-    queryClient.setQueryData(['jobs', 'personal', orgId, userId], jobs);
+    queryClient.setQueryData(['jobs', 'personal', orgId, userId], dropDeletedJobs(jobs));
 
   }, [queryClient]);
 
