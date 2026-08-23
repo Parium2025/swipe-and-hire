@@ -249,6 +249,13 @@ export function useMyCandidatesData(
     [user?.id, searchQuery, listId, stagesKey],
   );
 
+  // Realtime-effekterna har medvetet smala dependencies (annars prenumererar de
+  // om vid varje sökbokstav). Utan den här refen skrev de till en INAKTUELL
+  // query-nyckel så fort man sökte eller bytte lista — uppdateringen syntes då
+  // aldrig i vyn som faktiskt visas.
+  const queryKeyRef = useRef(queryKey);
+  queryKeyRef.current = queryKey;
+
   // Vilka kolumner som bett om nästa sida just nu (tom = första omgången).
   const requestedStagesRef = useRef<Set<string>>(new Set());
 
@@ -471,7 +478,7 @@ export function useMyCandidatesData(
             const sameList = !listId || !next.list_id || next.list_id === listId;
             if (next.recruiter_id === user.id && next.stage && sameList) {
               queryClient.setQueryData(
-                queryKey,
+                queryKeyRef.current,
                 (old: any) => {
                   if (!old?.pages) return old;
                   return {
@@ -479,7 +486,9 @@ export function useMyCandidatesData(
                     pages: old.pages.map((page: any) => ({
                       ...page,
                       items: page.items.map((c: MyCandidateData) =>
-                        c.id === next.id ? { ...c, stage: next.stage! } : c
+                        c.id === next.id
+                          ? { ...c, stage: next.stage!, updated_at: (next as any).updated_at || new Date().toISOString() }
+                          : c
                       ),
                     })),
                   };
@@ -527,7 +536,7 @@ export function useMyCandidatesData(
           if (updatedUserId && applicantIdsRef.current.has(updatedUserId)) {
             const newLastActiveAt = payload.new?.last_active_at;
             queryClient.setQueryData(
-              queryKey,
+              queryKeyRef.current,
               (old: any) => {
                 if (!old?.pages) return old;
                 return {
@@ -562,7 +571,7 @@ export function useMyCandidatesData(
           const appliedAt = payload.new?.applied_at;
           if (applicantId && applicantIdsRef.current.has(applicantId) && appliedAt) {
             queryClient.setQueryData(
-              queryKey,
+              queryKeyRef.current,
               (old: any) => {
                 if (!old?.pages) return old;
                 return {
@@ -607,7 +616,7 @@ export function useMyCandidatesData(
           const next = payload?.new as { applicant_id?: string; rating?: number; recruiter_id?: string } | undefined;
           // In-place cache update for own ratings to avoid full refetch
           if (next?.applicant_id && next?.recruiter_id === user.id && typeof next.rating === 'number') {
-            queryClient.setQueryData(queryKey, (old: any) => {
+            queryClient.setQueryData(queryKeyRef.current, (old: any) => {
               if (!old?.pages) return old;
               return {
                 ...old,
@@ -641,7 +650,7 @@ export function useMyCandidatesData(
           const next = payload?.new as { applicant_id?: string; note?: string; employer_id?: string } | undefined;
           // In-place cache update for own notes
           if (next?.applicant_id && next?.employer_id === user.id && typeof next.note === 'string') {
-            queryClient.setQueryData(queryKey, (old: any) => {
+            queryClient.setQueryData(queryKeyRef.current, (old: any) => {
               if (!old?.pages) return old;
               return {
                 ...old,
