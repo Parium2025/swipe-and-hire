@@ -266,8 +266,11 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, all);
         } catch {
           // Tyst fel — realtime/refetch återställer, första sidan visas ändå
+        } finally {
+          jobStreamRegistry.set(streamKey, { running: false, completedAt: Date.now() });
         }
         })();
+
       }, 0);
 
 
