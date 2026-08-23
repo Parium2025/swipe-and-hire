@@ -311,12 +311,13 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           const commit = (rows: JobPosting[]) => {
             if (!isCurrent()) return;
             queryClient.setQueryData(queryKey, (prev: JobPosting[] | undefined) => {
-              if (!prev || prev.length === 0) return rows;
+              if (!prev || prev.length === 0) return dropDeleted(rows);
               const byId = new Map(prev.map((j) => [j.id, j] as const));
               for (const row of rows) if (!byId.has(row.id)) byId.set(row.id, row);
-              return Array.from(byId.values());
+              return dropDeleted(Array.from(byId.values()));
             });
           };
+
 
           // eslint-disable-next-line no-constant-condition
           while (true) {
