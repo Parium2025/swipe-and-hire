@@ -27,6 +27,8 @@ import {
   Loader2,
   Video,
   Trash2,
+  EyeOff,
+
   AlertTriangle,
   Calendar
 } from 'lucide-react';
