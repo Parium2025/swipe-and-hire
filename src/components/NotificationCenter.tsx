@@ -136,9 +136,10 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const titleTruncated = useTruncation(titleRef);
   const bodyTruncated = useTruncation(bodyRef);
-  const needsTooltip = titleTruncated || bodyTruncated;
+  const [expanded, setExpanded] = useState(false);
+  const canExpand = titleTruncated || bodyTruncated || expanded;
 
-  const button = (
+  return (
     <motion.button
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
@@ -147,7 +148,8 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
       whileTap={{ scale: 0.98 }}
       onClick={() => {
         if (!item.is_read) onRead(item.id);
-        if (item.route) onNavigate(item.route);
+        if (item.route) { onNavigate(item.route); return; }
+        if (canExpand) setExpanded(v => !v);
       }}
       className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg ${
         item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
@@ -159,7 +161,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span ref={titleRef} className="text-sm font-medium text-white break-words line-clamp-2">{item.title}</span>
+          <span ref={titleRef} className={`text-sm font-medium text-white break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
           {item.count > 1 && (
             <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
               {item.count}×
@@ -169,24 +171,20 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
-        {item.body && <p ref={bodyRef} className="text-xs text-white mt-0.5 line-clamp-2">{item.body}</p>}
-        <span className="text-[10px] text-white mt-1 block">{timeAgo}</span>
+        {item.body && <p ref={bodyRef} className={`text-xs text-white mt-0.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-[10px] text-white">{timeAgo}</span>
+          {!item.route && canExpand && (
+            <span className="text-[10px] font-medium text-white/80 underline underline-offset-2">
+              {expanded ? 'Visa mindre' : 'Visa mer'}
+            </span>
+          )}
+        </div>
       </div>
     </motion.button>
   );
-
-  if (!needsTooltip) return button;
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent side="left" className="max-w-[260px] text-xs text-white">
-        <p className="font-medium text-white">{item.title}</p>
-        {item.body && <p className="mt-1 text-white">{item.body}</p>}
-      </TooltipContent>
-    </Tooltip>
-  );
 }
+
 
 // Tekniska felnotiser hör hemma i loggarna – aldrig i kundens notiscenter.
 const TECHNICAL_PATTERN = /backend-anrop|failed to fetch|appfel|misslyckat async|typeerror/i;
