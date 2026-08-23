@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
+import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, ChevronsDownUp, ChevronsUpDown, Check, ListChecks, X } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
-import { useJobsData, removeJobFromJobsCache, type JobPosting } from '@/hooks/useJobsData';
+import { useJobsData, removeJobFromJobsCache, removeJobsFromJobsCache, type JobPosting } from '@/hooks/useJobsData';
+
 import { MobileJobCard } from '@/components/MobileJobCard';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
@@ -65,6 +66,12 @@ const EmployerDashboard = memo(() => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [republishJob, setRepublishJob] = useState<JobPosting | null>(null);
   const [republishDialogOpen, setRepublishDialogOpen] = useState(false);
+  // Massradering (endast utgångna/utkast)
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
   const [editRepublishMode, setEditRepublishMode] = useState(false);
   const [pendingEditJobId, setPendingEditJobId] = useState<string | null>(null);
   const { user, profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
@@ -272,15 +279,23 @@ const EmployerDashboard = memo(() => {
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
 
+  // Markeringsläget får aldrig överleva ett tab-/sökbyte — annars raderar man
+  // annonser man inte längre ser på skärmen.
+  useEffect(() => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }, [activeTab, searchTerm]);
+
+
   // Använd lokal data-längd så vi inte visar tomma sidor när server-count är högre
   // än vad som faktiskt laddats in i klienten.
   const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
 
   // 🔥 Pre-warma BARA aktuell tab × current+next page (~40 bilder).
   // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.
-  // 🔑 URL:erna byggs med EXAKT samma transform + version som korten renderar
-  // (600x300 q75 cover / 64x64 q80 contain). Warmade vi originalbilden blev
-  // det en cache-miss vid render — dubbel bandbredd och noll nytta.
+  // 🔑 URL:erna byggs med EXAKT samma källa, transform och version som
+  // `MobileJobCard` renderar (job_image_url @ 600x400 q75 cover / logo 64x64
+  // q80 contain). Minsta avvikelse → cache-MISS vid render, dubbel bandbredd.
   const prewarmEntries = useMemo(() => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize * 2;
@@ -293,8 +308,8 @@ const EmployerDashboard = memo(() => {
     const entries: Array<{ path?: string | null; bucket?: 'job-images' | 'company-logos' }> = [];
     for (const j of window) {
       const v = getImageVersion(j as any);
-      const cardSource = j.job_image_url ?? j.job_image_desktop_url ?? null;
-      const cardUrl = buildCardImageUrl(cardSource, 'job-images', v, { width: 600, height: 300, quality: 75, resize: 'cover' });
+      const cardUrl = buildCardImageUrl(j.job_image_url ?? null, 'job-images', v, { width: 600, height: 400, quality: 75, resize: 'cover' });
+
       if (cardUrl) entries.push({ path: cardUrl });
       const logoUrl = buildCardImageUrl(j.company_logo_url ?? null, 'company-logos', v, { width: 64, height: 64, quality: 80, resize: 'contain' });
       if (logoUrl) entries.push({ path: logoUrl });
@@ -338,6 +353,70 @@ const EmployerDashboard = memo(() => {
     setJobToDelete(job);
     setDeleteDialogOpen(true);
   };
+
+  /**
+   * 🗑️ Massradering — endast på "Utgångna" och "Utkast". Aktiva annonser är
+   * medvetet undantagna: en live-annons ska aldrig kunna försvinna via en
+   * bock-i-farten. Radering sker i chunkar om 200 id:n så en RLS-uppdatering
+   * av 1 000 rader inte timeoutar, med tombstones + cache-städning i ett svep.
+   */
+  const bulkSelectable = activeTab === 'expired' || activeTab === 'draft';
+
+  const toggleSelected = useCallback((jobId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(jobId)) next.delete(jobId); else next.add(jobId);
+      return next;
+    });
+  }, []);
+
+  const exitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  const confirmBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length || bulkDeleting) return;
+    setBulkDeleting(true);
+    try {
+      queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        const set = new Set(ids);
+        return old.filter((j: any) => !set.has(j.id));
+      });
+      if (user?.id) removeJobsFromJobsCache(user.id, ids);
+
+      const now = new Date().toISOString();
+      const CHUNK = 200;
+      for (let i = 0; i < ids.length; i += CHUNK) {
+        const chunk = ids.slice(i, i + CHUNK);
+        const { error } = await supabase
+          .from('job_postings')
+          .update({ deleted_at: now, is_active: false })
+          .in('id', chunk);
+        if (error) throw error;
+      }
+
+      toast({
+        title: ids.length === 1 ? 'Annons borttagen' : `${ids.length} annonser borttagna`,
+        description: 'Annonserna har tagits bort.',
+      });
+      setBulkDeleteOpen(false);
+      exitSelectionMode();
+      invalidateJobs();
+    } catch (error: any) {
+      invalidateJobs();
+      toast({
+        title: 'Kunde inte ta bort alla annonser',
+        description: error?.message || 'Försök igen om en liten stund.',
+        variant: 'destructive',
+      });
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
 
   const handleRepublishClick = (job: JobPosting) => {
     setRepublishJob(job);
@@ -564,6 +643,71 @@ const EmployerDashboard = memo(() => {
         </div>
       )}
 
+      {/* 🗑️ Massradering — endast utgångna/utkast */}
+      {bulkSelectable && tabFilteredJobs.length > 0 && (
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+          {!selectionMode ? (
+            <button
+              type="button"
+              onClick={() => setSelectionMode(true)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+            >
+              <ListChecks className="h-3.5 w-3.5" />
+              Markera flera
+            </button>
+          ) : (
+            <>
+              <span className="text-xs sm:text-sm text-white font-medium">
+                {selectedIds.size} markerade
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const pageIds = pageJobs.map(j => j.id);
+                  const allSelected = pageIds.every(id => selectedIds.has(id));
+                  setSelectedIds(prev => {
+                    const next = new Set(prev);
+                    for (const id of pageIds) {
+                      if (allSelected) next.delete(id); else next.add(id);
+                    }
+                    return next;
+                  });
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+              >
+                {pageJobs.length > 0 && pageJobs.every(j => selectedIds.has(j.id)) ? 'Avmarkera sidan' : 'Markera sidan'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedIds(new Set(tabFilteredJobs.map(j => j.id)))}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+              >
+                Markera alla ({tabFilteredJobs.length})
+              </button>
+              <button
+                type="button"
+                disabled={selectedIds.size === 0}
+                onClick={() => setBulkDeleteOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 border border-red-400/40 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-500/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Ta bort markerade
+              </button>
+              <button
+                type="button"
+                onClick={exitSelectionMode}
+                aria-label="Avbryt markering"
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+                Avbryt
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+
 
       {/* Result indicator */}
       {searchTerm && (
@@ -604,20 +748,43 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <MobileJobCard
-                    job={job}
-                    onEdit={handleEditJob}
-                    onDelete={handleDeleteClick}
-                    onEditDraft={handleEditDraft}
-                    onPrefetch={prefetchJob}
-                    onRepublish={handleRepublishClick}
-                    cardIndex={idx}
-                    collapsible
-                    expanded={expandAll}
-                  />
-
+                  <div className="relative">
+                    <MobileJobCard
+                      job={job}
+                      onEdit={handleEditJob}
+                      onDelete={handleDeleteClick}
+                      onEditDraft={handleEditDraft}
+                      onPrefetch={prefetchJob}
+                      onRepublish={handleRepublishClick}
+                      cardIndex={idx}
+                      collapsible
+                      expanded={expandAll}
+                    />
+                    {selectionMode && bulkSelectable && (
+                      <button
+                        type="button"
+                        onClick={() => toggleSelected(job.id)}
+                        aria-pressed={selectedIds.has(job.id)}
+                        aria-label={`${selectedIds.has(job.id) ? 'Avmarkera' : 'Markera'} ${job.title}`}
+                        className={`absolute inset-0 z-20 flex items-start justify-end rounded-2xl p-3 transition-colors ${
+                          selectedIds.has(job.id) ? 'bg-primary/25 ring-2 ring-white/70' : 'bg-black/25 hover:bg-black/15'
+                        }`}
+                      >
+                        <span
+                          className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
+                            selectedIds.has(job.id)
+                              ? 'bg-white border-white'
+                              : 'bg-white/15 border-white/60 backdrop-blur-sm'
+                          }`}
+                        >
+                          {selectedIds.has(job.id) && <Check className="h-4 w-4 text-primary" />}
+                        </span>
+                      </button>
+                    )}
+                  </div>
                 </CardErrorBoundary>
               )}
+
             />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </>
@@ -669,20 +836,43 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <MobileJobCard
-                    job={job}
-                    onEdit={handlePremiumEditOpen}
-                    onDelete={handleDeleteClick}
-                    onEditDraft={handleEditDraft}
-                    onPrefetch={prefetchJob}
-                    onRepublish={handleRepublishClick}
-                    cardIndex={idx}
-                    collapsible
-                    expanded={expandAll}
-                  />
-
+                  <div className="relative">
+                    <MobileJobCard
+                      job={job}
+                      onEdit={handlePremiumEditOpen}
+                      onDelete={handleDeleteClick}
+                      onEditDraft={handleEditDraft}
+                      onPrefetch={prefetchJob}
+                      onRepublish={handleRepublishClick}
+                      cardIndex={idx}
+                      collapsible
+                      expanded={expandAll}
+                    />
+                    {selectionMode && bulkSelectable && (
+                      <button
+                        type="button"
+                        onClick={() => toggleSelected(job.id)}
+                        aria-pressed={selectedIds.has(job.id)}
+                        aria-label={`${selectedIds.has(job.id) ? 'Avmarkera' : 'Markera'} ${job.title}`}
+                        className={`absolute inset-0 z-20 flex items-start justify-end rounded-2xl p-3 transition-colors ${
+                          selectedIds.has(job.id) ? 'bg-primary/25 ring-2 ring-white/70' : 'bg-black/25 hover:bg-black/15'
+                        }`}
+                      >
+                        <span
+                          className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
+                            selectedIds.has(job.id)
+                              ? 'bg-white border-white'
+                              : 'bg-white/15 border-white/60 backdrop-blur-sm'
+                          }`}
+                        >
+                          {selectedIds.has(job.id) && <Check className="h-4 w-4 text-primary" />}
+                        </span>
+                      </button>
+                    )}
+                  </div>
                 </CardErrorBoundary>
               )}
+
             />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
           </>
@@ -734,7 +924,48 @@ const EmployerDashboard = memo(() => {
         </AlertDialogContentNoFocus>
       </AlertDialog>
 
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(o) => { if (!bulkDeleting) setBulkDeleteOpen(o); }}>
+        <AlertDialogContentNoFocus
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col"
+        >
+          <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-white" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort {selectedIds.size} {selectedIds.size === 1 ? 'annons' : 'annonser'}
+              </AlertDialogTitle>
+            </div>
+          </AlertDialogHeader>
+          <div className="overflow-y-auto flex-1 my-4">
+            <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
+              Du är på väg att ta bort {selectedIds.size} {activeTab === 'draft' ? 'utkast' : 'utgångna annonser'}. Ansökningar och statistik för dessa annonser försvinner från dina vyer. Denna åtgärd går inte att ångra.
+            </AlertDialogDescription>
+          </div>
+          <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
+            <AlertDialogCancel
+              disabled={bulkDeleting}
+              onClick={() => setBulkDeleteOpen(false)}
+              className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmBulkDelete(); }}
+              disabled={bulkDeleting}
+              variant="destructiveSoft"
+              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              {bulkDeleting ? 'Tar bort…' : 'Ta bort'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
+
       <EditJobDialog
+
         job={editingJob}
         open={editDialogOpen}
         republishMode={editRepublishMode}

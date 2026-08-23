@@ -10,6 +10,8 @@ import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmen
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 import { isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
+import { getImageVersion } from '@/lib/imageTransforms';
+
 import { useCompactWidth } from '@/hooks/useCompactWidth';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { JobPosting } from '@/hooks/useJobsData';
@@ -91,8 +93,13 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
 
   // Centraliserad bild-hantering — eliminerar 14 hooks per kort
   // 🚀 Transform: kortbild ~600px bred / ~400px hög, logo ~48px → 5-10× mindre filer, snabbare listor
-  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images', undefined, { width: 600, height: 400, quality: 75, resize: 'cover' });
-  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', undefined, { width: 64, height: 64, quality: 80, resize: 'contain' });
+  // 🔑 `imageVersion` (image_updated_at) MÅSTE med: utan `?v=` pekar URL:en på
+  // exakt samma adress efter en bildredigering och webbläsaren serverar den
+  // gamla bilden ur sin cache — arbetsgivaren ser sin gamla bild kvar.
+  const imageVersion = getImageVersion(job as any);
+  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
+
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
