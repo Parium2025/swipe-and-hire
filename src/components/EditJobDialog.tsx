@@ -76,7 +76,7 @@ import {
 // Import shared wizard components and types
 import { SortableQuestionItem, WizardFooter } from '@/components/wizard';
 import { JobQuestion } from '@/types/jobWizard';
-import { REPUBLISH_DAYS } from '@/lib/jobStatus';
+import { REPUBLISH_DAYS, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 
 interface JobPosting {
   id: string;
