@@ -74,9 +74,35 @@ export const setPersistedCacheValue = <T,>(storageKey: string, cacheKey: string,
 
 // ─── Module-level in-memory caches (survive dialog open/close) ──────
 
-export const summaryCache = new Map<string, CandidateSummaryCacheValue>();
-export const questionsCache = new Map<string, Record<string, { text: string; order: number }>>();
-export const notesCache = new Map<string, CandidateNote[]>();
+class LruMap<K, V> extends Map<K, V> {
+  constructor(private readonly maxEntries: number) {
+    super();
+  }
+
+  override get(key: K): V | undefined {
+    const value = super.get(key);
+    if (value !== undefined) {
+      super.delete(key);
+      super.set(key, value);
+    }
+    return value;
+  }
+
+  override set(key: K, value: V): this {
+    super.delete(key);
+    super.set(key, value);
+    while (this.size > this.maxEntries) {
+      const oldestKey = this.keys().next().value;
+      if (oldestKey === undefined) break;
+      super.delete(oldestKey);
+    }
+    return this;
+  }
+}
+
+export const summaryCache = new LruMap<string, CandidateSummaryCacheValue>(CACHE_MAX_ITEMS);
+export const questionsCache = new LruMap<string, Record<string, { text: string; order: number }>>(CACHE_MAX_ITEMS);
+export const notesCache = new LruMap<string, CandidateNote[]>(CACHE_MAX_ITEMS);
 
 // ─── Storage key constants (re-exported for consumers) ──────────────
 

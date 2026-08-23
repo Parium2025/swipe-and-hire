@@ -64,17 +64,9 @@ export const useOrganizationQuestions = () => {
     queryFn: async (): Promise<OrganizationQuestion[]> => {
       if (!user) return [];
 
-      // Get all job_questions from jobs owned by this employer (or org)
-      const { data, error } = await supabase
-        .from('job_questions')
-        .select(`
-          question_text,
-          question_type,
-          options,
-          job_id,
-          job_postings!inner(employer_id)
-        `)
-        .order('question_text');
+      // Aggregate on the server. A direct table read is capped at 1,000 rows,
+      // which silently hid older questions for large organizations.
+      const { data, error } = await supabase.rpc('get_employer_filter_questions');
 
       if (error) {
         console.error('Failed to fetch organization questions:', error);
@@ -83,35 +75,12 @@ export const useOrganizationQuestions = () => {
 
       if (!data) return [];
 
-      // Aggregate by question_text to get unique questions with counts
-      const questionMap = new Map<string, OrganizationQuestion>();
-
-      data.forEach((q: any) => {
-        const key = q.question_text;
-        const existing = questionMap.get(key);
-
-        if (existing) {
-          existing.job_count += 1;
-          // Merge options if different jobs have different options for same question
-          if (q.options && q.options.length > 0) {
-            const mergedOptions = new Set([...(existing.options || []), ...q.options]);
-            existing.options = Array.from(mergedOptions);
-          }
-        } else {
-          questionMap.set(key, {
-            question_text: q.question_text,
-            question_type: q.question_type,
-            options: q.options || null,
-            job_count: 1,
-          });
-        }
-      });
-
-      // Sort by job_count (most used first), then alphabetically
-      const result = Array.from(questionMap.values()).sort((a, b) => {
-        if (b.job_count !== a.job_count) return b.job_count - a.job_count;
-        return a.question_text.localeCompare(b.question_text, 'sv');
-      });
+      const result = (data || []).map((question: any) => ({
+        question_text: question.question_text,
+        question_type: question.question_type,
+        options: Array.isArray(question.options) ? question.options : null,
+        job_count: Number(question.job_count) || 0,
+      }));
 
       // 🔥 Cache for instant-load on next visit
       writeOrgQuestionsCache(user.id, result);

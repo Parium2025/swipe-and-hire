@@ -345,7 +345,8 @@ export function useMyCandidatesData(
     },
     enabled: !!user,
     staleTime: 0,
-    gcTime: Infinity,
+    // List/search query variants are disposable; bound memory in long sessions.
+    gcTime: 15 * 60 * 1000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     // 🔥 Instant-load from localStorage cache (only for non-search queries)

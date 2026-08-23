@@ -3748,6 +3748,15 @@ export type Database = {
             Args: { p_active_job_ids: string[]; p_user_id: string }
             Returns: Json
           }
+      get_employer_filter_questions: {
+        Args: never
+        Returns: {
+          job_count: number
+          options: string[]
+          question_text: string
+          question_type: string
+        }[]
+      }
       get_employer_jobs_counts: { Args: { p_scope?: string }; Returns: Json }
       get_employer_jobs_page: {
         Args: {
