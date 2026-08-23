@@ -31,6 +31,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { useEvaluateAllCandidates } from '@/hooks/useCriteriaResults';
+import { useStartCriteriaEvalRun } from '@/hooks/useCriteriaEvalRun';
 import { checkDiscriminationWithAI, checkInputQuality } from '@/lib/criteriaValidation';
 
 interface JobCriterion {
