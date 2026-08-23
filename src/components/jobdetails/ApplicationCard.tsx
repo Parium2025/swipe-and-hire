@@ -94,24 +94,25 @@ export const ApplicationCardContent = memo(({
   
   return (
     <div 
-      className={`bg-foreground/5 ring-1 ring-inset rounded-md px-2 py-1.5 group relative
+      className={`bg-white/5 ring-1 ring-inset rounded-md px-2 py-1.5 group relative
         transition-all duration-200 ease-out
         ${isSelectionMode ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
         ${isSelected 
-          ? 'ring-1 ring-white/35 bg-foreground/[0.08]' 
+          ? 'ring-1 ring-white/30 bg-white/[0.08]' 
           : isDragging 
-            ? 'ring-2 ring-inset ring-white/45 bg-foreground/10 scale-[1.02] shadow-lg shadow-primary/20' 
-            : 'ring-white/15 hover:ring-white/30 hover:bg-foreground/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-background/20'
+            ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
+            : 'ring-white/10 hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
         }`}
       onClick={handleClick}
       onMouseEnter={onPrefetch}
+      onTouchStart={onPrefetch}
     >
       {isSelectionMode && (
-        <div className="absolute left-1.5 top-1.5 z-10">
+        <div className="absolute left-1 top-1 z-10">
           <Checkbox 
             checked={isSelected}
             onCheckedChange={() => onToggleSelect?.()}
-            className="h-3.5 w-3.5 border border-foreground/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-foreground hover:border-foreground/70"
+            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white hover:border-white/70"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
