@@ -373,7 +373,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
             <h3 className="min-w-0 text-sm font-medium leading-tight text-white [overflow-wrap:anywhere]">
               Tid till första ansökan per annons
             </h3>
-            <InlineInfoTooltip content="Visar hur snabbt varje annons fick sin första ansökan. Baren representerar antal ansökningar — längre bar = fler ansökningar." />
+            <InlineInfoTooltip content="Visar hur snabbt varje annons fick sin första ansökan, räknat från publiceringstillfället (inte när utkastet skapades). Baren representerar antal ansökningar — längre bar = fler ansökningar." />
         </div>
         <div className="space-y-2">
           {visible.map((t, i) => {
@@ -438,6 +438,14 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
                 className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
               >
                 Visa fler ({enrichedTtfa.length - visibleCount} kvar)
+              </button>
+            )}
+            {hasMore && (
+              <button
+                onClick={() => setVisibleCount(enrichedTtfa.length)}
+                className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+              >
+                Visa alla ({enrichedTtfa.length})
               </button>
             )}
             {canStepBack && (
