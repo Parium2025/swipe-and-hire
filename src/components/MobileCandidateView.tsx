@@ -251,6 +251,8 @@ const CandidateRow = memo(function CandidateRow({
 interface MobileCandidateViewProps {
   jobId: string;
   applications: JobApplication[];
+  /** Serverside-totaler per steg (kan vara högre än laddade rader). */
+  stageTotals?: Record<string, number> | null;
   stages: string[];
   stageSettings: Record<string, { label: string; color: string; iconName: string; isCustom: boolean }>;
   criteriaCount: number;
