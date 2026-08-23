@@ -120,9 +120,12 @@ const JobDetails = () => {
 
   // Samma deterministiska förvärmning som /candidates och /my-candidates:
   // text → media (porträtt/video) → CV-sammanfattningar.
+  // Vi förvärmer de första 120 raderna — resten värms när man scrollar/öppnar.
+  // Utan taket skulle en annons med 1 000 sökande dra ner 1 000 porträtt direkt.
+  const WARMUP_LIMIT = 120;
   const warmupRows = useMemo(
     () =>
-      applications.map((a) => ({
+      applications.slice(0, WARMUP_LIMIT).map((a) => ({
         id: a.id,
         application_id: a.id,
         applicant_id: a.applicant_id,
@@ -135,6 +138,7 @@ const JobDetails = () => {
     [applications, jobId]
   );
   useCandidatePageWarmup(warmupRows);
+
 
 
 
