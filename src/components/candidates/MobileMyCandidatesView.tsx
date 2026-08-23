@@ -268,6 +268,12 @@ interface MobileMyCandidatesViewProps {
   renderActionBar?: React.ReactNode;
   onPrefetch?: (candidate: MyCandidateData) => void;
   onMarkAsViewed?: (applicationId: string) => void;
+  /** Sanna totalsiffror per steg från servern (badgen i flikraden). */
+  stageCounts?: Record<string, number>;
+  /** Finns fler kandidater att hämta i steget? */
+  hasMoreInStage?: (stage: string) => boolean;
+  /** Hämtar nästa sida när användaren scrollat nära botten. */
+  onLoadMore?: () => void;
 }
 
 export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
@@ -284,6 +290,9 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   renderActionBar,
   onPrefetch,
   onMarkAsViewed,
+  stageCounts,
+  hasMoreInStage,
+  onLoadMore,
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
@@ -405,7 +414,37 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     return result;
   }, [candidates, stages]);
 
-  const currentCandidates = candidatesByStage[activeTab] || [];
+  const stageCandidates = candidatesByStage[activeTab] || [];
+
+  // Renderfönster: mobilen målar aldrig fler än så här många rader åt gången.
+  // Fönstret växer när du scrollar nära botten, så listan känns oändlig men
+  // DOM:en förblir liten även när steget innehåller tusentals kandidater.
+  const RENDER_STEP = 40;
+  const [renderLimit, setRenderLimit] = useState(RENDER_STEP);
+
+  // Nytt steg = nytt fönster (annars ärver nästa flik ett uppblåst fönster).
+  useEffect(() => {
+    setRenderLimit(RENDER_STEP);
+  }, [activeTab]);
+
+  const currentCandidates = useMemo(
+    () => stageCandidates.slice(0, renderLimit),
+    [stageCandidates, renderLimit],
+  );
+
+  const handleListScroll = useCallback(
+    (e: React.UIEvent<HTMLElement>) => {
+      const el = e.target as HTMLElement;
+      if (!el || typeof el.scrollTop !== 'number') return;
+      if (el.scrollTop + el.clientHeight < el.scrollHeight - 400) return;
+      // Först: visa fler av de rader vi redan har. När de tar slut: hämta nästa sida.
+      setRenderLimit(prev => (prev < stageCandidates.length ? prev + RENDER_STEP : prev));
+      if (renderLimit >= stageCandidates.length && hasMoreInStage?.(activeTab)) {
+        onLoadMore?.();
+      }
+    },
+    [stageCandidates.length, renderLimit, hasMoreInStage, activeTab, onLoadMore],
+  );
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -423,7 +462,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
             const cfg = stageConfig[stage];
             if (!cfg) return null;
             const Icon = getIconByName(cfg.iconName);
-            const count = (candidatesByStage[stage] || []).length;
+            // Serverns totalsiffra när den finns — annars antalet laddade rader.
+            const count = stageCounts?.[stage] ?? (candidatesByStage[stage] || []).length;
             const isActive = stage === activeTab;
 
             const targetIdx = stageIdx === 0 ? 1 : 0;
@@ -525,7 +565,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
           onTouchMove={stageSwipeHandlers.onTouchMove}
           onTouchEnd={stageSwipeHandlers.onTouchEnd}
         >
-          <ScrollArea className="overscroll-contain touch-pan-y h-full" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
+          <ScrollArea
+            className="overscroll-contain touch-pan-y h-full"
+            style={{ maxHeight: 'calc(100dvh - 340px)' }}
+            /* capture: scroll-eventet kommer från Radix inre viewport och bubblar inte */
+            onScrollCapture={handleListScroll}
+          >
             <div className="flex flex-col gap-2">
               {currentCandidates.length === 0 ? (
                 <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center">

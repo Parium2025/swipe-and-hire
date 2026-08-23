@@ -708,6 +708,9 @@ const MyCandidates = () => {
           onToggleSelect={toggleCandidateSelection}
           onPrefetch={handlePrefetchCandidate}
           onMarkAsViewed={markApplicationAsViewed}
+          stageCounts={debouncedSearchQuery ? undefined : stageCounts}
+          hasMoreInStage={hasMoreInStage}
+          onLoadMore={loadMoreStage}
           renderActionBar={isSelectionMode ? (
             <MyCandidatesMobileActionBar
               selectedCount={selectedCandidateIds.size}
