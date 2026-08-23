@@ -1,6 +1,6 @@
 import { safeSetItem } from '@/lib/safeStorage';
 
-type AnalyticsCacheScope = 'overview' | 'advanced';
+type AnalyticsCacheScope = 'overview' | 'advanced' | 'team';
 
 type PersistedAnalyticsCacheEntry<T> = {
   timestamp: number;

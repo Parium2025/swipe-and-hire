@@ -3805,6 +3805,10 @@ export type Database = {
           website: string
         }[]
       }
+      get_employer_team_insights: {
+        Args: { p_days_back?: number; p_user_id: string }
+        Returns: Json
+      }
       get_jobseeker_dashboard_stats: {
         Args: { p_user_id: string }
         Returns: Json
