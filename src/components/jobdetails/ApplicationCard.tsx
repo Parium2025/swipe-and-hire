@@ -142,13 +142,13 @@ export const ApplicationCardContent = memo(({
           </TooltipProvider>
           <StarRating rating={application.rating} />
           {(appliedTime || lastActiveTime) && (
-            <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">
+            <div className="flex items-center gap-1.5 mt-0.5 max-w-full text-white text-[9px] leading-snug">
               {appliedTime && (
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="flex items-center gap-0.5 cursor-default">
-                        <ArrowDown className="h-2.5 w-2.5" />
+                      <span className="inline-flex items-center gap-1 cursor-default whitespace-nowrap">
+                        <ArrowDown className="h-2.5 w-2.5 shrink-0 text-white" strokeWidth={3} />
                         {appliedTime}
                       </span>
                     </TooltipTrigger>
@@ -162,8 +162,8 @@ export const ApplicationCardContent = memo(({
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="flex items-center gap-0.5 cursor-default">
-                        <Clock className="h-2.5 w-2.5" />
+                      <span className="inline-flex items-center gap-1 cursor-default whitespace-nowrap">
+                        <Clock className="h-2.5 w-2.5 shrink-0 text-white" strokeWidth={3} />
                         {lastActiveTime}
                       </span>
                     </TooltipTrigger>
