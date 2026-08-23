@@ -19,7 +19,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMyCandidateApplications } from '@/hooks/useMyCandidateApplications';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
-import { prefetchCandidateApplications } from '@/lib/candidateApplicationsSource';
+import {
+  prefetchCandidateApplications,
+  isCandidateApplicationsCacheFresh,
+  fetchApplicationsForApplicants,
+  writeCandidateApplicationsCache,
+} from '@/lib/candidateApplicationsSource';
 import { MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { useBulkCandidateOps } from '@/hooks/useBulkCandidateOps';
 import { useCandidateLists, useActiveCandidateList, useTeamCandidateLists } from '@/hooks/useCandidateLists';
