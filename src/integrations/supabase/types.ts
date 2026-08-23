@@ -1618,6 +1618,7 @@ export type Database = {
           part_time_shifts: string[] | null
           pitch: string | null
           positions_count: number | null
+          published_at: string | null
           remote_work_possible: string | null
           removed_applicants_count: number
           requirements: string | null
@@ -1674,6 +1675,7 @@ export type Database = {
           part_time_shifts?: string[] | null
           pitch?: string | null
           positions_count?: number | null
+          published_at?: string | null
           remote_work_possible?: string | null
           removed_applicants_count?: number
           requirements?: string | null
@@ -1730,6 +1732,7 @@ export type Database = {
           part_time_shifts?: string[] | null
           pitch?: string | null
           positions_count?: number | null
+          published_at?: string | null
           remote_work_possible?: string | null
           removed_applicants_count?: number
           requirements?: string | null
