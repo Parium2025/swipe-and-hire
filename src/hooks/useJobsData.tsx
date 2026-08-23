@@ -267,8 +267,14 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       const streamKey = JSON.stringify(queryKey);
       const now = Date.now();
       const state = jobStreamRegistry.get(streamKey);
-      if (state?.running) return merged;
-      if (state?.completedAt && now - state.completedAt < STREAM_COOLDOWN_MS) return merged;
+      // Skippas strömmen (pågår redan / avsvalning) måste vi ändå persistera den
+      // sammanslagna listan – annars saknas en nyss publicerad annons i
+      // localStorage och blinkar bort en kort stund vid nästa omladdning.
+      if (state?.running || (state?.completedAt && now - state.completedAt < STREAM_COOLDOWN_MS)) {
+        writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, merged);
+        return merged;
+      }
+
       const generation = (state?.generation ?? 0) + 1;
       jobStreamRegistry.set(streamKey, { running: true, completedAt: state?.completedAt ?? 0, generation });
 
