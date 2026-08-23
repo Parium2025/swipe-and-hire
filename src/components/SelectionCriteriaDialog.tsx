@@ -409,11 +409,11 @@ export function SelectionCriteriaDialog({
       
       // Start evaluation silently in background
       if (candidates.length > 0) {
-        evaluateAllCandidates.mutate(
-          { jobId, candidates },
+        startEvalRun.mutate(
+          { jobId },
           {
             onError: () => {
-              toast.error('Kunde inte utvärdera kandidater', {
+              toast.error('Kunde inte starta AI-granskningen', {
                 description: 'Försök igen om en stund.',
               });
             },
