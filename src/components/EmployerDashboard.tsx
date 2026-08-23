@@ -273,8 +273,11 @@ const EmployerDashboard = memo(() => {
   // än vad som faktiskt laddats in i klienten.
   const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
 
-  // 🔥 HÅL #2: Pre-warma BARA aktuell tab × current+next page (~40 bilder).
+  // 🔥 Pre-warma BARA aktuell tab × current+next page (~40 bilder).
   // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.
+  // 🔑 URL:erna byggs med EXAKT samma transform + version som korten renderar
+  // (600x300 q75 cover / 64x64 q80 contain). Warmade vi originalbilden blev
+  // det en cache-miss vid render — dubbel bandbredd och noll nytta.
   const prewarmEntries = useMemo(() => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize * 2;
@@ -284,14 +287,19 @@ const EmployerDashboard = memo(() => {
         ? tabBuckets.draft
         : tabBuckets.active;
     const window = currentBucket.slice(start, end);
-    const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
+    const entries: Array<{ path?: string | null; bucket?: 'job-images' | 'company-logos' }> = [];
     for (const j of window) {
-      if (j.job_image_url) entries.push({ path: j.job_image_url, bucket: 'job-images' });
-      if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
+      const v = getImageVersion(j as any);
+      const cardSource = j.job_image_url ?? j.job_image_desktop_url ?? null;
+      const cardUrl = buildCardImageUrl(cardSource, 'job-images', v, { width: 600, height: 300, quality: 75, resize: 'cover' });
+      if (cardUrl) entries.push({ path: cardUrl });
+      const logoUrl = buildCardImageUrl(j.company_logo_url ?? null, 'company-logos', v, { width: 64, height: 64, quality: 80, resize: 'contain' });
+      if (logoUrl) entries.push({ path: logoUrl });
     }
     return entries;
   }, [tabBuckets, activeTab, page, pageSize]);
   useImagePrewarm(prewarmEntries);
+
 
   // Sida-slice för respektive tab så pagineringen funkar oberoende.
   const sliceToPage = useCallback((arr: JobPosting[]) => {
