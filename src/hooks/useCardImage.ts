@@ -26,6 +26,51 @@ export interface CardImageTransform {
   resize?: 'cover' | 'contain' | 'fill';
 }
 
+/**
+ * 🔑 EXAKT samma URL som `useCardImage` renderar — inklusive retina-2×,
+ * quality, resize och `?v=`-versionen.
+ *
+ * Förvärmning (prewarm) MÅSTE gå via den här funktionen. Warmar man
+ * originalbildens URL istället får man en cache-MISS när kortet renderar
+ * transform-URL:en — dubbel bandbredd och noll nytta.
+ */
+export function buildCardImageUrl(
+  rawPath: string | null | undefined,
+  bucket: 'job-images' | 'company-logos' | 'profile-images',
+  version?: string | null,
+  transform?: CardImageTransform,
+): string | null {
+  if (!rawPath || typeof rawPath !== 'string') return null;
+  let path = rawPath.trim();
+  if (!path) return null;
+  if (path.startsWith('http')) {
+    try {
+      const parsed = new URL(path);
+      const match = parsed.pathname.match(/\/storage\/v1\/(?:object|render\/image)\/(?:public|sign)\/[^/]+\/(.+)$/);
+      if (match?.[1]) path = decodeURIComponent(match[1]);
+      else return path;
+    } catch {
+      return path;
+    }
+  }
+
+  const transformPayload = transform
+    ? {
+        ...(transform.width ? { width: Math.round(transform.width * 2) } : {}),
+        ...(transform.height ? { height: Math.round(transform.height * 2) } : {}),
+        quality: transform.quality ?? 75,
+        resize: transform.resize ?? ('cover' as const),
+      }
+    : undefined;
+
+  const { data } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(path, transformPayload ? { transform: transformPayload } : undefined);
+  return appendVersionToUrl(data?.publicUrl || null, version);
+}
+
+
+
 export function useCardImage(
   rawPath: string | null | undefined,
   bucket: 'job-images' | 'company-logos' | 'profile-images',
