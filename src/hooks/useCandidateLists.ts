@@ -149,10 +149,34 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
       const list = lists.find((l) => l.id === id);
       if (!list) throw new Error('Listan hittades inte');
       if (list.is_default) throw new Error('Standardlistan går inte att ta bort');
+
+      // Kandidaterna får inte försvinna med listan (raden kaskaderar i databasen).
+      // Flytta dem till standardlistans första steg innan vi raderar.
+      const fallback = lists.find((l) => l.is_default && l.id !== id);
+      if (fallback) {
+        const { data: targetStages } = await supabase
+          .from('user_stage_settings')
+          .select('stage_key')
+          .eq('user_id', ownerId!)
+          .eq('list_id', fallback.id)
+          .gt('order_index', -1)
+          .order('order_index', { ascending: true })
+          .limit(1);
+        const targetStage = targetStages?.[0]?.stage_key || 'to_contact';
+
+        const { error: moveError } = await supabase
+          .from('my_candidates')
+          .update({ list_id: fallback.id, stage: targetStage, updated_at: new Date().toISOString() })
+          .eq('list_id', id);
+        if (moveError) throw moveError;
+      }
+
       const { error } = await supabase.from('candidate_lists').delete().eq('id', id);
       if (error) throw error;
+      return { movedTo: fallback?.name ?? null };
     },
-    onSuccess: () => {
+
+    onSuccess: (result) => {
       invalidate();
       queryClient.invalidateQueries({ queryKey: ['my-candidates', ownerId] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', ownerId] });
@@ -160,8 +184,14 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
       // annars visas steg som inte längre finns.
       queryClient.invalidateQueries({ queryKey: ['stage-settings', ownerId] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', ownerId] });
-      toast.success('Listan togs bort');
+      queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+      toast.success(
+        result?.movedTo
+          ? `Listan togs bort – kandidaterna flyttades till "${result.movedTo}"`
+          : 'Listan togs bort',
+      );
     },
+
     onError: (error: any) => toast.error(error.message || 'Kunde inte ta bort listan'),
   });
 
