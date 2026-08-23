@@ -269,6 +269,7 @@ interface MobileCandidateViewProps {
 export const MobileCandidateView = memo(function MobileCandidateView({
   jobId,
   applications,
+  stageTotals,
   stages,
   stageSettings,
   criteriaCount,
