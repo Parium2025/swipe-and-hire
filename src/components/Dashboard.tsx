@@ -144,12 +144,16 @@ const Dashboard = memo(() => {
   }, [isLoading, activeJobs.length, expiredJobs.length]);
 
 
+  // Fallback när server-siffrorna inte hunnit fram: summera ALLA annonser
+  // (livstidstotal) – exakt samma definition som get_employer_dashboard_stats,
+  // annars hoppar Visningar/Ansökningar när serversvaret landar.
   const filteredStats = useMemo(() => ({
     totalJobs: activeJobs.length + expiredJobs.length,
     activeJobs: activeJobs.length,
-    totalViews: activeJobs.reduce((sum, job) => sum + (job.views_count || 0), 0),
-    totalApplications: activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0),
-  }), [activeJobs, expiredJobs]);
+    totalViews: (allJobs || []).reduce((sum, job) => sum + (job.views_count || 0), 0),
+    totalApplications: (allJobs || []).reduce((sum, job) => sum + (job.applications_count || 0), 0),
+  }), [activeJobs, expiredJobs, allJobs]);
+
 
   // VIKTIGT: skicka ALLA jobs in i filter/sort — inte tab-filtrerade.
   // Annars trigger varje tab-byte en ny filter/sort-pass och DOM-persistens
