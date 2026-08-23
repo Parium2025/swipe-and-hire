@@ -195,7 +195,9 @@ export const StatusColumn = memo(({
             <JobStageSettingsMenu 
               jobId={jobId}
               stageKey={status}
-              candidateCount={applications.length}
+              {/* Serverns totalsiffra – annars skyddar dialogen bara de kort
+                  som råkar vara inlästa när annonsen har många sökande. */}
+              candidateCount={displayCount}
               totalStageCount={totalStageCount}
               targetStageKey={targetStageKey}
               targetStageLabel={targetStageLabel}
