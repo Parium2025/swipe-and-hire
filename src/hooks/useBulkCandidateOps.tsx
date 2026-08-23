@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { enqueueCandidateOperation } from '@/hooks/useCandidateOperationQueue';
+import { updateMyCandidatesCache } from '@/hooks/useMyCandidatesData';
 import type { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 
 interface UseBulkCandidateOpsParams {
@@ -35,11 +36,16 @@ export function useBulkCandidateOps({
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const queryKey = ['my-candidates', user?.id, debouncedSearchQuery, listId] as const;
+  // OBS: tavlan hämtar per kolumn och lägger till en femte nyckeldel (stagesKey).
+  // Tidigare skrev bulk-operationerna till den fyrdelade nyckeln, som inte
+  // existerar i cachen — de optimistiska uppdateringarna försvann helt och
+  // korten låg kvar tills nästa nätverkssvar. Prefix + setQueriesData träffar
+  // alla varianter (med och utan kolumnnyckel).
+  const queryKeyPrefix = ['my-candidates', user?.id, debouncedSearchQuery, listId] as const;
 
   const updateCandidatesCache = useCallback(
     (updater: (items: MyCandidateData[]) => MyCandidateData[]) => {
-      queryClient.setQueryData(queryKey, (old: any) => {
+      queryClient.setQueriesData({ queryKey: queryKeyPrefix }, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
@@ -49,9 +55,12 @@ export function useBulkCandidateOps({
           })),
         };
       });
+      // Håll localStorage-cachen i synk så att instant-load inte målar spökkort.
+      updateMyCandidatesCache(user?.id, updater, listId);
     },
-    [queryClient, queryKey[0], queryKey[1], queryKey[2], queryKey[3]],
+    [queryClient, user?.id, debouncedSearchQuery, listId],
   );
+
 
   const bulkMoveToStage = useCallback(
     async (targetStage: CandidateStage) => {

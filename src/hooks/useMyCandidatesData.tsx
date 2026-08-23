@@ -217,7 +217,7 @@ function writeMyCandidatesCache(userId: string, items: MyCandidateData[], listId
   }
 }
 
-function updateMyCandidatesCache(
+export function updateMyCandidatesCache(
   userId: string | undefined,
   updater: (items: MyCandidateData[]) => MyCandidateData[],
   listId: string | null = null
@@ -334,10 +334,14 @@ export function useMyCandidatesData(
           : { updated_at: last.updated_at, id: last.id };
       }
 
-      // 🔥 Cacha första omgången för instant-load nästa besök (ej vid sökning)
-      if (isFirstRound(pageParam) && !trimmedSearch && items.length > 0) {
+      // 🔥 Cacha första omgången för instant-load nästa besök (ej vid sökning).
+      // Skrivs ÄVEN när resultatet är tomt — annars låg den gamla cachen kvar
+      // efter att sista kandidaten tagits bort och spökkort målades vid varje
+      // kallstart tills nätverkssvaret hann i kapp.
+      if (isFirstRound(pageParam) && !trimmedSearch) {
         writeMyCandidatesCache(user.id, items, listId);
       }
+
 
       return { items, cursors };
     },
@@ -886,8 +890,16 @@ export function useMyCandidatesData(
         };
       });
 
+      // Spegla flytten i localStorage-cachen — annars målades kortet i sin
+      // GAMLA kolumn vid nästa kallstart innan nätverkssvaret hann i kapp.
+      updateMyCandidatesCache(
+        user?.id,
+        (items) => items.map((c) => (c.id === id ? { ...c, stage, updated_at: movedAt } : c)),
+        listId,
+      );
 
       return { previousCandidates };
+
     },
     onError: (err, variables, context) => {
       // Don't rollback optimistic update — enqueue for retry instead
@@ -937,7 +949,12 @@ export function useMyCandidatesData(
         };
       });
 
+      // Ta bort ur localStorage-cachen också — annars kom kandidaten tillbaka
+      // som spökkort vid nästa instant-load.
+      updateMyCandidatesCache(user?.id, (items) => items.filter((c) => c.id !== id), listId);
+
       return { previousCandidates };
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
