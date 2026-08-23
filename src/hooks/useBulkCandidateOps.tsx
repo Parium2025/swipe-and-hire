@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { enqueueCandidateOperation } from '@/hooks/useCandidateOperationQueue';
+import { updateMyCandidatesCache } from '@/hooks/useMyCandidatesData';
 import type { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 
 interface UseBulkCandidateOpsParams {
@@ -55,7 +56,7 @@ export function useBulkCandidateOps({
         };
       });
       // Håll localStorage-cachen i synk så att instant-load inte målar spökkort.
-      updateMyCandidatesCacheItems(user?.id, updater, listId);
+      updateMyCandidatesCache(user?.id, updater, listId);
     },
     [queryClient, user?.id, debouncedSearchQuery, listId],
   );

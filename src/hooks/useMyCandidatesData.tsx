@@ -217,7 +217,7 @@ function writeMyCandidatesCache(userId: string, items: MyCandidateData[], listId
   }
 }
 
-function updateMyCandidatesCache(
+export function updateMyCandidatesCache(
   userId: string | undefined,
   updater: (items: MyCandidateData[]) => MyCandidateData[],
   listId: string | null = null
