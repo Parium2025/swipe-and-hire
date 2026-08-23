@@ -157,58 +157,6 @@ const FILLER_WORDS = new Set([
   'hallå', 'tja', 'tjo', 'hey', 'yo', 'yep', 'nope', 'nä',
 ]);
 
-// Small set of common Swedish words that ARE real (to avoid false positives)
-const COMMON_SWEDISH_WORDS = new Set([
-  'har', 'kan', 'ska', 'bör', 'med', 'och', 'att', 'för', 'den', 'det',
-  'ett', 'som', 'var', 'vid', 'till', 'från', 'eller', 'inte', 'över',
-  'under', 'mellan', 'inom', 'samt', 'utan', 'efter', 'genom', 'hos',
-  'mot', 'per', 'vid', 'minst', 'års', 'erfarenhet', 'kunskap',
-  'körkort', 'arbeta', 'jobba', 'arbete', 'jobb', 'svenska', 'engelska',
-  'skriftligt', 'muntligt', 'god', 'goda', 'bra', 'stark', 'starka',
-  'relevant', 'dokumenterad', 'kompetens', 'utbildning', 'behörighet',
-  'certifiering', 'truckkort', 'hygienpass', 'legitimation',
-]);
-
-/**
- * Check if a single word looks like gibberish (not a real word).
- * Uses vowel ratio, consonant clusters, and a known-word allowlist.
- */
-function isGibberishWord(rawWord: string): boolean {
-  // Strip surrounding punctuation (e.g. "körkort," → "körkort")
-  const word = rawWord.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
-  if (word.length <= 2) return false; // Too short to judge
-
-  // Known common word → not gibberish
-  if (COMMON_SWEDISH_WORDS.has(word.toLowerCase())) return false;
-
-  // Acronyms and certifications are legitimate criteria: SQL, HLR, ADR, CNC, YKB, IT, ISO
-  if (/^[A-ZÅÄÖ0-9]{2,6}$/.test(word)) return false;
-
-  // Tokens containing digits are usually concrete requirements (B2, ISO9001, 2+)
-  if (/\d/.test(word)) return false;
-
-  // Hyphenated compounds are judged part by part (HLR-certifikat, B-körkort)
-  if (word.includes('-')) {
-    return word.split('-').some(part => part.length >= 3 && isGibberishWord(part));
-  }
-
-  const vowels = word.match(/[aeiouåäöy]/gi) || [];
-  const vowelRatio = vowels.length / word.length;
-
-  // Real words typically have 25-70% vowels. Below 20% in 3+ char word = suspicious
-  if (word.length >= 3 && vowelRatio < 0.2) return true;
-
-  // Konsonantkluster: svenska sammansättningar har massor av legitima 3-kluster
-  // ("årsredovisning" → rsr, "arbetsplats" → tspl, "verkstadsteknik" → dst).
-  // Bara riktigt osannolika kluster (5+ i rad) räknas som gibberish.
-  if (/[^aeiouåäöy]{5,}/i.test(word.toLowerCase())) return true;
-
-  // Check for unlikely character sequences (triple+ repeated consonant)
-  if (/([^aeiouåäöy])\1{2,}/i.test(word)) return true;
-
-  return false;
-}
-
 /**
  * Check if text is gibberish or meaningless input.
  * Multi-layered: pattern checks → word-level gibberish detection → filler word detection.
@@ -260,24 +208,15 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
     }
   }
 
-  // Word-level gibberish detection — ANY gibberish word flags the input
-  // (one real word + gibberish = still not a valid criterion)
-  // Uses the original casing so acronyms (SQL, HLR, YKB) are recognised.
-  const originalWords = trimmed.split(/\s+/).filter(w => w.length > 0);
-  if (originalWords.length >= 1) {
-    const gibberishWords = originalWords.filter(w => w.length >= 3 && isGibberishWord(w));
-    if (gibberishWords.length > 0) {
-      return { isValid: false, reason: 'Formulera ett tydligt krav utan oläsbara ord.' };
-    }
-  }
-
   // Too short to be a meaningful criterion (single short word like "ab")
   if (trimmed.length < 3) {
     return { isValid: false, reason: 'Skriv ett tydligt kriterium.' };
   }
 
-  // Single word is OK if it's a real word (not gibberish, not filler)
-  // AI will interpret it broadly — e.g. "körkort" → check all driving licenses
+  // Språk bedöms inte med bokstavs- eller ordlistheuristik. Svenska
+  // sammansättningar, facktermer, certifikat och förkortningar ska alltid
+  // kunna passera. Den kontextuella AI-kontrollen vid aktivering avgör om
+  // kriteriet är diskriminerande; här stoppas bara uppenbart teckenspam.
 
   return { isValid: true };
 }
