@@ -349,7 +349,16 @@ const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <span className="text-[12px] text-white truncate">{job.title}</span>
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="text-[12px] text-white truncate cursor-default">{job.title}</span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[320px]">
+                          <p className="text-xs leading-relaxed break-words">{job.title}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     {expired ? (
                       <span className="shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-red-500/20 text-white border border-red-500/30">
                         Utgången
