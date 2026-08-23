@@ -628,6 +628,7 @@ const JobDetails = () => {
                     jobId={jobId || ''}
                     status={status}
                     applications={applicationsByStatus[status] || []}
+                    stageTotal={stageTotals ? stageTotals[status] ?? 0 : null}
                     onOpenProfile={handleOpenProfile}
                     onMarkAsViewed={markApplicationAsViewed}
                     onPrefetch={handlePrefetchCandidate}
