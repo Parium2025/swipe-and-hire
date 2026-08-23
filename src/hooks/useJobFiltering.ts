@@ -50,7 +50,19 @@ export type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'act
 
 const validSortOptions: SortOption[] = ['newest', 'oldest', 'title-asc', 'title-desc', 'active-first', 'expired-first', 'draft-first'];
 
-export const useJobFiltering = (jobs: FilterableJob[]) => {
+export interface UseJobFilteringOptions {
+  /**
+   * 'personal' = bara mina egna annonser (t.ex. /my-jobs).
+   * Utan detta kunde serversökningen (som alltid söker i hela organisationen)
+   * returnera kollegors annonser i den personliga vyn.
+   */
+  scope?: 'personal' | 'organization';
+  /** Inloggad användares id – används för att låsa serversöket till 'personal'. */
+  ownerId?: string | null;
+}
+
+export const useJobFiltering = (jobs: FilterableJob[], options: UseJobFilteringOptions = {}) => {
+  const { scope = 'organization', ownerId = null } = options;
   const [searchParams] = useSearchParams();
   const sortFromUrl = searchParams.get('sort');
   const initialSort: SortOption = sortFromUrl && validSortOptions.includes(sortFromUrl as SortOption) 
@@ -73,15 +85,18 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
   // 🔥 SCALE: serversidig sökning aktiveras automatiskt vid stora annonsvolymer
   const serverMode = jobs.length >= SERVER_SEARCH_THRESHOLD && !!searchTerm.trim();
 
+  // I personlig vy låser vi sökningen till mina egna annonser.
+  const effectiveRecruiterId = selectedRecruiterId ?? (scope === 'personal' ? ownerId : null);
+
   const { data: serverJobs, isFetching: isServerSearching } = useQuery({
-    queryKey: ['employer-jobs-search', searchTerm, sortBy, selectedRecruiterId],
+    queryKey: ['employer-jobs-search', searchTerm, sortBy, effectiveRecruiterId, scope],
     enabled: serverMode,
     staleTime: 60 * 1000,
     queryFn: async (): Promise<FilterableJob[]> => {
       const { data: hits, error } = await supabase.rpc('search_employer_jobs', {
         p_search: searchTerm,
         p_status: 'all',
-        p_recruiter_id: selectedRecruiterId,
+        p_recruiter_id: effectiveRecruiterId,
         p_sort: sortBy,
         p_limit: SERVER_SEARCH_LIMIT,
         p_offset: 0,

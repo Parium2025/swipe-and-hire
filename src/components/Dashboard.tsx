@@ -167,7 +167,7 @@ const Dashboard = memo(() => {
     selectedRecruiterId,
     setSelectedRecruiterId,
     filteredAndSortedJobs,
-  } = useJobFiltering(allJobs);
+  } = useJobFiltering(allJobs, { scope: 'organization' });
 
   // Pagination state
   const [page, setPage] = useState(1);

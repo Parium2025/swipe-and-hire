@@ -158,7 +158,7 @@ const EmployerDashboard = memo(() => {
     sortBy,
     setSortBy,
     filteredAndSortedJobs,
-  } = useJobFiltering(jobs);
+  } = useJobFiltering(jobs, { scope: 'personal', ownerId: user?.id ?? null });
   
   // Tab state synkad med URL (?tab=active|expired|draft)
   const tabParam = searchParams.get('tab') as JobStatusTab | null;
