@@ -324,7 +324,7 @@ export function SelectionCriteriaDialog({
           aiBlocked = true;
           setValidationErrors(prev => ({
             ...prev,
-            [validCriteria[i].id]: buildValidationMessage(validCriteria[i].title, validCriteria[i].prompt),
+            [validCriteria[i].id]: check.reason || DISCRIMINATION_MESSAGE,
           }));
         }
       });
