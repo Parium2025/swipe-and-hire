@@ -237,32 +237,34 @@ export function useMyApplicationsCache() {
   }, [user, queryClient]);
 
 
-  // Optimistic delete function
-  const deleteApplication = useCallback(async (applicationId: string) => {
+  // Dölj ansökan (aldrig hard delete — arbetsgivaren behåller ansökan).
+  // Offline: åtgärden köas och replayas när nätet är tillbaka.
+  const hideApplication = useCallback(async (applicationId: string) => {
     if (!user) return;
+    const hiddenAt = Date.now();
 
-    // Optimistic update
+    // Optimistisk uppdatering
     queryClient.setQueryData(['my-applications', user.id], (old: Application[] | undefined) => {
       const updated = old?.filter(app => app.id !== applicationId) || [];
       writeCache(user.id, updated);
       return updated;
     });
 
-    try {
-      const { error } = await supabase
-        .from('job_applications')
-        .delete()
-        .eq('id', applicationId)
-        .eq('applicant_id', user.id);
+    // Köa direkt — tas bort ur kön så fort servern bekräftat
+    enqueueHide(applicationId, user.id);
 
-      if (error) throw error;
-      
-      // Invalidate the count query
+    if (!getIsOnline()) {
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
-    } catch (err) {
-      // Revert on error
-      queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-      throw err;
+      return;
+    }
+
+    const ok = await pushHide(applicationId, user.id, hiddenAt);
+    if (ok) {
+      dequeueHide(applicationId, user.id);
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+    } else {
+      // Ligger kvar i kön och flushas av OfflineQueueRunner
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
     }
   }, [user, queryClient]);
 
@@ -271,6 +273,9 @@ export function useMyApplicationsCache() {
     isLoading,
     error,
     refetch,
-    deleteApplication,
+    hideApplication,
+    /** @deprecated Jobbsökare kan inte radera ansökningar — döljer endast i egen vy. */
+    deleteApplication: hideApplication,
   };
 }
+
