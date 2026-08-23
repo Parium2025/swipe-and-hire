@@ -345,9 +345,11 @@ export function SelectionCriteriaDialog({
       );
 
       let aiBlocked = false;
+      const flaggedTitles: string[] = [];
       aiChecks.forEach((check, i) => {
         if (check.isDiscriminatory) {
           aiBlocked = true;
+          flaggedTitles.push(validCriteria[i].title);
           setValidationErrors(prev => ({
             ...prev,
             [validCriteria[i].id]: check.reason || DISCRIMINATION_MESSAGE,
@@ -356,10 +358,18 @@ export function SelectionCriteriaDialog({
       });
 
       if (aiBlocked) {
-        toast.error('AI flaggade ett eller flera kriterier som potentiellt diskriminerande. Granska och justera.');
+        toast.error(
+          flaggedTitles.length === 1
+            ? `Kriteriet "${flaggedTitles[0]}" kan vara diskriminerande`
+            : `${flaggedTitles.length} kriterier kan vara diskriminerande`,
+          {
+            description: `Granska och formulera om: ${flaggedTitles.join(', ')}. Förklaringen står i rött under varje kriterium.`,
+          }
+        );
         setIsSaving(false);
         return;
       }
+
     } catch {
       // Non-blocking: if AI check fails, allow save
       console.warn('AI discrimination pre-check failed, proceeding with save');
