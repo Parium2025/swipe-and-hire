@@ -382,8 +382,9 @@ export const CandidateListsDialog = ({
                   />
                   ?{' '}
                   {pendingCount > 0
-                    ? `${pendingCount} ${pendingCount === 1 ? 'kandidat' : 'kandidater'} tas bort från din pipeline tillsammans med listans egna steg — ansökningarna finns kvar under Kandidater. Vill du behålla dem: stäng den här rutan, markera kandidaterna och flytta dem till en annan lista först. `
+                    ? `${pendingCount} ${pendingCount === 1 ? 'kandidat' : 'kandidater'} flyttas automatiskt till standardlistan "Mina kandidater". Listans egna steg tas bort. `
                     : 'Listans egna steg tas bort. '}
+
                   Denna åtgärd går inte att ångra.
                 </>
               )}
