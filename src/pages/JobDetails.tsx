@@ -87,11 +87,15 @@ const JobDetails = () => {
   const { 
     job, 
     applications, 
+    stageTotals,
+    totalApplications,
+    isLoadingMore,
     isLoading: dataLoading, 
     updateApplicationLocally, 
     updateJobLocally,
     refetch 
   } = useJobDetailsData(jobId);
+
   
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
