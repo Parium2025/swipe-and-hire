@@ -1187,11 +1187,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         storage.clear();
       } catch {}
  
-      // Starta auth-anropet
-      const { data: signInData, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      // 🛡️ Starta auth-anropet med timeout + ett automatiskt återförsök.
+      // Om backend hänger (t.ex. 504/upstream timeout) får användaren ett tydligt
+      // felmeddelande i stället för en spinner som snurrar för evigt.
+      const LOGIN_TIMEOUT_MS = 12000;
+      const withTimeout = <T,>(p: PromiseLike<T>, ms: number): Promise<T | { __timeout: true }> =>
+        Promise.race([
+          Promise.resolve(p) as Promise<T>,
+          new Promise<{ __timeout: true }>((resolve) =>
+            setTimeout(() => resolve({ __timeout: true }), ms)
+          ),
+        ]);
+
+      const attemptSignIn = () =>
+        withTimeout(supabase.auth.signInWithPassword({ email, password }), LOGIN_TIMEOUT_MS);
+
+      let result = await attemptSignIn();
+
+      // Automatiskt återförsök en gång vid timeout – täcker korta glapp i backend
+      if ((result as any)?.__timeout) {
+        await new Promise((r) => setTimeout(r, 1500));
+        result = await attemptSignIn();
+      }
+
+      if ((result as any)?.__timeout) {
+        authSplashEvents.hide();
+        toast({
+          title: "Servern svarar inte",
+          description: "Vi når inte inloggningstjänsten just nu. Försök igen om en liten stund.",
+          variant: "destructive",
+          duration: 8000,
+        });
+        setLoading(false);
+        setAuthAction(null);
+        isSigningInRef.current = false;
+        return { error: { code: 'auth_timeout', message: 'Auth request timed out' } };
+      }
+
+      const { data: signInData, error } = result as Awaited<ReturnType<typeof supabase.auth.signInWithPassword>>;
  
       if (error) {
         // 🎬 Dölj splash vid fel (samma mönster som logout)
@@ -1218,6 +1251,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false);
           setAuthAction(null);
           return { error: { ...error, code: 'email_not_confirmed', message: 'Email not confirmed' } };
+        } else if (/fetch|network|timeout|504|502|522/i.test(error.message || '')) {
+          toast({
+            title: "Servern svarar inte",
+            description: "Vi når inte inloggningstjänsten just nu. Försök igen om en liten stund.",
+            variant: "destructive",
+            duration: 8000
+          });
         } else {
           toast({ title: "Inloggningsfel", description: error.message, variant: "destructive" });
         }
@@ -1226,6 +1266,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuthAction(null);
         return { error };
       }
+
  
       // CRITICAL: Block login if email is not confirmed
       if (signInData?.user && !signInData.user.email_confirmed_at) {
