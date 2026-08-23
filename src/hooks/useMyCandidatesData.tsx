@@ -1033,6 +1033,17 @@ export function useMyCandidatesData(
 
       if (error) throw error;
 
+      // Samma kandidat kan ligga i flera listor — håll alla rader i synk så att
+      // betyget inte "försvinner" när man öppnar kortet från en annan lista.
+      const spreadApplicantId = applicantId || data?.applicant_id;
+      if (spreadApplicantId && user) {
+        await supabase
+          .from('my_candidates')
+          .update({ rating })
+          .eq('recruiter_id', user.id)
+          .eq('applicant_id', spreadApplicantId);
+      }
+
       // Also save to persistent candidate_ratings table (upsert)
       const targetApplicantId = applicantId || data?.applicant_id;
       if (targetApplicantId && user) {
@@ -1073,7 +1084,7 @@ export function useMyCandidatesData(
           pages: old.pages.map((page: any) => ({
             ...page,
             items: page.items.map((c: MyCandidateData) =>
-              c.id === id ? { ...c, rating } : c
+              c.id === id || (applicantId && c.applicant_id === applicantId) ? { ...c, rating } : c
             ),
           })),
         };
