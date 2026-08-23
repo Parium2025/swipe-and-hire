@@ -66,6 +66,7 @@ export function SelectionCriteriaDialog({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const evaluateAllCandidates = useEvaluateAllCandidates();
+  const startEvalRun = useStartCriteriaEvalRun();
   const queryClient = useQueryClient();
   
   // Inline editing state
