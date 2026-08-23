@@ -15,6 +15,8 @@ export interface StatusColumnProps {
   /** Serverside-total för steget. Kan vara högre än `applications.length`
    *  medan bakgrundsladdningen fortfarande strömmar in sidor. */
   stageTotal?: number | null;
+  /** true medan bakgrundsladdningen fortfarande hämtar sidor. */
+  isStreaming?: boolean;
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
   onPrefetch?: (app: JobApplication) => void;
@@ -41,6 +43,7 @@ export const StatusColumn = memo(({
   status, 
   applications, 
   stageTotal,
+  isStreaming: isStreamingPages,
   onOpenProfile, 
   onMarkAsViewed, 
   onPrefetch,
@@ -57,7 +60,10 @@ export const StatusColumn = memo(({
   stageIndex = 0,
 }: StatusColumnProps) => {
   const displayCount = Math.max(stageTotal ?? 0, applications.length);
-  const isStreaming = applications.length < displayCount;
+  // Visa bara "Laddar…" när bakgrundsströmmen faktiskt hämtar fler sidor.
+  // Annars blinkar texten till varje gång ett kort flyttas mellan steg
+  // (lokal flytt sker direkt, serverns totaler hinner efter någon sekund).
+  const isStreaming = Boolean(isStreamingPages) && applications.length < displayCount;
 
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);

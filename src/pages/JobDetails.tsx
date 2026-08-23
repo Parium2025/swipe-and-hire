@@ -285,6 +285,22 @@ const JobDetails = () => {
     return result;
   }, [applications, activeStages]);
 
+  // Serverns totaler är nycklade på rå status. Kort med en status som inte
+  // längre finns som steg visas i första kolumnen — då måste deras total
+  // följa med dit, annars visar kolumnen färre än antalet kort.
+  const normalizedStageTotals = useMemo(() => {
+    if (!stageTotals) return null;
+    const known = new Set([...activeStages, 'rejected']);
+    const out: Record<string, number> = {};
+    const firstStage = activeStages[0];
+    Object.entries(stageTotals).forEach(([status, count]) => {
+      const key = known.has(status) ? status : firstStage;
+      if (!key) return;
+      out[key] = (out[key] || 0) + count;
+    });
+    return out;
+  }, [stageTotals, activeStages]);
+
   const allVisibleApplicationIds = useMemo(() => {
     return applications.map(app => app.id);
   }, [applications]);
@@ -594,7 +610,7 @@ const JobDetails = () => {
           <MobileCandidateView
             jobId={jobId || ''}
             applications={applications}
-            stageTotals={stageTotals}
+            stageTotals={normalizedStageTotals}
             stages={activeStages}
             stageSettings={stageSettings}
             criteriaCount={criteriaCount}
@@ -654,7 +670,8 @@ const JobDetails = () => {
                     jobId={jobId || ''}
                     status={status}
                     applications={applicationsByStatus[status] || []}
-                    stageTotal={stageTotals ? stageTotals[status] ?? 0 : null}
+                    stageTotal={normalizedStageTotals ? normalizedStageTotals[status] ?? 0 : null}
+                    isStreaming={isLoadingMore}
                     onOpenProfile={handleOpenProfile}
                     onMarkAsViewed={markApplicationAsViewed}
                     onPrefetch={handlePrefetchCandidate}
