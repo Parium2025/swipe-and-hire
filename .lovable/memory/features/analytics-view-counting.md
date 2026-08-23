@@ -9,3 +9,4 @@ type: feature
 - Analys-fliken mäter alltid **externa visningar och ansökningar inom vald period**. `job_postings.views_count/applications_count` är livstidsräknare och används bara på annonskorten — blanda aldrig ihop de två måtten.
 - Tidszon för all dag/tid-gruppering: `Europe/Stockholm`.
 - Statistikcache i localStorage har 6 h TTL och UI visar "Uppdaterad HH:MM".
+- "Tid till första ansökan" mäts från `job_postings.published_at` (sätts automatiskt av triggern `trg_set_job_published_at` första gången annonsen blir aktiv), med fallback till `created_at` för äldre rader. Ansökningar före publicering ignoreras.
