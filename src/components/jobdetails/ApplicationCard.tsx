@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
-import { CriterionIconBadge, CriteriaSummaryPill } from '@/components/JobCriteriaManager';
+import { CriterionIconBadge, CriteriaSummaryPill } from '@/components/criteria/CriteriaBadges';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCompactTime } from '@/lib/date';

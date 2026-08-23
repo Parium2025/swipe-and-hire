@@ -73,6 +73,10 @@ export function SelectionCriteriaDialog({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const autoSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const [hasFetched, setHasFetched] = useState(false);
+  // Set when an already-activated criterion is removed — remaining candidates must
+  // be re-scored so the X/Y pill and badges reflect the new criteria set.
+  const needsReevalRef = useRef(false);
+
 
   useEffect(() => {
     setHasFetched(false);
@@ -106,6 +110,19 @@ export function SelectionCriteriaDialog({
       return next;
     });
   }, [open, criteria, drafts, jobId, queryClient]);
+
+  // Re-score candidates once, after the dialog closes, if an active criterion was removed
+  useEffect(() => {
+    if (open || !needsReevalRef.current) return;
+    needsReevalRef.current = false;
+
+    const remainingActive = criteria.filter(c => c.is_active && c.title?.trim() && c.prompt?.trim());
+    if (remainingActive.length === 0 || candidates.length === 0) return;
+
+    evaluateAllCandidates.mutate({ jobId, candidates });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
 
   useEffect(() => {
     if (!jobId) return;
@@ -256,7 +273,8 @@ export function SelectionCriteriaDialog({
   };
 
   const deleteCriterion = async (id: string) => {
-    
+    const wasActive = criteria.find(c => c.id === id)?.is_active === true;
+
     try {
       const { error } = await supabase
         .from('job_criteria')
@@ -264,7 +282,10 @@ export function SelectionCriteriaDialog({
         .eq('id', id);
 
       if (error) throw error;
-      
+
+      // An activated criterion disappeared → remaining candidates need new scores
+      if (wasActive) needsReevalRef.current = true;
+
       setCriteria(prev => prev.filter(c => c.id !== id));
       setDrafts(prev => {
         const next = { ...prev };
@@ -380,6 +401,9 @@ export function SelectionCriteriaDialog({
       // Invalidate criteria cache so counter updates instantly
       await queryClient.invalidateQueries({ queryKey: ['job-criteria', jobId] });
       
+      // Saving already re-scores everyone below — skip the delete-triggered pass
+      needsReevalRef.current = false;
+
       // Close dialog immediately — results appear via realtime
       onActivate?.(validCriteria.length);
       onOpenChange(false);
