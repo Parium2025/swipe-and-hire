@@ -610,7 +610,7 @@ const JobDetails = () => {
           <MobileCandidateView
             jobId={jobId || ''}
             applications={applications}
-            stageTotals={stageTotals}
+            stageTotals={normalizedStageTotals}
             stages={activeStages}
             stageSettings={stageSettings}
             criteriaCount={criteriaCount}
@@ -670,7 +670,8 @@ const JobDetails = () => {
                     jobId={jobId || ''}
                     status={status}
                     applications={applicationsByStatus[status] || []}
-                    stageTotal={stageTotals ? stageTotals[status] ?? 0 : null}
+                    stageTotal={normalizedStageTotals ? normalizedStageTotals[status] ?? 0 : null}
+                    isStreaming={isLoadingMore}
                     onOpenProfile={handleOpenProfile}
                     onMarkAsViewed={markApplicationAsViewed}
                     onPrefetch={handlePrefetchCandidate}
