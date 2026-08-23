@@ -411,8 +411,13 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         if (firstStage) result[firstStage].push(c);
       }
     });
+    // Senast ändrad först — samma ordning som servern levererar.
+    Object.values(result).forEach(list =>
+      list.sort((a, b) => (a.updated_at < b.updated_at ? 1 : a.updated_at > b.updated_at ? -1 : 0)),
+    );
     return result;
   }, [candidates, stages]);
+
 
   const stageCandidates = candidatesByStage[activeTab] || [];
 

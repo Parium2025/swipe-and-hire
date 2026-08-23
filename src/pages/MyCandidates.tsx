@@ -229,8 +229,14 @@ const MyCandidates = () => {
       }
       grouped[candidate.stage].push(candidate);
     });
+    // Samma ordning som servern (senast ändrad först) — annars behåller ett
+    // flyttat kort sin gamla djupa position tills nästa hämtning.
+    Object.values(grouped).forEach(list =>
+      list.sort((a, b) => (a.updated_at < b.updated_at ? 1 : a.updated_at > b.updated_at ? -1 : 0)),
+    );
     return grouped;
   }, [displayedCandidates, activeStageOrder]);
+
 
   // Stats
   const stats = useMemo(() => {

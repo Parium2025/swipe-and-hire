@@ -851,6 +851,10 @@ export function useMyCandidatesData(
       void queryClient.cancelQueries({ queryKey });
       const previousCandidates = queryClient.getQueryData(queryKey);
 
+      // Servern sätter updated_at = now() vid flytt, vilket gör att kortet
+      // hamnar överst i målkolumnen. Speglas här så att ett kort du drar från
+      // plats 5 000 inte "försvinner" ner i den nya kolumnen tills nästa hämtning.
+      const movedAt = new Date().toISOString();
       queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
@@ -858,11 +862,12 @@ export function useMyCandidatesData(
           pages: old.pages.map((page: any) => ({
             ...page,
             items: page.items.map((c: MyCandidateData) =>
-              c.id === id ? { ...c, stage } : c
+              c.id === id ? { ...c, stage, updated_at: movedAt } : c
             ),
           })),
         };
       });
+
 
       return { previousCandidates };
     },
