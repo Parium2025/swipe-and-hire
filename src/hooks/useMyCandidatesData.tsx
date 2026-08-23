@@ -278,8 +278,17 @@ export function useMyCandidatesData(
       if (!user) return { items: [], cursors: {} as StagePageParam };
 
       const targets = stageList ?? [ALL_STAGES];
-      const pending = targets.filter(stage => pageParam[stage] !== 'done');
+      let pending = targets.filter(stage => pageParam[stage] !== 'done');
+      // Scrollar du i EN kolumn ska bara den kolumnen hämta nästa sida.
+      // Utan detta drog varje "ladda mer" in 50 nya rader i samtliga kolumner.
+      // Tom uppsättning = första omgången → alla kolumner hämtas.
+      const requested = requestedStagesRef.current;
+      if (requested.size > 0) {
+        const narrowed = pending.filter(stage => requested.has(stage));
+        if (narrowed.length > 0) pending = narrowed;
+      }
       if (pending.length === 0) return { items: [], cursors: pageParam };
+
 
       const trimmedSearch = searchQuery.trim();
 
