@@ -121,7 +121,7 @@ export function SelectionCriteriaDialog({
     const remainingActive = criteria.filter(c => c.is_active && c.title?.trim() && c.prompt?.trim());
     if (remainingActive.length === 0 || candidates.length === 0) return;
 
-    evaluateAllCandidates.mutate({ jobId, candidates });
+    startEvalRun.mutate({ jobId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
