@@ -80,6 +80,9 @@ function VirtualJobGridImpl<T extends JobPosting>({
               visibility: isVisible ? 'visible' : 'hidden',
               zIndex: isVisible ? 1 : 0,
               pointerEvents: isVisible ? undefined : 'none',
+              // Dolda paneler klipps så att deras överskjutande höjd aldrig
+              // kan skapa extra scroll-yta under sista kortet i aktiv flik.
+              overflow: isVisible ? undefined : 'hidden',
             }}
           >
             {tab.jobs.map((job, idx) => (
