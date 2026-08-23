@@ -4,6 +4,8 @@ import { measurePerformance } from '@/lib/realtimePerformance';
 import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
+import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
+
 import { useAuth } from '@/hooks/useAuth';
 
 // Types for criterion results
@@ -95,8 +97,14 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
   const applicantIds = applicationsData.map(a => a.applicant_id);
 
   // Parallel fetch all related data
-  const [myCandidatesResult, criteriaResult, evaluationsResult] = await Promise.all([
-    // Fetch ratings
+  const [ratingsResult, myCandidatesResult, criteriaResult, evaluationsResult] = await Promise.all([
+    // Betyget är per KANDIDAT (candidate_ratings) — samma källa som Mina kandidater.
+    supabase
+      .from('candidate_ratings')
+      .select('applicant_id, rating')
+      .eq('recruiter_id', userId)
+      .in('applicant_id', applicantIds),
+    // Fallback för äldre betyg som bara hann skrivas till my_candidates
     supabase
       .from('my_candidates')
       .select('applicant_id, rating')
@@ -117,8 +125,12 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
 
   const ratingsByApplicant = new Map<string, number>();
   (myCandidatesResult.data || []).forEach(mc => {
-    ratingsByApplicant.set(mc.applicant_id, mc.rating || 0);
+    if (mc.rating) ratingsByApplicant.set(mc.applicant_id, mc.rating);
   });
+  (ratingsResult.data || []).forEach(r => {
+    ratingsByApplicant.set(r.applicant_id, r.rating || 0);
+  });
+
 
   const criteriaMap = new Map<string, string>();
   (criteriaResult.data || []).forEach(c => criteriaMap.set(c.id, c.title));
@@ -167,7 +179,10 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
         city: row.city || null,
       });
     });
+    // Auto-invalidera bildcachen när kandidaten bytt profilbild/video
+    syncProfileMediaVersions(batchMediaData as any);
   }
+
 
   // Fetch last_active_at for all applicants using the activity RPC
   const activityResult = await measurePerformance('matching', () => supabase.rpc('get_applicant_latest_activity', {
@@ -224,7 +239,7 @@ function readJobAppsCache(jobId: string): JobApplication[] | null {
 }
 
 function writeJobAppsCache(jobId: string, data: JobApplication[]): void {
-  writePersistentCache(JOB_APPS_CACHE_KEY + jobId, data.slice(0, 50));
+  writePersistentCache(JOB_APPS_CACHE_KEY + jobId, data.slice(0, 300));
 }
 
 export function useJobDetailsData(jobId: string | undefined) {
@@ -325,7 +340,33 @@ export function useJobDetailsData(jobId: string | undefined) {
           }
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'candidate_ratings',
+          filter: `recruiter_id=eq.${user.id}`,
+        },
+        (payload) => {
+          // Betyg sätts även från Mina kandidater/kandidatlistan — spegla direkt
+          // in i annonsvyn så att stjärnorna aldrig visar olika värden.
+          const row: any = payload.new || payload.old;
+          if (!row?.applicant_id) return;
+          queryClient.setQueryData(['job-applications', jobId], (old: JobApplication[] | undefined) => {
+            if (!old) return old;
+            const next = old.map(app =>
+              app.applicant_id === row.applicant_id
+                ? { ...app, rating: payload.eventType === 'DELETE' ? 0 : (row.rating ?? 0) }
+                : app
+            );
+            if (jobId) writeJobAppsCache(jobId, next);
+            return next;
+          });
+        }
+      )
       .subscribe();
+
 
     return () => {
       supabase.removeChannel(channel);

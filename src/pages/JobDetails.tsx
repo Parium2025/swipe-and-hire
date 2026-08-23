@@ -14,6 +14,8 @@ import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
+
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
@@ -112,6 +114,26 @@ const JobDetails = () => {
   
   const employerProfileImageUrl = useMediaUrl(job?.employer_profile?.profile_image_url, 'profile-image');
 
+  // Samma deterministiska förvärmning som /candidates och /my-candidates:
+  // text → media (porträtt/video) → CV-sammanfattningar.
+  const warmupRows = useMemo(
+    () =>
+      applications.map((a) => ({
+        id: a.id,
+        application_id: a.id,
+        applicant_id: a.applicant_id,
+        job_id: jobId ?? null,
+        cv_url: a.cv_url ?? null,
+        profile_image_url: a.profile_image_url ?? null,
+        video_url: a.video_url ?? null,
+        is_profile_video: a.is_profile_video ?? null,
+      })),
+    [applications, jobId]
+  );
+  useCandidatePageWarmup(warmupRows);
+
+
+
   // Load my_candidates map for rating updates — only re-fetch when applicant IDs actually change
   useEffect(() => {
     if (!user || applications.length === 0) return;
@@ -183,13 +205,8 @@ const JobDetails = () => {
       toast('Offline', { description: 'Du måste vara online för att uppdatera betyg' });
       return;
     }
+    if (!user) return;
 
-    const myCandidateId = myCandidatesMap.get(applicantId);
-    if (!myCandidateId) {
-      toast('Info', { description: 'Lägg först till kandidaten i din lista för att ge betyg' });
-      return;
-    }
-    
     updateApplicationLocally(
       applications.find(a => a.applicant_id === applicantId)?.id || '',
       { rating: newRating }
@@ -197,15 +214,33 @@ const JobDetails = () => {
     if (selectedApplication?.applicant_id === applicantId) {
       setSelectedApplication(prev => prev ? { ...prev, rating: newRating } : null);
     }
-    
+
     try {
-      const { error } = await supabase.from('my_candidates').update({ rating: newRating }).eq('id', myCandidateId);
+      // Betyget är per kandidat och lever i candidate_ratings — samma källa som
+      // Mina kandidater. Kandidaten behöver alltså inte ligga i en lista först.
+      const { error } = await supabase
+        .from('candidate_ratings')
+        .upsert(
+          { recruiter_id: user.id, applicant_id: applicantId, rating: newRating },
+          { onConflict: 'recruiter_id,applicant_id' }
+        );
       if (error) throw error;
+
+      // Håll ev. listrader i synk så att kortet visar samma sak överallt.
+      const myCandidateId = myCandidatesMap.get(applicantId);
+      if (myCandidateId) {
+        await supabase
+          .from('my_candidates')
+          .update({ rating: newRating })
+          .eq('recruiter_id', user.id)
+          .eq('applicant_id', applicantId);
+      }
     } catch {
       toast.error('Fel', { description: 'Kunde inte uppdatera betyg' });
       refetch();
     }
-  }, [myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch]);
+  }, [user, myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch]);
+
 
   const markApplicationAsViewed = useCallback(async (applicationId: string) => {
     updateApplicationLocally(applicationId, { viewed_at: new Date().toISOString() });
