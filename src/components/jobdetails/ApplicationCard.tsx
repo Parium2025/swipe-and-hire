@@ -130,7 +130,7 @@ export const ApplicationCardContent = memo(({
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                  <p className="text-primary-foreground font-medium text-xs truncate group-hover:text-primary-foreground/80 transition-colors cursor-default">
+                  <p className="text-white font-medium text-xs truncate transition-colors cursor-default">
                   {application.first_name} {application.last_name}
                 </p>
               </TooltipTrigger>
@@ -141,7 +141,7 @@ export const ApplicationCardContent = memo(({
           </TooltipProvider>
           <StarRating rating={application.rating} />
           {(appliedTime || lastActiveTime) && (
-            <div className="flex items-center gap-1.5 mt-0.5 text-muted-foreground text-[10px]">
+            <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">
               {appliedTime && (
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
