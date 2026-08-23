@@ -36,8 +36,10 @@ const OBVIOUS_DISCRIMINATION_PATTERNS = [
   { pattern: /\bålder\b|\båldern\b|\båldersgräns\b|\bfödelseår\b|\bfödd\b/i, category: 'Åldersdiskriminering' },
   { pattern: /\bför gammal\b|\bför ung\b|\bmax \d+ år\b|\bmin \d+ år\b/i, category: 'Åldersdiskriminering' },
   { pattern: /\bung\b|\bunga\b|\bgammal\b|\bgamla\b|\bpensionär\b|\bpensionärer\b|\btonåring\b|\btonåringar\b/i, category: 'Åldersdiskriminering' },
-  { pattern: /\bmedelålders\b|\bsenior\b|\bjunior\b(?!\s*(utvecklare|designer|konsult))/i, category: 'Åldersdiskriminering' },
-  { pattern: /\bnyexaminerad\b|\bnyutexaminerad\b/i, category: 'Åldersdiskriminering' },
+  { pattern: /\bmedelålders\b/i, category: 'Åldersdiskriminering' },
+  // NOTE: "senior", "junior", "nyexaminerad" är erfarenhetsnivåer (inte ålder) och
+  // tillåts därför som kriterier — t.ex. "Senior utvecklare", "Nyexaminerad ingenjör".
+
 
   // --- Disability ---
   { pattern: /\bhandikappad\b|\bhandikappade\b|\bhandikapp\b|\bfunktionshinder\b|\bfunktionsnedsättning\b/i, category: 'Diskriminering pga funktionsnedsättning' },
