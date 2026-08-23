@@ -554,7 +554,7 @@ const JobDetails = () => {
           jobId={jobId!}
           job={job}
           employerProfileImageUrl={employerProfileImageUrl}
-          applicationsCount={applications.length}
+          applicationsCount={totalApplications ?? applications.length}
           activeStagesLength={activeStages.length}
           isSelectionMode={isSelectionMode}
           canToggleStatus={!!user?.id && job.employer_id === user.id}
