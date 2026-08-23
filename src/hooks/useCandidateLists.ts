@@ -176,7 +176,7 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
       return { movedTo: fallback?.name ?? null };
     },
 
-    onSuccess: () => {
+    onSuccess: (result) => {
       invalidate();
       queryClient.invalidateQueries({ queryKey: ['my-candidates', ownerId] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', ownerId] });
@@ -184,8 +184,14 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
       // annars visas steg som inte längre finns.
       queryClient.invalidateQueries({ queryKey: ['stage-settings', ownerId] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', ownerId] });
-      toast.success('Listan togs bort');
+      queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+      toast.success(
+        result?.movedTo
+          ? `Listan togs bort – kandidaterna flyttades till "${result.movedTo}"`
+          : 'Listan togs bort',
+      );
     },
+
     onError: (error: any) => toast.error(error.message || 'Kunde inte ta bort listan'),
   });
 
