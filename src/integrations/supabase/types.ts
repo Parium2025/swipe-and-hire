@@ -3784,6 +3784,10 @@ export type Database = {
           question_type: string
         }[]
       }
+      get_employer_inbox_stats: {
+        Args: { p_active_job_ids: string[]; p_user_id: string }
+        Returns: Json
+      }
       get_employer_jobs_counts: { Args: { p_scope?: string }; Returns: Json }
       get_employer_jobs_page: {
         Args: {

@@ -66,7 +66,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
         writeEmployerCachedStat(user.id, 'unread_messages', 0);
         return empty;
       }
-      const { data, error } = await supabase.rpc('get_employer_dashboard_stats', {
+      const { data, error } = await supabase.rpc('get_employer_inbox_stats', {
         p_user_id: user.id,
         p_active_job_ids: activeJobIds,
       });
