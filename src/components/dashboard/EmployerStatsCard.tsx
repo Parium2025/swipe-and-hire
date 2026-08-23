@@ -54,7 +54,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   }, [jobs]);
 
   const { data: dashStats, isSuccess } = useQuery({
-    queryKey: ['employer-dashboard-stats', user?.id, activeJobIds],
+    queryKey: ['employer-inbox-stats', user?.id, activeJobIds],
     queryFn: async () => {
       const empty = { new_applications: 0, saved_favorites: 0, unread_messages: 0 };
       if (!user?.id) return empty;
@@ -100,7 +100,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       if (timer) return;
       timer = setTimeout(() => {
         timer = null;
-        queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+        queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
       }, 1200);
     };
     // Bara ansökningar på våra egna annonser är relevanta.
