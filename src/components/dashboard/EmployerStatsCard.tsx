@@ -1,10 +1,9 @@
-import { memo, useMemo, useEffect, useRef } from 'react';
+import { memo, useMemo, useEffect } from 'react';
 import { Briefcase, Heart, UserPlus, MessageSquare } from 'lucide-react';
-import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { isEmployerJobActive } from '@/lib/jobStatus';
+import { useEmployerJobsCounts } from '@/hooks/useEmployerScaleStats';
 import { StatsCarousel } from './StatsCarousel';
 import type { StatData } from './StatsCarousel';
 
@@ -41,56 +40,48 @@ interface EmployerStatsCardProps {
 }
 
 export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsCardProps) => {
-  const { jobs, isLoading: jobsLoading } = useJobsData({ scope: 'personal' });
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readEmployerCachedStats(user?.id), [user?.id]);
 
-  // Samma statusregler som /my-jobs och databasens räknare (jobStatus.ts) –
-  // annars kan "Aktiva annonser" här visa ett annat tal än annonslistan.
-  const activeJobIds = useMemo(() => {
-    if (!jobs) return [];
-    return jobs.filter(j => isEmployerJobActive(j)).map(j => j.id);
-  }, [jobs]);
+  // 🔒 Serverns räknare är sanning. Tidigare räknades aktiva annonser på den
+  // lokalt laddade listan – med 5 000 annonser visade kortet först 200 och
+  // klättrade sedan uppåt medan bakgrundsströmmen laddade resten.
+  const { data: serverCounts, isLoading: countsLoading } = useEmployerJobsCounts('personal');
+
 
   const { data: dashStats, isSuccess } = useQuery({
-    queryKey: ['employer-inbox-stats', user?.id, activeJobIds],
+    // 🔒 Nyckeln får INTE innehålla annons-id:n: med 5 000 aktiva annonser
+    // blev nyckeln megabytestor och varje ny annons gav en full refetch.
+    // Servern räknar själv fram vilka annonser som är aktiva.
+    queryKey: ['employer-inbox-stats', user?.id],
     queryFn: async () => {
       const empty = { new_applications: 0, saved_favorites: 0, unread_messages: 0 };
       if (!user?.id) return empty;
-      // Inga aktiva annonser → siffrorna ÄR noll. Skriv även cachen, annars
-      // kan gamla värden ligga kvar och visas nästa gång sidan öppnas.
-      if (activeJobIds.length === 0) {
-        writeEmployerCachedStat(user.id, 'new_applications', 0);
-        writeEmployerCachedStat(user.id, 'saved_favorites', 0);
-        writeEmployerCachedStat(user.id, 'unread_messages', 0);
-        return empty;
-      }
       const { data, error } = await supabase.rpc('get_employer_inbox_stats', {
         p_user_id: user.id,
-        p_active_job_ids: activeJobIds,
       });
       if (error) throw error;
-      const stats = data as { new_applications: number; saved_favorites: number; unread_messages: number };
+      const stats = (data ?? empty) as { new_applications: number; saved_favorites: number; unread_messages: number };
       writeEmployerCachedStat(user.id, 'new_applications', stats.new_applications);
       writeEmployerCachedStat(user.id, 'saved_favorites', stats.saved_favorites);
       writeEmployerCachedStat(user.id, 'unread_messages', stats.unread_messages);
       return stats;
     },
-    // Vänta tills annonserna laddats – annars skulle vi räkna "0 aktiva" på
-    // en halvladdad lista och nolla korten i en blink.
-    enabled: !!user?.id && !jobsLoading,
-    staleTime: Infinity,
+    enabled: !!user?.id,
+    staleTime: 30_000,
     gcTime: 1000 * 60 * 30,
     refetchOnMount: true,
   });
+
 
   const newApplicationsCount = dashStats?.new_applications ?? cachedStats['new_applications'] ?? 0;
   const savedFavoritesCount = dashStats?.saved_favorites ?? cachedStats['saved_favorites'] ?? 0;
   const unreadMessagesCount = dashStats?.unread_messages ?? cachedStats['unread_messages'] ?? 0;
 
-  const jobIdsRef = useRef<string[]>(activeJobIds);
-  jobIdsRef.current = activeJobIds;
+  // Serverfunktionen avgör själv vilka annonser som räknas — vi behöver inte
+  // längre hålla en lokal id-lista för att filtrera realtime-händelser.
+
 
   useEffect(() => {
     if (!user?.id) return;
@@ -104,11 +95,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       }, 1200);
     };
     // Bara ansökningar på våra egna annonser är relevanta.
-    const onApplication = (payload: { new?: Record<string, unknown>; old?: Record<string, unknown> }) => {
-      const jobId = (payload.new?.job_id ?? payload.old?.job_id) as string | undefined;
-      if (jobId && jobIdsRef.current.length > 0 && !jobIdsRef.current.includes(jobId)) return;
-      invalidateStats();
-    };
+    const onApplication = () => invalidateStats();
     const msgChannel = supabase
       .channel(`employer-conv-messages-${user.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
@@ -132,14 +119,15 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   }, [user?.id, queryClient]);
 
 
-  const activeJobsCount = activeJobIds.length;
+  const activeJobsCount = serverCounts?.active ?? 0;
   useEffect(() => {
-    if (!jobsLoading && activeJobsCount > 0) {
-      writeEmployerCachedStat(user?.id, 'active_jobs', activeJobsCount);
+    if (!countsLoading && serverCounts) {
+      writeEmployerCachedStat(user?.id, 'active_jobs', serverCounts.active);
     }
-  }, [activeJobsCount, jobsLoading, user?.id]);
+  }, [serverCounts, countsLoading, user?.id]);
 
-  const displayActiveJobs = jobsLoading ? (cachedStats['active_jobs'] ?? 0) : activeJobsCount;
+  const displayActiveJobs = serverCounts ? activeJobsCount : (cachedStats['active_jobs'] ?? 0);
+
 
   const statsArray: StatData[] = useMemo(() => [
     { icon: Briefcase, label: 'Aktiva annonser', value: displayActiveJobs, description: 'Mina aktiva jobbannonser', link: '/my-jobs?sort=active-first', emptyHint: 'Skapa din första annons' },
