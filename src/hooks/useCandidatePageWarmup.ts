@@ -16,7 +16,7 @@ import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
  *
  *   Steg 1 (direkt)      Text: anteckningar + aktivitetslogg (2 batchade queries)
  *   Steg 2 (+250 ms)     Media: porträtt i dialogstorlek + profilvideor
- *   Steg 3 (+250 ms)     AI: generera endast sammanfattningar som verkligen saknas
+ *   Steg 3 (+300 ms)     AI: generera endast sammanfattningar som verkligen saknas
  *
  * Samma pipeline används av /candidates och /my-candidates så att båda vyerna
  * beter sig identiskt. Ren cache-logik — noll UI-bieffekter.
@@ -39,7 +39,7 @@ interface Options {
 }
 
 const MEDIA_DELAY_MS = 250;
-const CV_DELAY_MS = 250;
+const CV_DELAY_MS = 300;
 
 export function useCandidatePageWarmup(
   rows: CandidateWarmupRow[] | undefined,
