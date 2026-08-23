@@ -642,6 +642,23 @@ export function useJobDetailsData(jobId: string | undefined) {
     });
   }, [queryClient, jobId]);
 
+  // Lägg flytt-låset ovanpå ALLA datakällor (query, ström, realtid) så att en
+  // kolumn aldrig kan visa det gamla steget efter att kortet släppts.
+  const applicationsWithPending = useMemo(() => {
+    const rows = applicationsQuery.data ?? [];
+    const pending = pendingStatusRef.current;
+    if (pending.size === 0) return rows;
+    const now = Date.now();
+    return rows.map(app => {
+      const entry = pending.get(app.id);
+      if (!entry) return app;
+      if (now - entry.at > PENDING_TTL_MS) return app;
+      if (app.status === entry.status) return app;
+      return { ...app, status: entry.status as JobApplication['status'] };
+    });
+    // pendingVersion tvingar omräkning när låset ändras.
+  }, [applicationsQuery.data, pendingVersion]);
+
   // Refetch both
   const refetch = useCallback(() => {
     jobQuery.refetch();
