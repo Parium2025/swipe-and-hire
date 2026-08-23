@@ -255,6 +255,10 @@ export function useMyCandidatesData(
   // aldrig i vyn som faktiskt visas.
   const queryKeyRef = useRef(queryKey);
   queryKeyRef.current = queryKey;
+  // Samma sak för aktiv lista: filtret nedan låste sig annars vid den lista som
+  // var vald när kanalen skapades.
+  const listIdRef = useRef(listId);
+  listIdRef.current = listId;
 
   // Vilka kolumner som bett om nästa sida just nu (tom = första omgången).
   const requestedStagesRef = useRef<Set<string>>(new Set());
@@ -475,7 +479,8 @@ export function useMyCandidatesData(
             const next = payload.new as { id: string; stage?: CandidateStage; recruiter_id?: string; list_id?: string | null };
 
             // Only update if it's the current user's candidate — och fortfarande i samma lista
-            const sameList = !listId || !next.list_id || next.list_id === listId;
+            const activeListId = listIdRef.current;
+            const sameList = !activeListId || !next.list_id || next.list_id === activeListId;
             if (next.recruiter_id === user.id && next.stage && sameList) {
               queryClient.setQueryData(
                 queryKeyRef.current,
