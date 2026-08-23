@@ -159,18 +159,20 @@ export const StatusColumn = memo(({
   }, [checkScroll]);
 
 
+  // Samma bredduträkning som Mina kandidater: kolumnerna delar hela bredden
+  // jämnt, ingen horisontell scroll → inga mätningar som hoppar under drag.
+  const slots = Math.max(1, columnSlots ?? totalStageCount);
+  const gapTotal = `${(slots - 1) * 0.75}rem`;
+
   return (
     <div 
       ref={setNodeRef}
-      className="flex-shrink-0 flex flex-col transition-colors h-full"
-      style={{ 
-        width: 'clamp(200px, 22vw, 260px)',
-        minWidth: '180px',
-      }}
+      className="flex-none flex flex-col transition-colors h-full min-w-0"
+      style={{ width: `calc((100% - ${gapTotal}) / ${slots})` }}
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
-        style={{ backgroundColor: `${displayColor}55` }}
+        style={{ backgroundColor: `${displayColor}33` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
@@ -179,8 +181,8 @@ export const StatusColumn = memo(({
             className="font-medium text-xs text-white truncate flex-1 min-w-0"
           />
           <span 
-            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: `${displayColor}88` }}
+            className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full flex-shrink-0"
+            style={{ backgroundColor: `${displayColor}66` }}
           >
             {displayCount}
           </span>
