@@ -321,8 +321,8 @@ const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-[260px]">
                 <p className="text-xs leading-relaxed">
-                  Visar hur stor andel besökare som söker vs lämnar utan att söka.
-                  Högre konvertering = bättre annons.
+                  Andel unika besökare som skickar in en ansökan. Varje person räknas en gång per annons,
+                  och era egna visningar räknas inte. Högre konvertering = bättre annons.
                 </p>
               </TooltipContent>
             </Tooltip>
