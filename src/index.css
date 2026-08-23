@@ -1200,7 +1200,9 @@ All colors MUST be HSL.
        samma object-position % olika mycket. */
     aspect-ratio: var(--job-media-aspect, 2 / 1);
     height: auto;
+    flex: none;
   }
+
 
   .job-card-mobile-body {
     padding: var(--job-card-mobile-content-padding);
