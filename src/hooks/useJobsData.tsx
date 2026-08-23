@@ -336,9 +336,12 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           // bara här — ersätter vi listan rakt av. Det rensar bort rader som
           // raderats på servern medan fliken varit stängd.
           if (isCurrent()) {
-            queryClient.setQueryData(queryKey, all);
-            writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, all);
+            // 🪦 Rader som raderats medan strömmen rullade får aldrig återuppstå.
+            const finalRows = dropDeleted(all);
+            queryClient.setQueryData(queryKey, finalRows);
+            writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, finalRows);
           }
+
         } catch {
           // Tyst fel — realtime/refetch återställer, första sidan visas ändå
         } finally {
