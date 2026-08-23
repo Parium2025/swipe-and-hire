@@ -35,6 +35,9 @@ import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { EmptyJobsCta } from '@/components/dashboard/EmptyJobsCta';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
+import { buildCardImageUrl } from '@/hooks/useCardImage';
+import { getImageVersion } from '@/lib/imageTransforms';
+
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
