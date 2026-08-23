@@ -228,8 +228,14 @@ const EmployerDashboard = memo(() => {
     };
   }, []);
   
-  // Check if there are any drafts
-  const hasDrafts = useMemo(() => jobs.some(job => isEmployerJobDraft(job)), [jobs]);
+  // Check if there are any drafts.
+  // Serverräkningen först: vid tusentals annonser kan utkasten ligga långt bak
+  // i bakgrundsströmmen, och då dök fliken upp först efter flera sekunder.
+  const hasDrafts = useMemo(
+    () => (serverCounts?.draft ?? 0) > 0 || jobs.some(job => isEmployerJobDraft(job)),
+    [serverCounts?.draft, jobs],
+  );
+
   
   // Beräkna ALLA tre tabbars data samtidigt — gör DOM-persistens möjlig.
   // VirtualJobGrid håller alla tre i DOM:en (display:none för inaktiva)
