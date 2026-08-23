@@ -1,7 +1,7 @@
 import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, Flag } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { useNotificationPreferences, type NotificationType } from '@/hooks/useNotificationPreferences';
@@ -47,6 +47,54 @@ function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>) {
   return truncated;
 }
 
+// Notiser saknar ofta en explicit route i metadata (t.ex. chattnotiser som bara
+// bär conversation_id). Här härleds målet så att varje notis alltid går att klicka på.
+function resolveRoute(type: string, metadata?: Record<string, unknown> | null): string | undefined {
+  const explicit = typeof metadata?.route === 'string' ? metadata.route : undefined;
+  if (explicit) return explicit;
+
+  const conversationId = metadata?.conversation_id;
+  if (typeof conversationId === 'string' && conversationId) {
+    return `/messages?conversation=${conversationId}`;
+  }
+
+  const jobId = typeof metadata?.job_id === 'string' ? metadata.job_id : undefined;
+
+  switch (type) {
+    case 'message':
+    case 'new_message':
+      return '/messages';
+    case 'new_application':
+      return jobId ? `/job-details/${jobId}` : '/candidates';
+    case 'application_status':
+      return '/my-applications';
+    case 'interview_scheduled':
+    case 'interview_reminder':
+      return '/my-candidates';
+    case 'job_expired':
+    case 'job_closed':
+      return '/my-jobs';
+    case 'saved_search_match':
+      return '/search-jobs';
+    case 'saved_job_expiring':
+      return '/saved-jobs';
+    default:
+      return undefined;
+  }
+}
+
+// Notiser som handlar om AI-problem ska kunna rapporteras direkt till supporten.
+const REPORTABLE_PATTERN = /\bai\b|utvärder|kriteri|analys|sammanfattning/i;
+
+function isReportable(kindIsError: boolean, title: string, body?: string | null): boolean {
+  return kindIsError && REPORTABLE_PATTERN.test(`${title} ${body ?? ''}`);
+}
+
+function supportReportRoute(title: string, body?: string | null): string {
+  const message = `Jag vill rapportera ett problem med AI-funktionen.\n\nNotis: ${title}${body ? `\nDetaljer: ${body}` : ''}\nTidpunkt: ${new Date().toLocaleString('sv-SE')}\n\nBeskriv gärna vad du gjorde när det hände:\n`;
+  return `/support?category=technical&message=${encodeURIComponent(message)}`;
+}
+
 function NotificationItem({ 
   notification, 
   onRead, 
@@ -58,7 +106,8 @@ function NotificationItem({
 }) {
   const Icon = typeIcons[notification.type] || Bell;
   const colorClass = typeColors[notification.type] || 'text-white';
-  const route = notification.metadata?.route as string | undefined;
+  const route = resolveRoute(notification.type, notification.metadata as Record<string, unknown> | null);
+
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: sv });
 
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -67,9 +116,12 @@ function NotificationItem({
   const bodyTruncated = useTruncation(bodyRef);
   const [expanded, setExpanded] = useState(false);
   const canExpand = titleTruncated || bodyTruncated || expanded;
+  const reportable = isReportable(true, notification.title, notification.body) && !route;
 
   return (
-    <motion.button
+    <motion.div
+      role="button"
+      tabIndex={0}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
@@ -80,7 +132,15 @@ function NotificationItem({
         if (route) { onNavigate(route); return; }
         if (canExpand) setExpanded(v => !v);
       }}
-      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg ${
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (!notification.is_read) onRead(notification.id);
+          if (route) { onNavigate(route); return; }
+          if (canExpand) setExpanded(v => !v);
+        }
+      }}
+      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg cursor-pointer ${
         notification.is_read 
           ? 'opacity-60 hover:bg-white/5' 
           : 'hover:bg-white/10 bg-white/5'
@@ -107,9 +167,25 @@ function NotificationItem({
               {expanded ? 'Visa mindre' : 'Visa mer'}
             </span>
           )}
+          {reportable && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!notification.is_read) onRead(notification.id);
+                onNavigate(supportReportRoute(notification.title, notification.body));
+              }}
+              className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+            >
+              <Flag className="h-2.5 w-2.5" strokeWidth={2} />
+              Rapportera
+            </button>
+          )}
         </div>
       </div>
-    </motion.button>
+
+    </motion.div>
+
   );
 }
 
@@ -138,20 +214,28 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
   const bodyTruncated = useTruncation(bodyRef);
   const [expanded, setExpanded] = useState(false);
   const canExpand = titleTruncated || bodyTruncated || expanded;
+  const reportable = isReportable(item.kind === 'error' || item.kind === 'warning', item.title, item.body) && !item.route;
+
+  const activate = () => {
+    if (!item.is_read) onRead(item.id);
+    if (item.route) { onNavigate(item.route); return; }
+    if (canExpand) setExpanded(v => !v);
+  };
 
   return (
-    <motion.button
+    <motion.div
+      role="button"
+      tabIndex={0}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.15 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => {
-        if (!item.is_read) onRead(item.id);
-        if (item.route) { onNavigate(item.route); return; }
-        if (canExpand) setExpanded(v => !v);
+      onClick={activate}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       }}
-      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg ${
+      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg cursor-pointer ${
         item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
       }`}
     >
@@ -179,9 +263,24 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
               {expanded ? 'Visa mindre' : 'Visa mer'}
             </span>
           )}
+          {reportable && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!item.is_read) onRead(item.id);
+                onNavigate(supportReportRoute(item.title, item.body));
+              }}
+              className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+            >
+              <Flag className="h-2.5 w-2.5" strokeWidth={2} />
+              Rapportera
+            </button>
+          )}
         </div>
       </div>
-    </motion.button>
+    </motion.div>
+
   );
 }
 

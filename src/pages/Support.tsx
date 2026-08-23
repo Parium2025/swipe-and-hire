@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +25,7 @@ interface SupportTicket {
 }
 
 const Support = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [category, setCategory] = useState('');
   // Auto-save message draft to localStorage
   const [message, setMessage, clearMessageDraft, hasMessageDraft] = useFieldDraft('support-message');
@@ -31,11 +34,25 @@ const Support = () => {
   const [ticketsLoading, setTicketsLoading] = useState(true);
   const { toast } = useToast();
   
+  // Förifyll formuläret när man kommer hit via "Rapportera" i en notis
+  useEffect(() => {
+    const prefillCategory = searchParams.get('category');
+    const prefillMessage = searchParams.get('message');
+    if (!prefillCategory && !prefillMessage) return;
+    if (prefillCategory) setCategory(prefillCategory);
+    if (prefillMessage) setMessage(prefillMessage);
+    const next = new URLSearchParams(searchParams);
+    next.delete('category');
+    next.delete('message');
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Hämta befintliga ärenden
   useEffect(() => {
     fetchTickets();
   }, []);
+
 
   const fetchTickets = async () => {
     try {
