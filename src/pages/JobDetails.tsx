@@ -684,6 +684,7 @@ const JobDetails = () => {
                     stageConfig={config}
                     totalStageCount={activeStages.length}
                     stageIndex={stageIndex}
+                    columnSlots={activeStages.length + (activeStages.length < 8 ? 1 : 0)}
                     criteriaCount={criteriaCount}
                     isSelectionMode={isSelectionMode}
                     selectedApplicationIds={selectedApplicationIds}
