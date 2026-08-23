@@ -4,6 +4,8 @@ import { measurePerformance } from '@/lib/realtimePerformance';
 import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
+import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
+
 import { useAuth } from '@/hooks/useAuth';
 
 // Types for criterion results
