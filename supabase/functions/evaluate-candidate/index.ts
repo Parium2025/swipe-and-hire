@@ -221,7 +221,7 @@ serve(async (req) => {
     // === AUTHORIZATION: caller must be applicant OR employer of the job ===
     if (callerId !== null && callerId !== applicant_id) {
       const { data: canView, error: authzError } = await supabase
-        .rpc('can_view_job_application', { _job_id: job_id }, { get: false })
+        .rpc('can_view_job_application', { p_job_id: job_id }, { get: false })
         .single();
       // Fallback: check via employer_owns_job_for_question style check by querying job_postings
       let allowed = false;
@@ -241,8 +241,8 @@ serve(async (req) => {
           } else {
             // Same-organization colleague check (roles hold the org, not job_postings)
             const [callerOrg, ownerOrg] = await Promise.all([
-              supabase.rpc('get_user_organization_id', { _user_id: callerId }),
-              supabase.rpc('get_user_organization_id', { _user_id: job.employer_id }),
+              supabase.rpc('get_user_organization_id', { p_user_id: callerId }),
+              supabase.rpc('get_user_organization_id', { p_user_id: job.employer_id }),
             ]);
             if (callerOrg.data && ownerOrg.data && callerOrg.data === ownerOrg.data) {
               allowed = true;
