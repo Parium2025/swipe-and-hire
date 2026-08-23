@@ -239,7 +239,7 @@ function readJobAppsCache(jobId: string): JobApplication[] | null {
 }
 
 function writeJobAppsCache(jobId: string, data: JobApplication[]): void {
-  writePersistentCache(JOB_APPS_CACHE_KEY + jobId, data.slice(0, 50));
+  writePersistentCache(JOB_APPS_CACHE_KEY + jobId, data.slice(0, 300));
 }
 
 export function useJobDetailsData(jobId: string | undefined) {
