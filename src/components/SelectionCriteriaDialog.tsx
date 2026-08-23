@@ -127,8 +127,16 @@ export function SelectionCriteriaDialog({
         .order('order_index');
 
       if (error) throw error;
-      
-      const loadedCriteria = data || [];
+
+      const rows = data || [];
+      // Garbage-collect empty, never-activated rows left behind by an aborted session
+      const orphanIds = rows
+        .filter(c => !c.is_active && !c.title?.trim() && !c.prompt?.trim())
+        .map(c => c.id);
+      if (orphanIds.length > 0) {
+        supabase.from('job_criteria').delete().in('id', orphanIds).then(() => {});
+      }
+      const loadedCriteria = rows.filter(c => !orphanIds.includes(c.id));
       setCriteria(loadedCriteria);
       
       const newDrafts: Record<string, { title: string; prompt: string }> = {};
@@ -151,33 +159,23 @@ export function SelectionCriteriaDialog({
     }
   };
 
-  const buildValidationMessage = (title: string, prompt: string) => {
-    const displayTitle = title.trim() || 'Fyll i vad personen har skrivit i titeln';
-    const displayPrompt = prompt.trim() || 'Fyll i vad personen har skrivit i titeln';
-    return `Titeln "${displayTitle}" och AI-instruktionen "${displayPrompt}" är otydliga och kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.`;
-  };
+  const DISCRIMINATION_MESSAGE =
+    'Kriteriet kan uppfattas som kopplat till en skyddad diskrimineringsgrund. Formulera om det så att det beskriver ett konkret krav för tjänsten.';
 
   const validateInput = (id: string, title: string, prompt: string) => {
-    const msg = buildValidationMessage(title, prompt);
-
-    const titleCheck = checkForDiscrimination(title);
-    if (titleCheck.isDiscriminatory) {
-      setValidationErrors(prev => ({ ...prev, [id]: msg }));
+    const setError = (message: string) => {
+      setValidationErrors(prev => ({ ...prev, [id]: message }));
       return false;
-    }
+    };
 
-    const promptCheck = checkForDiscrimination(prompt);
-    if (promptCheck.isDiscriminatory) {
-      setValidationErrors(prev => ({ ...prev, [id]: msg }));
-      return false;
-    }
+    if (checkForDiscrimination(title).isDiscriminatory) return setError(DISCRIMINATION_MESSAGE);
+    if (checkForDiscrimination(prompt).isDiscriminatory) return setError(DISCRIMINATION_MESSAGE);
 
     const promptQuality = checkInputQuality(prompt);
     if (!promptQuality.isValid) {
-      setValidationErrors(prev => ({ ...prev, [id]: msg }));
-      return false;
+      return setError(promptQuality.reason || 'Formulera ett tydligt kriterium.');
     }
-    
+
     setValidationErrors(prev => {
       const next = { ...prev };
       delete next[id];
@@ -334,7 +332,7 @@ export function SelectionCriteriaDialog({
           aiBlocked = true;
           setValidationErrors(prev => ({
             ...prev,
-            [validCriteria[i].id]: buildValidationMessage(validCriteria[i].title, validCriteria[i].prompt),
+            [validCriteria[i].id]: check.reason || DISCRIMINATION_MESSAGE,
           }));
         }
       });
@@ -436,7 +434,7 @@ export function SelectionCriteriaDialog({
         {criteria.length === 0 && !isLoading && (
             <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5 mt-3 mx-0 text-left">
               <p className="text-sm text-white leading-relaxed">
-                Titeln och AI-instruktionen är otydliga och har ingen tydlig koppling till tjänstens faktiska krav. Att använda detta som urvalsgrund kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.
+                Lägg till upp till fem kriterier som AI:n kontrollerar mot varje kandidats CV och svar. Formulera dem som konkreta, mätbara krav kopplade till tjänsten — t.ex. "Har B-körkort" eller "Minst 2 års erfarenhet inom lager".
               </p>
             </div>
           )}
