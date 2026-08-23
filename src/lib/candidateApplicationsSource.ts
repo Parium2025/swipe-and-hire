@@ -330,7 +330,7 @@ export async function fetchApplicationsForApplicants(
 const applicationsPrefetchInFlight = new Map<string, Promise<void>>();
 
 export function prefetchCandidateApplications(
-  userId: string | undefined,
+  userId: string,
   applicantId: string,
   fallback?: {
     profile_image_url?: string | null;
