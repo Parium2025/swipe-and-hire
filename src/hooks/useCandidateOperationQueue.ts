@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
@@ -312,16 +313,26 @@ export function hasPendingCandidateOps(userId?: string): boolean {
 
 export function useCandidateOperationQueue(userId: string | undefined) {
   const syncInProgress = useRef(false);
+  const queryClient = useQueryClient();
 
   const sync = useCallback(async () => {
     if (!userId || syncInProgress.current) return;
     syncInProgress.current = true;
     try {
-      await syncCandidateOperationQueue(userId);
+      const synced = await syncCandidateOperationQueue(userId);
+      // Köade flyttar/borttagningar ändrar kolumn- och listräknarna på servern.
+      // Utan den här invalideringen visade menyn gamla siffror tills man
+      // laddade om sidan manuellt.
+      if (synced > 0) {
+        queryClient.invalidateQueries({ queryKey: ['my-candidates', userId] });
+        queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', userId] });
+        queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', userId] });
+        queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+      }
     } finally {
       syncInProgress.current = false;
     }
-  }, [userId]);
+  }, [userId, queryClient]);
 
   // Auto-sync on connectivity restore
   useEffect(() => {
