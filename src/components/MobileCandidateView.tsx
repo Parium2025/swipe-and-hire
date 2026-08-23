@@ -414,7 +414,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           const cfg = stageSettings[stage];
           if (!cfg) return null;
           const Icon = getJobStageIconByName(cfg.iconName);
-          const count = (appsByStage[stage] || []).length;
+          const count = Math.max(stageTotals?.[stage] ?? 0, (appsByStage[stage] || []).length);
           const isActive = stage === activeTab;
 
           const targetIdx = stageIdx === 0 ? 1 : 0;
