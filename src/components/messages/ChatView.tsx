@@ -594,6 +594,14 @@ export function ChatView({
   });
 
   // Group messages by date
+  // Förladda bildbilagor så snart meddelanden finns – bilder ska vara på plats direkt.
+  useEffect(() => {
+    if (!messages.length) return;
+    prefetchAttachmentImages(
+      messages.map((m) => ({ url: m.attachment_url, type: m.attachment_type }))
+    );
+  }, [messages]);
+
   const groupedMessages = messages.reduce((groups, msg) => {
     const date = format(new Date(msg.created_at), 'yyyy-MM-dd');
     if (!groups[date]) groups[date] = [];

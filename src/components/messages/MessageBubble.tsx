@@ -149,7 +149,8 @@ export function MessageBubble({
             src={attachmentUrl}
             alt={message.attachment_name || 'Bild'}
             className="w-full h-auto rounded-lg bg-white/5"
-            loading="lazy"
+            loading="eager"
+            decoding="async"
             style={{ aspectRatio: '4/3', objectFit: 'cover' }}
             onLoad={(e) => {
               (e.target as HTMLImageElement).style.aspectRatio = '';

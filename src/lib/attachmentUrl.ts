@@ -36,8 +36,34 @@ const cache = new Map<string, string>();
  * Returnerar en giltig länk till en bilaga. Är den sparade länken på väg att gå ut
  * (eller redan död) skapas en färsk signerad länk från samma lagringssökväg.
  */
+/**
+ * Förladdar bildbilagor så att de redan ligger i webbläsarens cache när
+ * bubblan renderas – inga sena inhopp när man scrollar i en konversation.
+ */
+export function prefetchAttachmentImages(
+  attachments: Array<{ url: string | null | undefined; type: string | null | undefined }>
+) {
+  if (typeof window === 'undefined') return;
+  for (const a of attachments) {
+    if (!a.url || !a.type?.startsWith('image/')) continue;
+    const path = extractAttachmentPath(a.url);
+    const src = (path && cache.get(path)) || a.url;
+    if (prefetched.has(src)) continue;
+    prefetched.add(src);
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = src;
+  }
+}
+
+const prefetched = new Set<string>();
+
 export function useAttachmentUrl(storedUrl: string | null | undefined): string | null {
-  const [url, setUrl] = useState<string | null>(storedUrl ?? null);
+  const [url, setUrl] = useState<string | null>(() => {
+    // Läs cachen redan i render → aldrig en tom ruta först.
+    const path = extractAttachmentPath(storedUrl);
+    return (path && cache.get(path)) || storedUrl || null;
+  });
 
   useEffect(() => {
     if (!storedUrl) {
