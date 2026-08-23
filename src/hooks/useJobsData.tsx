@@ -138,8 +138,22 @@ const dropDeleted = dropDeletedJobs;
  * kan "blinka tillbaka" vid en omladdning innan servern hunnit svara.
  */
 export function removeJobFromJobsCache(userId: string, jobId: string): void {
-  deletedJobIds.add(jobId);
-  setTimeout(() => deletedJobIds.delete(jobId), DELETED_TTL_MS);
+  removeJobsFromJobsCache(userId, [jobId]);
+}
+
+/**
+ * Massradering: samma tombstone- och localStorage-städning som för en enskild
+ * annons, men i ETT svep. Att loopa `removeJobFromJobsCache` skulle parsa och
+ * skriva om hela localStorage-cachen en gång per annons (1 000 rader × 1 000
+ * annonser = frusen flik).
+ */
+export function removeJobsFromJobsCache(userId: string, jobIds: string[]): void {
+  if (!jobIds.length) return;
+  const ids = new Set(jobIds);
+  for (const id of ids) {
+    deletedJobIds.add(id);
+    setTimeout(() => deletedJobIds.delete(id), DELETED_TTL_MS);
+  }
   for (const scope of ['personal', 'organization']) {
     const key = cacheKeyFor(userId, scope);
     try {
@@ -147,13 +161,14 @@ export function removeJobFromJobsCache(userId: string, jobId: string): void {
       if (!raw) continue;
       const parsed = JSON.parse(raw) as CachedJobs;
       if (!parsed || !Array.isArray(parsed.jobs)) continue;
-      parsed.jobs = parsed.jobs.filter((j) => j?.id !== jobId);
+      parsed.jobs = parsed.jobs.filter((j) => !ids.has(j?.id));
       safeSetItem(key, JSON.stringify(parsed));
     } catch {
       /* ignore */
     }
   }
 }
+
 
 
 
