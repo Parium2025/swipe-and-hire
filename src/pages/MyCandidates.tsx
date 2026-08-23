@@ -695,6 +695,7 @@ const MyCandidates = () => {
     work_schedule: c.work_schedule,
     availability: c.availability,
     custom_answers: c.custom_answers,
+    questions_snapshot: c.questions_snapshot,
     status: c.status,
     applied_at: c.applied_at || c.created_at,
     updated_at: c.updated_at,

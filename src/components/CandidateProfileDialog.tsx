@@ -180,6 +180,7 @@ export const CandidateProfileDialog = ({
     const jobId = activeApplication?.job_id;
     if (!jobId) {
       setJobQuestions({});
+      setQuestionsLoading(false);
       return;
     }
     const cachedQ = questionsCache.get(jobId)
@@ -187,6 +188,7 @@ export const CandidateProfileDialog = ({
     if (cachedQ) {
       questionsCache.set(jobId, cachedQ);
       setJobQuestions(cachedQ);
+      setQuestionsLoading(false);
       return;
     }
     setJobQuestions({});
@@ -285,9 +287,18 @@ export const CandidateProfileDialog = ({
 
     const qCacheKey = activeApplication.job_id;
     const cachedQ = questionsCache.get(qCacheKey);
-    if (cachedQ && Object.keys(cachedQ).length > 0) { setJobQuestions(cachedQ); return; }
+    if (cachedQ && Object.keys(cachedQ).length > 0) {
+      setJobQuestions(cachedQ);
+      setQuestionsLoading(false);
+      return;
+    }
     const persistedQ = getPersistedCacheValue<Record<string, { text: string; order: number }>>(QUESTIONS_STORAGE_KEY, qCacheKey);
-    if (persistedQ && Object.keys(persistedQ).length > 0) { questionsCache.set(qCacheKey, persistedQ); setJobQuestions(persistedQ); return; }
+    if (persistedQ && Object.keys(persistedQ).length > 0) {
+      questionsCache.set(qCacheKey, persistedQ);
+      setJobQuestions(persistedQ);
+      setQuestionsLoading(false);
+      return;
+    }
     setQuestionsLoading(true);
     try {
       const { data, error } = await supabase
