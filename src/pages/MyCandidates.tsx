@@ -575,6 +575,8 @@ const MyCandidates = () => {
         profile_image_url: c!.profile_image_url,
         video_url: c!.is_profile_video ? c!.video_url : null,
       }));
+  }, [selectedCandidate, filteredCandidatesByStage]);
+
 
 
 
