@@ -419,6 +419,27 @@ const JobDetails = () => {
     return (applicationsByStatus[currentNavigationStage] || []).length;
   }, [currentNavigationStage, applicationsByStatus]);
 
+  // Förvärm grannarna i steget när en profil är öppen, så att pilarna
+  // ("nästa kandidat") visar bild/video/CV direkt i stället för att ladda.
+  const neighborWarmupRows = useMemo(() => {
+    if (!selectedApplication || !currentNavigationStage) return [];
+    const stageApps = applicationsByStatus[currentNavigationStage] || [];
+    const idx = stageApps.findIndex(a => a.id === selectedApplication.id);
+    if (idx < 0) return [];
+    return stageApps.slice(Math.max(0, idx - 3), idx + 4).map((a) => ({
+      id: a.id,
+      application_id: a.id,
+      applicant_id: a.applicant_id,
+      job_id: jobId ?? null,
+      cv_url: a.cv_url ?? null,
+      profile_image_url: a.profile_image_url ?? null,
+      video_url: a.video_url ?? null,
+      is_profile_video: a.is_profile_video ?? null,
+    }));
+  }, [selectedApplication, currentNavigationStage, applicationsByStatus, jobId]);
+  useCandidatePageWarmup(neighborWarmupRows);
+
+
   const getDisplayRating = useCallback((app: ApplicationData) => {
     return app.rating || 0;
   }, []);
