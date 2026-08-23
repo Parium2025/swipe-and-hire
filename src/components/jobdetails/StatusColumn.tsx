@@ -43,6 +43,7 @@ export const StatusColumn = memo(({
   status, 
   applications, 
   stageTotal,
+  isStreaming: isStreamingPages,
   onOpenProfile, 
   onMarkAsViewed, 
   onPrefetch,
