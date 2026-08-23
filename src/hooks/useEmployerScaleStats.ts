@@ -25,8 +25,23 @@ export interface EmployerDashboardStats {
  * Spotify-mönstret: visa cached state direkt, validera tyst.
  */
 
-const COUNTS_CACHE_KEY = 'parium_employer_counts_v1_';
-const STATS_CACHE_KEY = 'parium_employer_stats_v1_';
+// v2: nyckeln innehåller scope. I v1 delade 'personal' och 'organization'
+// samma nyckel, så den sida du besökte sist skrev över den andras seed —
+// resultatet blev en synlig sifferblinkning varje gång du växlade vy.
+const COUNTS_CACHE_KEY = 'parium_employer_counts_v2_';
+const STATS_CACHE_KEY = 'parium_employer_stats_v2_';
+
+const cacheKey = (prefix: string, userId: string, scope: string) => `${prefix}${scope}_${userId}`;
+
+/** Rensa v1-nycklarna en gång så gamla, scope-blandade värden aldrig visas. */
+try {
+  for (const legacy of ['parium_employer_counts_v1_', 'parium_employer_stats_v1_']) {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(legacy)) localStorage.removeItem(k);
+    }
+  }
+} catch { /* ignore */ }
 
 interface CachedEntry<T> {
   scope: string;
@@ -36,7 +51,7 @@ interface CachedEntry<T> {
 }
 
 function readCache<T>(prefix: string, userId: string, scope: string, orgId: string | null): T | undefined {
-  const key = prefix + userId;
+  const key = cacheKey(prefix, userId, scope);
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return undefined;
@@ -55,7 +70,7 @@ function readCache<T>(prefix: string, userId: string, scope: string, orgId: stri
 
 function writeCache<T>(prefix: string, userId: string, scope: string, orgId: string | null, data: T): void {
   const entry: CachedEntry<T> = { scope, orgId, data, timestamp: Date.now() };
-  safeSetItem(prefix + userId, JSON.stringify(entry));
+  safeSetItem(cacheKey(prefix, userId, scope), JSON.stringify(entry));
 }
 
 /**
