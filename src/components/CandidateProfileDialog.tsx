@@ -84,6 +84,20 @@ interface CandidateProfileDialogProps {
   adjacentMedia?: Array<{ profile_image_url?: string | null; video_url?: string | null } | null | undefined>;
 }
 
+function getQuestionSnapshot(
+  app: ApplicationData | null | undefined
+): Record<string, { text: string; order: number }> | null {
+  const snapshot = app?.questions_snapshot;
+  if (!Array.isArray(snapshot) || snapshot.length === 0) return null;
+  const map: Record<string, { text: string; order: number }> = {};
+  snapshot.forEach((q: any) => {
+    if (q?.id && typeof q.question_text === 'string') {
+      map[q.id] = { text: q.question_text, order: q.order_index ?? 0 };
+    }
+  });
+  return Object.keys(map).length > 0 ? map : null;
+}
+
 
 export const CandidateProfileDialog = ({
   application,
@@ -122,6 +136,8 @@ export const CandidateProfileDialog = ({
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>(() => {
+    const snapshot = getQuestionSnapshot(application);
+    if (snapshot) return snapshot;
     if (!application?.job_id) return {};
     const cached = questionsCache.get(application.job_id);
     if (cached) return cached;
@@ -155,6 +171,12 @@ export const CandidateProfileDialog = ({
   }, [allApplications, selectedApplicationId, application]);
 
   useLayoutEffect(() => {
+    const snapshot = getQuestionSnapshot(activeApplication);
+    if (snapshot) {
+      setJobQuestions(snapshot);
+      setQuestionsLoading(false);
+      return;
+    }
     const jobId = activeApplication?.job_id;
     if (!jobId) {
       setJobQuestions({});
@@ -168,6 +190,7 @@ export const CandidateProfileDialog = ({
       return;
     }
     setJobQuestions({});
+    setQuestionsLoading(true);
   }, [activeApplication?.job_id]);
 
   const profileImageUrl = useProfileImageUrl(activeApplication?.profile_image_url);
@@ -226,7 +249,8 @@ export const CandidateProfileDialog = ({
     setMobileTab('profile');
     setCvOpen(false);
     setJobDropdownOpen(false);
-    const cachedQ = questionsCache.get(application.job_id)
+    const snapshot = getQuestionSnapshot(application);
+    const cachedQ = snapshot || questionsCache.get(application.job_id)
       || getPersistedCacheValue<Record<string, { text: string; order: number }>>(QUESTIONS_STORAGE_KEY, application.job_id);
     if (cachedQ) {
       questionsCache.set(application.job_id, cachedQ);
@@ -252,13 +276,10 @@ export const CandidateProfileDialog = ({
     // (från tidpunkten då kandidaten sökte) — använd den. Det säkerställer
     // att arbetsgivaren ser exakt de frågor kandidaten faktiskt besvarade,
     // även om frågorna på jobbet senare har uppdaterats.
-    const snapshot = (activeApplication as any).questions_snapshot;
-    if (Array.isArray(snapshot) && snapshot.length > 0) {
-      const snapMap: Record<string, { text: string; order: number }> = {};
-      snapshot.forEach((q: any) => {
-        if (q?.id) snapMap[q.id] = { text: q.question_text, order: q.order_index ?? 0 };
-      });
-      setJobQuestions(snapMap);
+    const snapshot = getQuestionSnapshot(activeApplication);
+    if (snapshot) {
+      setJobQuestions(snapshot);
+      setQuestionsLoading(false);
       return;
     }
 
