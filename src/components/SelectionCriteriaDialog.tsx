@@ -273,7 +273,8 @@ export function SelectionCriteriaDialog({
   };
 
   const deleteCriterion = async (id: string) => {
-    
+    const wasActive = criteria.find(c => c.id === id)?.is_active === true;
+
     try {
       const { error } = await supabase
         .from('job_criteria')
@@ -281,7 +282,10 @@ export function SelectionCriteriaDialog({
         .eq('id', id);
 
       if (error) throw error;
-      
+
+      // An activated criterion disappeared → remaining candidates need new scores
+      if (wasActive) needsReevalRef.current = true;
+
       setCriteria(prev => prev.filter(c => c.id !== id));
       setDrafts(prev => {
         const next = { ...prev };
