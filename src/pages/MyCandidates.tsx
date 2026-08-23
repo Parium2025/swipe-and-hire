@@ -361,34 +361,31 @@ const MyCandidates = () => {
 
   const handleMoveCandidatesAndDelete = useCallback(async (fromStage: string, toStage: string) => {
     if (!user) return;
-    
-    const candidatesToMove = candidates.filter(c => c.stage === fromStage);
-    
-    if (candidatesToMove.length > 0) {
-      const previousData = queryClient.getQueryData(['my-candidates', user?.id, debouncedSearchQuery]);
-      updateCandidatesCache(items =>
-        items.map(c => c.stage === fromStage ? { ...c, stage: toStage } : c)
-      );
 
-      try {
-        const candidateIds = candidatesToMove.map(c => c.id);
-        const { error } = await supabase
-          .from('my_candidates')
-          .update({ stage: toStage })
-          .in('id', candidateIds);
+    updateCandidatesCache(items =>
+      items.map(c => c.stage === fromStage ? { ...c, stage: toStage } : c)
+    );
 
-        if (error) {
-          queryClient.setQueryData(['my-candidates', user?.id, debouncedSearchQuery], previousData);
-          throw error;
-        }
-      } catch (error: any) {
-        toast.error(error.message || 'Kunde inte flytta kandidaterna');
-        return;
-      }
+    try {
+      // Flytta på steget, inte på de id:n som råkar vara nedladdade — annars
+      // hade en kolumn med 3 000 kandidater bara flyttat de ~50 som syns.
+      let query = supabase
+        .from('my_candidates')
+        .update({ stage: toStage })
+        .eq('recruiter_id', user.id)
+        .eq('stage', fromStage);
+      query = activeListId ? query.eq('list_id', activeListId) : query.is('list_id', null);
+      const { error } = await query;
+      if (error) throw error;
+    } catch (error: any) {
+      // Ogiltigförklara i stället för att skriva tillbaka en gissad ögonblicksbild.
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+      toast.error(error.message || 'Kunde inte flytta kandidaterna');
+      return;
     }
 
     await deleteStage.mutateAsync(fromStage);
-  }, [user, candidates, deleteStage, queryClient, debouncedSearchQuery, updateCandidatesCache]);
+  }, [user, activeListId, deleteStage, queryClient, updateCandidatesCache]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
