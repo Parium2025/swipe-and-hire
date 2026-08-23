@@ -76,7 +76,7 @@ import {
 // Import shared wizard components and types
 import { SortableQuestionItem, WizardFooter } from '@/components/wizard';
 import { JobQuestion } from '@/types/jobWizard';
-import { REPUBLISH_DAYS } from '@/lib/jobStatus';
+import { REPUBLISH_DAYS, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 
 interface JobPosting {
   id: string;
@@ -110,6 +110,8 @@ interface JobPosting {
   job_image_desktop_url?: string;
   is_active?: boolean | null;
   expires_at?: string | null;
+  /** Null = aldrig publicerad → alltid utkast, aldrig "utgången". */
+  published_at?: string | null;
   part_time_days?: string[] | null;
   part_time_shifts?: string[] | null;
   duration_amount?: number | null;
@@ -171,9 +173,19 @@ const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, republishMode = false }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const isDraft = job ? !job.is_active : false;
-  // Utgången annons: aktiv i databasen men passerat utgångsdatum
-  const isExpired = !!job?.is_active && !!(job as any)?.expires_at && new Date((job as any).expires_at).getTime() <= Date.now();
+  // ⚠️ Använd SAMMA statusdefinition som listan/dashboarden (src/lib/jobStatus.ts).
+  // Tidigare räknades "utkast" som enbart `!is_active` — men en utgången annons
+  // avaktiveras (is_active = false) när den löper ut. Den togs därför för ett
+  // utkast här, vilket (a) skrev om `created_at` till nu och raderade annonsens
+  // verkliga ålder, och (b) hoppade över `republish_job` som är den enda vägen
+  // förbi dubblett-/cooldown-spärren vid återpublicering.
+  // `published_at` skickas alltid explicit: saknas nyckeln helt tolkar
+  // jobStatus.ts annonsen som publicerad, vilket vore fel för ett utkast.
+  const statusJob = job
+    ? { is_active: job.is_active ?? null, expires_at: job.expires_at ?? null, published_at: job.published_at ?? null }
+    : null;
+  const isExpired = statusJob ? isEmployerJobExpired(statusJob) : false;
+  const isDraft = statusJob ? isEmployerJobDraft(statusJob) : false;
   // Publiceringsläge: utkast som publiceras, eller utgången annons som återpubliceras efter redigering
   const publishMode = isDraft || republishMode || isExpired;
   const [isInitializing, setIsInitializing] = useState(true);
@@ -1876,7 +1888,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         .eq('id', job.id);
 
       if (error) {
-        toast({ title: 'Fel vid uppdatering', description: error.message, variant: 'destructive' });
+        // Samma läsbara felmeddelanden som i skapa-flödet — annars fick
+        // arbetsgivaren se den råa databaskoden "PARIUM_DUPLICATE_JOB: ...".
+        const msg = error.message || '';
+        let title = 'Fel vid uppdatering';
+        let description = error.message;
+        if (msg.includes('PARIUM_DUPLICATE_JOB')) {
+          title = 'Identisk annons finns redan';
+          description = 'Du har redan en aktiv annons med exakt samma innehåll. Ändra något (t.ex. tid, dag, lön eller några ord i beskrivningen) innan du publicerar igen.';
+        } else if (msg.includes('PARIUM_PUBLISH_COOLDOWN')) {
+          title = 'Vänta några sekunder';
+          description = 'Du behöver vänta ~20 sekunder mellan publiceringar. Försök igen om en stund.';
+        }
+        toast({ title, description, variant: 'destructive' });
         return;
       }
 
