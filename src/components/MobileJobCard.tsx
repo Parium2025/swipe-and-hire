@@ -10,6 +10,8 @@ import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmen
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 import { isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
+import { getImageVersion } from '@/lib/imageTransforms';
+
 import { useCompactWidth } from '@/hooks/useCompactWidth';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { JobPosting } from '@/hooks/useJobsData';
