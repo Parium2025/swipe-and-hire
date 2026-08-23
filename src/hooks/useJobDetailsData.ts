@@ -177,7 +177,10 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
         city: row.city || null,
       });
     });
+    // Auto-invalidera bildcachen när kandidaten bytt profilbild/video
+    syncProfileMediaVersions(batchMediaData as any);
   }
+
 
   // Fetch last_active_at for all applicants using the activity RPC
   const activityResult = await measurePerformance('matching', () => supabase.rpc('get_applicant_latest_activity', {
