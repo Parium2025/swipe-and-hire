@@ -98,16 +98,22 @@ function readJobsCache(userId: string, scope: string, orgId: string | null): Job
 
 function writeJobsCache(userId: string, scope: string, orgId: string | null, jobs: JobPosting[]): void {
   const key = cacheKeyFor(userId, scope);
+  // 🔥 SCALE: Cachen får ALDRIG innehålla en trunkerad lista — då visar UI:t
+  // "4 av 34". Är datasetet större än vad som ryms i localStorage skippar vi
+  // cachen helt och hämtar färskt istället.
+  if (jobs.length > 500) {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return;
+  }
   const cached: CachedJobs = {
-    // 🔥 SCALE: 500 jobb täcker 99% av alla orgs utan att spränga 5MB-quotan.
-    // safeStorage evictar äldre cache-entries automatiskt om vi ändå når taket.
-    jobs: jobs.slice(0, 500),
+    jobs,
     scope,
     orgId,
     timestamp: Date.now(),
   };
   safeSetItem(key, JSON.stringify(cached));
 }
+
 
 export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
   const { user, profile } = useAuth();
@@ -123,12 +129,10 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     queryFn: async () => {
       if (!user) return [];
       
-      // 🔥 SCALE: Paginerad hämtning i sidor om 1000.
-      // Cap vid 2 000 så vi aldrig blockerar klienten — dashboardens totalsiffror
-      // hämtas separat via get_employer_jobs_counts RPC och visar exakt antal
-      // (även för orgs med 5k–10k jobb). Listvyn visar de 2 000 senaste.
+      // 🔥 SCALE: Keyset-paginering utan tak — hämtar hela datasetet oavsett
+      // om arbetsgivaren har 5 eller 100 000 annonser. Keyset (created_at + id)
+      // istället för offset gör att sida 100 är lika snabb som sida 1.
       const PAGE_SIZE = 1000;
-      const HARD_CAP = 2_000;
       let result: JobPosting[] = [];
 
       const baseSelect = `
@@ -152,15 +156,24 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         if (ids.length > 0) employerIds = ids;
       }
 
-      // Fetch in pages until we run out or hit the cap
-      for (let from = 0; from < HARD_CAP; from += PAGE_SIZE) {
-        const to = Math.min(from + PAGE_SIZE - 1, HARD_CAP - 1);
-        const query = supabase
+      let cursor: { created_at: string; id: string } | null = null;
+
+      // Loopa tills servern slutar leverera fulla sidor — ingen hård gräns.
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        let query = supabase
           .from('job_postings')
           .select(baseSelect)
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
-          .range(from, to);
+          .order('id', { ascending: false })
+          .limit(PAGE_SIZE);
+
+        if (cursor) {
+          query = query.or(
+            `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
+          );
+        }
 
         const { data, error } = scope === 'organization' && employerIds.length > 1
           ? await query.in('employer_id', employerIds)
@@ -170,10 +183,15 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         const batch = (data ?? []) as JobPosting[];
         result.push(...batch);
         if (batch.length < PAGE_SIZE) break;
+        const last = batch[batch.length - 1] as any;
+        cursor = { created_at: last.created_at, id: last.id };
       }
 
-      // 🔥 Cache for instant-load on next visit
+      // 🔥 Cache for instant-load on next visit.
+      // Väldigt stora dataset skrivs inte till localStorage (kvot-tak) — de
+      // hämtas färskt istället, så cachen aldrig kan innehålla en trunkerad lista.
       writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, result);
+
 
       return result;
     },

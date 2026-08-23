@@ -59,35 +59,46 @@ export const useEmployerBackgroundSync = () => {
   // 📋 Preload arbetsgivarens jobb (alltid hämta färsk data - realtime synkar)
   const preloadJobs = useCallback(async (userId: string, orgId: string | null) => {
     // useJobsData äger den kompletta jobb-cachen. Den här bakgrundssynken får
-    // aldrig skriva sin begränsade 18-raders preload till samma queryKey:
-    // då ersätts t.ex. 48 laddade annonser med 14 aktiva + 4 utgångna, medan
-    // serverräknaren fortfarande korrekt visar 34 utgångna.
+    // aldrig skriva en trunkerad lista till samma queryKey — därför hämtar vi
+    // hela datasetet med keyset-paginering utan hård gräns.
     const PAGE_SIZE = 1000;
-    const HARD_CAP = 2_000;
     const jobs: any[] = [];
+    let cursor: { created_at: string; id: string } | null = null;
 
-    for (let from = 0; from < HARD_CAP; from += PAGE_SIZE) {
-      const { data, error } = await supabase
-          .from('job_postings')
-          .select(`
-            *,
-            employer_profile:profiles!job_postings_employer_id_fkey (
-              first_name,
-              last_name
-            )
-          `)
-          .eq('employer_id', userId)
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false })
-          .range(from, Math.min(from + PAGE_SIZE - 1, HARD_CAP - 1));
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      let query = supabase
+        .from('job_postings')
+        .select(`
+          *,
+          employer_profile:profiles!job_postings_employer_id_fkey (
+            first_name,
+            last_name
+          )
+        `)
+        .eq('employer_id', userId)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(PAGE_SIZE);
 
+      if (cursor) {
+        query = query.or(
+          `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
+        );
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       const batch = data ?? [];
       jobs.push(...batch);
       if (batch.length < PAGE_SIZE) break;
+      const last: any = batch[batch.length - 1];
+      cursor = { created_at: last.created_at, id: last.id };
     }
 
     queryClient.setQueryData(['jobs', 'personal', orgId, userId], jobs);
+
   }, [queryClient]);
 
   // 📅 Preload arbetsgivarens intervjuer (alltid hämta färsk data - realtime synkar)
