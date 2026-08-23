@@ -401,6 +401,9 @@ export function SelectionCriteriaDialog({
       // Invalidate criteria cache so counter updates instantly
       await queryClient.invalidateQueries({ queryKey: ['job-criteria', jobId] });
       
+      // Saving already re-scores everyone below — skip the delete-triggered pass
+      needsReevalRef.current = false;
+
       // Close dialog immediately — results appear via realtime
       onActivate?.(validCriteria.length);
       onOpenChange(false);
