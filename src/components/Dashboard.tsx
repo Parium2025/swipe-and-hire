@@ -292,10 +292,10 @@ const Dashboard = memo(() => {
         ariaLabel: 'Visa aktiva annonser',
         subItems: [{ label: 'Utgångna', value: expiredCount, onClick: () => goToTab('expired'), ariaLabel: 'Visa utgångna annonser' }],
       },
-      { icon: Eye, title: 'Visningar', value: isLoading ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading },
-      { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : totalApplications, loading: false, isLoading, onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
+      { icon: Eye, title: 'Visningar', value: isLoading && !seededStats ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading },
+      { icon: Users, title: 'Ansökningar', value: isLoading && !seededStats ? preloadedEmployerTotalApplications : totalApplications, loading: false, isLoading, onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
     ];
-  }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
+  }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
   if (!initialLoadDone) {
     return <EmployerDashboardSkeleton showDrafts={false} titleWidthClass="w-28" />;
