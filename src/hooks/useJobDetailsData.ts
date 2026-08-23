@@ -350,6 +350,7 @@ export function useJobDetailsData(jobId: string | undefined) {
   // hoppa tillbaka till ursprungskolumnen och sedan vidare igen — den där
   // blinkningen. Överskrivningen lever tills servern bekräftat samma status.
   const pendingStatusRef = useRef<Map<string, { status: string; at: number }>>(new Map());
+  const countsTimerRef = useRef<number | undefined>(undefined);
   const [pendingVersion, setPendingVersion] = useState(0);
   const PENDING_TTL_MS = 15000;
 
