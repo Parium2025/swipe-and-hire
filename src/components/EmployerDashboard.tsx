@@ -291,6 +291,14 @@ const EmployerDashboard = memo(() => {
   // än vad som faktiskt laddats in i klienten.
   const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
 
+  // Klampa sidan när listan krymper (t.ex. massradering av hela sista sidan).
+  // Utan detta stod man kvar på en sida som inte längre finns: tom lista och
+  // "Visar 37–36 av 36".
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+
   // 🔥 Pre-warma BARA aktuell tab × current+next page (~40 bilder).
   // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.
   // 🔑 URL:erna byggs med EXAKT samma källa, transform och version som
