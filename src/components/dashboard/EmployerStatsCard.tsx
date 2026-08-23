@@ -41,17 +41,15 @@ interface EmployerStatsCardProps {
 }
 
 export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsCardProps) => {
-  const { jobs, isLoading: jobsLoading } = useJobsData({ scope: 'personal' });
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readEmployerCachedStats(user?.id), [user?.id]);
 
-  // Samma statusregler som /my-jobs och databasens räknare (jobStatus.ts) –
-  // annars kan "Aktiva annonser" här visa ett annat tal än annonslistan.
-  const activeJobIds = useMemo(() => {
-    if (!jobs) return [];
-    return jobs.filter(j => isEmployerJobActive(j)).map(j => j.id);
-  }, [jobs]);
+  // 🔒 Serverns räknare är sanning. Tidigare räknades aktiva annonser på den
+  // lokalt laddade listan – med 5 000 annonser visade kortet först 200 och
+  // klättrade sedan uppåt medan bakgrundsströmmen laddade resten.
+  const { data: serverCounts, isLoading: countsLoading } = useEmployerJobsCounts('personal');
+
 
   const { data: dashStats, isSuccess } = useQuery({
     // 🔒 Nyckeln får INTE innehålla annons-id:n: med 5 000 aktiva annonser
