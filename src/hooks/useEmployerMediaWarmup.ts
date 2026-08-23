@@ -107,9 +107,9 @@ export function useEmployerMediaWarmup() {
         );
         // Detaljvy / swipe hämtar bilden UTAN transform (CandidateSlide,
         // CandidateProfileDialog) — warma exakt den cache-nyckeln, annars är
-        // förvärmningen bortkastad. Cap till 10 för att spara bandbredd.
+        // förvärmningen bortkastad. Cap till 24 (≈ en full skärm) för att spara bandbredd.
         Promise.allSettled(
-          limitedImages.slice(0, 10).map((p) =>
+          limitedImages.slice(0, 24).map((p) =>
             prefetchMediaUrl(p, 'profile-image', 86400).catch(() => {}),
           ),
         );
