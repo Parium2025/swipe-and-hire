@@ -20,6 +20,7 @@ import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
 import { useOfflineProfileQueue } from '@/hooks/useOfflineProfileQueue';
 import { useOfflineSavedJobsQueue } from '@/hooks/useOfflineSavedJobsQueue';
 import { useOfflineApplicationHideQueue } from '@/hooks/useOfflineApplicationHideQueue';
+import { useCandidateOperationQueue } from '@/hooks/useCandidateOperationQueue';
 
 export function OfflineQueueRunner() {
   const { user } = useAuth();
@@ -35,6 +36,9 @@ export function OfflineQueueRunner() {
   useOfflineMessageQueue(userId);
   useOfflineProfileQueue(userId);
   useOfflineSavedJobsQueue(userId);
+
+  // Arbetsgivarsidan: flytt/betyg/anteckning/borttagning av kandidater
+  useCandidateOperationQueue(userId);
 
 
   return null;
