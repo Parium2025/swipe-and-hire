@@ -173,8 +173,9 @@ export const StatusColumn = memo(({
             className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}88` }}
           >
-            {applications.length}
+            {displayCount}
           </span>
+
           {onOpenCriteriaDialog && (
             <button
               onClick={onOpenCriteriaDialog}
