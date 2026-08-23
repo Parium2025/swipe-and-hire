@@ -209,45 +209,102 @@ export function useEvaluateCandidate() {
   });
 }
 
-// Hook to trigger evaluation for all candidates with a specific job
+// Hook to trigger evaluation for all candidates with a specific job.
+// Built for full ads (500–1000+ ansökningar): adaptive worker pool,
+// automatic backoff on 429/5xx and progressive UI refresh.
 export function useEvaluateAllCandidates() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      jobId, 
-      candidates 
-    }: { 
-      jobId: string; 
+    mutationFn: async ({
+      jobId,
+      candidates,
+      onProgress,
+    }: {
+      jobId: string;
+      applicantId?: string;
       candidates: { applicant_id: string; application_id?: string }[];
+      onProgress?: (done: number, total: number) => void;
     }) => {
-      // Check if online before batch evaluation
-      // Process in batches to avoid overwhelming the API
-      const batchSize = 3;
-      const results = [];
+      const total = candidates.length;
+      const results: PromiseSettledResult<unknown>[] = [];
+      if (total === 0) return results;
 
-      for (let i = 0; i < candidates.length; i += batchSize) {
-        const batch = candidates.slice(i, i + batchSize);
-        
-        const batchResults = await Promise.allSettled(
-          batch.map(c => 
-            supabase.functions.invoke('evaluate-candidate', {
-              body: { 
-                job_id: jobId, 
-                applicant_id: c.applicant_id,
-                application_id: c.application_id,
-              },
-            })
-          )
-        );
+      // Adaptive concurrency: starts at 6 parallel calls, halves on
+      // rate-limit/server errors and recovers slowly on success.
+      let concurrency = 6;
+      const MIN_CONCURRENCY = 2;
+      const MAX_CONCURRENCY = 8;
+      let cooldownUntil = 0;
+      let done = 0;
+      let cursor = 0;
 
-        results.push(...batchResults);
+      const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-        // Small delay between batches
-        if (i + batchSize < candidates.length) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+      const isThrottled = (err: unknown) => {
+        const status = (err as { status?: number; context?: { status?: number } })?.status
+          ?? (err as { context?: { status?: number } })?.context?.status;
+        const msg = String((err as { message?: string })?.message ?? '');
+        return status === 429 || (status !== undefined && status >= 500) || /429|rate|timeout|fetch/i.test(msg);
+      };
+
+      const evaluateOne = async (c: { applicant_id: string; application_id?: string }) => {
+        // Up to 3 attempts with exponential backoff for transient failures.
+        let lastError: unknown = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const wait = cooldownUntil - Date.now();
+          if (wait > 0) await sleep(wait);
+
+          const { data, error } = await supabase.functions.invoke('evaluate-candidate', {
+            body: {
+              job_id: jobId,
+              applicant_id: c.applicant_id,
+              application_id: c.application_id,
+            },
+          });
+
+          if (!error) {
+            // Slowly recover concurrency after a healthy call
+            if (concurrency < MAX_CONCURRENCY && Math.random() < 0.15) concurrency += 1;
+            return data;
+          }
+
+          lastError = error;
+          if (!isThrottled(error)) break;
+
+          // Back off globally so all workers slow down together
+          concurrency = Math.max(MIN_CONCURRENCY, Math.floor(concurrency / 2));
+          const backoff = 1000 * Math.pow(2, attempt) + Math.random() * 400;
+          cooldownUntil = Math.max(cooldownUntil, Date.now() + backoff);
         }
-      }
+        throw lastError;
+      };
+
+      const worker = async () => {
+        while (cursor < total) {
+          const index = cursor++;
+          try {
+            const value = await evaluateOne(candidates[index]);
+            results[index] = { status: 'fulfilled', value };
+          } catch (reason) {
+            results[index] = { status: 'rejected', reason } as PromiseRejectedResult;
+          }
+          done += 1;
+          onProgress?.(done, total);
+
+          // Progressive refresh so cards fill in while the run continues
+          if (done % 25 === 0) {
+            queryClient.invalidateQueries({ queryKey: ['criteria-results'] });
+          }
+
+          // Respect the current adaptive concurrency ceiling
+          while (cursor - done > concurrency) await sleep(50);
+        }
+      };
+
+      await Promise.all(
+        Array.from({ length: Math.min(MAX_CONCURRENCY, total) }, () => worker())
+      );
 
       return results;
     },
@@ -262,3 +319,4 @@ export function useEvaluateAllCandidates() {
     },
   });
 }
+
