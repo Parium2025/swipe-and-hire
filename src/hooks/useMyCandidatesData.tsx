@@ -249,6 +249,9 @@ export function useMyCandidatesData(
     [user?.id, searchQuery, listId, stagesKey],
   );
 
+  // Vilka kolumner som bett om nästa sida just nu (tom = första omgången).
+  const requestedStagesRef = useRef<Set<string>>(new Set());
+
 
   // Nya kandidater hamnar i listan användaren jobbar i just nu (även när de
   // läggs till från /candidates, där hooken anropas utan list-id).
