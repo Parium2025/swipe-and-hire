@@ -340,6 +340,70 @@ const EmployerDashboard = memo(() => {
     setDeleteDialogOpen(true);
   };
 
+  /**
+   * 🗑️ Massradering — endast på "Utgångna" och "Utkast". Aktiva annonser är
+   * medvetet undantagna: en live-annons ska aldrig kunna försvinna via en
+   * bock-i-farten. Radering sker i chunkar om 200 id:n så en RLS-uppdatering
+   * av 1 000 rader inte timeoutar, med tombstones + cache-städning i ett svep.
+   */
+  const bulkSelectable = activeTab === 'expired' || activeTab === 'draft';
+
+  const toggleSelected = useCallback((jobId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(jobId)) next.delete(jobId); else next.add(jobId);
+      return next;
+    });
+  }, []);
+
+  const exitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  const confirmBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length || bulkDeleting) return;
+    setBulkDeleting(true);
+    try {
+      queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        const set = new Set(ids);
+        return old.filter((j: any) => !set.has(j.id));
+      });
+      if (user?.id) removeJobsFromJobsCache(user.id, ids);
+
+      const now = new Date().toISOString();
+      const CHUNK = 200;
+      for (let i = 0; i < ids.length; i += CHUNK) {
+        const chunk = ids.slice(i, i + CHUNK);
+        const { error } = await supabase
+          .from('job_postings')
+          .update({ deleted_at: now, is_active: false })
+          .in('id', chunk);
+        if (error) throw error;
+      }
+
+      toast({
+        title: ids.length === 1 ? 'Annons borttagen' : `${ids.length} annonser borttagna`,
+        description: 'Annonserna har tagits bort.',
+      });
+      setBulkDeleteOpen(false);
+      exitSelectionMode();
+      invalidateJobs();
+    } catch (error: any) {
+      invalidateJobs();
+      toast({
+        title: 'Kunde inte ta bort alla annonser',
+        description: error?.message || 'Försök igen om en liten stund.',
+        variant: 'destructive',
+      });
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+
   const handleRepublishClick = (job: JobPosting) => {
     setRepublishJob(job);
     setRepublishDialogOpen(true);
