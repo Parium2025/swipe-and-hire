@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck, Clock, Calendar, Info } from 'lucide-react';
 import { AdvancedAnalyticsSections, type AdvancedAnalyticsData } from '@/components/analytics/AdvancedAnalytics';
+import { TeamInsightsSection, type TeamInsightsData } from '@/components/analytics/TeamInsights';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { differenceInDays } from 'date-fns';
@@ -116,6 +117,14 @@ const fetchEmployerAnalyticsAdvanced = async (userId: string, selectedDays: numb
   const { data, error } = await supabase.rpc('get_employer_advanced_analytics', params);
   if (error) throw error;
   return data as unknown as AdvancedAnalyticsData;
+};
+
+const fetchEmployerTeamInsights = async (userId: string, selectedDays: number | null) => {
+  const params: { p_user_id: string; p_days_back?: number } = { p_user_id: userId };
+  if (selectedDays !== null) params.p_days_back = selectedDays;
+  const { data, error } = await supabase.rpc('get_employer_team_insights' as never, params as never);
+  if (error) throw error;
+  return data as unknown as TeamInsightsData;
 };
 
 const InlineInfoTooltip = memo(({ content }: { content: string }) => (
@@ -536,6 +545,34 @@ const EmployerAnalytics = memo(() => {
   });
 
 
+  const teamCacheKey = useMemo(
+    () => getEmployerAnalyticsCacheKey('team', user?.id, selectedDays),
+    [user?.id, selectedDays],
+  );
+  const cachedTeamEntry = useMemo(
+    () => readEmployerAnalyticsCacheEntry<TeamInsightsData>(teamCacheKey),
+    [teamCacheKey],
+  );
+
+  const { data: teamData } = useQuery({
+    queryKey: ['employer-team-insights', user?.id, selectedDays],
+    queryFn: async () => {
+      if (!user) return null;
+      return fetchEmployerTeamInsights(user.id, selectedDays);
+    },
+    enabled: !!user,
+    initialData: () => cachedTeamEntry?.value,
+    initialDataUpdatedAt: () => cachedTeamEntry?.timestamp ?? 0,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (teamData && user?.id) {
+      writeEmployerAnalyticsCache(teamCacheKey, teamData);
+    }
+  }, [teamCacheKey, teamData, user?.id]);
+
   useEffect(() => {
     persistEmployerAnalyticsFilter(selectedDays);
   }, [selectedDays]);
@@ -946,6 +983,9 @@ const EmployerAnalytics = memo(() => {
 
       {/* ─── Advanced analytics sections ─── */}
       <AdvancedAnalyticsSections data={advancedData ?? null} />
+
+      {/* ─── Kollegial statistik (endast för organisationer med flera rekryterare) ─── */}
+      <TeamInsightsSection data={teamData ?? null} />
 
       {/* Empty state */}
       {analytics.length === 0 && !isLoading && (
