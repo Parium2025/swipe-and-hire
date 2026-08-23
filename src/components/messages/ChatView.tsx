@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
+import { prefetchAttachmentImages } from '@/lib/attachmentUrl';
 import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType, inspectFileContent } from '@/lib/chatFileTypes';
 import { useConversationMessages, type Conversation, type ConversationMessage } from '@/hooks/useConversations';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
@@ -594,6 +595,14 @@ export function ChatView({
   });
 
   // Group messages by date
+  // Förladda bildbilagor så snart meddelanden finns – bilder ska vara på plats direkt.
+  useEffect(() => {
+    if (!messages.length) return;
+    prefetchAttachmentImages(
+      messages.map((m) => ({ url: m.attachment_url, type: m.attachment_type }))
+    );
+  }, [messages]);
+
   const groupedMessages = messages.reduce((groups, msg) => {
     const date = format(new Date(msg.created_at), 'yyyy-MM-dd');
     if (!groups[date]) groups[date] = [];
