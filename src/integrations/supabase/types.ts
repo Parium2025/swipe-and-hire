@@ -3769,12 +3769,10 @@ export type Database = {
         Args: { p_days_back?: number; p_user_id: string }
         Returns: Json
       }
-      get_employer_dashboard_stats:
-        | { Args: { p_scope?: string }; Returns: Json }
-        | {
-            Args: { p_active_job_ids: string[]; p_user_id: string }
-            Returns: Json
-          }
+      get_employer_dashboard_stats: {
+        Args: { p_scope?: string }
+        Returns: Json
+      }
       get_employer_filter_questions: {
         Args: never
         Returns: {
