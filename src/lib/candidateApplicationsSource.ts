@@ -321,3 +321,40 @@ export async function fetchApplicationsForApplicants(
 
   return result;
 }
+
+/**
+ * Förvärmer localStorage-cachen för en kandidats alla ansökningar (hover/touch).
+ * Utan detta räknades "X jobb" först när dialogen redan var öppen, vilket syntes
+ * som att badgen "laddades upp" efteråt. Dedupas så hover-spam bara ger ett anrop.
+ */
+const applicationsPrefetchInFlight = new Map<string, Promise<void>>();
+
+export function prefetchCandidateApplications(
+  userId: string | undefined,
+  applicantId: string,
+  fallback?: {
+    profile_image_url?: string | null;
+    video_url?: string | null;
+    is_profile_video?: boolean | null;
+  },
+): Promise<void> {
+  if (!applicantId || typeof window === 'undefined') return Promise.resolve();
+  if (isCandidateApplicationsCacheFresh(userId, applicantId)) return Promise.resolve();
+  const key = candidateAppsCacheKey(userId, applicantId);
+  const existing = applicationsPrefetchInFlight.get(key);
+  if (existing) return existing;
+
+  const run = (async () => {
+    try {
+      const items = await fetchApplicationsForApplicant(userId, applicantId, fallback);
+      if (items.length > 0) writeCandidateApplicationsCache(userId, applicantId, items);
+    } catch {
+      /* prefetch är best-effort */
+    } finally {
+      applicationsPrefetchInFlight.delete(key);
+    }
+  })();
+
+  applicationsPrefetchInFlight.set(key, run);
+  return run;
+}
