@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
 import { prefetchCandidateNotes } from '@/hooks/useCandidateNotes';
 import { getIsOnline } from '@/lib/connectivityManager';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
