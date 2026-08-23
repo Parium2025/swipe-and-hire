@@ -146,6 +146,7 @@ export function useBulkCandidateOps({
           throw new Error('Vissa kandidater kunde inte tas bort');
         }
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
+        queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
         queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
         toast.success(`${ids.length} kandidater borttagna från din lista`);
       } catch {
