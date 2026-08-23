@@ -36,6 +36,8 @@ export interface StatusColumnProps {
   targetStageLabel?: string;
   onMoveCandidatesAndDelete?: () => Promise<void>;
   stageIndex?: number;
+  /** Antal kolumnslottar som bredden ska delas på (inkl. "Nytt steg"-slotten). */
+  columnSlots?: number;
 }
 
 export const StatusColumn = memo(({ 
