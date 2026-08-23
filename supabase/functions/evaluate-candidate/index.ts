@@ -221,7 +221,7 @@ serve(async (req) => {
     // === AUTHORIZATION: caller must be applicant OR employer of the job ===
     if (callerId !== null && callerId !== applicant_id) {
       const { data: canView, error: authzError } = await supabase
-        .rpc('can_view_job_application', { _job_id: job_id }, { get: false })
+        .rpc('can_view_job_application', { p_job_id: job_id }, { get: false })
         .single();
       // Fallback: check via employer_owns_job_for_question style check by querying job_postings
       let allowed = false;
@@ -229,22 +229,24 @@ serve(async (req) => {
         allowed = true;
       } else {
         // Direct ownership check as fallback
-        const { data: job } = await supabase
+        const { data: job, error: jobError } = await supabase
           .from('job_postings')
-          .select('employer_id, organization_id')
+          .select('employer_id')
           .eq('id', job_id)
-          .single();
+          .maybeSingle();
+        if (jobError) console.warn('evaluate-candidate job lookup failed:', jobError.message);
         if (job) {
           if (job.employer_id === callerId) {
             allowed = true;
-          } else if (job.organization_id) {
-            const { data: sameOrg } = await supabase
-              .from('profiles')
-              .select('user_id')
-              .eq('user_id', callerId)
-              .eq('organization_id', job.organization_id)
-              .maybeSingle();
-            if (sameOrg) allowed = true;
+          } else {
+            // Same-organization colleague check (roles hold the org, not job_postings)
+            const [callerOrg, ownerOrg] = await Promise.all([
+              supabase.rpc('get_user_organization_id', { p_user_id: callerId }),
+              supabase.rpc('get_user_organization_id', { p_user_id: job.employer_id }),
+            ]);
+            if (callerOrg.data && ownerOrg.data && callerOrg.data === ownerOrg.data) {
+              allowed = true;
+            }
           }
         }
       }
