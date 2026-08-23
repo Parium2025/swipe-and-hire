@@ -571,8 +571,11 @@ const MyCandidates = () => {
       stageCandidates[idx - 3], stageCandidates[idx + 3],
     ]
       .filter(Boolean)
-      .map(c => ({ profile_image_url: c!.profile_image_url }));
-  }, [selectedCandidate, filteredCandidatesByStage]);
+      .map(c => ({
+        profile_image_url: c!.profile_image_url,
+        video_url: c!.is_profile_video ? c!.video_url : null,
+      }));
+
 
 
   // Förladda porträtten i ORIGINALKVALITET när webbläsaren är idle.
