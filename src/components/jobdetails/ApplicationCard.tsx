@@ -18,8 +18,8 @@ export const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxS
           key={i}
           className={`h-2.5 w-2.5 ${
             i < rating 
-              ? 'text-amber-400 fill-amber-400' 
-              : 'text-muted-foreground/30'
+              ? 'text-yellow-400 fill-yellow-400' 
+              : 'text-white/30'
           }`}
         />
       ))}
