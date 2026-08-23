@@ -200,7 +200,7 @@ export const StatusColumn = memo(({
 
         <div 
           ref={scrollContainerRef}
-          onScroll={checkScroll}
+          onScroll={onScrollThrottled}
           className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
         >
           {isOver && (
@@ -211,8 +211,10 @@ export const StatusColumn = memo(({
             </div>
           )}
 
-          <SortableContext items={applications.map(a => a.id)} strategy={verticalListSortingStrategy}>
-            {applications.map((app) => (
+          {topSpacer > 0 && <div data-spacer="top" style={{ height: topSpacer }} />}
+
+          <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+            {visibleApplications.map((app) => (
               <SortableApplicationCard 
                 key={app.id} 
                 application={app} 
@@ -226,6 +228,9 @@ export const StatusColumn = memo(({
               />
             ))}
           </SortableContext>
+
+          {bottomSpacer > 0 && <div data-spacer="bottom" style={{ height: bottomSpacer }} />}
+
 
           {applications.length === 0 && !isOver && (
             <div className="py-8 text-center text-xs text-white">
