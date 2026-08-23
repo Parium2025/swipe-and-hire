@@ -13,6 +13,7 @@ import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { clampJobTitle } from '@/lib/jobTitle';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
+import { hydrateMyCandidateRows, type RawMyCandidateRow } from '@/lib/myCandidatesHydration';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -63,6 +64,79 @@ export const STAGE_CONFIG = {
 
 // Page size for pagination - optimized for performance
 const PAGE_SIZE = 50;
+
+/** Nyckel som används när tavlan inte skickar in några kolumner (t.ex. mobilvyn). */
+const ALL_STAGES = '__all__';
+
+/**
+ * Keyset-markör per kolumn. `id` är med som tiebreaker eftersom en massflytt
+ * ger många rader exakt samma `updated_at` — utan tiebreaker skulle rader
+ * hoppas över mellan sidorna.
+ */
+type StageCursor = { updated_at: string; id: string } | null;
+type StagePageParam = Record<string, StageCursor | 'done'>;
+
+function isFirstRound(pageParam: StagePageParam): boolean {
+  return Object.keys(pageParam || {}).length === 0;
+}
+
+/** En sida ur EN kolumn, sorterad nyast först. */
+async function fetchStagePage(
+  userId: string,
+  listId: string | null,
+  stage: string,
+  cursor: StageCursor,
+): Promise<RawMyCandidateRow[]> {
+  let query = supabase
+    .from('my_candidates')
+    .select('id, application_id, applicant_id, job_id, stage, notes, rating, created_at, updated_at')
+    .eq('recruiter_id', userId)
+    .order('updated_at', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(PAGE_SIZE);
+
+  if (listId) query = query.eq('list_id', listId);
+  if (stage !== ALL_STAGES) query = query.eq('stage', stage);
+  if (cursor) {
+    query = query.or(
+      `updated_at.lt.${cursor.updated_at},and(updated_at.eq.${cursor.updated_at},id.lt.${cursor.id})`,
+    );
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []) as RawMyCandidateRow[];
+}
+
+/** Samma sida, men filtrerad via fulltextsökning på servern. */
+async function fetchSearchPage(
+  userId: string,
+  searchQuery: string,
+  listId: string | null,
+  stage: string,
+  cursor: StageCursor,
+): Promise<RawMyCandidateRow[]> {
+  const { data, error } = await supabase.rpc('search_my_candidates', {
+    p_recruiter_id: userId,
+    p_search_query: searchQuery,
+    p_limit: PAGE_SIZE,
+    p_cursor_updated_at: cursor?.updated_at ?? null,
+    p_list_id: listId,
+    p_stage: stage === ALL_STAGES ? null : stage,
+  });
+  if (error) throw error;
+  return ((data || []) as any[]).map(row => ({
+    id: row.my_candidate_id,
+    application_id: row.application_id,
+    applicant_id: row.applicant_id,
+    job_id: row.job_id,
+    stage: row.stage,
+    notes: row.notes,
+    rating: row.rating,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }));
+}
 
 // 🔥 localStorage cache for instant-load
 // v2 bryter gamla cacher som kunde sakna profilmedia/viewed_at och gav FA + ny-prick efter hard refresh.
@@ -151,17 +225,30 @@ function updateMyCandidatesCache(
   writeMyCandidatesCache(userId, updater(cached), listId);
 }
 
-export function useMyCandidatesData(searchQuery: string = '', listId: string | null = null) {
+/**
+ * `stages` = kolumnerna som tavlan visar. När den anges hämtas kandidaterna
+ * PER KOLUMN med egen markör, i stället för en global lista som måste laddas
+ * i sin helhet innan en djup kolumn blir komplett.
+ */
+export function useMyCandidatesData(
+  searchQuery: string = '',
+  listId: string | null = null,
+  stages?: string[],
+) {
   const { user } = useAuth();
   const instanceId = useId();
 
   const queryClient = useQueryClient();
 
+  const stageList = useMemo(() => (stages && stages.length > 0 ? stages : null), [stages]);
+  const stagesKey = useMemo(() => (stageList ? [...stageList].sort().join('|') : ''), [stageList]);
+
   // Stable query key for optimistic updates (must match useInfiniteQuery key exactly)
   const queryKey = useMemo(
-    () => ['my-candidates', user?.id, searchQuery, listId] as const,
-    [user?.id, searchQuery, listId],
+    () => ['my-candidates', user?.id, searchQuery, listId, stagesKey] as const,
+    [user?.id, searchQuery, listId, stagesKey],
   );
+
 
   // Nya kandidater hamnar i listan användaren jobbar i just nu (även när de
   // läggs till från /candidates, där hooken anropas utan list-id).
@@ -185,307 +272,54 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['my-candidates', user?.id, searchQuery, listId],
-    initialPageParam: null as string | null,
+    queryKey,
+    initialPageParam: {} as StagePageParam,
     queryFn: async ({ pageParam }) => {
-      if (!user) return { items: [], nextCursor: null };
+      if (!user) return { items: [], cursors: {} as StagePageParam };
 
-      // If search query exists, use Full-Text Search RPC for blazing fast filtering
-      if (searchQuery && searchQuery.trim()) {
-        const { data: searchResults, error: searchError } = await supabase.rpc('search_my_candidates', {
-          p_recruiter_id: user.id,
-          p_search_query: searchQuery.trim(),
-          p_limit: PAGE_SIZE,
-          p_cursor_updated_at: pageParam || null,
-          p_list_id: listId,
-        });
+      const targets = stageList ?? [ALL_STAGES];
+      const pending = targets.filter(stage => pageParam[stage] !== 'done');
+      if (pending.length === 0) return { items: [], cursors: pageParam };
 
-        if (searchError) throw searchError;
-        if (!searchResults || searchResults.length === 0) {
-          return { items: [], nextCursor: null };
-        }
+      const trimmedSearch = searchQuery.trim();
 
-        // Get application details for the search results
-        const applicationIds = searchResults.map((r: any) => r.application_id);
-        const applicantIds = [...new Set(searchResults.map((r: any) => r.applicant_id))];
+      // En förfrågan per kolumn — alla serveras av indexet
+      // (recruiter_id, list_id, stage, updated_at desc), så svarstiden är
+      // konstant oavsett hur många kandidater listan innehåller totalt.
+      const results = await Promise.all(
+        pending.map(async (stage) => {
+          const cursor = (pageParam[stage] ?? null) as StageCursor;
+          const rows = trimmedSearch
+            ? await fetchSearchPage(user.id, trimmedSearch, listId, stage, cursor)
+            : await fetchStagePage(user.id, listId, stage, cursor);
+          return { stage, rows };
+        }),
+      );
 
-        // Fetch job applications data
-        const { data: applications, error: appError } = await supabase
-          .from('job_applications')
-          .select(`
-            id, applicant_id, first_name, last_name, email, phone, location, bio,
-            cv_url, age, employment_status, work_schedule, availability, custom_answers, questions_snapshot,
-            candidate_profile_label, profile_image_snapshot_url, video_snapshot_url,
-            status, applied_at, viewed_at, job_postings!inner(title)
-          `)
-          .in('id', applicationIds);
+      // EN hydrering för hela omgången → tre nätverksanrop totalt, inte tre per kolumn.
+      const allRows = results.flatMap(r => r.rows);
+      const items = await hydrateMyCandidateRows(user.id, allRows);
 
-        if (appError) throw appError;
-        const appMap = new Map(applications?.map(app => [app.id, app]) || []);
-
-        // Fetch profile media batch
-        const profileMediaMap: Record<string, any> = {};
-        const { data: batchMediaData, error: batchMediaError } = await supabase.rpc('get_applicant_profile_media_batch', {
-          p_applicant_ids: applicantIds,
-          p_employer_id: user.id,
-        });
-
-        // Media är en obligatorisk del av kandidatkortet. Ett tillfälligt RPC-fel
-        // får inte tyst omvandlas till null och sedan cachas som initialer.
-        if (batchMediaError) throw batchMediaError;
-
-        if (batchMediaData) {
-          batchMediaData.forEach((row: any) => {
-            profileMediaMap[row.applicant_id] = {
-              profile_image_url: row.profile_image_url,
-              video_url: row.video_url,
-              is_profile_video: row.is_profile_video,
-              last_active_at: row.last_active_at || null,
-            };
-          });
-          // Auto-invalidera cache när kandidaten bytt profilbild/video
-          syncProfileMediaVersions(batchMediaData as any);
-        }
-
-        // Fetch activity data
-        const activityMap: Record<string, any> = {};
-        const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
-          p_applicant_ids: applicantIds,
-          p_employer_id: user.id,
-        });
-
-        if (activityData) {
-          activityData.forEach((item: any) => {
-            activityMap[item.applicant_id] = {
-              latest_application_at: item.latest_application_at,
-              last_active_at: item.last_active_at,
-            };
-          });
-        }
-
-        // Combine data
-        const items: MyCandidateData[] = searchResults.map((mc: any) => {
-          const app = appMap.get(mc.application_id);
-          const liveMedia = profileMediaMap[mc.applicant_id] || {};
-          const media = resolveCandidateMedia(app as any, liveMedia);
-          const activity = activityMap[mc.applicant_id] || {};
-
-          return {
-            id: mc.my_candidate_id,
-            recruiter_id: user.id,
-            applicant_id: mc.applicant_id,
-            application_id: mc.application_id,
-            job_id: mc.job_id,
-            stage: mc.stage,
-            notes: mc.notes,
-            rating: mc.rating || 0,
-            created_at: mc.created_at,
-            updated_at: mc.updated_at,
-            first_name: app?.first_name || null,
-            last_name: app?.last_name || null,
-            email: app?.email || null,
-            phone: app?.phone || null,
-            location: app?.location || null,
-            bio: app?.bio || null,
-            cv_url: app?.cv_url || null,
-            age: app?.age || null,
-            employment_status: app?.employment_status || null,
-            work_schedule: app?.work_schedule || null,
-            availability: app?.availability || null,
-            custom_answers: app?.custom_answers || null,
-            questions_snapshot: app?.questions_snapshot || null,
-            status: app?.status || 'pending',
-            job_title: clampJobTitle((app?.job_postings as any)?.title) || null,
-            profile_image_url: media.profile_image_url,
-            video_url: media.video_url,
-            is_profile_video: media.is_profile_video,
-            applied_at: app?.applied_at || null,
-            viewed_at: app?.viewed_at || null,
-            latest_application_at: activity.latest_application_at || null,
-            last_active_at: (activity.last_active_at ?? (liveMedia as any).last_active_at) || null,
-          };
-        });
-
-        const lastItem = searchResults[searchResults.length - 1];
-        const nextCursor = searchResults.length === PAGE_SIZE ? lastItem.updated_at : null;
-
-
-
-        return { items, nextCursor };
+      const cursors: StagePageParam = { ...pageParam };
+      for (const { stage, rows } of results) {
+        const last = rows[rows.length - 1];
+        cursors[stage] = rows.length < PAGE_SIZE || !last
+          ? 'done'
+          : { updated_at: last.updated_at, id: last.id };
       }
 
-      // No search query - use standard query with cursor-based pagination
-      let query = supabase
-        .from('my_candidates')
-        .select('*')
-        .eq('recruiter_id', user.id)
-        .order('updated_at', { ascending: false })
-        .limit(PAGE_SIZE);
-
-      // Varje lista har sina egna kandidater
-      if (listId) query = query.eq('list_id', listId);
-
-      // Apply cursor for pagination
-      if (pageParam) {
-        query = query.lt('updated_at', pageParam);
-      }
-
-      const { data: myCandidates, error: mcError } = await query;
-
-      if (mcError) throw mcError;
-      if (!myCandidates || myCandidates.length === 0) {
-        return { items: [], nextCursor: null };
-      }
-
-      // Get application IDs to fetch related data
-      const applicationIds = myCandidates.map(mc => mc.application_id);
-
-      // Fetch job applications data - all fields needed for profile dialog
-      const { data: applications, error: appError } = await supabase
-        .from('job_applications')
-        .select(`
-          id,
-          applicant_id,
-          first_name,
-          last_name,
-          email,
-          phone,
-          location,
-          bio,
-          cv_url,
-          age,
-          employment_status,
-          work_schedule,
-          availability,
-          custom_answers,
-          questions_snapshot,
-          candidate_profile_label,
-          profile_image_snapshot_url,
-          video_snapshot_url,
-          status,
-          applied_at,
-          viewed_at,
-          job_postings!inner(title)
-        `)
-        .in('id', applicationIds);
-
-      if (appError) throw appError;
-
-      // Create a map for quick lookup
-      const appMap = new Map(applications?.map(app => [app.id, app]) || []);
-
-      // Fetch profile media for all applicants in ONE batch call (scales to millions)
-      const applicantIds = [...new Set(myCandidates.map(mc => mc.applicant_id))];
-      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; last_active_at: string | null }> = {};
-
-      // Single batch RPC call instead of N individual calls - critical for 10M+ users
-      const { data: batchMediaData, error: batchMediaError } = await supabase.rpc('get_applicant_profile_media_batch', {
-        p_applicant_ids: applicantIds,
-        p_employer_id: user.id,
-      });
-
-      // Låt React Query göra om hela sidans hämtning vid transient auth-/nätfel.
-      // Tidigare fortsatte flödet med null-media och skrev det till listcachen.
-      if (batchMediaError) throw batchMediaError;
-
-      if (batchMediaData && Array.isArray(batchMediaData)) {
-        batchMediaData.forEach((row: any) => {
-          profileMediaMap[row.applicant_id] = {
-            profile_image_url: row.profile_image_url,
-            video_url: row.video_url,
-            is_profile_video: row.is_profile_video,
-            last_active_at: row.last_active_at || null,
-          };
-        });
-        // Auto-invalidera cache när kandidaten bytt profilbild/video
-        syncProfileMediaVersions(batchMediaData as any);
-      }
-
-      // Fill in nulls for any applicants not returned
-      applicantIds.forEach((id) => {
-        if (!profileMediaMap[id]) {
-          profileMediaMap[id] = {
-            profile_image_url: null,
-            video_url: null,
-            is_profile_video: null,
-            last_active_at: null,
-          };
-        }
-      });
-
-      // Fetch latest activity data (latest_application_at across org + last_active_at)
-      const activityMap: Record<string, { latest_application_at: string | null; last_active_at: string | null }> = {};
-      const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
-        p_applicant_ids: applicantIds,
-        p_employer_id: user.id,
-      });
-
-      if (activityData) {
-        activityData.forEach((item: any) => {
-          activityMap[item.applicant_id] = {
-            latest_application_at: item.latest_application_at,
-            last_active_at: item.last_active_at,
-          };
-        });
-      }
-
-      // Combine the data
-      const items: MyCandidateData[] = myCandidates.map(mc => {
-        const app = appMap.get(mc.application_id);
-        const liveMedia = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null };
-        const media = resolveCandidateMedia(app as any, liveMedia);
-        const activity = activityMap[mc.applicant_id] || { latest_application_at: null, last_active_at: null };
-
-        return {
-          id: mc.id,
-          recruiter_id: mc.recruiter_id,
-          applicant_id: mc.applicant_id,
-          application_id: mc.application_id,
-          job_id: mc.job_id,
-          stage: mc.stage as CandidateStage,
-          notes: mc.notes,
-          rating: mc.rating || 0,
-          created_at: mc.created_at,
-          updated_at: mc.updated_at,
-          first_name: app?.first_name || null,
-          last_name: app?.last_name || null,
-          email: app?.email || null,
-          phone: app?.phone || null,
-          location: app?.location || null,
-          bio: app?.bio || null,
-          cv_url: app?.cv_url || null,
-          age: app?.age || null,
-          employment_status: app?.employment_status || null,
-          work_schedule: app?.work_schedule || null,
-          availability: app?.availability || null,
-          custom_answers: app?.custom_answers || null,
-          questions_snapshot: app?.questions_snapshot || null,
-          status: app?.status || 'pending',
-          job_title: clampJobTitle((app?.job_postings as any)?.title) || null,
-          profile_image_url: media.profile_image_url,
-          video_url: media.video_url,
-          is_profile_video: media.is_profile_video,
-          applied_at: app?.applied_at || null,
-          viewed_at: app?.viewed_at || null,
-          latest_application_at: activity.latest_application_at,
-          last_active_at: activity.last_active_at ?? liveMedia.last_active_at,
-        };
-      });
-
-      // Determine next cursor for pagination
-      const lastItem = myCandidates[myCandidates.length - 1];
-      const nextCursor = myCandidates.length === PAGE_SIZE ? lastItem.updated_at : null;
-
-
-
-      // 🔥 Cache first page for instant-load on next visit (only for non-search)
-      if (!pageParam && !searchQuery && items.length > 0) {
+      // 🔥 Cacha första omgången för instant-load nästa besök (ej vid sökning)
+      if (isFirstRound(pageParam) && !trimmedSearch && items.length > 0) {
         writeMyCandidatesCache(user.id, items, listId);
       }
 
-      return { items, nextCursor };
+      return { items, cursors };
     },
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    getNextPageParam: (lastPage) => {
+      const cursors = lastPage.cursors || {};
+      const hasMore = Object.values(cursors).some(v => v !== 'done');
+      return hasMore ? cursors : undefined;
+    },
     enabled: !!user,
     staleTime: 0,
     gcTime: Infinity,
@@ -496,9 +330,11 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
       if (!user || searchQuery) return undefined;
       const cached = readMyCandidatesCache(user.id, listId);
       if (!cached || cached.length === 0) return undefined;
+      // Markörerna är okända för cachad data → låt första nätverksomgången
+      // sätta dem. Tavlan målas direkt, riktiga siffror kommer från RPC:n.
       return {
-        pages: [{ items: cached, nextCursor: cached.length >= PAGE_SIZE ? cached[cached.length - 1]?.updated_at : null }],
-        pageParams: [null],
+        pages: [{ items: cached, cursors: {} as StagePageParam }],
+        pageParams: [{} as StagePageParam],
       };
     },
     initialDataUpdatedAt: () => {
@@ -507,17 +343,27 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
     },
   });
 
-  // PRE-FETCHING: Automatically load next batch in background after each page loads
-  // This makes scrolling feel instant - data is ready before user reaches bottom
-  useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage && data?.pages && data.pages.length > 0) {
-      // Small delay to avoid blocking the main thread
-      const timer = setTimeout(() => {
-        fetchNextPage();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [data?.pages?.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  // Vilka kolumner har fler kandidater kvar på servern? Driver kolumnernas
+  // "ladda mer när du scrollar nära botten".
+  const cursorsByStage = useMemo(() => {
+    const pages = data?.pages || [];
+    return (pages[pages.length - 1]?.cursors || {}) as StagePageParam;
+  }, [data]);
+
+  const hasMoreInStage = useCallback(
+    (stage: string) => {
+      if (!stageList) return !!hasNextPage;
+      const value = cursorsByStage[stage];
+      // Okänt läge (t.ex. direkt från localStorage-cachen) → anta att det finns mer.
+      return value !== 'done';
+    },
+    [stageList, cursorsByStage, hasNextPage],
+  );
+
+  const loadMoreStage = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
 
   // 🔥 Only show loading if we don't have cached data
   const isLoading = queryLoading && !hasCachedData;
@@ -542,17 +388,27 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
   // en tom platta ~en halv sekund innan bilden dök upp.
   // Körs SYNKRONT under render (inte i en effekt) så signeringen startar innan
   // första målningen — annars hinner kortet ritas en gång utan media.
+  // Tak per omgång: max 200 nya rader förvärms åt gången. Redan förvärmda
+  // hoppas över, så nästa omgång tar vid där den förra slutade. Utan tak skulle
+  // en lista med 3 000 kandidater trigga 3 000 signeringar och lika många
+  // videohämtningar på en gång.
+  const WARM_PER_RUN = 200;
   const warmedMediaRef = useRef<Set<string>>(new Set());
   useMemo(() => {
     if (candidates.length === 0) return;
     const warmed = warmedMediaRef.current;
+    let budget = WARM_PER_RUN;
     for (const c of candidates) {
+      if (budget <= 0) break;
       const img = typeof c.profile_image_url === 'string' ? c.profile_image_url.trim() : '';
+      const vid = c.is_profile_video && typeof c.video_url === 'string' ? c.video_url.trim() : '';
+      const isNew = (img && !warmed.has(`i:${img}`)) || (vid && !warmed.has(`v:${vid}`));
+      if (!isNew) continue;
+      budget -= 1;
       if (img && !warmed.has(`i:${img}`)) {
         warmed.add(`i:${img}`);
         void prefetchMediaUrl(img, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
       }
-      const vid = c.is_profile_video && typeof c.video_url === 'string' ? c.video_url.trim() : '';
       if (vid && !warmed.has(`v:${vid}`)) {
         warmed.add(`v:${vid}`);
         void prefetchMediaUrl(vid, 'profile-video', MEDIA_URL_TTL);
@@ -1322,6 +1178,10 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    /** Hämtar nästa 50 i varje kolumn som fortfarande har fler kandidater. */
+    loadMoreStage,
+    /** Har den här kolumnen fler kandidater kvar på servern? */
+    hasMoreInStage,
     addCandidate,
     addCandidates,
     moveCandidate,

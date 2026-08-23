@@ -24,6 +24,12 @@ export interface StageColumnProps {
   isSelectionMode?: boolean;
   selectedCandidateIds?: Set<string>;
   onToggleSelect?: (candidateId: string) => void;
+  /** Verkligt antal i kolumnen (från servern) — inte antalet nedladdade rader. */
+  totalCount?: number;
+  /** Finns fler kandidater att hämta i den här kolumnen? */
+  hasMore?: boolean;
+  /** Anropas när användaren scrollat nära botten. */
+  onLoadMore?: () => void;
 }
 
 export const StageColumn = ({
@@ -41,6 +47,9 @@ export const StageColumn = ({
   isSelectionMode,
   selectedCandidateIds,
   onToggleSelect,
+  totalCount,
+  hasMore,
+  onLoadMore,
 }: Omit<StageColumnProps, 'onMoveCandidate'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
@@ -66,6 +75,12 @@ export const StageColumn = ({
 
   const isVirtual = candidates.length > VIRTUALIZE_THRESHOLD;
 
+  // Håll senaste callbacken i en ref så scroll-lyssnaren aldrig behöver bindas om.
+  const loadMoreRef = useRef(onLoadMore);
+  loadMoreRef.current = onLoadMore;
+  const hasMoreRef = useRef(hasMore);
+  hasMoreRef.current = hasMore;
+
   const checkScroll = useCallback(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
@@ -76,6 +91,12 @@ export const StageColumn = ({
     setCanScrollDown(hasScrollableContent && !isAtBottom);
     setScrollTop(el.scrollTop);
     setViewportHeight(el.clientHeight);
+
+    // Ladda nästa sida i god tid — 600 px innan botten — så att nya kort redan
+    // ligger på plats när användaren når dem.
+    if (hasMoreRef.current && el.scrollTop + el.clientHeight >= el.scrollHeight - 600) {
+      loadMoreRef.current?.();
+    }
   }, []);
 
   useEffect(() => {
@@ -148,7 +169,8 @@ export const StageColumn = ({
             className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}66` }}
           >
-            {candidates.length}
+            {/* Sant totalantal från servern — nedladdade rader kan vara färre. */}
+            {typeof totalCount === 'number' ? totalCount : candidates.length}
           </span>
           {!isReadOnly && (
             <div className="ml-auto">
