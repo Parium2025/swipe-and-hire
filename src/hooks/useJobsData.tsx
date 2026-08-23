@@ -39,6 +39,8 @@ export interface JobPosting {
   created_at: string;
   updated_at: string;
   expires_at?: string;
+  published_at?: string | null;
+
   employer_id: string;
   job_image_url?: string;
   company_logo_url?: string;
@@ -64,7 +66,11 @@ interface UseJobsDataOptions {
 }
 
 // 🔥 localStorage cache for employer jobs - instant-load
-const EMPLOYER_JOBS_CACHE_KEY = 'parium_employer_jobs_v3_';
+// v4: egen nyckel per scope (personal/organization) + kravet på published_at,
+// så gamla payloads (före published_at fanns) aldrig kan felklassa annonser.
+const EMPLOYER_JOBS_CACHE_KEY = 'parium_employer_jobs_v4_';
+
+const cacheKeyFor = (userId: string, scope: string) => `${EMPLOYER_JOBS_CACHE_KEY}${scope}_${userId}`;
 
 interface CachedJobs {
   jobs: JobPosting[];
@@ -74,21 +80,24 @@ interface CachedJobs {
 }
 
 function readJobsCache(userId: string, scope: string, orgId: string | null): JobPosting[] | null {
-  const key = EMPLOYER_JOBS_CACHE_KEY + userId;
+  const key = cacheKeyFor(userId, scope);
   const cached = safeReadJsonCache<CachedJobs>(key, (value): value is CachedJobs => {
     const candidate = value as Partial<CachedJobs> | null;
     return !!candidate
       && Array.isArray(candidate.jobs)
       && typeof candidate.scope === 'string'
       && (candidate.orgId === null || typeof candidate.orgId === 'string')
-      && typeof candidate.timestamp === 'number';
+      && typeof candidate.timestamp === 'number'
+      // Varje rad måste ha statusfälten – annars klassas publicerade annonser som utkast.
+      && candidate.jobs.every(j => !!j && typeof j === 'object' && 'published_at' in j && 'expires_at' in j);
   });
+
   if (!cached || cached.scope !== scope || cached.orgId !== orgId) return null;
   return cached.jobs;
 }
 
 function writeJobsCache(userId: string, scope: string, orgId: string | null, jobs: JobPosting[]): void {
-  const key = EMPLOYER_JOBS_CACHE_KEY + userId;
+  const key = cacheKeyFor(userId, scope);
   const cached: CachedJobs = {
     // 🔥 SCALE: 500 jobb täcker 99% av alla orgs utan att spränga 5MB-quotan.
     // safeStorage evictar äldre cache-entries automatiskt om vi ändå når taket.
