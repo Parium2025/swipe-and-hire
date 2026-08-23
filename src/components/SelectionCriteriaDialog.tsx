@@ -436,7 +436,7 @@ export function SelectionCriteriaDialog({
         {criteria.length === 0 && !isLoading && (
             <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5 mt-3 mx-0 text-left">
               <p className="text-sm text-white leading-relaxed">
-                Titeln och AI-instruktionen är otydliga och har ingen tydlig koppling till tjänstens faktiska krav. Att använda detta som urvalsgrund kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.
+                Lägg till upp till fem kriterier som AI:n kontrollerar mot varje kandidats CV och svar. Formulera dem som konkreta, mätbara krav kopplade till tjänsten — t.ex. "Har B-körkort" eller "Minst 2 års erfarenhet inom lager".
               </p>
             </div>
           )}
