@@ -156,6 +156,10 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
       invalidate();
       queryClient.invalidateQueries({ queryKey: ['my-candidates', ownerId] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', ownerId] });
+      // Listans egna steg kaskaderar bort i databasen – stegcachen måste med,
+      // annars visas steg som inte längre finns.
+      queryClient.invalidateQueries({ queryKey: ['stage-settings', ownerId] });
+      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', ownerId] });
       toast.success('Listan togs bort');
     },
     onError: (error: any) => toast.error(error.message || 'Kunde inte ta bort listan'),
