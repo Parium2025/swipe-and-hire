@@ -101,6 +101,21 @@ export const StageColumn = ({
     }
   }, []);
 
+  // Scroll-eventet kan komma flera gånger per bildruta. Utan tak skulle varje
+  // event trigga en omrendering av kolumnen — vi mäter en gång per bildruta.
+  const rafRef = useRef<number | null>(null);
+  const onScrollThrottled = useCallback(() => {
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      checkScroll();
+    });
+  }, [checkScroll]);
+
+  useEffect(() => () => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+  }, []);
+
   useEffect(() => {
     checkScroll();
   }, [candidates.length, checkScroll]);
@@ -137,6 +152,11 @@ export const StageColumn = ({
   const topSpacer = isVirtual && startIndex > 0 ? startIndex * pitch - GAP : 0;
   const bottomSpacer =
     isVirtual && endIndex < candidates.length ? (candidates.length - endIndex) * pitch - GAP : 0;
+
+  // dnd-kit behöver bara känna till de kort som faktiskt är monterade.
+  // Att bygga en id-lista med 10 000 poster vid varje omrendering kostade mer
+  // än själva ritandet av kolumnen.
+  const sortableIds = useMemo(() => visibleCandidates.map((c) => c.id), [visibleCandidates]);
 
   // Dynamic gap: (totalStageCount - 1) * 0.75rem
   const gapTotal = `${(totalStageCount - 1) * 0.75}rem`;
@@ -197,7 +217,7 @@ export const StageColumn = ({
 
         <div
           ref={scrollContainerRef}
-          onScroll={checkScroll}
+          onScroll={onScrollThrottled}
           className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
         >
           {isOver && (
@@ -210,7 +230,7 @@ export const StageColumn = ({
 
           {topSpacer > 0 && <div data-spacer="top" style={{ height: topSpacer }} aria-hidden />}
 
-          <SortableContext items={candidates.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
             {visibleCandidates.map((candidate) => (
               <SortableCandidateCard
                 key={candidate.id}
