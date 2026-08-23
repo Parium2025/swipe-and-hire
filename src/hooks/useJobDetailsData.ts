@@ -521,16 +521,32 @@ export function useJobDetailsData(jobId: string | undefined) {
         (payload) => {
           // Optimistically update the cache
           if (payload.eventType === 'UPDATE') {
+            const row: any = payload.new;
+            // Servern bekräftade flytten → släpp låset för just det steget.
+            clearPendingStatus(row.id, row.status);
             queryClient.setQueryData(['job-applications', jobId], (old: JobApplication[] | undefined) => {
               if (!old) return old;
-              return old.map(app => 
-                app.id === payload.new.id 
-                  ? { ...app, ...payload.new }
-                  : app
-              );
+              const next = old.map(app => {
+                if (app.id !== row.id) return app;
+                // Bara kolumner som faktiskt finns på raden får skrivas över.
+                // Tidigare spreds hela råraden in, vilket nollade berikade fält
+                // (betyg, media, kriterier) och fick kortet att blinka om.
+                return {
+                  ...app,
+                  status: row.status ?? app.status,
+                  viewed_at: row.viewed_at ?? app.viewed_at,
+                  updated_at: row.updated_at ?? app.updated_at,
+                  cover_letter: row.cover_letter ?? app.cover_letter,
+                  custom_answers: row.custom_answers ?? app.custom_answers,
+                };
+              });
+              if (jobId) writeJobAppsCache(jobId, next);
+              return next;
             });
-            // Statusbyten påverkar stegtotalerna.
-            queryClient.invalidateQueries({ queryKey: ['job-stage-counts', jobId] });
+            // Statusbyten påverkar stegtotalerna — men vänta ut pågående flytt.
+            if (countsTimerRef.current === undefined) {
+              queryClient.invalidateQueries({ queryKey: ['job-stage-counts', jobId] });
+            }
           } else {
             // INSERT/DELETE → debouncad omhämtning
             scheduleInvalidate();
