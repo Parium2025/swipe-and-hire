@@ -499,8 +499,19 @@ const MyCandidates = () => {
     const vid = candidate.is_profile_video && typeof candidate.video_url === 'string' ? candidate.video_url.trim() : '';
     if (vid) void prefetchMediaUrl(vid, 'profile-video', MEDIA_URL_TTL).catch(() => {});
 
+    // "X jobb"-badgen läses ur samma localStorage-cache som dialogen. Genom att
+    // fylla den vid hover är siffran på plats i första framen i stället för att
+    // hoppa in när nätverkssvaret kommer.
+    void prefetchCandidateApplications(user.id, candidate.applicant_id, {
+      profile_image_url: candidate.profile_image_url,
+      video_url: candidate.video_url,
+      is_profile_video: candidate.is_profile_video,
+    });
+
     prefetchCandidateActivities(queryClient, candidate.applicant_id, user.id);
     prefetchCandidateNotes(candidate.applicant_id);
+    
+
     
     queryClient.prefetchQuery({
       queryKey: ['candidate-notes', candidate.applicant_id],
