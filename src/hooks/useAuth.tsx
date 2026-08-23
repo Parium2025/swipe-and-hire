@@ -1919,35 +1919,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
   const refreshSidebarCounts = useCallback(async () => {
     try {
-      // Hämta aktiva jobb med employer_id, created_at OCH expires_at för att filtrera bort utgångna
-      const { data: activeJobs } = await supabase
-        .from('job_postings')
-        .select('employer_id, created_at, expires_at')
-        .eq('is_active', true);
-      
-      // Filtrera bort utgångna jobb (där expires_at har passerat)
-      const now = new Date();
-      const nonExpiredJobs = (activeJobs || []).filter(job => {
-        if (!job.expires_at) return true;
-        return new Date(job.expires_at) > now;
-      });
-      
-      const newTotalJobs = nonExpiredJobs.length;
+      // 🔒 SKALA: tidigare laddades ALLA aktiva annonser ner till webbläsaren och
+      // räknades i JS. PostgREST kapar svaret vid 1 000 rader, så siffrorna frös
+      // vid 1 000 så fort marknaden växte — och payloaden blev onödigt tung.
+      // Nu räknar databasen: en enda liten JSON tillbaka.
+      const { data: marketCounts } = await supabase.rpc('get_job_market_counts');
+      const market = (marketCounts ?? {}) as {
+        total_jobs?: number;
+        unique_companies?: number;
+        new_this_week?: number;
+      };
+
+      const newTotalJobs = Number(market.total_jobs) || 0;
       setPreloadedTotalJobs(newTotalJobs);
       try { sessionStorage.setItem(TOTAL_JOBS_CACHE_KEY, String(newTotalJobs)); } catch {}
 
-      // Räkna unika företag (endast icke-utgångna)
-      const uniqueEmployers = new Set(nonExpiredJobs.map(j => j.employer_id));
-      const newUniqueCompanies = uniqueEmployers.size;
+      const newUniqueCompanies = Number(market.unique_companies) || 0;
       setPreloadedUniqueCompanies(newUniqueCompanies);
       try { sessionStorage.setItem(UNIQUE_COMPANIES_CACHE_KEY, String(newUniqueCompanies)); } catch {}
 
-      // Räkna nya denna vecka (endast icke-utgångna)
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      const newThisWeek = nonExpiredJobs.filter(j => new Date(j.created_at) > weekAgo).length;
+      const newThisWeek = Number(market.new_this_week) || 0;
       setPreloadedNewThisWeek(newThisWeek);
       try { sessionStorage.setItem(NEW_THIS_WEEK_CACHE_KEY, String(newThisWeek)); } catch {}
+
 
       // Hämta antal sparade jobb för användaren (alla, inklusive utgångna)
       if (user) {
