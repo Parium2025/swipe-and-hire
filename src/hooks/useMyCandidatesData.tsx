@@ -372,8 +372,13 @@ export function useMyCandidatesData(
     [stageList, cursorsByStage, hasNextPage],
   );
 
-  const loadMoreStage = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+  const loadMoreStage = useCallback((stage?: string) => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    // Endast den kolumn som scrollades hämtar nästa sida.
+    requestedStagesRef.current = stage ? new Set([stage]) : new Set();
+    void fetchNextPage().finally(() => {
+      requestedStagesRef.current = new Set();
+    });
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 
