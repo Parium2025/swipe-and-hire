@@ -17,6 +17,8 @@ import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
+import { buildCardImageUrl } from '@/hooks/useCardImage';
+import { getImageVersion } from '@/lib/imageTransforms';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
