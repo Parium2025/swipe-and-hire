@@ -890,8 +890,16 @@ export function useMyCandidatesData(
         };
       });
 
+      // Spegla flytten i localStorage-cachen — annars målades kortet i sin
+      // GAMLA kolumn vid nästa kallstart innan nätverkssvaret hann i kapp.
+      updateMyCandidatesCache(
+        user?.id,
+        (items) => items.map((c) => (c.id === id ? { ...c, stage, updated_at: movedAt } : c)),
+        listId,
+      );
 
       return { previousCandidates };
+
     },
     onError: (err, variables, context) => {
       // Don't rollback optimistic update — enqueue for retry instead
