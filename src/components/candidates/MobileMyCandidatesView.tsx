@@ -268,6 +268,12 @@ interface MobileMyCandidatesViewProps {
   renderActionBar?: React.ReactNode;
   onPrefetch?: (candidate: MyCandidateData) => void;
   onMarkAsViewed?: (applicationId: string) => void;
+  /** Sanna totalsiffror per steg från servern (badgen i flikraden). */
+  stageCounts?: Record<string, number>;
+  /** Finns fler kandidater att hämta i steget? */
+  hasMoreInStage?: (stage: string) => boolean;
+  /** Hämtar nästa sida när användaren scrollat nära botten. */
+  onLoadMore?: () => void;
 }
 
 export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
