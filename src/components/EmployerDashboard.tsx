@@ -540,6 +540,13 @@ const EmployerDashboard = memo(() => {
         )}
       </div>
 
+      {/* Antalsindikator: visar alltid hur många av totalen som syns på sidan */}
+      {!searchTerm && tabFilteredJobs.length > 0 && totalPages > 1 && (
+        <div className="mt-2 text-center text-xs sm:text-sm text-white">
+          Visar {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, tabFilteredJobs.length)} av {tabFilteredJobs.length} annonser
+        </div>
+      )}
+
 
       {/* Result indicator */}
       {searchTerm && (
