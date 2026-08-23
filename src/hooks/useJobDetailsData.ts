@@ -354,6 +354,10 @@ export function useJobDetailsData(jobId: string | undefined) {
   const [pendingVersion, setPendingVersion] = useState(0);
   const PENDING_TTL_MS = 15000;
 
+  useEffect(() => () => {
+    if (countsTimerRef.current !== undefined) window.clearTimeout(countsTimerRef.current);
+  }, []);
+
   const setPendingStatus = useCallback((applicationId: string, status: string) => {
     pendingStatusRef.current.set(applicationId, { status, at: Date.now() });
     setPendingVersion(v => v + 1);
