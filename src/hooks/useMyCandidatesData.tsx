@@ -67,7 +67,11 @@ const PAGE_SIZE = 50;
 // 🔥 localStorage cache for instant-load
 // v2 bryter gamla cacher som kunde sakna profilmedia/viewed_at och gav FA + ny-prick efter hard refresh.
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_v2_';
-const MY_CANDIDATES_CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+// Stale-while-revalidate: listan hämtas ändå om vid varje mount (staleTime: 0),
+// så cachen finns bara till för att första painten ska vara instant. En 5-min
+// TTL innebar att varje besök efter en kafferast började med tom tavla och att
+// medielänkarna signerades från noll (initialer/tom cirkel i ~0,5 s).
+const MY_CANDIDATES_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 interface CachedMyCandidates {
   items: MyCandidateData[];
