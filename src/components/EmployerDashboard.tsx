@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
-import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
+import { useJobsData, removeJobFromJobsCache, type JobPosting } from '@/hooks/useJobsData';
 import { MobileJobCard } from '@/components/MobileJobCard';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
@@ -343,10 +343,14 @@ const EmployerDashboard = memo(() => {
         return old.filter((j: any) => j.id !== jobToDelete.id);
       });
 
-      // Soft delete in DB
+      // Rensa localStorage-cachen direkt så annonsen inte blinkar tillbaka
+      if (user?.id) removeJobFromJobsCache(user.id, jobToDelete.id);
+
+      // Soft delete in DB — is_active måste nollas också, annars ligger raden
+      // kvar som "aktiv" i alla vyer/räknare som bara tittar på is_active.
       const { error } = await supabase
         .from('job_postings')
-        .update({ deleted_at: new Date().toISOString() })
+        .update({ deleted_at: new Date().toISOString(), is_active: false })
         .eq('id', jobToDelete.id);
 
       if (error) {
