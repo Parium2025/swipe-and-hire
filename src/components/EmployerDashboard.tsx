@@ -11,7 +11,7 @@ import { useJobsData, removeJobFromJobsCache, removeJobsFromJobsCache, type JobP
 
 import { MobileJobCard } from '@/components/MobileJobCard';
 
-import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+
 import { TruncatedText } from '@/components/TruncatedText';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { formatDateShortSv } from '@/lib/date';
@@ -308,7 +308,7 @@ const EmployerDashboard = memo(() => {
     const entries: Array<{ path?: string | null; bucket?: 'job-images' | 'company-logos' }> = [];
     for (const j of window) {
       const v = getImageVersion(j as any);
-      const cardUrl = buildCardImageUrl(j.job_image_url ?? null, 'job-images', v, { width: 600, height: 400, quality: 75, resize: 'cover' });
+      const cardUrl = buildCardImageUrl(j.job_image_url ?? (j as any).job_image_desktop_url ?? null, 'job-images', v, { width: 600, height: 400, quality: 75, resize: 'cover' });
 
       if (cardUrl) entries.push({ path: cardUrl });
       const logoUrl = buildCardImageUrl(j.company_logo_url ?? null, 'company-logos', v, { width: 64, height: 64, quality: 80, resize: 'contain' });

@@ -97,7 +97,12 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   // exakt samma adress efter en bildredigering och webbläsaren serverar den
   // gamla bilden ur sin cache — arbetsgivaren ser sin gamla bild kvar.
   const imageVersion = getImageVersion(job as any);
-  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
+  // 🔑 Samma fallback som ReadOnlyMobileJobCard och jobbsökarvyerna: annonser
+  // som bara har en desktop-bild (äldre/importerade) visade annars bara en
+  // gradient här — bild fanns hos jobbsökaren men inte i "Mina annonser".
+  const cardImageSource = job.job_image_url ?? (job as any).job_image_desktop_url ?? null;
+  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
+
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
 
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
