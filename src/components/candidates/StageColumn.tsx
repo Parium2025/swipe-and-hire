@@ -78,6 +78,8 @@ export const StageColumn = ({
   // Håll senaste callbacken i en ref så scroll-lyssnaren aldrig behöver bindas om.
   const loadMoreRef = useRef(onLoadMore);
   loadMoreRef.current = onLoadMore;
+  const stageRef = useRef(stage);
+  stageRef.current = stage;
   const hasMoreRef = useRef(hasMore);
   hasMoreRef.current = hasMore;
 
