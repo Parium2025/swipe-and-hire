@@ -101,6 +101,21 @@ export const StageColumn = ({
     }
   }, []);
 
+  // Scroll-eventet kan komma flera gånger per bildruta. Utan tak skulle varje
+  // event trigga en omrendering av kolumnen — vi mäter en gång per bildruta.
+  const rafRef = useRef<number | null>(null);
+  const onScrollThrottled = useCallback(() => {
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      checkScroll();
+    });
+  }, [checkScroll]);
+
+  useEffect(() => () => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+  }, []);
+
   useEffect(() => {
     checkScroll();
   }, [candidates.length, checkScroll]);
