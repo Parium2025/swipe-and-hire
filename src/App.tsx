@@ -130,6 +130,7 @@ import { syncBrowserChrome, mountChromePopstateGuard, noteChromePath } from "@/l
 import BottomChromeStrip from "@/components/BottomChromeStrip";
 import TopChromeStrip from "@/components/TopChromeStrip";
 import { PremiumLimitListener } from "@/components/premium/PremiumLimitListener";
+import { CriteriaEvalProgress } from "@/components/CriteriaEvalProgress";
 
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 // Defer to idle time to avoid blocking first paint
