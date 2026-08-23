@@ -1,5 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  summaryCache,
+  setPersistedCacheValue,
+  SUMMARY_STORAGE_KEY,
+} from '@/components/candidateProfile/candidateProfileCache';
+import type { CandidateSummaryCacheValue } from '@/components/candidateProfile/candidateProfileCache';
 
 interface CandidateWithCv {
   applicant_id: string;
@@ -68,29 +74,30 @@ export const useCvSummaryPreloader = (candidates: CandidateWithCv[]) => {
         // Filtrera bort kandidater som redan har en aktuell sammanfattning
         // (antingen jobb-specifik ELLER proaktiv profil-sammanfattning)
         const candidatesNeedingSummary = candidatesWithCv.filter((c) => {
-          // Markera som behandlad oavsett för att undvika upprepade anrop
-          processedRef.current.add(c.application_id);
-
           // Kolla jobb-specifik sammanfattning
           const jobKey = `${c.applicant_id}-${c.job_id}`;
           const existingKeyPoints = existingJobMap.get(jobKey);
           if (existingKeyPoints) {
             const sourceCvUrl = extractSourceCvUrl(existingKeyPoints);
             // Om sammanfattningen finns och matchar nuvarande CV → skippa
-            if (sourceCvUrl && sourceCvUrl === c.cv_url) return false;
-            // Om sammanfattningen finns men saknar meta → äldre format, men fortfarande giltigt
-            if (sourceCvUrl) return false; // har en sammanfattning med känd källa
+            if (sourceCvUrl && sourceCvUrl === c.cv_url) {
+              processedRef.current.add(c.application_id);
+              return false;
+            }
           }
 
           // Kolla proaktiv profil-sammanfattning (profile_cv_summaries)
           const profileSummary = profileMap.get(c.applicant_id);
           if (profileSummary && profileSummary.cv_url === c.cv_url) {
             // Profil-sammanfattning finns och matchar → SKIPPA generering
+            processedRef.current.add(c.application_id);
             return false;
           }
 
-          // Ingen sammanfattning finns alls → behöver genereras
-          return !existingKeyPoints;
+          // Ingen verifierat aktuell sammanfattning finns. Äldre jobbspecifika
+          // rader utan source_cv_url får inte stoppa warmup: dialogen betraktar
+          // dem som inaktuella och skulle annars börja generera först vid öppning.
+          return true;
         });
 
         // Generera sammanfattningar i bakgrunden (max 3 samtidigt).
@@ -118,6 +125,18 @@ export const useCvSummaryPreloader = (candidates: CandidateWithCv[]) => {
                   gatewayBlocked = true;
                   return;
                 }
+                if (!error && data?.summary) {
+                  const cacheKey = `${candidate.applicant_id}_${candidate.job_id || 'no-job'}_${candidate.cv_url || '__no-cv__'}`;
+                  const value: CandidateSummaryCacheValue = {
+                    summary_text: data.summary.summary_text || '',
+                    key_points: data.summary.key_points || null,
+                    document_type: data.document_type || data.summary.document_type || null,
+                    is_valid_cv: data.is_valid_cv,
+                  };
+                  summaryCache.set(cacheKey, value);
+                  setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, value);
+                  processedRef.current.add(candidate.application_id);
+                }
                 console.log(`CV summary generated for ${candidate.application_id}`);
               } catch (error) {
                 console.warn(`Failed to generate CV summary for ${candidate.application_id}:`, error);
@@ -137,8 +156,9 @@ export const useCvSummaryPreloader = (candidates: CandidateWithCv[]) => {
       }
     };
 
-    // Kör med en kort fördröjning för att inte blockera initial render
-    const timeoutId = setTimeout(preloadSummaries, 1000);
+    // Hooken aktiveras först efter sidans initiala text-warmup. Starta då direkt;
+    // en extra sekund här gjorde att en snabb användare hann öppna dialogen först.
+    const timeoutId = setTimeout(preloadSummaries, 0);
 
     return () => clearTimeout(timeoutId);
   }, [candidates]);

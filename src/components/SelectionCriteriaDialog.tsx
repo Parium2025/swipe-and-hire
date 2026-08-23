@@ -31,7 +31,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { useEvaluateAllCandidates } from '@/hooks/useCriteriaResults';
-import { checkForDiscrimination, checkDiscriminationWithAI, checkInputQuality } from '@/lib/criteriaValidation';
+import { checkDiscriminationWithAI, checkInputQuality } from '@/lib/criteriaValidation';
 
 interface JobCriterion {
   id: string;
@@ -184,9 +184,6 @@ export function SelectionCriteriaDialog({
       setValidationErrors(prev => ({ ...prev, [id]: message }));
       return false;
     };
-
-    if (checkForDiscrimination(title).isDiscriminatory) return setError(DISCRIMINATION_MESSAGE);
-    if (checkForDiscrimination(prompt).isDiscriminatory) return setError(DISCRIMINATION_MESSAGE);
 
     const promptQuality = checkInputQuality(prompt);
     if (!promptQuality.isValid) {

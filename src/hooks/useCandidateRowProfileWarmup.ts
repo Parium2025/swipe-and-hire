@@ -25,7 +25,7 @@ interface RowLike {
  * Ren cache-logik. Skriver till samma cacher som CandidateProfileDialog läser
  * synkront vid mount, alltså syns datan utan nätverksanrop.
  */
-const MAX_ROWS = 60;
+const MAX_ROWS = 120;
 
 function extractMeta(keyPoints: unknown) {
   const points = Array.isArray(keyPoints) ? keyPoints : [];
@@ -81,8 +81,6 @@ export function useCandidateRowProfileWarmup(rows: RowLike[] | undefined, enable
       (i) => !warmedRef.current.has(`${i.applicant_id}|${i.job_id}|${i.cv_url}`)
     );
     if (pending.length === 0) return;
-    pending.forEach((i) => warmedRef.current.add(`${i.applicant_id}|${i.job_id}|${i.cv_url}`));
-
     let cancelled = false;
 
     const run = async () => {
@@ -202,24 +200,21 @@ export function useCandidateRowProfileWarmup(rows: RowLike[] | undefined, enable
         if (cancelled) return;
         await prefetchMediaUrl(path, 'cv').catch(() => {});
       }
+
+      // Markera först när hela körningen är klar. Tidigare markerades raderna
+      // före nätverksanropen; om effekten städades under inloggning/sidbyte
+      // avbröts körningen men raderna betraktades ändå som förvärmda för alltid.
+      if (!cancelled) {
+        pending.forEach((i) => warmedRef.current.add(`${i.applicant_id}|${i.job_id}|${i.cv_url}`));
+      }
     };
 
-    let idleId: number | undefined;
-    let timeoutId: number | undefined;
-    const ric = (globalThis as unknown as {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-    }).requestIdleCallback;
-    if (typeof ric === 'function') {
-      idleId = ric(() => void run(), { timeout: 800 });
-    } else {
-      timeoutId = window.setTimeout(() => void run(), 200);
-    }
+    // Textdata är liten och måste starta direkt. requestIdleCallback kunde på
+    // iPad skjuta upp warmup tills efter att användaren redan öppnat profilen.
+    void run();
 
     return () => {
       cancelled = true;
-      const w = globalThis as unknown as { cancelIdleCallback?: (id: number) => void };
-      if (idleId !== undefined && typeof w.cancelIdleCallback === 'function') w.cancelIdleCallback(idleId);
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, itemsKey]);
