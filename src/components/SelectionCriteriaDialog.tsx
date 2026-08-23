@@ -73,6 +73,10 @@ export function SelectionCriteriaDialog({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const autoSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const [hasFetched, setHasFetched] = useState(false);
+  // Set when an already-activated criterion is removed — remaining candidates must
+  // be re-scored so the X/Y pill and badges reflect the new criteria set.
+  const needsReevalRef = useRef(false);
+
 
   useEffect(() => {
     setHasFetched(false);
