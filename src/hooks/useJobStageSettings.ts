@@ -302,6 +302,10 @@ export function useJobStageSettings(jobId: string | undefined) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['job-stage-settings', jobId] });
+      // Kandidaterna flyttades precis till ett annat steg – kort och
+      // kolumnräknare måste hämtas om, annars visar de gamla siffror.
+      queryClient.invalidateQueries({ queryKey: ['job-applications', jobId] });
+      queryClient.invalidateQueries({ queryKey: ['job-stage-counts', jobId] });
     },
   });
 

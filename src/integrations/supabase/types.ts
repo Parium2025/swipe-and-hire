@@ -2132,6 +2132,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "my_candidates_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "my_candidates_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "my_candidates_list_id_fkey"
             columns: ["list_id"]
             isOneToOne: false

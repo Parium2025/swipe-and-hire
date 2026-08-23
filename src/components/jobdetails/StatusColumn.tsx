@@ -195,7 +195,7 @@ export const StatusColumn = memo(({
             <JobStageSettingsMenu 
               jobId={jobId}
               stageKey={status}
-              candidateCount={applications.length}
+              candidateCount={displayCount}
               totalStageCount={totalStageCount}
               targetStageKey={targetStageKey}
               targetStageLabel={targetStageLabel}

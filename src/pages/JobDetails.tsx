@@ -488,19 +488,23 @@ const JobDetails = () => {
   }, [updateApplicationLocally, stageSettings, refetch]);
 
   const handleMoveCandidatesForStage = useCallback(async (stageKey: string, targetKey: string) => {
+    // Uppdatera de inlästa korten direkt (känns omedelbart) …
     const apps = applicationsByStatus[stageKey] || [];
-    if (apps.length === 0) return;
-    const ids = apps.map(a => a.id);
-    ids.forEach(id => updateApplicationLocally(id, { status: targetKey as JobApplication['status'] }));
+    apps.forEach(a => updateApplicationLocally(a.id, { status: targetKey as JobApplication['status'] }));
+
+    // … men flytta ALLA i steget på servern. Vid stora annonser är bara en
+    // del av ansökningarna inlästa; utan detta blev resten kvar med en status
+    // vars kolumn strax raderas och de försvann tyst ur vyn.
     const { error } = await supabase
       .from('job_applications')
       .update({ status: targetKey })
-      .in('id', ids);
+      .eq('job_id', jobId)
+      .eq('status', stageKey);
     if (error) {
       refetch();
       throw error;
     }
-  }, [applicationsByStatus, updateApplicationLocally, refetch]);
+  }, [applicationsByStatus, updateApplicationLocally, refetch, jobId]);
 
   // DnD handlers
   const handleDragStart = useCallback((event: DragStartEvent) => {
