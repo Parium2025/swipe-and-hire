@@ -156,8 +156,9 @@ export const useCvSummaryPreloader = (candidates: CandidateWithCv[]) => {
       }
     };
 
-    // Kör med en kort fördröjning för att inte blockera initial render
-    const timeoutId = setTimeout(preloadSummaries, 1000);
+    // Hooken aktiveras först efter sidans initiala text-warmup. Starta då direkt;
+    // en extra sekund här gjorde att en snabb användare hann öppna dialogen först.
+    const timeoutId = setTimeout(preloadSummaries, 0);
 
     return () => clearTimeout(timeoutId);
   }, [candidates]);
