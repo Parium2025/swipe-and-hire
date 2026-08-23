@@ -179,8 +179,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
   // utkast här, vilket (a) skrev om `created_at` till nu och raderade annonsens
   // verkliga ålder, och (b) hoppade över `republish_job` som är den enda vägen
   // förbi dubblett-/cooldown-spärren vid återpublicering.
-  const isExpired = job ? isEmployerJobExpired(job) : false;
-  const isDraft = job ? isEmployerJobDraft(job) : false;
+  // `published_at` skickas alltid explicit: saknas nyckeln helt tolkar
+  // jobStatus.ts annonsen som publicerad, vilket vore fel för ett utkast.
+  const statusJob = job
+    ? { is_active: job.is_active ?? null, expires_at: job.expires_at ?? null, published_at: job.published_at ?? null }
+    : null;
+  const isExpired = statusJob ? isEmployerJobExpired(statusJob) : false;
+  const isDraft = statusJob ? isEmployerJobDraft(statusJob) : false;
   // Publiceringsläge: utkast som publiceras, eller utgången annons som återpubliceras efter redigering
   const publishMode = isDraft || republishMode || isExpired;
   const [isInitializing, setIsInitializing] = useState(true);
