@@ -217,6 +217,17 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         return first;
       }
 
+      // 🔒 En ström per nyckel. Utan detta startar varje sidbyte/refetch
+      // (refetchOnMount: 'always') en ny full genomströmning av alla sidor —
+      // vid 5 000 annonser blir det tiotals onödiga nätverksrundor och
+      // konkurrerande skrivningar mot samma cache.
+      const streamKey = JSON.stringify(queryKey);
+      const now = Date.now();
+      const state = jobStreamRegistry.get(streamKey);
+      if (state?.running) return first;
+      if (state?.completedAt && now - state.completedAt < STREAM_COOLDOWN_MS) return first;
+      jobStreamRegistry.set(streamKey, { running: true, completedAt: state?.completedAt ?? 0 });
+
       // Strömma resten i bakgrunden — blockerar aldrig första renderingen.
       // Starta först på nästa tick: annars kan en snabb batch skriva sin längre
       // lista INNAN React Query hunnit committa `first`, som då skriver över
@@ -224,6 +235,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       setTimeout(() => {
         void (async () => {
         try {
+
           let all = [...first];
           let cursor = cursorOf(first);
           const seen = new Set(all.map((j: any) => j.id));
