@@ -211,14 +211,6 @@ export const StatusColumn = memo(({
           onScroll={onScrollThrottled}
           className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
         >
-          {isOver && (
-            <div className="mb-2 flex items-center justify-center">
-              <div className="rounded-md bg-white/10 ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white">
-                Släpp här
-              </div>
-            </div>
-          )}
-
           {topSpacer > 0 && <div data-spacer="top" style={{ height: topSpacer }} />}
 
           <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
