@@ -949,7 +949,12 @@ export function useMyCandidatesData(
         };
       });
 
+      // Ta bort ur localStorage-cachen också — annars kom kandidaten tillbaka
+      // som spökkort vid nästa instant-load.
+      updateMyCandidatesCache(user?.id, (items) => items.filter((c) => c.id !== id), listId);
+
       return { previousCandidates };
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
