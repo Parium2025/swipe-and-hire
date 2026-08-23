@@ -334,10 +334,14 @@ export function useMyCandidatesData(
           : { updated_at: last.updated_at, id: last.id };
       }
 
-      // 🔥 Cacha första omgången för instant-load nästa besök (ej vid sökning)
-      if (isFirstRound(pageParam) && !trimmedSearch && items.length > 0) {
+      // 🔥 Cacha första omgången för instant-load nästa besök (ej vid sökning).
+      // Skrivs ÄVEN när resultatet är tomt — annars låg den gamla cachen kvar
+      // efter att sista kandidaten tagits bort och spökkort målades vid varje
+      // kallstart tills nätverkssvaret hann i kapp.
+      if (isFirstRound(pageParam) && !trimmedSearch) {
         writeMyCandidatesCache(user.id, items, listId);
       }
+
 
       return { items, cursors };
     },
