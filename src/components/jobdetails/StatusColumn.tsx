@@ -166,7 +166,7 @@ export const StatusColumn = memo(({
       }}
     >
       <div 
-        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-foreground/20 flex-shrink-0 ${isOver ? 'ring-2 ring-foreground/40' : ''}`}
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
         style={{ backgroundColor: `${displayColor}55` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
@@ -207,7 +207,7 @@ export const StatusColumn = memo(({
         </div>
       </div>
 
-      <div className="relative min-h-0 flex-1 rounded-lg border border-white/20 bg-white/5">
+      <div className="relative min-h-0 flex-1 rounded-lg bg-white/5 ring-1 ring-inset ring-white/10">
         {canScrollUp && (
           <div className="absolute top-0 left-0 right-0 z-10 h-6 rounded-t-lg bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
         )}
@@ -219,7 +219,7 @@ export const StatusColumn = memo(({
         >
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
-              <div className="animate-pulse rounded-md border border-white/20 bg-white/10 px-4 py-3 text-xs font-medium text-white">
+              <div className="rounded-md bg-white/10 ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
                 Släpp här
               </div>
             </div>
@@ -260,9 +260,9 @@ export const StatusColumn = memo(({
         </div>
 
         {canScrollDown && (
-          <div className="absolute bottom-0 left-0 right-0 z-10 flex h-8 items-end justify-center rounded-b-lg bg-gradient-to-t from-white/10 to-transparent pb-1 pointer-events-none">
+          <div className="absolute bottom-0 left-0 right-0 z-10 flex h-8 items-end justify-center rounded-b-lg bg-gradient-to-t from-white/5 to-transparent pb-1 pointer-events-none">
             <div className="animate-bounce">
-              <ChevronDown className="h-3.5 w-3.5 text-white/70" />
+              <ChevronDown className="h-3.5 w-3.5 text-white/60" />
             </div>
           </div>
         )}
