@@ -651,7 +651,7 @@ export function useJobDetailsData(jobId: string | undefined) {
 
   return {
     job: jobQuery.data ?? null,
-    applications: applicationsQuery.data ?? [],
+    applications: applicationsWithPending,
     stageTotals,
     totalApplications,
     loadedCount,
