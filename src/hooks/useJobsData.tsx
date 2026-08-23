@@ -128,12 +128,15 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     queryKey: ['jobs', scope, profile?.organization_id, user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
-      // 🔥 SCALE: Keyset-paginering utan tak — hämtar hela datasetet oavsett
-      // om arbetsgivaren har 5 eller 100 000 annonser. Keyset (created_at + id)
-      // istället för offset gör att sida 100 är lika snabb som sida 1.
+
+      // 🔥 SCALE: Progressiv keyset-strömning utan tak.
+      // Första sidan (200 rader) returneras direkt så UI:t målas omedelbart,
+      // resten strömmas in i bakgrunden i sidor om 1000 och läggs till i cachen.
+      // Keyset (created_at + id) gör sida 500 lika snabb som sida 1 — därför
+      // fungerar det lika bra med 5 som med 100 000 annonser.
+      const FIRST_PAGE = 200;
       const PAGE_SIZE = 1000;
-      let result: JobPosting[] = [];
+      const queryKey = ['jobs', scope, profile?.organization_id, user.id];
 
       const baseSelect = `
         *,
@@ -156,18 +159,17 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         if (ids.length > 0) employerIds = ids;
       }
 
-      let cursor: { created_at: string; id: string } | null = null;
-
-      // Loopa tills servern slutar leverera fulla sidor — ingen hård gräns.
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
+      const fetchPage = async (
+        cursor: { created_at: string; id: string } | null,
+        size: number
+      ): Promise<JobPosting[]> => {
         let query = supabase
           .from('job_postings')
           .select(baseSelect)
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .order('id', { ascending: false })
-          .limit(PAGE_SIZE);
+          .limit(size);
 
         if (cursor) {
           query = query.or(
@@ -180,21 +182,49 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           : await query.eq('employer_id', employerIds[0]);
 
         if (error) throw error;
-        const batch = (data ?? []) as JobPosting[];
-        result.push(...batch);
-        if (batch.length < PAGE_SIZE) break;
-        const last = batch[batch.length - 1] as any;
-        cursor = { created_at: last.created_at, id: last.id };
+        return (data ?? []) as JobPosting[];
+      };
+
+      const cursorOf = (rows: JobPosting[]) => {
+        const last = rows[rows.length - 1] as any;
+        return { created_at: last.created_at, id: last.id };
+      };
+
+      const first = await fetchPage(null, FIRST_PAGE);
+
+      if (first.length < FIRST_PAGE) {
+        writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, first);
+        return first;
       }
 
-      // 🔥 Cache for instant-load on next visit.
-      // Väldigt stora dataset skrivs inte till localStorage (kvot-tak) — de
-      // hämtas färskt istället, så cachen aldrig kan innehålla en trunkerad lista.
-      writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, result);
+      // Strömma resten i bakgrunden — blockerar aldrig första renderingen.
+      void (async () => {
+        try {
+          let all = [...first];
+          let cursor = cursorOf(first);
+          const seen = new Set(all.map((j: any) => j.id));
 
+          // eslint-disable-next-line no-constant-condition
+          while (true) {
+            const batch = await fetchPage(cursor, PAGE_SIZE);
+            if (batch.length === 0) break;
+            const fresh = batch.filter((j: any) => !seen.has(j.id));
+            fresh.forEach((j: any) => seen.add(j.id));
+            all = [...all, ...fresh];
+            queryClient.setQueryData(queryKey, all);
+            if (batch.length < PAGE_SIZE) break;
+            cursor = cursorOf(batch);
+          }
 
-      return result;
+          writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, all);
+        } catch {
+          // Tyst fel — realtime/refetch återställer, första sidan visas ändå
+        }
+      })();
+
+      return first;
     },
+
     enabled: !!user,
     staleTime: 10 * 60 * 1000, // 10 min fallback if realtime drops
     gcTime: Infinity, // Keep in cache permanently during session
