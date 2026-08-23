@@ -19,6 +19,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMyCandidateApplications } from '@/hooks/useMyCandidateApplications';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import {
+  prefetchCandidateApplications,
+  isCandidateApplicationsCacheFresh,
+  fetchApplicationsForApplicants,
+  writeCandidateApplicationsCache,
+} from '@/lib/candidateApplicationsSource';
 import { MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { useBulkCandidateOps } from '@/hooks/useBulkCandidateOps';
 import { useCandidateLists, useActiveCandidateList, useTeamCandidateLists } from '@/hooks/useCandidateLists';
@@ -499,8 +505,19 @@ const MyCandidates = () => {
     const vid = candidate.is_profile_video && typeof candidate.video_url === 'string' ? candidate.video_url.trim() : '';
     if (vid) void prefetchMediaUrl(vid, 'profile-video', MEDIA_URL_TTL).catch(() => {});
 
+    // "X jobb"-badgen läses ur samma localStorage-cache som dialogen. Genom att
+    // fylla den vid hover är siffran på plats i första framen i stället för att
+    // hoppa in när nätverkssvaret kommer.
+    void prefetchCandidateApplications(user.id, candidate.applicant_id, {
+      profile_image_url: candidate.profile_image_url,
+      video_url: candidate.video_url,
+      is_profile_video: candidate.is_profile_video,
+    });
+
     prefetchCandidateActivities(queryClient, candidate.applicant_id, user.id);
     prefetchCandidateNotes(candidate.applicant_id);
+    
+
     
     queryClient.prefetchQuery({
       queryKey: ['candidate-notes', candidate.applicant_id],
@@ -610,6 +627,47 @@ const MyCandidates = () => {
       if (ric && cic) cic(handle); else window.clearTimeout(handle as number);
     };
   }, [filteredCandidatesByStage]);
+
+  // Förvärm "X jobb" för de översta korten i EN batchfråga när webbläsaren är
+  // idle. Hover täcker musanvändare, men på touch finns ingen hover — då syntes
+  // badgen först efter att dialogen öppnats.
+  useEffect(() => {
+    if (!user) return;
+    const conn = (navigator as any)?.connection;
+    if (conn?.saveData) return;
+
+    const seeds = Object.values(filteredCandidatesByStage)
+      .flat()
+      .slice(0, 60) as MyCandidateData[];
+    const pending = new Map<string, MyCandidateData>();
+    for (const c of seeds) {
+      if (!c?.applicant_id || pending.has(c.applicant_id)) continue;
+      if (isCandidateApplicationsCacheFresh(user.id, c.applicant_id)) continue;
+      pending.set(c.applicant_id, c);
+    }
+    if (pending.size === 0) return;
+
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const fallbacks = new Map(
+          Array.from(pending.entries()).map(([id, c]) => [id, {
+            profile_image_url: c.profile_image_url,
+            video_url: c.video_url,
+            is_profile_video: c.is_profile_video,
+          }]),
+        );
+        const grouped = await fetchApplicationsForApplicants(user.id, Array.from(pending.keys()), fallbacks);
+        if (cancelled) return;
+        for (const [applicantId, apps] of grouped) {
+          writeCandidateApplicationsCache(user.id, applicantId, apps);
+        }
+      } catch { /* best-effort */ }
+    };
+    const timer = window.setTimeout(() => void run(), 200);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [user, filteredCandidatesByStage]);
+
 
   /** Map MyCandidateData → ApplicationData for CandidateSwipeViewer / Dialog */
   const mapCandidateToAppData = useCallback((c: MyCandidateData): ApplicationData => ({

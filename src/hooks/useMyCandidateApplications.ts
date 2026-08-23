@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -25,13 +25,32 @@ export function useMyCandidateApplications(
 ) {
   const { user } = useAuth();
   const userId = user?.id;
-  const [allApplications, setAllApplications] = useState<ApplicationData[]>([]);
+  // Cachen läses SYNKRONT vid första render. Tidigare låg läsningen i effekten
+  // nedan, vilket gav en första målning utan "X jobb"-badge — den poppade in
+  // en frame senare trots att svaret redan fanns lokalt.
+  const [allApplications, setAllApplications] = useState<ApplicationData[]>(() =>
+    applicantId && dialogOpen ? (readCandidateApplicationsCache(userId, applicantId) ?? []) : []
+  );
   const [loading, setLoading] = useState(false);
+
+  // Hooken lever kvar mellan kandidatbyten (dialogen monteras om inte). Därför
+  // räcker inte lazy-init: byter man kandidat måste cachen läsas om i
+  // renderfasen, annars ritas första framen utan "X jobb".
+  const cacheKeyRef = useRef<string | null>(null);
+  const currentKey = applicantId && dialogOpen ? `${userId || 'anon'}:${applicantId}` : null;
+  if (currentKey !== cacheKeyRef.current) {
+    cacheKeyRef.current = currentKey;
+    const preloaded = applicantId && dialogOpen
+      ? readCandidateApplicationsCache(userId, applicantId)
+      : null;
+    setAllApplications(preloaded ?? []);
+  }
 
   const readCache = useCallback(
     (aid: string) => readCandidateApplicationsCache(userId, aid),
     [userId]
   );
+
 
   useEffect(() => {
     if (!applicantId || !userId || !dialogOpen) {

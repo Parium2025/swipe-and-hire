@@ -118,6 +118,8 @@ const MyCandidateRow = memo(function MyCandidateRow({
       ref={rowRef}
       onClick={handleTap}
       onMouseEnter={onPrefetch}
+      onTouchStart={onPrefetch}
+
     >
       {!isSelectionMode && isUnread && (
         <div className="absolute left-1.5 top-1.5">
