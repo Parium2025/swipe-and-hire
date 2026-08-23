@@ -279,6 +279,14 @@ const EmployerDashboard = memo(() => {
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
 
+  // Markeringsläget får aldrig överleva ett tab-/sökbyte — annars raderar man
+  // annonser man inte längre ser på skärmen.
+  useEffect(() => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }, [activeTab, searchTerm]);
+
+
   // Använd lokal data-längd så vi inte visar tomma sidor när server-count är högre
   // än vad som faktiskt laddats in i klienten.
   const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
