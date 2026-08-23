@@ -118,7 +118,7 @@ const MyApplications = () => {
   const { interviews, isLoading: interviewsLoading } = useCandidateInterviews();
 
   // Use cached applications hook for instant load + realtime sync
-  const { applications, isLoading, error, deleteApplication } = useMyApplicationsCache();
+  const { applications, isLoading, error, hideApplication } = useMyApplicationsCache();
 
   // Tab state (persisted in URL like SavedJobs)
   type TabValue = 'active' | 'expired';
