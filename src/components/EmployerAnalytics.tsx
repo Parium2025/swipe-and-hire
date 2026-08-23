@@ -313,7 +313,7 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
     <div>
       <div className="flex items-baseline justify-between mb-2">
         <span className="text-2xl font-bold text-white tabular-nums">{totalViews}</span>
-        <span className="text-[11px] text-white">totalt under perioden</span>
+        <span className="text-[11px] text-white">unika besökare under perioden</span>
       </div>
       <svg width="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
         <defs>
