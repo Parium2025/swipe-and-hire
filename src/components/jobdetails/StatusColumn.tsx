@@ -196,19 +196,9 @@ export const StatusColumn = memo(({
               <Sparkles className="h-3.5 w-3.5" />
             </button>
           )}
-          <div className="ml-auto">
-            <JobStageSettingsMenu 
-              jobId={jobId}
-              stageKey={status}
-              candidateCount={displayCount}
-              totalStageCount={totalStageCount}
-              targetStageKey={targetStageKey}
-              targetStageLabel={targetStageLabel}
-              onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
-              onLiveColorChange={setLiveColor}
-              stageIndex={stageIndex}
-            />
-          </div>
+          {/* Stegen i en jobbannons är låsta standardsteg – de kan inte byggas
+              om, döpas om eller raderas här. Vill man ha egna steg används
+              "Mina kandidater". */}
         </div>
       </div>
 
