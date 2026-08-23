@@ -832,6 +832,106 @@ export type Database = {
           },
         ]
       }
+      criteria_eval_items: {
+        Row: {
+          applicant_id: string
+          application_id: string | null
+          attempts: number
+          created_at: string
+          error: string | null
+          id: string
+          job_id: string
+          run_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          application_id?: string | null
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          job_id: string
+          run_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          application_id?: string | null
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          job_id?: string
+          run_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "criteria_eval_items_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "criteria_eval_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      criteria_eval_runs: {
+        Row: {
+          created_at: string
+          created_by: string
+          done_items: number
+          failed_items: number
+          finished_at: string | null
+          id: string
+          job_id: string
+          lease_until: string | null
+          pause_reason: string | null
+          status: string
+          total_items: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          done_items?: number
+          failed_items?: number
+          finished_at?: string | null
+          id?: string
+          job_id: string
+          lease_until?: string | null
+          pause_reason?: string | null
+          status?: string
+          total_items?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          done_items?: number
+          failed_items?: number
+          finished_at?: string | null
+          id?: string
+          job_id?: string
+          lease_until?: string | null
+          pause_reason?: string | null
+          status?: string
+          total_items?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "criteria_eval_runs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       criterion_feedback: {
         Row: {
           ai_result: string
@@ -3491,6 +3591,10 @@ export type Database = {
         Returns: boolean
       }
       can_view_job_application: { Args: { p_job_id: string }; Returns: boolean }
+      cancel_criteria_eval_run: {
+        Args: { p_run_id: string }
+        Returns: undefined
+      }
       claim_account_deletions: {
         Args: { _limit?: number }
         Returns: {
@@ -3513,6 +3617,22 @@ export type Database = {
       claim_admin_alert: {
         Args: { _alert_key: string; _cooldown_minutes?: number }
         Returns: boolean
+      }
+      claim_criteria_eval_items: {
+        Args: { p_limit?: number; p_run_id: string }
+        Returns: {
+          applicant_id: string
+          application_id: string
+          item_id: string
+        }[]
+      }
+      claim_criteria_eval_run: {
+        Args: { p_lease_seconds?: number }
+        Returns: {
+          created_by: string
+          job_id: string
+          run_id: string
+        }[]
       }
       claim_outreach_dispatch: {
         Args: {
@@ -3646,6 +3766,10 @@ export type Database = {
       ensure_default_candidate_list: {
         Args: { p_owner_id: string }
         Returns: string
+      }
+      finish_criteria_eval_item: {
+        Args: { p_error?: string; p_item_id: string; p_ok: boolean }
+        Returns: undefined
       }
       get_active_plan_details: {
         Args: { _user_id: string }
@@ -4012,6 +4136,10 @@ export type Database = {
       normalize_job_text: { Args: { t: string }; Returns: string }
       parium_norm: { Args: { t: string }; Returns: string }
       parium_synonyms: { Args: { _tok: string }; Returns: string[] }
+      pause_criteria_eval_run: {
+        Args: { p_reason: string; p_run_id: string }
+        Returns: undefined
+      }
       purge_completed_deletion_rows: { Args: never; Returns: number }
       purge_old_email_dlq: { Args: never; Returns: number }
       purge_old_outreach_logs: { Args: never; Returns: number }
@@ -4083,6 +4211,10 @@ export type Database = {
           p_user_agent?: string
         }
         Returns: Json
+      }
+      release_criteria_eval_run: {
+        Args: { p_run_id: string }
+        Returns: undefined
       }
       remove_session: { Args: { p_session_token: string }; Returns: undefined }
       render_outreach_template: {
@@ -4258,6 +4390,7 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      start_criteria_eval_run: { Args: { p_job_id: string }; Returns: string }
       switch_conversation_job_context: {
         Args: {
           p_conversation_id: string

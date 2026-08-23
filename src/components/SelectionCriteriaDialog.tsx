@@ -31,6 +31,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { useEvaluateAllCandidates } from '@/hooks/useCriteriaResults';
+import { useStartCriteriaEvalRun } from '@/hooks/useCriteriaEvalRun';
 import { checkDiscriminationWithAI, checkInputQuality } from '@/lib/criteriaValidation';
 
 interface JobCriterion {
@@ -66,6 +67,7 @@ export function SelectionCriteriaDialog({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const evaluateAllCandidates = useEvaluateAllCandidates();
+  const startEvalRun = useStartCriteriaEvalRun();
   const queryClient = useQueryClient();
   
   // Inline editing state
@@ -119,7 +121,7 @@ export function SelectionCriteriaDialog({
     const remainingActive = criteria.filter(c => c.is_active && c.title?.trim() && c.prompt?.trim());
     if (remainingActive.length === 0 || candidates.length === 0) return;
 
-    evaluateAllCandidates.mutate({ jobId, candidates });
+    startEvalRun.mutate({ jobId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -407,11 +409,11 @@ export function SelectionCriteriaDialog({
       
       // Start evaluation silently in background
       if (candidates.length > 0) {
-        evaluateAllCandidates.mutate(
-          { jobId, candidates },
+        startEvalRun.mutate(
+          { jobId },
           {
             onError: () => {
-              toast.error('Kunde inte utvärdera kandidater', {
+              toast.error('Kunde inte starta AI-granskningen', {
                 description: 'Försök igen om en stund.',
               });
             },
