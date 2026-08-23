@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
+import { prefetchAttachmentImages } from '@/lib/attachmentUrl';
 import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType, inspectFileContent } from '@/lib/chatFileTypes';
 import { useConversationMessages, type Conversation, type ConversationMessage } from '@/hooks/useConversations';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
