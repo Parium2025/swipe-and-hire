@@ -95,8 +95,14 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
   const applicantIds = applicationsData.map(a => a.applicant_id);
 
   // Parallel fetch all related data
-  const [myCandidatesResult, criteriaResult, evaluationsResult] = await Promise.all([
-    // Fetch ratings
+  const [ratingsResult, myCandidatesResult, criteriaResult, evaluationsResult] = await Promise.all([
+    // Betyget är per KANDIDAT (candidate_ratings) — samma källa som Mina kandidater.
+    supabase
+      .from('candidate_ratings')
+      .select('applicant_id, rating')
+      .eq('recruiter_id', userId)
+      .in('applicant_id', applicantIds),
+    // Fallback för äldre betyg som bara hann skrivas till my_candidates
     supabase
       .from('my_candidates')
       .select('applicant_id, rating')
@@ -117,8 +123,12 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
 
   const ratingsByApplicant = new Map<string, number>();
   (myCandidatesResult.data || []).forEach(mc => {
-    ratingsByApplicant.set(mc.applicant_id, mc.rating || 0);
+    if (mc.rating) ratingsByApplicant.set(mc.applicant_id, mc.rating);
   });
+  (ratingsResult.data || []).forEach(r => {
+    ratingsByApplicant.set(r.applicant_id, r.rating || 0);
+  });
+
 
   const criteriaMap = new Map<string, string>();
   (criteriaResult.data || []).forEach(c => criteriaMap.set(c.id, c.title));
