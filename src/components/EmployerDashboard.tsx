@@ -228,8 +228,14 @@ const EmployerDashboard = memo(() => {
     };
   }, []);
   
-  // Check if there are any drafts
-  const hasDrafts = useMemo(() => jobs.some(job => isEmployerJobDraft(job)), [jobs]);
+  // Check if there are any drafts.
+  // Serverräkningen först: vid tusentals annonser kan utkasten ligga långt bak
+  // i bakgrundsströmmen, och då dök fliken upp först efter flera sekunder.
+  const hasDrafts = useMemo(
+    () => (serverCounts?.draft ?? 0) > 0 || jobs.some(job => isEmployerJobDraft(job)),
+    [serverCounts?.draft, jobs],
+  );
+
   
   // Beräkna ALLA tre tabbars data samtidigt — gör DOM-persistens möjlig.
   // VirtualJobGrid håller alla tre i DOM:en (display:none för inaktiva)
@@ -290,6 +296,14 @@ const EmployerDashboard = memo(() => {
   // Använd lokal data-längd så vi inte visar tomma sidor när server-count är högre
   // än vad som faktiskt laddats in i klienten.
   const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
+
+  // Klampa sidan när listan krymper (t.ex. massradering av hela sista sidan).
+  // Utan detta stod man kvar på en sida som inte längre finns: tom lista och
+  // "Visar 37–36 av 36".
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
 
   // 🔥 Pre-warma BARA aktuell tab × current+next page (~40 bilder).
   // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.

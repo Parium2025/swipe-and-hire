@@ -191,6 +191,12 @@ const Dashboard = memo(() => {
 
   const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
 
+  // Samma klamp som i Mina annonser: sidan får aldrig peka utanför listan.
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+
   const sliceToPage = useCallback(<T,>(arr: T[]) => {
     const start = (page - 1) * pageSize;
     return arr.slice(start, start + pageSize);
