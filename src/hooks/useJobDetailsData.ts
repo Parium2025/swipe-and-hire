@@ -340,7 +340,33 @@ export function useJobDetailsData(jobId: string | undefined) {
           }
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'candidate_ratings',
+          filter: `recruiter_id=eq.${user.id}`,
+        },
+        (payload) => {
+          // Betyg sätts även från Mina kandidater/kandidatlistan — spegla direkt
+          // in i annonsvyn så att stjärnorna aldrig visar olika värden.
+          const row: any = payload.new || payload.old;
+          if (!row?.applicant_id) return;
+          queryClient.setQueryData(['job-applications', jobId], (old: JobApplication[] | undefined) => {
+            if (!old) return old;
+            const next = old.map(app =>
+              app.applicant_id === row.applicant_id
+                ? { ...app, rating: payload.eventType === 'DELETE' ? 0 : (row.rating ?? 0) }
+                : app
+            );
+            if (jobId) writeJobAppsCache(jobId, next);
+            return next;
+          });
+        }
+      )
       .subscribe();
+
 
     return () => {
       supabase.removeChannel(channel);
