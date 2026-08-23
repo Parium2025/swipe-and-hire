@@ -293,9 +293,9 @@ const EmployerDashboard = memo(() => {
 
   // 🔥 Pre-warma BARA aktuell tab × current+next page (~40 bilder).
   // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.
-  // 🔑 URL:erna byggs med EXAKT samma transform + version som korten renderar
-  // (600x300 q75 cover / 64x64 q80 contain). Warmade vi originalbilden blev
-  // det en cache-miss vid render — dubbel bandbredd och noll nytta.
+  // 🔑 URL:erna byggs med EXAKT samma källa, transform och version som
+  // `MobileJobCard` renderar (job_image_url @ 600x400 q75 cover / logo 64x64
+  // q80 contain). Minsta avvikelse → cache-MISS vid render, dubbel bandbredd.
   const prewarmEntries = useMemo(() => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize * 2;
@@ -308,8 +308,8 @@ const EmployerDashboard = memo(() => {
     const entries: Array<{ path?: string | null; bucket?: 'job-images' | 'company-logos' }> = [];
     for (const j of window) {
       const v = getImageVersion(j as any);
-      const cardSource = j.job_image_url ?? j.job_image_desktop_url ?? null;
-      const cardUrl = buildCardImageUrl(cardSource, 'job-images', v, { width: 600, height: 300, quality: 75, resize: 'cover' });
+      const cardUrl = buildCardImageUrl(j.job_image_url ?? null, 'job-images', v, { width: 600, height: 400, quality: 75, resize: 'cover' });
+
       if (cardUrl) entries.push({ path: cardUrl });
       const logoUrl = buildCardImageUrl(j.company_logo_url ?? null, 'company-logos', v, { width: 64, height: 64, quality: 80, resize: 'contain' });
       if (logoUrl) entries.push({ path: logoUrl });
