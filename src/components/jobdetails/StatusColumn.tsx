@@ -36,6 +36,8 @@ export interface StatusColumnProps {
   targetStageLabel?: string;
   onMoveCandidatesAndDelete?: () => Promise<void>;
   stageIndex?: number;
+  /** Antal kolumnslottar som bredden ska delas på (inkl. "Nytt steg"-slotten). */
+  columnSlots?: number;
 }
 
 export const StatusColumn = memo(({ 
@@ -58,6 +60,7 @@ export const StatusColumn = memo(({
   targetStageLabel,
   onMoveCandidatesAndDelete,
   stageIndex = 0,
+  columnSlots,
 }: StatusColumnProps) => {
   const displayCount = Math.max(stageTotal ?? 0, applications.length);
   // Visa bara "Laddar…" när bakgrundsströmmen faktiskt hämtar fler sidor.
@@ -156,18 +159,20 @@ export const StatusColumn = memo(({
   }, [checkScroll]);
 
 
+  // Samma bredduträkning som Mina kandidater: kolumnerna delar hela bredden
+  // jämnt, ingen horisontell scroll → inga mätningar som hoppar under drag.
+  const slots = Math.max(1, columnSlots ?? totalStageCount);
+  const gapTotal = `${(slots - 1) * 0.75}rem`;
+
   return (
     <div 
       ref={setNodeRef}
-      className="flex-shrink-0 flex flex-col transition-colors h-full"
-      style={{ 
-        width: 'clamp(200px, 22vw, 260px)',
-        minWidth: '180px',
-      }}
+      className="flex-none flex flex-col transition-colors h-full min-w-0"
+      style={{ width: `calc((100% - ${gapTotal}) / ${slots})` }}
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
-        style={{ backgroundColor: `${displayColor}55` }}
+        style={{ backgroundColor: `${displayColor}33` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
@@ -176,8 +181,8 @@ export const StatusColumn = memo(({
             className="font-medium text-xs text-white truncate flex-1 min-w-0"
           />
           <span 
-            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: `${displayColor}88` }}
+            className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full flex-shrink-0"
+            style={{ backgroundColor: `${displayColor}66` }}
           >
             {displayCount}
           </span>
@@ -209,7 +214,7 @@ export const StatusColumn = memo(({
 
       <div className="relative min-h-0 flex-1 rounded-lg bg-white/5 ring-1 ring-inset ring-white/10">
         {canScrollUp && (
-          <div className="absolute top-0 left-0 right-0 z-10 h-6 rounded-t-lg bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 z-10 h-6 rounded-t-lg bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
         )}
 
         <div 
@@ -251,7 +256,7 @@ export const StatusColumn = memo(({
             </div>
           )}
 
-          {displayCount === 0 && !isOver && (
+          {applications.length === 0 && !isStreaming && !isOver && (
             <div className="py-8 text-center text-xs text-white">
               Inga kandidater i detta steg
             </div>

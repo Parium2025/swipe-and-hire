@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useDragScroll } from '@/hooks/useDragScroll';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { usePullToDismiss } from '@/hooks/usePullToDismiss';
 import { useAuth } from '@/hooks/useAuth';
@@ -63,7 +62,6 @@ const JobDetails = () => {
   const useMobileView = isTouchDevice || device === 'mobile';
 
   const { setStageCount } = useKanbanLayout();
-  const dragScrollRef = useDragScroll<HTMLDivElement>();
   const pageRef = useRef<HTMLDivElement>(null);
 
   const handleBack = useCallback(() => {
@@ -653,14 +651,15 @@ const JobDetails = () => {
               },
             }}
           >
-             <div 
-               ref={dragScrollRef}
-               className="flex gap-3 pb-4 pt-2 overflow-x-auto select-none cursor-grab active:cursor-grabbing scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
-               style={{ 
-                 height: 'calc(100vh - 300px)',
-                 overflowY: 'hidden',
-                 WebkitOverflowScrolling: 'touch',
-               }}
+            {/* Samma tavelstruktur som Mina kandidater: kolumnerna delar bredden
+                jämnt utan horisontell scroll — inget hoppar under hover/drag. */}
+            <div 
+              className="flex gap-3 pb-4 pt-2 w-full"
+              style={{ 
+                height: 'calc(100vh - 300px)',
+                overflowX: 'hidden',
+                overflowY: 'hidden',
+              }}
             >
               {activeStages.map((status, stageIndex) => {
                 const config = stageSettings[status] || { label: status, color: '#0EA5E9', iconName: 'inbox', isCustom: false };
@@ -683,6 +682,7 @@ const JobDetails = () => {
                     stageConfig={config}
                     totalStageCount={activeStages.length}
                     stageIndex={stageIndex}
+                    columnSlots={activeStages.length + (activeStages.length < 8 ? 1 : 0)}
                     criteriaCount={criteriaCount}
                     isSelectionMode={isSelectionMode}
                     selectedApplicationIds={selectedApplicationIds}
@@ -694,12 +694,15 @@ const JobDetails = () => {
                 );
               })}
               {activeStages.length < 8 && (
-                <div className="flex-shrink-0 flex items-start pt-1">
+                <div
+                  className="flex-none flex flex-col h-full min-w-0"
+                  style={{ width: `calc((100% - ${(activeStages.length) * 0.75}rem) / ${activeStages.length + 1})` }}
+                >
                   <CreateJobStageDialog 
                     jobId={jobId || ''}
                     currentStageCount={activeStages.length}
                     trigger={
-                      <button className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                      <button className="w-full rounded-md px-2 py-1.5 mb-2 ring-1 ring-inset ring-white/10 bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 text-white text-xs font-medium flex-shrink-0">
                         <Plus className="h-3.5 w-3.5" />
                         Nytt steg
                       </button>
@@ -712,7 +715,11 @@ const JobDetails = () => {
             <DragOverlay modifiers={[snapCenterToCursor]} dropAnimation={null}>
               {activeApplication ? (
                 <div className="opacity-95 pointer-events-none">
-                  <ApplicationCardContent application={activeApplication} isDragging />
+                  <ApplicationCardContent
+                    application={activeApplication}
+                    isDragging
+                    criteriaCount={criteriaCount}
+                  />
                 </div>
               ) : null}
             </DragOverlay>
