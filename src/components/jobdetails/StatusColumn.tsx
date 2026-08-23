@@ -60,7 +60,10 @@ export const StatusColumn = memo(({
   stageIndex = 0,
 }: StatusColumnProps) => {
   const displayCount = Math.max(stageTotal ?? 0, applications.length);
-  const isStreaming = applications.length < displayCount;
+  // Visa bara "Laddar…" när bakgrundsströmmen faktiskt hämtar fler sidor.
+  // Annars blinkar texten till varje gång ett kort flyttas mellan steg
+  // (lokal flytt sker direkt, serverns totaler hinner efter någon sekund).
+  const isStreaming = Boolean(isStreamingPages) && applications.length < displayCount;
 
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
