@@ -239,12 +239,18 @@ export const StatusColumn = memo(({
 
           {bottomSpacer > 0 && <div data-spacer="bottom" style={{ height: bottomSpacer }} />}
 
+          {isStreaming && (
+            <div className="py-2 text-center text-[10px] text-white/70">
+              Laddar {applications.length} av {displayCount}…
+            </div>
+          )}
 
-          {applications.length === 0 && !isOver && (
+          {displayCount === 0 && !isOver && (
             <div className="py-8 text-center text-xs text-white">
               Inga kandidater i detta steg
             </div>
           )}
+
         </div>
 
         {canScrollDown && (
