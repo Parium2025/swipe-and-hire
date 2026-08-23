@@ -85,15 +85,18 @@ export const useJobFiltering = (jobs: FilterableJob[], options: UseJobFilteringO
   // 🔥 SCALE: serversidig sökning aktiveras automatiskt vid stora annonsvolymer
   const serverMode = jobs.length >= SERVER_SEARCH_THRESHOLD && !!searchTerm.trim();
 
+  // I personlig vy låser vi sökningen till mina egna annonser.
+  const effectiveRecruiterId = selectedRecruiterId ?? (scope === 'personal' ? ownerId : null);
+
   const { data: serverJobs, isFetching: isServerSearching } = useQuery({
-    queryKey: ['employer-jobs-search', searchTerm, sortBy, selectedRecruiterId],
+    queryKey: ['employer-jobs-search', searchTerm, sortBy, effectiveRecruiterId, scope],
     enabled: serverMode,
     staleTime: 60 * 1000,
     queryFn: async (): Promise<FilterableJob[]> => {
       const { data: hits, error } = await supabase.rpc('search_employer_jobs', {
         p_search: searchTerm,
         p_status: 'all',
-        p_recruiter_id: selectedRecruiterId,
+        p_recruiter_id: effectiveRecruiterId,
         p_sort: sortBy,
         p_limit: SERVER_SEARCH_LIMIT,
         p_offset: 0,
