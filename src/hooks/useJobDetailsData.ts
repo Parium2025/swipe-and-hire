@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCachedProfile, readPersistentCache, writePersistentCache } from '@/lib/performanceGuards';
 import { measurePerformance } from '@/lib/realtimePerformance';
-import { useEffect, useCallback, useRef, useState } from 'react';
+import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
