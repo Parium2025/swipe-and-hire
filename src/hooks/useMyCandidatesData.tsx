@@ -540,33 +540,35 @@ export function useMyCandidatesData(searchQuery: string = '', listId: string | n
   // Nätverkssvaret gör redan detta, men när listan kommer från localStorage
   // (instant-load) finns inget svar att haka på — då hann korten annars visa
   // en tom platta ~en halv sekund innan bilden dök upp.
+  // Körs SYNKRONT under render (inte i en effekt) så signeringen startar innan
+  // första målningen — annars hinner kortet ritas en gång utan media.
   const warmedMediaRef = useRef<Set<string>>(new Set());
-  useEffect(() => {
+  useMemo(() => {
     if (candidates.length === 0) return;
-    const jobs: Array<Promise<unknown>> = [];
+    const warmed = warmedMediaRef.current;
     for (const c of candidates) {
       const img = typeof c.profile_image_url === 'string' ? c.profile_image_url.trim() : '';
-      if (img && !warmedMediaRef.current.has(`i:${img}`)) {
-        warmedMediaRef.current.add(`i:${img}`);
-        jobs.push(prefetchMediaUrl(img, 'profile-image', 86400, AVATAR_TRANSFORM));
+      if (img && !warmed.has(`i:${img}`)) {
+        warmed.add(`i:${img}`);
+        void prefetchMediaUrl(img, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
       }
       const vid = c.is_profile_video && typeof c.video_url === 'string' ? c.video_url.trim() : '';
-      if (vid && !warmedMediaRef.current.has(`v:${vid}`)) {
-        warmedMediaRef.current.add(`v:${vid}`);
-        jobs.push(prefetchMediaUrl(vid, 'profile-video'));
+      if (vid && !warmed.has(`v:${vid}`)) {
+        warmed.add(`v:${vid}`);
+        void prefetchMediaUrl(vid, 'profile-video', MEDIA_URL_TTL);
       }
     }
     // Förvärm full-size porträtt för de översta raderna → profil-dialogen
     // öppnas med bilden på plats (aldrig initialer eller tom cirkel).
-    for (const c of candidates.slice(0, 12)) {
+    for (const c of candidates.slice(0, 24)) {
       const img = typeof c.profile_image_url === 'string' ? c.profile_image_url.trim() : '';
-      if (img && !warmedMediaRef.current.has(`f:${img}`)) {
-        warmedMediaRef.current.add(`f:${img}`);
-        jobs.push(prefetchMediaUrl(img, 'profile-image', 86400));
+      if (img && !warmed.has(`f:${img}`)) {
+        warmed.add(`f:${img}`);
+        void prefetchMediaUrl(img, 'profile-image', MEDIA_URL_TTL);
       }
     }
-    if (jobs.length > 0) void Promise.allSettled(jobs);
   }, [candidates]);
+
 
 
   // Real-time subscription for my_candidates changes (all users for team sync)
