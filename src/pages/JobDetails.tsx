@@ -112,6 +112,26 @@ const JobDetails = () => {
   
   const employerProfileImageUrl = useMediaUrl(job?.employer_profile?.profile_image_url, 'profile-image');
 
+  // Samma deterministiska förvärmning som /candidates och /my-candidates:
+  // text → media (porträtt/video) → CV-sammanfattningar.
+  const warmupRows = useMemo(
+    () =>
+      applications.map((a) => ({
+        id: a.id,
+        application_id: a.id,
+        applicant_id: a.applicant_id,
+        job_id: jobId ?? null,
+        cv_url: a.cv_url ?? null,
+        profile_image_url: a.profile_image_url ?? null,
+        video_url: a.video_url ?? null,
+        is_profile_video: a.is_profile_video ?? null,
+      })),
+    [applications, jobId]
+  );
+  useCandidatePageWarmup(warmupRows);
+
+
+
   // Load my_candidates map for rating updates — only re-fetch when applicant IDs actually change
   useEffect(() => {
     if (!user || applications.length === 0) return;
