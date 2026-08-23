@@ -3562,6 +3562,13 @@ export type Database = {
           list_id: string
         }[]
       }
+      count_my_candidates_per_stage: {
+        Args: { p_list_id?: string }
+        Returns: {
+          candidate_count: number
+          stage: string
+        }[]
+      }
       count_search_jobs: {
         Args: {
           p_category?: string
@@ -4180,46 +4187,27 @@ export type Database = {
           workplace_postal_code: string
         }[]
       }
-      search_my_candidates:
-        | {
-            Args: {
-              p_cursor_updated_at?: string
-              p_limit?: number
-              p_recruiter_id: string
-              p_search_query: string
-            }
-            Returns: {
-              applicant_id: string
-              application_id: string
-              created_at: string
-              job_id: string
-              my_candidate_id: string
-              notes: string
-              rating: number
-              stage: string
-              updated_at: string
-            }[]
-          }
-        | {
-            Args: {
-              p_cursor_updated_at?: string
-              p_limit?: number
-              p_list_id?: string
-              p_recruiter_id: string
-              p_search_query: string
-            }
-            Returns: {
-              applicant_id: string
-              application_id: string
-              created_at: string
-              job_id: string
-              my_candidate_id: string
-              notes: string
-              rating: number
-              stage: string
-              updated_at: string
-            }[]
-          }
+      search_my_candidates: {
+        Args: {
+          p_cursor_updated_at?: string
+          p_limit?: number
+          p_list_id?: string
+          p_recruiter_id: string
+          p_search_query: string
+          p_stage?: string
+        }
+        Returns: {
+          applicant_id: string
+          application_id: string
+          created_at: string
+          job_id: string
+          my_candidate_id: string
+          notes: string
+          rating: number
+          stage: string
+          updated_at: string
+        }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       switch_conversation_job_context: {

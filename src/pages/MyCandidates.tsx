@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { MyCandidateData, useMyCandidatesData } from '@/hooks/useMyCandidatesData';
+import { useMyCandidateStageCounts } from '@/hooks/useMyCandidateStageCounts';
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -137,7 +138,12 @@ const MyCandidates = () => {
     updateNotes: hookUpdateNotes,
     updateRating: hookUpdateRating,
     markAsViewed: hookMarkAsViewed,
-  } = useMyCandidatesData(debouncedSearchQuery, activeListId);
+    loadMoreStage,
+    hasMoreInStage,
+  } = useMyCandidatesData(debouncedSearchQuery, activeListId, activeStageOrder);
+
+  // Sanna totalsiffror per kolumn (räknas i databasen, inte på nedladdade rader)
+  const stageCounts = useMyCandidateStageCounts(activeListId, !isViewingColleague);
 
   // updateCandidatesCache is now provided by useBulkCandidateOps hook
 
@@ -764,6 +770,10 @@ const MyCandidates = () => {
                   isSelectionMode={isSelectionMode}
                   selectedCandidateIds={selectedCandidateIds}
                   onToggleSelect={toggleCandidateSelection}
+                  // Vid sökning gäller inte serverns totalsiffra — då räknar vi träffarna.
+                  totalCount={debouncedSearchQuery ? undefined : stageCounts?.[stage]}
+                  hasMore={hasMoreInStage(stage)}
+                  onLoadMore={loadMoreStage}
                 />
               );
             })}
