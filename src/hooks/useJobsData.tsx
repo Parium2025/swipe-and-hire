@@ -114,6 +114,26 @@ function writeJobsCache(userId: string, scope: string, orgId: string | null, job
   safeSetItem(key, JSON.stringify(cached));
 }
 
+/**
+ * Tar bort en annons ur localStorage-cachen direkt vid radering, så den aldrig
+ * kan "blinka tillbaka" vid en omladdning innan servern hunnit svara.
+ */
+export function removeJobFromJobsCache(userId: string, jobId: string): void {
+  for (const scope of ['personal', 'organization']) {
+    const key = cacheKeyFor(userId, scope);
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw) as CachedJobs;
+      if (!parsed || !Array.isArray(parsed.jobs)) continue;
+      parsed.jobs = parsed.jobs.filter((j) => j?.id !== jobId);
+      safeSetItem(key, JSON.stringify(parsed));
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 
 export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
   const { user, profile } = useAuth();
