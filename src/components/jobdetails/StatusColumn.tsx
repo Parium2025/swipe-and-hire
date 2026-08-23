@@ -3,7 +3,6 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
-import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import { SortableApplicationCard } from './ApplicationCard';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
