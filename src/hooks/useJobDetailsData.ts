@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCachedProfile, readPersistentCache, writePersistentCache } from '@/lib/performanceGuards';
 import { measurePerformance } from '@/lib/realtimePerformance';
-import { useEffect, useCallback, useRef, useState } from 'react';
+import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
@@ -343,6 +343,34 @@ export function useJobDetailsData(jobId: string | undefined) {
   const queryClient = useQueryClient();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  // ── Flytt-lås ───────────────────────────────────────────────────────────
+  // Exakt samma princip som i Mina kandidater: när ett kort dras till ett nytt
+  // steg får INGEN senare datakälla (omhämtning från läsreplika, realtidseko,
+  // bakgrundsström) skriva tillbaka det gamla steget. Utan detta hann kortet
+  // hoppa tillbaka till ursprungskolumnen och sedan vidare igen — den där
+  // blinkningen. Överskrivningen lever tills servern bekräftat samma status.
+  const pendingStatusRef = useRef<Map<string, { status: string; at: number }>>(new Map());
+  const countsTimerRef = useRef<number | undefined>(undefined);
+  const [pendingVersion, setPendingVersion] = useState(0);
+  const PENDING_TTL_MS = 15000;
+
+  useEffect(() => () => {
+    if (countsTimerRef.current !== undefined) window.clearTimeout(countsTimerRef.current);
+  }, []);
+
+  const setPendingStatus = useCallback((applicationId: string, status: string) => {
+    pendingStatusRef.current.set(applicationId, { status, at: Date.now() });
+    setPendingVersion(v => v + 1);
+  }, []);
+
+  const clearPendingStatus = useCallback((applicationId: string, confirmedStatus?: string) => {
+    const entry = pendingStatusRef.current.get(applicationId);
+    if (!entry) return;
+    if (confirmedStatus !== undefined && entry.status !== confirmedStatus) return;
+    pendingStatusRef.current.delete(applicationId);
+    setPendingVersion(v => v + 1);
+  }, []);
+
   // Job details query
   const jobQuery = useQuery({
     queryKey: ['job-details', jobId],
@@ -497,16 +525,30 @@ export function useJobDetailsData(jobId: string | undefined) {
         (payload) => {
           // Optimistically update the cache
           if (payload.eventType === 'UPDATE') {
+            const row: any = payload.new;
+            // Servern bekräftade flytten → släpp låset för just det steget.
+            clearPendingStatus(row.id, row.status);
             queryClient.setQueryData(['job-applications', jobId], (old: JobApplication[] | undefined) => {
               if (!old) return old;
-              return old.map(app => 
-                app.id === payload.new.id 
-                  ? { ...app, ...payload.new }
-                  : app
-              );
+              const next = old.map(app => {
+                if (app.id !== row.id) return app;
+                // Bara kolumner som faktiskt finns på raden får skrivas över.
+                // Tidigare spreds hela råraden in, vilket nollade berikade fält
+                // (betyg, media, kriterier) och fick kortet att blinka om.
+                return {
+                  ...app,
+                  status: row.status ?? app.status,
+                  viewed_at: row.viewed_at ?? app.viewed_at,
+                  custom_answers: row.custom_answers ?? app.custom_answers,
+                };
+              });
+              if (jobId) writeJobAppsCache(jobId, next);
+              return next;
             });
-            // Statusbyten påverkar stegtotalerna.
-            queryClient.invalidateQueries({ queryKey: ['job-stage-counts', jobId] });
+            // Statusbyten påverkar stegtotalerna — men vänta ut pågående flytt.
+            if (countsTimerRef.current === undefined) {
+              queryClient.invalidateQueries({ queryKey: ['job-stage-counts', jobId] });
+            }
           } else {
             // INSERT/DELETE → debouncad omhämtning
             scheduleInvalidate();
@@ -598,9 +640,17 @@ export function useJobDetailsData(jobId: string | undefined) {
       return updated;
     });
     if (updates.status) {
-      queryClient.invalidateQueries({ queryKey: ['job-stage-counts', jobId] });
+      // Lås steget lokalt tills servern bekräftat det.
+      setPendingStatus(applicationId, updates.status as string);
+      // Räkna om totalerna först när flytten hunnit landa — en omedelbar
+      // omhämtning läser ofta upp gamla siffror och fick rubrikerna att hoppa.
+      if (countsTimerRef.current !== undefined) window.clearTimeout(countsTimerRef.current);
+      countsTimerRef.current = window.setTimeout(() => {
+        countsTimerRef.current = undefined;
+        queryClient.invalidateQueries({ queryKey: ['job-stage-counts', jobId] });
+      }, 1200);
     }
-  }, [queryClient, jobId]);
+  }, [queryClient, jobId, setPendingStatus]);
 
   // Helper to update job locally
   const updateJobLocally = useCallback((updates: Partial<JobPosting>) => {
@@ -609,6 +659,23 @@ export function useJobDetailsData(jobId: string | undefined) {
       return { ...old, ...updates };
     });
   }, [queryClient, jobId]);
+
+  // Lägg flytt-låset ovanpå ALLA datakällor (query, ström, realtid) så att en
+  // kolumn aldrig kan visa det gamla steget efter att kortet släppts.
+  const applicationsWithPending = useMemo(() => {
+    const rows = applicationsQuery.data ?? [];
+    const pending = pendingStatusRef.current;
+    if (pending.size === 0) return rows;
+    const now = Date.now();
+    return rows.map(app => {
+      const entry = pending.get(app.id);
+      if (!entry) return app;
+      if (now - entry.at > PENDING_TTL_MS) return app;
+      if (app.status === entry.status) return app;
+      return { ...app, status: entry.status as JobApplication['status'] };
+    });
+    // pendingVersion tvingar omräkning när låset ändras.
+  }, [applicationsQuery.data, pendingVersion]);
 
   // Refetch both
   const refetch = useCallback(() => {
@@ -619,7 +686,7 @@ export function useJobDetailsData(jobId: string | undefined) {
 
   return {
     job: jobQuery.data ?? null,
-    applications: applicationsQuery.data ?? [],
+    applications: applicationsWithPending,
     stageTotals,
     totalApplications,
     loadedCount,
