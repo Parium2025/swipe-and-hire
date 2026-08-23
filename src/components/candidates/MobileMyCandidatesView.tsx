@@ -273,7 +273,7 @@ interface MobileMyCandidatesViewProps {
   /** Finns fler kandidater att hämta i steget? */
   hasMoreInStage?: (stage: string) => boolean;
   /** Hämtar nästa sida när användaren scrollat nära botten. */
-  onLoadMore?: () => void;
+  onLoadMore?: (stage: string) => void;
 }
 
 export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
@@ -440,7 +440,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       // Först: visa fler av de rader vi redan har. När de tar slut: hämta nästa sida.
       setRenderLimit(prev => (prev < stageCandidates.length ? prev + RENDER_STEP : prev));
       if (renderLimit >= stageCandidates.length && hasMoreInStage?.(activeTab)) {
-        onLoadMore?.();
+        onLoadMore?.(activeTab);
       }
     },
     [stageCandidates.length, renderLimit, hasMoreInStage, activeTab, onLoadMore],

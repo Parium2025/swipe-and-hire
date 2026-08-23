@@ -28,8 +28,8 @@ export interface StageColumnProps {
   totalCount?: number;
   /** Finns fler kandidater att hämta i den här kolumnen? */
   hasMore?: boolean;
-  /** Anropas när användaren scrollat nära botten. */
-  onLoadMore?: () => void;
+  /** Anropas när användaren scrollat nära botten (med kolumnens steg). */
+  onLoadMore?: (stage: string) => void;
 }
 
 export const StageColumn = ({
@@ -78,6 +78,8 @@ export const StageColumn = ({
   // Håll senaste callbacken i en ref så scroll-lyssnaren aldrig behöver bindas om.
   const loadMoreRef = useRef(onLoadMore);
   loadMoreRef.current = onLoadMore;
+  const stageRef = useRef(stage);
+  stageRef.current = stage;
   const hasMoreRef = useRef(hasMore);
   hasMoreRef.current = hasMore;
 
@@ -95,7 +97,7 @@ export const StageColumn = ({
     // Ladda nästa sida i god tid — 600 px innan botten — så att nya kort redan
     // ligger på plats när användaren når dem.
     if (hasMoreRef.current && el.scrollTop + el.clientHeight >= el.scrollHeight - 600) {
-      loadMoreRef.current?.();
+      loadMoreRef.current?.(stageRef.current);
     }
   }, []);
 
