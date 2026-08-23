@@ -216,12 +216,14 @@ ApplicationPatterns.displayName = 'ApplicationPatterns';
 const RecruitmentTimeCard = memo(({ data }: { data: RecruitmentTime }) => {
   if (data.sample_count === 0) return null;
 
+  const lowSample = data.sample_count < 3;
+
   return (
     <Card className="bg-white/5 border-white/10 overflow-hidden">
       <CardContent className="p-5">
         <div className="flex items-center gap-1.5 mb-4">
           <Hourglass className="h-3.5 w-3.5 text-white shrink-0" />
-          <h3 className="text-sm font-medium text-white">Genomsnittlig rekryteringstid</h3>
+          <h3 className="text-sm font-medium text-white">Svarstid till intervju</h3>
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -229,10 +231,11 @@ const RecruitmentTimeCard = memo(({ data }: { data: RecruitmentTime }) => {
                   <Info className="h-3.5 w-3.5" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[260px]">
+              <TooltipContent side="top" className="max-w-[280px]">
                 <p className="text-xs leading-relaxed">
-                  Mäter tiden från ansökan till intervjubokning. Kortare tid = snabbare rekryteringsprocess.
-                  Baserat på {data.sample_count} genomförda intervjubokningar.
+                  Hur lång tid det tar från att en kandidat skickar sin ansökan tills ni bokar in en intervju.
+                  Mäts bara på ansökningar som faktiskt lett till en bokad intervju under perioden
+                  {` (${data.sample_count} st)`}. Kortare tid = snabbare process och nöjdare kandidater.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -241,23 +244,30 @@ const RecruitmentTimeCard = memo(({ data }: { data: RecruitmentTime }) => {
 
         <div className="text-center mb-4">
           <p className="text-3xl font-bold text-white tracking-tight">{formatDuration(data.avg_seconds)}</p>
-          <p className="text-[11px] text-white mt-1">genomsnitt från ansökan till intervjubokning</p>
+          <p className="text-[11px] text-white mt-1">i snitt från ansökan till bokad intervju</p>
+          {lowSample && (
+            <p className="text-[11px] text-amber-300 mt-2">
+              Preliminärt värde — baserat på {data.sample_count === 1 ? 'endast 1 intervjubokning' : `endast ${data.sample_count} intervjubokningar`}
+            </p>
+          )}
         </div>
 
-        <div className="flex gap-2">
-          <div className="flex-1 rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-2 text-center">
-            <p className="text-[10px] text-white mb-0.5">Snabbast</p>
-            <p className="text-sm font-bold text-emerald-400">{formatDuration(data.min_seconds)}</p>
+        {!lowSample && (
+          <div className="flex gap-2">
+            <div className="flex-1 rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-2 text-center">
+              <p className="text-[10px] text-white mb-0.5">Snabbast</p>
+              <p className="text-sm font-bold text-emerald-400">{formatDuration(data.min_seconds)}</p>
+            </div>
+            <div className="flex-1 rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-2 text-center">
+              <p className="text-[10px] text-white mb-0.5">Långsammast</p>
+              <p className="text-sm font-bold text-amber-400">{formatDuration(data.max_seconds)}</p>
+            </div>
+            <div className="flex-1 rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-2 text-center">
+              <p className="text-[10px] text-white mb-0.5">Datapunkter</p>
+              <p className="text-sm font-bold text-white">{data.sample_count}</p>
+            </div>
           </div>
-          <div className="flex-1 rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-2 text-center">
-            <p className="text-[10px] text-white mb-0.5">Långsammast</p>
-            <p className="text-sm font-bold text-amber-400">{formatDuration(data.max_seconds)}</p>
-          </div>
-          <div className="flex-1 rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-2 text-center">
-            <p className="text-[10px] text-white mb-0.5">Datapunkter</p>
-            <p className="text-sm font-bold text-white">{data.sample_count}</p>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
