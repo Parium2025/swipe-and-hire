@@ -18,6 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -167,6 +168,16 @@ export function CandidatesTable({
       },
       staleTime: Infinity,
     });
+
+    // Dialogen visar porträttet UTAN transform (full storlek). Listan värmer bara
+    // avatar-varianten, så utan detta hämtades och avkodades bilden först när
+    // dialogen öppnades — det syntes som en snabb inladdning.
+    const img = typeof application.profile_image_url === 'string' ? application.profile_image_url.trim() : '';
+    if (img) void prefetchMediaUrl(img, 'profile-image', 86400).catch(() => {});
+    const vid = application.is_profile_video && typeof application.video_url === 'string'
+      ? application.video_url.trim()
+      : '';
+    if (vid) void prefetchMediaUrl(vid, 'profile-video', 86400).catch(() => {});
 
     prefetchSingle(application);
   }, [user, queryClient, prefetchSingle]);

@@ -41,7 +41,7 @@ export async function hydrateMyCandidateRows(
   const applicantIds = [...new Set(rows.map(r => r.applicant_id))];
 
   // Ansökningarna (fryst ögonblicksbild) + media + aktivitet hämtas parallellt.
-  const [appsRes, mediaRes, activityRes] = await Promise.all([
+  const [appsRes, mediaRes, activityRes, ratingsRes] = await Promise.all([
     supabase.from('job_applications').select(APPLICATION_FIELDS).in('id', applicationIds),
     supabase.rpc('get_applicant_profile_media_batch', {
       p_applicant_ids: applicantIds,
@@ -51,12 +51,24 @@ export async function hydrateMyCandidateRows(
       p_applicant_ids: applicantIds,
       p_employer_id: userId,
     }),
+    // Betyget är per KANDIDAT (candidate_ratings), inte per rad i my_candidates.
+    // Ligger samma kandidat i två listor hade bara den rad man satte betyg på
+    // fått värdet — den andra visade noll stjärnor i dialogen.
+    supabase
+      .from('candidate_ratings')
+      .select('applicant_id, rating')
+      .eq('recruiter_id', userId)
+      .in('applicant_id', applicantIds),
   ]);
 
   if (appsRes.error) throw appsRes.error;
   // Media är en obligatorisk del av kandidatkortet. Ett tillfälligt RPC-fel får
   // inte tyst bli null och sedan cachas som initialer.
   if (mediaRes.error) throw mediaRes.error;
+
+  const ratingMap = new Map<string, number>(
+    (ratingsRes.data || []).map((r: any) => [r.applicant_id, r.rating as number]),
+  );
 
   const appMap = new Map((appsRes.data || []).map(app => [app.id, app]));
 
@@ -108,7 +120,7 @@ export async function hydrateMyCandidateRows(
       job_id: row.job_id,
       stage: row.stage,
       notes: row.notes,
-      rating: row.rating || 0,
+      rating: ratingMap.get(row.applicant_id) ?? row.rating ?? 0,
       created_at: row.created_at,
       updated_at: row.updated_at,
       first_name: app?.first_name || null,

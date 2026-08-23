@@ -316,6 +316,18 @@ export function useMediaUrl(
   }, [storagePath, mediaType, transformKey]);
   
   const [url, setUrl] = useState<string | null>(cachedUrl);
+
+  // Hooken lever kvar när man byter kandidat i en öppen dialog (komponenten
+  // monteras inte om). useState-initialvärdet gäller bara första mount, så utan
+  // den här synkroniseringen ritades första framen efter bytet UTAN bild — även
+  // när URL:en redan låg i cachen. Det var den kvarvarande "laddas upp"-känslan.
+  const mediaKeyRef = useRef<string | null>(null);
+  const mediaKey = storagePath ? `${storagePath}|${mediaType}|${transformKey}` : null;
+  if (mediaKey !== mediaKeyRef.current) {
+    mediaKeyRef.current = mediaKey;
+    setUrl(cachedUrl);
+  }
+
   const mountedRef = useRef(true);
   const [retryNonce, setRetryNonce] = useState(0);
   const retryCountRef = useRef(0);
