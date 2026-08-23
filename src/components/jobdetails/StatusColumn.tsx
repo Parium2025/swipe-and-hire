@@ -60,6 +60,7 @@ export const StatusColumn = memo(({
   targetStageLabel,
   onMoveCandidatesAndDelete,
   stageIndex = 0,
+  columnSlots,
 }: StatusColumnProps) => {
   const displayCount = Math.max(stageTotal ?? 0, applications.length);
   // Visa bara "Laddar…" när bakgrundsströmmen faktiskt hämtar fler sidor.
