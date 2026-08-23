@@ -1,10 +1,9 @@
-import { memo, useMemo, useEffect, useRef } from 'react';
+import { memo, useMemo, useEffect } from 'react';
 import { Briefcase, Heart, UserPlus, MessageSquare } from 'lucide-react';
-import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { isEmployerJobActive } from '@/lib/jobStatus';
+import { useEmployerJobsCounts } from '@/hooks/useEmployerScaleStats';
 import { StatsCarousel } from './StatsCarousel';
 import type { StatData } from './StatsCarousel';
 
@@ -96,11 +95,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       }, 1200);
     };
     // Bara ansökningar på våra egna annonser är relevanta.
-    const onApplication = (payload: { new?: Record<string, unknown>; old?: Record<string, unknown> }) => {
-      const jobId = (payload.new?.job_id ?? payload.old?.job_id) as string | undefined;
-      if (jobId && jobIdsRef.current.length > 0 && !jobIdsRef.current.includes(jobId)) return;
-      invalidateStats();
-    };
+    const onApplication = () => invalidateStats();
     const msgChannel = supabase
       .channel(`employer-conv-messages-${user.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
