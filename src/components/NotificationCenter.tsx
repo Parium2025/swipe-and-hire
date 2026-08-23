@@ -214,20 +214,28 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
   const bodyTruncated = useTruncation(bodyRef);
   const [expanded, setExpanded] = useState(false);
   const canExpand = titleTruncated || bodyTruncated || expanded;
+  const reportable = isReportable(item.kind === 'error' || item.kind === 'warning', item.title, item.body) && !item.route;
+
+  const activate = () => {
+    if (!item.is_read) onRead(item.id);
+    if (item.route) { onNavigate(item.route); return; }
+    if (canExpand) setExpanded(v => !v);
+  };
 
   return (
-    <motion.button
+    <motion.div
+      role="button"
+      tabIndex={0}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.15 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => {
-        if (!item.is_read) onRead(item.id);
-        if (item.route) { onNavigate(item.route); return; }
-        if (canExpand) setExpanded(v => !v);
+      onClick={activate}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       }}
-      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg ${
+      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg cursor-pointer ${
         item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
       }`}
     >
@@ -255,9 +263,24 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
               {expanded ? 'Visa mindre' : 'Visa mer'}
             </span>
           )}
+          {reportable && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!item.is_read) onRead(item.id);
+                onNavigate(supportReportRoute(item.title, item.body));
+              }}
+              className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+            >
+              <Flag className="h-2.5 w-2.5" strokeWidth={2} />
+              Rapportera
+            </button>
+          )}
         </div>
       </div>
-    </motion.button>
+    </motion.div>
+
   );
 }
 
