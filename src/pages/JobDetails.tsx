@@ -14,6 +14,8 @@ import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
+
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
