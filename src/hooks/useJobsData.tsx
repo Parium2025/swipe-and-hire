@@ -39,6 +39,8 @@ export interface JobPosting {
   created_at: string;
   updated_at: string;
   expires_at?: string;
+  published_at?: string | null;
+
   employer_id: string;
   job_image_url?: string;
   company_logo_url?: string;
