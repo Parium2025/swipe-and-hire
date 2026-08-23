@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCandidateRowMediaWarmup } from '@/hooks/useCandidateRowMediaWarmup';
 import { useCandidateRowDetailsWarmup } from '@/hooks/useCandidateRowDetailsWarmup';
+import { useCandidateRowProfileWarmup } from '@/hooks/useCandidateRowProfileWarmup';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 
 /**
