@@ -85,6 +85,12 @@ export function useSidebarRoutePrefetch() {
       }
       case '/my-jobs': {
         // /my-jobs → useJobsData({ scope: 'personal' }) → ['jobs', 'personal', orgId, userId]
+        // 🔒 SCALE: useJobsData äger den kompletta listan (progressiv keyset-
+        // strömning utan tak). Finns redan data i cachen får vi ALDRIG skriva
+        // en trunkerad prefetch ovanpå den — då krymper listan till 1 000 rader
+        // och UI:t visar "1 000 av 5 000". Prefetchen är alltså bara en
+        // kallstartsvärmare.
+        if (queryClient.getQueryData(['jobs', 'personal', orgId, user.id])) break;
         queryClient.prefetchQuery({
           queryKey: ['jobs', 'personal', orgId, user.id],
           queryFn: async () => {
@@ -101,7 +107,8 @@ export function useSidebarRoutePrefetch() {
               .is('deleted_at', null)
               .eq('employer_id', user.id)
               .order('created_at', { ascending: false })
-              .range(0, 999);
+              .order('id', { ascending: false })
+              .limit(200);
             if (error) throw error;
             return data ?? [];
           },
@@ -111,6 +118,7 @@ export function useSidebarRoutePrefetch() {
         });
         break;
       }
+
       case '/dashboard': {
         // /dashboard → useJobsData({ scope: 'organization' }) → ['jobs', 'organization', orgId, userId]
         // Speglar fetchern i useJobsData: först org-medlemmar → sedan deras jobb.
