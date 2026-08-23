@@ -4,6 +4,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useCallback, useRef } from 'react';
 import { imageCache } from '@/lib/imageCache';
 import { fetchAllPages } from '@/lib/fetchAllPages';
+import { getIsOnline } from '@/lib/connectivityManager';
+import { enqueueHide, dequeueHide, pushHide, getQueuedHiddenIds } from '@/lib/applicationHideQueue';
+
 
 import {
   MY_APPLICATIONS_SELECT,
