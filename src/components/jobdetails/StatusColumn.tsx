@@ -237,9 +237,11 @@ export const StatusColumn = memo(({
             </div>
           )}
 
-          {applications.length === 0 && !isStreaming && !isOver && (
+          {/* Tomt steg: samma ruta hela tiden — texten byts, inget monteras
+              in eller ut. Det var in/ut-monteringen som blinkade vid släpp. */}
+          {applications.length === 0 && !isStreaming && (
             <div className="py-8 text-center text-xs text-white">
-              Inga kandidater i detta steg
+              {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
             </div>
           )}
 
