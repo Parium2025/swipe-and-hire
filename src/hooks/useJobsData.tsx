@@ -402,12 +402,28 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           ? { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const, filter: jobFilter }
           : { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const },
         (payload) => {
+          const listKey = ['jobs', scope, profile?.organization_id, user?.id];
+          const dropRow = (id?: string) => {
+            if (!id) return;
+            queryClient.setQueryData(listKey, (oldData: JobPosting[] | undefined) =>
+              oldData ? oldData.filter(job => job.id !== id) : oldData
+            );
+            if (user?.id) removeJobFromJobsCache(user.id, id);
+          };
+
           if (payload.eventType === 'UPDATE') {
             // Serverns applications_count är sanning. Släpp eventuella optimistiska
             // deltas för samma jobb, annars adderas de ovanpå ett redan uppdaterat
             // värde och siffran dubbelräknas tills nästa event kommer in.
             if (payload.new?.id) pendingDeltas.delete(payload.new.id as string);
-            queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
+            // Soft-delete kommer in som UPDATE. Utan detta skulle raden ligga
+            // kvar i den sammanslagna listan tills nästa full genomströmning.
+            if ((payload.new as { deleted_at?: string | null })?.deleted_at) {
+              dropRow(payload.new.id as string);
+              scheduleStatsInvalidate();
+              return;
+            }
+            queryClient.setQueryData(listKey, (oldData: JobPosting[] | undefined) => {
               if (!oldData) return oldData;
               return oldData.map(job =>
                 job.id === payload.new.id
@@ -417,9 +433,11 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             });
             scheduleStatsInvalidate();
           } else {
+            if (payload.eventType === 'DELETE') dropRow((payload.old as { id?: string })?.id);
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             scheduleStatsInvalidate();
           }
+
         }
       )
       .subscribe();
