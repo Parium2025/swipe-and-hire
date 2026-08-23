@@ -67,7 +67,7 @@ export const StatusColumn = memo(({
   // (lokal flytt sker direkt, serverns totaler hinner efter någon sekund).
   const isStreaming = Boolean(isStreamingPages) && applications.length < displayCount;
 
-  const [liveColor, setLiveColor] = useState<string | null>(null);
+  const [liveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -213,7 +213,7 @@ export const StatusColumn = memo(({
         >
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
-              <div className="rounded-md bg-white/10 ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
+              <div className="rounded-md bg-white/10 ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white">
                 Släpp här
               </div>
             </div>
