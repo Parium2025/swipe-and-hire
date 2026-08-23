@@ -28,8 +28,8 @@ export interface StageColumnProps {
   totalCount?: number;
   /** Finns fler kandidater att hämta i den här kolumnen? */
   hasMore?: boolean;
-  /** Anropas när användaren scrollat nära botten. */
-  onLoadMore?: () => void;
+  /** Anropas när användaren scrollat nära botten (med kolumnens steg). */
+  onLoadMore?: (stage: string) => void;
 }
 
 export const StageColumn = ({
