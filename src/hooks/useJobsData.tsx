@@ -65,6 +65,12 @@ interface UseJobsDataOptions {
   enableRealtime?: boolean;
 }
 
+// 🔒 Bakgrundsströmning: en aktiv ström per query-nyckel, med avsvalning efteråt
+// så att sidbyten/refetches inte startar om hela genomströmningen i onödan.
+const jobStreamRegistry = new Map<string, { running: boolean; completedAt: number }>();
+const STREAM_COOLDOWN_MS = 60 * 1000;
+
+
 // 🔥 localStorage cache for employer jobs - instant-load
 // v4: egen nyckel per scope (personal/organization) + kravet på published_at,
 // så gamla payloads (före published_at fanns) aldrig kan felklassa annonser.
