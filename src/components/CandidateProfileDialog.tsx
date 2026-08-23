@@ -81,7 +81,7 @@ interface CandidateProfileDialogProps {
   candidateIndex?: number;
   candidateTotal?: number;
   /** Intilliggande kandidater (föregående/nästa) för förladdning av porträtt. */
-  adjacentMedia?: Array<{ profile_image_url?: string | null } | null | undefined>;
+  adjacentMedia?: Array<{ profile_image_url?: string | null; video_url?: string | null } | null | undefined>;
 }
 
 
