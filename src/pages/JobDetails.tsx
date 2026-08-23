@@ -653,14 +653,15 @@ const JobDetails = () => {
               },
             }}
           >
-             <div 
-               ref={dragScrollRef}
-               className="flex gap-3 pb-4 pt-2 overflow-x-auto select-none cursor-grab active:cursor-grabbing scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
-               style={{ 
-                 height: 'calc(100vh - 300px)',
-                 overflowY: 'hidden',
-                 WebkitOverflowScrolling: 'touch',
-               }}
+            {/* Samma tavelstruktur som Mina kandidater: kolumnerna delar bredden
+                jämnt utan horisontell scroll — inget hoppar under hover/drag. */}
+            <div 
+              className="flex gap-3 pb-4 pt-2 w-full"
+              style={{ 
+                height: 'calc(100vh - 300px)',
+                overflowX: 'hidden',
+                overflowY: 'hidden',
+              }}
             >
               {activeStages.map((status, stageIndex) => {
                 const config = stageSettings[status] || { label: status, color: '#0EA5E9', iconName: 'inbox', isCustom: false };
