@@ -62,10 +62,12 @@ export const useEmployerBackgroundSync = () => {
     // aldrig skriva sin begränsade 18-raders preload till samma queryKey:
     // då ersätts t.ex. 48 laddade annonser med 14 aktiva + 4 utgångna, medan
     // serverräknaren fortfarande korrekt visar 34 utgångna.
-    await queryClient.prefetchQuery({
-      queryKey: ['jobs', 'personal', orgId, userId],
-      queryFn: async () => {
-        const { data, error } = await supabase
+    const PAGE_SIZE = 1000;
+    const HARD_CAP = 2_000;
+    const jobs: any[] = [];
+
+    for (let from = 0; from < HARD_CAP; from += PAGE_SIZE) {
+      const { data, error } = await supabase
           .from('job_postings')
           .select(`
             *,
@@ -76,13 +78,16 @@ export const useEmployerBackgroundSync = () => {
           `)
           .eq('employer_id', userId)
           .is('deleted_at', null)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .range(from, Math.min(from + PAGE_SIZE - 1, HARD_CAP - 1));
 
-        if (error) throw error;
-        return data ?? [];
-      },
-      staleTime: 10 * 60 * 1000,
-    });
+      if (error) throw error;
+      const batch = data ?? [];
+      jobs.push(...batch);
+      if (batch.length < PAGE_SIZE) break;
+    }
+
+    queryClient.setQueryData(['jobs', 'personal', orgId, userId], jobs);
   }, [queryClient]);
 
   // 📅 Preload arbetsgivarens intervjuer (alltid hämta färsk data - realtime synkar)
