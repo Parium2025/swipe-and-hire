@@ -2644,7 +2644,8 @@ const MobileJobWizard = ({
           title: "Jobbannons skapad!",
           description: "Din annons är nu publicerad och synlig för jobbsökare.",
           variant: "success",
-          duration: 5000
+          duration: 5000,
+          route: jobPost?.id ? `/job/${jobPost.id}` : '/my-jobs'
         });
       }, 320);
 
