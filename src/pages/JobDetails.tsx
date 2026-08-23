@@ -138,29 +138,32 @@ const JobDetails = () => {
 
 
 
-  // Load my_candidates map for rating updates — only re-fetch when applicant IDs actually change
-  useEffect(() => {
-    if (!user || applications.length === 0) return;
-    
-    const applicantIds = applications.map(a => a.applicant_id).sort();
-    const idsHash = applicantIds.join(',');
-    if (idsHash === myCandidatesApplicantIdsRef.current) return;
-    myCandidatesApplicantIdsRef.current = idsHash;
-    
-    const loadMyCandidatesMap = async () => {
-      const { data } = await supabase
-        .from('my_candidates')
-        .select('id, applicant_id')
-        .eq('recruiter_id', user.id)
-        .in('applicant_id', applicantIds);
-      
-      const candidateIdsMap = new Map<string, string>();
-      (data || []).forEach(mc => candidateIdsMap.set(mc.applicant_id, mc.id));
-      setMyCandidatesMap(candidateIdsMap);
-    };
-    
-    loadMyCandidatesMap();
-  }, [user, applications]);
+  // Karta över vilka sökande som redan ligger i en kandidatlista. Ligger i
+  // React Query så realtidshändelser på my_candidates kan invalidera den.
+  const applicantIdsKey = useMemo(
+    () => applications.map(a => a.applicant_id).sort().join(','),
+    [applications]
+  );
+  const { data: myCandidatesMap = new Map<string, string>() } = useQuery({
+    queryKey: ['job-my-candidates-map', jobId, applicantIdsKey],
+    enabled: !!user && applications.length > 0,
+    staleTime: 60 * 1000,
+    gcTime: Infinity,
+    queryFn: async () => {
+      const ids = applicantIdsKey.split(',').filter(Boolean);
+      const map = new Map<string, string>();
+      for (let i = 0; i < ids.length; i += 200) {
+        const { data } = await supabase
+          .from('my_candidates')
+          .select('id, applicant_id')
+          .eq('recruiter_id', user!.id)
+          .in('applicant_id', ids.slice(i, i + 200));
+        (data || []).forEach(mc => map.set(mc.applicant_id, mc.id));
+      }
+      return map;
+    },
+  });
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
