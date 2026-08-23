@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import type { JobPosting } from '@/hooks/useJobsData';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { useAuth } from '@/hooks/useAuth';
 
 
 interface MobileJobCardProps {
