@@ -621,9 +621,17 @@ export function useJobDetailsData(jobId: string | undefined) {
       return updated;
     });
     if (updates.status) {
-      queryClient.invalidateQueries({ queryKey: ['job-stage-counts', jobId] });
+      // Lås steget lokalt tills servern bekräftat det.
+      setPendingStatus(applicationId, updates.status as string);
+      // Räkna om totalerna först när flytten hunnit landa — en omedelbar
+      // omhämtning läser ofta upp gamla siffror och fick rubrikerna att hoppa.
+      if (countsTimerRef.current !== undefined) window.clearTimeout(countsTimerRef.current);
+      countsTimerRef.current = window.setTimeout(() => {
+        countsTimerRef.current = undefined;
+        queryClient.invalidateQueries({ queryKey: ['job-stage-counts', jobId] });
+      }, 1200);
     }
-  }, [queryClient, jobId]);
+  }, [queryClient, jobId, setPendingStatus]);
 
   // Helper to update job locally
   const updateJobLocally = useCallback((updates: Partial<JobPosting>) => {
