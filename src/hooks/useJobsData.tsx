@@ -67,7 +67,7 @@ interface UseJobsDataOptions {
 
 // 🔒 Bakgrundsströmning: en aktiv ström per query-nyckel, med avsvalning efteråt
 // så att sidbyten/refetches inte startar om hela genomströmningen i onödan.
-const jobStreamRegistry = new Map<string, { running: boolean; completedAt: number }>();
+const jobStreamRegistry = new Map<string, { running: boolean; completedAt: number; generation?: number }>();
 const STREAM_COOLDOWN_MS = 60 * 1000;
 
 
@@ -218,9 +218,46 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
 
       const first = await fetchPage(null, FIRST_PAGE);
 
+      // 🔒 INVARIANT: listan i cachen får ALDRIG krympa på grund av en
+      // partiell hämtning. Det var grundorsaken till hela "visar 4 av 34"-
+      // familjen: queryFn returnerade sida 1 (200 rader) och React Query
+      // ersatte då en redan färdigströmmad lista på tusentals rader.
+      // Här slår vi istället ihop sida 1 med det som redan finns, och tar bort
+      // rader som bevisligen försvunnit (de som ligger inom sida 1:s
+      // tidsfönster men saknas i svaret = raderade på servern).
+      const mergeWithCache = (freshFirstPage: JobPosting[]): JobPosting[] => {
+        const prev = queryClient.getQueryData<JobPosting[]>(queryKey);
+        if (!prev || prev.length === 0) return freshFirstPage;
+
+        const freshIds = new Set(freshFirstPage.map((j) => j.id));
+        // Nedre gräns för det fönster servern precis bekräftade.
+        const windowFloor = freshFirstPage.length > 0
+          ? freshFirstPage[freshFirstPage.length - 1].created_at
+          : null;
+        const isFullDataset = freshFirstPage.length < FIRST_PAGE;
+
+        const byId = new Map<string, JobPosting>();
+        for (const row of freshFirstPage) byId.set(row.id, row);
+        for (const row of prev) {
+          if (byId.has(row.id)) continue;
+          // Hela datasetet rymdes i ett svar → allt som saknas är raderat.
+          if (isFullDataset) continue;
+          // Inom det bekräftade fönstret men inte i svaret → raderat.
+          if (windowFloor && row.created_at >= windowFloor && !freshIds.has(row.id)) continue;
+          byId.set(row.id, row);
+        }
+
+        return Array.from(byId.values()).sort((a, b) => {
+          if (a.created_at === b.created_at) return a.id < b.id ? 1 : -1;
+          return a.created_at < b.created_at ? 1 : -1;
+        });
+      };
+
+      const merged = mergeWithCache(first);
+
       if (first.length < FIRST_PAGE) {
-        writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, first);
-        return first;
+        writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, merged);
+        return merged;
       }
 
       // 🔒 En ström per nyckel. Utan detta startar varje sidbyte/refetch
@@ -230,16 +267,19 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       const streamKey = JSON.stringify(queryKey);
       const now = Date.now();
       const state = jobStreamRegistry.get(streamKey);
-      if (state?.running) return first;
-      if (state?.completedAt && now - state.completedAt < STREAM_COOLDOWN_MS) return first;
-      jobStreamRegistry.set(streamKey, { running: true, completedAt: state?.completedAt ?? 0 });
+      if (state?.running) return merged;
+      if (state?.completedAt && now - state.completedAt < STREAM_COOLDOWN_MS) return merged;
+      const generation = (state?.generation ?? 0) + 1;
+      jobStreamRegistry.set(streamKey, { running: true, completedAt: state?.completedAt ?? 0, generation });
 
       // Strömma resten i bakgrunden — blockerar aldrig första renderingen.
       // Starta först på nästa tick: annars kan en snabb batch skriva sin längre
-      // lista INNAN React Query hunnit committa `first`, som då skriver över
-      // allt med bara 200 rader ("visar 4 av 34"-buggen).
+      // lista INNAN React Query hunnit committa `first`.
       setTimeout(() => {
         void (async () => {
+        // Bara den senaste strömmen får skriva. En äldre ström som fortfarande
+        // rullar när scope/konto bytts kan aldrig skriva över färsk data.
+        const isCurrent = () => jobStreamRegistry.get(streamKey)?.generation === generation;
         try {
 
           let all = [...first];
@@ -249,6 +289,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           // Merge-uppdatering: behåll allt som redan ligger i cachen (t.ex.
           // realtime-patchar) och lägg bara till nya rader.
           const commit = (rows: JobPosting[]) => {
+            if (!isCurrent()) return;
             queryClient.setQueryData(queryKey, (prev: JobPosting[] | undefined) => {
               if (!prev || prev.length === 0) return rows;
               const byId = new Map(prev.map((j) => [j.id, j] as const));
@@ -259,6 +300,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
 
           // eslint-disable-next-line no-constant-condition
           while (true) {
+            if (!isCurrent()) return;
             const batch = await fetchPage(cursor, PAGE_SIZE);
             if (batch.length === 0) break;
             const fresh = batch.filter((j: any) => !seen.has(j.id));
@@ -269,19 +311,28 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             cursor = cursorOf(batch);
           }
 
-          writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, all);
+          // Auktoritativ slutskrivning: nu har vi hela datasetet, så här — och
+          // bara här — ersätter vi listan rakt av. Det rensar bort rader som
+          // raderats på servern medan fliken varit stängd.
+          if (isCurrent()) {
+            queryClient.setQueryData(queryKey, all);
+            writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, all);
+          }
         } catch {
           // Tyst fel — realtime/refetch återställer, första sidan visas ändå
         } finally {
-          jobStreamRegistry.set(streamKey, { running: false, completedAt: Date.now() });
+          if (isCurrent()) {
+            jobStreamRegistry.set(streamKey, { running: false, completedAt: Date.now(), generation });
+          }
         }
         })();
 
       }, 0);
 
 
-      return first;
+      return merged;
     },
+
 
     enabled: !!user,
     staleTime: 10 * 60 * 1000, // 10 min fallback if realtime drops
@@ -351,12 +402,28 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           ? { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const, filter: jobFilter }
           : { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const },
         (payload) => {
+          const listKey = ['jobs', scope, profile?.organization_id, user?.id];
+          const dropRow = (id?: string) => {
+            if (!id) return;
+            queryClient.setQueryData(listKey, (oldData: JobPosting[] | undefined) =>
+              oldData ? oldData.filter(job => job.id !== id) : oldData
+            );
+            if (user?.id) removeJobFromJobsCache(user.id, id);
+          };
+
           if (payload.eventType === 'UPDATE') {
             // Serverns applications_count är sanning. Släpp eventuella optimistiska
             // deltas för samma jobb, annars adderas de ovanpå ett redan uppdaterat
             // värde och siffran dubbelräknas tills nästa event kommer in.
             if (payload.new?.id) pendingDeltas.delete(payload.new.id as string);
-            queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
+            // Soft-delete kommer in som UPDATE. Utan detta skulle raden ligga
+            // kvar i den sammanslagna listan tills nästa full genomströmning.
+            if ((payload.new as { deleted_at?: string | null })?.deleted_at) {
+              dropRow(payload.new.id as string);
+              scheduleStatsInvalidate();
+              return;
+            }
+            queryClient.setQueryData(listKey, (oldData: JobPosting[] | undefined) => {
               if (!oldData) return oldData;
               return oldData.map(job =>
                 job.id === payload.new.id
@@ -366,9 +433,11 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             });
             scheduleStatsInvalidate();
           } else {
+            if (payload.eventType === 'DELETE') dropRow((payload.old as { id?: string })?.id);
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             scheduleStatsInvalidate();
           }
+
         }
       )
       .subscribe();
