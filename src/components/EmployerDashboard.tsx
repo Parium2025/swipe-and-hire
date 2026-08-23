@@ -66,6 +66,12 @@ const EmployerDashboard = memo(() => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [republishJob, setRepublishJob] = useState<JobPosting | null>(null);
   const [republishDialogOpen, setRepublishDialogOpen] = useState(false);
+  // Massradering (endast utgångna/utkast)
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
   const [editRepublishMode, setEditRepublishMode] = useState(false);
   const [pendingEditJobId, setPendingEditJobId] = useState<string | null>(null);
   const { user, profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
