@@ -91,7 +91,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                 key={m.user_id}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25, delay: Math.min(i * 0.03, 0.２ as unknown as number) }}
+                transition={{ duration: 0.25, delay: Math.min(i * 0.03, 0.2) }}
                 className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-3"
               >
                 <div className="flex items-center gap-3">
