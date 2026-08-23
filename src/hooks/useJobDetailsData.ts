@@ -343,6 +343,29 @@ export function useJobDetailsData(jobId: string | undefined) {
   const queryClient = useQueryClient();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  // ── Flytt-lås ───────────────────────────────────────────────────────────
+  // Exakt samma princip som i Mina kandidater: när ett kort dras till ett nytt
+  // steg får INGEN senare datakälla (omhämtning från läsreplika, realtidseko,
+  // bakgrundsström) skriva tillbaka det gamla steget. Utan detta hann kortet
+  // hoppa tillbaka till ursprungskolumnen och sedan vidare igen — den där
+  // blinkningen. Överskrivningen lever tills servern bekräftat samma status.
+  const pendingStatusRef = useRef<Map<string, { status: string; at: number }>>(new Map());
+  const [pendingVersion, setPendingVersion] = useState(0);
+  const PENDING_TTL_MS = 15000;
+
+  const setPendingStatus = useCallback((applicationId: string, status: string) => {
+    pendingStatusRef.current.set(applicationId, { status, at: Date.now() });
+    setPendingVersion(v => v + 1);
+  }, []);
+
+  const clearPendingStatus = useCallback((applicationId: string, confirmedStatus?: string) => {
+    const entry = pendingStatusRef.current.get(applicationId);
+    if (!entry) return;
+    if (confirmedStatus !== undefined && entry.status !== confirmedStatus) return;
+    pendingStatusRef.current.delete(applicationId);
+    setPendingVersion(v => v + 1);
+  }, []);
+
   // Job details query
   const jobQuery = useQuery({
     queryKey: ['job-details', jobId],
