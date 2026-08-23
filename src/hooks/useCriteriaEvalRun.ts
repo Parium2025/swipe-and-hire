@@ -84,12 +84,16 @@ export function useActiveCriteriaEvalRuns() {
     },
   });
 
-  // Refresh candidate cards as the server works through the queue
+  // Refresh candidate cards only when the server actually completed more work
+  const lastDoneRef = useRef(0);
   useEffect(() => {
     const rows = query.data ?? [];
-    if (rows.length === 0) return;
+    const done = rows.reduce((sum, r) => sum + (r.done_items ?? 0), 0);
+    if (rows.length === 0 || done === lastDoneRef.current) return;
+    lastDoneRef.current = done;
     queryClient.invalidateQueries({ queryKey: ['criteria-results'] });
   }, [query.data, queryClient]);
+
 
   return query;
 }
