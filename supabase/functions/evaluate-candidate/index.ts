@@ -8,7 +8,7 @@ const corsHeaders = {
 
 // Bump this when the AI system prompt / evaluation logic changes materially.
 // Included in criterion_hash → forces a global cache invalidation for all criteria.
-const PROMPT_VERSION = 'v2026-07-23';
+const PROMPT_VERSION = 'v2026-08-23-evidence';
 
 // Normalize prompt text before hashing so tiny cosmetic edits don't invalidate
 // the cache. Lowercases, trims, collapses whitespace, strips trailing punctuation.
@@ -1078,7 +1078,27 @@ VIKTIGT:
 - Läs CV-fulltext noggrant för år, arbetsgivare, certifikat
 - Räkna faktiska år vid erfarenhetskrav
 - Saknad information ≠ negativ information — men båda ger no_match
-- Var STRIKT vid diskvalificerande krav (t.ex. certifikat), MJUKARE vid nice-to-haves`;
+- Var STRIKT vid diskvalificerande krav (t.ex. certifikat), MJUKARE vid nice-to-haves
+
+═══════════════════════════════════════════════════
+🔎 BEVISKÄLLA — VAD RÄKNAS SOM BEVIS
+═══════════════════════════════════════════════════
+Ett ord som bara FÖREKOMMER i ett dokument är INTE bevis. Fråga dig alltid: säger kandidaten att hen har detta, eller nämns ordet bara?
+
+GILTIGT bevis (→ kan ge "match"):
+1. Tjänsteperiod/arbetsgivare i CV:t där uppgiften ingår ("Ekonomiassistent, 2019–2023 — bokslut och årsredovisning").
+2. Kandidatens egen beskrivning i fritext, personligt brev, "om mig", svar på frågor eller video ("Jag har arbetat med årsredovisning i tre år").
+3. Kandidatens egen uppräkning av kompetenser/styrkor — punktlistor räknas ("Mina styrkor: bokslut, årsredovisning, moms") även utan årtal. Sätt då lite lägre confidence (~0.6–0.75).
+4. Certifikat/intyg/utbildning som styrker kravet.
+
+INTE bevis (→ "no_match"):
+- Ordet förekommer bara i ett uppladdat dokument som inte handlar om kandidatens egen erfarenhet (t.ex. en bifogad årsredovisning för en bostadsrättsförening, en arbetsgivares broschyr, en mall eller ett exempeldokument). Att dokumentet HETER "årsredovisning" bevisar inte att kandidaten arbetat med årsredovisningar.
+- Ordet nämns om någon annan person, om ett företag eller i en jobbannonstext.
+
+🚫 NEGATIONER — MYCKET VIKTIGT
+Om kandidaten uttryckligen förnekar kravet ska det ALLTID bli "no_match" med hög confidence, aldrig "match".
+Exempel som betyder NEJ: "Jag har inte jobbat med årsredovisning", "ingen erfarenhet av X", "har aldrig arbetat med X", "saknar X", "har inte B-körkort", "ej truckkort", "inga kunskaper i X", "bara läst om X men aldrig använt det", "planerar att lära mig X", "vill lära mig X".
+Läs alltid hela meningen runt ordet innan du bedömer — nekande formuleringar får aldrig läsas som träff. Skriv i reasoning att kandidaten uttryckligen anger att hen saknar detta.`;
 
     const summaryInstruction = includeSummary
       ? `\n\nBonus: Skriv även en kort professionell sammanfattning (2–4 meningar på svenska) av kandidatens profil samt 3–6 nyckelpunkter (kort text + typ: strength|experience|skill|note).`
