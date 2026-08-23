@@ -122,6 +122,8 @@ export function useSidebarRoutePrefetch() {
       case '/dashboard': {
         // /dashboard → useJobsData({ scope: 'organization' }) → ['jobs', 'organization', orgId, userId]
         // Speglar fetchern i useJobsData: först org-medlemmar → sedan deras jobb.
+        // Samma invariant som ovan: skriv aldrig över en redan strömmad lista.
+        if (queryClient.getQueryData(['jobs', 'organization', orgId, user.id])) break;
         queryClient.prefetchQuery({
           queryKey: ['jobs', 'organization', orgId, user.id],
           queryFn: async () => {
@@ -148,7 +150,9 @@ export function useSidebarRoutePrefetch() {
               .select(baseSelect)
               .is('deleted_at', null)
               .order('created_at', { ascending: false })
-              .range(0, 999);
+              .order('id', { ascending: false })
+              .limit(200);
+
             const { data, error } = orgId && employerIds.length > 1
               ? await query.in('employer_id', employerIds)
               : await query.eq('employer_id', employerIds[0]);
