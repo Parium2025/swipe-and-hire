@@ -414,7 +414,37 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     return result;
   }, [candidates, stages]);
 
-  const currentCandidates = candidatesByStage[activeTab] || [];
+  const stageCandidates = candidatesByStage[activeTab] || [];
+
+  // Renderfönster: mobilen målar aldrig fler än så här många rader åt gången.
+  // Fönstret växer när du scrollar nära botten, så listan känns oändlig men
+  // DOM:en förblir liten även när steget innehåller tusentals kandidater.
+  const RENDER_STEP = 40;
+  const [renderLimit, setRenderLimit] = useState(RENDER_STEP);
+
+  // Nytt steg = nytt fönster (annars ärver nästa flik ett uppblåst fönster).
+  useEffect(() => {
+    setRenderLimit(RENDER_STEP);
+  }, [activeTab]);
+
+  const currentCandidates = useMemo(
+    () => stageCandidates.slice(0, renderLimit),
+    [stageCandidates, renderLimit],
+  );
+
+  const handleListScroll = useCallback(
+    (e: React.UIEvent<HTMLElement>) => {
+      const el = e.target as HTMLElement;
+      if (!el || typeof el.scrollTop !== 'number') return;
+      if (el.scrollTop + el.clientHeight < el.scrollHeight - 400) return;
+      // Först: visa fler av de rader vi redan har. När de tar slut: hämta nästa sida.
+      setRenderLimit(prev => (prev < stageCandidates.length ? prev + RENDER_STEP : prev));
+      if (renderLimit >= stageCandidates.length && hasMoreInStage?.(activeTab)) {
+        onLoadMore?.();
+      }
+    },
+    [stageCandidates.length, renderLimit, hasMoreInStage, activeTab, onLoadMore],
+  );
 
   return (
     <TooltipProvider delayDuration={200}>
