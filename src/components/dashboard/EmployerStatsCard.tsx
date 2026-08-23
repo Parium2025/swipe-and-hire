@@ -54,36 +54,29 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   }, [jobs]);
 
   const { data: dashStats, isSuccess } = useQuery({
-    queryKey: ['employer-inbox-stats', user?.id, activeJobIds],
+    // 🔒 Nyckeln får INTE innehålla annons-id:n: med 5 000 aktiva annonser
+    // blev nyckeln megabytestor och varje ny annons gav en full refetch.
+    // Servern räknar själv fram vilka annonser som är aktiva.
+    queryKey: ['employer-inbox-stats', user?.id],
     queryFn: async () => {
       const empty = { new_applications: 0, saved_favorites: 0, unread_messages: 0 };
       if (!user?.id) return empty;
-      // Inga aktiva annonser → siffrorna ÄR noll. Skriv även cachen, annars
-      // kan gamla värden ligga kvar och visas nästa gång sidan öppnas.
-      if (activeJobIds.length === 0) {
-        writeEmployerCachedStat(user.id, 'new_applications', 0);
-        writeEmployerCachedStat(user.id, 'saved_favorites', 0);
-        writeEmployerCachedStat(user.id, 'unread_messages', 0);
-        return empty;
-      }
       const { data, error } = await supabase.rpc('get_employer_inbox_stats', {
         p_user_id: user.id,
-        p_active_job_ids: activeJobIds,
       });
       if (error) throw error;
-      const stats = data as { new_applications: number; saved_favorites: number; unread_messages: number };
+      const stats = (data ?? empty) as { new_applications: number; saved_favorites: number; unread_messages: number };
       writeEmployerCachedStat(user.id, 'new_applications', stats.new_applications);
       writeEmployerCachedStat(user.id, 'saved_favorites', stats.saved_favorites);
       writeEmployerCachedStat(user.id, 'unread_messages', stats.unread_messages);
       return stats;
     },
-    // Vänta tills annonserna laddats – annars skulle vi räkna "0 aktiva" på
-    // en halvladdad lista och nolla korten i en blink.
-    enabled: !!user?.id && !jobsLoading,
-    staleTime: Infinity,
+    enabled: !!user?.id,
+    staleTime: 30_000,
     gcTime: 1000 * 60 * 30,
     refetchOnMount: true,
   });
+
 
   const newApplicationsCount = dashStats?.new_applications ?? cachedStats['new_applications'] ?? 0;
   const savedFavoritesCount = dashStats?.saved_favorites ?? cachedStats['saved_favorites'] ?? 0;
