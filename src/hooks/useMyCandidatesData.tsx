@@ -116,11 +116,14 @@ async function fetchSearchPage(
   stage: string,
   cursor: StageCursor,
 ): Promise<RawMyCandidateRow[]> {
-  const { data, error } = await supabase.rpc('search_my_candidates', {
+  // Generated backend types lag behind migrations in the local editor; keep
+  // the composite cursor explicit so bulk moves cannot skip equal timestamps.
+  const { data, error } = await (supabase.rpc as any)('search_my_candidates', {
     p_recruiter_id: userId,
     p_search_query: searchQuery,
     p_limit: PAGE_SIZE,
     p_cursor_updated_at: cursor?.updated_at ?? null,
+    p_cursor_id: cursor?.id ?? null,
     p_list_id: listId,
     p_stage: stage === ALL_STAGES ? null : stage,
   });
@@ -345,7 +348,8 @@ export function useMyCandidatesData(
     },
     enabled: !!user,
     staleTime: 0,
-    gcTime: Infinity,
+    // List/search query variants are disposable; bound memory in long sessions.
+    gcTime: 15 * 60 * 1000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     // 🔥 Instant-load from localStorage cache (only for non-search queries)

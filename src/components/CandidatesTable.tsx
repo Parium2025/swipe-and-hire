@@ -939,6 +939,11 @@ export function CandidatesTable({
           onClose={() => setSwipeViewerOpen(false)}
           onOpenFullProfile={handleSwipeOpenFullProfile}
           getDisplayRating={getDisplayRating}
+          onLoadMore={onLoadMore}
+          // Direct navigation is an explicit request to continue, so it must not
+          // stop at the table's background-prefetch budget.
+          hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
         />
       )}
 

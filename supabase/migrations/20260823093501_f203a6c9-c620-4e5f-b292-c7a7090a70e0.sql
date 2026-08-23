@@ -1,0 +1,1 @@
+ALTER FUNCTION public.get_employer_filter_questions() SECURITY INVOKER;

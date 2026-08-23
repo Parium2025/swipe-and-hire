@@ -188,7 +188,7 @@ const MyCandidates = () => {
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [swipeStageCandidates, setSwipeStageCandidates] = useState<MyCandidateData[]>([]);
-  
+
   // ── Centralized application fetching ─────────────────
   const candidateFallback = useMemo(() => selectedCandidate ? {
     profile_image_url: selectedCandidate.profile_image_url,
@@ -274,6 +274,15 @@ const MyCandidates = () => {
     });
     return filtered;
   }, [candidatesByStage, searchQuery, debouncedSearchQuery, activeStageOrder]);
+
+  // Keep an open viewer connected to newly fetched pages instead of freezing the
+  // candidate array captured at click time.
+  useEffect(() => {
+    if (!swipeViewerOpen) return;
+    const stage = swipeStageCandidates[0]?.stage;
+    if (!stage) return;
+    setSwipeStageCandidates(filteredCandidatesByStage[stage] || []);
+  }, [swipeViewerOpen, filteredCandidatesByStage]);
 
   const filteredTotal = useMemo(() => {
     return Object.values(filteredCandidatesByStage).reduce((sum, arr) => sum + arr.length, 0);
@@ -894,6 +903,11 @@ const MyCandidates = () => {
         onClose={() => setSwipeViewerOpen(false)}
         onOpenFullProfile={handleSwipeOpenFullProfile}
         getDisplayRating={getDisplayRating}
+        onLoadMore={() => {
+          const stage = swipeStageCandidates[swipeInitialIndex]?.stage;
+          if (stage) loadMoreStage(stage);
+        }}
+        hasMore={Boolean(swipeStageCandidates[swipeInitialIndex]?.stage && hasMoreInStage(swipeStageCandidates[swipeInitialIndex].stage))}
         onRemoveCandidate={(app) => {
           const original = displayedCandidates.find(c => c.application_id === app.id);
           if (original) {

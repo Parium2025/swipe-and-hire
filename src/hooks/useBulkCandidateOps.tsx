@@ -91,6 +91,8 @@ export function useBulkCandidateOps({
         if ((data?.length ?? 0) < ids.length) {
           throw new Error('Vissa kandidater kunde inte flyttas');
         }
+        queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
+        queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
         toast.success(`${count} kandidater flyttade till "${label}"`, {
           icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />,
         });

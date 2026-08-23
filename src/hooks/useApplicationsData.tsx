@@ -553,7 +553,8 @@ export const useApplicationsData = (
     // Standardvyn cachas (realtime håller den fräsch). Sök/filter/sortering
     // måste alltid gå mot databasen.
     staleTime: isDefaultView ? Infinity : 0,
-    gcTime: Infinity,
+    // Search/sort combinations must not accumulate forever during long recruiter sessions.
+    gcTime: 15 * 60 * 1000,
     refetchOnMount: !isDefaultView,
     refetchOnWindowFocus: false,
     initialData: () => {

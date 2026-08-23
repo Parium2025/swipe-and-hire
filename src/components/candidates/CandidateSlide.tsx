@@ -128,6 +128,7 @@ export const CandidateSlide = memo(function CandidateSlide({
   const notesHook = useCandidateNotes({
     applicantId: application.applicant_id,
     jobId: application.job_id,
+    enabled: isVisible,
   });
   const { fetchNotes, saveNote, startEditing } = notesHook;
 

@@ -205,6 +205,7 @@ export const CandidateProfileDialog = ({
   const notesHook = useCandidateNotes({
     applicantId: activeApplication?.applicant_id || application?.applicant_id || null,
     jobId: activeApplication?.job_id || null,
+    enabled: open,
   });
 
   const summaryHook = useCandidateSummary({
