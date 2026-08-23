@@ -218,11 +218,26 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       }
 
       // Strömma resten i bakgrunden — blockerar aldrig första renderingen.
-      void (async () => {
+      // Starta först på nästa tick: annars kan en snabb batch skriva sin längre
+      // lista INNAN React Query hunnit committa `first`, som då skriver över
+      // allt med bara 200 rader ("visar 4 av 34"-buggen).
+      setTimeout(() => {
+        void (async () => {
         try {
           let all = [...first];
           let cursor = cursorOf(first);
           const seen = new Set(all.map((j: any) => j.id));
+
+          // Merge-uppdatering: behåll allt som redan ligger i cachen (t.ex.
+          // realtime-patchar) och lägg bara till nya rader.
+          const commit = (rows: JobPosting[]) => {
+            queryClient.setQueryData(queryKey, (prev: JobPosting[] | undefined) => {
+              if (!prev || prev.length === 0) return rows;
+              const byId = new Map(prev.map((j) => [j.id, j] as const));
+              for (const row of rows) if (!byId.has(row.id)) byId.set(row.id, row);
+              return Array.from(byId.values());
+            });
+          };
 
           // eslint-disable-next-line no-constant-condition
           while (true) {
@@ -231,7 +246,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             const fresh = batch.filter((j: any) => !seen.has(j.id));
             fresh.forEach((j: any) => seen.add(j.id));
             all = [...all, ...fresh];
-            queryClient.setQueryData(queryKey, all);
+            commit(all);
             if (batch.length < PAGE_SIZE) break;
             cursor = cursorOf(batch);
           }
@@ -240,7 +255,9 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         } catch {
           // Tyst fel — realtime/refetch återställer, första sidan visas ändå
         }
-      })();
+        })();
+      }, 0);
+
 
       return first;
     },
