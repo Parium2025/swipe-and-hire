@@ -643,6 +643,71 @@ const EmployerDashboard = memo(() => {
         </div>
       )}
 
+      {/* 🗑️ Massradering — endast utgångna/utkast */}
+      {bulkSelectable && tabFilteredJobs.length > 0 && (
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+          {!selectionMode ? (
+            <button
+              type="button"
+              onClick={() => setSelectionMode(true)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+            >
+              <ListChecks className="h-3.5 w-3.5" />
+              Markera flera
+            </button>
+          ) : (
+            <>
+              <span className="text-xs sm:text-sm text-white font-medium">
+                {selectedIds.size} markerade
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const pageIds = pageJobs.map(j => j.id);
+                  const allSelected = pageIds.every(id => selectedIds.has(id));
+                  setSelectedIds(prev => {
+                    const next = new Set(prev);
+                    for (const id of pageIds) {
+                      if (allSelected) next.delete(id); else next.add(id);
+                    }
+                    return next;
+                  });
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+              >
+                {pageJobs.length > 0 && pageJobs.every(j => selectedIds.has(j.id)) ? 'Avmarkera sidan' : 'Markera sidan'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedIds(new Set(tabFilteredJobs.map(j => j.id)))}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+              >
+                Markera alla ({tabFilteredJobs.length})
+              </button>
+              <button
+                type="button"
+                disabled={selectedIds.size === 0}
+                onClick={() => setBulkDeleteOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 border border-red-400/40 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-500/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Ta bort markerade
+              </button>
+              <button
+                type="button"
+                onClick={exitSelectionMode}
+                aria-label="Avbryt markering"
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+                Avbryt
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+
 
       {/* Result indicator */}
       {searchTerm && (
