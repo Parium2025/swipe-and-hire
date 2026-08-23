@@ -136,9 +136,12 @@ export const MyCandidatesHeader = ({
                 />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[240px] max-w-[86vw]">
-              <DropdownMenuLabel className="text-xs font-medium text-white">Mina listor</DropdownMenuLabel>
-              {lists.map(list => {
+            <DropdownMenuContent
+              align="center"
+              className="min-w-[240px] max-w-[86vw] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-1 [&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10"
+            >
+              <DropdownMenuLabel className="px-2.5 py-1.5 text-xs font-medium text-white/70">Mina listor</DropdownMenuLabel>
+              {lists.map((list, index) => {
                 const isActive = !isViewingColleague && activeList?.id === list.id;
                 return (
                   <DropdownMenuItem
@@ -147,12 +150,12 @@ export const MyCandidatesHeader = ({
                       onViewColleague(null);
                       onSelectList(list.id);
                     }}
-                    className={`text-white hover:text-white cursor-pointer ${isActive ? 'bg-white/10' : ''}`}
+                    className={`flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${isActive ? 'bg-white/15' : ''}`}
                   >
                     {isActive ? (
-                      <Check className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <Check className="h-4 w-4 flex-shrink-0" />
                     ) : (
-                      <UserCheck className="h-4 w-4 mr-2 flex-shrink-0 text-white/70" />
+                      <UserCheck className="h-4 w-4 flex-shrink-0 text-white/70" />
                     )}
                     <span className="truncate min-w-0">{list.name}</span>
                     <span className="ml-auto pl-2 flex-shrink-0 text-white tabular-nums">
@@ -163,16 +166,16 @@ export const MyCandidatesHeader = ({
               })}
               <DropdownMenuItem
                 onClick={onManageLists}
-                className="text-white hover:text-white cursor-pointer"
+                className="flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors"
               >
-                <Settings2 className="h-4 w-4 mr-2 flex-shrink-0 text-white/70" />
+                <Settings2 className="h-4 w-4 flex-shrink-0 text-white/70" />
                 Hantera listor
               </DropdownMenuItem>
 
               {hasTeam && teamMembers.length > 0 && (
-                <DropdownMenuGroup>
-                  <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuLabel className="text-xs font-medium text-white">Kollegors listor</DropdownMenuLabel>
+                <DropdownMenuGroup className="[&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10">
+                  <DropdownMenuSeparator className="bg-white/10 my-1" />
+                  <DropdownMenuLabel className="px-2.5 py-1.5 text-xs font-medium text-white/70">Kollegors listor</DropdownMenuLabel>
                   {teamMembers.map(member => {
                     const memberLists = colleagueListsByOwner[member.userId] ?? [];
                     const avatar = (
@@ -181,7 +184,7 @@ export const MyCandidatesHeader = ({
                         firstName={member.firstName}
                         lastName={member.lastName}
                         size="xs"
-                        className="mr-2 flex-shrink-0"
+                        className="flex-shrink-0"
                       />
                     );
 
@@ -190,7 +193,7 @@ export const MyCandidatesHeader = ({
                         <DropdownMenuItem
                           key={member.userId}
                           onClick={() => onViewColleague(member.userId, memberLists[0]?.id ?? null)}
-                          className={`text-white hover:text-white cursor-pointer ${viewingColleagueId === member.userId ? 'bg-white/10' : ''}`}
+                          className={`flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${viewingColleagueId === member.userId ? 'bg-white/15' : ''}`}
                         >
                           {avatar}
                           <span className="truncate min-w-0">{member.firstName} {member.lastName}</span>
@@ -200,17 +203,17 @@ export const MyCandidatesHeader = ({
 
                     return (
                       <DropdownMenuSub key={member.userId}>
-                        <DropdownMenuSubTrigger className="text-white hover:text-white cursor-pointer">
+                        <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors">
                           {avatar}
                           <span className="truncate min-w-0">{member.firstName} {member.lastName}</span>
                         </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="bg-card-parium border-white/20 min-w-[200px]">
+                        <DropdownMenuSubContent className="min-w-[200px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-xl rounded-lg p-1 [&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10">
                           {memberLists.map(list => (
                             <DropdownMenuItem
                               key={list.id}
                               onClick={() => onViewColleague(member.userId, list.id)}
-                              className={`text-white hover:text-white cursor-pointer ${
-                                viewingColleagueId === member.userId && viewingColleagueList?.id === list.id ? 'bg-white/10' : ''
+                              className={`flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${
+                                viewingColleagueId === member.userId && viewingColleagueList?.id === list.id ? 'bg-white/15' : ''
                               }`}
                             >
                               <span className="truncate min-w-0">{list.name}</span>
