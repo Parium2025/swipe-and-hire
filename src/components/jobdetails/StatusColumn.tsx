@@ -214,7 +214,7 @@ export const StatusColumn = memo(({
 
       <div className="relative min-h-0 flex-1 rounded-lg bg-white/5 ring-1 ring-inset ring-white/10">
         {canScrollUp && (
-          <div className="absolute top-0 left-0 right-0 z-10 h-6 rounded-t-lg bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 z-10 h-6 rounded-t-lg bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
         )}
 
         <div 
