@@ -462,7 +462,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
             const cfg = stageConfig[stage];
             if (!cfg) return null;
             const Icon = getIconByName(cfg.iconName);
-            const count = (candidatesByStage[stage] || []).length;
+            // Serverns totalsiffra när den finns — annars antalet laddade rader.
+            const count = stageCounts?.[stage] ?? (candidatesByStage[stage] || []).length;
             const isActive = stage === activeTab;
 
             const targetIdx = stageIdx === 0 ? 1 : 0;
