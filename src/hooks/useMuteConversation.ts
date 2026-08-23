@@ -27,13 +27,15 @@ export function useMuteConversation() {
       if (error) throw error;
       return { conversationId, muted };
     },
-    onSuccess: ({ muted }) => {
+    onSuccess: ({ muted, conversationId }) => {
       void queryClient.invalidateQueries({ queryKey: ['conversations'] });
       toast.success(muted ? 'Konversationen är tystad' : 'Notiser påslagna igen', {
         description: muted
           ? 'Du får inga notiser härifrån. Meddelanden syns fortfarande i chatten.'
           : undefined,
-      });
+        // Klick på notisen tar dig direkt till konversationen.
+        route: `/messages?conversation=${conversationId}`,
+      } as Parameters<typeof toast.success>[1]);
     },
     onError: (error: Error) => {
       console.error('Failed to toggle conversation mute:', error);

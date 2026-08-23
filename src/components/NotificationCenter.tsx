@@ -130,7 +130,7 @@ const toastTones = {
   info: 'bg-sky-400/15 text-sky-300 ring-sky-400/30',
 } as const;
 
-function ArchivedToastItem({ item, onRead }: { item: ArchivedToast; onRead: (id: string) => void }) {
+function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; onRead: (id: string) => void; onNavigate: (route: string) => void }) {
   const Icon = toastIcons[item.kind] ?? Info;
   const timeAgo = formatDistanceToNow(new Date(item.at), { addSuffix: true, locale: sv });
 
@@ -147,7 +147,10 @@ function ArchivedToastItem({ item, onRead }: { item: ArchivedToast; onRead: (id:
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.15 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => { if (!item.is_read) onRead(item.id); }}
+      onClick={() => {
+        if (!item.is_read) onRead(item.id);
+        if (item.route) onNavigate(item.route);
+      }}
       className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg ${
         item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
       }`}
@@ -243,6 +246,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
           at,
           count: Number(n.metadata?.count) > 1 ? Number(n.metadata.count) : 1,
           is_read: n.is_read,
+          route: typeof n.metadata?.route === 'string' ? n.metadata.route : undefined,
         };
         return { kind: 'synced' as const, at, n: toast };
       }
@@ -390,6 +394,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                     key={`${entry.kind === 'synced' ? 'y' : 'l'}-${entry.n.id}`}
                     item={entry.n}
                     onRead={entry.kind === 'synced' ? markAsRead : toastArchive.markAsRead}
+                    onNavigate={handleNavigate}
                   />
                 ))}
 

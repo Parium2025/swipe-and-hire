@@ -16,6 +16,8 @@ export interface ArchivedToast {
   at: number;
   count: number;
   is_read: boolean;
+  /** Valfri destination – gör notisen klickbar i notiscentret. */
+  route?: string;
 }
 
 const KEY = "parium_toast_archive_v1";
@@ -56,7 +58,7 @@ function notifyServerRefresh() {
 
 // --- Serversynk ---------------------------------------------------------
 
-const pending = new Map<string, { timer: number; localId: string; kind: ToastKind; title: string; body?: string }>();
+const pending = new Map<string, { timer: number; localId: string; kind: ToastKind; title: string; body?: string; route?: string }>();
 
 async function flushToServer(key: string) {
   const entry = pending.get(key);
@@ -90,7 +92,7 @@ async function flushToServer(key: string) {
         type: `toast_${entry.kind}`,
         title: entry.title,
         body: entry.body ?? null,
-        metadata: { toast: true, count },
+        metadata: { toast: true, count, ...(entry.route ? { route: entry.route } : {}) },
       });
       if (error) return; // behåll lokalt om synken misslyckas
     }
@@ -110,13 +112,13 @@ async function flushToServer(key: string) {
   }
 }
 
-function scheduleSync(localId: string, kind: ToastKind, title: string, body?: string) {
+function scheduleSync(localId: string, kind: ToastKind, title: string, body?: string, route?: string) {
   if (typeof window === "undefined") return;
   const key = `${kind}|${title}|${body || ""}`;
   const existing = pending.get(key);
   if (existing) window.clearTimeout(existing.timer);
   const timer = window.setTimeout(() => flushToServer(key), SYNC_DEBOUNCE);
-  pending.set(key, { timer, localId, kind, title, body });
+  pending.set(key, { timer, localId, kind, title, body, route });
 }
 
 export const toastArchive = {
@@ -125,7 +127,7 @@ export const toastArchive = {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
-  add(kind: ToastKind, title: string, body?: string) {
+  add(kind: ToastKind, title: string, body?: string, route?: string) {
     const clean = (title || "").trim();
     if (!clean) return;
     const now = Date.now();
@@ -139,7 +141,7 @@ export const toastArchive = {
       now - existing.at < MERGE_WINDOW
     ) {
       localId = existing.id;
-      items = [{ ...existing, count: existing.count + 1, at: now, is_read: false }, ...items.slice(1)];
+      items = [{ ...existing, count: existing.count + 1, at: now, is_read: false, route: route ?? existing.route }, ...items.slice(1)];
     } else {
       localId = `${now}-${Math.random().toString(36).slice(2, 8)}`;
       items = [
@@ -151,12 +153,13 @@ export const toastArchive = {
           at: now,
           count: 1,
           is_read: false,
+          route,
         },
         ...items,
       ].slice(0, MAX);
     }
     persist();
-    scheduleSync(localId, kind, clean, body?.trim() || undefined);
+    scheduleSync(localId, kind, clean, body?.trim() || undefined, route);
   },
   markAsRead(id: string) {
     items = items.map((n) => (n.id === id ? { ...n, is_read: true } : n));
