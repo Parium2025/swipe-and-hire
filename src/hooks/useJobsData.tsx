@@ -67,7 +67,7 @@ interface UseJobsDataOptions {
 
 // 🔒 Bakgrundsströmning: en aktiv ström per query-nyckel, med avsvalning efteråt
 // så att sidbyten/refetches inte startar om hela genomströmningen i onödan.
-const jobStreamRegistry = new Map<string, { running: boolean; completedAt: number }>();
+const jobStreamRegistry = new Map<string, { running: boolean; completedAt: number; generation?: number }>();
 const STREAM_COOLDOWN_MS = 60 * 1000;
 
 
