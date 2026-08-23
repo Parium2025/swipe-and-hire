@@ -1460,6 +1460,7 @@ export type Database = {
           email: string | null
           employment_status: string | null
           first_name: string | null
+          hidden_by_applicant_at: string | null
           id: string
           job_id: string
           last_name: string | null
@@ -1488,6 +1489,7 @@ export type Database = {
           email?: string | null
           employment_status?: string | null
           first_name?: string | null
+          hidden_by_applicant_at?: string | null
           id?: string
           job_id: string
           last_name?: string | null
@@ -1516,6 +1518,7 @@ export type Database = {
           email?: string | null
           employment_status?: string | null
           first_name?: string | null
+          hidden_by_applicant_at?: string | null
           id?: string
           job_id?: string
           last_name?: string | null
