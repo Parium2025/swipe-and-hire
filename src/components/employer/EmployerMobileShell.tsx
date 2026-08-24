@@ -1,4 +1,5 @@
 import type { CSSProperties, Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
+import { useLocation } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import EmployerSidebar from '@/components/EmployerSidebar';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -32,6 +33,10 @@ const EmployerMobileShell = ({
   mainScrollRef,
   onJobCreated,
 }: EmployerMobileShellProps) => {
+  // Chattsidan är en fullhöjdsvy — extra bottenutrymme skulle lämna en tom yta.
+  const { pathname } = useLocation();
+  const isMessages = pathname.startsWith('/messages');
+
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
