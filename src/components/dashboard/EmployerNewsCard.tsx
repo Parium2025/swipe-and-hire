@@ -154,7 +154,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 )}
               </motion.div>
             ) : (
-              <p className="text-xs text-white/60 text-center">Inga nyheter just nu</p>
+              <p className="text-xs text-white text-center">Inga nyheter just nu</p>
             )}
           </AnimatePresence>
         </div>

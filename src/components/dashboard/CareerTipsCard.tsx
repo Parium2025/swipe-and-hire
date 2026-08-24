@@ -74,8 +74,8 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5" />
         <CardContent className="relative p-4 h-full flex flex-col items-center justify-center">
-          <Lightbulb className="h-8 w-8 text-white/60 mb-2" />
-          <p className="text-sm text-white/60 text-center">
+          <Lightbulb className="h-8 w-8 text-white mb-2" />
+          <p className="text-sm text-white text-center">
             Karriärtips laddas...
           </p>
         </CardContent>
@@ -133,7 +133,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 />
               </motion.div>
             ) : (
-              <p className="text-xs text-white/60 text-center">Inga nyheter just nu</p>
+              <p className="text-xs text-white text-center">Inga nyheter just nu</p>
             )}
           </AnimatePresence>
         </div>
