@@ -349,7 +349,7 @@ export default function Messages() {
                 />
               </div>
             ) : (
-              <ScrollArea className="h-full">
+              <ScrollArea className="h-full no-chrome-pad">
                 <div className="p-2">
                   {filteredConversations.map((conv, index) => {
                     const isLast = index === filteredConversations.length - 1;
@@ -410,6 +410,7 @@ export default function Messages() {
         )}>
           {selectedConversation ? (
             <ChatView
+              key={selectedConversation.id}
               conversation={selectedConversation}
               currentUserId={user?.id || ''}
               onBack={handleBackToList}

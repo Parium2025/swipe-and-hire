@@ -245,7 +245,17 @@ const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }
             <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full"></div>
           </div>
           
-          <main data-main-scroll-container="true" className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${location.pathname === '/messages' ? 'pb-0' : 'pb-8'}`} style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+          <main
+            data-main-scroll-container="true"
+            className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${location.pathname === '/messages' ? 'no-chrome-pad' : 'pb-8'}`}
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain',
+              paddingBottom: location.pathname === '/messages'
+                ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)'
+                : undefined,
+            }}
+          >
             {children}
             <div aria-hidden="true" style={{ flexShrink: 0, height: location.pathname === '/messages' ? '0px' : 'var(--chrome-strip-pad, calc(env(safe-area-inset-bottom, 0px) + 96px))' }} />
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
 import { prefetchAttachmentImages } from '@/lib/attachmentUrl';
 import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType, inspectFileContent } from '@/lib/chatFileTypes';
@@ -96,6 +96,7 @@ export function ChatView({
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [isInitialScrollReady, setIsInitialScrollReady] = useState(false);
   // Edit state
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editOriginalContent, setEditOriginalContent] = useState('');
@@ -190,10 +191,6 @@ export function ChatView({
     setEditOriginalContent('');
   }, [conversation.id]);
 
-  // Timers som pinnar scrollen till botten vid öppning av en chatt
-  const initialPinTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  useEffect(() => () => { initialPinTimers.current.forEach(clearTimeout); }, []);
-
   // Track if user is near bottom of scroll area
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -204,9 +201,16 @@ export function ChatView({
   }, []);
 
   // Smart scroll
-  useEffect(() => {
+  // Kör före webbläsarens paint. En vanlig effect visar först chattens topp och
+  // flyttar sedan ned innehållet, vilket ger en tydlig blixt på iOS Safari.
+  useLayoutEffect(() => {
     const viewport = getViewportEl();
     if (!viewport) return;
+
+    if (messages.length === 0 && !isLoading) {
+      setIsInitialScrollReady(true);
+      return;
+    }
 
     const isInitialLoad = prevMessageCountRef.current === 0 && messages.length > 0;
     const firstMessageId = messages[0]?.id || null;
@@ -227,19 +231,6 @@ export function ChatView({
           top: viewport.scrollHeight,
           behavior: isInitialLoad ? 'auto' : 'smooth',
         });
-        // Bilder/bubblor kan ändra höjd efter första målningen — pinna om
-        // så att man alltid landar på det senaste meddelandet.
-        if (isInitialLoad) {
-          const pin = () => {
-            const el = getViewportEl();
-            if (el) el.scrollTop = el.scrollHeight;
-          };
-          requestAnimationFrame(pin);
-          const t1 = setTimeout(pin, 80);
-          const t2 = setTimeout(pin, 250);
-          const t3 = setTimeout(pin, 600);
-          initialPinTimers.current = [t1, t2, t3];
-        }
       }
     }
 
@@ -247,7 +238,8 @@ export function ChatView({
     prevMessageCountRef.current = messages.length;
     prevFirstMessageIdRef.current = firstMessageId;
     prevScrollHeightRef.current = viewport.scrollHeight;
-  }, [messages, currentUserId, getViewportEl]);
+    if (!isInitialScrollReady) setIsInitialScrollReady(true);
+  }, [messages, currentUserId, getViewportEl, isInitialScrollReady, isLoading]);
 
   // Scroll to bottom when typing indicator appears
   useEffect(() => {
@@ -639,7 +631,7 @@ export function ChatView({
   const currentSearchMatchId = searchMatchIds[searchIndex] || null;
 
   return (
-    <div className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden animate-fade-in">
+    <div className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-white/10 flex-shrink-0">
         <button
@@ -856,7 +848,14 @@ export function ChatView({
       </AnimatePresence>
 
       {/* Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4" onScrollCapture={handleScroll}>
+      <ScrollArea
+        ref={scrollAreaRef}
+        className={cn(
+          "flex-1 p-4 no-chrome-pad",
+          messages.length > 0 && !isInitialScrollReady && "opacity-0"
+        )}
+        onScrollCapture={handleScroll}
+      >
         {isLoading ? (
           <div className="space-y-4 p-4">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -943,14 +942,6 @@ export function ChatView({
                       <div
                         key={msg.id}
                         id={`msg-${msg.id}`}
-                        // ⚡ Native virtualisering: webbläsaren hoppar över
-                        // layout/målning för bubblor utanför skärmen, men
-                        // behåller elementet så att sökning och scroll-till-
-                        // meddelande fortsätter fungera exakt som förut.
-                        style={{
-                          contentVisibility: 'auto',
-                          containIntrinsicSize: 'auto 72px',
-                        } as React.CSSProperties}
                         className={cn(
                           "transition-colors rounded-lg",
                           isSearchHighlighted && "bg-yellow-500/10 ring-1 ring-yellow-500/30 p-1 -m-1"
