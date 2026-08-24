@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
-import { Trash2, AlertTriangle } from 'lucide-react';
+import { Trash2, AlertTriangle, MailOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -14,12 +14,17 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 
 const DELETE_THRESHOLD = 80;
 const MAX_TRANSLATE = 100;
+const UNREAD_THRESHOLD = 80;
 
 interface SwipeableConversationItemProps {
   children: React.ReactNode;
   onDelete: () => void;
   isDeleting?: boolean;
   conversationName: string;
+  /** Dra åt höger för att markera konversationen som oläst igen. */
+  onMarkUnread?: () => void;
+  /** Döljer oläst-åtgärden när konversationen redan är oläst. */
+  canMarkUnread?: boolean;
 }
 
 export function SwipeableConversationItem({
@@ -27,6 +32,8 @@ export function SwipeableConversationItem({
   onDelete,
   isDeleting,
   conversationName,
+  onMarkUnread,
+  canMarkUnread = false,
 }: SwipeableConversationItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
