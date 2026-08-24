@@ -140,7 +140,7 @@ function NotificationItem({
           if (canExpand) setExpanded(v => !v);
         }
       }}
-      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg cursor-pointer ${
+      className={`w-full flex items-start gap-3 px-3 py-4 text-left transition-colors rounded-lg cursor-pointer ${
         notification.is_read 
           ? 'opacity-60 hover:bg-white/5' 
           : 'hover:bg-white/10 bg-white/5'
