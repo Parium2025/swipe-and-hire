@@ -545,7 +545,11 @@ Svara ENDAST med giltig JSON.`
       }),
     });
 
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.error(`AI gateway ${response.status} vid ifyllnad av nyheter`);
+      return [];
+    }
+
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
