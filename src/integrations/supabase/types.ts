@@ -4244,6 +4244,10 @@ export type Database = {
         }
         Returns: Json
       }
+      resume_paused_criteria_eval_runs: {
+        Args: { p_min_age_minutes?: number }
+        Returns: number
+      }
       run_data_retention: { Args: never; Returns: undefined }
       same_organization: {
         Args: { p_user_id_1: string; p_user_id_2: string }
