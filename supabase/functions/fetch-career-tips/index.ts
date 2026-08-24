@@ -741,7 +741,7 @@ serve(async (req) => {
     
     console.log(`Fetch results: ${successfulFetches}/${RSS_SOURCES.length} succeeded`);
     if (failedFetches > 0) {
-      console.log(`Failed sources: ${fetchResults.filter(r => !r.success).map((r, i) => RSS_SOURCES[i].name).join(', ')}`);
+      console.log(`Failed sources: ${RSS_SOURCES.filter((_, i) => !fetchResults[i].success).map(s => s.name).join(', ')}`);
     }
     
     const seen = new Set<string>();
