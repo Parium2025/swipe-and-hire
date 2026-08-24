@@ -15,6 +15,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 const DELETE_THRESHOLD = 80;
 const MAX_TRANSLATE = 100;
 const UNREAD_THRESHOLD = 80;
+const DIRECTION_LOCK_PX = 8;
 
 interface SwipeableConversationItemProps {
   children: React.ReactNode;
