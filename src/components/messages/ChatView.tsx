@@ -107,6 +107,7 @@ export function ChatView({
   const prevMessageCountRef = useRef(0);
   const prevFirstMessageIdRef = useRef<string | null>(null);
   const prevScrollHeightRef = useRef(0);
+  const initialScrollFrameRef = useRef<number | null>(null);
 
   // Search state
   const [showSearch, setShowSearch] = useState(false);
@@ -189,6 +190,7 @@ export function ChatView({
     setPendingFile(null);
     setEditingMessageId(null);
     setEditOriginalContent('');
+    setIsInitialScrollReady(false);
   }, [conversation.id]);
 
   // Track if user is near bottom of scroll area
@@ -200,14 +202,15 @@ export function ChatView({
     isNearBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < threshold;
   }, []);
 
-  // Smart scroll
-  // Kör före webbläsarens paint. En vanlig effect visar först chattens topp och
-  // flyttar sedan ned innehållet, vilket ger en tydlig blixt på iOS Safari.
+  // Smart scroll. Radix-viewporten kan fortfarande ha 0px höjd under den första
+  // layoutpassagen på mobil. Vänta därför tills både viewport och hela innehållet
+  // har stabila mått innan chatten visas. Det gäller även automatiska
+  // avslutsmeddelanden som kan vara den sista raden i konversationen.
   useLayoutEffect(() => {
     const viewport = getViewportEl();
     if (!viewport) return;
 
-    if (messages.length === 0 && !isLoading) {
+    if (messages.length === 0 && !isLoading && viewport.clientHeight > 0) {
       setIsInitialScrollReady(true);
       return;
     }
@@ -226,20 +229,74 @@ export function ChatView({
       const lastMessage = messages[messages.length - 1];
       const isOwnNewMessage = isNewMessage && lastMessage?.sender_id === currentUserId;
 
-      if (isInitialLoad || isOwnNewMessage || isNearBottomRef.current) {
+      if (!isInitialLoad && (isOwnNewMessage || isNearBottomRef.current)) {
         viewport.scrollTo({
           top: viewport.scrollHeight,
-          behavior: isInitialLoad ? 'auto' : 'smooth',
+          behavior: 'smooth',
         });
       }
     }
 
-
     prevMessageCountRef.current = messages.length;
     prevFirstMessageIdRef.current = firstMessageId;
     prevScrollHeightRef.current = viewport.scrollHeight;
-    if (!isInitialScrollReady) setIsInitialScrollReady(true);
+
+    if (isInitialLoad || !isInitialScrollReady) {
+      let stableFrames = 0;
+      let previousHeight = -1;
+      let attempts = 0;
+
+      const pinBeforeReveal = () => {
+        attempts += 1;
+        const currentViewport = getViewportEl();
+        if (!currentViewport || currentViewport.clientHeight === 0) {
+          if (attempts < 30) initialScrollFrameRef.current = requestAnimationFrame(pinBeforeReveal);
+          return;
+        }
+
+        currentViewport.scrollTop = currentViewport.scrollHeight;
+        const currentHeight = currentViewport.scrollHeight;
+        stableFrames = currentHeight === previousHeight ? stableFrames + 1 : 0;
+        previousHeight = currentHeight;
+
+        if (stableFrames >= 2 || attempts >= 30) {
+          isNearBottomRef.current = true;
+          prevScrollHeightRef.current = currentHeight;
+          setIsInitialScrollReady(true);
+          initialScrollFrameRef.current = null;
+          return;
+        }
+
+        initialScrollFrameRef.current = requestAnimationFrame(pinBeforeReveal);
+      };
+
+      initialScrollFrameRef.current = requestAnimationFrame(pinBeforeReveal);
+      return () => {
+        if (initialScrollFrameRef.current !== null) {
+          cancelAnimationFrame(initialScrollFrameRef.current);
+          initialScrollFrameRef.current = null;
+        }
+      };
+    }
   }, [messages, currentUserId, getViewportEl, isInitialScrollReady, isLoading]);
+
+  // Bilagor, systemmeddelanden och font/layout-ändringar kan öka innehållets
+  // höjd efter första renderingen. Behåll bottenankaret så länge användaren inte
+  // själv har scrollat uppåt.
+  useEffect(() => {
+    const viewport = getViewportEl();
+    const content = viewport?.firstElementChild;
+    if (!viewport || !content || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(() => {
+      if (!isNearBottomRef.current) return;
+      viewport.scrollTop = viewport.scrollHeight;
+      prevScrollHeightRef.current = viewport.scrollHeight;
+    });
+    observer.observe(content);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [conversation.id, getViewportEl]);
 
   // Scroll to bottom when typing indicator appears
   useEffect(() => {
