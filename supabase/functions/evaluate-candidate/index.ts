@@ -97,7 +97,17 @@ interface EvaluationResponse {
   key_points?: Array<{ text: string; type?: string }>;
 }
 
+// Terminalt/övergående gatewayfel som måste behålla sin HTTP-status hela vägen
+// ut till anroparen (kö-workern bryter kedjan på 402/403 och backar av på 429).
+class GatewayError extends Error {
+  constructor(public status: number, public body: string) {
+    super(`AI gateway ${status}: ${body.slice(0, 200)}`);
+    this.name = 'GatewayError';
+  }
+}
+
 // Retry with exponential backoff
+
 async function fetchWithRetry(
   url: string,
   options: RequestInit,
@@ -489,14 +499,38 @@ serve(async (req) => {
       const alreadyHasSummary = !!(cvSummary?.summary_text);
       const shouldGenerateSummary = !alreadyHasSummary && !!rawText;
 
-      const aiResponse = await callLovableAI(
-        LOVABLE_API_KEY,
-        jobContext,
-        candidateContext,
-        criteriaToEvaluate,
-        feedbackContext,
-        shouldGenerateSummary,
-      );
+      let aiResponse: EvaluationResponse | null = null;
+      try {
+        aiResponse = await callLovableAI(
+          LOVABLE_API_KEY,
+          jobContext,
+          candidateContext,
+          criteriaToEvaluate,
+          feedbackContext,
+          shouldGenerateSummary,
+        );
+      } catch (gatewayError) {
+        if (gatewayError instanceof GatewayError) {
+          const userMessage = gatewayError.status === 402
+            ? 'AI-krediterna är slut. Fyll på i arbetsytans inställningar för att fortsätta utvärdera.'
+            : gatewayError.status === 403
+              ? 'AI-tjänsten är blockerad för den här arbetsytan.'
+              : 'För hög belastning på AI-tjänsten just nu. Försök igen om en stund.';
+
+          await supabase
+            .from('candidate_evaluations')
+            .update({ status: 'failed', error_message: userMessage, updated_at: new Date().toISOString() })
+            .eq('id', evaluation.id);
+
+          // Behåll gatewayens status → kö-workern bryter kedjan istället för
+          // att fortsätta bränna igenom hela kandidatlistan.
+          return new Response(
+            JSON.stringify({ error: userMessage, status: gatewayError.status }),
+            { status: gatewayError.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        throw gatewayError;
+      }
 
       if (!aiResponse) {
         await supabase
@@ -509,6 +543,7 @@ serve(async (req) => {
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
       freshResults = aiResponse.criteria_results;
 
       // Persist combined-pipe summary (if AI produced one).
@@ -1188,8 +1223,15 @@ Läs alltid hela meningen runt ordet innan du bedömer — nekande formuleringar
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI error:', response.status, errorText);
+      // Terminala gateway-statusar måste bubbla upp med rätt status så att
+      // kö-workern kan bryta kedjan (402 = slut på krediter, 403 = blockerad,
+      // 429 = rate limit) istället för att mala vidare på ett generiskt 500.
+      if ([402, 403, 429].includes(response.status)) {
+        throw new GatewayError(response.status, errorText);
+      }
       return null;
     }
+
 
     const data = await response.json();
     
@@ -1246,7 +1288,9 @@ Läs alltid hela meningen runt ordet innan du bedömer — nekande formuleringar
 
     return null;
   } catch (error) {
+    if (error instanceof GatewayError) throw error;
     console.error('Error calling AI:', error);
+
     return null;
   }
 }
