@@ -254,7 +254,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
-        {item.body && <p ref={bodyRef} className={`text-xs text-white mt-0.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
+        {item.body && <p ref={bodyRef} className={`text-xs text-white mt-1.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
         <div className="flex items-center gap-2 mt-1">
           <span className="text-[10px] text-white">{timeAgo}</span>
           {!item.route && canExpand && (
