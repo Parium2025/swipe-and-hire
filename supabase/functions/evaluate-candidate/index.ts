@@ -511,11 +511,16 @@ serve(async (req) => {
         );
       } catch (gatewayError) {
         if (gatewayError instanceof GatewayError) {
-          const userMessage = gatewayError.status === 402
-            ? 'AI-krediterna är slut. Fyll på i arbetsytans inställningar för att fortsätta utvärdera.'
-            : gatewayError.status === 403
-              ? 'AI-tjänsten är blockerad för den här arbetsytan.'
-              : 'För hög belastning på AI-tjänsten just nu. Försök igen om en stund.';
+          // Kunden ska ALDRIG se interna orsaker (krediter, spärrar, kvoter).
+          // Neutralt, lugnt meddelande utåt – orsaken loggas internt.
+          const userMessage =
+            gatewayError.status === 429
+              ? 'Hög belastning just nu — granskningen fortsätter automatiskt om en stund.'
+              : 'AI-granskningen är tillfälligt otillgänglig. Vi återupptar automatiskt.';
+
+          console.error(
+            `[gateway] status=${gatewayError.status} reason=${gatewayError.message?.slice(0, 200)}`,
+          );
 
           await supabase
             .from('candidate_evaluations')
@@ -531,6 +536,7 @@ serve(async (req) => {
         }
         throw gatewayError;
       }
+
 
       if (!aiResponse) {
         await supabase

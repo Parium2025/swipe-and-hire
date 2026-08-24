@@ -1002,7 +1002,8 @@ serve(async (req) => {
     );
   } catch (e) {
     console.error('Fatal error:', e);
-    const message = e instanceof Error ? e.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    // Interna feltexter går aldrig ut till kunden.
+    return new Response(JSON.stringify({ error: 'Innehållet kunde inte hämtas just nu. Försök igen om en stund.' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
+
 });

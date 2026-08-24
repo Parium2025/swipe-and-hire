@@ -25,6 +25,9 @@ export function CriteriaEvalProgress() {
       {visible.map((run) => {
         const pct = Math.min(100, Math.round((run.done_items / Math.max(1, run.total_items)) * 100));
         const isPaused = run.status === 'paused';
+        // Endast ett verkligt kontostopp är ett fel för kunden. Kreditpauser och
+        // rate limits är interna och återupptas automatiskt – de visas som väntläge.
+        const isBlocked = isPaused && run.pause_reason === 'blocked';
 
         return (
           <div
@@ -37,14 +40,14 @@ export function CriteriaEvalProgress() {
             <div className="flex items-start gap-2.5">
               <div className={cn(
                 'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
-                isPaused ? 'bg-destructive/15 text-destructive' : 'bg-primary/15 text-primary',
+                isBlocked ? 'bg-destructive/15 text-destructive' : 'bg-primary/15 text-primary',
               )}>
-                {isPaused ? <AlertTriangle className="h-4 w-4" /> : <Sparkles className="h-4 w-4 animate-pulse" />}
+                {isBlocked ? <AlertTriangle className="h-4 w-4" /> : <Sparkles className="h-4 w-4 animate-pulse" />}
               </div>
 
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium leading-snug text-foreground">
-                  {isPaused ? 'AI-granskningen är pausad' : 'AI granskar kandidater'}
+                  {isBlocked ? 'AI-granskningen är pausad' : isPaused ? 'AI-granskningen väntar' : 'AI granskar kandidater'}
                 </p>
                 <p className="mt-0.5 break-words text-xs text-muted-foreground">
                   {isPaused
@@ -54,11 +57,12 @@ export function CriteriaEvalProgress() {
 
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className={cn('h-full rounded-full transition-all duration-500', isPaused ? 'bg-destructive' : 'bg-primary')}
+                    className={cn('h-full rounded-full transition-all duration-500', isBlocked ? 'bg-destructive' : 'bg-primary')}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
               </div>
+
 
               <button
                 type="button"
@@ -90,12 +94,13 @@ export function CriteriaEvalProgress() {
 function pauseText(reason: string | null): string {
   switch (reason) {
     case 'credits_exhausted':
-      return 'AI-krediterna tog slut. Fyll på så återupptas granskningen automatiskt.';
+      return 'AI-granskningen tar en kort paus och fortsätter automatiskt om en liten stund.';
     case 'blocked':
-      return 'AI-tjänsten är blockerad för kontot. Kontakta support.';
+      return 'AI-granskningen är tillfälligt otillgänglig. Vi är på det — försök gärna igen senare.';
     case 'rate_limited':
-      return 'För många förfrågningar just nu — vi fortsätter automatiskt om en stund.';
+      return 'Hög belastning just nu — granskningen fortsätter automatiskt om en stund.';
     default:
       return 'Granskningen pausades och återupptas automatiskt.';
+
   }
 }

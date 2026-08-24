@@ -36,9 +36,17 @@ Deno.serve(async (req) => {
     return json({ stopped: 'hop_budget' });
   }
 
+  // ─── Självläkning: plocka upp pausade körningar igen ─────────────────
+  // Interna gateway-stopp (krediter, kvoter, rate limits) får aldrig kräva
+  // att kunden gör något – kön återupptas automatiskt efter en kort paus.
+  const { error: resumeError } = await supabase
+    .rpc('resume_paused_criteria_eval_runs', { p_min_age_minutes: 5 });
+  if (resumeError) console.warn('resume_paused_criteria_eval_runs failed:', resumeError.message);
+
   // ─── Single-flight: claim one run with a lease ───────────────────────
   const { data: claimed, error: claimError } = await supabase
     .rpc('claim_criteria_eval_run', { p_lease_seconds: LEASE_SECONDS });
+
 
   if (claimError) {
     console.error('claim_criteria_eval_run failed:', claimError.message);
