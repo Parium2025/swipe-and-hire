@@ -6,11 +6,9 @@ import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import type { JobStageSettings } from '@/hooks/useJobStageSettings';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
-import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
-import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { formatCompactTime } from '@/lib/date';
 import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
-import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare, Check, X } from 'lucide-react';
+import { Star, Sparkles, ChevronRight, Square, CheckSquare, Check, X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDragScroll } from '@/hooks/useDragScroll';
@@ -299,7 +297,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
       localStorage.setItem(`parium:jobDetails:${jobId}:activeStage`, activeTab);
     } catch { /* noop */ }
   }, [jobId, activeTab]);
-  const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
   const [previewStage, setPreviewStage] = useState<string | null>(null);
   const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const previewDelayRef = useRef<ReturnType<typeof setTimeout>>();
@@ -356,7 +353,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     const isDoubleTap = !!lastTap && lastTap.stage === stage && now - lastTap.time <= 320;
 
     if (isDoubleTap) {
-      setOpenStageMenu(stage);
       lastTouchTapRef.current = null;
       return;
     }
@@ -417,10 +413,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           const count = Math.max(stageTotals?.[stage] ?? 0, (appsByStage[stage] || []).length);
           const isActive = stage === activeTab;
 
-          const targetIdx = stageIdx === 0 ? 1 : 0;
-          const targetStageKey = stages[targetIdx];
-          const targetStageLabel = stageSettings[targetStageKey]?.label;
-
           return (
             <div
               key={stage}
@@ -454,7 +446,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   setActiveTab(stage);
                 }
                }}
-               onDoubleClick={() => setOpenStageMenu(stage)}
                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 backdrop-blur-sm cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] ${
                 isActive ? 'shadow-lg border-white/50' : 'border-transparent'
@@ -506,47 +497,11 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   )}
                 </button>
               )}
-              {/* Stage settings menu (3-dot) — visual-only on touch, functional on mouse */}
-              <span
-                onPointerDown={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <JobStageSettingsMenu
-                  jobId={jobId}
-                  stageKey={stage}
-                  candidateCount={count}
-                  totalStageCount={stages.length}
-                  targetStageKey={targetStageKey}
-                  targetStageLabel={targetStageLabel}
-                  stageIndex={stageIdx}
-                  disableTouchTrigger={isTouchCapable}
-                  open={openStageMenu === stage}
-                  onOpenChange={(nextOpen) => {
-                    setOpenStageMenu((prev) => {
-                      if (nextOpen) return stage;
-                      return prev === stage ? null : prev;
-                    });
-                  }}
-                />
-              </span>
+              {/* Stegen i en jobbannons är låsta standardsteg — hanteras i "Mina kandidater" */}
             </div>
           );
         })}
 
-        {/* Add new stage button */}
-        {stages.length < 8 && (
-          <CreateJobStageDialog
-            jobId={jobId}
-            currentStageCount={stages.length}
-            trigger={
-              <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap bg-white/5 text-white ring-1 ring-inset ring-white/10 active:scale-95 transition-all shrink-0 backdrop-blur-sm">
-                <Plus className="h-3.5 w-3.5" />
-                Nytt steg
-              </button>
-            }
-          />
-        )}
       </div>
 
       {/* Inline action bar for selection mode — placed above candidate list */}
