@@ -18,6 +18,12 @@ export interface AppNotification {
 
 const CACHE_KEY = 'parium_notifications_cache';
 
+// Chattmeddelanden räknas redan i sidomenyns chattbadge — de ska aldrig
+// dyka upp i klockan/notiscentret.
+const HIDDEN_TYPES = new Set(['message', 'new_message', 'chat_message']);
+const isHiddenType = (type: string) => HIDDEN_TYPES.has(type);
+
+
 const getCached = (userId: string): AppNotification[] | null => {
   return safeReadArrayCache<AppNotification>(CACHE_KEY, 'items', (env) => {
     return env.userId === userId && typeof env.ts === 'number' && Date.now() - env.ts < 60 * 60 * 1000;
