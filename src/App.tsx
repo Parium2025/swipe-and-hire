@@ -1,4 +1,5 @@
 import { useState, useEffect, useLayoutEffect, lazy, Suspense } from "react";
+import { PageLoader } from "@/components/ui/page-loader";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -175,9 +176,7 @@ const queryClient = new QueryClient({
 initConnectivityManager(queryClient);
 
 // Minimal loading fallback - just gradient background, no spinner
-const LazyFallback = () => (
-  <div className="min-h-screen bg-parium-gradient" />
-);
+const LazyFallback = () => <PageLoader />;
 
 const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare', '/om-oss', '/integritetspolicy', '/dpa', '/unsubscribe'];
 const isPublicLightweightPath = (pathname: string) =>
