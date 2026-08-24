@@ -998,6 +998,12 @@ async function callLovableAI(
   includeSummary: boolean = false,
 ): Promise<EvaluationResponse | null> {
   try {
+    // Auktoritativt synonymlexikon för just dessa kriterier (garanterat säkerhetsnät
+    // istället för att lita enbart på modellens allmänbildning).
+    const aliasBlock = buildAliasPromptBlock(
+      (criteria || []).flatMap((c: any) => [c?.title, c?.prompt].filter(Boolean)),
+    );
+
     const systemPrompt = `Du är en professionell svensk rekryteringsassistent som utvärderar kandidater mot urvalskriterier.
 
 ═══════════════════════════════════════════════════
