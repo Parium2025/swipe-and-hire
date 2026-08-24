@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { EmojiReactionPicker } from '@/components/messages/EmojiReactionPicker';
+import { AttachmentImageViewer } from '@/components/messages/AttachmentImageViewer';
 import { getMessageSenderName } from '@/lib/conversationDisplayUtils';
 import { Briefcase, Check, CheckCheck, Paperclip, FileText, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
@@ -45,6 +46,7 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   const senderName = getMessageSenderName(message.sender_profile);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showImageViewer, setShowImageViewer] = useState(false);
   const lastTapRef = useRef(0);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
