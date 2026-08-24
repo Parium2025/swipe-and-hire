@@ -52,6 +52,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const initializedRef = useRef(false);
   const mountedRef = useRef(true);
   const backgroundUpdatePendingRef = useRef(false);
+  const hadErrorRef = useRef(false);
 
   const safeFallback = useCallback((city = ''): WeatherData => ({
     temperature: 0,
@@ -374,7 +375,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Retry watcher: whenever weather transitions to error state, schedule a retry.
-    if (weather.error && !isOffline) {
+    if (hadErrorRef.current && !isOffline) {
       scheduleRetry();
     }
 
@@ -389,7 +390,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       window.removeEventListener('online', handleOnline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback, weather.error]);
+  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback]);
+
+  // Track error state without re-running the init effect (which would tear down
+  // and restart the GPS watcher on every transient failure).
+  useEffect(() => {
+    hadErrorRef.current = Boolean(weather.error);
+  }, [weather.error]);
 
   return weather;
 };
