@@ -206,9 +206,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       // IP-derived (city-wrong) position. Works the same in every country.
       const manual = getManualLocation();
   if (manual) {
-    const loc: CachedLocation = { lat: manual.lat, lon: manual.lon, city: manual.city, source: 'fallback', timestamp: Date.now() };
-    setCachedLocation(loc);
-    return loc;
+    // Manual choice wins; weather for it is fetched below.
+    location = { lat: manual.lat, lon: manual.lon, city: manual.city, source: 'fallback', timestamp: Date.now() };
+    setCachedLocation(location);
   }
 
   const gpsResult = await getAccuratePosition({
@@ -489,12 +489,12 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
 
   const manual = getManualLocation();
   if (manual) {
-    const loc: CachedLocation = { lat: manual.lat, lon: manual.lon, city: manual.city, source: 'fallback', timestamp: Date.now() };
-    setCachedLocation(loc);
-    return loc;
+    // Manual choice wins; weather for it is fetched below.
+    location = { lat: manual.lat, lon: manual.lon, city: manual.city, source: 'fallback', timestamp: Date.now() };
+    setCachedLocation(location);
   }
 
-  const gpsResult = await getAccuratePosition({
+  const gpsResult = location ? null : await getAccuratePosition({
     timeout: 5000,
     maximumAge: 30 * 60 * 1000,
   });
