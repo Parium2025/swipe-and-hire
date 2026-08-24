@@ -350,9 +350,11 @@ export default function Messages() {
               </div>
             ) : (
               <ScrollArea className="h-full">
-                <div className="p-2 space-y-1">
-                  {filteredConversations.map((conv) => {
+                <div className="p-2">
+                  {filteredConversations.map((conv, index) => {
+                    const isLast = index === filteredConversations.length - 1;
                     const { displayMember, isSelf } = resolveDisplayMember(conv.members, user?.id);
+
                     const displayName = getConversationDisplayName({
                       isGroup: conv.is_group,
                       groupName: conv.name,
