@@ -1188,8 +1188,15 @@ Läs alltid hela meningen runt ordet innan du bedömer — nekande formuleringar
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI error:', response.status, errorText);
+      // Terminala gateway-statusar måste bubbla upp med rätt status så att
+      // kö-workern kan bryta kedjan (402 = slut på krediter, 403 = blockerad,
+      // 429 = rate limit) istället för att mala vidare på ett generiskt 500.
+      if ([402, 403, 429].includes(response.status)) {
+        throw new GatewayError(response.status, errorText);
+      }
       return null;
     }
+
 
     const data = await response.json();
     
