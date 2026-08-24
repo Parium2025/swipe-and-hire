@@ -147,26 +147,51 @@ function normalize(text: string): string {
 
 /**
  * Plockar ut de aliasgrupper som är relevanta för rekryterarens kriterier.
- * Deterministisk (bevarar ALIAS_GROUPS-ordning) så cache-hashen blir stabil.
+ *
+ * Prioritering: grupper rankas efter hur SPECIFIK träffen är (längsta matchande
+ * term + antal träffar). Generiska grupper som "Erfarenhetsnivå" ("erfarenhet av")
+ * trängs därför ut sist när taket nås — inte de fackspecifika grupperna.
+ * Resultatet sorteras tillbaka i ALIAS_GROUPS-ordning → deterministisk output
+ * och stabil cache-hash.
  */
-export function matchAliasGroups(criteriaTexts: string[], maxGroups = 20): AliasGroup[] {
+export function matchAliasGroups(criteriaTexts: string[], maxGroups = 28): AliasGroup[] {
   const haystack = normalize(criteriaTexts.filter(Boolean).join(' \n '));
   if (haystack.trim().length === 0) return [];
 
-  const matched: AliasGroup[] = [];
-  for (const group of ALIAS_GROUPS) {
-    const hit = group.terms.some((term) => {
+  const scored: { index: number; group: AliasGroup; score: number }[] = [];
+
+  ALIAS_GROUPS.forEach((group, index) => {
+    let hits = 0;
+    let longest = 0;
+    for (const term of group.terms) {
       const t = term.toLowerCase().trim();
-      if (t.length === 0) return false;
+      if (t.length === 0) continue;
       // Korta termer (≤3 tecken, t.ex. "ob", "hr", "ml") kräver ordgräns
-      if (t.length <= 3) return haystack.includes(` ${t} `);
-      return haystack.includes(t);
-    });
-    if (hit) matched.push(group);
-    if (matched.length >= maxGroups) break;
-  }
-  return matched;
+      const hit = t.length <= 3 ? haystack.includes(` ${t} `) : haystack.includes(t);
+      if (hit) {
+        hits++;
+        if (t.length > longest) longest = t.length;
+      }
+    }
+    if (hits > 0) scored.push({ index, group, score: longest * 10 + hits });
+  });
+
+  return scored
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, maxGroups)
+    .sort((a, b) => a.index - b.index)
+    .map((s) => s.group);
 }
+
+/**
+ * Stabil signatur över de aliasgrupper som gäller för EN text (ett kriterium).
+ * Används i criterion_hash så att cachen speglar exakt vilket lexikon som
+ * påverkade bedömningen — utan att syskonkriterier invaliderar cachen.
+ */
+export function aliasSignature(criteriaTexts: string[]): string {
+  return matchAliasGroups(criteriaTexts).map((g) => g.canonical).join('|');
+}
+
 
 /**
  * Renderar matchade grupper som ett kompakt promptavsnitt.

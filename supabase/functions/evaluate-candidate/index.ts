@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { buildAliasPromptBlock } from "../_shared/domain-aliases.ts";
+import { buildAliasPromptBlock, aliasSignature } from "../_shared/domain-aliases.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,7 +9,7 @@ const corsHeaders = {
 
 // Bump this when the AI system prompt / evaluation logic changes materially.
 // Included in criterion_hash → forces a global cache invalidation for all criteria.
-const PROMPT_VERSION = 'v2026-08-24-aliases';
+const PROMPT_VERSION = 'v2026-08-24-aliases2';
 
 // Normalize prompt text before hashing so tiny cosmetic edits don't invalidate
 // the cache. Lowercases, trims, collapses whitespace, strips trailing punctuation.
@@ -360,14 +360,18 @@ serve(async (req) => {
         const perCriterionFeedback = feedbackByCriterion.get(c.id) || '';
         const normTitle = normalizeForHash(c.title);
         const normPrompt = normalizeForHash(c.prompt);
+        // Aliaslexikonet påverkar bedömningen → in i hashen, men bara de grupper
+        // som just DETTA kriterium triggar (syskonkriterier ska inte invalidera).
+        const aliasSig = aliasSignature([c?.title, c?.prompt].filter(Boolean));
         return {
           ...c,
           _criterion_hash: await sha256(
-            `${PROMPT_VERSION}||${normTitle}||${normPrompt}||${perCriterionFeedback}`
+            `${PROMPT_VERSION}||${normTitle}||${normPrompt}||${perCriterionFeedback}||${aliasSig}`
           ),
         };
       })
     );
+
 
     const criterionHashes = Array.from(new Set(criteriaWithHashes.map(c => c._criterion_hash)));
     const { data: cachedRows } = await supabase
