@@ -63,7 +63,6 @@ export function CriteriaEvalProgress() {
                 </div>
               </div>
 
-              </div>
 
               <button
                 type="button"
