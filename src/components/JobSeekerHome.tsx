@@ -2,6 +2,8 @@ import { memo, useMemo, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWeather } from '@/hooks/useWeather';
 import { useGreeting } from '@/hooks/useGreeting';
+import { useMinuteTick } from '@/hooks/useMinuteTick';
+
 import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
