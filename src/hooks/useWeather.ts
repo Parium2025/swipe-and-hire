@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useBackgroundLocation } from './useBackgroundLocation';
-import { isNativeApp, isMobileWeb, getCurrentPosition, getAccuratePosition, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
+import { isNativeApp, isMobileWeb, getAccuratePosition, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
 import {
   type CachedLocation,
   getCachedLocation,
@@ -220,8 +220,11 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           return;
         }
 
-        const cached = locationRef.current || getCachedLocation();
-        const cityHint = cached?.city || '';
+        // Only reuse the cached city name when we are still in the same place —
+        // otherwise let the server resolve the real city for the new coordinates.
+        const nearCached =
+          cachedFix && getDistanceKm(cachedFix.lat, cachedFix.lon, gpsResult.lat, gpsResult.lon) < 10;
+        const cityHint = nearCached ? cachedFix?.city || '' : '';
         await updateLocation(gpsResult.lat, gpsResult.lon, cityHint || null, 'gps');
         return;
       }
@@ -349,7 +352,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
             console.log(`📍 GPS watchPosition: moved ${distance.toFixed(2)}km - updating!`);
           }
 
-          const cityHint = cached?.city || '';
+          const stillNearby =
+            cached && getDistanceKm(cached.lat, cached.lon, newLat, newLon) < 10;
+          const cityHint = stillNearby ? cached?.city || '' : '';
           await updateLocation(newLat, newLon, cityHint || null, 'gps');
         },
         (error) => {
