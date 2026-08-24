@@ -96,7 +96,7 @@ export const setCachedWeather = (weather: Omit<CachedWeather, 'timestamp'>) => {
   } catch { /* Silent fail */ }
 };
 
-// ─── Manuell plats ───────────────────────────────────────
+// ─── Rensning av äldre lagring ───────────────────────────
 // Legacy: a manual city override used to be stored here. Removed — positioning
 // is fully automatic. Clean up any leftover value from older sessions.
 try { localStorage.removeItem('parium_weather_manual_location'); } catch { /* ignore */ }
