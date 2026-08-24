@@ -13,6 +13,7 @@ import {
   getServerSideIPLocation,
   geocodeCity,
   getTimeBasedEmoji,
+  getManualLocation,
 } from '@/lib/weatherApi';
 
 // Re-export for consumers that import from here
@@ -192,6 +193,14 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   });
 
   const runLocationCheck = useCallback(async (silent = true) => {
+    // A manually chosen city always wins — it is the user correcting us.
+    const manual = getManualLocation();
+    if (manual) {
+      locationRef.current = { lat: manual.lat, lon: manual.lon, city: manual.city, source: 'fallback', timestamp: Date.now() };
+      await fetchWeatherOnly(manual.lat, manual.lon, manual.city);
+      return;
+    }
+
     try {
       // Fast first fix, automatically refined when the browser hands us an
       // IP-derived (city-wrong) position. Works the same in every country.
@@ -342,6 +351,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           const newLat = position.coords.latitude;
           const newLon = position.coords.longitude;
           const accuracy = position.coords.accuracy ?? Number.POSITIVE_INFINITY;
+          if (getManualLocation()) return;
 
           const cached = locationRef.current;
           // Discard coarse (IP-derived) updates when we already know better.
@@ -396,6 +406,14 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     };
 
+    const handleManualLocationChange = () => {
+      if (!mountedRef.current) return;
+      updateWeather({ isLoading: true, error: null });
+      inFlightRef.current = false;
+      void checkForLocationChange(false);
+    };
+
+    window.addEventListener('parium:weather-location-changed', handleManualLocationChange);
     window.addEventListener('online', handleOnline);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
@@ -406,6 +424,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         console.log('🛰️ Real-time GPS tracking stopped');
       }
       clearInterval(gpsTrackingInterval);
+      window.removeEventListener('parium:weather-location-changed', handleManualLocationChange);
       window.removeEventListener('online', handleOnline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
@@ -461,7 +480,14 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
 
   let location: CachedLocation | null = null;
 
-  const gpsResult = await getAccuratePosition({
+  const manual = getManualLocation();
+  if (manual) {
+    // Manual choice wins; weather for it is fetched below.
+    location = { lat: manual.lat, lon: manual.lon, city: manual.city, source: 'fallback', timestamp: Date.now() };
+    setCachedLocation(location);
+  }
+
+  const gpsResult = location ? null : await getAccuratePosition({
     timeout: 5000,
     maximumAge: 30 * 60 * 1000,
   });
