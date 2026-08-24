@@ -15,6 +15,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 const DELETE_THRESHOLD = 80;
 const MAX_TRANSLATE = 100;
 const UNREAD_THRESHOLD = 80;
+const DIRECTION_LOCK_PX = 8;
 
 interface SwipeableConversationItemProps {
   children: React.ReactNode;
@@ -50,6 +51,7 @@ export function SwipeableConversationItem({
   const pendingXRef = useRef(0);
   const isSwipingRef = useRef(false);
   const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
+  const lockOffsetRef = useRef(0);
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
@@ -110,6 +112,7 @@ export function SwipeableConversationItem({
     currentXRef.current = 0;
     isSwipingRef.current = false;
     directionLockedRef.current = null;
+    lockOffsetRef.current = 0;
     if (contentRef.current) contentRef.current.style.transition = '';
   }, []);
 
@@ -119,16 +122,20 @@ export function SwipeableConversationItem({
     const deltaY = touch.clientY - startYRef.current;
 
     if (!directionLockedRef.current) {
-      if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
+      if (Math.abs(deltaX) > DIRECTION_LOCK_PX || Math.abs(deltaY) > DIRECTION_LOCK_PX) {
         directionLockedRef.current = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
+        // Starta rörelsen från noll — annars hoppar kortet 8 px direkt (kändes "tvärnitande").
+        lockOffsetRef.current = deltaX;
       }
       return;
     }
 
     if (directionLockedRef.current === 'vertical') return;
 
+    const adjusted = deltaX - lockOffsetRef.current;
+
     // Vänster = ta bort. Höger = markera som oläst (bara när det är möjligt).
-    const swipingRight = deltaX > 0;
+    const swipingRight = adjusted > 0;
     if (swipingRight && !(onMarkUnread && canMarkUnread)) {
       if (isSwipingRef.current) setX(0);
       return;
@@ -136,14 +143,15 @@ export function SwipeableConversationItem({
 
     isSwipingRef.current = true;
 
-    const absDelta = Math.abs(deltaX);
+    const absDelta = Math.abs(adjusted);
     const threshold = swipingRight ? UNREAD_THRESHOLD : DELETE_THRESHOLD;
-    const clamped = Math.min(absDelta, MAX_TRANSLATE);
-    const dampened = clamped > threshold
-      ? threshold + (clamped - threshold) * 0.3
-      : clamped;
+    // Mjuk gummibandskurva efter tröskeln istället för hård klippning.
+    const over = Math.max(absDelta - threshold, 0);
+    const resisted =
+      Math.min(absDelta, threshold) +
+      (MAX_TRANSLATE - threshold) * (1 - Math.exp(-over / (MAX_TRANSLATE - threshold)));
 
-    const x = swipingRight ? dampened : -dampened;
+    const x = swipingRight ? resisted : -resisted;
     currentXRef.current = x;
     setX(x);
   }, [onMarkUnread, canMarkUnread, setX]);
@@ -158,11 +166,14 @@ export function SwipeableConversationItem({
       setShowConfirm(true);
     } else if (offset >= UNREAD_THRESHOLD && onMarkUnread && canMarkUnread) {
       try { navigator.vibrate?.(8); } catch { /* ignoreras */ }
-      onMarkUnread();
+      // Låt tillbakafjädringen hinna starta innan listan uppdateras — annars
+      // klipper omrenderingen animationen och det ser ryckigt ut.
+      window.setTimeout(() => onMarkUnread(), 220);
     }
 
     isSwipingRef.current = false;
     directionLockedRef.current = null;
+    lockOffsetRef.current = 0;
   }, [animateBack, onMarkUnread, canMarkUnread]);
 
   const handleConfirmDelete = useCallback(() => {
