@@ -7,7 +7,8 @@ import logoRings from '@/assets/parium-logo-rings.png?inline';
  * Premium-känsla:
  *  - Visas först efter en kort fördröjning (default 180 ms) så snabba laddningar
  *    aldrig blinkar till med en spinner.
- *  - Pulserande Parium-logomark, lugn vågrörelse och en mjuk procentindikator.
+ *  - Pulserande Parium-logomark, lugn vågrörelse och en obestämd laddningslinje
+ *    (ingen fejkad procent som hoppar till klart).
  *  - Respekterar prefers-reduced-motion via Tailwind (motion-reduce).
  */
 export const PageLoader = ({
