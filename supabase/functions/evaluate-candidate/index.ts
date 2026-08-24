@@ -1253,7 +1253,9 @@ Läs alltid hela meningen runt ordet innan du bedömer — nekande formuleringar
 
     return null;
   } catch (error) {
+    if (error instanceof GatewayError) throw error;
     console.error('Error calling AI:', error);
+
     return null;
   }
 }
