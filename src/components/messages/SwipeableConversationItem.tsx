@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { Trash2, AlertTriangle, MailOpen, MoreVertical } from 'lucide-react';
+import { Trash2, AlertTriangle, MailOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -11,12 +11,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 const DELETE_THRESHOLD = 80;
 const MAX_TRANSLATE = 100;
@@ -58,6 +52,7 @@ export function SwipeableConversationItem({
   const isSwipingRef = useRef(false);
   const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   const lockOffsetRef = useRef(0);
+  const suppressClickRef = useRef(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
@@ -111,10 +106,9 @@ export function SwipeableConversationItem({
     currentXRef.current = 0;
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    startXRef.current = touch.clientX;
-    startYRef.current = touch.clientY;
+  const beginDrag = useCallback((clientX: number, clientY: number) => {
+    startXRef.current = clientX;
+    startYRef.current = clientY;
     currentXRef.current = 0;
     isSwipingRef.current = false;
     directionLockedRef.current = null;
@@ -122,10 +116,9 @@ export function SwipeableConversationItem({
     if (contentRef.current) contentRef.current.style.transition = '';
   }, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - startXRef.current;
-    const deltaY = touch.clientY - startYRef.current;
+  const moveDrag = useCallback((clientX: number, clientY: number) => {
+    const deltaX = clientX - startXRef.current;
+    const deltaY = clientY - startYRef.current;
 
     if (!directionLockedRef.current) {
       if (Math.abs(deltaX) > DIRECTION_LOCK_PX || Math.abs(deltaY) > DIRECTION_LOCK_PX) {
@@ -162,7 +155,7 @@ export function SwipeableConversationItem({
     setX(x);
   }, [onMarkUnread, canMarkUnread, setX]);
 
-  const handleTouchEnd = useCallback(() => {
+  const endDrag = useCallback(() => {
     if (!isSwipingRef.current) return;
 
     const offset = currentXRef.current;
@@ -180,12 +173,50 @@ export function SwipeableConversationItem({
     isSwipingRef.current = false;
     directionLockedRef.current = null;
     lockOffsetRef.current = 0;
+    // Blockera klicket som annars öppnar konversationen direkt efter dragningen.
+    suppressClickRef.current = true;
+    window.setTimeout(() => { suppressClickRef.current = false; }, 250);
   }, [animateBack, onMarkUnread, canMarkUnread]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    beginDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, [beginDrag]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, [moveDrag]);
+
+  // Mus: exakt samma gest som med fingret — dra åt vänster för att ta bort,
+  // åt höger för att markera som oläst.
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    beginDrag(e.clientX, e.clientY);
+
+    const onMove = (ev: MouseEvent) => {
+      ev.preventDefault();
+      moveDrag(ev.clientX, ev.clientY);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      endDrag();
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }, [beginDrag, moveDrag, endDrag]);
+
+  const handleClickCapture = useCallback((e: React.MouseEvent) => {
+    if (suppressClickRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, []);
 
   const handleConfirmDelete = useCallback(() => {
     setShowConfirm(false);
     onDelete();
   }, [onDelete]);
+
 
   return (
     <>
@@ -193,7 +224,9 @@ export function SwipeableConversationItem({
         className="relative overflow-hidden rounded-lg group"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onTouchEnd={endDrag}
+        onMouseDown={handleMouseDown}
+        onClickCapture={handleClickCapture}
         onTouchCancel={animateBack}
       >
         {/* Markera som oläst — visas vid drag åt höger */}
@@ -249,35 +282,6 @@ export function SwipeableConversationItem({
           {children}
         </div>
 
-        {/* Desktop: hover-menu for mark unread / delete (mouse alternative to swipe) */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              onClick={(e) => e.stopPropagation()}
-              className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 h-7 w-7 items-center justify-center rounded-full bg-white/10 text-white opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100"
-              aria-label="Konversationsåtgärder"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="left" align="center" className="min-w-[10rem]">
-            <DropdownMenuItem
-              disabled={!canMarkUnread}
-              onSelect={() => onMarkUnread?.()}
-            >
-              <MailOpen className="mr-2 h-4 w-4" />
-              Markera som oläst
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => setShowConfirm(true)}
-              className="text-destructive focus:text-destructive"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Ta bort
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       {/* Delete confirmation dialog – matches app standard */}
