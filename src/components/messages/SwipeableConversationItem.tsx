@@ -131,6 +131,36 @@ export function SwipeableConversationItem({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Markera som oläst — visas vid drag åt höger */}
+        {showUnreadButton && (
+          <div className="absolute inset-y-0 left-0 flex items-center z-0 pl-3">
+            <div
+              style={{
+                opacity: unreadProgress,
+                transform: `scale(${0.6 + unreadProgress * 0.4})`,
+              }}
+            >
+              <button
+                className={cn(
+                  "rounded-full flex items-center gap-1 px-3 py-2",
+                  "bg-blue-500/20 border border-blue-500/40",
+                  "text-white font-medium text-xs transition-all duration-150",
+                  unreadProgress >= 1 && "bg-blue-500/30 border-blue-500/50"
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetPosition();
+                  onMarkUnread?.();
+                }}
+                tabIndex={-1}
+              >
+                <MailOpen className="h-3.5 w-3.5 text-white" />
+                <span>Oläst</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Delete button on the RIGHT side */}
         {showDeleteButton && (
           <div className="absolute inset-y-0 right-0 flex items-center z-0 pr-3">
