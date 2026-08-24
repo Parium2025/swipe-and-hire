@@ -190,7 +190,12 @@ export function ChatView({
     setEditOriginalContent('');
   }, [conversation.id]);
 
+  // Timers som pinnar scrollen till botten vid öppning av en chatt
+  const initialPinTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => { initialPinTimers.current.forEach(clearTimeout); }, []);
+
   // Track if user is near bottom of scroll area
+
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement | null;
     if (!target) return;
