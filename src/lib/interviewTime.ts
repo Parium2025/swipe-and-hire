@@ -1,26 +1,27 @@
-import { format, isToday, isTomorrow } from 'date-fns';
-import { sv } from 'date-fns/locale';
+import {
+  formatSwedishShortDate,
+  formatSwedishTime,
+  swedishDayDiff,
+} from '@/lib/swedishTime';
 
+/** Allt visas i svensk tid (Europe/Stockholm), oavsett enhetens tidszon. */
 export const formatInterviewDate = (dateStr: string): string => {
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return '';
-  if (isToday(date)) return 'Idag';
-  if (isTomorrow(date)) return 'Imorgon';
-  return format(date, 'd MMM', { locale: sv });
+  const dayDiff = swedishDayDiff(Date.now(), date);
+  if (dayDiff === 0) return 'Idag';
+  if (dayDiff === 1) return 'Imorgon';
+  return formatSwedishShortDate(date);
 };
 
 export const formatInterviewTime = (dateStr: string): string => {
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return '';
-  return format(date, 'HH:mm');
+  return formatSwedishTime(date);
 };
 
-/** Calendar-day difference (not elapsed 24h blocks) so "Imorgon" always means tomorrow. */
-const calendarDayDiff = (from: Date, to: Date): number => {
-  const a = new Date(from.getFullYear(), from.getMonth(), from.getDate()).getTime();
-  const b = new Date(to.getFullYear(), to.getMonth(), to.getDate()).getTime();
-  return Math.round((b - a) / 86_400_000);
-};
+/** Calendar-day difference in Swedish time so "Imorgon" always means tomorrow. */
+const calendarDayDiff = (from: Date, to: Date): number => swedishDayDiff(from, to);
 
 /** Relative label. Recomputed on every minute tick by the cards. */
 export const getTimeUntil = (scheduledAt: string, now: number = Date.now()): string => {
