@@ -6,11 +6,9 @@ import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import type { JobStageSettings } from '@/hooks/useJobStageSettings';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
-import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
-import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { formatCompactTime } from '@/lib/date';
 import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
-import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare, Check, X } from 'lucide-react';
+import { Star, Sparkles, ChevronRight, Square, CheckSquare, Check, X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDragScroll } from '@/hooks/useDragScroll';
@@ -299,7 +297,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
       localStorage.setItem(`parium:jobDetails:${jobId}:activeStage`, activeTab);
     } catch { /* noop */ }
   }, [jobId, activeTab]);
-  const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
   const [previewStage, setPreviewStage] = useState<string | null>(null);
   const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const previewDelayRef = useRef<ReturnType<typeof setTimeout>>();
@@ -356,7 +353,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     const isDoubleTap = !!lastTap && lastTap.stage === stage && now - lastTap.time <= 320;
 
     if (isDoubleTap) {
-      setOpenStageMenu(stage);
       lastTouchTapRef.current = null;
       return;
     }
@@ -417,10 +413,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           const count = Math.max(stageTotals?.[stage] ?? 0, (appsByStage[stage] || []).length);
           const isActive = stage === activeTab;
 
-          const targetIdx = stageIdx === 0 ? 1 : 0;
-          const targetStageKey = stages[targetIdx];
-          const targetStageLabel = stageSettings[targetStageKey]?.label;
-
           return (
             <div
               key={stage}
@@ -454,7 +446,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   setActiveTab(stage);
                 }
                }}
-               onDoubleClick={() => setOpenStageMenu(stage)}
                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 backdrop-blur-sm cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] ${
                 isActive ? 'shadow-lg border-white/50' : 'border-transparent'
