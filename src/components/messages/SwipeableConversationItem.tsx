@@ -118,7 +118,9 @@ export function SwipeableConversationItem({
   }, [onDelete]);
 
   const deleteProgress = Math.min(Math.abs(translateX) / DELETE_THRESHOLD, 1);
-  const showDeleteButton = Math.abs(translateX) > 5;
+  const showDeleteButton = translateX < -5;
+  const unreadProgress = Math.min(Math.max(translateX, 0) / UNREAD_THRESHOLD, 1);
+  const showUnreadButton = translateX > 5 && !!onMarkUnread && canMarkUnread;
 
   return (
     <>
