@@ -84,3 +84,11 @@ export const formatSwedishDateTime = (
   const raw = longDateFormatter.format(d);
   return { time: formatSwedishTime(d), date: raw.charAt(0).toUpperCase() + raw.slice(1) };
 };
+
+/**
+ * Hour 0-23 in the *device's own* timezone. Used for personal, location-based
+ * cues (greeting, day/night emoji) so a user in Tokyo or New York sees the
+ * right time of day. Business times (interviews, deadlines) stay Swedish.
+ */
+export const getLocalHour = (date: Date | number = Date.now()): number =>
+  (typeof date === 'number' ? new Date(date) : date).getHours();
