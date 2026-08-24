@@ -886,9 +886,10 @@ serve(async (req) => {
         
         console.log(`RSS-PRIORITERAD: Tar bort ${aiReplaced} AI + ${rssRemoved} äldsta RSS för att behålla ${targetSlots} totalt`);
         
-        for (const id of idsToDelete) {
-          await supabase.from('daily_hr_news').delete().eq('id', id);
+        if (idsToDelete.length > 0) {
+          await supabase.from('daily_hr_news').delete().in('id', idsToDelete);
         }
+
         
         console.log(`Feed har nu exakt ${targetSlots} items (RSS prioriterat)`);
       }
