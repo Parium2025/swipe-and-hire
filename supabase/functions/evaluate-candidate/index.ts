@@ -97,7 +97,17 @@ interface EvaluationResponse {
   key_points?: Array<{ text: string; type?: string }>;
 }
 
+// Terminalt/övergående gatewayfel som måste behålla sin HTTP-status hela vägen
+// ut till anroparen (kö-workern bryter kedjan på 402/403 och backar av på 429).
+class GatewayError extends Error {
+  constructor(public status: number, public body: string) {
+    super(`AI gateway ${status}: ${body.slice(0, 200)}`);
+    this.name = 'GatewayError';
+  }
+}
+
 // Retry with exponential backoff
+
 async function fetchWithRetry(
   url: string,
   options: RequestInit,
