@@ -9,9 +9,7 @@ import {
   Head,
   Heading,
   Html,
-  Link,
   Preview,
-  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
@@ -20,31 +18,25 @@ interface MagicLinkEmailProps {
   confirmationUrl: string
 }
 
-export const MagicLinkEmail = ({ confirmationUrl }: MagicLinkEmailProps) => (
-  <Html lang="sv" dir="ltr">
+export const MagicLinkEmail = ({
+  siteName,
+  confirmationUrl,
+}: MagicLinkEmailProps) => (
+  <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Din inloggningslänk till Parium</Preview>
+    <Preview>Your login link for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={brandSection}>
-          <Text style={brand}>Parium</Text>
-        </Section>
-        <Heading style={h1}>Din inloggningslänk</Heading>
+        <Heading style={h1}>Your login link</Heading>
         <Text style={text}>
-          Klicka på knappen nedan för att logga in på Parium. Länken går ut om en stund.
+          Click the button below to log in to {siteName}. This link will expire
+          shortly.
         </Text>
-        <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
-          <Button style={button} href={confirmationUrl}>Logga in</Button>
-        </Section>
-        <Text style={smallText}>
-          Fungerar inte knappen? Kopiera länken:{' '}
-          <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
-        </Text>
+        <Button style={button} href={confirmationUrl}>
+          Log In
+        </Button>
         <Text style={footer}>
-          Om du inte begärde denna länk kan du ignorera mailet.
-        </Text>
-        <Text style={noReply}>
-          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
+          If you didn't request this link, you can safely ignore this email.
         </Text>
       </Container>
     </Body>
@@ -53,23 +45,26 @@ export const MagicLinkEmail = ({ confirmationUrl }: MagicLinkEmailProps) => (
 
 export default MagicLinkEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }
-const container = { padding: '32px 28px', maxWidth: '560px' }
-const brandSection = { margin: '0 0 24px' }
-const brand = { fontSize: '20px', fontWeight: 700 as const, color: '#001F3D', margin: 0, letterSpacing: '-0.3px' }
-const h1 = { fontSize: '24px', fontWeight: 700 as const, color: '#001F3D', margin: '0 0 20px', letterSpacing: '-0.3px' }
-const text = { fontSize: '15px', color: '#334155', lineHeight: '1.6', margin: '0 0 16px' }
-const smallText = { fontSize: '13px', color: '#64748b', lineHeight: '1.5', margin: '0 0 24px', wordBreak: 'break-all' as const }
-const link = { color: '#001F3D', textDecoration: 'underline' }
-const button = {
-  backgroundColor: '#001F3D',
-  color: '#ffffff',
-  fontSize: '15px',
-  fontWeight: 600 as const,
-  borderRadius: '8px',
-  padding: '14px 28px',
-  textDecoration: 'none',
-  display: 'inline-block',
+const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
+const container = { padding: '20px 25px' }
+const h1 = {
+  fontSize: '22px',
+  fontWeight: 'bold' as const,
+  color: '#000000',
+  margin: '0 0 20px',
 }
-const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }
-const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', fontStyle: 'italic' as const }
+const text = {
+  fontSize: '14px',
+  color: '#55575d',
+  lineHeight: '1.5',
+  margin: '0 0 25px',
+}
+const button = {
+  backgroundColor: '#000000',
+  color: '#ffffff',
+  fontSize: '14px',
+  borderRadius: '8px',
+  padding: '12px 20px',
+  textDecoration: 'none',
+}
+const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
