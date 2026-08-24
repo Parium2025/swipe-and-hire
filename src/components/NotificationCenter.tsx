@@ -1,7 +1,7 @@
 import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, Flag } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { useNotificationPreferences, type NotificationType } from '@/hooks/useNotificationPreferences';
@@ -140,7 +140,7 @@ function NotificationItem({
           if (canExpand) setExpanded(v => !v);
         }
       }}
-      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg cursor-pointer ${
+      className={`w-full flex items-start gap-3 px-3 py-4 text-left transition-colors rounded-lg cursor-pointer ${
         notification.is_read 
           ? 'opacity-60 hover:bg-white/5' 
           : 'hover:bg-white/10 bg-white/5'
@@ -158,9 +158,9 @@ function NotificationItem({
           )}
         </div>
         {notification.body && (
-          <p ref={bodyRef} className={`text-xs text-white mt-0.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
+          <p ref={bodyRef} className={`text-xs text-white mt-1.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
         )}
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 mt-2">
           <span className="text-[10px] text-white">{timeAgo}</span>
           {!route && canExpand && (
             <span className="text-[10px] font-medium text-white/80 underline underline-offset-2">
@@ -175,9 +175,8 @@ function NotificationItem({
                 if (!notification.is_read) onRead(notification.id);
                 onNavigate(supportReportRoute(notification.title, notification.body));
               }}
-              className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+              className="ml-auto inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
             >
-              <Flag className="h-2.5 w-2.5" strokeWidth={2} />
               Rapportera
             </button>
           )}
@@ -235,7 +234,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       }}
-      className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg cursor-pointer ${
+      className={`w-full flex items-start gap-3 px-3 py-4 text-left transition-colors rounded-lg cursor-pointer ${
         item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
       }`}
     >
@@ -255,8 +254,8 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
-        {item.body && <p ref={bodyRef} className={`text-xs text-white mt-0.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
-        <div className="flex items-center gap-2 mt-1">
+        {item.body && <p ref={bodyRef} className={`text-xs text-white mt-1.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
+        <div className="flex items-center gap-2 mt-2">
           <span className="text-[10px] text-white">{timeAgo}</span>
           {!item.route && canExpand && (
             <span className="text-[10px] font-medium text-white/80 underline underline-offset-2">
@@ -271,9 +270,8 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
                 if (!item.is_read) onRead(item.id);
                 onNavigate(supportReportRoute(item.title, item.body));
               }}
-              className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+              className="ml-auto inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
             >
-              <Flag className="h-2.5 w-2.5" strokeWidth={2} />
               Rapportera
             </button>
           )}
