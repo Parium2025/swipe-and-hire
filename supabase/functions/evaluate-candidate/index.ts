@@ -1056,6 +1056,8 @@ Exempel på vad du MÅSTE förstå som EKVIVALENT:
 - "2+ års erfarenhet" → räkna faktiska år från CV:s tjänstgöringsperioder
 - "junior" ≈ 0-2 år ; "senior" ≈ 5+ år
 - Om CV visar 2019-2024 = ~5 år
+${aliasBlock}
+
 
 ═══════════════════════════════════════════════════
 📋 BEDÖMNINGSREGLER
