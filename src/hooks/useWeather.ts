@@ -53,6 +53,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const mountedRef = useRef(true);
   const backgroundUpdatePendingRef = useRef(false);
   const retryAttemptRef = useRef(0);
+  // Guards against overlapping location/weather resolutions (interval, tab focus,
+  // GPS watcher and retry can all fire at once).
+  const inFlightRef = useRef(false);
+  // Monotonic sequence: a slow response from an older position must never
+  // overwrite a newer one (otherwise you can see another city's temperature).
+  const requestSeqRef = useRef(0);
+  const [retryTick, setRetryTick] = useState(0);
 
   const safeFallback = useCallback((city = ''): WeatherData => ({
     temperature: 0,
@@ -100,10 +107,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   }, []);
 
   const fetchWeatherOnly = useCallback(async (lat: number, lon: number, city: string, showLoading = false) => {
+    const seq = ++requestSeqRef.current;
     try {
       if (showLoading) updateWeather({ isLoading: true });
       
       const result = await fetchCurrentWeather(lat, lon);
+      // A newer request started while this one was in flight — discard.
+      if (seq !== requestSeqRef.current) return;
       const { temperature, feelsLike, temperatureAvailable, weatherCode, isNight } = result;
       // Use server-cached city if we don't have one yet
       const resolvedCity = city || result.cachedCity || '';
@@ -127,7 +137,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         isNight,
       };
       
-      setCachedWeather(weatherData);
+      // Never persist a neutral fallback reading — it would keep the UI empty
+      // for the full cache window even after the upstream API recovers.
+      if (temperatureAvailable) setCachedWeather(weatherData);
       
       updateWeather({
         ...weatherData,
@@ -135,6 +147,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         error: null,
       });
     } catch (err) {
+      if (seq !== requestSeqRef.current) return;
       console.error('Weather fetch error:', err);
       updateWeather(safeFallback(city));
     }
@@ -178,7 +191,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     enabled: enabled && backgroundLocationEnabled && isNativeApp(),
   });
 
-  const checkForLocationChange = useCallback(async (silent = true) => {
+  const runLocationCheck = useCallback(async (silent = true) => {
     // On web (esp. iOS Safari) high accuracy often times out or takes 10-15s.
     // Low accuracy = wifi/cell tower positioning, city-level, ~1-2s. Perfect for weather.
     const useHighAccuracy = isNativeApp();
@@ -262,6 +275,17 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }
   }, [fallbackCity, fetchWeatherOnly, safeFallback, updateLocation, updateWeather]);
 
+  /** Single-flight wrapper: overlapping triggers reuse the in-flight resolution. */
+  const checkForLocationChange = useCallback(async (silent = true) => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+    try {
+      await runLocationCheck(silent);
+    } finally {
+      inFlightRef.current = false;
+    }
+  }, [runLocationCheck]);
+
   // Main initialization effect
   useEffect(() => {
     mountedRef.current = true;
@@ -317,9 +341,11 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           console.warn('GPS watchPosition error:', error.message);
         },
         {
-          enableHighAccuracy: true,
+          // City-level accuracy is enough for weather; high accuracy keeps the
+          // GPS radio awake and drains battery on mobile browsers.
+          enableHighAccuracy: false,
           timeout: 10000,
-          maximumAge: 30000,
+          maximumAge: 5 * 60 * 1000,
         }
       );
       console.log('🛰️ Real-time GPS tracking started via watchPosition');
@@ -381,14 +407,18 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     retryAttemptRef.current = attempt + 1;
 
     const id = setTimeout(() => {
-      if (mountedRef.current && navigator.onLine !== false) {
-        console.log(`🔁 Weather retry attempt ${attempt + 1}`);
-        void checkForLocationChange(true);
-      }
+      if (!mountedRef.current || navigator.onLine === false) return;
+      console.log(`🔁 Weather retry attempt ${attempt + 1}`);
+      void checkForLocationChange(true).finally(() => {
+        // Re-arm: the error string is identical between failures, so we need an
+        // explicit tick to schedule the next (longer) backoff step.
+        if (mountedRef.current) setRetryTick(t => t + 1);
+      });
     }, delay);
 
     return () => clearTimeout(id);
-  }, [enabled, weather.error, checkForLocationChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, weather.error, retryTick, checkForLocationChange]);
 
   return weather;
 };
