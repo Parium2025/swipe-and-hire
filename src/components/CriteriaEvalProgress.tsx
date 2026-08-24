@@ -25,6 +25,9 @@ export function CriteriaEvalProgress() {
       {visible.map((run) => {
         const pct = Math.min(100, Math.round((run.done_items / Math.max(1, run.total_items)) * 100));
         const isPaused = run.status === 'paused';
+        // Endast ett verkligt kontostopp är ett fel för kunden. Kreditpauser och
+        // rate limits är interna och återupptas automatiskt – de visas som väntläge.
+        const isBlocked = isPaused && run.pause_reason === 'blocked';
 
         return (
           <div
@@ -37,20 +40,28 @@ export function CriteriaEvalProgress() {
             <div className="flex items-start gap-2.5">
               <div className={cn(
                 'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
-                isPaused ? 'bg-destructive/15 text-destructive' : 'bg-primary/15 text-primary',
+                isBlocked ? 'bg-destructive/15 text-destructive' : 'bg-primary/15 text-primary',
               )}>
-                {isPaused ? <AlertTriangle className="h-4 w-4" /> : <Sparkles className="h-4 w-4 animate-pulse" />}
+                {isBlocked ? <AlertTriangle className="h-4 w-4" /> : <Sparkles className="h-4 w-4 animate-pulse" />}
               </div>
 
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium leading-snug text-foreground">
-                  {isPaused ? 'AI-granskningen är pausad' : 'AI granskar kandidater'}
+                  {isBlocked ? 'AI-granskningen är pausad' : isPaused ? 'AI-granskningen väntar' : 'AI granskar kandidater'}
                 </p>
                 <p className="mt-0.5 break-words text-xs text-muted-foreground">
                   {isPaused
                     ? pauseText(run.pause_reason)
                     : `${run.done_items} av ${run.total_items} klara${run.failed_items > 0 ? ` · ${run.failed_items} misslyckades` : ''}`}
                 </p>
+
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className={cn('h-full rounded-full transition-all duration-500', isBlocked ? 'bg-destructive' : 'bg-primary')}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+
 
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                   <div
