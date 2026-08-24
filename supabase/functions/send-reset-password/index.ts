@@ -1,4 +1,4 @@
-// Skickar återställningsmejl via Lovable Emails (send-transactional-email).
+// Skickar återställningsmejl via Lovable Emails (hanterad e-postleverans).
 // Ersätter tidigare Resend-baserad implementation. Callers (useAuth, Auth.tsx) behöver inte ändras.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
