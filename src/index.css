@@ -2318,8 +2318,8 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
 
 /* Global laddningsvåg (PageLoader) — lugn, andningslik rörelse */
 @keyframes parium-wave {
-  0%, 100% { transform: scaleY(0.55); opacity: 0.45; }
-  50% { transform: scaleY(1.15); opacity: 0.85; }
+  0%, 100% { transform: scaleY(0.5); opacity: 0.4; }
+  50% { transform: scaleY(1.2); opacity: 0.95; }
 }
 
 @keyframes parium-breathe {

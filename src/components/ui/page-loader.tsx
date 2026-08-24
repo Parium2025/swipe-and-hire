@@ -46,17 +46,25 @@ export const PageLoader = ({
           <div className="absolute inset-[6px] rounded-full bg-primary-foreground/5 blur-[6px]" />
         </div>
 
-        {/* Lugn, andningslik våg */}
-        <div className="flex items-end gap-2" aria-hidden="true">
+        {/* Lugn, pulserande våg med mjuk glow */}
+        <div className="relative flex items-end gap-2" aria-hidden="true">
           {[0, 1, 2, 3, 4].map((i) => (
-            <span
-              key={i}
-              className="block h-2 w-1.5 origin-bottom rounded-full bg-primary-foreground/60 motion-reduce:animate-none"
-              style={{
-                animation: 'parium-wave 2.8s ease-in-out infinite',
-                animationDelay: `${i * 0.16}s`,
-              }}
-            />
+            <span key={i} className="relative flex h-3 w-1.5 items-end justify-center">
+              <span
+                className="absolute h-2 w-1.5 origin-bottom rounded-full bg-primary-foreground/30 blur-[3px] motion-reduce:animate-none"
+                style={{
+                  animation: 'parium-wave 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite',
+                  animationDelay: `${i * 0.18}s`,
+                }}
+              />
+              <span
+                className="block h-2 w-1.5 origin-bottom rounded-full bg-primary-foreground/70 motion-reduce:animate-none"
+                style={{
+                  animation: 'parium-wave 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite',
+                  animationDelay: `${i * 0.18}s`,
+                }}
+              />
+            </span>
           ))}
         </div>
 
