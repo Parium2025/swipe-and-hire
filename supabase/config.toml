@@ -75,3 +75,5 @@ project_id = "jrjaegapuujushsiofoi"
     verify_jwt = false
   [functions.send-reset-password]
     verify_jwt = false
+  [functions.weather-cache]
+    verify_jwt = false

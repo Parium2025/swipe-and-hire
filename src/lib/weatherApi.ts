@@ -265,7 +265,7 @@ export const getCityName = async (lat: number, lon: number): Promise<string> => 
   const nominatim = async (): Promise<string> => {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=sv`,
-      { signal: AbortSignal.timeout(5000) }
+      { signal: AbortSignal.timeout(5000), headers: { 'Accept': 'application/json' } }
     );
     if (!response.ok) throw new Error('not ok');
     const data = await response.json();

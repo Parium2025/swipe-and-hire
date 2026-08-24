@@ -52,6 +52,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const initializedRef = useRef(false);
   const mountedRef = useRef(true);
   const backgroundUpdatePendingRef = useRef(false);
+  const retryAttemptRef = useRef(0);
 
   const safeFallback = useCallback((city = ''): WeatherData => ({
     temperature: 0,
@@ -265,32 +266,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   useEffect(() => {
     mountedRef.current = true;
     let watchId: number | null = null;
-    let retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
-    let retryAttempt = 0;
-
     if (!enabled) {
       return () => { mountedRef.current = false; };
     }
 
     // Skip network calls when offline — keep any cached weather visible instead.
     const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
-
-    const scheduleRetry = () => {
-      // Exponential backoff on total failure: 30s → 2min → 5min (capped)
-      const delays = [30_000, 120_000, 300_000];
-      const delay = delays[Math.min(retryAttempt, delays.length - 1)];
-      retryAttempt += 1;
-      if (retryTimeoutId) clearTimeout(retryTimeoutId);
-      retryTimeoutId = setTimeout(() => {
-        if (mountedRef.current && navigator.onLine !== false) {
-          console.log(`🔁 Weather retry attempt ${retryAttempt}`);
-          checkForLocationChange(true).then(() => {
-            // Reset attempt counter on success (error cleared)
-            if (mountedRef.current) retryAttempt = 0;
-          });
-        }
-      }, delay);
-    };
 
     if (!initializedRef.current) {
       initializedRef.current = true;
@@ -353,8 +334,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     const handleOnline = () => {
       console.log('Network changed - checking location...');
-      retryAttempt = 0;
-      if (retryTimeoutId) { clearTimeout(retryTimeoutId); retryTimeoutId = null; }
+      retryAttemptRef.current = 0;
       checkForLocationChange(true);
     };
 
@@ -373,11 +353,6 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     window.addEventListener('online', handleOnline);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Retry watcher: whenever weather transitions to error state, schedule a retry.
-    if (weather.error && !isOffline) {
-      scheduleRetry();
-    }
-
     return () => {
       mountedRef.current = false;
       if (watchId !== null) {
@@ -385,11 +360,35 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         console.log('🛰️ Real-time GPS tracking stopped');
       }
       clearInterval(gpsTrackingInterval);
-      if (retryTimeoutId) clearTimeout(retryTimeoutId);
       window.removeEventListener('online', handleOnline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback, weather.error]);
+  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback]);
+
+  // Retry watcher — isolated from the init effect so a transient failure never
+  // tears down and restarts the GPS watcher.
+  useEffect(() => {
+    if (!enabled || !weather.error) {
+      retryAttemptRef.current = 0;
+      return;
+    }
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+
+    // Exponential backoff on total failure: 30s → 2min → 5min (capped)
+    const delays = [30_000, 120_000, 300_000];
+    const attempt = retryAttemptRef.current;
+    const delay = delays[Math.min(attempt, delays.length - 1)];
+    retryAttemptRef.current = attempt + 1;
+
+    const id = setTimeout(() => {
+      if (mountedRef.current && navigator.onLine !== false) {
+        console.log(`🔁 Weather retry attempt ${attempt + 1}`);
+        void checkForLocationChange(true);
+      }
+    }, delay);
+
+    return () => clearTimeout(id);
+  }, [enabled, weather.error, checkForLocationChange]);
 
   return weather;
 };
