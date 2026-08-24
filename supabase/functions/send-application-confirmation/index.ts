@@ -83,7 +83,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.warn('Preference check failed, defaulting to send:', prefErr);
     }
 
-    // 3) Send via Lovable Emails (send-transactional-email)
+    // 3) Send via Lovable Emails (hanterad e-postleverans)
     const idempotencyKey = `app-confirm-${application_id || applicant_email}-${job_title}`.slice(0, 200);
 
     let data;

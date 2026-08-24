@@ -53,7 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Found ${expiringJobs?.length || 0} jobs expiring within 8 hours`);
 
-    // Send employer notification emails via Lovable Emails (send-transactional-email)
+    // Send employer notification emails via Lovable Emails (hanterad e-postleverans)
     let emailsSent = 0;
     if (expiringJobs && expiringJobs.length > 0) {
       for (const job of expiringJobs) {
