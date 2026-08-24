@@ -106,24 +106,38 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
   return items;
 }
 
+// Korta nyckelord (t.ex. "hr", "ai", "lön") måste matcha hela ord — annars
+// träffar de mitt inne i orelaterade ord ("Ohrström", "detalj", "flygkonflikt").
+const wordRegexCache = new Map<string, RegExp>();
+function matchesKeyword(text: string, keyword: string): boolean {
+  if (keyword.length > 4 || keyword.includes(' ')) return text.includes(keyword);
+  let re = wordRegexCache.get(keyword);
+  if (!re) {
+    re = new RegExp(`(^|[^a-zåäö0-9])${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-zåäö0-9]|$)`, 'i');
+    wordRegexCache.set(keyword, re);
+  }
+  return re.test(text);
+}
+
 function isHRRelevant(text: string, source: string): boolean {
   const t = text.toLowerCase();
-  if (BLOCKLIST.some(k => t.includes(k))) return false;
-  return HR_KEYWORDS.some(k => t.includes(k));
+  if (BLOCKLIST.some(k => matchesKeyword(t, k))) return false;
+  return HR_KEYWORDS.some(k => matchesKeyword(t, k));
 }
 
 function isNegative(text: string): boolean {
   const t = text.toLowerCase();
-  return NEGATIVE_KEYWORDS.some(k => t.includes(k));
+  return NEGATIVE_KEYWORDS.some(k => matchesKeyword(t, k));
 }
 
 function categorize(text: string): string {
   const t = text.toLowerCase();
   for (const cat of CATEGORIES) {
-    if (cat.keywords.some(k => t.includes(k))) return cat.key;
+    if (cat.keywords.some(k => matchesKeyword(t, k))) return cat.key;
   }
   return 'trends';
 }
+
 
 function getCatInfo(key: string) {
   return CATEGORIES.find(c => c.key === key) || CATEGORIES.find(c => c.key === 'trends')!;
@@ -441,7 +455,12 @@ Svara ENDAST med giltig JSON.`
       }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      // 402/403 = spärr, 429/5xx = tillfälligt. Loggas internt, aldrig ut till kund.
+      console.error(`AI gateway ${response.status} vid enskild nyhet`);
+      return null;
+    }
+
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
@@ -526,7 +545,11 @@ Svara ENDAST med giltig JSON.`
       }),
     });
 
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.error(`AI gateway ${response.status} vid ifyllnad av nyheter`);
+      return [];
+    }
+
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
@@ -679,9 +702,9 @@ serve(async (req) => {
     console.log(`Fetch results: ${successfulFetches}/${RSS_SOURCES.length} successful, ${totalRetries} retries used`);
     
     if (failedFetches > 0) {
-      const failedSources = fetchResults
-        .filter(r => !r.success)
-        .map((r, i) => RSS_SOURCES[i].name);
+      const failedSources = RSS_SOURCES
+        .filter((_, i) => !fetchResults[i].success)
+        .map(s => s.name);
       console.warn(`Failed sources: ${failedSources.join(', ')}`);
     }
     
@@ -694,7 +717,13 @@ serve(async (req) => {
       return true;
     });
     
-    allRss.sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime());
+    // Negativa artiklar (skandal, konflikt, varsel-drev) rankas sist — de tas bara
+    // in när det saknas positivt material, så feeden aldrig blir tom.
+    allRss.sort((a, b) => {
+      if (a.isNegative !== b.isNegative) return a.isNegative ? 1 : -1;
+      return new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime();
+    });
+
 
     // ===== STEP 4: Check for existing URLs to de-duplicate =====
     const { data: existingRss } = await supabase

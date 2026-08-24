@@ -175,15 +175,28 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
 
 // SMART FILTER for career tips - focused on RELEVANCE for job seekers
 // Allows both positive and negative news as long as it's career-relevant
+// Korta nyckelord ("cv", "hr", "gig", "lön") måste matcha hela ord, annars
+// träffar de mitt inne i orelaterade ord.
+const wordRegexCache = new Map<string, RegExp>();
+function matchesKeyword(text: string, keyword: string): boolean {
+  if (keyword.length > 4 || keyword.includes(' ') || keyword.includes('-')) return text.includes(keyword);
+  let re = wordRegexCache.get(keyword);
+  if (!re) {
+    re = new RegExp(`(^|[^a-zåäö0-9])${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-zåäö0-9]|$)`, 'i');
+    wordRegexCache.set(keyword, re);
+  }
+  return re.test(text);
+}
+
 function isCareerRelevant(text: string): boolean {
   const t = text.toLowerCase();
   
   // 1. Block completely irrelevant topics (politics, sports, entertainment, etc.)
-  if (BLOCKLIST.some(k => t.includes(k))) return false;
+  if (BLOCKLIST.some(k => matchesKeyword(t, k))) return false;
   
   // 2. Must contain at least one career-related keyword
   // This is the ONLY requirement now - much more permissive
-  return CAREER_KEYWORDS.some(k => t.includes(k));
+  return CAREER_KEYWORDS.some(k => matchesKeyword(t, k));
 }
 
 // Calculate relevance score for ranking - higher = more useful for job seekers
@@ -193,11 +206,11 @@ function getRelevanceScore(text: string): number {
   
   // Bonus points for actionable/tips keywords (most useful for job seekers)
   for (const keyword of PRIORITY_KEYWORDS) {
-    if (t.includes(keyword)) score += 3;
+    if (matchesKeyword(t, keyword)) score += 3;
   }
   
   // Extra points for multiple career keywords (more focused content)
-  const careerMatches = CAREER_KEYWORDS.filter(k => t.includes(k)).length;
+  const careerMatches = CAREER_KEYWORDS.filter(k => matchesKeyword(t, k)).length;
   score += careerMatches;
   
   return score;
@@ -206,10 +219,11 @@ function getRelevanceScore(text: string): number {
 function categorize(text: string): string {
   const t = text.toLowerCase();
   for (const cat of CATEGORIES) {
-    if (cat.keywords.some(k => t.includes(k))) return cat.key;
+    if (cat.keywords.some(k => matchesKeyword(t, k))) return cat.key;
   }
   return 'career';
 }
+
 
 function getCatInfo(key: string) {
   return CATEGORIES.find(c => c.key === key) || CATEGORIES.find(c => c.key === 'career')!;
@@ -502,7 +516,11 @@ Svara ENDAST med giltig JSON.`
       }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`AI gateway ${response.status} vid enskilt karriärtips`);
+      return null;
+    }
+
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
@@ -575,7 +593,11 @@ Svara ENDAST med giltig JSON.`
       }),
     });
 
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.error(`AI gateway ${response.status} vid ifyllnad av karriärtips`);
+      return [];
+    }
+
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
@@ -719,7 +741,7 @@ serve(async (req) => {
     
     console.log(`Fetch results: ${successfulFetches}/${RSS_SOURCES.length} succeeded`);
     if (failedFetches > 0) {
-      console.log(`Failed sources: ${fetchResults.filter(r => !r.success).map((r, i) => RSS_SOURCES[i].name).join(', ')}`);
+      console.log(`Failed sources: ${RSS_SOURCES.filter((_, i) => !fetchResults[i].success).map(s => s.name).join(', ')}`);
     }
     
     const seen = new Set<string>();
