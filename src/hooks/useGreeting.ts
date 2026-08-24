@@ -9,7 +9,8 @@ export interface Greeting {
 }
 
 const computeGreeting = (): Greeting => {
-  const hour = new Date().getHours();
+  // Alltid svensk tid — hälsningen ska matcha Sverige oavsett enhetens tidszon.
+  const hour = getSwedishHour();
   if (hour >= 5 && hour < 10) return { text: 'God morgon', isEvening: false, isDaytime: true };
   if (hour >= 10 && hour < 12) return { text: 'God förmiddag', isEvening: false, isDaytime: true };
   if (hour >= 12 && hour < 17) return { text: 'God eftermiddag', isEvening: false, isDaytime: true };
