@@ -499,14 +499,38 @@ serve(async (req) => {
       const alreadyHasSummary = !!(cvSummary?.summary_text);
       const shouldGenerateSummary = !alreadyHasSummary && !!rawText;
 
-      const aiResponse = await callLovableAI(
-        LOVABLE_API_KEY,
-        jobContext,
-        candidateContext,
-        criteriaToEvaluate,
-        feedbackContext,
-        shouldGenerateSummary,
-      );
+      let aiResponse: EvaluationResponse | null = null;
+      try {
+        aiResponse = await callLovableAI(
+          LOVABLE_API_KEY,
+          jobContext,
+          candidateContext,
+          criteriaToEvaluate,
+          feedbackContext,
+          shouldGenerateSummary,
+        );
+      } catch (gatewayError) {
+        if (gatewayError instanceof GatewayError) {
+          const userMessage = gatewayError.status === 402
+            ? 'AI-krediterna är slut. Fyll på i arbetsytans inställningar för att fortsätta utvärdera.'
+            : gatewayError.status === 403
+              ? 'AI-tjänsten är blockerad för den här arbetsytan.'
+              : 'För hög belastning på AI-tjänsten just nu. Försök igen om en stund.';
+
+          await supabase
+            .from('candidate_evaluations')
+            .update({ status: 'failed', error_message: userMessage, updated_at: new Date().toISOString() })
+            .eq('id', evaluation.id);
+
+          // Behåll gatewayens status → kö-workern bryter kedjan istället för
+          // att fortsätta bränna igenom hela kandidatlistan.
+          return new Response(
+            JSON.stringify({ error: userMessage, status: gatewayError.status }),
+            { status: gatewayError.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        throw gatewayError;
+      }
 
       if (!aiResponse) {
         await supabase
@@ -519,6 +543,7 @@ serve(async (req) => {
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
       freshResults = aiResponse.criteria_results;
 
       // Persist combined-pipe summary (if AI produced one).
