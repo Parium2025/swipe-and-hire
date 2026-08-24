@@ -61,14 +61,8 @@ export function CriteriaEvalProgress() {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
+              </div>
 
-
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={cn('h-full rounded-full transition-all duration-500', isPaused ? 'bg-destructive' : 'bg-primary')}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
               </div>
 
               <button
