@@ -2316,8 +2316,13 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   will-change: auto !important;
 }
 
-/* Global laddningsvåg (PageLoader) */
+/* Global laddningsvåg (PageLoader) — lugn, andningslik rörelse */
 @keyframes parium-wave {
-  0%, 100% { height: 10px; opacity: 0.55; }
-  50% { height: 26px; opacity: 1; }
+  0%, 100% { transform: scaleY(0.55); opacity: 0.45; }
+  50% { transform: scaleY(1.15); opacity: 0.85; }
+}
+
+@keyframes parium-breathe {
+  0%, 100% { opacity: 0.3; transform: scale(0.96); }
+  50% { opacity: 0.55; transform: scale(1.04); }
 }
