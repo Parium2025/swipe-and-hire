@@ -266,7 +266,7 @@ export function AppSidebar() {
                   <SidebarMenuButton 
                       asChild
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
+                        mx-2 rounded-lg text-[0.875rem] transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white'
@@ -317,7 +317,7 @@ export function AppSidebar() {
 
         {/* Profile Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
+          <SidebarGroupLabel className="text-white text-xs uppercase tracking-[0.08em] px-4">
             Profil
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -328,7 +328,7 @@ export function AppSidebar() {
                       asChild
                       data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
+                        mx-2 rounded-lg text-[0.875rem] transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white'
@@ -355,7 +355,7 @@ export function AppSidebar() {
 
         {/* Business Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
+          <SidebarGroupLabel className="text-white text-xs uppercase tracking-[0.08em] px-4">
             Ekonomi
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -365,7 +365,7 @@ export function AppSidebar() {
                     <SidebarMenuButton 
                       asChild
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
+                        mx-2 rounded-lg text-[0.875rem] transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white'
@@ -392,7 +392,7 @@ export function AppSidebar() {
 
         {/* Support Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
+          <SidebarGroupLabel className="text-white text-xs uppercase tracking-[0.08em] px-4">
             Support
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -402,7 +402,7 @@ export function AppSidebar() {
                     <SidebarMenuButton 
                       asChild
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
+                        mx-2 rounded-lg text-[0.875rem] transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white'
@@ -424,7 +424,7 @@ export function AppSidebar() {
                <SidebarMenuItem>
                  <SidebarMenuButton
                    asChild
-                   className="mx-2 rounded-lg transition-all duration-200 active:!bg-transparent text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white"
+                   className="mx-2 rounded-lg text-[0.875rem] transition-all duration-200 active:!bg-transparent text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white"
                  >
                    <button
                      onClick={(e) => {
