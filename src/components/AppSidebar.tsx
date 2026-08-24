@@ -237,7 +237,7 @@ export function AppSidebar() {
               <p className="text-sm font-medium text-white truncate">
                 {profile?.first_name} {profile?.last_name}
               </p>
-              <p className="text-sm text-white truncate">
+              <p className="text-xs text-white truncate">
                 {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
               </p>
             </div>
@@ -454,7 +454,7 @@ export function AppSidebar() {
             variant="glass"
             data-allow-border="true"
             className={`
-              min-h-[var(--control-height)] w-full justify-start text-[0.95rem] md:min-h-[var(--control-height-compact)] md:text-sm
+              min-h-[var(--control-height)] w-full justify-start text-[0.875rem] md:min-h-[var(--control-height-compact)] md:text-sm
               ${collapsed ? 'px-2' : 'px-4'}
             `}
           >
