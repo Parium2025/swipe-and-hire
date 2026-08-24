@@ -204,14 +204,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     try {
       // Fast first fix, automatically refined when the browser hands us an
       // IP-derived (city-wrong) position. Works the same in every country.
-      const manual = getManualLocation();
-  if (manual) {
-    // Manual choice wins; weather for it is fetched below.
-    location = { lat: manual.lat, lon: manual.lon, city: manual.city, source: 'fallback', timestamp: Date.now() };
-    setCachedLocation(location);
-  }
-
-  const gpsResult = await getAccuratePosition({
+      const gpsResult = await getAccuratePosition({
         timeout: isNativeApp() ? 8000 : 6000,
         // Accept a fix up to 2 minutes old — avoids waking the radio on every
         // periodic/visibility check when we don't need a fresh lock.
