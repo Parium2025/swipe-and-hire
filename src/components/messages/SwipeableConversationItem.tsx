@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { Trash2, AlertTriangle, MailOpen } from 'lucide-react';
+import { Trash2, AlertTriangle, MailOpen, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -11,6 +11,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const DELETE_THRESHOLD = 80;
 const MAX_TRANSLATE = 100;
@@ -184,7 +190,7 @@ export function SwipeableConversationItem({
   return (
     <>
       <div
-        className="relative overflow-hidden rounded-lg"
+        className="relative overflow-hidden rounded-lg group"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -242,6 +248,36 @@ export function SwipeableConversationItem({
         >
           {children}
         </div>
+
+        {/* Desktop: hover-menu for mark unread / delete (mouse alternative to swipe) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              onClick={(e) => e.stopPropagation()}
+              className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 h-7 w-7 items-center justify-center rounded-full bg-white/10 text-white opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100"
+              aria-label="Konversationsåtgärder"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="left" align="center" className="min-w-[10rem]">
+            <DropdownMenuItem
+              disabled={!canMarkUnread}
+              onSelect={() => onMarkUnread?.()}
+            >
+              <MailOpen className="mr-2 h-4 w-4" />
+              Markera som oläst
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => setShowConfirm(true)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Ta bort
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Delete confirmation dialog – matches app standard */}
