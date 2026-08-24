@@ -158,7 +158,7 @@ function NotificationItem({
           )}
         </div>
         {notification.body && (
-          <p ref={bodyRef} className={`text-xs text-white mt-0.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
+          <p ref={bodyRef} className={`text-xs text-white mt-1.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
         )}
         <div className="flex items-center gap-2 mt-1">
           <span className="text-[10px] text-white">{timeAgo}</span>
