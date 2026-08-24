@@ -15,10 +15,10 @@ const corsHeaders = {
 }
 
 // Configuration
-const SITE_NAME = "parium-ab"
+const SITE_NAME = "Parium"
 const SENDER_DOMAIN = "notify.parium.se"
 const ROOT_DOMAIN = "parium.se"
-const FROM_DOMAIN = "notify.parium.se"
+const FROM_DOMAIN = "parium.se"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
 // Template mapping for preview mode
@@ -124,12 +124,12 @@ async function handlePreview(req: Request): Promise<Response> {
 // owns only the email decisions: subjects, templates, and per-type props.
 const handler = createAuthEmailHandler({
   apiKey: Deno.env.get('LOVABLE_API_KEY')!,
-  from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+  from: `${SITE_NAME} <no-reply@${FROM_DOMAIN}>`,
   senderDomain: SENDER_DOMAIN,
   sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
   emails: {
     signup: {
-      subject: 'Confirm your email',
+      subject: 'Bekräfta din e-postadress',
       render: (data) =>
         React.createElement(SignupEmail, {
           siteName: SITE_NAME,
@@ -139,7 +139,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     invite: {
-      subject: "You've been invited",
+      subject: 'Du har bjudits in till Parium',
       render: (data) =>
         React.createElement(InviteEmail, {
           siteName: SITE_NAME,
@@ -148,7 +148,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     magiclink: {
-      subject: 'Your login link',
+      subject: 'Din inloggningslänk till Parium',
       render: (data) =>
         React.createElement(MagicLinkEmail, {
           siteName: SITE_NAME,
@@ -156,7 +156,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     recovery: {
-      subject: 'Reset your password',
+      subject: 'Återställ ditt lösenord',
       render: (data) =>
         React.createElement(RecoveryEmail, {
           siteName: SITE_NAME,
@@ -164,7 +164,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     email_change: {
-      subject: 'Confirm your new email',
+      subject: 'Bekräfta din nya e-postadress',
       render: (data) =>
         React.createElement(EmailChangeEmail, {
           siteName: SITE_NAME,
@@ -175,7 +175,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     reauthentication: {
-      subject: 'Your verification code',
+      subject: 'Din verifieringskod',
       render: (data) =>
         React.createElement(ReauthenticationEmail, { token: data.token ?? '' }),
     },

@@ -7,13 +7,13 @@ import { TEMPLATES } from './registry.ts'
 // expose sending to the browser.
 
 // Configuration baked in at scaffold time
-const SITE_NAME = "parium-ab"
+const SITE_NAME = "Parium"
 // SENDER_DOMAIN is the verified sender subdomain FQDN (e.g., "notify.example.com").
 // It MUST match the subdomain delegated to Lovable's nameservers. NEVER use the root domain.
 const SENDER_DOMAIN = "notify.parium.se"
 // FROM_DOMAIN is the domain shown in the From: header (e.g., "example.com").
 // Can be the root domain when display_from_root is enabled — this is cosmetic only.
-const FROM_DOMAIN = "notify.parium.se"
+const FROM_DOMAIN = "parium.se"
 
 export type SendTemplateEmailResult =
   | { sent: true }
@@ -70,7 +70,7 @@ export async function sendTemplateEmail(
     await sendLovableEmail(
       {
         to: recipient,
-        from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+        from: `${SITE_NAME} <no-reply@${FROM_DOMAIN}>`,
         sender_domain: SENDER_DOMAIN,
         subject,
         html,
