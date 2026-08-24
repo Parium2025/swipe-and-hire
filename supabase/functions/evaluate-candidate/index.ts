@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { buildAliasPromptBlock } from "../_shared/domain-aliases.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,7 +9,7 @@ const corsHeaders = {
 
 // Bump this when the AI system prompt / evaluation logic changes materially.
 // Included in criterion_hash → forces a global cache invalidation for all criteria.
-const PROMPT_VERSION = 'v2026-08-23-evidence';
+const PROMPT_VERSION = 'v2026-08-24-aliases';
 
 // Normalize prompt text before hashing so tiny cosmetic edits don't invalidate
 // the cache. Lowercases, trims, collapses whitespace, strips trailing punctuation.
@@ -997,6 +998,12 @@ async function callLovableAI(
   includeSummary: boolean = false,
 ): Promise<EvaluationResponse | null> {
   try {
+    // Auktoritativt synonymlexikon för just dessa kriterier (garanterat säkerhetsnät
+    // istället för att lita enbart på modellens allmänbildning).
+    const aliasBlock = buildAliasPromptBlock(
+      (criteria || []).flatMap((c: any) => [c?.title, c?.prompt].filter(Boolean)),
+    );
+
     const systemPrompt = `Du är en professionell svensk rekryteringsassistent som utvärderar kandidater mot urvalskriterier.
 
 ═══════════════════════════════════════════════════
@@ -1055,6 +1062,8 @@ Exempel på vad du MÅSTE förstå som EKVIVALENT:
 - "2+ års erfarenhet" → räkna faktiska år från CV:s tjänstgöringsperioder
 - "junior" ≈ 0-2 år ; "senior" ≈ 5+ år
 - Om CV visar 2019-2024 = ~5 år
+${aliasBlock}
+
 
 ═══════════════════════════════════════════════════
 📋 BEDÖMNINGSREGLER
