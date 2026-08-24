@@ -364,36 +364,39 @@ export default function Messages() {
                     });
 
                     return (
-                      <SwipeableConversationItem
-                        key={conv.id}
-                        canMarkUnread={conv.unread_count === 0 && !!conv.last_message}
-                        onMarkUnread={() => {
-                          markAsUnread(conv.id);
-                          if (selectedConversationId === conv.id) {
-                            setSelectedConversationId(null);
-                            setShowMobileChat(false);
-                          }
-                        }}
-                        onDelete={() => {
-                          deleteConversation(conv.id);
-                          if (selectedConversationId === conv.id) {
-                            setSelectedConversationId(null);
-                            setShowMobileChat(false);
-                          }
-                        }}
-                        isDeleting={isDeleting}
-                        conversationName={displayName}
-                      >
-                        <ConversationItem
-                          conversation={conv}
-                          isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
-                          currentUserId={user?.id || ''}
-                          onClick={() => handleSelectConversation(conv.id)}
-                          category={categorizeConversation(conv)}
-                        />
-                      </SwipeableConversationItem>
+                      <div key={conv.id}>
+                        <SwipeableConversationItem
+                          canMarkUnread={conv.unread_count === 0 && !!conv.last_message}
+                          onMarkUnread={() => {
+                            markAsUnread(conv.id);
+                            if (selectedConversationId === conv.id) {
+                              setSelectedConversationId(null);
+                              setShowMobileChat(false);
+                            }
+                          }}
+                          onDelete={() => {
+                            deleteConversation(conv.id);
+                            if (selectedConversationId === conv.id) {
+                              setSelectedConversationId(null);
+                              setShowMobileChat(false);
+                            }
+                          }}
+                          isDeleting={isDeleting}
+                          conversationName={displayName}
+                        >
+                          <ConversationItem
+                            conversation={conv}
+                            isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
+                            currentUserId={user?.id || ''}
+                            onClick={() => handleSelectConversation(conv.id)}
+                            category={categorizeConversation(conv)}
+                          />
+                        </SwipeableConversationItem>
+                        {!isLast && <div aria-hidden="true" className="mx-3 h-px bg-white/10" />}
+                      </div>
                     );
                   })}
+
                 </div>
               </ScrollArea>
             )}
