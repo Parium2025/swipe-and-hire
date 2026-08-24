@@ -3585,6 +3585,10 @@ export type Database = {
           user_role: string
         }[]
       }
+      can_add_conversation_member: {
+        Args: { p_conversation_id: string; p_user_id: string }
+        Returns: boolean
+      }
       can_employer_read_application_file: {
         Args: { p_name: string }
         Returns: boolean
