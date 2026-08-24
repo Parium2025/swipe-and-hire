@@ -175,9 +175,8 @@ function NotificationItem({
                 if (!notification.is_read) onRead(notification.id);
                 onNavigate(supportReportRoute(notification.title, notification.body));
               }}
-              className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+              className="ml-auto inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
             >
-              <Flag className="h-2.5 w-2.5" strokeWidth={2} />
               Rapportera
             </button>
           )}
