@@ -106,24 +106,38 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
   return items;
 }
 
+// Korta nyckelord (t.ex. "hr", "ai", "lön") måste matcha hela ord — annars
+// träffar de mitt inne i orelaterade ord ("Ohrström", "detalj", "flygkonflikt").
+const wordRegexCache = new Map<string, RegExp>();
+function matchesKeyword(text: string, keyword: string): boolean {
+  if (keyword.length > 4 || keyword.includes(' ')) return text.includes(keyword);
+  let re = wordRegexCache.get(keyword);
+  if (!re) {
+    re = new RegExp(`(^|[^a-zåäö0-9])${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-zåäö0-9]|$)`, 'i');
+    wordRegexCache.set(keyword, re);
+  }
+  return re.test(text);
+}
+
 function isHRRelevant(text: string, source: string): boolean {
   const t = text.toLowerCase();
-  if (BLOCKLIST.some(k => t.includes(k))) return false;
-  return HR_KEYWORDS.some(k => t.includes(k));
+  if (BLOCKLIST.some(k => matchesKeyword(t, k))) return false;
+  return HR_KEYWORDS.some(k => matchesKeyword(t, k));
 }
 
 function isNegative(text: string): boolean {
   const t = text.toLowerCase();
-  return NEGATIVE_KEYWORDS.some(k => t.includes(k));
+  return NEGATIVE_KEYWORDS.some(k => matchesKeyword(t, k));
 }
 
 function categorize(text: string): string {
   const t = text.toLowerCase();
   for (const cat of CATEGORIES) {
-    if (cat.keywords.some(k => t.includes(k))) return cat.key;
+    if (cat.keywords.some(k => matchesKeyword(t, k))) return cat.key;
   }
   return 'trends';
 }
+
 
 function getCatInfo(key: string) {
   return CATEGORIES.find(c => c.key === key) || CATEGORIES.find(c => c.key === 'trends')!;
