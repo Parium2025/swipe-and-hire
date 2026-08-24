@@ -48,7 +48,7 @@ export default function Messages() {
   const conversationsCtx = useConversationsContext();
   const conversations = conversationsCtx?.conversations ?? [];
   const isLoading = conversationsCtx?.isLoading ?? false;
-  const totalUnreadCount = conversationsCtx?.totalUnreadCount ?? 0;
+  
   const refetch = conversationsCtx?.refetch ?? (() => {});
 
   // Instant render when conversations are already cached, fade-in only on cold load
