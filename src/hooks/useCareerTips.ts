@@ -162,29 +162,9 @@ const fetchRecentCareerTips = async (): Promise<CareerTipItem[]> => {
 };
 
 export const useCareerTips = () => {
-  const queryClient = useQueryClient();
+  // Ingen realtidskanal: innehållet byts bara 4 ggr/dygn av cron. staleTime är
+  // synkad mot cron-slotarna, vilket skalar utan en öppen socket per besökare.
 
-  // Real-time subscription for instant updates when new tips are added
-  useEffect(() => {
-    const channel = supabase
-      .channel('career-tips-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'daily_career_tips',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['career-tips'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
 
   return useQuery({
     queryKey: ['career-tips'],
