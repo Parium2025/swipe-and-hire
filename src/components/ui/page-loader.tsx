@@ -22,8 +22,6 @@ export const PageLoader = ({
   showProgress?: boolean;
 }) => {
   const [visible, setVisible] = useState(delayMs === 0);
-  const [progress, setProgress] = useState(0);
-  const startedAt = useRef<number | null>(null);
 
   useEffect(() => {
     if (delayMs === 0) return;
@@ -31,21 +29,6 @@ export const PageLoader = ({
     return () => window.clearTimeout(t);
   }, [delayMs]);
 
-  // Mjuk, avtagande progress som närmar sig 96 % men aldrig "ljuger" om 100 %.
-  useEffect(() => {
-    if (!visible || !showProgress) return;
-    let raf = 0;
-    const tick = (now: number) => {
-      if (startedAt.current === null) startedAt.current = now;
-      const elapsed = (now - startedAt.current) / 1000;
-      // Exponentiell mättnad: snabb start, lugnt slut
-      const value = 96 * (1 - Math.exp(-elapsed / 1.6));
-      setProgress(value);
-      raf = window.requestAnimationFrame(tick);
-    };
-    raf = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(raf);
-  }, [visible, showProgress]);
 
   return (
     <div
