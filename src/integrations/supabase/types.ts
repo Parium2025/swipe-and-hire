@@ -1964,6 +1964,24 @@ export type Database = {
           },
         ]
       }
+      job_run_locks: {
+        Row: {
+          key: string
+          locked_until: string
+          updated_at: string
+        }
+        Insert: {
+          key: string
+          locked_until: string
+          updated_at?: string
+        }
+        Update: {
+          key?: string
+          locked_until?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_stage_settings: {
         Row: {
           color: string | null
@@ -4197,6 +4215,7 @@ export type Database = {
         Args: { p_run_id: string }
         Returns: undefined
       }
+      release_job_lock: { Args: { _key: string }; Returns: undefined }
       remove_session: { Args: { p_session_token: string }; Returns: undefined }
       render_outreach_template: {
         Args: { p_data?: Json; p_template: string }
@@ -4390,6 +4409,10 @@ export type Database = {
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
       trigger_inactive_account_retention: { Args: never; Returns: undefined }
       trigger_news_health_watchdog: { Args: never; Returns: undefined }
+      try_claim_job_lock: {
+        Args: { _key: string; _ttl_seconds: number }
+        Returns: boolean
+      }
       try_uuid: { Args: { p_text: string }; Returns: string }
       unaccent: { Args: { "": string }; Returns: string }
       verify_cron_secret: {
