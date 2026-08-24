@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import logoRings from '@/assets/parium-logo-rings.png?inline';
 
 /**
  * Global laddningsindikator för route-/lazy-laddning.
@@ -6,25 +7,45 @@ import { useEffect, useState } from 'react';
  * Premium-känsla:
  *  - Visas först efter en kort fördröjning (default 180 ms) så snabba laddningar
  *    aldrig blinkar till med en spinner.
- *  - Mjuk fade-in, roterande ring + pulserande vågstaplar i varumärkets färger.
+ *  - Pulserande Parium-logomark, lugn vågrörelse och en mjuk procentindikator.
  *  - Respekterar prefers-reduced-motion via Tailwind (motion-reduce).
  */
 export const PageLoader = ({
   delayMs = 180,
   label = 'Laddar…',
   fullscreen = true,
+  showProgress = true,
 }: {
   delayMs?: number;
   label?: string;
   fullscreen?: boolean;
+  showProgress?: boolean;
 }) => {
   const [visible, setVisible] = useState(delayMs === 0);
+  const [progress, setProgress] = useState(0);
+  const startedAt = useRef<number | null>(null);
 
   useEffect(() => {
     if (delayMs === 0) return;
     const t = window.setTimeout(() => setVisible(true), delayMs);
     return () => window.clearTimeout(t);
   }, [delayMs]);
+
+  // Mjuk, avtagande progress som närmar sig 96 % men aldrig "ljuger" om 100 %.
+  useEffect(() => {
+    if (!visible || !showProgress) return;
+    let raf = 0;
+    const tick = (now: number) => {
+      if (startedAt.current === null) startedAt.current = now;
+      const elapsed = (now - startedAt.current) / 1000;
+      // Exponentiell mättnad: snabb start, lugnt slut
+      const value = 96 * (1 - Math.exp(-elapsed / 1.6));
+      setProgress(value);
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [visible, showProgress]);
 
   return (
     <div
@@ -38,12 +59,15 @@ export const PageLoader = ({
           visible ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        {/* Roterande ring med mjuk glow */}
-        <div className="relative h-14 w-14">
-          <div className="absolute inset-0 rounded-full border-2 border-primary-foreground/15" />
-          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary-foreground/90 border-r-primary-foreground/40 animate-[spin_2s_linear_infinite] motion-reduce:animate-none" />
-          <div className="absolute inset-0 rounded-full border-primary-foreground/10 blur-[8px] animate-[parium-breathe_3s_ease-in-out_infinite] motion-reduce:animate-none" />
-          <div className="absolute inset-[6px] rounded-full bg-primary-foreground/5 blur-[6px]" />
+        {/* Pulserande Parium-logomark med mjuk glow */}
+        <div className="relative h-16 w-16" aria-hidden="true">
+          <div
+            className="absolute inset-0 rounded-full bg-primary-foreground/10 blur-[14px] animate-[parium-breathe_3.2s_ease-in-out_infinite] motion-reduce:animate-none"
+          />
+          <div
+            className="absolute inset-0 bg-contain bg-center bg-no-repeat animate-[parium-logo-pulse_3.2s_ease-in-out_infinite] motion-reduce:animate-none"
+            style={{ backgroundImage: `url(${logoRings})` }}
+          />
         </div>
 
         {/* Lugn, pulserande våg med mjuk glow */}
@@ -67,6 +91,20 @@ export const PageLoader = ({
             </span>
           ))}
         </div>
+
+        {showProgress && (
+          <div className="flex w-40 flex-col items-center gap-2">
+            <div className="h-[3px] w-full overflow-hidden rounded-full bg-primary-foreground/15">
+              <div
+                className="h-full rounded-full bg-primary-foreground/80 transition-[width] duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span className="text-xs font-medium tabular-nums text-primary-foreground/70">
+              {Math.round(progress)} %
+            </span>
+          </div>
+        )}
 
         <p className="text-sm font-medium text-primary-foreground/90">{label}</p>
       </div>

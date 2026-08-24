@@ -2326,3 +2326,9 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   0%, 100% { opacity: 0.3; transform: scale(0.96); }
   50% { opacity: 0.55; transform: scale(1.04); }
 }
+
+/* PageLoader — pulserande Parium-logomark */
+@keyframes parium-logo-pulse {
+  0%, 100% { opacity: 0.72; transform: scale(0.94); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
