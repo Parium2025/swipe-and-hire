@@ -9,7 +9,7 @@ const corsHeaders = {
 
 // Bump this when the AI system prompt / evaluation logic changes materially.
 // Included in criterion_hash → forces a global cache invalidation for all criteria.
-const PROMPT_VERSION = 'v2026-08-23-evidence';
+const PROMPT_VERSION = 'v2026-08-24-aliases';
 
 // Normalize prompt text before hashing so tiny cosmetic edits don't invalidate
 // the cache. Lowercases, trims, collapses whitespace, strips trailing punctuation.
