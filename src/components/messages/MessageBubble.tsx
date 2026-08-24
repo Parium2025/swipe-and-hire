@@ -144,7 +144,12 @@ export function MessageBubble({
 
     if (isImage) {
       return (
-        <div className="mt-2 rounded-lg overflow-hidden max-w-[240px]">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setShowImageViewer(true); }}
+          className="mt-2 block rounded-lg overflow-hidden max-w-[240px] active:scale-[0.98] transition-transform"
+          aria-label="Öppna bilagan i helskärm"
+        >
           <img
             src={attachmentUrl}
             alt={message.attachment_name || 'Bild'}
@@ -157,7 +162,7 @@ export function MessageBubble({
               (e.target as HTMLImageElement).style.objectFit = '';
             }}
           />
-        </div>
+        </button>
       );
     }
 
