@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
+import { useMinuteTick } from '@/hooks/useMinuteTick';
 
 export interface Greeting {
   text: string;
@@ -16,27 +17,11 @@ const computeGreeting = (): Greeting => {
 };
 
 /**
- * Reactive greeting that ticks on the next full minute and every 60s thereafter.
- * Single source of truth used by JobSeekerHome and EmployerHome.
+ * Reactive greeting driven by the shared minute tick: aligned to the full minute,
+ * paused while the tab is hidden and recomputed instantly when it returns
+ * (so an app left open overnight never shows a stale "God kväll").
  */
 export const useGreeting = (): Greeting => {
-  const [greeting, setGreeting] = useState<Greeting>(() => computeGreeting());
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    const now = new Date();
-    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
-
-    const syncTimeout = setTimeout(() => {
-      setGreeting(computeGreeting());
-      intervalRef.current = setInterval(() => setGreeting(computeGreeting()), 60000);
-    }, msUntilNextMinute);
-
-    return () => {
-      clearTimeout(syncTimeout);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
-
-  return greeting;
+  const tick = useMinuteTick();
+  return useMemo(() => computeGreeting(), [tick]);
 };
