@@ -823,11 +823,13 @@ serve(async (req) => {
       .filter(i => i.published_at && new Date(i.published_at) < new Date(Date.now() - 24 * 60 * 60 * 1000))
       .map(i => i.id);
 
+    // Vid "fullt ös" kan RSS ge fler nya artiklar än feeden har platser.
+    // Ta bara de nyaste targetSlots — resten skulle ändå raderas direkt efteråt.
     const eligibleNewItems = filterBySourceLimit(
       newRssItems,
       postCleanupRss.filter(i => !staleRssIds.includes(i.id)),
       maxPerSource,
-    );
+    ).slice(0, targetSlots);
 
     console.log(`Eligible new items with max ${maxPerSource}/source: ${eligibleNewItems.length}`);
 
