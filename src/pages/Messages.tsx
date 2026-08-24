@@ -48,7 +48,7 @@ export default function Messages() {
   const conversationsCtx = useConversationsContext();
   const conversations = conversationsCtx?.conversations ?? [];
   const isLoading = conversationsCtx?.isLoading ?? false;
-  const totalUnreadCount = conversationsCtx?.totalUnreadCount ?? 0;
+  
   const refetch = conversationsCtx?.refetch ?? (() => {});
 
   // Instant render when conversations are already cached, fade-in only on cold load
@@ -254,10 +254,8 @@ export default function Messages() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">Chattar</h1>
-            {totalUnreadCount > 0 && (
-              <p className="text-white text-sm">{totalUnreadCount} olästa meddelanden</p>
-            )}
           </div>
+
         </div>
 
         {hasTeam && (
