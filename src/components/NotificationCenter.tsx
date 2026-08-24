@@ -160,7 +160,7 @@ function NotificationItem({
         {notification.body && (
           <p ref={bodyRef} className={`text-xs text-white mt-1.5 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
         )}
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 mt-2">
           <span className="text-[10px] text-white">{timeAgo}</span>
           {!route && canExpand && (
             <span className="text-[10px] font-medium text-white/80 underline underline-offset-2">
