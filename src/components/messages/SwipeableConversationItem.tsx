@@ -111,10 +111,9 @@ export function SwipeableConversationItem({
     currentXRef.current = 0;
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    startXRef.current = touch.clientX;
-    startYRef.current = touch.clientY;
+  const beginDrag = useCallback((clientX: number, clientY: number) => {
+    startXRef.current = clientX;
+    startYRef.current = clientY;
     currentXRef.current = 0;
     isSwipingRef.current = false;
     directionLockedRef.current = null;
@@ -122,10 +121,9 @@ export function SwipeableConversationItem({
     if (contentRef.current) contentRef.current.style.transition = '';
   }, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - startXRef.current;
-    const deltaY = touch.clientY - startYRef.current;
+  const moveDrag = useCallback((clientX: number, clientY: number) => {
+    const deltaX = clientX - startXRef.current;
+    const deltaY = clientY - startYRef.current;
 
     if (!directionLockedRef.current) {
       if (Math.abs(deltaX) > DIRECTION_LOCK_PX || Math.abs(deltaY) > DIRECTION_LOCK_PX) {
@@ -162,7 +160,7 @@ export function SwipeableConversationItem({
     setX(x);
   }, [onMarkUnread, canMarkUnread, setX]);
 
-  const handleTouchEnd = useCallback(() => {
+  const endDrag = useCallback(() => {
     if (!isSwipingRef.current) return;
 
     const offset = currentXRef.current;
@@ -180,12 +178,50 @@ export function SwipeableConversationItem({
     isSwipingRef.current = false;
     directionLockedRef.current = null;
     lockOffsetRef.current = 0;
+    // Blockera klicket som annars öppnar konversationen direkt efter dragningen.
+    suppressClickRef.current = true;
+    window.setTimeout(() => { suppressClickRef.current = false; }, 250);
   }, [animateBack, onMarkUnread, canMarkUnread]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    beginDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, [beginDrag]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, [moveDrag]);
+
+  // Mus: exakt samma gest som med fingret — dra åt vänster för att ta bort,
+  // åt höger för att markera som oläst.
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    beginDrag(e.clientX, e.clientY);
+
+    const onMove = (ev: MouseEvent) => {
+      ev.preventDefault();
+      moveDrag(ev.clientX, ev.clientY);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      endDrag();
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }, [beginDrag, moveDrag, endDrag]);
+
+  const handleClickCapture = useCallback((e: React.MouseEvent) => {
+    if (suppressClickRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, []);
 
   const handleConfirmDelete = useCallback(() => {
     setShowConfirm(false);
     onDelete();
   }, [onDelete]);
+
 
   return (
     <>
