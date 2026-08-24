@@ -86,7 +86,7 @@ export function useNotifications() {
 
       if (error) throw error;
       const items = ((data || []) as AppNotification[]).filter(
-        (n) => !mutedTypesRef.current.has(n.type)
+        (n) => !mutedTypesRef.current.has(n.type) && !isHiddenType(n.type)
       );
       setNotifications(items);
       setUnreadCount(items.filter(n => !n.is_read).length);
