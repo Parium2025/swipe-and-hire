@@ -50,7 +50,7 @@ export function useMarkConversationUnread() {
       try {
         await supabase
           .from('conversation_members')
-          .update({ last_read_at: newLastRead })
+          .update({ last_read_at: newLastRead, manually_unread: true } as never)
           .eq('conversation_id', conversationId)
           .eq('user_id', user.id);
       } catch (err) {

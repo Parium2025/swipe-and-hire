@@ -322,7 +322,7 @@ export function useConversations() {
       // First get all conversation IDs where user is a member
       const { data: memberships, error: memberError } = await supabase
         .from('conversation_members')
-        .select('conversation_id, last_read_at, muted_at')
+        .select('conversation_id, last_read_at, muted_at, manually_unread')
         .eq('user_id', user.id);
 
       if (memberError) throw memberError;
@@ -632,6 +632,7 @@ export function useConversations() {
             conversation_id?: string;
             last_read_at?: string | null;
             muted_at?: string | null;
+            manually_unread?: boolean | null;
           };
           if (!row?.conversation_id) return;
 
@@ -641,6 +642,7 @@ export function useConversations() {
               if (conv.id !== row.conversation_id) return conv;
               const lastMessageAt = conv.last_message?.created_at || conv.last_message_at;
               const isRead =
+                !row.manually_unread &&
                 !!row.last_read_at &&
                 (!lastMessageAt || new Date(row.last_read_at) >= new Date(lastMessageAt));
               return {
@@ -951,7 +953,7 @@ export function useConversationMessages(conversationId: string | null) {
     try {
       await supabase
         .from('conversation_members')
-        .update({ last_read_at: new Date().toISOString() })
+        .update({ last_read_at: new Date().toISOString(), manually_unread: false } as never)
         .eq('conversation_id', conversationId)
         .eq('user_id', user.id);
 

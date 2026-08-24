@@ -652,6 +652,7 @@ export type Database = {
           is_admin: boolean
           joined_at: string
           last_read_at: string | null
+          manually_unread: boolean
           muted_at: string | null
           user_id: string
         }
@@ -661,6 +662,7 @@ export type Database = {
           is_admin?: boolean
           joined_at?: string
           last_read_at?: string | null
+          manually_unread?: boolean
           muted_at?: string | null
           user_id: string
         }
@@ -670,6 +672,7 @@ export type Database = {
           is_admin?: boolean
           joined_at?: string
           last_read_at?: string | null
+          manually_unread?: boolean
           muted_at?: string | null
           user_id?: string
         }
