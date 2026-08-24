@@ -18,6 +18,12 @@ export interface AppNotification {
 
 const CACHE_KEY = 'parium_notifications_cache';
 
+// Chattmeddelanden räknas redan i sidomenyns chattbadge — de ska aldrig
+// dyka upp i klockan/notiscentret.
+const HIDDEN_TYPES = new Set(['message', 'new_message', 'chat_message']);
+const isHiddenType = (type: string) => HIDDEN_TYPES.has(type);
+
+
 const getCached = (userId: string): AppNotification[] | null => {
   return safeReadArrayCache<AppNotification>(CACHE_KEY, 'items', (env) => {
     return env.userId === userId && typeof env.ts === 'number' && Date.now() - env.ts < 60 * 60 * 1000;
@@ -80,7 +86,7 @@ export function useNotifications() {
 
       if (error) throw error;
       const items = ((data || []) as AppNotification[]).filter(
-        (n) => !mutedTypesRef.current.has(n.type)
+        (n) => !mutedTypesRef.current.has(n.type) && !isHiddenType(n.type)
       );
       setNotifications(items);
       setUnreadCount(items.filter(n => !n.is_read).length);
@@ -132,7 +138,7 @@ export function useNotifications() {
         },
         (payload) => {
           const newNotif = payload.new as AppNotification;
-          if (mutedTypesRef.current.has(newNotif.type)) return;
+          if (mutedTypesRef.current.has(newNotif.type) || isHiddenType(newNotif.type)) return;
           setNotifications(prev => {
             if (prev.some((n) => n.id === newNotif.id)) return prev;
             const updated = [newNotif, ...prev];

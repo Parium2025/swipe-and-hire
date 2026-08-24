@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { Trash2, AlertTriangle, MailOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -27,6 +27,11 @@ interface SwipeableConversationItemProps {
   canMarkUnread?: boolean;
 }
 
+/**
+ * Premiumkänsla: all rörelse under fingret skrivs direkt till DOM:en via refs
+ * och requestAnimationFrame — inga React-renders per touchmove (som ger hack).
+ * State används bara när gesten är klar (dialog) eller när knapparna ska visas.
+ */
 export function SwipeableConversationItem({
   children,
   onDelete,
@@ -35,20 +40,67 @@ export function SwipeableConversationItem({
   onMarkUnread,
   canMarkUnread = false,
 }: SwipeableConversationItemProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const deleteRef = useRef<HTMLDivElement>(null);
+  const unreadRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
   const startYRef = useRef(0);
   const currentXRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+  const pendingXRef = useRef(0);
   const isSwipingRef = useRef(false);
   const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
-  const [translateX, setTranslateX] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
 
-  const resetPosition = useCallback(() => {
-    setIsResetting(true);
-    setTranslateX(0);
-    setTimeout(() => setIsResetting(false), 300);
+  useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
+
+  const paint = useCallback(() => {
+    rafRef.current = null;
+    const x = pendingXRef.current;
+    const content = contentRef.current;
+    if (content) content.style.transform = `translate3d(${x}px,0,0)`;
+
+    const del = deleteRef.current;
+    if (del) {
+      const p = Math.min(Math.max(-x, 0) / DELETE_THRESHOLD, 1);
+      del.style.opacity = `${p}`;
+      del.style.transform = `scale(${0.6 + p * 0.4})`;
+      del.style.visibility = p > 0.02 ? 'visible' : 'hidden';
+    }
+    const un = unreadRef.current;
+    if (un) {
+      const p = Math.min(Math.max(x, 0) / UNREAD_THRESHOLD, 1);
+      un.style.opacity = `${p}`;
+      un.style.transform = `scale(${0.6 + p * 0.4})`;
+      un.style.visibility = p > 0.02 ? 'visible' : 'hidden';
+    }
+  }, []);
+
+  const setX = useCallback((x: number) => {
+    pendingXRef.current = x;
+    if (rafRef.current === null) rafRef.current = requestAnimationFrame(paint);
+  }, [paint]);
+
+  const animateBack = useCallback(() => {
+    const content = contentRef.current;
+    if (content) {
+      content.style.transition = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
+      content.style.transform = 'translate3d(0,0,0)';
+      window.setTimeout(() => {
+        if (contentRef.current) contentRef.current.style.transition = '';
+      }, 280);
+    }
+    [deleteRef.current, unreadRef.current].forEach((el) => {
+      if (!el) return;
+      el.style.transition = 'opacity 200ms ease-out, transform 200ms ease-out';
+      el.style.opacity = '0';
+      el.style.transform = 'scale(0.6)';
+      window.setTimeout(() => {
+        if (el) { el.style.transition = ''; el.style.visibility = 'hidden'; }
+      }, 220);
+    });
+    pendingXRef.current = 0;
+    currentXRef.current = 0;
   }, []);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -58,7 +110,7 @@ export function SwipeableConversationItem({
     currentXRef.current = 0;
     isSwipingRef.current = false;
     directionLockedRef.current = null;
-    setIsResetting(false);
+    if (contentRef.current) contentRef.current.style.transition = '';
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
@@ -67,7 +119,7 @@ export function SwipeableConversationItem({
     const deltaY = touch.clientY - startYRef.current;
 
     if (!directionLockedRef.current) {
-      if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+      if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
         directionLockedRef.current = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
       }
       return;
@@ -78,7 +130,7 @@ export function SwipeableConversationItem({
     // Vänster = ta bort. Höger = markera som oläst (bara när det är möjligt).
     const swipingRight = deltaX > 0;
     if (swipingRight && !(onMarkUnread && canMarkUnread)) {
-      if (isSwipingRef.current) setTranslateX(0);
+      if (isSwipingRef.current) setX(0);
       return;
     }
 
@@ -91,65 +143,54 @@ export function SwipeableConversationItem({
       ? threshold + (clamped - threshold) * 0.3
       : clamped;
 
-    currentXRef.current = swipingRight ? dampened : -dampened;
-    setTranslateX(swipingRight ? dampened : -dampened);
-  }, [onMarkUnread, canMarkUnread]);
+    const x = swipingRight ? dampened : -dampened;
+    currentXRef.current = x;
+    setX(x);
+  }, [onMarkUnread, canMarkUnread, setX]);
 
   const handleTouchEnd = useCallback(() => {
     if (!isSwipingRef.current) return;
 
     const offset = currentXRef.current;
-    resetPosition();
+    animateBack();
 
     if (offset <= -DELETE_THRESHOLD) {
       setShowConfirm(true);
     } else if (offset >= UNREAD_THRESHOLD && onMarkUnread && canMarkUnread) {
+      try { navigator.vibrate?.(8); } catch { /* ignoreras */ }
       onMarkUnread();
     }
 
-    currentXRef.current = 0;
     isSwipingRef.current = false;
     directionLockedRef.current = null;
-  }, [resetPosition, onMarkUnread, canMarkUnread]);
+  }, [animateBack, onMarkUnread, canMarkUnread]);
 
   const handleConfirmDelete = useCallback(() => {
     setShowConfirm(false);
     onDelete();
   }, [onDelete]);
 
-  const deleteProgress = Math.min(Math.abs(translateX) / DELETE_THRESHOLD, 1);
-  const showDeleteButton = translateX < -5;
-  const unreadProgress = Math.min(Math.max(translateX, 0) / UNREAD_THRESHOLD, 1);
-  const showUnreadButton = translateX > 5 && !!onMarkUnread && canMarkUnread;
-
   return (
     <>
       <div
-        ref={containerRef}
         className="relative overflow-hidden rounded-lg"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onTouchCancel={animateBack}
       >
         {/* Markera som oläst — visas vid drag åt höger */}
-        {showUnreadButton && (
+        {onMarkUnread && canMarkUnread && (
           <div className="absolute inset-y-0 left-0 flex items-center z-0 pl-3">
             <div
-              style={{
-                opacity: unreadProgress,
-                transform: `scale(${0.6 + unreadProgress * 0.4})`,
-              }}
+              ref={unreadRef}
+              style={{ opacity: 0, transform: 'scale(0.6)', visibility: 'hidden', willChange: 'transform, opacity' }}
             >
               <button
-                className={cn(
-                  "rounded-full flex items-center gap-1 px-3 py-2",
-                  "bg-blue-500/20 border border-blue-500/40",
-                  "text-white font-medium text-xs transition-all duration-150",
-                  unreadProgress >= 1 && "bg-blue-500/30 border-blue-500/50"
-                )}
+                className="rounded-full flex items-center gap-1 px-3 py-2 bg-blue-500/20 border border-blue-500/40 text-white font-medium text-xs"
                 onClick={(e) => {
                   e.stopPropagation();
-                  resetPosition();
+                  animateBack();
                   onMarkUnread?.();
                 }}
                 tabIndex={-1}
@@ -162,49 +203,31 @@ export function SwipeableConversationItem({
         )}
 
         {/* Delete button on the RIGHT side */}
-        {showDeleteButton && (
-          <div className="absolute inset-y-0 right-0 flex items-center z-0 pr-3">
-            <div
-              className={cn(
-                "flex items-center justify-center transition-transform",
-                deleteProgress >= 1 ? "scale-110" : "scale-100"
-              )}
-              style={{
-                opacity: deleteProgress,
-                transform: `scale(${0.6 + deleteProgress * 0.4})`,
+        <div className="absolute inset-y-0 right-0 flex items-center z-0 pr-3">
+          <div
+            ref={deleteRef}
+            style={{ opacity: 0, transform: 'scale(0.6)', visibility: 'hidden', willChange: 'transform, opacity' }}
+          >
+            <button
+              className="rounded-full flex items-center gap-1 px-3 py-2 bg-destructive/20 border border-destructive/40 text-white font-medium text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                animateBack();
+                setShowConfirm(true);
               }}
+              tabIndex={-1}
             >
-              <button
-                className={cn(
-                  "rounded-full flex items-center gap-1 px-3 py-2",
-                  "bg-destructive/20 border border-destructive/40",
-                  "text-white font-medium text-xs",
-                  "transition-all duration-150",
-                  deleteProgress >= 1 && "bg-destructive/30 border-destructive/50"
-                )}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  resetPosition();
-                  setShowConfirm(true);
-                }}
-                tabIndex={-1}
-              >
-                <Trash2 className="h-3.5 w-3.5 text-white" />
-                <span>Ta bort</span>
-              </button>
-            </div>
+              <Trash2 className="h-3.5 w-3.5 text-white" />
+              <span>Ta bort</span>
+            </button>
           </div>
-        )}
+        </div>
 
         {/* Content layer – slides LEFT to reveal delete on right */}
         <div
-          className={cn(
-            "relative z-10",
-            isResetting && "transition-transform duration-300 ease-out"
-          )}
-          style={{
-            transform: `translateX(${translateX}px)`,
-          }}
+          ref={contentRef}
+          className="relative z-10"
+          style={{ transform: 'translate3d(0,0,0)', willChange: 'transform' }}
         >
           {children}
         </div>
