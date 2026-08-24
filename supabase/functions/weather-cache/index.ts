@@ -56,7 +56,7 @@ async function fetchCity(lat: number, lon: number): Promise<string> {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=sv`,
-      { signal: AbortSignal.timeout(5000) }
+      { signal: AbortSignal.timeout(5000), headers: GEO_HEADERS }
     );
     if (res.ok) {
       const data = await res.json();
@@ -153,30 +153,44 @@ Deno.serve(async (req) => {
     if (cached && now - cached.timestamp < WEATHER_TTL) {
       weatherData = cached.data;
     } else {
+      let isFallback = false;
       try {
         weatherData = await fetchWeather(roundCoord(lat), roundCoord(lon));
       } catch (weatherError) {
         console.warn('Open-Meteo unavailable, returning safe fallback:', weatherError);
         weatherData = fallbackWeather(roundCoord(lat), roundCoord(lon));
+        isFallback = true;
       }
-      weatherCache.set(key, { data: weatherData, timestamp: now });
+      // A fallback response must expire quickly so a short upstream outage
+      // doesn't lock an entire coordinate grid to a neutral 0° for 15 minutes.
+      weatherCache.set(key, {
+        data: weatherData,
+        timestamp: isFallback ? now - (WEATHER_TTL - WEATHER_FALLBACK_TTL) : now,
+      });
     }
 
     // Check city cache
     let city: string;
     const cachedCity = cityCache.get(key);
-    if (cachedCity && now - cachedCity.timestamp < CITY_TTL) {
+    const cityTtl = cachedCity?.city ? CITY_TTL : CITY_EMPTY_TTL;
+    if (cachedCity && now - cachedCity.timestamp < cityTtl) {
       city = cachedCity.city;
     } else {
-      city = await fetchCity(lat, lon);
+      city = await fetchCity(roundCoord(lat), roundCoord(lon));
       cityCache.set(key, { city, timestamp: now });
     }
 
     // Cleanup old entries periodically (keep cache bounded)
-    if (weatherCache.size > 10000) {
+    if (weatherCache.size > MAX_CACHE_ENTRIES) {
       const cutoff = now - WEATHER_TTL;
       for (const [k, v] of weatherCache) {
         if (v.timestamp < cutoff) weatherCache.delete(k);
+      }
+    }
+    if (cityCache.size > MAX_CACHE_ENTRIES) {
+      const cutoff = now - CITY_TTL;
+      for (const [k, v] of cityCache) {
+        if (v.timestamp < cutoff) cityCache.delete(k);
       }
     }
 
