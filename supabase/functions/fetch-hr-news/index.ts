@@ -665,6 +665,20 @@ serve(async (req) => {
         });
     }
 
+    // Single-flight: bara EN körning i taget, oavsett hur många klienter som
+    // råkar be om en uppdatering samtidigt (skalar till miljoner användare).
+    const { data: gotLock } = await supabase.rpc('try_claim_job_lock', {
+      _key: 'fetch-hr-news',
+      _ttl_seconds: 600,
+    });
+    if (gotLock !== true) {
+      console.log('Another fetch-hr-news run is already in progress — skipping');
+      return new Response(JSON.stringify({ message: 'Run already in progress', skipped: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+
     console.log('Fetching HR news with retry logic...');
 
     // ===== STEP 1: Get current state of the database =====
