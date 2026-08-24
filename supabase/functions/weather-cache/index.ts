@@ -13,6 +13,8 @@ const CITY_TTL = 60 * 60 * 1000;    // 1 hour (cities don't move)
 const CITY_EMPTY_TTL = 5 * 60 * 1000; // retry unknown city sooner
 const MAX_CACHE_ENTRIES = 10000;
 const OPEN_METEO_TIMEOUT_MS = 4500;
+// The client aborts at 5s; leave room so a slow geocode never costs the weather.
+const CITY_LOOKUP_BUDGET_MS = 2000;
 // Nominatim's usage policy requires an identifying User-Agent; without it
 // requests are rate limited/403:ed at volume.
 const GEO_HEADERS = { 'User-Agent': 'Parium/1.0 (https://parium.se)' };
@@ -56,7 +58,7 @@ async function fetchCity(lat: number, lon: number): Promise<string> {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=sv`,
-      { signal: AbortSignal.timeout(5000), headers: GEO_HEADERS }
+      { signal: AbortSignal.timeout(2500), headers: GEO_HEADERS }
     );
     if (res.ok) {
       const data = await res.json();
@@ -137,8 +139,14 @@ Deno.serve(async (req) => {
     }
 
     const { lat, lon } = body;
-    if (typeof lat !== 'number' || typeof lon !== 'number') {
-      return new Response(JSON.stringify({ error: 'lat and lon required' }), {
+    // typeof NaN === 'number', so validate finiteness and real-world range too —
+    // otherwise a bad client sends NaN and poisons the cache under key "NaN,NaN".
+    const validCoords =
+      typeof lat === 'number' && typeof lon === 'number' &&
+      Number.isFinite(lat) && Number.isFinite(lon) &&
+      lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+    if (!validCoords) {
+      return new Response(JSON.stringify({ error: 'valid lat and lon required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -146,6 +154,7 @@ Deno.serve(async (req) => {
 
     const key = cacheKey(lat, lon);
     const now = Date.now();
+    const startedAt = now;
 
     // Check weather cache
     let weatherData: unknown;
@@ -175,6 +184,10 @@ Deno.serve(async (req) => {
     const cityTtl = cachedCity?.city ? CITY_TTL : CITY_EMPTY_TTL;
     if (cachedCity && now - cachedCity.timestamp < cityTtl) {
       city = cachedCity.city;
+    } else if (Date.now() - startedAt > CITY_LOOKUP_BUDGET_MS) {
+      // Weather already ate the request budget; return without the city rather
+      // than letting the client time out and lose the temperature as well.
+      city = cachedCity?.city ?? '';
     } else {
       city = await fetchCity(roundCoord(lat), roundCoord(lon));
       cityCache.set(key, { city, timestamp: now });

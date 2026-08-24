@@ -1,3 +1,5 @@
+import { getSwedishHour } from '@/lib/swedishTime';
+
 // ─── Types ───────────────────────────────────────────────
 
 export interface CachedLocation {
@@ -393,8 +395,10 @@ export const getServerSideIPLocation = async (): Promise<{ lat: number; lon: num
 /** Forward geocode a city name to coordinates */
 export const geocodeCity = async (city: string): Promise<{ lat: number; lon: number; name: string }> => {
   const res = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=sv&format=json`
+    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=sv&format=json`,
+    { signal: AbortSignal.timeout(5000) }
   );
+  if (!res.ok) throw new Error(`Geocoding error: ${res.status}`);
   const data = await res.json();
   const best = data?.results?.[0];
   if (!best) throw new Error('No geocoding result');
@@ -405,9 +409,9 @@ export const geocodeCity = async (city: string): Promise<{ lat: number; lon: num
   };
 };
 
-/** Fallback emoji based on time of day */
+/** Fallback emoji based on time of day (always Swedish time, like the greeting) */
 export function getTimeBasedEmoji(): string {
-  const hour = new Date().getHours();
+  const hour = getSwedishHour();
   if (hour >= 5 && hour < 12) return '☀️';
   if (hour >= 12 && hour < 18) return '👋';
   return '🌙';
