@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
+import { getSwedishHour } from '@/lib/swedishTime';
 
 export interface Greeting {
   text: string;
