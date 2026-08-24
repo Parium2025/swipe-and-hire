@@ -6,6 +6,7 @@ import { useGreeting } from '@/hooks/useGreeting';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 
 import { hasConfirmedWeather } from '@/lib/weatherApi';
+import { formatSwedishDateTime } from '@/lib/swedishTime';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
@@ -14,25 +15,13 @@ import { useIsSystemAdmin } from '@/components/SystemHealthPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { EmployerHomeSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
-const formatDateTime = (): { time: string; date: string } => {
-  const now = new Date();
-  const time = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-  const date = now.toLocaleDateString('sv-SE', { 
-    weekday: 'long', 
-    day: 'numeric', 
-    month: 'long' 
-  });
-  // Capitalize first letter
-  const capitalizedDate = date.charAt(0).toUpperCase() + date.slice(1);
-  return { time, date: capitalizedDate };
-};
 
 
 const DateTimeDisplay = memo(() => {
   // Delad minuttick: synkad mot hel minut, pausar när fliken är dold och
   // uppdaterar direkt när man kommer tillbaka (ingen 10s-timer i bakgrunden).
   const tick = useMinuteTick();
-  const dateTime = useMemo(() => formatDateTime(), [tick]);
+  const dateTime = useMemo(() => formatSwedishDateTime(), [tick]);
 
   return (
     <p className="text-sm text-white font-medium mt-1">

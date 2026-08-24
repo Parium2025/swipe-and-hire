@@ -5,27 +5,17 @@ import { useGreeting } from '@/hooks/useGreeting';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 
 import { hasConfirmedWeather } from '@/lib/weatherApi';
+import { formatSwedishDateTime } from '@/lib/swedishTime';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
 
-const formatDateTime = (): { time: string; date: string } => {
-  const now = new Date();
-  const time = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-  const date = now.toLocaleDateString('sv-SE', { 
-    weekday: 'long', 
-    day: 'numeric', 
-    month: 'long' 
-  });
-  const capitalizedDate = date.charAt(0).toUpperCase() + date.slice(1);
-  return { time, date: capitalizedDate };
-};
 
 const DateTimeDisplay = memo(() => {
   // Delad minuttick i stället för 10s-timer: synkad, pausad när fliken är dold.
   const tick = useMinuteTick();
-  const dateTime = useMemo(() => formatDateTime(), [tick]);
+  const dateTime = useMemo(() => formatSwedishDateTime(), [tick]);
 
   return (
     <p className="text-sm text-white font-medium mt-1">
