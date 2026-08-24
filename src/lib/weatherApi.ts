@@ -1,4 +1,4 @@
-import { getSwedishHour } from '@/lib/swedishTime';
+import { getLocalHour } from '@/lib/swedishTime';
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -409,9 +409,9 @@ export const geocodeCity = async (city: string): Promise<{ lat: number; lon: num
   };
 };
 
-/** Fallback emoji based on time of day (always Swedish time, like the greeting) */
+/** Fallback emoji based on the user's own local time of day (like the greeting) */
 export function getTimeBasedEmoji(): string {
-  const hour = getSwedishHour();
+  const hour = getLocalHour();
   if (hour >= 5 && hour < 12) return '☀️';
   if (hour >= 12 && hour < 18) return '👋';
   return '🌙';

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
-import { getSwedishHour } from '@/lib/swedishTime';
+import { getLocalHour } from '@/lib/swedishTime';
 
 export interface Greeting {
   text: string;
@@ -9,8 +9,9 @@ export interface Greeting {
 }
 
 const computeGreeting = (): Greeting => {
-  // Alltid svensk tid — hälsningen ska matcha Sverige oavsett enhetens tidszon.
-  const hour = getSwedishHour();
+  // Hälsningen följer användarens egen tidszon — är du i New York ska det stå
+  // "God morgon" när det är morgon där. (Intervjutider m.m. är alltid svensk tid.)
+  const hour = getLocalHour();
   if (hour >= 5 && hour < 10) return { text: 'God morgon', isEvening: false, isDaytime: true };
   if (hour >= 10 && hour < 12) return { text: 'God förmiddag', isEvening: false, isDaytime: true };
   if (hour >= 12 && hour < 17) return { text: 'God eftermiddag', isEvening: false, isDaytime: true };

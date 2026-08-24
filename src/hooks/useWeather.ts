@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useBackgroundLocation } from './useBackgroundLocation';
-import { isNativeApp, getCurrentPosition, getDistanceKm } from '@/lib/gpsUtils';
+import { isNativeApp, isMobileWeb, getAccuratePosition, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
 import {
   type CachedLocation,
   getCachedLocation,
@@ -192,24 +192,39 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   });
 
   const runLocationCheck = useCallback(async (silent = true) => {
-    // On web (esp. iOS Safari) high accuracy often times out or takes 10-15s.
-    // Low accuracy = wifi/cell tower positioning, city-level, ~1-2s. Perfect for weather.
-    const useHighAccuracy = isNativeApp();
-
     try {
-      const gpsResult = await getCurrentPosition({
-        timeout: useHighAccuracy ? 8000 : 5000,
-        enableHighAccuracy: useHighAccuracy,
-        // Accept a GPS fix up to 2 minutes old — avoids waking the radio for a
-        // fresh lock on every periodic/visibility check when we don't need one.
+      // Fast first fix, automatically refined when the browser hands us an
+      // IP-derived (city-wrong) position. Works the same in every country.
+      const gpsResult = await getAccuratePosition({
+        timeout: isNativeApp() ? 8000 : 6000,
+        // Accept a fix up to 2 minutes old — avoids waking the radio on every
+        // periodic/visibility check when we don't need a fresh lock.
         maximumAge: 2 * 60 * 1000,
       });
 
       if (gpsResult && mountedRef.current) {
-        console.log(`🛰️ GPS coordinates: ${gpsResult.lat.toFixed(6)}, ${gpsResult.lon.toFixed(6)}`);
+        console.log(
+          `🛰️ GPS coordinates: ${gpsResult.lat.toFixed(6)}, ${gpsResult.lon.toFixed(6)} (±${Math.round(gpsResult.accuracy)}m)`,
+        );
 
-        const cached = locationRef.current || getCachedLocation();
-        const cityHint = cached?.city || '';
+        const cachedFix = locationRef.current || getCachedLocation();
+        // A coarse fix must never overwrite a precise recent one (that is how a
+        // laptop in Haninge ends up showing the ISP's city).
+        if (
+          gpsResult.accuracy > COARSE_FIX_ACCURACY_M &&
+          cachedFix?.source === 'gps' &&
+          Date.now() - cachedFix.timestamp < 30 * 60 * 1000
+        ) {
+          console.log('📍 Ignoring coarse fix — keeping recent precise location');
+          await fetchWeatherOnly(cachedFix.lat, cachedFix.lon, cachedFix.city);
+          return;
+        }
+
+        // Only reuse the cached city name when we are still in the same place —
+        // otherwise let the server resolve the real city for the new coordinates.
+        const nearCached =
+          cachedFix && getDistanceKm(cachedFix.lat, cachedFix.lon, gpsResult.lat, gpsResult.lon) < 10;
+        const cityHint = nearCached ? cachedFix?.city || '' : '';
         await updateLocation(gpsResult.lat, gpsResult.lon, cityHint || null, 'gps');
         return;
       }
@@ -326,24 +341,29 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         async (position) => {
           const newLat = position.coords.latitude;
           const newLon = position.coords.longitude;
+          const accuracy = position.coords.accuracy ?? Number.POSITIVE_INFINITY;
 
           const cached = locationRef.current;
+          // Discard coarse (IP-derived) updates when we already know better.
+          if (accuracy > COARSE_FIX_ACCURACY_M && cached?.source === 'gps') return;
           if (cached) {
             const distance = getDistanceKm(cached.lat, cached.lon, newLat, newLon);
             if (distance < 0.5) return;
             console.log(`📍 GPS watchPosition: moved ${distance.toFixed(2)}km - updating!`);
           }
 
-          const cityHint = cached?.city || '';
+          const stillNearby =
+            cached && getDistanceKm(cached.lat, cached.lon, newLat, newLon) < 10;
+          const cityHint = stillNearby ? cached?.city || '' : '';
           await updateLocation(newLat, newLon, cityHint || null, 'gps');
         },
         (error) => {
           console.warn('GPS watchPosition error:', error.message);
         },
         {
-          // City-level accuracy is enough for weather; high accuracy keeps the
-          // GPS radio awake and drains battery on mobile browsers.
-          enableHighAccuracy: false,
+          // Desktop: high accuracy (wifi positioning, no battery cost).
+          // Mobile web: low accuracy so the GPS radio stays asleep.
+          enableHighAccuracy: !isMobileWeb(),
           timeout: 10000,
           maximumAge: 5 * 60 * 1000,
         }
@@ -441,9 +461,8 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
 
   let location: CachedLocation | null = null;
 
-  const gpsResult = await getCurrentPosition({
+  const gpsResult = await getAccuratePosition({
     timeout: 5000,
-    enableHighAccuracy: false,
     maximumAge: 30 * 60 * 1000,
   });
 
