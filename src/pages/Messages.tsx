@@ -15,6 +15,7 @@ import { EmptyConversationList, EmptyChatState } from '@/components/messages/Emp
 import { MessagesTabs, type ConversationTab } from '@/components/MessagesTabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDeleteConversation } from '@/hooks/useDeleteConversation';
+import { useMarkConversationUnread } from '@/hooks/useMarkConversationUnread';
 import { useBlockConversation, useBlockedUsers } from '@/hooks/useBlockConversation';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -70,6 +71,7 @@ export default function Messages() {
   }, [isLoading, conversations.length]);
 
   const { deleteConversation, isDeleting } = useDeleteConversation();
+  const { markAsUnread } = useMarkConversationUnread();
   const { data: blockedUsers = [] } = useBlockedUsers();
   const { unblockUser, isUnblocking } = useBlockConversation();
   const blockedIds = blockedUsers.map((b) => b.blocked_id);
@@ -362,6 +364,14 @@ export default function Messages() {
                     return (
                       <SwipeableConversationItem
                         key={conv.id}
+                        canMarkUnread={conv.unread_count === 0 && !!conv.last_message}
+                        onMarkUnread={() => {
+                          markAsUnread(conv.id);
+                          if (selectedConversationId === conv.id) {
+                            setSelectedConversationId(null);
+                            setShowMobileChat(false);
+                          }
+                        }}
                         onDelete={() => {
                           deleteConversation(conv.id);
                           if (selectedConversationId === conv.id) {
