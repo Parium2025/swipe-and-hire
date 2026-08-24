@@ -693,9 +693,9 @@ serve(async (req) => {
     console.log(`Fetch results: ${successfulFetches}/${RSS_SOURCES.length} successful, ${totalRetries} retries used`);
     
     if (failedFetches > 0) {
-      const failedSources = fetchResults
-        .filter(r => !r.success)
-        .map((r, i) => RSS_SOURCES[i].name);
+      const failedSources = RSS_SOURCES
+        .filter((_, i) => !fetchResults[i].success)
+        .map(s => s.name);
       console.warn(`Failed sources: ${failedSources.join(', ')}`);
     }
     
@@ -708,7 +708,13 @@ serve(async (req) => {
       return true;
     });
     
-    allRss.sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime());
+    // Negativa artiklar (skandal, konflikt, varsel-drev) rankas sist — de tas bara
+    // in när det saknas positivt material, så feeden aldrig blir tom.
+    allRss.sort((a, b) => {
+      if (a.isNegative !== b.isNegative) return a.isNegative ? 1 : -1;
+      return new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime();
+    });
+
 
     // ===== STEP 4: Check for existing URLs to de-duplicate =====
     const { data: existingRss } = await supabase
