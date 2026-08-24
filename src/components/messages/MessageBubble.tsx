@@ -344,6 +344,16 @@ export function MessageBubble({
         isOwn={isOwn}
         anchorRect={anchorRect}
       />
+
+      {/* Helskärmsvisare för bildbilagor — pinch, panorering och dubbeltryck */}
+      {attachmentUrl && (
+        <AttachmentImageViewer
+          open={showImageViewer}
+          onClose={() => setShowImageViewer(false)}
+          src={attachmentUrl}
+          fileName={message.attachment_name || undefined}
+        />
+      )}
     </>
   );
 }
