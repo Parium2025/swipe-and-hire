@@ -140,7 +140,7 @@ function NotificationItem({
           if (canExpand) setExpanded(v => !v);
         }
       }}
-      className={`w-full flex items-start gap-4 px-4 py-4 text-left transition-colors rounded-lg cursor-pointer ${
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-none cursor-pointer ${
         notification.is_read 
           ? 'opacity-60 hover:bg-white/5' 
           : 'hover:bg-white/10 bg-white/5'
@@ -151,19 +151,19 @@ function NotificationItem({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span ref={titleRef} className={`text-sm font-medium text-white break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.title}</span>
+        <div className="flex items-start gap-2">
+          <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{notification.title}</span>
           {!notification.is_read && (
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
         {notification.body && (
-          <p ref={bodyRef} className={`text-xs text-white mt-2 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
+          <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
         )}
-        <div className="flex items-center gap-2 mt-3">
+        <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
           {!route && canExpand && (
-            <span className="text-[10px] font-medium text-white/80 underline underline-offset-2">
+            <span className="text-xs font-medium text-white/80 underline underline-offset-2">
               {expanded ? 'Visa mindre' : 'Visa mer'}
             </span>
           )}
@@ -175,7 +175,7 @@ function NotificationItem({
                 if (!notification.is_read) onRead(notification.id);
                 onNavigate(supportReportRoute(notification.title, notification.body));
               }}
-              className="ml-auto inline-flex items-center rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+              className="ml-auto inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
             >
               Rapportera
             </button>
@@ -234,7 +234,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       }}
-      className={`w-full flex items-start gap-4 px-4 py-4 text-left transition-colors rounded-lg cursor-pointer ${
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-none cursor-pointer ${
         item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
       }`}
     >
@@ -243,8 +243,8 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
       </span>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span ref={titleRef} className={`text-sm font-medium text-white break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
+        <div className="flex items-start gap-2">
+          <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
           {item.count > 1 && (
             <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
               {item.count}×
@@ -254,11 +254,11 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
-        {item.body && <p ref={bodyRef} className={`text-xs text-white mt-2 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
-        <div className="flex items-center gap-2 mt-3">
+        {item.body && <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
+        <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
           {!item.route && canExpand && (
-            <span className="text-[10px] font-medium text-white/80 underline underline-offset-2">
+            <span className="text-xs font-medium text-white/80 underline underline-offset-2">
               {expanded ? 'Visa mindre' : 'Visa mer'}
             </span>
           )}
@@ -270,7 +270,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
                 if (!item.is_read) onRead(item.id);
                 onNavigate(supportReportRoute(item.title, item.body));
               }}
-              className="ml-auto inline-flex items-center rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+              className="ml-auto inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
             >
               Rapportera
             </button>
@@ -467,14 +467,14 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
           </div>
 
           {/* Notification list */}
-          <div className="overflow-y-auto flex-1 p-3" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="overflow-y-auto flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
             {merged.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-white">
                 <Bell className="h-8 w-8 mb-3 opacity-60" />
                 <p className="text-sm">Inga notifikationer</p>
               </div>
             ) : (
-              <div className="divide-y divide-white/10 [&>*]:py-2 first:[&>*]:pt-0 last:[&>*]:pb-0">
+              <div className="divide-y divide-white/10">
                 {merged.map(entry => entry.kind === 'server' ? (
                   <NotificationItem
                     key={`s-${entry.n.id}`}
