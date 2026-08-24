@@ -51,6 +51,7 @@ export function SwipeableConversationItem({
   const pendingXRef = useRef(0);
   const isSwipingRef = useRef(false);
   const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
+  const lockOffsetRef = useRef(0);
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
