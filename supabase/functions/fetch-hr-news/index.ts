@@ -855,17 +855,22 @@ serve(async (req) => {
         const idsToDelete: string[] = [];
         let remaining = excess;
 
+        // Plocka de n äldsta ur en nyast-först-sorterad lista.
+        // OBS: slice(-0) returnerar HELA arrayen — därför explicit n <= 0-guard.
+        const takeOldest = <T,>(arr: T[], n: number): T[] => (n <= 0 ? [] : arr.slice(-n));
+
         // STEG 0: Ta bort gamla RSS-artiklar först, så nya artiklar faktiskt syns
-        const staleToDelete = rssItems
-          .filter(i => staleRssIds.includes(i.id))
-          .slice(-Math.min(remaining, staleRssIds.length));
+        const staleToDelete = takeOldest(
+          rssItems.filter(i => staleRssIds.includes(i.id)),
+          remaining,
+        );
         for (const item of staleToDelete) {
           idsToDelete.push(item.id);
           remaining--;
         }
         
         // STEG 1: Ta bort AI-artiklar först (från äldst till nyast)
-        const aiToDelete = aiItems.slice(-Math.min(remaining, aiItems.length));
+        const aiToDelete = takeOldest(aiItems, remaining);
         for (const item of aiToDelete) {
           idsToDelete.push(item.id);
           remaining--;
