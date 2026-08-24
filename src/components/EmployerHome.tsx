@@ -3,6 +3,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useWeather } from '@/hooks/useWeather';
 import { useGreeting } from '@/hooks/useGreeting';
+import { useMinuteTick } from '@/hooks/useMinuteTick';
+
 import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
