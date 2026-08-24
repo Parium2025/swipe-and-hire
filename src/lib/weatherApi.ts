@@ -1,4 +1,4 @@
-import { getLocalHour } from '@/lib/swedishTime';
+import { getLocalHour } from '@/lib/localTime';
 
 // ─── Types ───────────────────────────────────────────────
 

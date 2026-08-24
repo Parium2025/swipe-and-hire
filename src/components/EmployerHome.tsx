@@ -6,7 +6,7 @@ import { useGreeting } from '@/hooks/useGreeting';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 
 import { hasConfirmedWeather } from '@/lib/weatherApi';
-import { formatSwedishDateTime } from '@/lib/swedishTime';
+import { formatLocalDateTime } from '@/lib/localTime';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
@@ -21,7 +21,7 @@ const DateTimeDisplay = memo(() => {
   // Delad minuttick: synkad mot hel minut, pausar när fliken är dold och
   // uppdaterar direkt när man kommer tillbaka (ingen 10s-timer i bakgrunden).
   const tick = useMinuteTick();
-  const dateTime = useMemo(() => formatSwedishDateTime(), [tick]);
+  const dateTime = useMemo(() => formatLocalDateTime(), [tick]);
 
   return (
     <p className="text-sm text-white font-medium mt-1">

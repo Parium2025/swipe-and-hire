@@ -1,27 +1,31 @@
 import {
-  formatSwedishShortDate,
-  formatSwedishTime,
-  swedishDayDiff,
-} from '@/lib/swedishTime';
+  formatLocalShortDate,
+  formatLocalTime,
+  localDayDiff,
+} from '@/lib/localTime';
 
-/** Allt visas i svensk tid (Europe/Stockholm), oavsett enhetens tidszon. */
+/**
+ * Intervjutider visas i användarens egen tidszon. Tidpunkten lagras alltid som
+ * ett absolut ögonblick (UTC), så en rekryterare i New York och en kandidat i
+ * Sverige ser samma möte — var och en på sin egen klocka.
+ */
 export const formatInterviewDate = (dateStr: string): string => {
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return '';
-  const dayDiff = swedishDayDiff(Date.now(), date);
+  const dayDiff = localDayDiff(Date.now(), date);
   if (dayDiff === 0) return 'Idag';
   if (dayDiff === 1) return 'Imorgon';
-  return formatSwedishShortDate(date);
+  return formatLocalShortDate(date);
 };
 
 export const formatInterviewTime = (dateStr: string): string => {
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return '';
-  return formatSwedishTime(date);
+  return formatLocalTime(date);
 };
 
-/** Calendar-day difference in Swedish time so "Imorgon" always means tomorrow. */
-const calendarDayDiff = (from: Date, to: Date): number => swedishDayDiff(from, to);
+/** Calendar-day difference in local time so "Imorgon" always means tomorrow. */
+const calendarDayDiff = (from: Date, to: Date): number => localDayDiff(from, to);
 
 /** Relative label. Recomputed on every minute tick by the cards. */
 export const getTimeUntil = (scheduledAt: string, now: number = Date.now()): string => {

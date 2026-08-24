@@ -5,7 +5,7 @@ import { useGreeting } from '@/hooks/useGreeting';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 
 import { hasConfirmedWeather } from '@/lib/weatherApi';
-import { formatSwedishDateTime } from '@/lib/swedishTime';
+import { formatLocalDateTime } from '@/lib/localTime';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
@@ -15,7 +15,7 @@ import GpsPrompt from '@/components/GpsPrompt';
 const DateTimeDisplay = memo(() => {
   // Delad minuttick i stället för 10s-timer: synkad, pausad när fliken är dold.
   const tick = useMinuteTick();
-  const dateTime = useMemo(() => formatSwedishDateTime(), [tick]);
+  const dateTime = useMemo(() => formatLocalDateTime(), [tick]);
 
   return (
     <p className="text-sm text-white font-medium mt-1">
