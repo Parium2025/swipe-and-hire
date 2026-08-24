@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 // (service-role check now uses literal key match — no JWT payload trust)
 // Ersätter tidigare Resend-import: outreach-mejl går nu via Lovable Emails (send-transactional-email).
 
@@ -270,26 +271,19 @@ async function dispatchLog(log: OutreachLog) {
       const trackingUrl = `${supabaseUrl}/functions/v1/outreach-open-track?logId=${encodeURIComponent(log.id)}`;
       const emailSubject = subject || `Meddelande från ${context.companyName}`;
 
-      // Skickar via Lovable Emails — samma domän (notify.parium.se) och kösystem
-      // som övriga mejl, så leverans landar i inkorgen tack vare SPF/DKIM/DMARC.
-      const { data: sendData, error: sendError } = await admin.functions.invoke('send-transactional-email', {
-        body: {
-          templateName: 'outreach-message',
-          recipientEmail: context.recipientEmail,
-          idempotencyKey: `outreach-${log.id}`,
-          templateData: {
-            body,
-            company_name: context.companyName,
-            subject: emailSubject,
-            tracking_url: trackingUrl,
-          },
+      // Skickar via Lovable Emails — samma domän (notify.parium.se) som övriga
+      // mejl, så leverans landar i inkorgen tack vare SPF/DKIM/DMARC.
+      await sendLoggedTemplateEmail('outreach-message', context.recipientEmail, {
+        idempotencyKey: `outreach-${log.id}`,
+        templateData: {
+          body,
+          company_name: context.companyName,
+          subject: emailSubject,
+          tracking_url: trackingUrl,
         },
       });
 
-      if (sendError) throw new Error(sendError.message || 'E-postutskicket misslyckades');
-      const emailMessageId = (sendData as { messageId?: string; id?: string } | null)?.messageId
-        ?? (sendData as { id?: string } | null)?.id
-        ?? null;
+      const emailMessageId = null;
 
       await admin.from('outreach_dispatch_logs').update({
         status: 'sent',

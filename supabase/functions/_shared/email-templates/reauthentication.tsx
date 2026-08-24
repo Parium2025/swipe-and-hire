@@ -32,9 +32,6 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
         <Text style={footer}>
           Koden går ut snart. Om du inte begärde detta kan du ignorera mailet.
         </Text>
-        <Text style={noReply}>
-          Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
-        </Text>
       </Container>
     </Body>
   </Html>
@@ -61,4 +58,3 @@ const codeStyle = {
   margin: '0 0 24px',
 }
 const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }
-const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', fontStyle: 'italic' as const }

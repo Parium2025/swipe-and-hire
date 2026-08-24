@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { enforceRateLimit, normalizeEmail, requestIp } from "../_shared/rate-limit.ts";
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -79,24 +80,21 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 2) Skicka via Lovable Emails.
     const idempotencyKey = `password-reset-${normalizedEmail}-${Date.now()}`;
-    const { data, error } = await supabaseAdmin.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: "password-reset",
-        recipientEmail: normalizedEmail,
+    let data;
+    try {
+      data = await sendLoggedTemplateEmail("password-reset", normalizedEmail, {
         idempotencyKey,
         templateData: { reset_url: resetUrl },
-      },
-    });
-
-    if (error) {
-      console.error("send-transactional-email failed:", error);
+      });
+    } catch (sendErr) {
+      console.error("password reset email failed:", sendErr);
       return new Response(
-        JSON.stringify({ error: error.message || "send-transactional-email failed" }),
+        JSON.stringify({ error: "E-postutskicket misslyckades" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    console.log("Reset email queued via Lovable Emails");
+    console.log("Reset email sent via Lovable Emails");
     return new Response(
       JSON.stringify({ success: true, data }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },

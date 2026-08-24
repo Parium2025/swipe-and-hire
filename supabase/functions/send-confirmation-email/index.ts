@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { requireServiceRole } from "../_shared/service-auth.ts";
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,28 +50,30 @@ const handler = async (req: Request): Promise<Response> => {
 
     const isEmployer = role === "employer";
 
-    const { data, error } = await supabaseAdmin.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: isEmployer ? "employer-account-confirmation" : "account-confirmation",
-        recipientEmail: email,
-        idempotencyKey,
-        templateData: isEmployer
-          ? {
-              first_name: first_name || "där",
-              confirmation_url,
-              company_name: company_name || "ert företag",
-            }
-          : {
-              first_name: first_name || "där",
-              confirmation_url,
-            },
-      },
-    });
-
-    if (error) {
-      console.error("send-transactional-email failed:", error);
+    let data;
+    try {
+      data = await sendLoggedTemplateEmail(
+        isEmployer ? "employer-account-confirmation" : "account-confirmation",
+        email,
+        {
+          idempotencyKey,
+          templateData: isEmployer
+            ? {
+                first_name: first_name || "där",
+                confirmation_url,
+                company_name: company_name || "ert företag",
+              }
+            : {
+                first_name: first_name || "där",
+                confirmation_url,
+              },
+        },
+      );
+    } catch (sendErr) {
+      console.error("confirmation email failed:", sendErr);
+      const error = { message: "E-postutskicket misslyckades" };
       return new Response(
-        JSON.stringify({ error: error.message || "send-transactional-email failed" }),
+        JSON.stringify({ error: error.message }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }

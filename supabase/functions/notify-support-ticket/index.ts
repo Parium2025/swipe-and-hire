@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
 import { verifyCaller } from "../_shared/service-auth.ts";
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -70,24 +71,19 @@ const handler = async (req: Request): Promise<Response> => {
     const fromName = [ticket.profiles?.first_name, ticket.profiles?.last_name]
       .filter(Boolean).join(' ') || 'Okänd användare';
 
-    const { data, error } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'support-ticket-alert',
-        recipientEmail: ADMIN_EMAIL,
-        idempotencyKey: `support-ticket-${ticket.id}`,
-        templateData: {
-          ticket_id: ticket.id,
-          category: ticket.category || '—',
-          subject: ticket.subject || 'Nytt supportärende',
-          from_name: fromName,
-          created_at: new Date(ticket.created_at).toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm' }),
-          message: ticket.message || '',
-        },
+    const data = await sendLoggedTemplateEmail('support-ticket-alert', ADMIN_EMAIL, {
+      idempotencyKey: `support-ticket-${ticket.id}`,
+      templateData: {
+        ticket_id: ticket.id,
+        category: ticket.category || '—',
+        subject: ticket.subject || 'Nytt supportärende',
+        from_name: fromName,
+        created_at: new Date(ticket.created_at).toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm' }),
+        message: ticket.message || '',
       },
     });
 
-    if (error) throw error;
-    console.log("Support notification enqueued");
+    console.log("Support notification sent");
 
     return new Response(JSON.stringify({ success: true, ...data }), {
       status: 200,

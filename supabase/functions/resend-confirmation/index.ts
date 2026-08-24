@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { enforceRateLimit, normalizeEmail, requestIp } from "../_shared/rate-limit.ts";
 import { findUserByEmail } from "../_shared/find-user.ts";
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -113,33 +114,34 @@ const handler = async (req: Request): Promise<Response> => {
     // 4) Skicka via Lovable Emails.
     const idempotencyKey = `resend-confirm-${user.id}-${Date.now()}`;
     const isEmployer = role === "employer";
-    const { data, error } = await supabaseAdmin.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: isEmployer ? "employer-account-confirmation" : "account-confirmation",
-        recipientEmail: normalizedEmail,
-        idempotencyKey,
-        templateData: isEmployer
-          ? {
-              first_name: firstName,
-              confirmation_url: confirmationUrl,
-              company_name: companyName,
-            }
-          : {
-              first_name: firstName,
-              confirmation_url: confirmationUrl,
-            },
-      },
-    });
-
-    if (error) {
-      console.error("send-transactional-email failed:", error);
+    let data;
+    try {
+      data = await sendLoggedTemplateEmail(
+        isEmployer ? "employer-account-confirmation" : "account-confirmation",
+        normalizedEmail,
+        {
+          idempotencyKey,
+          templateData: isEmployer
+            ? {
+                first_name: firstName,
+                confirmation_url: confirmationUrl,
+                company_name: companyName,
+              }
+            : {
+                first_name: firstName,
+                confirmation_url: confirmationUrl,
+              },
+        },
+      );
+    } catch (sendErr) {
+      console.error("resend confirmation email failed:", sendErr);
       return new Response(
-        JSON.stringify({ error: error.message || "send-transactional-email failed" }),
+        JSON.stringify({ error: "E-postutskicket misslyckades" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    console.log("Resend confirmation queued via Lovable Emails");
+    console.log("Resend confirmation sent via Lovable Emails");
     return new Response(
       JSON.stringify({ success: true, message: "Ny bekräftelselänk skickad!", data }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },

@@ -22,9 +22,7 @@ interface RecoveryEmailProps {
 
 export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
   <Html lang="sv" dir="ltr">
-    <Head>
-      <meta charSet="utf-8" />
-    </Head>
+    <Head />
     <Preview>Återställ ditt lösenord på Parium</Preview>
     <Body style={main}>
       <Container style={container}>
@@ -36,16 +34,15 @@ export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
           Vi fick en förfrågan om att återställa lösenordet till ditt Parium-konto.
           Klicka på knappen nedan för att välja ett nytt lösenord.
         </Text>
-        <Section style={{ textAlign: 'center' as const, margin: '32px 0 20px' }}>
+        <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
           <Button style={button} href={confirmationUrl}>Välj nytt lösenord</Button>
-          <Text style={smallText}>Länken gäller i 1 timme och kan användas en gång.</Text>
         </Section>
         <Text style={smallText}>
-          Fungerar inte knappen?{' '}
-          <Link href={confirmationUrl} style={link}>Klicka här för att återställa</Link>
+          Fungerar inte knappen? Kopiera länken:{' '}
+          <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
         </Text>
         <Text style={footer}>
-          Har du inte själv begärt en återställning? Klicka inte på länken. Ditt lösenord är fortfarande oförändrat, men någon kan ha försökt komma åt ditt konto. Kontakta oss direkt på support@parium.se så hjälper vi dig att säkra kontot.
+          Om du inte begärde en återställning kan du ignorera detta mail – ditt lösenord förblir oförändrat.
         </Text>
         <Text style={noReply}>
           Svara inte på detta mejl — det är skickat från en automatisk utgående adress.

@@ -19,6 +19,7 @@ interface ApplicationConfirmationRequest {
 }
 
 import { verifyCaller } from "../_shared/service-auth.ts";
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -85,28 +86,25 @@ const handler = async (req: Request): Promise<Response> => {
     // 3) Send via Lovable Emails (send-transactional-email)
     const idempotencyKey = `app-confirm-${application_id || applicant_email}-${job_title}`.slice(0, 200);
 
-    const { data, error } = await supabaseAdmin.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'application-confirmation',
-        recipientEmail: applicant_email,
+    let data;
+    try {
+      data = await sendLoggedTemplateEmail('application-confirmation', applicant_email, {
         idempotencyKey,
         templateData: {
           applicant_first_name,
           job_title,
           company_name,
         },
-      },
-    });
-
-    if (error) {
-      console.error("Failed to enqueue application confirmation:", error);
+      });
+    } catch (sendErr) {
+      console.error("Failed to send application confirmation:", sendErr);
       return new Response(
-        JSON.stringify({ error: error.message || 'send-transactional-email failed' }),
+        JSON.stringify({ error: 'E-postutskicket misslyckades' }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
-    console.log("Application confirmation enqueued", { queued: !!data });
+    console.log("Application confirmation sent", { sent: !!data });
 
     return new Response(JSON.stringify({ success: true, ...data }), {
       status: 200,

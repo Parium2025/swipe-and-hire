@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.39.3";
 import { requireServiceRole } from "../_shared/service-auth.ts";
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -79,23 +80,18 @@ const handler = async (req: Request): Promise<Response> => {
             : `${Math.ceil(hoursRemaining / 24)} dag(ar)`;
 
         try {
-          const { error: sendError } = await supabase.functions.invoke('send-transactional-email', {
-            body: {
-              templateName: 'job-expiration',
-              recipientEmail: email,
-              idempotencyKey: `job-expiration-${job.id}-${Math.floor(expiresDate.getTime() / (60 * 60 * 1000))}`,
-              templateData: {
-                first_name: firstName,
-                job_title: job.title,
-                time_text: timeText,
-              },
+          await sendLoggedTemplateEmail('job-expiration', email, {
+            idempotencyKey: `job-expiration-${job.id}-${Math.floor(expiresDate.getTime() / (60 * 60 * 1000))}`,
+            templateData: {
+              first_name: firstName,
+              job_title: job.title,
+              time_text: timeText,
             },
           });
-          if (sendError) throw sendError;
           emailsSent++;
-          console.log('Enqueued job expiration email', { jobId: job.id });
+          console.log('Sent job expiration email', { jobId: job.id });
         } catch (emailError) {
-          console.error('Failed to enqueue job expiration email', { jobId: job.id, error: emailError });
+          console.error('Failed to send job expiration email', { jobId: job.id, error: emailError });
         }
       }
     }
@@ -304,23 +300,18 @@ const handler = async (req: Request): Promise<Response> => {
               }
 
               if (candidateEmail) {
-                const { error: candidateMailError } = await supabase.functions.invoke('send-transactional-email', {
-                  body: {
-                    templateName: 'job-closed-candidate',
-                    recipientEmail: candidateEmail,
-                    idempotencyKey: `job-closed-candidate-${job.id}-${applicant.applicant_id}`,
-                    templateData: {
-                      first_name: candidateProfile?.first_name || 'där',
-                      job_title: job.title,
-                      company_name: companyName,
-                    },
+                await sendLoggedTemplateEmail('job-closed-candidate', candidateEmail, {
+                  idempotencyKey: `job-closed-candidate-${job.id}-${applicant.applicant_id}`,
+                  templateData: {
+                    first_name: candidateProfile?.first_name || 'där',
+                    job_title: job.title,
+                    company_name: companyName,
                   },
                 });
-                if (candidateMailError) throw candidateMailError;
               }
             }
           } catch (mailError) {
-            console.error('Failed to enqueue job-closed candidate email', { jobId: job.id, error: mailError });
+            console.error('Failed to send job-closed candidate email', { jobId: job.id, error: mailError });
           }
 
           autoCloseMessagesSent += 1;

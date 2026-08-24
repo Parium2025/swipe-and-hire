@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -81,16 +82,10 @@ const generateGoogleCalendarUrl = (
 const enqueueInvitation = async (
   recipientEmail: string, isEmployer: boolean, payload: Record<string, any>, idempotencyKey: string
 ) => {
-  const { data, error } = await supabaseAdmin.functions.invoke('send-transactional-email', {
-    body: {
-      templateName: 'interview-invitation',
-      recipientEmail,
-      idempotencyKey,
-      templateData: { ...payload, is_employer: isEmployer },
-    },
+  return await sendLoggedTemplateEmail('interview-invitation', recipientEmail, {
+    idempotencyKey,
+    templateData: { ...payload, is_employer: isEmployer },
   });
-  if (error) throw new Error(error.message || 'send-transactional-email failed');
-  return data;
 };
 
 const handler = async (req: Request): Promise<Response> => {
