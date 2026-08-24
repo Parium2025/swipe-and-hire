@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { EmojiReactionPicker } from '@/components/messages/EmojiReactionPicker';
+import { AttachmentImageViewer } from '@/components/messages/AttachmentImageViewer';
 import { getMessageSenderName } from '@/lib/conversationDisplayUtils';
 import { Briefcase, Check, CheckCheck, Paperclip, FileText, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
@@ -45,6 +46,7 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   const senderName = getMessageSenderName(message.sender_profile);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showImageViewer, setShowImageViewer] = useState(false);
   const lastTapRef = useRef(0);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -144,7 +146,12 @@ export function MessageBubble({
 
     if (isImage) {
       return (
-        <div className="mt-2 rounded-lg overflow-hidden max-w-[240px]">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setShowImageViewer(true); }}
+          className="mt-2 block rounded-lg overflow-hidden max-w-[240px] active:scale-[0.98] transition-transform"
+          aria-label="Öppna bilagan i helskärm"
+        >
           <img
             src={attachmentUrl}
             alt={message.attachment_name || 'Bild'}
@@ -157,7 +164,7 @@ export function MessageBubble({
               (e.target as HTMLImageElement).style.objectFit = '';
             }}
           />
-        </div>
+        </button>
       );
     }
 
@@ -337,6 +344,16 @@ export function MessageBubble({
         isOwn={isOwn}
         anchorRect={anchorRect}
       />
+
+      {/* Helskärmsvisare för bildbilagor — pinch, panorering och dubbeltryck */}
+      {attachmentUrl && (
+        <AttachmentImageViewer
+          open={showImageViewer}
+          onClose={() => setShowImageViewer(false)}
+          src={attachmentUrl}
+          fileName={message.attachment_name || undefined}
+        />
+      )}
     </>
   );
 }

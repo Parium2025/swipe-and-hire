@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
-import { Trash2, AlertTriangle } from 'lucide-react';
+import { Trash2, AlertTriangle, MailOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -14,12 +14,17 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 
 const DELETE_THRESHOLD = 80;
 const MAX_TRANSLATE = 100;
+const UNREAD_THRESHOLD = 80;
 
 interface SwipeableConversationItemProps {
   children: React.ReactNode;
   onDelete: () => void;
   isDeleting?: boolean;
   conversationName: string;
+  /** Dra åt höger för att markera konversationen som oläst igen. */
+  onMarkUnread?: () => void;
+  /** Döljer oläst-åtgärden när konversationen redan är oläst. */
+  canMarkUnread?: boolean;
 }
 
 export function SwipeableConversationItem({
@@ -27,6 +32,8 @@ export function SwipeableConversationItem({
   onDelete,
   isDeleting,
   conversationName,
+  onMarkUnread,
+  canMarkUnread = false,
 }: SwipeableConversationItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
@@ -68,39 +75,42 @@ export function SwipeableConversationItem({
 
     if (directionLockedRef.current === 'vertical') return;
 
-    // Only allow swiping LEFT (deltaX < 0) to reveal delete on the right
-    if (deltaX >= 0) {
-      if (isSwipingRef.current) {
-        setTranslateX(0);
-      }
+    // Vänster = ta bort. Höger = markera som oläst (bara när det är möjligt).
+    const swipingRight = deltaX > 0;
+    if (swipingRight && !(onMarkUnread && canMarkUnread)) {
+      if (isSwipingRef.current) setTranslateX(0);
       return;
     }
 
     isSwipingRef.current = true;
 
     const absDelta = Math.abs(deltaX);
+    const threshold = swipingRight ? UNREAD_THRESHOLD : DELETE_THRESHOLD;
     const clamped = Math.min(absDelta, MAX_TRANSLATE);
-    const dampened = clamped > DELETE_THRESHOLD
-      ? DELETE_THRESHOLD + (clamped - DELETE_THRESHOLD) * 0.3
+    const dampened = clamped > threshold
+      ? threshold + (clamped - threshold) * 0.3
       : clamped;
 
-    currentXRef.current = dampened;
-    setTranslateX(-dampened); // negative = slide left
-  }, []);
+    currentXRef.current = swipingRight ? dampened : -dampened;
+    setTranslateX(swipingRight ? dampened : -dampened);
+  }, [onMarkUnread, canMarkUnread]);
 
   const handleTouchEnd = useCallback(() => {
     if (!isSwipingRef.current) return;
 
-    if (currentXRef.current >= DELETE_THRESHOLD) {
-      resetPosition();
+    const offset = currentXRef.current;
+    resetPosition();
+
+    if (offset <= -DELETE_THRESHOLD) {
       setShowConfirm(true);
-    } else {
-      resetPosition();
+    } else if (offset >= UNREAD_THRESHOLD && onMarkUnread && canMarkUnread) {
+      onMarkUnread();
     }
 
+    currentXRef.current = 0;
     isSwipingRef.current = false;
     directionLockedRef.current = null;
-  }, [resetPosition]);
+  }, [resetPosition, onMarkUnread, canMarkUnread]);
 
   const handleConfirmDelete = useCallback(() => {
     setShowConfirm(false);
@@ -108,7 +118,9 @@ export function SwipeableConversationItem({
   }, [onDelete]);
 
   const deleteProgress = Math.min(Math.abs(translateX) / DELETE_THRESHOLD, 1);
-  const showDeleteButton = Math.abs(translateX) > 5;
+  const showDeleteButton = translateX < -5;
+  const unreadProgress = Math.min(Math.max(translateX, 0) / UNREAD_THRESHOLD, 1);
+  const showUnreadButton = translateX > 5 && !!onMarkUnread && canMarkUnread;
 
   return (
     <>
@@ -119,6 +131,36 @@ export function SwipeableConversationItem({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Markera som oläst — visas vid drag åt höger */}
+        {showUnreadButton && (
+          <div className="absolute inset-y-0 left-0 flex items-center z-0 pl-3">
+            <div
+              style={{
+                opacity: unreadProgress,
+                transform: `scale(${0.6 + unreadProgress * 0.4})`,
+              }}
+            >
+              <button
+                className={cn(
+                  "rounded-full flex items-center gap-1 px-3 py-2",
+                  "bg-blue-500/20 border border-blue-500/40",
+                  "text-white font-medium text-xs transition-all duration-150",
+                  unreadProgress >= 1 && "bg-blue-500/30 border-blue-500/50"
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetPosition();
+                  onMarkUnread?.();
+                }}
+                tabIndex={-1}
+              >
+                <MailOpen className="h-3.5 w-3.5 text-white" />
+                <span>Oläst</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Delete button on the RIGHT side */}
         {showDeleteButton && (
           <div className="absolute inset-y-0 right-0 flex items-center z-0 pr-3">
