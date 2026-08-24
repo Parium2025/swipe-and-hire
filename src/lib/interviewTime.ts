@@ -15,6 +15,13 @@ export const formatInterviewTime = (dateStr: string): string => {
   return format(date, 'HH:mm');
 };
 
+/** Calendar-day difference (not elapsed 24h blocks) so "Imorgon" always means tomorrow. */
+const calendarDayDiff = (from: Date, to: Date): number => {
+  const a = new Date(from.getFullYear(), from.getMonth(), from.getDate()).getTime();
+  const b = new Date(to.getFullYear(), to.getMonth(), to.getDate()).getTime();
+  return Math.round((b - a) / 86_400_000);
+};
+
 /** Relative label. Recomputed on every minute tick by the cards. */
 export const getTimeUntil = (scheduledAt: string, now: number = Date.now()): string => {
   const scheduled = new Date(scheduledAt).getTime();
@@ -24,15 +31,16 @@ export const getTimeUntil = (scheduledAt: string, now: number = Date.now()): str
 
   const diffMins = Math.floor(diffMs / 60_000);
   const diffHours = Math.floor(diffMs / 3_600_000);
-  const diffDays = Math.floor(diffMs / 86_400_000);
+  const dayDiff = calendarDayDiff(new Date(now), new Date(scheduled));
 
   if (diffMins < 1) return 'Strax';
   if (diffMins < 60) return `Om ${diffMins} min`;
-  if (diffHours < 24) return `Om ${diffHours} tim`;
-  if (diffDays === 1) return 'Imorgon';
-  if (diffDays < 7) return `Om ${diffDays} dagar`;
+  if (diffHours < 24 && dayDiff === 0) return `Om ${diffHours} tim`;
+  if (dayDiff === 1) return 'Imorgon';
+  if (dayDiff > 1 && dayDiff < 7) return `Om ${dayDiff} dagar`;
   return formatInterviewDate(scheduledAt);
 };
+
 
 export const isInterviewUrgent = (scheduledAt: string, now: number = Date.now()): boolean => {
   const scheduled = new Date(scheduledAt).getTime();

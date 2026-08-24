@@ -3,6 +3,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useWeather } from '@/hooks/useWeather';
 import { useGreeting } from '@/hooks/useGreeting';
+import { useMinuteTick } from '@/hooks/useMinuteTick';
+
 import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
@@ -27,23 +29,18 @@ const formatDateTime = (): { time: string; date: string } => {
 
 
 const DateTimeDisplay = memo(() => {
-  const [dateTime, setDateTime] = useState(() => formatDateTime());
-  
-  useEffect(() => {
-    // Update every 10 seconds for responsive time display
-    const interval = setInterval(() => {
-      setDateTime(formatDateTime());
-    }, 10000);
-    
-    return () => clearInterval(interval);
-  }, []);
-  
+  // Delad minuttick: synkad mot hel minut, pausar när fliken är dold och
+  // uppdaterar direkt när man kommer tillbaka (ingen 10s-timer i bakgrunden).
+  const tick = useMinuteTick();
+  const dateTime = useMemo(() => formatDateTime(), [tick]);
+
   return (
     <p className="text-sm text-white font-medium mt-1">
       {dateTime.date} · {dateTime.time}
     </p>
   );
 });
+
 
 DateTimeDisplay.displayName = 'DateTimeDisplay';
 

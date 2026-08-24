@@ -12,22 +12,28 @@ export const useMinuteTick = (enabled = true): number => {
   useEffect(() => {
     if (!enabled) return;
 
+    let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const clearTimers = () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      // Viktigt: en väntande minutsynk får inte starta ett intervall
+      // efter att fliken dolts – då tickar kortet i bakgrunden.
+      if (syncTimeout) {
+        clearTimeout(syncTimeout);
+        syncTimeout = null;
+      }
     };
-
-    let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const start = () => {
       clearTimers();
-      if (syncTimeout) clearTimeout(syncTimeout);
       const now = new Date();
       const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
       setTick(Date.now());
       syncTimeout = setTimeout(() => {
+        syncTimeout = null;
         setTick(Date.now());
         intervalRef.current = setInterval(() => setTick(Date.now()), 60_000);
       }, msUntilNextMinute);
@@ -42,11 +48,11 @@ export const useMinuteTick = (enabled = true): number => {
     document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
-      if (syncTimeout) clearTimeout(syncTimeout);
       clearTimers();
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [enabled]);
+
 
   return tick;
 };

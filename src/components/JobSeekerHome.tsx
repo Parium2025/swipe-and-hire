@@ -2,6 +2,8 @@ import { memo, useMemo, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWeather } from '@/hooks/useWeather';
 import { useGreeting } from '@/hooks/useGreeting';
+import { useMinuteTick } from '@/hooks/useMinuteTick';
+
 import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
@@ -21,22 +23,17 @@ const formatDateTime = (): { time: string; date: string } => {
 };
 
 const DateTimeDisplay = memo(() => {
-  const [dateTime, setDateTime] = useState(() => formatDateTime());
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDateTime(formatDateTime());
-    }, 10000);
-    
-    return () => clearInterval(interval);
-  }, []);
-  
+  // Delad minuttick i stället för 10s-timer: synkad, pausad när fliken är dold.
+  const tick = useMinuteTick();
+  const dateTime = useMemo(() => formatDateTime(), [tick]);
+
   return (
     <p className="text-sm text-white font-medium mt-1">
       {dateTime.date} · {dateTime.time}
     </p>
   );
 });
+
 
 DateTimeDisplay.displayName = 'DateTimeDisplay';
 
