@@ -140,7 +140,7 @@ function NotificationItem({
           if (canExpand) setExpanded(v => !v);
         }
       }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-none cursor-pointer ${
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-xl cursor-pointer ${
         notification.is_read 
           ? 'opacity-60 hover:bg-white/5' 
           : 'hover:bg-white/10 bg-white/5'
@@ -234,7 +234,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-none cursor-pointer ${
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-xl cursor-pointer ${
         item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
       }`}
     >
@@ -467,14 +467,14 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
           </div>
 
           {/* Notification list */}
-          <div className="overflow-y-auto flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="overflow-y-auto flex-1 p-3" style={{ WebkitOverflowScrolling: 'touch' }}>
             {merged.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-white">
                 <Bell className="h-8 w-8 mb-3 opacity-60" />
                 <p className="text-sm">Inga notifikationer</p>
               </div>
             ) : (
-              <div className="divide-y divide-white/10">
+              <div className="space-y-2">
                 {merged.map(entry => entry.kind === 'server' ? (
                   <NotificationItem
                     key={`s-${entry.n.id}`}
