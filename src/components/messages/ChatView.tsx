@@ -222,8 +222,22 @@ export function ChatView({
           top: viewport.scrollHeight,
           behavior: isInitialLoad ? 'auto' : 'smooth',
         });
+        // Bilder/bubblor kan ändra höjd efter första målningen — pinna om
+        // så att man alltid landar på det senaste meddelandet.
+        if (isInitialLoad) {
+          const pin = () => {
+            const el = getViewportEl();
+            if (el) el.scrollTop = el.scrollHeight;
+          };
+          requestAnimationFrame(pin);
+          const t1 = setTimeout(pin, 80);
+          const t2 = setTimeout(pin, 250);
+          const t3 = setTimeout(pin, 600);
+          initialPinTimers.current = [t1, t2, t3];
+        }
       }
     }
+
 
     prevMessageCountRef.current = messages.length;
     prevFirstMessageIdRef.current = firstMessageId;
