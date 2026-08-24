@@ -360,14 +360,18 @@ serve(async (req) => {
         const perCriterionFeedback = feedbackByCriterion.get(c.id) || '';
         const normTitle = normalizeForHash(c.title);
         const normPrompt = normalizeForHash(c.prompt);
+        // Aliaslexikonet påverkar bedömningen → in i hashen, men bara de grupper
+        // som just DETTA kriterium triggar (syskonkriterier ska inte invalidera).
+        const aliasSig = aliasSignature([c?.title, c?.prompt].filter(Boolean));
         return {
           ...c,
           _criterion_hash: await sha256(
-            `${PROMPT_VERSION}||${normTitle}||${normPrompt}||${perCriterionFeedback}`
+            `${PROMPT_VERSION}||${normTitle}||${normPrompt}||${perCriterionFeedback}||${aliasSig}`
           ),
         };
       })
     );
+
 
     const criterionHashes = Array.from(new Set(criteriaWithHashes.map(c => c._criterion_hash)));
     const { data: cachedRows } = await supabase
