@@ -207,7 +207,7 @@ export function ChatView({
     const viewport = getViewportEl();
     if (!viewport) return;
 
-    if (messages.length === 0) {
+    if (messages.length === 0 && !isLoading) {
       setIsInitialScrollReady(true);
       return;
     }
@@ -239,7 +239,7 @@ export function ChatView({
     prevFirstMessageIdRef.current = firstMessageId;
     prevScrollHeightRef.current = viewport.scrollHeight;
     if (!isInitialScrollReady) setIsInitialScrollReady(true);
-  }, [messages, currentUserId, getViewportEl, isInitialScrollReady]);
+  }, [messages, currentUserId, getViewportEl, isInitialScrollReady, isLoading]);
 
   // Scroll to bottom when typing indicator appears
   useEffect(() => {
