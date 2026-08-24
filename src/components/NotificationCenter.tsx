@@ -470,7 +470,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
           <div className="overflow-y-auto flex-1 p-3" style={{ WebkitOverflowScrolling: 'touch' }}>
             {merged.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-white">
-                <Bell className="h-8 w-8 mb-3 opacity-60" />
+                <Bell className="h-8 w-8 mb-3 text-white" />
                 <p className="text-sm">Inga notifikationer</p>
               </div>
             ) : (
