@@ -94,12 +94,13 @@ export function CriteriaEvalProgress() {
 function pauseText(reason: string | null): string {
   switch (reason) {
     case 'credits_exhausted':
-      return 'AI-krediterna tog slut. Fyll på så återupptas granskningen automatiskt.';
+      return 'AI-granskningen tar en kort paus och fortsätter automatiskt om en liten stund.';
     case 'blocked':
-      return 'AI-tjänsten är blockerad för kontot. Kontakta support.';
+      return 'AI-granskningen är tillfälligt otillgänglig. Vi är på det — försök gärna igen senare.';
     case 'rate_limited':
-      return 'För många förfrågningar just nu — vi fortsätter automatiskt om en stund.';
+      return 'Hög belastning just nu — granskningen fortsätter automatiskt om en stund.';
     default:
       return 'Granskningen pausades och återupptas automatiskt.';
+
   }
 }
