@@ -96,6 +96,7 @@ export function ChatView({
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [isInitialScrollReady, setIsInitialScrollReady] = useState(false);
   // Edit state
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editOriginalContent, setEditOriginalContent] = useState('');
@@ -206,6 +207,11 @@ export function ChatView({
     const viewport = getViewportEl();
     if (!viewport) return;
 
+    if (messages.length === 0) {
+      setIsInitialScrollReady(true);
+      return;
+    }
+
     const isInitialLoad = prevMessageCountRef.current === 0 && messages.length > 0;
     const firstMessageId = messages[0]?.id || null;
     const wasOlderMessagesPrepended = prevFirstMessageIdRef.current !== null
@@ -232,7 +238,8 @@ export function ChatView({
     prevMessageCountRef.current = messages.length;
     prevFirstMessageIdRef.current = firstMessageId;
     prevScrollHeightRef.current = viewport.scrollHeight;
-  }, [messages, currentUserId, getViewportEl]);
+    if (!isInitialScrollReady) setIsInitialScrollReady(true);
+  }, [messages, currentUserId, getViewportEl, isInitialScrollReady]);
 
   // Scroll to bottom when typing indicator appears
   useEffect(() => {
@@ -841,7 +848,14 @@ export function ChatView({
       </AnimatePresence>
 
       {/* Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4" onScrollCapture={handleScroll}>
+      <ScrollArea
+        ref={scrollAreaRef}
+        className={cn(
+          "flex-1 p-4 no-chrome-pad",
+          messages.length > 0 && !isInitialScrollReady && "opacity-0"
+        )}
+        onScrollCapture={handleScroll}
+      >
         {isLoading ? (
           <div className="space-y-4 p-4">
             {Array.from({ length: 6 }).map((_, i) => (
