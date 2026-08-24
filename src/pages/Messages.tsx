@@ -392,7 +392,7 @@ export default function Messages() {
                             category={categorizeConversation(conv)}
                           />
                         </SwipeableConversationItem>
-                        {!isLast && <div aria-hidden="true" className="mx-3 h-px bg-white/10" />}
+                        {!isLast && <div aria-hidden="true" className="mx-3 h-px bg-white/20" />}
                       </div>
                     );
                   })}
