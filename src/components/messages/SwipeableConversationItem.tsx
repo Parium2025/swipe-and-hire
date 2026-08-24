@@ -75,39 +75,42 @@ export function SwipeableConversationItem({
 
     if (directionLockedRef.current === 'vertical') return;
 
-    // Only allow swiping LEFT (deltaX < 0) to reveal delete on the right
-    if (deltaX >= 0) {
-      if (isSwipingRef.current) {
-        setTranslateX(0);
-      }
+    // Vänster = ta bort. Höger = markera som oläst (bara när det är möjligt).
+    const swipingRight = deltaX > 0;
+    if (swipingRight && !(onMarkUnread && canMarkUnread)) {
+      if (isSwipingRef.current) setTranslateX(0);
       return;
     }
 
     isSwipingRef.current = true;
 
     const absDelta = Math.abs(deltaX);
+    const threshold = swipingRight ? UNREAD_THRESHOLD : DELETE_THRESHOLD;
     const clamped = Math.min(absDelta, MAX_TRANSLATE);
-    const dampened = clamped > DELETE_THRESHOLD
-      ? DELETE_THRESHOLD + (clamped - DELETE_THRESHOLD) * 0.3
+    const dampened = clamped > threshold
+      ? threshold + (clamped - threshold) * 0.3
       : clamped;
 
-    currentXRef.current = dampened;
-    setTranslateX(-dampened); // negative = slide left
-  }, []);
+    currentXRef.current = swipingRight ? dampened : -dampened;
+    setTranslateX(swipingRight ? dampened : -dampened);
+  }, [onMarkUnread, canMarkUnread]);
 
   const handleTouchEnd = useCallback(() => {
     if (!isSwipingRef.current) return;
 
-    if (currentXRef.current >= DELETE_THRESHOLD) {
-      resetPosition();
+    const offset = currentXRef.current;
+    resetPosition();
+
+    if (offset <= -DELETE_THRESHOLD) {
       setShowConfirm(true);
-    } else {
-      resetPosition();
+    } else if (offset >= UNREAD_THRESHOLD && onMarkUnread && canMarkUnread) {
+      onMarkUnread();
     }
 
+    currentXRef.current = 0;
     isSwipingRef.current = false;
     directionLockedRef.current = null;
-  }, [resetPosition]);
+  }, [resetPosition, onMarkUnread, canMarkUnread]);
 
   const handleConfirmDelete = useCallback(() => {
     setShowConfirm(false);
