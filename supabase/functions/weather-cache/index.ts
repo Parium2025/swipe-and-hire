@@ -8,8 +8,14 @@ const weatherCache = new Map<string, { data: unknown; timestamp: number }>();
 const cityCache = new Map<string, { city: string; timestamp: number }>();
 
 const WEATHER_TTL = 15 * 60 * 1000; // 15 minutes
+const WEATHER_FALLBACK_TTL = 60 * 1000; // 1 min — never poison the grid with a neutral 0°
 const CITY_TTL = 60 * 60 * 1000;    // 1 hour (cities don't move)
+const CITY_EMPTY_TTL = 5 * 60 * 1000; // retry unknown city sooner
+const MAX_CACHE_ENTRIES = 10000;
 const OPEN_METEO_TIMEOUT_MS = 4500;
+// Nominatim's usage policy requires an identifying User-Agent; without it
+// requests are rate limited/403:ed at volume.
+const GEO_HEADERS = { 'User-Agent': 'Parium/1.0 (https://parium.se)' };
 
 const fallbackWeather = (lat: number, lon: number) => ({
   latitude: lat,
