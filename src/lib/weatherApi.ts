@@ -96,49 +96,10 @@ export const setCachedWeather = (weather: Omit<CachedWeather, 'timestamp'>) => {
   } catch { /* Silent fail */ }
 };
 
-// ─── Manuell plats ───────────────────────────────────────
-// När webbläsaren bara kan gissa via IP (vanligt på stationära datorer utan
-// wifi-positionering) hamnar man i operatörens stad. Då får användaren välja
-// sin plats själv, och det valet vinner alltid över automatisk positionering.
-
-const MANUAL_LOCATION_KEY = 'parium_weather_manual_location';
-
-export interface ManualLocation {
-  lat: number;
-  lon: number;
-  city: string;
-}
-
-export const getManualLocation = (): ManualLocation | null => {
-  try {
-    const raw = localStorage.getItem(MANUAL_LOCATION_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (
-      !data ||
-      typeof data.lat !== 'number' ||
-      typeof data.lon !== 'number' ||
-      !Number.isFinite(data.lat) ||
-      !Number.isFinite(data.lon) ||
-      typeof data.city !== 'string'
-    ) {
-      localStorage.removeItem(MANUAL_LOCATION_KEY);
-      return null;
-    }
-    return data as ManualLocation;
-  } catch {
-    return null;
-  }
-};
-
-export const setManualLocation = (location: ManualLocation | null) => {
-  try {
-    if (location) localStorage.setItem(MANUAL_LOCATION_KEY, JSON.stringify(location));
-    else localStorage.removeItem(MANUAL_LOCATION_KEY);
-  } catch { /* Silent fail */ }
-  clearWeatherCache();
-  window.dispatchEvent(new CustomEvent('parium:weather-location-changed'));
-};
+// ─── Rensning av äldre lagring ───────────────────────────
+// Legacy: a manual city override used to be stored here. Removed — positioning
+// is fully automatic. Clean up any leftover value from older sessions.
+try { localStorage.removeItem('parium_weather_manual_location'); } catch { /* ignore */ }
 
 export const clearWeatherCache = () => {
   try {

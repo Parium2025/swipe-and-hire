@@ -5,7 +5,6 @@ import { useGreeting } from '@/hooks/useGreeting';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 
 import { hasConfirmedWeather } from '@/lib/weatherApi';
-import { WeatherLocationDialog } from '@/components/WeatherLocationDialog';
 import { formatLocalDateTime } from '@/lib/localTime';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
@@ -41,7 +40,6 @@ const JobSeekerHome = memo(() => {
   const firstName = profile?.first_name || 'du';
   
   const { text: greetingText, isEvening, isDaytime } = useGreeting();
-  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   
   // Fetch weather independently of GPS permission. If GPS is denied, useWeather
   // still falls back to IP/server/profile city; blocking the hook here makes the
@@ -126,15 +124,7 @@ const JobSeekerHome = memo(() => {
             >
               {hasConfirmedWeather(weather) ? (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => setLocationDialogOpen(true)}
-                    className="underline decoration-white/30 underline-offset-4 transition-colors hover:decoration-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded-sm"
-                    title="Fel stad? Klicka för att välja plats"
-                  >
-                    {weather.city}
-                  </button>
-                  , {weather.temperature}°
+                  {weather.city}, {weather.temperature}°
                   {weather.feelsLike !== weather.temperature && (
                     <span className="text-white"> (känns som {weather.feelsLike}°)</span>
                   )}
@@ -144,11 +134,6 @@ const JobSeekerHome = memo(() => {
               {weather.description} <span className="text-xl">{displayEmoji}</span>
             </motion.p>
           ) : null}
-          <WeatherLocationDialog
-            open={locationDialogOpen}
-            onOpenChange={setLocationDialogOpen}
-            currentCity={weather.city}
-          />
         </motion.div>
 
         {/* Dashboard Grid */}
