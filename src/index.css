@@ -2030,7 +2030,10 @@ All colors MUST be HSL.
 @media (max-width: 767px) {
   .messages-container {
     padding-inline: 0;
+    /* Går hela vägen ner till färgremsan — inget tomt fält under chatten. */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
   }
+
 }
 
 /* ============================================
