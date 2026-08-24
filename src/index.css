@@ -2332,3 +2332,10 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   0%, 100% { opacity: 0.72; transform: scale(0.94); }
   50% { opacity: 1; transform: scale(1.04); }
 }
+
+/* PageLoader — obestämd (indeterminate) laddningslinje utan fejkad procent */
+@keyframes parium-indeterminate {
+  0% { transform: translateX(-60%) scaleX(0.35); }
+  50% { transform: translateX(30%) scaleX(0.6); }
+  100% { transform: translateX(160%) scaleX(0.35); }
+}

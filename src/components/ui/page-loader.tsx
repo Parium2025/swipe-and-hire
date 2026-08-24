@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import logoRings from '@/assets/parium-logo-rings.png?inline';
 
 /**
@@ -22,8 +22,6 @@ export const PageLoader = ({
   showProgress?: boolean;
 }) => {
   const [visible, setVisible] = useState(delayMs === 0);
-  const [progress, setProgress] = useState(0);
-  const startedAt = useRef<number | null>(null);
 
   useEffect(() => {
     if (delayMs === 0) return;
@@ -31,21 +29,6 @@ export const PageLoader = ({
     return () => window.clearTimeout(t);
   }, [delayMs]);
 
-  // Mjuk, avtagande progress som närmar sig 96 % men aldrig "ljuger" om 100 %.
-  useEffect(() => {
-    if (!visible || !showProgress) return;
-    let raf = 0;
-    const tick = (now: number) => {
-      if (startedAt.current === null) startedAt.current = now;
-      const elapsed = (now - startedAt.current) / 1000;
-      // Exponentiell mättnad: snabb start, lugnt slut
-      const value = 96 * (1 - Math.exp(-elapsed / 1.6));
-      setProgress(value);
-      raf = window.requestAnimationFrame(tick);
-    };
-    raf = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(raf);
-  }, [visible, showProgress]);
 
   return (
     <div
@@ -93,18 +76,14 @@ export const PageLoader = ({
         </div>
 
         {showProgress && (
-          <div className="flex w-40 flex-col items-center gap-2">
-            <div className="h-[3px] w-full overflow-hidden rounded-full bg-primary-foreground/15">
-              <div
-                className="h-full rounded-full bg-primary-foreground/80 transition-[width] duration-300 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <span className="text-xs font-medium tabular-nums text-primary-foreground/70">
-              {Math.round(progress)} %
-            </span>
+          <div className="h-[3px] w-40 overflow-hidden rounded-full bg-primary-foreground/15" aria-hidden="true">
+            <div
+              className="h-full w-full origin-left rounded-full bg-primary-foreground/80 motion-reduce:animate-none"
+              style={{ animation: 'parium-indeterminate 1.9s cubic-bezier(0.45, 0, 0.55, 1) infinite' }}
+            />
           </div>
         )}
+
 
         <p className="text-sm font-medium text-primary-foreground/90">{label}</p>
       </div>
