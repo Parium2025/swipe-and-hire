@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import logoRings from '@/assets/parium-logo-rings.png?inline';
 
 /**
