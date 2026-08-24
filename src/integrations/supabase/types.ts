@@ -1964,6 +1964,24 @@ export type Database = {
           },
         ]
       }
+      job_run_locks: {
+        Row: {
+          key: string
+          locked_until: string
+          updated_at: string
+        }
+        Insert: {
+          key: string
+          locked_until: string
+          updated_at?: string
+        }
+        Update: {
+          key?: string
+          locked_until?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_stage_settings: {
         Row: {
           color: string | null
@@ -3743,10 +3761,6 @@ export type Database = {
         Args: { _body: string; _metadata?: Json; _title: string }
         Returns: string
       }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
       delete_note_activities_for_applicant: {
         Args: { p_applicant_id: string }
         Returns: undefined
@@ -3760,15 +3774,10 @@ export type Database = {
         }
         Returns: undefined
       }
-      email_queue_dispatch: { Args: never; Returns: undefined }
       employer_owns_job: { Args: { p_job_id: string }; Returns: boolean }
       employer_owns_job_for_question: {
         Args: { p_job_id: string }
         Returns: boolean
-      }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
       }
       ensure_default_candidate_list: {
         Args: { p_owner_id: string }
@@ -4131,15 +4140,6 @@ export type Database = {
           source: string
         }[]
       }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       normalize_job_text: { Args: { t: string }; Returns: string }
       parium_norm: { Args: { t: string }; Returns: string }
       parium_synonyms: { Args: { _tok: string }; Returns: string[] }
@@ -4166,14 +4166,6 @@ export type Database = {
           p_priority?: number
         }
         Returns: string
-      }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
       }
       record_app_exception: {
         Args: {
@@ -4223,6 +4215,7 @@ export type Database = {
         Args: { p_run_id: string }
         Returns: undefined
       }
+      release_job_lock: { Args: { _key: string }; Returns: undefined }
       remove_session: { Args: { p_session_token: string }; Returns: undefined }
       render_outreach_template: {
         Args: { p_data?: Json; p_template: string }
@@ -4416,6 +4409,10 @@ export type Database = {
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
       trigger_inactive_account_retention: { Args: never; Returns: undefined }
       trigger_news_health_watchdog: { Args: never; Returns: undefined }
+      try_claim_job_lock: {
+        Args: { _key: string; _ttl_seconds: number }
+        Returns: boolean
+      }
       try_uuid: { Args: { p_text: string }; Returns: string }
       unaccent: { Args: { "": string }; Returns: string }
       verify_cron_secret: {

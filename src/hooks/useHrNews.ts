@@ -1,6 +1,5 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useEffect } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 
 export interface HrNewsItem {
@@ -87,6 +86,23 @@ function hasStaleVisibleNews(items: HrNewsItem[] | null | undefined): boolean {
   return newest === 0 || Date.now() - newest > STALE_ARTICLE_AGE_MS;
 }
 
+// Per-enhet cooldown: en enskild klient får aldrig be backend om en ny körning
+// oftare än så här. Skyddar mot att miljoner flikar triggar samma jobb samtidigt
+// (backend har dessutom ett eget körningslås).
+const REFRESH_COOLDOWN_MS = 30 * 60 * 1000;
+const REFRESH_KEY = 'parium_hr_news_last_refresh';
+
+function mayRequestRefresh(): boolean {
+  try {
+    const last = Number(localStorage.getItem(REFRESH_KEY) ?? 0);
+    if (Number.isFinite(last) && Date.now() - last < REFRESH_COOLDOWN_MS) return false;
+    safeSetItem(REFRESH_KEY, String(Date.now()));
+  } catch {
+    /* storage unavailable — allow the call */
+  }
+  return true;
+}
+
 /**
  * BULLETPROOF NEWS FETCHER
  *
@@ -110,9 +126,9 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
   if (allNews && allNews.length > 0) {
     writeCache(allNews);
 
-    if (hasStaleVisibleNews(allNews)) {
+    if (hasStaleVisibleNews(allNews) && mayRequestRefresh()) {
       void supabase.functions
-        .invoke('fetch-hr-news', { body: { force: true } })
+        .invoke('fetch-hr-news', { body: {} })
         .catch(() => { /* background refresh, never blocks the UI */ });
     }
 
@@ -121,7 +137,10 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
 
   // Truly empty: try once to have the backend populate the feed
   try {
-    await supabase.functions.invoke('fetch-hr-news', { body: { force: true } });
+    if (mayRequestRefresh()) {
+      await supabase.functions.invoke('fetch-hr-news', { body: {} });
+    }
+
 
     const { data: refreshedNews } = await supabase
       .from('daily_hr_news')
@@ -142,29 +161,10 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
 };
 
 export const useHrNews = () => {
-  const queryClient = useQueryClient();
+  // Ingen realtidskanal här: flödet uppdateras bara 4 ggr/dygn av cron, och en
+  // öppen realtidsprenumeration per besökare skalar dåligt vid miljontals
+  // användare. staleTime är synkad mot cron-slotarna + refetch vid fokus.
 
-  // Real-time subscription for instant updates when new articles are added
-  useEffect(() => {
-    const channel = supabase
-      .channel('hr-news-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'daily_hr_news',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['hr-news'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
 
   return useQuery({
     queryKey: ['hr-news'],

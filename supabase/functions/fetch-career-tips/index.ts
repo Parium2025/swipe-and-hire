@@ -703,6 +703,20 @@ serve(async (req) => {
         });
     }
 
+    // Single-flight: endast en körning åt gången även om tusentals klienter
+    // ber om uppdatering samtidigt.
+    const { data: gotLock } = await supabase.rpc('try_claim_job_lock', {
+      _key: 'fetch-career-tips',
+      _ttl_seconds: 600,
+    });
+    if (gotLock !== true) {
+      console.log('Another fetch-career-tips run is already in progress — skipping');
+      return new Response(JSON.stringify({ message: 'Run already in progress', skipped: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+
     console.log('Fetching career tips with retry logic...');
 
     // ===== STEP 1: Get current state =====

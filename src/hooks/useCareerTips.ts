@@ -1,7 +1,6 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
-import { useEffect } from 'react';
 
 export interface CareerTipItem {
   id: string;
@@ -92,6 +91,21 @@ function hasStaleVisibleTips(items: CareerTipItem[] | null | undefined): boolean
   return newest === 0 || Date.now() - newest > STALE_TIP_AGE_MS;
 }
 
+// Per-enhet cooldown mot att många klienter triggar samma bakgrundsjobb.
+const REFRESH_COOLDOWN_MS = 30 * 60 * 1000;
+const REFRESH_KEY = 'parium_career_tips_last_refresh';
+
+function mayRequestRefresh(): boolean {
+  try {
+    const last = Number(localStorage.getItem(REFRESH_KEY) ?? 0);
+    if (Number.isFinite(last) && Date.now() - last < REFRESH_COOLDOWN_MS) return false;
+    safeSetItem(REFRESH_KEY, String(Date.now()));
+  } catch {
+    /* storage unavailable — allow the call */
+  }
+  return true;
+}
+
 /**
  * BULLETPROOF CAREER TIPS FETCHER
  *
@@ -114,9 +128,9 @@ const fetchRecentCareerTips = async (): Promise<CareerTipItem[]> => {
   if (allTips && allTips.length > 0) {
     writeCache(allTips);
 
-    if (hasStaleVisibleTips(allTips)) {
+    if (hasStaleVisibleTips(allTips) && mayRequestRefresh()) {
       void supabase.functions
-        .invoke('fetch-career-tips', { body: { force: true } })
+        .invoke('fetch-career-tips', { body: {} })
         .catch(() => { /* background refresh, never blocks the UI */ });
     }
 
@@ -124,7 +138,10 @@ const fetchRecentCareerTips = async (): Promise<CareerTipItem[]> => {
   }
 
   try {
-    await supabase.functions.invoke('fetch-career-tips', { body: { force: true } });
+    if (mayRequestRefresh()) {
+      await supabase.functions.invoke('fetch-career-tips', { body: {} });
+    }
+
 
     const { data: refreshedTips } = await supabase
       .from('daily_career_tips')
@@ -144,29 +161,9 @@ const fetchRecentCareerTips = async (): Promise<CareerTipItem[]> => {
 };
 
 export const useCareerTips = () => {
-  const queryClient = useQueryClient();
+  // Ingen realtidskanal: innehållet byts bara 4 ggr/dygn av cron. staleTime är
+  // synkad mot cron-slotarna, vilket skalar utan en öppen socket per besökare.
 
-  // Real-time subscription for instant updates when new tips are added
-  useEffect(() => {
-    const channel = supabase
-      .channel('career-tips-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'daily_career_tips',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['career-tips'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
 
   return useQuery({
     queryKey: ['career-tips'],
