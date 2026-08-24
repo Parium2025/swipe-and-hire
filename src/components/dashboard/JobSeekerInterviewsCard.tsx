@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,40 +6,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Video, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
-import { format, isToday, isTomorrow } from 'date-fns';
-import { sv } from 'date-fns/locale';
+import { useMinuteTick } from '@/hooks/useMinuteTick';
+import {
+  formatInterviewDate,
+  formatInterviewTime,
+  getTimeUntil,
+  isInterviewUrgent,
+  isInterviewOver,
+  getMeetingUrl,
+} from '@/lib/interviewTime';
 import { GRADIENTS } from './dashboardConstants';
 
 type LocationType = 'video' | 'office';
-
-const formatInterviewDate = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  if (isToday(date)) return 'Idag';
-  if (isTomorrow(date)) return 'Imorgon';
-  return format(date, 'd MMM', { locale: sv });
-};
-
-const formatInterviewTime = (dateStr: string): string => {
-  return format(new Date(dateStr), 'HH:mm');
-};
-
-const getTimeUntil = (scheduledAt: string): string => {
-  const now = new Date();
-  const scheduled = new Date(scheduledAt);
-  const diffMs = scheduled.getTime() - now.getTime();
-  
-  if (diffMs < 0) return 'Pågår/passerad';
-  
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
-  if (diffMins < 60) return `Om ${diffMins} min`;
-  if (diffHours < 24) return `Om ${diffHours} tim`;
-  if (diffDays === 1) return 'Imorgon';
-  if (diffDays < 7) return `Om ${diffDays} dagar`;
-  return formatInterviewDate(scheduledAt);
-};
 
 const getLocationIcon = (type: LocationType) => {
   switch (type) {
@@ -60,9 +38,14 @@ const getLocationLabel = (type: LocationType) => {
 export const JobSeekerInterviewsCard = memo(() => {
   const { interviews, isLoading } = useCandidateInterviews();
   const navigate = useNavigate();
-  
-  const upcomingInterviews = interviews.slice(0, 5);
-  const hasMore = interviews.length > 5;
+  const now = useMinuteTick();
+
+  const liveInterviews = useMemo(
+    () => (interviews as any[]).filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
+    [interviews, now],
+  );
+  const upcomingInterviews = liveInterviews.slice(0, 5);
+  const hasMore = liveInterviews.length > 5;
 
   if (isLoading) {
     return (
@@ -114,8 +97,9 @@ export const JobSeekerInterviewsCard = memo(() => {
             <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
               {upcomingInterviews.map((interview: any) => {
                 const LocationIcon = getLocationIcon(interview.location_type);
-                const timeUntil = getTimeUntil(interview.scheduled_at);
-                const isUrgent = timeUntil.includes('min') || timeUntil.includes('tim');
+                const timeUntil = getTimeUntil(interview.scheduled_at, now);
+                const isUrgent = isInterviewUrgent(interview.scheduled_at, now);
+                const meetingUrl = getMeetingUrl(interview.location_details);
                 
                 const companyName = interview.job_postings?.workplace_name?.trim() || 'Okänt företag';
                 
@@ -126,8 +110,8 @@ export const JobSeekerInterviewsCard = memo(() => {
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
                     onClick={() => {
-                      if (interview.location_type === 'video' && interview.location_details) {
-                        window.open(interview.location_details, '_blank', 'noopener');
+                      if (interview.location_type === 'video' && meetingUrl) {
+                        window.open(meetingUrl, '_blank', 'noopener,noreferrer');
                       } else {
                         navigate('/my-applications');
                       }
@@ -169,9 +153,9 @@ export const JobSeekerInterviewsCard = memo(() => {
         {hasMore && (
           <button
             onClick={() => navigate('/my-applications')}
-            className="text-[10px] text-white/80 hover:text-white underline underline-offset-2 mt-1 text-center"
+            className="text-[10px] text-white hover:text-white underline underline-offset-2 mt-1 text-center"
           >
-            Se alla ({interviews.length})
+            Se alla ({liveInterviews.length})
           </button>
         )}
       </CardContent>
