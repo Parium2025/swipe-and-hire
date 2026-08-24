@@ -516,7 +516,11 @@ Svara ENDAST med giltig JSON.`
       }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`AI gateway ${response.status} vid enskilt karriärtips`);
+      return null;
+    }
+
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
