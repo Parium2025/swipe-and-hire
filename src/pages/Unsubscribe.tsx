@@ -1,48 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Bell, Check, ChevronRight, Mail } from "lucide-react";
+import { Bell, ChevronRight, Mail } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Sidan har två lägen:
- * 1. Med `?token=` från ett mejl — vi avregistrerar direkt (ett klick, inget
- *    extra bekräftelsesteg) och bekräftar med en lugn statusrad.
- * 2. Utan token — användaren styr sina utskick i notisinställningarna.
+ * Avregistrering hanteras numera av Parium Mail utanför appen. Den här sidan
+ * hjälper användaren att styra sina utskick i notisinställningarna.
  */
-type UnsubState = 'idle' | 'working' | 'done' | 'failed';
-
 const Unsubscribe = () => {
   const navigate = useNavigate();
   const { user, profile, userRole, loading } = useAuth();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
-  const [state, setState] = useState<UnsubState>(token ? 'working' : 'idle');
-  const ranRef = useRef(false);
-
-  useEffect(() => {
-    if (!token || ranRef.current) return;
-    ranRef.current = true;
-
-    (async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('handle-email-unsubscribe', {
-          body: { token },
-        });
-        if (error) throw error;
-        const result = data as { success?: boolean; valid?: boolean; reason?: string } | null;
-        if (result?.success || result?.reason === 'already_unsubscribed') {
-          setState('done');
-        } else {
-          setState('failed');
-        }
-      } catch {
-        setState('failed');
-      }
-    })();
-  }, [token]);
 
   const openNotificationSettings = () => {
     const role = (profile as { role?: string } | null)?.role ?? userRole?.role;
@@ -76,41 +44,15 @@ const Unsubscribe = () => {
 
         <div className="mb-3 flex items-center gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-secondary/30 bg-secondary/10">
-            {state === 'done'
-              ? <Check className="h-[18px] w-[18px] text-secondary" />
-              : <Bell className="h-[18px] w-[18px] text-secondary" />}
+            <Bell className="h-[18px] w-[18px] text-secondary" />
           </span>
-          <h1 className="text-2xl font-semibold text-white">
-            {state === 'done' ? 'Du är avprenumererad' : 'Hantera dina utskick'}
-          </h1>
+          <h1 className="text-2xl font-semibold text-white">Hantera dina utskick</h1>
         </div>
 
-        {state === 'working' && (
-          <p className="mb-7 text-sm leading-6 text-white sm:text-base">
-            Vi avslutar din prenumeration …
-          </p>
-        )}
-
-        {state === 'done' && (
-          <p className="mb-7 text-sm leading-6 text-white sm:text-base">
-            Vi skickar inga fler mejl till den här adressen. Vill du slå på vissa utskick igen gör du det
-            i dina notisinställningar.
-          </p>
-        )}
-
-        {state === 'failed' && (
-          <p className="mb-7 text-sm leading-6 text-white sm:text-base">
-            Länken gick inte att använda — den kan redan vara använd eller ha gått ut. Du kan alltid styra
-            dina utskick i notisinställningarna.
-          </p>
-        )}
-
-        {state === 'idle' && (
-          <p className="mb-7 text-sm leading-6 text-white sm:text-base">
-            Du väljer själv vilka mejl och notiser du vill få. Allt styrs i dina notisinställningar — slå av
-            det du inte vill ha och slå på det igen när du vill.
-          </p>
-        )}
+        <p className="mb-7 text-sm leading-6 text-white sm:text-base">
+          Du väljer själv vilka mejl och notiser du vill få. Allt styrs i dina notisinställningar — slå av
+          det du inte vill ha och slå på det igen när du vill.
+        </p>
 
         <Button
           type="button"
