@@ -162,29 +162,10 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
 };
 
 export const useHrNews = () => {
-  const queryClient = useQueryClient();
+  // Ingen realtidskanal här: flödet uppdateras bara 4 ggr/dygn av cron, och en
+  // öppen realtidsprenumeration per besökare skalar dåligt vid miljontals
+  // användare. staleTime är synkad mot cron-slotarna + refetch vid fokus.
 
-  // Real-time subscription for instant updates when new articles are added
-  useEffect(() => {
-    const channel = supabase
-      .channel('hr-news-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'daily_hr_news',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['hr-news'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
 
   return useQuery({
     queryKey: ['hr-news'],
