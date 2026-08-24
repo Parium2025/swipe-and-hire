@@ -410,6 +410,7 @@ export default function Messages() {
         )}>
           {selectedConversation ? (
             <ChatView
+              key={selectedConversation.id}
               conversation={selectedConversation}
               currentUserId={user?.id || ''}
               onBack={handleBackToList}

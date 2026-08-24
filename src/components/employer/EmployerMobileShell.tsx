@@ -88,7 +88,7 @@ const EmployerMobileShell = ({
           <main
             ref={mainScrollRef}
             data-main-scroll-container="true"
-            className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${isMessages ? 'pb-0' : 'pb-8'}`}
+            className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${isMessages ? 'pb-0 no-chrome-pad' : 'pb-8'}`}
             style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as CSSProperties}
           >
             {children}
