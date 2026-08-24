@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { requireServiceRole } from "../_shared/service-auth.ts";
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -174,25 +175,21 @@ serve(async (req) => {
       );
     }
 
-    const { data, error } = await supabase.functions.invoke('send-transactional-email', {
-
-      body: {
-        templateName: 'admin-alert',
-        recipientEmail: ADMIN_EMAIL,
+    let data;
+    try {
+      data = await sendLoggedTemplateEmail('admin-alert', ADMIN_EMAIL, {
         idempotencyKey,
         templateData,
-      },
-    });
-
-    if (error) {
-      console.error("Failed to enqueue admin alert:", error);
+      });
+    } catch (sendErr) {
+      console.error("Failed to send admin alert:", sendErr);
       return new Response(
-        JSON.stringify({ error: "Failed to enqueue alert", details: error.message }),
+        JSON.stringify({ error: "Failed to send alert" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    console.log("Admin alert enqueued:", data);
+    console.log("Admin alert sent:", data);
     return new Response(
       JSON.stringify({ success: true, ...data }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },

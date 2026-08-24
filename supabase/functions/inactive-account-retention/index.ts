@@ -14,6 +14,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { requireServiceRoleOrCronSecret } from '../_shared/service-auth.ts'
 import { purgeUserData } from '../_shared/user-purge.ts'
 import { forEachAuthUser } from '../_shared/find-user.ts'
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 
 const corsHeaders = {
@@ -149,16 +150,12 @@ Deno.serve(async (req) => {
         }
 
         try {
-          await admin.functions.invoke('send-transactional-email', {
-            body: {
-              templateName: 'account-inactivity-warning',
-              recipientEmail: notice.email,
-              idempotencyKey: `inactivity-reminder-${threshold}-${notice.user_id}-${notice.warned_at.slice(0, 10)}`,
-              templateData: {
-                first_name: nameMap.get(notice.user_id) || 'där',
-                delete_date: new Date(notice.scheduled_delete_at).toLocaleDateString('sv-SE'),
-                days_left: String(Math.max(daysLeft, 1)),
-              },
+          await sendLoggedTemplateEmail('account-inactivity-warning', notice.email, {
+            idempotencyKey: `inactivity-reminder-${threshold}-${notice.user_id}-${notice.warned_at.slice(0, 10)}`,
+            templateData: {
+              first_name: nameMap.get(notice.user_id) || 'där',
+              delete_date: new Date(notice.scheduled_delete_at).toLocaleDateString('sv-SE'),
+              days_left: String(Math.max(daysLeft, 1)),
             },
           })
         } catch (e) {
@@ -270,18 +267,13 @@ Deno.serve(async (req) => {
 
         if (email) {
           try {
-            await admin.functions.invoke('send-transactional-email', {
-              body: {
-                templateName: 'account-inactivity-warning',
-                recipientEmail: email,
-                // datumstämpel så att en ny varningsomgång inte dedupliceras bort
-                idempotencyKey: `inactivity-warning-${profile.user_id}-${now.toISOString().slice(0, 10)}`,
-
-                templateData: {
-                  first_name: profile.first_name || 'där',
-                  delete_date: deleteAt.toLocaleDateString('sv-SE'),
-                  days_left: String(GRACE_DAYS),
-                },
+            await sendLoggedTemplateEmail('account-inactivity-warning', email, {
+              // datumstämpel så att en ny varningsomgång inte dedupliceras bort
+              idempotencyKey: `inactivity-warning-${profile.user_id}-${now.toISOString().slice(0, 10)}`,
+              templateData: {
+                first_name: profile.first_name || 'där',
+                delete_date: deleteAt.toLocaleDateString('sv-SE'),
+                days_left: String(GRACE_DAYS),
               },
             })
           } catch (e) {
