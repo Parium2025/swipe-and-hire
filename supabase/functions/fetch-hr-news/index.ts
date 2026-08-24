@@ -455,7 +455,12 @@ Svara ENDAST med giltig JSON.`
       }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      // 402/403 = spärr, 429/5xx = tillfälligt. Loggas internt, aldrig ut till kund.
+      console.error(`AI gateway ${response.status} vid enskild nyhet`);
+      return null;
+    }
+
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
