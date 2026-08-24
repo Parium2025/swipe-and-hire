@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { buildAliasPromptBlock } from "../_shared/domain-aliases.ts";
+import { buildAliasPromptBlock, aliasSignature } from "../_shared/domain-aliases.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,7 +9,7 @@ const corsHeaders = {
 
 // Bump this when the AI system prompt / evaluation logic changes materially.
 // Included in criterion_hash → forces a global cache invalidation for all criteria.
-const PROMPT_VERSION = 'v2026-08-24-aliases';
+const PROMPT_VERSION = 'v2026-08-24-aliases2';
 
 // Normalize prompt text before hashing so tiny cosmetic edits don't invalidate
 // the cache. Lowercases, trims, collapses whitespace, strips trailing punctuation.
