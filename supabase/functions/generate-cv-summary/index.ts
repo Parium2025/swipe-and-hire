@@ -487,16 +487,18 @@ VIKTIGT:
       
       if (aiResponse.status === 429) {
         return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Försök igen senare.' }),
+          JSON.stringify({ error: 'Hög belastning just nu — försök igen om en liten stund.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (aiResponse.status === 402) {
+      if (aiResponse.status === 402 || aiResponse.status === 403) {
+        // Intern orsak (krediter/spärr) loggas ovan – kunden ser bara ett neutralt svar.
         return new Response(
-          JSON.stringify({ error: 'AI credits slut. Kontakta support.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'AI-sammanfattningen är tillfälligt otillgänglig. Vi försöker igen automatiskt.' }),
+          { status: aiResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
       
       return new Response(
         JSON.stringify({ error: 'AI-tjänsten kunde inte svara' }),
