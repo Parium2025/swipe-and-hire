@@ -63,6 +63,8 @@ export const BookInterviewDialog = ({
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const skipNextMessageResetRef = useRef(false);
+  const prefilledInterviewIdRef = useRef<string | null>(null);
+
   
   // Get employer's settings from profile FIRST (before using in state initialization)
   const savedOfficeAddress = (profile as any)?.interview_office_address || profile?.address || '';
