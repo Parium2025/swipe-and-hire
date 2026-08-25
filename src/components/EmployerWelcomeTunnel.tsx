@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,7 @@ interface EmployerWelcomeTunnelProps {
 
 const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: EmployerWelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
+  const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(
     typeof initialStep === 'number' ? Math.min(Math.max(initialStep, 0), 2) : 0
@@ -88,6 +90,19 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       setDraftRestored(true);
     }
   }, [draftRestored, draftKey]);
+
+  // Ärv organisationens möteslänk – en inbjuden kollega får företagets
+  // befintliga standardlänk förifylld (kan alltid ändras).
+  const orgLinkAppliedRef = useRef(false);
+  useEffect(() => {
+    if (!draftRestored || orgLinkAppliedRef.current) return;
+    if (!orgDefaultVideoLink) return;
+    setFormData((prev) => {
+      if (prev.interviewVideoLink) return prev;
+      orgLinkAppliedRef.current = true;
+      return { ...prev, interviewVideoLink: orgDefaultVideoLink };
+    });
+  }, [draftRestored, orgDefaultVideoLink]);
 
   // Auto-save draft
   useEffect(() => {
