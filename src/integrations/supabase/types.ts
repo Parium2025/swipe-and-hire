@@ -3918,7 +3918,6 @@ export type Database = {
         Args: { p_days_back?: number; p_user_id: string }
         Returns: Json
       }
-      get_employer_analytics: { Args: { p_user_id: string }; Returns: Json }
       get_employer_analytics_v2: {
         Args: { p_days_back?: number; p_user_id: string }
         Returns: Json
