@@ -1,5 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { parseWeatherResponse, hasConfirmedWeather, setCachedWeather, getCachedWeather, getStaleCachedWeather } from '../weatherApi';
+
+// ─── Mock localStorage ──────────────────────────────────────────────
+const localStorageMap = new Map<string, string>();
+const localStorageMock = {
+  getItem: vi.fn((key: string) => localStorageMap.get(key) ?? null),
+  setItem: vi.fn((key: string, value: string) => { localStorageMap.set(key, value); }),
+  removeItem: vi.fn((key: string) => { localStorageMap.delete(key); }),
+  clear: vi.fn(() => localStorageMap.clear()),
+  get length() { return localStorageMap.size; },
+  key: vi.fn((i: number) => [...localStorageMap.keys()][i] ?? null),
+};
+Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock, writable: true });
 
 const makeResponse = (overrides: Record<string, unknown> = {}) => ({
   current: {
