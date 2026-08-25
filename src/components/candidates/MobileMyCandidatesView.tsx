@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
 import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 /* ── Star Rating ─────────────────────────────────────── */
 const StarRating = ({ rating = 0 }: { rating?: number }) => (
@@ -146,16 +147,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
         </p>
         <StarRating rating={candidate.rating} />
         {candidate.job_title && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="text-white text-[11px] truncate block w-full cursor-default">
-                {candidate.job_title}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-[280px]">
-              <p className="text-sm break-words">{candidate.job_title}</p>
-            </TooltipContent>
-          </Tooltip>
+          <TruncatedText text={candidate.job_title} className="text-white text-[11px]" />
         )}
         {(appliedTime || lastActiveTime) && (
           <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">
