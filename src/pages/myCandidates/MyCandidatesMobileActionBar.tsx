@@ -16,6 +16,7 @@ import {
   Square,
 } from 'lucide-react';
 import { getIconByName } from '@/hooks/useStageSettings';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { useDevice } from '@/hooks/use-device';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 
