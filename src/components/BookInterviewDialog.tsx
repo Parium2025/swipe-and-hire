@@ -244,6 +244,18 @@ export const BookInterviewDialog = ({
       return;
     }
     
+    if (locationType === 'video' && trimmedVideoLink && !videoLinkIsValid) {
+      toast.error('Videolänken ser inte giltig ut', {
+        description: 'Klistra in hela länken från Teams, Zoom, Google Meet, Webex eller Whereby.',
+      });
+      return;
+    }
+
+    if (locationType === 'office' && !editableAddress.trim()) {
+      toast.error('Ange adressen för intervjun');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -291,6 +303,19 @@ export const BookInterviewDialog = ({
           }).select('id').single();
 
       if (error) throw error;
+
+      // Spara länken som standard om rekryteraren bad om det.
+      if (locationType === 'video' && saveVideoLinkAsDefault && videoLinkIsValid && videoLinkDiffersFromDefault) {
+        try {
+          await supabase
+            .from('profiles')
+            .update({ interview_video_link: normalizeMeetingLink(trimmedVideoLink) })
+            .eq('user_id', user.id);
+          queryClient.invalidateQueries({ queryKey: ['profile'] });
+        } catch (linkErr) {
+          console.error('Kunde inte spara standardlänk:', linkErr);
+        }
+      }
 
       let description = isReschedule ? 'Intervjun är ombokad.' : 'Intervjun är bokad.';
 
