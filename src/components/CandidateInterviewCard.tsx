@@ -183,7 +183,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
         {interview.message && (
           <button
             onClick={() => setShowMessage(!showMessage)}
-            className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors w-full"
+            className="flex items-center gap-2 text-sm text-white hover:text-white transition-colors w-full"
           >
             <MessageSquare className="w-4 h-4" />
             <span>Meddelande från arbetsgivaren</span>
