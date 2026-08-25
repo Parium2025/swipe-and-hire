@@ -284,20 +284,17 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
         {value.map((filter) => {
           const displayText = filter.answers.length === 0 ? 'Alla' : filter.answers.join(', ');
           const fullText = `${filter.question}: ${displayText}`;
-          const isTruncatedChip = filter.question.length > 15;
-          
-          const chipContent = (
+
+          return (
             <button
               key={filter.question}
-              className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[200px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
+              className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[240px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
             >
-              <span className="truncate min-w-0">
-                {filter.question.length > 15 
-                  ? filter.question.slice(0, 15) + '...' 
-                  : filter.question
-                }
-              </span>
-              <span className="flex-shrink-0 text-white">: {displayText}</span>
+              <TruncatedText
+                text={fullText}
+                className="truncate min-w-0"
+                insideInteractive
+              />
               <span
                 onClick={(e) => {
                   e.stopPropagation();
@@ -309,24 +306,8 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
               </span>
             </button>
           );
-          
-          if (!isTruncatedChip) {
-            return <React.Fragment key={filter.question}>{chipContent}</React.Fragment>;
-          }
-          
-          return (
-            <TooltipProvider key={filter.question} delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  {chipContent}
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs bg-slate-900 border-white/20 text-white">
-                  <p>{fullText}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
         })}
+
       </>
     );
   }
