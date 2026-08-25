@@ -25,6 +25,9 @@ export interface Interview {
   job_title?: string;
 }
 
+/** Möten som pågår just nu ska ligga kvar; längsta rimliga intervju. */
+const IN_PROGRESS_WINDOW_MS = 6 * 60 * 60 * 1000;
+
 // 🔥 localStorage cache for employer interviews - instant-load
 const EMPLOYER_INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
 
@@ -85,7 +88,9 @@ export const useInterviews = () => {
           job_applications(first_name, last_name)
         `)
         .eq('employer_id', user.id)
-        .gte('scheduled_at', new Date().toISOString())
+        // Hämta även möten som just startat – ett pågående möte får inte
+        // försvinna från kortet mitt under intervjun. isInterviewOver städar bort.
+        .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
         .in('status', ['pending', 'confirmed'])
         .order('scheduled_at', { ascending: true });
 
@@ -239,7 +244,7 @@ export const useCandidateInterviews = () => {
           )
         `)
         .eq('applicant_id', user.id)
-        .gte('scheduled_at', new Date().toISOString())
+        .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
         .in('status', ['pending', 'confirmed'])
         .order('scheduled_at', { ascending: true });
 

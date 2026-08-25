@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
+import { useMinuteTick } from '@/hooks/useMinuteTick';
+import { getMeetingUrl } from '@/lib/interviewTime';
 import { toast } from 'sonner';
 
 interface CandidateInterviewCardProps {
@@ -45,8 +47,9 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
   const [isResponding, setIsResponding] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
 
+  const tick = useMinuteTick();
   const scheduledDate = new Date(interview.scheduled_at);
-  const now = new Date();
+  const now = new Date(tick);
   const minutesUntil = differenceInMinutes(scheduledDate, now);
   const isLive = minutesUntil <= 15 && minutesUntil >= -interview.duration_minutes;
   const isPending = interview.status === 'pending';
@@ -61,24 +64,17 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
 
   const getEmployerName = () => interview.job_postings?.workplace_name?.trim() || 'Arbetsgivare';
 
-  // Handle video link click
+  // Only a real http(s) link may be opened – fritext som "Teams" får aldrig navigera.
+  const meetingUrl = getMeetingUrl(
+    interview.location_details?.match(/(https?:\/\/[^\s]+)/)?.[1] ?? interview.location_details,
+  );
+
   const handleJoinVideo = () => {
-    if (!interview.location_details) {
+    if (!meetingUrl) {
       toast.error('Ingen videolänk tillgänglig');
       return;
     }
-
-    // Extract URL from location_details (might have extra text)
-    let videoUrl = interview.location_details;
-    
-    // Try to extract URL if it's embedded in text
-    const urlMatch = videoUrl.match(/(https?:\/\/[^\s]+)/);
-    if (urlMatch) {
-      videoUrl = urlMatch[1];
-    }
-
-    // Open in new tab
-    window.open(videoUrl, '_blank', 'noopener,noreferrer');
+    window.open(meetingUrl, '_blank', 'noopener,noreferrer');
   };
 
   // Handle accept/decline
@@ -95,12 +91,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
   };
 
   // Check if video link is a valid URL
-  const hasVideoLink = interview.location_type === 'video' && 
-    interview.location_details && 
-    (interview.location_details.includes('http') || 
-     interview.location_details.includes('teams') ||
-     interview.location_details.includes('zoom') ||
-     interview.location_details.includes('meet'));
+  const hasVideoLink = interview.location_type === 'video' && !!meetingUrl;
 
   return (
     <Card className={cn(
@@ -265,7 +256,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
             <Button
               onClick={() => {
                 const query = encodeURIComponent(interview.location_details || '');
-                window.open(`https://maps.google.com?q=${query}`, '_blank');
+                window.open(`https://maps.google.com?q=${query}`, '_blank', 'noopener,noreferrer');
               }}
               variant="ghost"
               className="flex-1 text-white hover:bg-white/10 border border-white/10"
