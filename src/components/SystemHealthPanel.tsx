@@ -102,11 +102,26 @@ const getStoredHistory = (): RealUsageStats[] => {
   }
 };
 
+/** Dygnsnyckel i svensk tid — DB-aggregaten grupperar på Europe/Stockholm.
+ *  new Date().toISOString() är UTC och skulle byta dygn vid fel klockslag. */
+const stockholmDayKey = (value: string | number | Date = Date.now()): string => {
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Stockholm',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d);
+};
+
 const storeHistory = (stats: RealUsageStats) => {
   try {
+    // Läs alltid om precis innan skrivning: två överlappande fetchStats()
+    // (intervall + realtime-event) får inte skriva över varandras punkt.
     const history = getStoredHistory();
-    const today = new Date().toISOString().split('T')[0];
-    const existingTodayIndex = history.findIndex(h => h.timestamp.startsWith(today));
+    const today = stockholmDayKey();
+    const existingTodayIndex = history.findIndex(h => stockholmDayKey(h.timestamp) === today);
     if (existingTodayIndex >= 0) {
       history[existingTodayIndex] = stats;
     } else {
@@ -118,6 +133,7 @@ const storeHistory = (stats: RealUsageStats) => {
     // Ignore storage errors
   }
 };
+
 
 // Hook for checking admin status — måste spegla serverns kontroll
 // (public.user_roles / is_platform_admin), annars anropar klienten
@@ -180,12 +196,18 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const isAdmin = useIsSystemAdmin();
+  // Serialiserar hämtningar: intervallet och sex realtime-lyssnare kan annars
+  // starta överlappande körningar som skriver över varandras historikpunkt.
+  const inFlightRef = useRef(false);
 
   const fetchStats = useCallback(async () => {
     if (!isAdmin) return;
-    
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+
     try {
       setError(null);
+
       
       // Get session for auth header
       const { data: { session } } = await supabase.auth.getSession();
@@ -391,8 +413,10 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       console.error('Failed to fetch system stats:', err);
       setError('Kunde inte hämta data');
     } finally {
+      inFlightRef.current = false;
       setLoading(false);
     }
+
   }, [isAdmin]);
 
   useEffect(() => {
