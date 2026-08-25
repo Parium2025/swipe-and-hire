@@ -1,7 +1,7 @@
 import { memo, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Users, Info, Lightbulb } from 'lucide-react';
+import { Users, Info, Lightbulb, CalendarCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export interface TeamMemberStats {
@@ -76,7 +76,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
         <div className="flex items-center gap-1.5 mb-1">
           <Users className="h-4 w-4 text-white/70 shrink-0" />
           <h3 className="text-[15px] font-semibold text-white">Lär av varandra</h3>
-          <InfoTip content="Visar hur annonserna presterar per kollega i din organisation. Syftet är att se vad som fungerar bra och kopiera det – inte att ranka personer. Visningar är unika besökare. Era egna visningar, ansökningar och intervjuer räknas aldrig med." />
+          <InfoTip content="Visar hur annonserna presterar per kollega i din organisation. Syftet är att se vad som fungerar bra och kopiera det – inte att ranka personer. Visningar är unika besökare. Intervjuer räknas på den kollega som bokat och håller intervjun, oavsett vem som äger annonsen. Era egna visningar, ansökningar och intervjuer räknas aldrig med." />
         </div>
         <p className="text-[12px] text-white/70 mb-4">
           Så presterar er organisations annonser – per kollega under vald period.
@@ -104,11 +104,20 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-medium text-white truncate">{m.name}</p>
-                    <p className="text-[11px] text-white/70">
-                      {m.jobs_count} annonser · {m.views} vis. · {m.applications} ans. · {m.interviews} intervjuer
-                    </p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-white">
+                      <span className="whitespace-nowrap">{m.jobs_count} annonser</span>
+                      <span aria-hidden className="text-white/40">·</span>
+                      <span className="whitespace-nowrap">{m.views} visningar</span>
+                      <span aria-hidden className="text-white/40">·</span>
+                      <span className="whitespace-nowrap">{m.applications} ansökningar</span>
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white/[0.10] px-2 py-0.5 font-medium">
+                        <CalendarCheck className="h-3 w-3 shrink-0" aria-hidden />
+                        {m.interviews} intervjuer
+                      </span>
+                    </div>
                   </div>
                   <span className="text-[13px] font-semibold text-white shrink-0">{conv}%</span>
+
                 </div>
                 <div className="mt-2 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                   <div
