@@ -3771,6 +3771,7 @@ export type Database = {
         Args: { _body: string; _metadata?: Json; _title: string }
         Returns: string
       }
+      cron_auth_header: { Args: never; Returns: Json }
       delete_note_activities_for_applicant: {
         Args: { p_applicant_id: string }
         Returns: undefined
@@ -4157,7 +4158,6 @@ export type Database = {
         Returns: undefined
       }
       purge_completed_deletion_rows: { Args: never; Returns: number }
-      purge_old_email_dlq: { Args: never; Returns: number }
       purge_old_outreach_logs: { Args: never; Returns: number }
       purge_soft_deleted_jobs: {
         Args: never

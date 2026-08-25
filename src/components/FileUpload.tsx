@@ -63,6 +63,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
     setUploading(true);
     setUploadProgress(0);
     setUploadError(null);
+    // Deklareras utanför try: annars fortsätter intervallet för evigt om
+    // uppladdningen kastar innan clearInterval hinner köras.
+    let progressInterval: ReturnType<typeof setInterval> | undefined;
     try {
 
       const { data } = await supabase.auth.getUser();
@@ -71,7 +74,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       }
 
       // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           if (prev >= 90) return prev;
           return prev + 10;
@@ -86,6 +89,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       );
 
       clearInterval(progressInterval);
+      progressInterval = undefined;
       setUploadProgress(100);
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
@@ -124,6 +128,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       setLastFailedFile(file);
       setUploadError(message);
     } finally {
+      if (progressInterval) clearInterval(progressInterval);
       setUploading(false);
       setUploadProgress(0);
     }

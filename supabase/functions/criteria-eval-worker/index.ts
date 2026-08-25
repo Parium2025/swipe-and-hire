@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { verifyCaller } from '../_shared/service-auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,6 +19,12 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // 🔒 verify_jwt=false (pg_cron använder en vault-token, inte en JWT) → vi måste
+  // autentisera själva. Tillåtna: service_role, pg_cron-token, eller en
+  // kryptografiskt verifierad inloggad användare (klienten "knuffar" kön).
+  const caller = await verifyCaller(req, corsHeaders);
+  if (caller instanceof Response) return caller;
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

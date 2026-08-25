@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { requireServiceRole } from "../_shared/service-auth.ts";
+import { requireServiceRoleOrCronSecret } from "../_shared/service-auth.ts";
 
 
 const corsHeaders = {
@@ -113,7 +113,7 @@ serve(async (req) => {
   }
 
   // Cron/internal only — called by pg_net triggers and cron jobs.
-  const authErr = requireServiceRole(req, corsHeaders);
+  const authErr = await requireServiceRoleOrCronSecret(req, corsHeaders);
   if (authErr) return authErr;
 
 
