@@ -104,11 +104,20 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-medium text-white truncate">{m.name}</p>
-                    <p className="text-[11px] text-white/70">
-                      {m.jobs_count} annonser · {m.views} vis. · {m.applications} ans. · {m.interviews} intervjuer
-                    </p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-white">
+                      <span className="whitespace-nowrap">{m.jobs_count} annonser</span>
+                      <span aria-hidden className="text-white/40">·</span>
+                      <span className="whitespace-nowrap">{m.views} visningar</span>
+                      <span aria-hidden className="text-white/40">·</span>
+                      <span className="whitespace-nowrap">{m.applications} ansökningar</span>
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white/[0.10] px-2 py-0.5 font-medium">
+                        <CalendarCheck className="h-3 w-3 shrink-0" aria-hidden />
+                        {m.interviews} intervjuer
+                      </span>
+                    </div>
                   </div>
                   <span className="text-[13px] font-semibold text-white shrink-0">{conv}%</span>
+
                 </div>
                 <div className="mt-2 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                   <div
