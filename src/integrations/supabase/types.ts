@@ -3625,6 +3625,16 @@ export type Database = {
         Returns: boolean
       }
       can_view_job_application: { Args: { p_job_id: string }; Returns: boolean }
+      can_write_my_candidate: {
+        Args: {
+          p_applicant_id: string
+          p_application_id: string
+          p_job_id: string
+          p_list_id: string
+          p_recruiter_id: string
+        }
+        Returns: boolean
+      }
       cancel_criteria_eval_run: {
         Args: { p_run_id: string }
         Returns: undefined
