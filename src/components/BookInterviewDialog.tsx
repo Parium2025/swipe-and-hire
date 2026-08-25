@@ -108,6 +108,31 @@ export const BookInterviewDialog = ({
     onOpenChange(newOpen);
   };
 
+  // Finns redan en aktiv intervju för ansökan? Då är detta en ombokning,
+  // inte ett nytt möte – annars skulle kandidaten få dubbla kallelser.
+  const { data: existingInterview } = useQuery({
+    queryKey: ['existing-interview', applicationId],
+    enabled: open && !!applicationId,
+    staleTime: 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('interviews')
+        .select('id, scheduled_at, duration_minutes, location_type, location_details, subject, message')
+        .eq('application_id', applicationId)
+        .in('status', ['pending', 'confirmed'])
+        .order('scheduled_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      // Ett möte som redan är över ska inte bokas om – då är det ett nytt möte.
+      const end = new Date(data.scheduled_at).getTime() + (data.duration_minutes || 30) * 60_000;
+      return end > Date.now() ? data : null;
+    },
+  });
+
+  const isReschedule = !!existingInterview;
+
   // Set default values when dialog opens — always sync from latest profile
   useEffect(() => {
     if (open) {
@@ -120,6 +145,28 @@ export const BookInterviewDialog = ({
       setEditableVideoLink(savedVideoLink);
     }
   }, [open, jobTitle, videoDefaultMessage, savedOfficeAddress, savedVideoLink]);
+
+  // Förifyll med den befintliga bokningen när det är en ombokning.
+  useEffect(() => {
+    if (!open || !existingInterview) return;
+    const scheduled = new Date(existingInterview.scheduled_at);
+    if (!Number.isNaN(scheduled.getTime())) {
+      setDate(scheduled);
+      setTime(`${String(scheduled.getHours()).padStart(2, '0')}:${String(Math.floor(scheduled.getMinutes() / 15) * 15).padStart(2, '0')}`);
+    }
+    setDuration(String(existingInterview.duration_minutes || 30));
+    const type = existingInterview.location_type === 'office' ? 'office' : 'video';
+    setLocationType(type);
+    if (type === 'video') {
+      const link = normalizeMeetingLink(existingInterview.location_details || '');
+      if (link) setEditableVideoLink(link);
+    } else if (existingInterview.location_details) {
+      setEditableAddress(existingInterview.location_details.split('\n\n')[0]);
+    }
+    if (existingInterview.subject) setSubject(existingInterview.subject);
+    if (existingInterview.message) setMessage(existingInterview.message);
+  }, [open, existingInterview]);
+
 
   // Update message when location type changes
   useEffect(() => {
