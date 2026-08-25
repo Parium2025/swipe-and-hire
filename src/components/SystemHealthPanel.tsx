@@ -196,12 +196,18 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const isAdmin = useIsSystemAdmin();
+  // Serialiserar hämtningar: intervallet och sex realtime-lyssnare kan annars
+  // starta överlappande körningar som skriver över varandras historikpunkt.
+  const inFlightRef = useRef(false);
 
   const fetchStats = useCallback(async () => {
     if (!isAdmin) return;
-    
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+
     try {
       setError(null);
+
       
       // Get session for auth header
       const { data: { session } } = await supabase.auth.getSession();
