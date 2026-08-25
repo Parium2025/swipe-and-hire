@@ -111,6 +111,8 @@ export function SendMessageDialog({
   const manualActionTemplates = useMemo(() => getManualOutreachTemplateGroups(templates), [templates]);
   const presetGroup = presetAction ? manualActionTemplates[presetAction] : null;
   const dialogTitle = presetGroup?.action.label ?? 'Chatta';
+  // Ren chatt: när dialogen öppnas via "Chatta" finns ingen kanalväljare eller mallar
+  const simpleChat = !presetGroup || presetGroup.channels.length === 0;
 
   useEffect(() => {
     if (!open) {
@@ -150,6 +152,32 @@ export function SendMessageDialog({
 
   const handleSend = async () => {
     if (!user) return;
+
+    if (simpleChat) {
+      if (!message.trim()) return;
+      setSending(true);
+      try {
+        const result = await createConversation.mutateAsync({
+          memberIds: [recipientId],
+          jobId: jobId || null,
+          applicationId: applicationId || null,
+          initialMessage: message.trim(),
+        });
+        toast.success(`Meddelande skickat till ${recipientName}`, { route: '/messages' } as Parameters<typeof toast.success>[1]);
+        setMessage('');
+        clearMessageDraft();
+        onOpenChange(false);
+        if (navigateToMessages && result.id) {
+          navigate(`/messages?conversation=${result.id}`);
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        toast.error('Kunde inte skicka meddelande');
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
 
     const chatSelected = selectedChannels.includes('chat');
     if (chatSelected && !message.trim() && !selectedTemplateIds.chat) return;
@@ -277,9 +305,10 @@ export function SendMessageDialog({
               <p className="text-white text-center text-sm leading-relaxed px-2">
                 {presetGroup
                   ? `Skicka ${presetGroup.action.label.toLowerCase()} till ${recipientName} med de mallar som finns klara.`
-                  : `Skicka ett premiumutskick till ${recipientName} via chat, e-post och push.`}
+                  : `Skriv ett meddelande till ${recipientName}.`}
               </p>
 
+              {!simpleChat && (
               <div className="space-y-2">
                 <Label className="text-white">Kanaler</Label>
                 <div className="flex flex-wrap gap-2">
@@ -301,8 +330,9 @@ export function SendMessageDialog({
                   })}
                 </div>
               </div>
+              )}
 
-              {selectedChannels.includes('chat') && templatesByChannel.chat.length > 0 && (
+              {!simpleChat && selectedChannels.includes('chat') && templatesByChannel.chat.length > 0 && (
                 <div className="space-y-2">
                   <Label className="text-white">Chatmall</Label>
                   <Select
@@ -321,7 +351,7 @@ export function SendMessageDialog({
                 </div>
               )}
 
-              {selectedChannels.filter((channel) => channel !== 'chat').map((channel) => (
+              {(simpleChat ? [] : selectedChannels.filter((channel) => channel !== 'chat')).map((channel) => (
                 <div key={channel} className="space-y-2">
                   <Label className="text-white">{channel === 'email' ? 'E-postmall' : 'Pushmall'}</Label>
                   <Select value={selectedTemplateIds[channel] ?? ''} onValueChange={(value) => setSelectedTemplateIds((prev) => ({ ...prev, [channel]: value }))}>
@@ -334,7 +364,7 @@ export function SendMessageDialog({
               ))}
 
               <div className="space-y-2">
-                <Label className="text-white">Chattmeddelande</Label>
+                <Label className="text-white">{simpleChat ? 'Meddelande' : 'Chattmeddelande'}</Label>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
