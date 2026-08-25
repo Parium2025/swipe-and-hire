@@ -1183,7 +1183,7 @@ const SearchJobs = memo(() => {
             <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {jobToUnsave && (
                 <>
-                  Är du säker på att du vill ta bort <TruncatedText text={`"${jobToUnsave.title}"`} className="font-semibold text-white break-words" />? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{jobToUnsave.title}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>
