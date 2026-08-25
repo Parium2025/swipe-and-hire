@@ -356,7 +356,7 @@ const PublicJobPage = () => {
           <span>/</span>
           <Link to={`/jobb/${slugify(city)}`} className="hover:text-white/80">{city}</Link>
           <span>/</span>
-          <TruncatedText text={job.title} className="text-white/80 truncate max-w-[200px] sm:max-w-[320px]" />
+          <TruncatedText text={job.title} className="text-white/80 truncate min-w-0 max-w-full sm:max-w-[60ch]" />
         </nav>
 
         <motion.header
