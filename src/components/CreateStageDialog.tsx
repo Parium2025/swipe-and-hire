@@ -24,6 +24,7 @@ import {
 import { toast } from 'sonner';
 import { MAX_KANBAN_STAGES } from '@/hooks/useKanbanLayout';
 import { cn } from '@/lib/utils';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface CreateStageDialogProps {
   trigger?: React.ReactNode;
@@ -154,7 +155,7 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
                     style={{ backgroundColor: `${selectedColor}33` }}
                   >
                     <IconComponent className="h-4 w-4 text-white flex-shrink-0" />
-                    <span className="font-medium text-sm text-white truncate max-w-[200px]">{label || 'Nytt steg'}</span>
+                    <div className="min-w-0 max-w-[240px]"><TruncatedText text={label || 'Nytt steg'} className="font-medium text-sm text-white" /></div>
                     <span 
                       className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors flex-shrink-0"
                       style={{ backgroundColor: `${selectedColor}66` }}

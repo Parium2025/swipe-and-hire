@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Send, CheckCircle, X, Minus, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { TruncatedText as SmartTruncatedText } from '@/components/ui/truncated-text';
 import { TruncatedText } from '@/components/TruncatedText';
 import type { JobQuestion } from '@/types/jobWizard';
 
@@ -454,12 +455,12 @@ export function ApplicationQuestionsWizard({
                             alwaysShowTooltip={false}
                           />
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-sm font-medium truncate max-w-[120px] text-white">
-                            {typeof displayAnswer === 'string' && displayAnswer.length > 20 
-                              ? displayAnswer.slice(0, 20) + '…' 
-                              : displayAnswer}
-                          </span>
+                        <div className="flex min-w-0 max-w-[55%] items-center gap-2">
+                          <SmartTruncatedText
+                            text={String(displayAnswer)}
+                            insideInteractive
+                            className="text-sm font-medium text-white text-right"
+                          />
                           <ArrowRight className="w-3.5 h-3.5 text-white" />
                         </div>
                       </div>
