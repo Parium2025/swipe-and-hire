@@ -335,10 +335,26 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       } else if (!isOffline) {
         checkForLocationChange(false);
       } else {
-        // Offline with no cache — gracefully hide the weather row, but keep
-        // the greeting and clock. The fallback city hint is preserved so a
-        // name can still be shown if the consumer wants it.
-        updateWeather(safeFallback(fallbackCity || ''));
+        // Offline: prefer a stale cached reading over hiding the weather row.
+        const stale = getStaleCachedWeather();
+        if (stale) {
+          updateWeather({
+            temperature: stale.temperature,
+            feelsLike: stale.feelsLike,
+            temperatureAvailable: stale.temperatureAvailable,
+            weatherCode: stale.weatherCode,
+            description: stale.description,
+            emoji: stale.emoji,
+            city: stale.city,
+            isLoading: false,
+            error: null,
+          });
+        } else {
+          // No cache at all — gracefully hide the weather row, but keep
+          // the greeting and clock. The fallback city hint is preserved so a
+          // name can still be shown if the consumer wants it.
+          updateWeather(safeFallback(fallbackCity || ''));
+        }
       }
     }
 
