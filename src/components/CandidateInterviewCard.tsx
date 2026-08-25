@@ -198,7 +198,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
         {/* Message content */}
         {showMessage && interview.message && (
           <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-            <p className="text-white/90 text-sm whitespace-pre-wrap">
+            <p className="text-white text-sm whitespace-pre-wrap break-words">
               {interview.message}
             </p>
           </div>
