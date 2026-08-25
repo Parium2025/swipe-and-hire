@@ -170,7 +170,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
               {interview.location_type === 'video' ? 'Videomöte' : 'På plats'}
             </p>
             {interview.location_details && (
-              <p className="text-white/70 text-sm mt-0.5 break-words whitespace-pre-wrap">
+              <p className="text-white text-sm mt-0.5 break-words whitespace-pre-wrap">
                 {interview.location_type === 'video' && hasVideoLink
                   ? 'Länk tillgänglig - klicka för att ansluta'
                   : interview.location_details}
