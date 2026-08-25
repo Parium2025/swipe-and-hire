@@ -347,9 +347,9 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                           onCategoryChange(category.value);
                           onSubcategoriesChange([]);
                         }}
-                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between gap-2 min-w-0 touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
                       >
-                        <span>{category.label}</span>
+                        <span className="min-w-0 line-clamp-2 break-words">{category.label}</span>
                         {selectedCategory === category.value && (
                           <Check className="h-4 w-4 text-white" />
                         )}
@@ -408,9 +408,9 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                               : [...selectedSubcategories, subcat]
                           );
                         }}
-                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between gap-2 min-w-0 touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
                       >
-                        <span>{subcat}</span>
+                        <span className="min-w-0 line-clamp-2 break-words">{subcat}</span>
                         {selectedSubcategories.includes(subcat) && (
                           <Check className="h-4 w-4 text-white" />
                         )}

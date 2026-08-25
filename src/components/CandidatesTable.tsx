@@ -827,7 +827,12 @@ export function CandidatesTable({
                             )}
 
                           </div>
-                          {application.phone && <div className="text-sm text-white truncate max-w-[220px]">{application.phone}</div>}
+                          {application.phone && (
+                            <TruncatedText
+                              text={application.phone}
+                              className="text-sm text-white max-w-[220px]"
+                            />
+                          )}
                         </div>
                       </div>
                     </TableCell>
