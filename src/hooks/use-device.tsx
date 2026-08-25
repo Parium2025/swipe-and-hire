@@ -1,7 +1,10 @@
 import { useRef, useSyncExternalStore } from 'react';
 
-// Desktop breakpoint - below this we use mobile/tablet layout with sidebar
-const MOBILE_BREAKPOINT = 1024;
+// Desktop breakpoint - below this we use mobile/tablet layout with sidebar.
+// 1180px (not 1024px): the employer top nav needs ~1120px before its items
+// start to collide/overflow, so we switch to the mobile layout with margin
+// instead of rendering a cramped desktop header.
+const MOBILE_BREAKPOINT = 1180;
 
 export type DeviceType = 'mobile' | 'desktop';
 
