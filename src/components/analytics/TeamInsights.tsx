@@ -1,7 +1,7 @@
 import { memo, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Users, Info, Lightbulb } from 'lucide-react';
+import { Users, Info, Lightbulb, CalendarCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export interface TeamMemberStats {
