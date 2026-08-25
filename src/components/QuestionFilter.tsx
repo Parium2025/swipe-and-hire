@@ -72,7 +72,7 @@ const QuestionItem = memo(({
     >
       <MessageSquare className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-white" />
       <div className="flex-1 min-w-0">
-        <p ref={textRef} className="text-sm leading-tight truncate text-white">{question.question_text}</p>
+        <p ref={textRef} className="min-w-0 flex-1 truncate text-sm leading-tight text-white">{question.question_text}</p>
         {isSelected && (
           <p className="text-xs text-white mt-0.5">
             = {allSelected ? 'Alla' : selectedAnswers.join(', ')}

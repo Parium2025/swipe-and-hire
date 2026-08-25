@@ -291,9 +291,10 @@ const SupportAdmin = () => {
                       </div>
                     </div>
                     <TruncatedText text={ticket.subject} className="mb-1 text-sm font-medium text-white" />
-                    <p className="text-white text-sm mb-2">
-                      {ticket.profiles?.first_name} {ticket.profiles?.last_name}
-                    </p>
+                    <TruncatedText
+                      text={`${ticket.profiles?.first_name ?? ''} ${ticket.profiles?.last_name ?? ''}`.trim() || 'Okänd användare'}
+                      className="mb-2 text-sm text-white"
+                    />
                     <p className="text-white text-sm">
                       {new Date(ticket.created_at).toLocaleString('sv-SE')}
                     </p>
@@ -309,9 +310,9 @@ const SupportAdmin = () => {
           {selectedTicket ? (
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-white">{selectedTicket.subject}</CardTitle>
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <TruncatedText text={selectedTicket.subject} className="text-lg font-semibold text-white" lines={2} />
                     <CardDescription className="text-white mt-1">
                       Ärende {selectedTicket.id.slice(0, 8)}
                     </CardDescription>
@@ -339,11 +340,12 @@ const SupportAdmin = () => {
               <CardContent className="space-y-4">
                 {/* Ärendeinfo */}
                 <div className="grid grid-cols-2 gap-4 p-4 bg-white/5 rounded-lg">
-                  <div className="flex items-center gap-2 text-white">
-                    <User className="h-4 w-4" />
-                    <span className="text-sm">
-                      {selectedTicket.profiles?.first_name} {selectedTicket.profiles?.last_name}
-                    </span>
+                   <div className="flex min-w-0 items-center gap-2 text-white">
+                     <User className="h-4 w-4 shrink-0" />
+                     <TruncatedText
+                       text={`${selectedTicket.profiles?.first_name ?? ''} ${selectedTicket.profiles?.last_name ?? ''}`.trim() || 'Okänd användare'}
+                       className="text-sm"
+                     />
                   </div>
                   <div className="flex items-center gap-2 text-white">
                     <Tag className="h-4 w-4" />
@@ -379,14 +381,12 @@ const SupportAdmin = () => {
                               : 'bg-white/5 mr-8'
                           }`}
                         >
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-white text-sm font-medium">
-                              {message.is_admin_reply 
-                                ? 'Admin (Du)' 
-                                : `${message.profiles?.first_name} ${message.profiles?.last_name}`
-                              }
-                            </span>
-                            <span className="text-white text-sm">
+                           <div className="flex min-w-0 items-center gap-2 mb-1">
+                             <TruncatedText
+                               text={message.is_admin_reply ? 'Admin (Du)' : `${message.profiles?.first_name ?? ''} ${message.profiles?.last_name ?? ''}`.trim() || 'Okänd användare'}
+                               className="flex-1 text-sm font-medium text-white"
+                             />
+                             <span className="shrink-0 text-white text-sm">
                               {new Date(message.created_at).toLocaleString('sv-SE')}
                             </span>
                           </div>

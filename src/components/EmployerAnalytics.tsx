@@ -169,7 +169,7 @@ const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel, footn
     <div className="flex-1 min-w-0 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-center">
       <div className="flex items-center justify-center gap-1.5 mb-1.5">
         <Icon className="h-3.5 w-3.5 text-white shrink-0" />
-        <span className="text-[11px] font-medium text-white truncate">{label}</span>
+        <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-white" title={label}>{label}</span>
       </div>
       <div className="flex items-baseline justify-center gap-1 flex-nowrap min-w-0">
         <span className="text-xl font-bold text-white tabular-nums">{current}</span>

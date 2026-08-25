@@ -54,6 +54,7 @@ export function SwipeableConversationItem({
   const lockOffsetRef = useRef(0);
   const suppressClickRef = useRef(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [revealedSide, setRevealedSide] = useState<'delete' | 'unread' | null>(null);
 
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
 
@@ -68,16 +69,16 @@ export function SwipeableConversationItem({
       const p = Math.min(Math.max(-x, 0) / DELETE_THRESHOLD, 1);
       del.style.opacity = `${p}`;
       del.style.transform = `scale(${0.6 + p * 0.4})`;
-      del.style.visibility = p > 0.02 ? 'visible' : 'hidden';
+      if (p > 0.02 && revealedSide !== 'delete') setRevealedSide('delete');
     }
     const un = unreadRef.current;
     if (un) {
       const p = Math.min(Math.max(x, 0) / UNREAD_THRESHOLD, 1);
       un.style.opacity = `${p}`;
       un.style.transform = `scale(${0.6 + p * 0.4})`;
-      un.style.visibility = p > 0.02 ? 'visible' : 'hidden';
+      if (p > 0.02 && revealedSide !== 'unread') setRevealedSide('unread');
     }
-  }, []);
+  }, [revealedSide]);
 
   const setX = useCallback((x: number) => {
     pendingXRef.current = x;
@@ -99,12 +100,22 @@ export function SwipeableConversationItem({
       el.style.opacity = '0';
       el.style.transform = 'scale(0.6)';
       window.setTimeout(() => {
-        if (el) { el.style.transition = ''; el.style.visibility = 'hidden'; }
+        if (el) el.style.transition = '';
       }, 220);
     });
+    setRevealedSide(null);
     pendingXRef.current = 0;
     currentXRef.current = 0;
   }, []);
+
+  useEffect(() => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    pendingXRef.current = 0;
+    currentXRef.current = 0;
+    setRevealedSide(null);
+    if (contentRef.current) contentRef.current.style.transform = 'translate3d(0,0,0)';
+  }, [conversationName]);
 
   const beginDrag = useCallback((clientX: number, clientY: number) => {
     startXRef.current = clientX;
@@ -231,10 +242,10 @@ export function SwipeableConversationItem({
       >
         {/* Markera som oläst — visas vid drag åt höger */}
         {onMarkUnread && canMarkUnread && (
-          <div className="absolute inset-y-0 left-0 flex items-center z-0 pl-3">
+          <div className={cn("absolute inset-y-0 left-0 z-0 flex items-center pl-3", revealedSide === 'unread' ? 'visible' : 'invisible')}>
             <div
               ref={unreadRef}
-              style={{ opacity: 0, transform: 'scale(0.6)', visibility: 'hidden', willChange: 'transform, opacity' }}
+              style={{ opacity: 0, transform: 'scale(0.6)', willChange: 'transform, opacity' }}
             >
               <button
                 className="rounded-full flex items-center gap-1 px-3 py-2 bg-blue-500/20 border border-blue-500/40 text-white font-medium text-xs"
@@ -253,10 +264,10 @@ export function SwipeableConversationItem({
         )}
 
         {/* Delete button on the RIGHT side */}
-        <div className="absolute inset-y-0 right-0 flex items-center z-0 pr-3">
+        <div className={cn("absolute inset-y-0 right-0 z-0 flex items-center pr-3", revealedSide === 'delete' ? 'visible' : 'invisible')}>
           <div
             ref={deleteRef}
-            style={{ opacity: 0, transform: 'scale(0.6)', visibility: 'hidden', willChange: 'transform, opacity' }}
+            style={{ opacity: 0, transform: 'scale(0.6)', willChange: 'transform, opacity' }}
           >
             <button
               className="rounded-full flex items-center gap-1 px-3 py-2 bg-destructive/20 border border-destructive/40 text-white font-medium text-xs"

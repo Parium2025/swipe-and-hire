@@ -144,7 +144,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
             {currentTip?.source_url ? (
               <div className="flex items-center gap-1.5 text-white min-w-0 overflow-hidden whitespace-nowrap">
                 <span className="text-xs shrink-0">Läs mer</span>
-                <span className="text-[10px] text-white truncate">· {currentTip.source}</span>
+                <TruncatedText text={`· ${currentTip.source}`} className="min-w-0 flex-1 text-[10px] text-white" />
                 <ExternalLink className="h-3 w-3 shrink-0" />
               </div>
             ) : currentTip ? (
@@ -153,7 +153,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 title="Denna text är genererad av vår AI-karriärcoach när inga aktuella RSS-artiklar finns tillgängliga."
               >
                 <Sparkles className="h-3 w-3 shrink-0" />
-                <span className="text-[10px] font-medium truncate">AI-genererad</span>
+                <span className="min-w-0 flex-1 truncate text-[10px] font-medium">AI-genererad</span>
               </div>
             ) : null}
           </div>

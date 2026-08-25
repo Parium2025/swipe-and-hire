@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getStatusAlertHistory, processStatusAlerts, type StatusAlert } from '@/lib/statusAlerts';
 import { getAppFailureHistory, subscribeToAppFailures, type AppFailure } from '@/lib/appFailureMonitor';
 import { supabase } from '@/integrations/supabase/client';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 type StoredException = {
   id: string;
@@ -188,9 +189,9 @@ export default function RealtimeStatusPage() {
               <div className="space-y-2">
                 {alerts.slice(0, 5).map((alert) => (
                   <div key={alert.id} className="rounded-lg border border-border bg-background/50 p-3 text-sm">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-medium text-foreground">{alert.title}</span>
-                      <span className={alert.status === 'critical' ? 'text-xs text-red-300' : 'text-xs text-amber-300'}>
+                    <div className="flex min-w-0 items-center justify-between gap-3">
+                      <TruncatedText text={alert.title} className="flex-1 font-medium text-foreground" />
+                      <span className={alert.status === 'critical' ? 'shrink-0 text-xs text-red-300' : 'shrink-0 text-xs text-amber-300'}>
                         {new Date(alert.createdAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -223,9 +224,9 @@ export default function RealtimeStatusPage() {
                 last_seen_at: new Date(failure.lastSeenAt).toISOString(),
               }))).map((failure) => (
                 <div key={failure.id} className="rounded-lg border border-border bg-background/50 p-3 text-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-medium text-foreground">{failure.title}</span>
-                    <span className={failure.severity === 'critical' ? 'text-xs text-red-300' : 'text-xs text-amber-300'}>
+                  <div className="flex min-w-0 items-center justify-between gap-3">
+                    <TruncatedText text={failure.title} className="flex-1 font-medium text-foreground" />
+                    <span className={failure.severity === 'critical' ? 'shrink-0 text-xs text-red-300' : 'shrink-0 text-xs text-amber-300'}>
                       {failure.occurrence_count}× · {new Date(failure.last_seen_at).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
