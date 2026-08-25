@@ -8,7 +8,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_EMAIL = "fredrikandits@hotmail.com";
+// Läses från secrets (samma mönster som send-admin-alert) så adressen kan bytas
+// utan kodändring och inte ligger i repo-historiken.
+const ADMIN_EMAIL = Deno.env.get("ADMIN_ALERT_EMAIL") ?? "fredrikandits@hotmail.com";
 
 interface NotificationRequest {
   ticketId: string;
