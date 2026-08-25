@@ -256,7 +256,7 @@ export function MessageBubble({
         )}>
           {/* Sender name for group chats */}
           {isGroup && showAvatar && !isOwn && senderName !== 'Okänd' && (
-            <span className="text-pure-white text-xs mb-1 ml-1">
+            <span className="block max-w-full truncate text-pure-white text-xs mb-1 ml-1">
               {senderName}
             </span>
           )}
