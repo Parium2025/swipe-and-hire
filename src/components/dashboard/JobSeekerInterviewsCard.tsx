@@ -119,10 +119,13 @@ export const JobSeekerInterviewsCard = memo(() => {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-white truncate">
+                        <p
+                          className="text-xs font-semibold text-white truncate"
+                          title={interview.job_postings?.title || 'Intervju'}
+                        >
                           {interview.job_postings?.title || 'Intervju'}
                         </p>
-                        <p className="text-[10px] text-white truncate">
+                        <p className="text-[10px] text-white truncate" title={companyName}>
                           {companyName}
                         </p>
                       </div>

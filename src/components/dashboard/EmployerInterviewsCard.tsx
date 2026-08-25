@@ -105,8 +105,8 @@ export const EmployerInterviewsCard = memo(() => {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-white truncate">{interview.candidate_name}</p>
-                        <p className="text-[10px] text-white truncate">{interview.job_title}</p>
+                        <p className="text-xs font-semibold text-white truncate" title={interview.candidate_name}>{interview.candidate_name}</p>
+                        <p className="text-[10px] text-white truncate" title={interview.job_title}>{interview.job_title}</p>
                       </div>
                       <span className={cn(
                         "text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap text-white",
