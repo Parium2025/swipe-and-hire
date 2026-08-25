@@ -75,6 +75,12 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
         invalidateStats
       )
+      // DELETE-payloads innehåller endast id (REPLICA IDENTITY DEFAULT) och matchar
+      // därför inte filtret ovan — lyssna ofiltrerat och invalidera bara cachen.
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'job_applications' },
+        invalidateStats
+      )
+
       .on('postgres_changes', { event: '*', schema: 'public', table: 'interviews', filter: `applicant_id=eq.${user.id}` },
         invalidateStats
       )
