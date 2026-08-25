@@ -164,16 +164,26 @@ export const BookInterviewDialog = ({
       setEditableAddress(existingInterview.location_details.split('\n\n')[0]);
     }
     if (existingInterview.subject) setSubject(existingInterview.subject);
-    if (existingInterview.message) setMessage(existingInterview.message);
+    if (existingInterview.message) {
+      skipNextMessageResetRef.current = true;
+      setMessage(existingInterview.message);
+    }
   }, [open, existingInterview]);
 
 
   // Update message when location type changes
   useEffect(() => {
     if (open) {
+      // Vid ombokning behåller vi rekryterarens egna text – standardmallen
+      // får aldrig skriva över den när platstypen förifylls.
+      if (skipNextMessageResetRef.current) {
+        skipNextMessageResetRef.current = false;
+        return;
+      }
       setMessage(getDefaultMessageForType(locationType));
     }
   }, [locationType]);
+
 
   // Update location details when type or address changes
   useEffect(() => {
