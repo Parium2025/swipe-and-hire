@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
@@ -62,6 +62,7 @@ export const BookInterviewDialog = ({
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const skipNextMessageResetRef = useRef(false);
   
   // Get employer's settings from profile FIRST (before using in state initialization)
   const savedOfficeAddress = (profile as any)?.interview_office_address || profile?.address || '';
@@ -224,24 +225,37 @@ export const BookInterviewDialog = ({
           ? normalizeMeetingLink(editableVideoLink || locationDetails || '')
           : locationDetails || '';
 
-      // Create interview
-      const { data: interviewRow, error } = await supabase.from('interviews').insert({
-        job_id: jobId,
-        applicant_id: candidateId,
-        application_id: applicationId,
-        employer_id: user.id,
+      const interviewFields = {
         scheduled_at: scheduledAt.toISOString(),
         duration_minutes: parseInt(duration),
         location_type: locationType,
         location_details: normalizedVideoLocationDetails || null,
         subject: subject || null,
         message: message || null,
-        status: 'pending',
-      }).select('id').single();
+      };
+
+      // Ombokning uppdaterar samma möte – annars får kandidaten två
+      // kalenderposter och två intervjuer i sina listor.
+      const { data: interviewRow, error } = isReschedule && existingInterview
+        ? await supabase
+            .from('interviews')
+            .update({ ...interviewFields, status: 'pending' })
+            .eq('id', existingInterview.id)
+            .eq('employer_id', user.id)
+            .select('id')
+            .single()
+        : await supabase.from('interviews').insert({
+            job_id: jobId,
+            applicant_id: candidateId,
+            application_id: applicationId,
+            employer_id: user.id,
+            ...interviewFields,
+            status: 'pending',
+          }).select('id').single();
 
       if (error) throw error;
 
-      let description = 'Intervjun är bokad.';
+      let description = isReschedule ? 'Intervjun är ombokad.' : 'Intervjun är bokad.';
 
       // 1. Send the interview invitation email with .ics calendar attachment
       try {
@@ -296,15 +310,20 @@ export const BookInterviewDialog = ({
         description = 'Intervjukallelse med kalenderinbjudan skickad!';
       }
 
-      toast.success(`Intervju bokad för ${candidateName}`, { description });
+      toast.success(
+        isReschedule ? `Intervju ombokad för ${candidateName}` : `Intervju bokad för ${candidateName}`,
+        { description },
+      );
 
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-interviews'] });
+      queryClient.invalidateQueries({ queryKey: ['existing-interview', applicationId] });
       queryClient.invalidateQueries({ queryKey: ['candidate-activities'] });
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
       console.error('Error creating interview:', error);
-      toast.error('Kunde inte boka intervjun');
+      toast.error(isReschedule ? 'Kunde inte boka om intervjun' : 'Kunde inte boka intervjun');
     } finally {
       setIsSubmitting(false);
     }
@@ -356,7 +375,7 @@ export const BookInterviewDialog = ({
         className="parium-panel max-w-none w-[min(92vw,500px)] max-h-[85vh] bg-parium-gradient text-white border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden p-0 flex flex-col"
       >
         <DialogHeader className="sr-only">
-          <DialogTitle className="sr-only">Boka intervju</DialogTitle>
+          <DialogTitle className="sr-only">{isReschedule ? 'Boka om intervju' : 'Boka intervju'}</DialogTitle>
           <DialogDescription className="sr-only">Skicka en intervjukallelse till {candidateName}</DialogDescription>
         </DialogHeader>
         <AnimatedBackground showBubbles={false} />
@@ -365,7 +384,7 @@ export const BookInterviewDialog = ({
           <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
             <h2 className="text-white text-lg font-semibold flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5" />
-                Boka intervju
+                {isReschedule ? 'Boka om intervju' : 'Boka intervju'}
               </h2>
               <button
                 onClick={() => handleOpenChange(false)}
@@ -377,7 +396,9 @@ export const BookInterviewDialog = ({
 
           <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
             <p className="text-white text-center text-sm leading-snug">
-              Skicka en intervjukallelse till {candidateName} för tjänsten {jobTitle}
+              {isReschedule
+                ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
+                : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
             </p>
 
           {/* Date picker */}
@@ -584,7 +605,7 @@ export const BookInterviewDialog = ({
                     Skickar...
                   </>
                 ) : (
-                  'Skicka intervjukallelse'
+                  isReschedule ? 'Skicka ny tid' : 'Skicka intervjukallelse'
                 )}
               </Button>
               <Button 
