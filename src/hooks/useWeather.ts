@@ -8,6 +8,7 @@ import {
   getCachedLocation,
   setCachedLocation,
   getCachedWeather,
+  getStaleCachedWeather,
   setCachedWeather,
   getWeatherInfo,
   fetchCurrentWeather,
