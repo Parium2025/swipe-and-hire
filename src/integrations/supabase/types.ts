@@ -2819,6 +2819,7 @@ export type Database = {
           company_logo_original_url: string | null
           company_logo_url: string | null
           company_name: string | null
+          company_social_media_links: Json
           cover_image_url: string | null
           created_at: string
           cv_url: string | null
@@ -2871,6 +2872,7 @@ export type Database = {
           company_logo_original_url?: string | null
           company_logo_url?: string | null
           company_name?: string | null
+          company_social_media_links?: Json
           cover_image_url?: string | null
           created_at?: string
           cv_url?: string | null
@@ -2923,6 +2925,7 @@ export type Database = {
           company_logo_original_url?: string | null
           company_logo_url?: string | null
           company_name?: string | null
+          company_social_media_links?: Json
           cover_image_url?: string | null
           created_at?: string
           cv_url?: string | null
@@ -4008,6 +4011,7 @@ export type Database = {
           company_logo_original_url: string | null
           company_logo_url: string | null
           company_name: string | null
+          company_social_media_links: Json
           cover_image_url: string | null
           created_at: string
           cv_url: string | null
