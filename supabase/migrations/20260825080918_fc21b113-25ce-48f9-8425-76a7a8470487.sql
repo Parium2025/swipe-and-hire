@@ -1,0 +1,17 @@
+DROP INDEX IF EXISTS public.idx_candidate_evaluations_job_applicant;
+DROP INDEX IF EXISTS public.idx_candidate_summaries_job_applicant;
+DROP INDEX IF EXISTS public.idx_email_confirmations_token;
+DROP INDEX IF EXISTS public.idx_email_confirmations_user_id;
+DROP INDEX IF EXISTS public.idx_unsubscribe_tokens_token;
+DROP INDEX IF EXISTS public.idx_job_applications_job_applicant;
+DROP INDEX IF EXISTS public.idx_job_views_job_user;
+DROP INDEX IF EXISTS public.idx_my_candidates_applicant_id;
+DROP INDEX IF EXISTS public.idx_my_candidates_application_id;
+DROP INDEX IF EXISTS public.idx_notifications_user_id;
+DROP INDEX IF EXISTS public.idx_cv_summaries_user;
+DROP INDEX IF EXISTS public.idx_profile_cv_summaries_user_id;
+DROP INDEX IF EXISTS public.idx_profiles_user_id;
+DROP INDEX IF EXISTS public.idx_suppressed_emails_email;
+DROP INDEX IF EXISTS public.idx_swipe_actions_user_job;
+DROP INDEX IF EXISTS public.idx_my_candidates_recruiter_id;
+DROP INDEX IF EXISTS public.idx_my_candidates_stage;
