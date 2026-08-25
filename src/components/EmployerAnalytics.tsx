@@ -322,7 +322,7 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
     <div>
       <div className="flex items-baseline justify-between mb-2">
         <span className="text-2xl font-bold text-white tabular-nums">{totalViews}</span>
-        <span className="text-[11px] text-white">unika besökare under perioden</span>
+        <span className="text-[11px] text-white">visningar under perioden</span>
       </div>
       <svg width="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
         <defs>
@@ -646,7 +646,31 @@ const EmployerAnalytics = memo(() => {
 
   const deviceBreakdown = useMemo(() => rawData?.device_breakdown ?? [], [rawData]);
   const osBreakdown = useMemo(() => rawData?.os_breakdown ?? [], [rawData]);
-  const dailyViews = useMemo(() => rawData?.daily_views ?? [], [rawData]);
+  // Dagar utan visningar saknas i svaret. Utan utfyllnad blir tidsaxeln
+  // felaktig — två punkter med en veckas mellanrum ritas som grannar.
+  const dailyViews = useMemo(() => {
+    const raw = rawData?.daily_views ?? [];
+    if (raw.length < 2) return raw;
+
+    const sorted = [...raw]
+      .filter((d) => typeof d?.date === 'string' && !Number.isNaN(Date.parse(`${d.date}T00:00:00Z`)))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    if (sorted.length < 2) return sorted;
+
+    const counts = new Map(sorted.map((d) => [d.date, Number(d.count) || 0]));
+    const cursor = new Date(`${sorted[0].date}T00:00:00Z`);
+    const end = new Date(`${sorted[sorted.length - 1].date}T00:00:00Z`);
+    const filled: DailyView[] = [];
+
+    // Skyddsspärr: aldrig fler än ~2 år punkter oavsett dataläge.
+    while (cursor <= end && filled.length < 800) {
+      const key = cursor.toISOString().slice(0, 10);
+      filled.push({ date: key, count: counts.get(key) ?? 0 });
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+
+    return filled;
+  }, [rawData]);
   const trends = rawData?.trends ?? null;
   const bestDay = rawData?.best_day ?? null;
   const ttfa = useMemo(() => rawData?.time_to_first_application ?? [], [rawData]);
@@ -840,7 +864,7 @@ const EmployerAnalytics = memo(() => {
               <CardContent className="p-4 flex flex-col h-full">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <span className="min-w-0 flex-1 text-[11px] font-medium leading-tight text-white [overflow-wrap:anywhere]">
-                    Bästa publiceringsdag
+                    Mest aktiva veckodag
                   </span>
                   <div className="-mt-1 shrink-0">
                     <InlineInfoTooltip content="Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser." />
