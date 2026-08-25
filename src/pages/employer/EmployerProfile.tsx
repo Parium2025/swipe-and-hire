@@ -1,3 +1,4 @@
+import { TEXT_LIMITS } from '@/lib/textLimits';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -521,6 +522,7 @@ const EmployerProfile = () => {
                 <Label htmlFor="first_name" className="text-sm text-white">Förnamn</Label>
                 <Input
                   id="first_name"
+                  maxLength={TEXT_LIMITS.personName}
                   value={formData.first_name}
                   onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                   className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
@@ -530,6 +532,7 @@ const EmployerProfile = () => {
                 <Label htmlFor="last_name" className="text-sm text-white">Efternamn</Label>
                 <Input
                   id="last_name"
+                  maxLength={TEXT_LIMITS.personName}
                   value={formData.last_name}
                   onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                   className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
@@ -561,6 +564,7 @@ const EmployerProfile = () => {
               <Label htmlFor="location" className="text-sm text-white">Plats</Label>
                 <Input
                   id="location"
+                  maxLength={TEXT_LIMITS.location}
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
                   placeholder="T.ex. Stockholm, Sverige"
@@ -572,6 +576,7 @@ const EmployerProfile = () => {
               <Label htmlFor="phone" className="text-sm text-white">Telefonnummer (frivilligt)</Label>
                 <Input
                   id="phone"
+                  maxLength={TEXT_LIMITS.phone}
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   placeholder="T.ex. 070-123 45 67"
@@ -583,6 +588,7 @@ const EmployerProfile = () => {
               <Label htmlFor="bio" className="text-sm text-white">Om mig</Label>
                 <Textarea
                   id="bio"
+                  maxLength={TEXT_LIMITS.bio}
                   value={formData.bio}
                   onChange={(e) => setFormData({...formData, bio: e.target.value})}
                   rows={3}

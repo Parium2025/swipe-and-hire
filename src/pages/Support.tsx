@@ -1,3 +1,4 @@
+import { TEXT_LIMITS } from '@/lib/textLimits';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -240,6 +241,7 @@ const Support = () => {
               <Label htmlFor="message" className="text-sm text-white">Meddelande</Label>
             <Textarea
                 id="message"
+                maxLength={TEXT_LIMITS.supportMessage}
                 placeholder="Beskriv ditt problem eller din fråga detaljerat..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
