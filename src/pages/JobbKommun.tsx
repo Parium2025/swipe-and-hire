@@ -40,14 +40,11 @@ const JobbKommun = () => {
     if (!kommun) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from('job_postings')
-        .select('id,title,workplace_city,workplace_name,employment_type')
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .ilike('workplace_city', `%${kommun.name}%`)
-        .order('created_at', { ascending: false })
-        .limit(6);
+      // Publik RPC — utloggade besökare får inte läsa job_postings direkt.
+      const { data } = await supabase.rpc('search_jobs', {
+        p_city: kommun.name,
+        p_limit: 6,
+      });
       if (!cancelled) setJobs((data as PublicJobRow[]) || []);
     })();
     return () => { cancelled = true; };
