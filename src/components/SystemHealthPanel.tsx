@@ -213,7 +213,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
         supabase.from('job_postings').select('views_count'),
         // Interviews scheduled this week and upcoming
         supabase.from('interviews').select('id', { count: 'exact', head: true })
-          .eq('status', 'scheduled')
+          .in('status', ['pending', 'confirmed'])
           .gte('scheduled_at', new Date().toISOString()),
         // Open support tickets
         supabase.from('support_tickets').select('id', { count: 'exact', head: true })

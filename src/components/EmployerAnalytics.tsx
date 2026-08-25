@@ -681,13 +681,20 @@ const EmployerAnalytics = memo(() => {
   const ttfa = useMemo(() => rawData?.time_to_first_application ?? [], [rawData]);
 
   const totals = useMemo(() => {
-    if (!analytics.length) return { views: 0, applications: 0, interviews: 0 };
+    // Intervjuer utan koppling till en annons (manuellt tillagda kandidater) finns
+    // bara i trends-summan — annars blir organisationens total lägre än delsummorna.
+    const jobInterviews = analytics.reduce((s: number, j: JobAnalytics) => s + j.interviews_count, 0);
+    const trendInterviews = Number(trends?.current_interviews);
+    const interviews = Number.isFinite(trendInterviews) && trendInterviews >= 0
+      ? Math.max(trendInterviews, jobInterviews)
+      : jobInterviews;
+    if (!analytics.length) return { views: 0, applications: 0, interviews };
     return {
       views: analytics.reduce((s: number, j: JobAnalytics) => s + j.views_count, 0),
       applications: analytics.reduce((s: number, j: JobAnalytics) => s + j.applications_count, 0),
-      interviews: analytics.reduce((s: number, j: JobAnalytics) => s + j.interviews_count, 0),
+      interviews,
     };
-  }, [analytics]);
+  }, [analytics, trends]);
 
 
   // Average time to first application
