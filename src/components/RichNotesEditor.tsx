@@ -24,21 +24,9 @@ export interface RichNotesEditorHandle {
   getEditor: () => Editor | null;
 }
 
-const ToolbarButton = memo(({ 
-  onClick, 
-  icon: Icon, 
-  title,
-  isActive = false,
-  disabled = false,
-  compact = false,
-  large = false,
-  tapToPreview = false,
-  previewingId,
-  buttonId,
-  onTapPreview
-}: { 
-  onClick: () => void; 
-  icon: React.ComponentType<{ className?: string }>; 
+interface ToolbarButtonProps {
+  onClick: () => void;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   isActive?: boolean;
   disabled?: boolean;
@@ -48,7 +36,21 @@ const ToolbarButton = memo(({
   previewingId?: string | null;
   buttonId?: string;
   onTapPreview?: (id: string) => void;
-}) => {
+}
+
+const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
+  onClick,
+  icon: Icon,
+  title,
+  isActive = false,
+  disabled = false,
+  compact = false,
+  large = false,
+  tapToPreview = false,
+  previewingId,
+  buttonId,
+  onTapPreview
+}, ref) => {
   const isShowingPreview = tapToPreview && previewingId === buttonId;
 
   const handleClick = () => {
@@ -71,6 +73,7 @@ const ToolbarButton = memo(({
       <Tooltip open={isShowingPreview || undefined}>
         <TooltipTrigger asChild>
           <button
+            ref={ref}
             type="button"
             tabIndex={-1}
             onMouseDown={(e) => {
@@ -105,7 +108,7 @@ const ToolbarButton = memo(({
       </Tooltip>
     </TooltipProvider>
   );
-});
+}));
 
 ToolbarButton.displayName = 'ToolbarButton';
 

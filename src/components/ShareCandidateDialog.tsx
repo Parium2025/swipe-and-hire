@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { Loader2, Check, Users } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface ShareCandidateDialogProps {
   open: boolean;
@@ -116,11 +117,11 @@ export function ShareCandidateDialog({
                 return (
                   <div
                     key={member.userId}
-                    className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                    className="flex items-center justify-between gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <TeamMemberAvatar imageUrl={member.profileImageUrl} />
-                      <span className="text-white font-medium">{fullName}</span>
+                      <TruncatedText text={fullName} className="text-white font-medium" />
                     </div>
                     <Button
                       size="sm"
@@ -129,7 +130,7 @@ export function ShareCandidateDialog({
                       onClick={() => handleShare(member.userId, fullName)}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="transition-colors duration-300 focus:outline-none focus:ring-0"
+                      className="shrink-0 transition-colors duration-300 focus:outline-none focus:ring-0"
                     >
                       {isSharing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

@@ -1,3 +1,4 @@
+import { TEXT_LIMITS } from '@/lib/textLimits';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -574,6 +575,7 @@ const CompanyProfile = () => {
                 <Label htmlFor="company_name" className="text-white">Företagsnamn</Label>
                 <Input
                   id="company_name"
+                  maxLength={TEXT_LIMITS.companyName}
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
                   className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
@@ -738,6 +740,7 @@ const CompanyProfile = () => {
                 <Label htmlFor="address" className="text-white">Huvudkontor</Label>
                 <Input
                   id="address"
+                  maxLength={TEXT_LIMITS.address}
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                   placeholder="Hammarby Backen 89555"
@@ -749,6 +752,7 @@ const CompanyProfile = () => {
                 <Label htmlFor="website" className="text-white">Webbsida</Label>
                 <Input
                   id="website"
+                  maxLength={TEXT_LIMITS.website}
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="https://din-webbsida.se"
@@ -761,6 +765,7 @@ const CompanyProfile = () => {
               <Label htmlFor="company_description" className="text-white">Företagsbeskrivning</Label>
               <Textarea
                 id="company_description"
+                maxLength={TEXT_LIMITS.companyDescription}
                 value={formData.company_description}
                 onChange={(e) => setFormData({...formData, company_description: e.target.value})}
                 placeholder="Vi säljer bilar"

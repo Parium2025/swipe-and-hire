@@ -2043,6 +2043,7 @@ export function MessageTemplatesSettings() {
                             value={templateForm.channelContent[channel].subject}
                             onFocus={() => setActiveTemplateChannel(channel)}
                             onChange={(e) => setTemplateChannelContent(channel, 'subject', e.target.value)}
+                            maxLength={200}
                             className="bg-white/5 border-white/10 text-white"
                           />
                           {templateForm.channelContent[channel].subject.length > 60 && (
