@@ -408,7 +408,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
                     <TooltipProvider delayDuration={200}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="text-[12px] text-white truncate max-w-[200px] sm:max-w-[300px] md:max-w-[400px] cursor-default">{t.title}</span>
+                          <span className="text-[12px] text-white truncate min-w-0 flex-1 cursor-default">{t.title}</span>
                         </TooltipTrigger>
                         <TooltipContent side="top" className="max-w-[300px] text-xs">
                           <p>{t.title}</p>
