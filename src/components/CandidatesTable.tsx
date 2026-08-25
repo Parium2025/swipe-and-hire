@@ -4,6 +4,7 @@ import { ApplicationData } from '@/hooks/useApplicationsData';
 import { formatTimeAgo } from '@/lib/date';
 import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { CandidateAvatar } from './CandidateAvatar';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
@@ -778,9 +779,12 @@ export function CandidatesTable({
                           lastName={application.last_name}
                           stopPropagation
                         />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-white">{application.first_name} {application.last_name}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <TruncatedText
+                              text={`${application.first_name} ${application.last_name}`}
+                              className="font-medium text-white max-w-[220px]"
+                            />
                             {teamInfo && teamInfo.colleagues.length > 0 && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -823,7 +827,7 @@ export function CandidatesTable({
                             )}
 
                           </div>
-                          {application.phone && <div className="text-sm text-white">{application.phone}</div>}
+                          {application.phone && <div className="text-sm text-white truncate max-w-[220px]">{application.phone}</div>}
                         </div>
                       </div>
                     </TableCell>
@@ -837,7 +841,9 @@ export function CandidatesTable({
                         })}
                       </div>
                     </TableCell>
-                    <TableCell className="text-white">{application.job_title || 'Okänd tjänst'}</TableCell>
+                    <TableCell className="text-white max-w-[180px]">
+                      <TruncatedText text={application.job_title || 'Okänd tjänst'} />
+                    </TableCell>
                     <TableCell className="text-white whitespace-nowrap">{formatTimeAgo(application.applied_at)}</TableCell>
                     <TableCell className="text-white whitespace-nowrap">
                       {application.last_active_at ? (
