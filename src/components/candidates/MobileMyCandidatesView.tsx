@@ -142,9 +142,10 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-white font-medium text-sm truncate">
-          {candidate.first_name} {candidate.last_name}
-        </p>
+        <TruncatedText
+          text={`${candidate.first_name} ${candidate.last_name}`}
+          className="text-white font-medium text-sm"
+        />
         <StarRating rating={candidate.rating} />
         {candidate.job_title && (
           <TruncatedText text={candidate.job_title} className="text-white text-[11px]" />
