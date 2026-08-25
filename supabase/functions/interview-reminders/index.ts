@@ -406,9 +406,32 @@ Deno.serve(async (req) => {
             ? `${candidateProfile.first_name || ""} ${candidateProfile.last_name || ""}`.trim()
             : "kandidaten";
 
-          // Send push notification to recruiter
+          const followupTitle = "Dags att ge återkoppling 💬";
+          const followupBody = `Det har gått 3 dagar sedan intervjun med ${candidateName} för "${jobTitle}". Ge kandidaten besked!`;
+
+          // Notis i appen först – push är ett komplement för mobilappen.
+          const { error: followupNotifError } = await supabase.from("notifications").insert({
+            user_id: interview.employer_id,
+            type: "followup_reminder",
+            title: followupTitle,
+            body: followupBody,
+            metadata: {
+              interview_id: interview.id,
+              applicant_id: interview.applicant_id,
+              route: "/employer",
+            },
+          });
+
+          if (followupNotifError) {
+            console.error(`Error creating follow-up notification for interview ${interview.id}:`, followupNotifError);
+            errors.push(`Followup ${interview.id}: ${followupNotifError.message}`);
+          } else {
+            followupRemindersSent++;
+            console.log(`Follow-up reminder sent to employer ${interview.employer_id} for candidate ${candidateName}`);
+          }
+
           try {
-            const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+            await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -416,8 +439,8 @@ Deno.serve(async (req) => {
               },
               body: JSON.stringify({
                 recipient_id: interview.employer_id,
-                title: "Dags att ge återkoppling 💬",
-                body: `Det har gått 3 dagar sedan intervjun med ${candidateName} för "${jobTitle}". Ge kandidaten besked!`,
+                title: followupTitle,
+                body: followupBody,
                 data: {
                   type: "followup_reminder",
                   interview_id: interview.id,
@@ -426,16 +449,8 @@ Deno.serve(async (req) => {
                 },
               }),
             });
-
-            const result = await response.json();
-            if (result.success || result.sent >= 0) {
-              followupRemindersSent++;
-              console.log(`Follow-up reminder sent to employer ${interview.employer_id} for candidate ${candidateName}`);
-            }
           } catch (err) {
-            console.error(`Error sending follow-up reminder for interview ${interview.id}:`, err);
-            const message = err instanceof Error ? err.message : 'Unknown error';
-            errors.push(`Followup ${interview.id}: ${message}`);
+            console.error(`Push failed for follow-up ${interview.id}:`, err);
           }
         }
       }
