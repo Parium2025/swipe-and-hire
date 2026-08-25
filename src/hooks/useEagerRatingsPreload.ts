@@ -799,9 +799,11 @@ export const useEagerRatingsPreload = () => {
   useEffect(() => {
     if (!user) return;
 
+    const instanceId = crypto.randomUUID();
+
     // Realtime för intervjuer
     const interviewsChannel = supabase
-      .channel(`employer-interviews-${user.id}`)
+      .channel(`employer-interviews-preload-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -818,7 +820,7 @@ export const useEagerRatingsPreload = () => {
 
     // Realtime för jobbmallar
     const templatesChannel = supabase
-      .channel(`employer-templates-${user.id}`)
+      .channel(`employer-templates-preload-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -835,7 +837,7 @@ export const useEagerRatingsPreload = () => {
 
     // Realtime för stage-settings
     const stageSettingsChannel = supabase
-      .channel(`employer-stage-settings-${user.id}`)
+      .channel(`employer-stage-settings-preload-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
