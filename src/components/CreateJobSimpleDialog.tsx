@@ -829,8 +829,15 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               </Button>
               <Button 
                 variant="glass"
-                onMouseDown={(e) => e.currentTarget.blur()}
-                onMouseUp={(e) => e.currentTarget.blur()}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  const activeEl = document.activeElement as HTMLElement;
+                  if (activeEl?.blur) activeEl.blur();
+                }}
+                onTouchStart={() => {
+                  const activeEl = document.activeElement as HTMLElement;
+                  if (activeEl?.blur) activeEl.blur();
+                }}
                 onClick={handleClose}
                 className="min-h-[44px] rounded-full"
               >
