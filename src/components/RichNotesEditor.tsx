@@ -73,6 +73,7 @@ const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
       <Tooltip open={isShowingPreview || undefined}>
         <TooltipTrigger asChild>
           <button
+            ref={ref}
             type="button"
             tabIndex={-1}
             onMouseDown={(e) => {
@@ -107,7 +108,7 @@ const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
       </Tooltip>
     </TooltipProvider>
   );
-});
+}));
 
 ToolbarButton.displayName = 'ToolbarButton';
 
