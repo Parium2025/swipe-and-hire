@@ -128,7 +128,7 @@ export const MyCandidatesHeader = ({
                 <TruncatedText
                   text={title}
                   className="truncate min-w-0 text-white"
-                  tooltipSide="bottom"
+                  side="bottom"
                 />
                 <span className="text-white flex-shrink-0">({totalCount})</span>
                 <ChevronDown
