@@ -346,14 +346,28 @@ Deno.serve(async (req) => {
       for (const interview of pastInterviews) {
         const jobTitle = (interview.job_postings as any)?.title || "tjänsten";
 
+        // Claim först: samtidiga körningar får aldrig skicka dubbla påminnelser.
+        const { data: claimedFollowup } = await supabase
+          .from("interviews")
+          .update({ followup_reminder_sent_at: now.toISOString() })
+          .eq("id", interview.id)
+          .is("followup_reminder_sent_at", null)
+          .select("id")
+          .maybeSingle();
+        if (!claimedFollowup) continue;
+
         // Check if the recruiter has already taken action on this candidate
         // (changed status from pending/reviewed, or added to my_candidates with stage change)
-        const { data: application } = await supabase
-          .from("job_applications")
-          .select("status")
-          .eq("job_id", interview.job_id!)
-          .eq("applicant_id", interview.applicant_id)
-          .single();
+        // maybeSingle: intervjun kan sakna koppling till en ansökan (manuellt tillagd kandidat).
+        const { data: application } = interview.job_id
+          ? await supabase
+              .from("job_applications")
+              .select("status")
+              .eq("job_id", interview.job_id)
+              .eq("applicant_id", interview.applicant_id)
+              .limit(1)
+              .maybeSingle()
+          : { data: null };
 
         // If the candidate is still in "interview" status, the recruiter hasn't acted
         const needsReminder = application?.status === "interview" || application?.status === "pending" || application?.status === "reviewed";
@@ -364,7 +378,8 @@ Deno.serve(async (req) => {
             .from("profiles")
             .select("first_name, last_name")
             .eq("user_id", interview.applicant_id)
-            .single();
+            .maybeSingle();
+
 
           const candidateName = candidateProfile
             ? `${candidateProfile.first_name || ""} ${candidateProfile.last_name || ""}`.trim()
