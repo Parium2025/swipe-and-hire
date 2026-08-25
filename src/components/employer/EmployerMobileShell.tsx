@@ -8,15 +8,11 @@ import { FloatingBubbles } from '@/components/FloatingBubbles';
 import { Plus } from 'lucide-react';
 import { EmployerLogoSidebarTrigger, EmployerMobileProfileAvatar } from '@/components/employer/EmployerMobileHeader';
 import NotificationCenter from '@/components/NotificationCenter';
-import DeveloperControls from '@/components/DeveloperControls';
 
 interface EmployerMobileShellProps {
   children: ReactNode;
   sidebarOpen: boolean;
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
-  isOrgAdmin: boolean;
-  developerView: string;
-  onViewChange: (view: string) => void;
   createJobButtonRef: RefObject<HTMLButtonElement>;
   mainScrollRef: RefObject<HTMLElement>;
   onJobCreated: () => void;
@@ -26,9 +22,6 @@ const EmployerMobileShell = ({
   children,
   sidebarOpen,
   setSidebarOpen,
-  isOrgAdmin,
-  developerView,
-  onViewChange,
   createJobButtonRef,
   mainScrollRef,
   onJobCreated,
@@ -62,15 +55,6 @@ const EmployerMobileShell = ({
               </button>
               <NotificationCenter />
               <EmployerMobileProfileAvatar />
-              {isOrgAdmin && (
-                <div className="hidden md:block">
-                  <DeveloperControls
-                    onViewChange={onViewChange}
-                    currentView={developerView}
-                    forceVisible={isOrgAdmin}
-                  />
-                </div>
-              )}
             </div>
           </header>
 

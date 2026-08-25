@@ -88,7 +88,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
       {/* DESKTOP chrome — mirrors EmployerTopNav layout exactly.
           Real order (left→right):
             LEFT: logo | Annonser | Kandidater | Chattar | Företag | Notif | Profil-avatar
-            RIGHT (extraRight): Utvecklarvy pill | Skapa ny annons */}
+            RIGHT (extraRight): Skapa ny annons */}
       <header className="hidden lg:flex shrink-0 h-16 items-center border-b border-white/20 bg-transparent">
         <div className="w-full responsive-container-wide flex items-center justify-between">
           {/* Left group — allt sitter i samma gap-1 block som i EmployerTopNav */}
@@ -110,9 +110,8 @@ const SkeletonChrome = memo(function SkeletonChrome() {
               <div className={`h-10 w-[64px] rounded-lg ${SHAPE}`} />
             </div>
           </div>
-          {/* Right group — extraRight: Utvecklarvy pill + Skapa ny annons */}
+          {/* Right group — extraRight: Skapa ny annons */}
           <div className="flex items-center gap-3">
-            <div className={`h-10 w-[132px] rounded-lg ${SHAPE}`} />
             <div className={`h-10 w-[164px] rounded-lg ${SHAPE}`} />
           </div>
         </div>

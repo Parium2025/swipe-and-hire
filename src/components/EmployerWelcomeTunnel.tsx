@@ -35,13 +35,10 @@ export const clearEmployerWelcomeDraft = (uid?: string | null) => {
 
 interface EmployerWelcomeTunnelProps {
   onComplete: () => void;
-  /** Developer-only: jump directly to a given step on mount */
   initialStep?: number;
-  /** Developer-only: when true, no data is written to the database (Spara is mocked) */
-  previewMode?: boolean;
 }
 
-const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: EmployerWelcomeTunnelProps) => {
+const EmployerWelcomeTunnel = ({ onComplete, initialStep }: EmployerWelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { toast } = useToast();
@@ -242,16 +239,6 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
 
     setIsSubmitting(true);
     try {
-      // 🛠️ Preview mode (DeveloperControls) – do NOT touch the database
-      if (previewMode) {
-        toast({
-          title: "Förhandsgranskning",
-          description: "Sparat (preview) – ingen data skrevs till databasen."
-        });
-        onComplete();
-        return;
-      }
-
       const result = await updateProfile({
         company_logo_url: formData.companyLogoUrl,
         interview_video_link: formData.interviewVideoLink

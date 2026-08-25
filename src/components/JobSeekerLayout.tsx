@@ -1,11 +1,9 @@
 import { ReactNode, memo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsPlatformAdmin } from '@/hooks/useIsPlatformAdmin';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';
 import JobSeekerTopNav from '@/components/JobSeekerTopNav';
-import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,8 +23,6 @@ import { useDevice } from '@/hooks/use-device';
 interface JobSeekerLayoutProps {
   children: ReactNode;
   overlay?: ReactNode;
-  developerView?: string;
-  onViewChange?: (view: string) => void;
 }
 
 // Logo that acts as sidebar trigger — same visual as desktop PariumLogoButton
@@ -92,9 +88,8 @@ const MobileProfileAvatar = () => {
   );
 };
 
-const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }: JobSeekerLayoutProps) => {
+const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
   const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
-  const { isPlatformAdmin } = useIsPlatformAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -130,15 +125,6 @@ const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }
           {/* Top Navigation for Desktop */}
           <header className="sticky top-0 z-40">
             <JobSeekerTopNav />
-            {/* Developer controls */}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
-              {isPlatformAdmin && onViewChange && (
-                <DeveloperControls 
-                  onViewChange={onViewChange}
-                  currentView={developerView || 'dashboard'}
-                />
-              )}
-            </div>
           </header>
           
           {/* Bubbles - GPU-promoted layer to avoid scroll repaint */}
@@ -219,14 +205,6 @@ const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }
               <NotificationCenter />
               {/* Profile Avatar */}
               <MobileProfileAvatar />
-              {isPlatformAdmin && onViewChange && (
-                <div className="hidden md:block">
-                  <DeveloperControls 
-                    onViewChange={onViewChange}
-                    currentView={developerView || 'dashboard'}
-                  />
-                </div>
-              )}
             </div>
           </header>
           
