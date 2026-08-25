@@ -1,5 +1,4 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
-import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useLocation } from 'react-router-dom';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
@@ -18,13 +17,10 @@ import { NoPlanBanner } from '@/components/NoPlanBanner';
 interface EmployerLayoutProps {
   children: ReactNode;
   overlay?: ReactNode;
-  isOrgAdmin?: boolean;
 }
 
 // Inner component that uses the KanbanLayout context
-const EmployerLayoutInner = memo(({ children, overlay, isOrgAdmin: isOrgAdminProp }: EmployerLayoutProps) => {
-  const { isAdmin: isOrgAdminFromHook } = useIsOrgAdmin();
-  const isOrgAdmin = isOrgAdminProp ?? isOrgAdminFromHook;
+const EmployerLayoutInner = memo(({ children, overlay }: EmployerLayoutProps) => {
   const { invalidateJobs } = useJobsData();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
@@ -137,10 +133,10 @@ const EmployerLayoutInner = memo(({ children, overlay, isOrgAdmin: isOrgAdminPro
 EmployerLayoutInner.displayName = 'EmployerLayoutInner';
 
 // Wrapper component that provides the KanbanLayout context
-const EmployerLayout = memo(({ children, overlay, isOrgAdmin }: EmployerLayoutProps) => {
+const EmployerLayout = memo(({ children, overlay }: EmployerLayoutProps) => {
   return (
     <KanbanLayoutProvider>
-      <EmployerLayoutInner isOrgAdmin={isOrgAdmin} overlay={overlay}>
+      <EmployerLayoutInner overlay={overlay}>
         {children}
       </EmployerLayoutInner>
     </KanbanLayoutProvider>

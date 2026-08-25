@@ -88,6 +88,9 @@ const TeamManagement = () => {
       });
       
       if (!orgData) {
+        setOrganizationId(null);
+        setTeamMembers([]);
+        try { localStorage.removeItem(`${TEAM_CACHE_PREFIX}${user.id}`); } catch { /* ignore */ }
         setLoading(false);
         return;
       }

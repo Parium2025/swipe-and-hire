@@ -8,7 +8,6 @@ import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import CompanyReviews from '@/components/CompanyReviews';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useIsPlatformAdmin } from '@/hooks/useIsPlatformAdmin';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -385,7 +384,6 @@ const employerIntroTourKey = (userId: string) => `parium_emp_intro_tour_done:${u
 
 const Index = () => {
   const { user, profile, userRole, loading, authAction } = useAuth();
-  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
   const { isPlatformAdmin, loading: platformAdminLoading } = useIsPlatformAdmin();
 
   // Förhämta prenumerationsplanerna i bakgrunden så /valj-plan aldrig visar skelett.
@@ -862,7 +860,6 @@ const Index = () => {
     const employerKeepKey = isJobViewOverlay ? lastEmployerPathRef.current : location.pathname;
     return (
       <EmployerLayout
-        isOrgAdmin={isOrgAdmin}
         overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}
       >
         <KeepAlive
