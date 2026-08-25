@@ -416,7 +416,12 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
 
     // For personal scope, filter realtime to only this employer's jobs
     // For org scope, we still need broader listening but use a unique channel name
-    const channelSuffix = `${user.id}-${scope}`;
+    // Varje effect-instans måste ha ett eget kanalnamn. React Strict Mode och
+    // snabba dependency-byten kan starta nästa effect innan removeChannel för
+    // den föregående är klar; återanvändning av namnet ger då en redan
+    // subscribad kanal som inte accepterar fler callbacks.
+    const effectInstanceId = crypto.randomUUID();
+    const channelSuffix = `${user.id}-${scope}-${effectInstanceId}`;
 
     // Only filter for personal scope — org scope needs all org members' jobs
     const jobFilter = scope !== 'organization' ? `employer_id=eq.${user.id}` : undefined;
