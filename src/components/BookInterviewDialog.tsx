@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X, Pencil, CheckCircle2, AlertCircle, Check } from 'lucide-react';
 import { format, startOfDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { normalizeMeetingLink } from '@/lib/meetingLink';
+import { normalizeMeetingLink, isSupportedMeetingLink } from '@/lib/meetingLink';
 
 interface BookInterviewDialogProps {
   open: boolean;
@@ -87,6 +87,14 @@ export const BookInterviewDialog = ({
   // State for editable video link
   const [editableVideoLink, setEditableVideoLink] = useState(savedVideoLink);
   const [videoLinkEditing, setVideoLinkEditing] = useState(false);
+  const [saveVideoLinkAsDefault, setSaveVideoLinkAsDefault] = useState(false);
+
+  const trimmedVideoLink = editableVideoLink.trim();
+  const videoLinkIsValid = trimmedVideoLink
+    ? isSupportedMeetingLink(normalizeMeetingLink(trimmedVideoLink))
+    : false;
+  const videoLinkDiffersFromDefault =
+    !!trimmedVideoLink && normalizeMeetingLink(trimmedVideoLink) !== savedVideoLink;
 
   // Get the correct default message based on location type
   const getDefaultMessageForType = (type: 'video' | 'office') => {
@@ -105,6 +113,8 @@ export const BookInterviewDialog = ({
       setLocationDetails('');
       setEditableAddress(savedOfficeAddress);
       setEditableVideoLink(savedVideoLink);
+      setVideoLinkEditing(false);
+      setSaveVideoLinkAsDefault(false);
       setMessage(videoDefaultMessage);
       setSubject('');
     }
@@ -136,9 +146,12 @@ export const BookInterviewDialog = ({
 
   const isReschedule = !!existingInterview;
 
-  // Set default values when dialog opens — always sync from latest profile
+  // Set default values when dialog OPENS (transition false → true).
+  // Får aldrig köra om på profil-refetch — då skulle en bakgrundsuppdatering
+  // nollställa datum, platstyp, meddelande och rekryterarens inskrivna länk.
+  const wasOpenRef = useRef(false);
   useEffect(() => {
-    if (open) {
+    if (open && !wasOpenRef.current) {
       setSubject(`Intervju för ${jobTitle}`);
       setDate(new Date());
       setLocationType('video');
@@ -146,8 +159,12 @@ export const BookInterviewDialog = ({
       // Sync editable fields from latest profile values
       setEditableAddress(savedOfficeAddress);
       setEditableVideoLink(savedVideoLink);
+      setVideoLinkEditing(false);
+      setSaveVideoLinkAsDefault(false);
     }
-  }, [open, jobTitle, videoDefaultMessage, savedOfficeAddress, savedVideoLink]);
+    wasOpenRef.current = open;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Förifyll med den befintliga bokningen när det är en ombokning.
   // Får bara ske EN gång per öppning – annars skriver en bakgrundsrefetch
@@ -193,7 +210,15 @@ export const BookInterviewDialog = ({
         skipNextMessageResetRef.current = false;
         return;
       }
-      setMessage(getDefaultMessageForType(locationType));
+      // Byt bara ut texten om den fortfarande är en oredigerad standardmall.
+      setMessage((current) => {
+        const untouched =
+          current.trim() === '' ||
+          current === videoDefaultMessage ||
+          current === officeDefaultMessage ||
+          current === FALLBACK_MESSAGE;
+        return untouched ? getDefaultMessageForType(locationType) : current;
+      });
     }
   }, [locationType]);
 
@@ -209,7 +234,7 @@ export const BookInterviewDialog = ({
     } else if (locationType === 'video') {
       const normalizedVideoLink = normalizeMeetingLink(editableVideoLink);
       // Use video link if available, otherwise show generic message
-      setLocationDetails(normalizedVideoLink || 'Videosamtal via Parium');
+      setLocationDetails(normalizedVideoLink || 'Videointervju – länk skickas separat');
     }
   }, [locationType, editableAddress, officeInstructions, editableVideoLink]);
 
@@ -219,6 +244,18 @@ export const BookInterviewDialog = ({
       return;
     }
     
+    if (locationType === 'video' && trimmedVideoLink && !videoLinkIsValid) {
+      toast.error('Videolänken ser inte giltig ut', {
+        description: 'Klistra in hela länken från Teams, Zoom, Google Meet, Webex eller Whereby.',
+      });
+      return;
+    }
+
+    if (locationType === 'office' && !editableAddress.trim()) {
+      toast.error('Ange adressen för intervjun');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -266,6 +303,19 @@ export const BookInterviewDialog = ({
           }).select('id').single();
 
       if (error) throw error;
+
+      // Spara länken som standard om rekryteraren bad om det.
+      if (locationType === 'video' && saveVideoLinkAsDefault && videoLinkIsValid && videoLinkDiffersFromDefault) {
+        try {
+          await supabase
+            .from('profiles')
+            .update({ interview_video_link: normalizeMeetingLink(trimmedVideoLink) })
+            .eq('user_id', user.id);
+          queryClient.invalidateQueries({ queryKey: ['profile'] });
+        } catch (linkErr) {
+          console.error('Kunde inte spara standardlänk:', linkErr);
+        }
+      }
 
       let description = isReschedule ? 'Intervjun är ombokad.' : 'Intervjun är bokad.';
 
@@ -491,36 +541,36 @@ export const BookInterviewDialog = ({
           {/* Location type */}
           <div className="space-y-2">
             <Label className="text-white">Plats</Label>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 className={cn(
-                  "h-[var(--control-height-sm)] inline-flex items-center gap-1.5 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
-                  locationType === 'video' 
-                    ? "bg-white/20 border-white/40 text-white" 
+                  "h-11 inline-flex items-center justify-center gap-2 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
+                  locationType === 'video'
+                    ? "bg-white/20 border-white/40 text-white"
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('video')}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
               >
-                <Video className="h-3.5 w-3.5" />
-                <span>Video</span>
+                <Video className="h-4 w-4" />
+                <span>Videomöte</span>
               </button>
               <button
                 type="button"
                 className={cn(
-                  "h-[var(--control-height-sm)] inline-flex items-center gap-1.5 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
-                  locationType === 'office' 
-                    ? "bg-white/20 border-white/40 text-white" 
+                  "h-11 inline-flex items-center justify-center gap-2 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
+                  locationType === 'office'
+                    ? "bg-white/20 border-white/40 text-white"
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('office')}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
               >
-                <Building2 className="h-3.5 w-3.5" />
-                <span>Kontor</span>
+                <Building2 className="h-4 w-4" />
+                <span>På plats</span>
               </button>
             </div>
           </div>
@@ -529,15 +579,29 @@ export const BookInterviewDialog = ({
           {locationType === 'video' && (
             <div className="space-y-2">
               <Label className="text-white">Videolänk</Label>
-              {editableVideoLink && !videoLinkEditing ? (
-                <button
-                  type="button"
-                  onClick={() => setVideoLinkEditing(true)}
-                  className="w-full flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 h-11 text-left text-white text-sm transition-colors hover:bg-white/15"
-                >
-                  <Video className="h-4 w-4 shrink-0 text-white" />
-                  <span className="truncate">{getVideoLinkLabel(editableVideoLink)}</span>
-                </button>
+
+              {trimmedVideoLink && !videoLinkEditing ? (
+                <div className="rounded-md border border-white/20 bg-white/10 px-3 py-2.5 flex items-center gap-2.5">
+                  {videoLinkIsValid ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-green-400" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-white text-sm truncate">{getVideoLinkLabel(trimmedVideoLink)}</p>
+                    <p className="text-white/70 text-xs truncate">{trimmedVideoLink.replace(/^https?:\/\//, '')}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setVideoLinkEditing(true)}
+                    onMouseDown={(e) => e.currentTarget.blur()}
+                    onMouseUp={(e) => e.currentTarget.blur()}
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-2.5 py-1.5 text-xs text-white transition-colors hover:bg-white/20 focus:outline-none focus:ring-0"
+                  >
+                    <Pencil className="h-3 w-3" />
+                    Ändra
+                  </button>
+                </div>
               ) : (
                 <Input
                   value={editableVideoLink}
@@ -548,13 +612,46 @@ export const BookInterviewDialog = ({
                     if (normalized) setVideoLinkEditing(false);
                   }}
                   autoFocus={videoLinkEditing}
-                  placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                  inputMode="url"
+                  placeholder="Klistra in din möteslänk"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                 />
               )}
-              <p className="text-white text-xs">Din Teams, Zoom eller Google Meet-länk</p>
+
+              {trimmedVideoLink && !videoLinkIsValid && (
+                <p className="text-amber-400 text-xs">
+                  Länken känns inte igen som Teams, Zoom, Google Meet, Webex eller Whereby. Kontrollera att du klistrat in hela länken.
+                </p>
+              )}
+
+              {!trimmedVideoLink && (
+                <p className="text-white text-xs">
+                  Ingen länk angiven – kandidaten får kallelsen med texten “Videointervju – länk skickas separat”.
+                </p>
+              )}
+
+              {videoLinkIsValid && videoLinkDiffersFromDefault && (
+                <button
+                  type="button"
+                  onClick={() => setSaveVideoLinkAsDefault((v) => !v)}
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  onMouseUp={(e) => e.currentTarget.blur()}
+                  className="flex items-center gap-2 text-xs text-white transition-colors focus:outline-none focus:ring-0"
+                >
+                  <span
+                    className={cn(
+                      "h-4 w-4 rounded border flex items-center justify-center transition-colors",
+                      saveVideoLinkAsDefault ? "bg-white/30 border-white/50" : "border-white/30 bg-white/10"
+                    )}
+                  >
+                    {saveVideoLinkAsDefault && <Check className="h-3 w-3 text-white" />}
+                  </span>
+                  Spara som min standardlänk
+                </button>
+              )}
             </div>
           )}
+
 
           {/* Location details - Address and Instructions */}
           {locationType === 'office' && (
