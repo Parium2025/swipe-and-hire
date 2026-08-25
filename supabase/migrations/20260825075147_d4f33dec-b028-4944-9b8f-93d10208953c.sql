@@ -1,0 +1,17 @@
+ALTER TABLE public.conversation_messages REPLICA IDENTITY FULL;
+ALTER TABLE public.conversation_message_reactions REPLICA IDENTITY FULL;
+ALTER TABLE public.conversations REPLICA IDENTITY FULL;
+ALTER TABLE public.candidate_notes REPLICA IDENTITY FULL;
+ALTER TABLE public.employer_notes REPLICA IDENTITY FULL;
+ALTER TABLE public.jobseeker_notes REPLICA IDENTITY FULL;
+ALTER TABLE public.candidate_ratings REPLICA IDENTITY FULL;
+ALTER TABLE public.candidate_evaluations REPLICA IDENTITY FULL;
+ALTER TABLE public.criterion_results REPLICA IDENTITY FULL;
+ALTER TABLE public.candidate_activities REPLICA IDENTITY FULL;
+ALTER TABLE public.interviews REPLICA IDENTITY FULL;
+ALTER TABLE public.job_applications REPLICA IDENTITY FULL;
+ALTER TABLE public.job_stage_settings REPLICA IDENTITY FULL;
+ALTER TABLE public.user_stage_settings REPLICA IDENTITY FULL;
+ALTER TABLE public.saved_searches REPLICA IDENTITY FULL;
+ALTER TABLE public.user_sessions REPLICA IDENTITY FULL;
+ALTER TABLE public.company_reviews REPLICA IDENTITY FULL;
