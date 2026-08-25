@@ -3724,6 +3724,10 @@ export type Database = {
         Args: { p_recruiter_id: string }
         Returns: number
       }
+      count_external_applications: {
+        Args: { p_job_id: string }
+        Returns: number
+      }
       count_job_applications_per_stage: {
         Args: { p_job_id: string }
         Returns: {
