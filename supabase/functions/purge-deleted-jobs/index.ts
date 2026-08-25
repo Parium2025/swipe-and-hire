@@ -2,6 +2,7 @@
 // Anropas nattligen av pg_cron. Endast service_role får trigga.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { requireServiceRoleOrCronSecret } from '../_shared/service-auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,20 +14,16 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // 🔒 Endast service_role får köra (skyddar mot masssraderingsattack)
-  const authHeader = req.headers.get('Authorization') ?? '';
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-  if (!serviceKey || authHeader !== `Bearer ${serviceKey}`) {
-    return new Response(
-      JSON.stringify({ error: 'Forbidden — service role required' }),
-      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
-  }
+  // 🔒 Endast service_role eller pg_cron får köra (skyddar mot masssraderingsattack)
+  const authResp = await requireServiceRoleOrCronSecret(req, corsHeaders);
+  if (authResp) return authResp;
 
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
     serviceKey,
   );
+
 
   const startedAt = Date.now();
 

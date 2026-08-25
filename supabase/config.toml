@@ -77,3 +77,21 @@ project_id = "jrjaegapuujushsiofoi"
     verify_jwt = false
   [functions.weather-cache]
     verify_jwt = false
+  [functions.outreach-open-track]
+    verify_jwt = false
+  [functions.criteria-eval-worker]
+    verify_jwt = false
+  [functions.purge-deleted-jobs]
+    verify_jwt = false
+  [functions.purge-orphaned-media]
+    verify_jwt = false
+  [functions.saved-job-expiration-reminders]
+    verify_jwt = false
+  [functions.cleanup-expired-confirmations]
+    verify_jwt = false
+  [functions.inactive-account-retention]
+    verify_jwt = false
+  [functions.cron-health-watchdog]
+    verify_jwt = false
+  [functions.news-health-watchdog]
+    verify_jwt = false

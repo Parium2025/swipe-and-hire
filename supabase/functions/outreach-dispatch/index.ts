@@ -459,13 +459,17 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
 }
 
 
-function isServiceRoleRequest(request: Request): boolean {
+async function isServiceRoleRequest(request: Request): Promise<boolean> {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return false;
   const token = authHeader.slice('Bearer '.length).trim();
-  // ⚠️ Only trust the literal service-role key. Never trust JWT `role` claim
-  // from a base64 decode — that is trivially forgeable when verify_jwt=false.
-  return token === serviceRoleKey;
+  // ⚠️ Only trust the literal service-role key or the vault-stored pg_cron token.
+  // Never trust a JWT `role` claim from a base64 decode — trivially forgeable
+  // when verify_jwt=false.
+  if (token === serviceRoleKey) return true;
+  if (token.length < 32) return false;
+  const { data, error } = await admin.rpc('verify_cron_secret', { _token: token });
+  return !error && data === true;
 }
 
 
@@ -474,7 +478,7 @@ Deno.serve(async (request) => {
 
   try {
     const user = await getUserFromRequest(request);
-    const serviceRole = isServiceRoleRequest(request);
+    const serviceRole = await isServiceRoleRequest(request);
     const body = request.method === 'POST' ? await request.json().catch(() => ({})) : {};
 
     if ((body as { mode?: string }).mode === 'manual') {
