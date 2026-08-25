@@ -300,7 +300,7 @@ export function SwipeableConversationItem({
             </div>
             <AlertDialogDescription className="text-white text-sm leading-relaxed">
               Vill du ta bort konversationen med{' '}
-              <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">
+              <span className="font-semibold text-white break-words">
                 &quot;{conversationName}&quot;
               </span>
               ? Konversationen försvinner från din inkorg. När båda parter har tagit bort den raderas allt innehåll permanent.

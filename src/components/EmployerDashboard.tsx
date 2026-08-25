@@ -924,7 +924,7 @@ const EmployerDashboard = memo(() => {
             <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
               {jobToDelete && (
                 <>
-                  Är du säker på att du vill ta bort <TruncatedText text={`"${jobToDelete.title}"`} className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom" />? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <TruncatedText text={`"${jobToDelete.title}"`} className="font-semibold text-white break-words" />? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>

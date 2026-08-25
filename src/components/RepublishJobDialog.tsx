@@ -99,7 +99,7 @@ export function RepublishJobDialog({
               <>
                 <TruncatedText
                   text={`"${jobTitle}"`}
-                  className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom"
+                  className="font-semibold text-white break-words"
                 />{' '}
                 återaktiveras i {REPUBLISH_DAYS} dagar. Alla tidigare kandidater, meddelanden och urval följer med.
               </>

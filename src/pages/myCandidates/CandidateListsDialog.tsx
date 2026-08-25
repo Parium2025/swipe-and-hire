@@ -378,7 +378,7 @@ export const CandidateListsDialog = ({
                   Är du säker på att du vill ta bort{' '}
                   <TruncatedText
                     text={`"${pendingDelete.name}"`}
-                    className="font-semibold text-white inline-block max-w-[220px] truncate align-bottom"
+                    className="font-semibold text-white break-words"
                   />
                   ?{' '}
                   {pendingCount > 0

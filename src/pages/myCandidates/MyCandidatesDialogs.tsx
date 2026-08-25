@@ -35,7 +35,7 @@ export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCa
         </div>
         <AlertDialogDescription className="text-white text-sm leading-relaxed">
           Är du säker på att du vill ta bort{' '}
-          <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">
+          <span className="font-semibold text-white break-words">
             "{candidate?.first_name} {candidate?.last_name}"
           </span>
           ? Denna åtgärd går inte att ångra.
