@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.get_employer_team_insights(uuid, integer) FROM PUBLIC, anon;
