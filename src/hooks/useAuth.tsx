@@ -2297,7 +2297,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshSidebarCounts();
         }
       )
+      // DELETE skickar endast id (REPLICA IDENTITY DEFAULT) → matchar inte filtret ovan.
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'job_applications' },
+        () => {
+          refreshSidebarCounts();
+        }
+      )
       .subscribe((status) => handleChannelStatus('applications', status));
+
 
     // Real-time för alla job_applications (uppdaterar employer kandidat-badge)
     // Lyssnar på alla INSERT för att fånga nya ansökningar till arbetsgivarens jobb
