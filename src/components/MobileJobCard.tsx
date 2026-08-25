@@ -355,21 +355,21 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
                   <TruncatedText
                     text={recruiterName || '–'}
-                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+                    className="min-w-0 flex-1 truncate text-right text-sm leading-snug text-white font-medium"
                   />
                 </div>
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
                   <TruncatedText
                     text={job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}
-                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+                    className="min-w-0 flex-1 truncate text-right text-sm leading-snug text-white font-medium"
                   />
                 </div>
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
                   <TruncatedText
                     text={job.location || '–'}
-                    className="max-w-[65%] truncate text-right text-sm leading-snug text-white font-medium"
+                    className="min-w-0 flex-1 truncate text-right text-sm leading-snug text-white font-medium"
                   />
                 </div>
                 <div className="flex items-center justify-between gap-3">
