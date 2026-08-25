@@ -3710,6 +3710,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      complete_past_interviews: { Args: never; Returns: number }
       compute_job_fingerprint: {
         Args: { j: Database["public"]["Tables"]["job_postings"]["Row"] }
         Returns: string
