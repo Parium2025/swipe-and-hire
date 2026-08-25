@@ -3,6 +3,7 @@ import { MessageSquare, CalendarPlus, Users, Trash2, ChevronLeft, ChevronRight }
 import type { StageSettings } from '@/hooks/useStageSettings';
 import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
 import type { ButtonProps } from '@/components/ui/button';
+import { noFocusRingProps } from '@/lib/noFocusRing';
 
 interface QuickAction {
   key: ManualOutreachActionKey;
