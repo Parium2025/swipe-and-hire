@@ -255,7 +255,11 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
           {isConfirmed && interview.location_type === 'office' && interview.location_details && (
             <Button
               onClick={() => {
-                const query = encodeURIComponent(interview.location_details || '');
+                // Endast adressraden ska till kartan – ev. instruktioner
+                // efter tomrad förstör sökningen.
+                const address = (interview.location_details || '').split('\n\n')[0].trim();
+                const query = encodeURIComponent(address);
+
                 window.open(`https://maps.google.com?q=${query}`, '_blank', 'noopener,noreferrer');
               }}
               variant="ghost"
