@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef, useId } from 'react'
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { toast } from 'sonner';
@@ -467,8 +468,7 @@ export function useMyCandidatesData(
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel(`my-candidates-team-sync:${instanceId}`)
+    const channel = createRealtimeChannel(`my-candidates-team-sync:${instanceId}`)
 
       .on(
         'postgres_changes',
@@ -535,8 +535,7 @@ export function useMyCandidatesData(
   useEffect(() => {
     if (!user) return;
 
-    const profilesChannel = supabase
-      .channel(`candidate-activity-profiles:${instanceId}`)
+    const profilesChannel = createRealtimeChannel(`candidate-activity-profiles:${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -570,8 +569,7 @@ export function useMyCandidatesData(
       )
       .subscribe();
 
-    const applicationsChannel = supabase
-      .channel(`candidate-activity-applications:${instanceId}`)
+    const applicationsChannel = createRealtimeChannel(`candidate-activity-applications:${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -616,8 +614,7 @@ export function useMyCandidatesData(
   useEffect(() => {
     if (!user) return;
 
-    const ratingsChannel = supabase
-      .channel(`candidate-ratings-sync:${instanceId}`)
+    const ratingsChannel = createRealtimeChannel(`candidate-ratings-sync:${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -650,8 +647,7 @@ export function useMyCandidatesData(
       )
       .subscribe();
 
-    const notesChannel = supabase
-      .channel(`candidate-notes-sync:${instanceId}`)
+    const notesChannel = createRealtimeChannel(`candidate-notes-sync:${instanceId}`)
       .on(
         'postgres_changes',
         {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { getTimeRemaining } from '@/lib/date';
 import { detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
@@ -1211,8 +1212,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     const ids = realtimeJobIdsKey.split(',');
     const filter = `id=in.(${ids.join(',')})`;
 
-    const channel = supabase
-      .channel(`optimized-search-realtime-${ids.length}`)
+    const channel = createRealtimeChannel(`optimized-search-realtime-${ids.length}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_postings', filter },
@@ -1343,8 +1343,7 @@ export function useInfiniteJobSearch(options: UseInfiniteJobSearchOptions) {
   const allJobs = useMemo(() => data?.pages.flat() || [], [data]);
 
   useEffect(() => {
-    const channel = supabase
-      .channel('infinite-search-realtime')
+    const channel = createRealtimeChannel('infinite-search-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, () => {
         queryClient.invalidateQueries({ queryKey: ['infinite-job-search'] });
       })

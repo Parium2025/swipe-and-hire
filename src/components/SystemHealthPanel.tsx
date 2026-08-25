@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle, Wifi, Calendar, HeadphonesIcon, FileSearch, Newspaper, Lightbulb, Rss } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -432,8 +433,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     const interval = setInterval(fetchStats, 30000);
     
     // Subscribe to realtime changes for instant updates
-    const channel = supabase
-      .channel('system-health-live')
+    const channel = createRealtimeChannel('system-health-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, () => {
         fetchStats();
       })

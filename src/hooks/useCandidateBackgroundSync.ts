@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from '@/hooks/useAuth';
@@ -73,8 +74,7 @@ export const useCandidateBackgroundSync = () => {
     // För job_applications finns ingen direkt employer-kolumn — den syncen
     // triggas istället via my_candidates/candidate_ratings/notes (alla rör
     // samma kandidat-pool) samt via useEmployerBackgroundSync för nya ansökningar.
-    channelRef.current = supabase
-      .channel(`candidate-sync-${userId}`)
+    channelRef.current = createRealtimeChannel(`candidate-sync-${userId}`)
       .on(
         'postgres_changes',
         {

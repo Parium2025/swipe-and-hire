@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import {
   readCandidateApplicationsCache,
   writeCandidateApplicationsCache,
@@ -84,8 +85,7 @@ export function useMyCandidateApplications(
     fetchAll();
 
     // 🔴 Realtime: nya/uppdaterade ansökningar studsar in i öppen dialog
-    const channel = supabase
-      .channel(`my-candidate-apps-${applicantId}`)
+    const channel = createRealtimeChannel(`my-candidate-apps-${applicantId}`)
       .on(
         'postgres_changes',
         {

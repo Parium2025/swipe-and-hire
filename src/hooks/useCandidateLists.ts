@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
@@ -79,8 +80,7 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
   // 📡 Realtime: nya/ändrade listor (t.ex. från en annan flik eller enhet)
   useEffect(() => {
     if (!ownerId) return;
-    const channel = supabase
-      .channel(`candidate-lists-${ownerId}`)
+    const channel = createRealtimeChannel(`candidate-lists-${ownerId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'candidate_lists', filter: `owner_id=eq.${ownerId}` },

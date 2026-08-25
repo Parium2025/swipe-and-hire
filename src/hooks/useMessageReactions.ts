@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from './useAuth';
 import { useEffect } from 'react';
 
@@ -57,8 +58,7 @@ export function useMessageReactions(conversationId: string | null) {
   useEffect(() => {
     if (!conversationId) return;
 
-    const channel = supabase
-      .channel(`reactions-${conversationId}`)
+    const channel = createRealtimeChannel(`reactions-${conversationId}`)
       .on(
         'postgres_changes',
         {

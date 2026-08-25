@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
@@ -391,8 +392,7 @@ export const useJobSeekerBackgroundSync = () => {
     if (!user || !isJobSeeker) return;
 
     // Realtime för sparade jobb
-    const savedJobsChannel = supabase
-      .channel(`job-seeker-saved-jobs-${user.id}`)
+    const savedJobsChannel = createRealtimeChannel(`job-seeker-saved-jobs-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -408,8 +408,7 @@ export const useJobSeekerBackgroundSync = () => {
       .subscribe();
 
     // Realtime för ansökningar
-    const applicationsChannel = supabase
-      .channel(`job-seeker-applications-${user.id}`)
+    const applicationsChannel = createRealtimeChannel(`job-seeker-applications-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -425,8 +424,7 @@ export const useJobSeekerBackgroundSync = () => {
       .subscribe();
 
     // Realtime för meddelanden
-    const messagesChannel = supabase
-      .channel(`job-seeker-messages-${user.id}`)
+    const messagesChannel = createRealtimeChannel(`job-seeker-messages-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -468,8 +466,7 @@ export const useJobSeekerBackgroundSync = () => {
       }, 5000);
     };
 
-    const newJobsChannel = supabase
-      .channel('job-seeker-new-jobs')
+    const newJobsChannel = createRealtimeChannel('job-seeker-new-jobs')
       .on(
         'postgres_changes',
         {
@@ -486,8 +483,7 @@ export const useJobSeekerBackgroundSync = () => {
     // Realtime för profiles - om arbetsgivaren ändrar namn/logo i sin profil
     // triggas DB-funktionen sync_company_name_to_jobs som uppdaterar job_postings,
     // men vi lyssnar även här direkt för att vara dubbelt säkra.
-    const employerProfilesChannel = supabase
-      .channel('job-seeker-employer-profiles')
+    const employerProfilesChannel = createRealtimeChannel('job-seeker-employer-profiles')
       .on(
         'postgres_changes',
         {
@@ -517,8 +513,7 @@ export const useJobSeekerBackgroundSync = () => {
       .subscribe();
 
     // Realtime för intervjuer (bokade intervjuer för kandidaten)
-    const interviewsChannel = supabase
-      .channel(`job-seeker-interviews-${user.id}`)
+    const interviewsChannel = createRealtimeChannel(`job-seeker-interviews-${user.id}`)
       .on(
         'postgres_changes',
         {

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useOnline } from '@/hooks/useOnlineStatus';
@@ -130,8 +131,7 @@ export const useSavedJobs = () => {
     if (!user) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
 
-    const channel = supabase
-      .channel(`saved-jobs-${user.id}`)
+    const channel = createRealtimeChannel(`saved-jobs-${user.id}`)
       .on(
         'postgres_changes',
         {

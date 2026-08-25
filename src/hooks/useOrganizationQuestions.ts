@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 
 export interface OrganizationQuestion {
   question_text: string;
@@ -106,8 +107,7 @@ export const useOrganizationQuestions = () => {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel(`org-questions-${user.id}`)
+    const channel = createRealtimeChannel(`org-questions-${user.id}`)
       .on(
         'postgres_changes',
         {

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { useAuth } from '@/hooks/useAuth';
 import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
@@ -231,8 +232,7 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
   useEffect(() => {
     if (!colleagueId || !user) return;
 
-    const channel = supabase
-      .channel(`colleague-candidates-${colleagueId}`)
+    const channel = createRealtimeChannel(`colleague-candidates-${colleagueId}`)
       .on(
         'postgres_changes',
         {

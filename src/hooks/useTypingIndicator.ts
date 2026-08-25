@@ -17,6 +17,7 @@ export function useTypingIndicator(conversationId: string | null) {
   useEffect(() => {
     if (!conversationId || !user) return;
 
+    // Presence requires the shared conversation topic across different clients.
     const channel = supabase.channel(`typing-${conversationId}`, {
       config: {
         presence: {

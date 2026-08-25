@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   Phone, Calendar, Gift, Star, Inbox, Eye,
@@ -363,8 +364,7 @@ export function useJobStageSettings(jobId: string | undefined) {
   useEffect(() => {
     if (!jobId || !user) return;
 
-    const channel = supabase
-      .channel(`job-stage-settings-${jobId}`)
+    const channel = createRealtimeChannel(`job-stage-settings-${jobId}`)
       .on(
         'postgres_changes',
         {

@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { safeSetItem } from '@/lib/safeStorage';
 import { useIsPremium } from '@/hooks/useIsPremium';
@@ -296,8 +297,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     if (!user?.id || safeSavedJobs.length === 0) return;
     const ids = new Set(safeSavedJobs.map(sj => sj.job_id));
 
-    const channel = supabase
-      .channel(`saved-jobs-postings-${user.id}`)
+    const channel = createRealtimeChannel(`saved-jobs-postings-${user.id}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'job_postings' },

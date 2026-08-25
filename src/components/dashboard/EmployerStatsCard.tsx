@@ -2,6 +2,7 @@ import { memo, useMemo, useEffect } from 'react';
 import { Briefcase, Heart, UserPlus, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEmployerJobsCounts } from '@/hooks/useEmployerScaleStats';
 import { StatsCarousel } from './StatsCarousel';
@@ -96,8 +97,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     };
     // Bara ansökningar på våra egna annonser är relevanta.
     const onApplication = () => invalidateStats();
-    const msgChannel = supabase
-      .channel(`employer-conv-messages-${user.id}`)
+    const msgChannel = createRealtimeChannel(`employer-conv-messages-${user.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
         invalidateStats
       )

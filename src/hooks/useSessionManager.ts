@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 
 const SESSION_TOKEN_KEY = 'parium_session_token';
 
@@ -505,8 +506,7 @@ export function useSessionManager(
     // sessionen får vi en push från databasen och loggar ut direkt — i stället
     // för att vänta upp till 30 s på nästa pollning. Pollningen är kvar som
     // säkerhetsnät om realtidskanalen skulle tappas.
-    const channel = supabase
-      .channel(`user-sessions-${userId}`)
+    const channel = createRealtimeChannel(`user-sessions-${userId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'user_sessions', filter: `user_id=eq.${userId}` },

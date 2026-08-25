@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useCallback, useEffect } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 
@@ -142,8 +143,7 @@ export function useCompanyReviewsCache(companyId: string | null) {
   useEffect(() => {
     if (!companyId) return;
 
-    const channel = supabase
-      .channel(`company-reviews-${companyId}`)
+    const channel = createRealtimeChannel(`company-reviews-${companyId}`)
       .on(
         'postgres_changes',
         {

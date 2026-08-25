@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { getIsOnline } from '@/lib/connectivityManager';
 
@@ -129,8 +130,7 @@ export const useInterviews = () => {
     if (!user?.id) return;
 
     const instanceId = crypto.randomUUID();
-    const channel = supabase
-      .channel(`employer-interviews-ui-${user.id}-${instanceId}`)
+    const channel = createRealtimeChannel(`employer-interviews-ui-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -278,8 +278,7 @@ export const useCandidateInterviews = () => {
     if (!user?.id) return;
 
     const instanceId = crypto.randomUUID();
-    const channel = supabase
-      .channel(`candidate-interviews-ui-${user.id}-${instanceId}`)
+    const channel = createRealtimeChannel(`candidate-interviews-ui-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -42,8 +43,7 @@ export function useProfileViewStats() {
   // Realtid: ny logg → invalidera
   useEffect(() => {
     if (!userId) return;
-    const channel = supabase
-      .channel(`profile-views-${userId}`)
+    const channel = createRealtimeChannel(`profile-views-${userId}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'profile_views', filter: `viewed_user_id=eq.${userId}` },

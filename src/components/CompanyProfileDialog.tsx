@@ -19,6 +19,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
@@ -103,8 +104,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   React.useEffect(() => {
     if (!open || !companyId) return;
 
-    const profileChannel = supabase
-      .channel(`profile-dialog-${companyId}`)
+    const profileChannel = createRealtimeChannel(`profile-dialog-${companyId}`)
       .on(
         'postgres_changes',
         {
@@ -130,8 +130,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   React.useEffect(() => {
     if (!open || !companyId) return;
 
-    const reviewsChannel = supabase
-      .channel(`reviews-dialog-${companyId}`)
+    const reviewsChannel = createRealtimeChannel(`reviews-dialog-${companyId}`)
       .on(
         'postgres_changes',
         {

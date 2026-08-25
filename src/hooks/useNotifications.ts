@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { safeReadArrayCache } from '@/lib/safeStorage';
 import { toastArchive } from '@/lib/toastArchive';
@@ -126,8 +127,7 @@ export function useNotifications() {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel(`notifications-${user.id}`)
+    const channel = createRealtimeChannel(`notifications-${user.id}`)
       .on(
         'postgres_changes',
         {

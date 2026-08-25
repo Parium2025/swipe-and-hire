@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { warmActivityAvatars } from '@/lib/warmTeamAvatars';
 
@@ -122,8 +123,7 @@ export function useCandidateActivities(applicantId: string | null) {
   useEffect(() => {
     if (!applicantId || !user) return;
 
-    const channel = supabase
-      .channel(`candidate-activities-${applicantId}`)
+    const channel = createRealtimeChannel(`candidate-activities-${applicantId}`)
       .on(
         'postgres_changes',
         {
