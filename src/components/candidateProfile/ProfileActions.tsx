@@ -4,6 +4,7 @@ import type { StageSettings } from '@/hooks/useStageSettings';
 import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
 import type { ButtonProps } from '@/components/ui/button';
 import { noFocusRingProps, noFlashButtonClass } from '@/lib/noFocusRing';
+import { cn } from '@/lib/utils';
 
 interface QuickAction {
   key: ManualOutreachActionKey;

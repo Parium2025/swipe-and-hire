@@ -4,6 +4,7 @@ import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, Chevron
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { noFocusRingProps, noFlashButtonClass } from '@/lib/noFocusRing';
+import { cn } from '@/lib/utils';
 import ProfileVideo from '@/components/ProfileVideo';
 import { formatTimeAgo } from '@/lib/date';
 import { CandidateSummarySection } from '@/components/candidateProfile/CandidateSummarySection';
