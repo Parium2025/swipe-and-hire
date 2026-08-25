@@ -413,8 +413,10 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       console.error('Failed to fetch system stats:', err);
       setError('Kunde inte hämta data');
     } finally {
+      inFlightRef.current = false;
       setLoading(false);
     }
+
   }, [isAdmin]);
 
   useEffect(() => {
