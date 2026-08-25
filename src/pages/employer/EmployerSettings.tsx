@@ -189,7 +189,7 @@ const EmployerSettings = () => {
             <AccordionTrigger className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-6 md:px-4 py-4 text-sm font-medium text-white no-underline hover:no-underline hover:bg-white/10 transition-colors data-[state=open]:rounded-b-none">
               {section.label}
             </AccordionTrigger>
-            <AccordionContent forceMount className="pb-0 pt-4 data-[state=closed]:hidden">
+            <AccordionContent className="pb-0 pt-4">
               {section.content}
             </AccordionContent>
           </AccordionItem>
