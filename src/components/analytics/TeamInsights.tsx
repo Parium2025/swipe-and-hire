@@ -12,6 +12,7 @@ export interface TeamMemberStats {
   views: number;
   applications: number;
   interviews: number;
+  interviews_completed?: number;
 }
 
 export interface TeamTraits {
@@ -76,7 +77,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
         <div className="flex items-center gap-1.5 mb-1">
           <Users className="h-4 w-4 text-white/70 shrink-0" />
           <h3 className="text-[15px] font-semibold text-white">Lär av varandra</h3>
-          <InfoTip content="Visar hur annonserna presterar per kollega i din organisation. Syftet är att se vad som fungerar bra och kopiera det – inte att ranka personer. Visningar är unika besökare. Intervjuer räknas på den kollega som bokat och håller intervjun, oavsett vem som äger annonsen. Era egna visningar, ansökningar och intervjuer räknas aldrig med." />
+          <InfoTip content="Visar hur annonserna presterar per kollega i din organisation. Syftet är att se vad som fungerar bra och kopiera det – inte att ranka personer. Visningar är unika besökare. Intervjuer räknas på den kollega som bokat och håller intervjun, oavsett vem som äger annonsen. Chippet visar bokade intervjuer och hur många av dem som faktiskt hunnit genomföras (tiden har passerat och intervjun är varken avbokad eller nekad). Era egna visningar, ansökningar och intervjuer räknas aldrig med." />
         </div>
         <p className="text-[12px] text-white/70 mb-4">
           Så presterar er organisations annonser – per kollega under vald period.
@@ -110,9 +111,14 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                       <span className="whitespace-nowrap">{m.views} visningar</span>
                       <span aria-hidden className="text-white/40">·</span>
                       <span className="whitespace-nowrap">{m.applications} ansökningar</span>
-                      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white/[0.10] px-2 py-0.5 font-medium">
+                      <span
+                        className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white/[0.10] px-2 py-0.5 font-medium"
+                        title={`${m.interviews} bokade intervjuer, varav ${m.interviews_completed ?? 0} genomförda`}
+                      >
                         <CalendarCheck className="h-3 w-3 shrink-0" aria-hidden />
-                        {m.interviews} intervjuer
+                        {m.interviews} bokade
+                        <span aria-hidden className="text-white/40">/</span>
+                        {m.interviews_completed ?? 0} genomförda
                       </span>
                     </div>
                   </div>
