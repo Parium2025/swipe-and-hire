@@ -19,6 +19,8 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
+import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
+import { useCompanyReviewsCache } from '@/hooks/useCompanyReviewsCache';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
