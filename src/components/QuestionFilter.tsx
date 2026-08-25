@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { Filter, Search, X, ChevronDown, MessageSquare } from 'lucide-react';
 import { useOrganizationQuestions, OrganizationQuestion } from '@/hooks/useOrganizationQuestions';
 
@@ -438,7 +439,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
                                       checked={isOptionSelected}
                                       className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary pointer-events-none"
                                     />
-                                    <span className="truncate text-white">{option}</span>
+                                    <TruncatedText text={option} className="truncate text-white min-w-0" insideInteractive />
                                   </button>
                                 );
                               })}
