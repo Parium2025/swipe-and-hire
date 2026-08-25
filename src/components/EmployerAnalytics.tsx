@@ -873,7 +873,7 @@ const EmployerAnalytics = memo(() => {
               : 'Insikter för alla dina annonser'}
           </p>
           {dataUpdatedAt > 0 && (
-            <p className="text-[11px] text-white/80">
+            <p className="text-[11px] text-white">
               {isFetching
                 ? 'Uppdaterar…'
                 : `Uppdaterad ${new Date(dataUpdatedAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}`}
