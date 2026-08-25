@@ -6,6 +6,7 @@ import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
 import { clampJobTitle } from '@/lib/jobTitle';
+import { warmTeamAvatars } from '@/lib/warmTeamAvatars';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
