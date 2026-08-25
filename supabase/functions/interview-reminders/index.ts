@@ -253,78 +253,79 @@ Deno.serve(async (req) => {
           ? "På plats"
           : "Telefonintervju";
 
-        // Send reminder to candidate (only if the employer keeps it enabled)
+        // Notis i appen + push. Push kräver mobilappen – notisen i appen är
+        // det enda som når webbanvändare, därför skapas den alltid först.
+        const notifyBoth = async (
+          userId: string,
+          title: string,
+          body: string,
+          route: string,
+        ) => {
+          let delivered = false;
+          const { error: notifError } = await supabase.from("notifications").insert({
+            user_id: userId,
+            type: "interview_reminder",
+            title,
+            body,
+            metadata: { interview_id: interview.id, route },
+          });
+          if (notifError) {
+            console.error(`Failed to create in-app reminder for ${userId}:`, notifError);
+            errors.push(`Notification ${userId}: ${notifError.message}`);
+          } else {
+            delivered = true;
+          }
+
+          try {
+            await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseServiceKey}`,
+              },
+              body: JSON.stringify({
+                recipient_id: userId,
+                title,
+                body,
+                data: {
+                  type: "interview_reminder",
+                  interview_id: interview.id,
+                  route,
+                },
+              }),
+            });
+          } catch (err) {
+            // Push är ett komplement – saknad mobilapp får inte fälla påminnelsen.
+            console.error(`Push failed for ${userId}:`, err);
+          }
+
+          if (delivered) {
+            console.log(`Reminder delivered to ${userId}`);
+            remindersSent++;
+          }
+        };
+
+        // Kandidaten påminns bara om arbetsgivaren har "Före intervjun" på.
         const candidateReminderAllowed = await candidateRemindersAllowed(interview.employer_id);
-        if (!candidateReminderAllowed) {
+        if (candidateReminderAllowed) {
+          await notifyBoth(
+            interview.applicant_id,
+            "Intervju om 10 minuter ⏰",
+            `Din intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
+            "/my-applications",
+          );
+        } else {
           console.log(`Candidate reminder skipped – employer ${interview.employer_id} has interview_before off`);
         }
-        try {
-          if (!candidateReminderAllowed) throw { skip: true };
 
+        // Arbetsgivaren påminns alltid om sin egen bokning.
+        await notifyBoth(
+          interview.employer_id,
+          "Intervju om 10 minuter ⏰",
+          `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
+          "/employer",
+        );
 
-
-          const candidateResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${supabaseServiceKey}`,
-            },
-            body: JSON.stringify({
-              recipient_id: interview.applicant_id,
-              title: "Intervju om 10 minuter ⏰",
-              body: `Din intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
-              data: {
-                type: "interview_reminder",
-                interview_id: interview.id,
-                route: "/my-applications",
-              },
-            }),
-          });
-          const candidateResult = await candidateResponse.json();
-          if (candidateResult.success || candidateResult.sent >= 0) {
-            console.log(`Reminder sent to candidate ${interview.applicant_id}`);
-            remindersSent++;
-          }
-        } catch (err) {
-          if ((err as { skip?: boolean })?.skip) {
-            // Avstängt av arbetsgivaren – inget fel, bara tyst.
-          } else {
-            console.error(`Error sending reminder to candidate ${interview.applicant_id}:`, err);
-            const message = err instanceof Error ? err.message : 'Unknown error';
-            errors.push(`Candidate ${interview.applicant_id}: ${message}`);
-          }
-        }
-
-
-        // Send reminder to employer
-        try {
-          const employerResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${supabaseServiceKey}`,
-            },
-            body: JSON.stringify({
-              recipient_id: interview.employer_id,
-              title: "Intervju om 10 minuter ⏰",
-              body: `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
-              data: {
-                type: "interview_reminder",
-                interview_id: interview.id,
-                route: "/employer",
-              },
-            }),
-          });
-          const employerResult = await employerResponse.json();
-          if (employerResult.success || employerResult.sent >= 0) {
-            console.log(`Reminder sent to employer ${interview.employer_id}`);
-            remindersSent++;
-          }
-        } catch (err) {
-          console.error(`Error sending reminder to employer ${interview.employer_id}:`, err);
-          const message = err instanceof Error ? err.message : 'Unknown error';
-          errors.push(`Employer ${interview.employer_id}: ${message}`);
-        }
       }
     } else {
       console.log("No upcoming interviews found in the 10-minute window");
