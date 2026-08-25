@@ -63,7 +63,36 @@ const CRITICAL_JOBS: Array<{ name: string; maxAgeHours: number; why: string }> =
     maxAgeHours: 2,
     why: "Påminnelser om bokade intervjuer.",
   },
+  {
+    name: "outreach-dispatch-sweeper",
+    maxAgeHours: 2,
+    why: "Alla automatiska utskick (mejl, chatt, push) från mallar och regler.",
+  },
+  {
+    name: "criteria-eval-worker-sweeper",
+    maxAgeHours: 2,
+    why: "AI-utvärdering av urvalskriterier för nya kandidater.",
+  },
+  {
+    name: "process-account-deletions",
+    maxAgeHours: 2,
+    why: "Genomförande av begärda kontoraderingar (GDPR art. 17).",
+  },
+  {
+    name: "cleanup-stale-sessions",
+    maxAgeHours: 2,
+    why: "Städning av gamla inloggningssessioner.",
+  },
+  {
+    name: "saved-job-expiration-reminders",
+    maxAgeHours: 12,
+    why: "Påminnelser om sparade jobb som snart går ut.",
+  },
 ];
+
+/** Utskickskön får inte bygga upp en svans av rader som aldrig går iväg. */
+const STUCK_QUEUE_MINUTES = 30;
+const STUCK_QUEUE_THRESHOLD = 25;
 
 /** Bevisad körning, inte bara "cron skickade iväg anropet". */
 const RETENTION_EVIDENCE_MAX_AGE_HOURS = 36;
