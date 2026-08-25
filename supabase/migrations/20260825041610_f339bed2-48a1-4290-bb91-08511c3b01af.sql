@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.enqueue_outreach_dispatch_on_reschedule() FROM PUBLIC, anon, authenticated;
