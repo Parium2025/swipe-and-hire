@@ -43,23 +43,25 @@ export function useJobCounts() {
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('job_postings')
-        .select('workplace_city,location,occupation')
-        .eq('is_active', true)
-        .is('deleted_at', null);
+      // Publik funktion — utloggade besökare saknar direktläsning på
+      // job_postings och fick tidigare 0 jobb på alla SEO-sidor.
+      const { data, error } = await supabase.rpc('get_public_job_facets' as any);
 
       if (error || !data) return EMPTY;
 
+      const rows = data as Array<{ city: string | null; occupation: string | null; job_count: number }>;
+
       const result: JobCountsData = {
-        total: data.length,
+        total: 0,
         byCity: {},
         byOccupation: {},
         byCityOccupation: {},
       };
 
-      for (const row of data) {
-        const cityRaw = (row.workplace_city || row.location || '').toString().trim();
+      for (const row of rows) {
+        const n = Number(row.job_count) || 0;
+        result.total += n;
+        const cityRaw = (row.city || '').toString().trim();
         const occRaw = (row.occupation || '').toString().trim();
         const citySlug = cityRaw ? slugify(cityRaw) : '';
         const occSlug = occRaw ? slugify(occRaw) : '';

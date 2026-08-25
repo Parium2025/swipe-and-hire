@@ -74,31 +74,21 @@ const PublicJobPage = () => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const now = new Date().toISOString();
-      const { data, error } = await supabase
-        .from('job_postings')
-        .select('id,title,description,requirements,location,occupation,employment_type,work_schedule,salary_min,salary_max,salary_type,salary_transparency,workplace_city,workplace_county,workplace_postal_code,workplace_address,workplace_name,company_logo_url,job_image_url,benefits,created_at,expires_at,is_active,positions_count,remote_work_possible,work_location_type')
-        .eq('id', jobId)
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .or(`expires_at.is.null,expires_at.gt.${now}`)
-        .maybeSingle();
+      // Utloggade besökare har ingen direktläsning på job_postings — annonsen
+      // hämtas därför via en publik databasfunktion. Utan den blev varje delad
+      // jobblänk "Tillsatt" för alla som inte var inloggade.
+      const { data, error } = await supabase.rpc('get_public_job' as any, { p_job_id: jobId });
       if (cancelled) return;
-      if (error || !data) {
-        // Sekundär hämtning utan is_active för att ge kontext om jobbet är tillsatt.
-        const { data: expired } = await supabase
-          .from('job_postings')
-          .select('title,occupation')
-          .eq('id', jobId)
-          .maybeSingle();
-        if (!cancelled && expired) {
-          setExpiredCtx({ title: expired.title || undefined, occupation: expired.occupation || undefined });
+      const payload = (data ?? {}) as { job?: Job; expired?: { title?: string; occupation?: string } };
+      if (error || !payload.job) {
+        if (!cancelled && payload.expired) {
+          setExpiredCtx({ title: payload.expired.title || undefined, occupation: payload.expired.occupation || undefined });
         }
         setNotFound(true);
         setLoading(false);
         return;
       }
-      setJob(data as Job);
+      setJob(payload.job as Job);
       setLoading(false);
     })();
     return () => { cancelled = true; };
