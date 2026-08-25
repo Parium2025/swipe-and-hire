@@ -34,10 +34,10 @@ function detectOS(): string {
   if (/Windows NT/i.test(ua)) return 'windows';
   // macOS (after iPadOS check)
   if (/Macintosh|Mac OS X/i.test(ua)) return 'macos';
-  // Linux (after Android check)
-  if (/Linux/i.test(ua)) return 'linux';
-  // ChromeOS
+  // ChromeOS (before Linux — CrOS user agents also contain "Linux")
   if (/CrOS/i.test(ua)) return 'chromeos';
+  // Linux (after Android/ChromeOS check)
+  if (/Linux/i.test(ua)) return 'linux';
 
   return 'unknown';
 }
