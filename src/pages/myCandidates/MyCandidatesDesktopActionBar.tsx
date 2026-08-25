@@ -14,6 +14,7 @@ import {
   Square,
 } from 'lucide-react';
 import { getIconByName } from '@/hooks/useStageSettings';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface MyCandidatesDesktopActionBarProps {
   selectedCount: number;
@@ -82,7 +83,7 @@ export const MyCandidatesDesktopActionBar = ({
                 >
                   <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: settings?.color || '#6366F1' }} />
                   <Icon className="h-4 w-4 mr-2 text-white/70" />
-                  <TruncatedText text={settings?.label || stage} className="truncate min-w-0" insideInteractive />"
+                  <TruncatedText text={settings?.label || stage} className="truncate min-w-0" insideInteractive />
                 </DropdownMenuItem>
               );
             })}
@@ -97,7 +98,7 @@ export const MyCandidatesDesktopActionBar = ({
                     className="text-white hover:text-white cursor-pointer"
                   >
                     <ListChecks className="h-4 w-4 mr-2 text-white/70 flex-shrink-0" />
-                    <span className="truncate">{list.name}</span>
+                    <TruncatedText text={list.name} className="truncate min-w-0" insideInteractive />
                   </DropdownMenuItem>
                 ))}
               </>
