@@ -63,7 +63,36 @@ const CRITICAL_JOBS: Array<{ name: string; maxAgeHours: number; why: string }> =
     maxAgeHours: 2,
     why: "Påminnelser om bokade intervjuer.",
   },
+  {
+    name: "outreach-dispatch-sweeper",
+    maxAgeHours: 2,
+    why: "Alla automatiska utskick (mejl, chatt, push) från mallar och regler.",
+  },
+  {
+    name: "criteria-eval-worker-sweeper",
+    maxAgeHours: 2,
+    why: "AI-utvärdering av urvalskriterier för nya kandidater.",
+  },
+  {
+    name: "process-account-deletions",
+    maxAgeHours: 2,
+    why: "Genomförande av begärda kontoraderingar (GDPR art. 17).",
+  },
+  {
+    name: "cleanup-stale-sessions",
+    maxAgeHours: 2,
+    why: "Städning av gamla inloggningssessioner.",
+  },
+  {
+    name: "saved-job-expiration-reminders",
+    maxAgeHours: 12,
+    why: "Påminnelser om sparade jobb som snart går ut.",
+  },
 ];
+
+/** Utskickskön får inte bygga upp en svans av rader som aldrig går iväg. */
+const STUCK_QUEUE_MINUTES = 30;
+const STUCK_QUEUE_THRESHOLD = 25;
 
 /** Bevisad körning, inte bara "cron skickade iväg anropet". */
 const RETENTION_EVIDENCE_MAX_AGE_HOURS = 36;
@@ -217,6 +246,33 @@ serve(async (req) => {
           },
         });
       }
+    }
+
+    // 3) Utskickskön: bygger det upp en svans av rader som aldrig går iväg?
+    const stuckCutoff = new Date(Date.now() - STUCK_QUEUE_MINUTES * 60 * 1000).toISOString();
+    const { count: stuckCount, error: stuckError } = await supabase
+      .from("outreach_dispatch_logs")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["pending", "retrying"])
+      .lt("created_at", stuckCutoff);
+
+    if (stuckError) {
+      issues.push({
+        code: "outreach_queue_unreadable",
+        severity: "warning",
+        message: "Kan inte läsa status för utskickskön",
+        summary: "Vi kan inte verifiera att automatiska utskick går iväg.",
+        details: { error_message: stuckError.message },
+      });
+    } else if ((stuckCount ?? 0) >= STUCK_QUEUE_THRESHOLD) {
+      issues.push({
+        code: "outreach_queue_stuck",
+        severity: "critical",
+        message: `${stuckCount} automatiska utskick har legat i kön i över ${STUCK_QUEUE_MINUTES} minuter`,
+        summary:
+          "Mallar och regler ser rätt ut i gränssnittet, men mejlen/chattmeddelandena når inte kandidaterna.",
+        details: { stuck_count: stuckCount, older_than_minutes: STUCK_QUEUE_MINUTES },
+      });
     }
 
     await Promise.all(issues.map((issue) => sendAlert(supabase, issue)));
