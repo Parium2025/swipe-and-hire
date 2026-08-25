@@ -249,7 +249,7 @@ export function MessageBubble({
 
         {/* Message content */}
         <div className={cn(
-          "max-w-[70%] flex flex-col",
+          "min-w-0 max-w-[70%] flex flex-col",
           isOwn ? "items-end" : "items-start"
         )}>
           {/* Sender name for group chats */}
@@ -259,7 +259,7 @@ export function MessageBubble({
             </span>
           )}
 
-          <div className="relative">
+          <div className="relative min-w-0 max-w-full">
             <div
               ref={bubbleRef}
               className={cn(
