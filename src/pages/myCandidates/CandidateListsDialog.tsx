@@ -131,7 +131,12 @@ const SortableListRow = ({
             </div>
           )}
           <div className="min-w-0 flex-1 py-0.5">
-            <p className="text-sm font-medium text-white break-words [overflow-wrap:anywhere] line-clamp-2">{list.name}</p>
+            <TruncatedText
+              text={list.name}
+              lines={2}
+              tooltipSide="bottom"
+              className="text-sm font-medium text-white [overflow-wrap:anywhere]"
+            />
             <p className="text-xs text-white">
               {count} kandidater
               {list.is_default ? ' · standardlista' : ''}
