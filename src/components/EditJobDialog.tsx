@@ -1793,8 +1793,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       return formData.work_location_type && 
              formData.remote_work_possible && 
              formData.workplace_name.trim() && 
-             formData.contact_email.trim() &&
-             formData.workplace_postal_code.trim() && 
+             /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email.trim()) &&
+             isValidSwedishPostalCode(formData.workplace_postal_code) && 
              formData.workplace_city.trim();
     }
     

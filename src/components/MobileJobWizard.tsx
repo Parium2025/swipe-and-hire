@@ -61,6 +61,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
 import { DEFAULT_JOB_OVERLAY_TEXT_COLOR, getJobOverlayTextStyle, normalizeJobOverlayTextColor } from '@/lib/jobOverlayText';
+import { isEmployerJobDraft } from '@/lib/jobStatus';
 
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
@@ -2100,8 +2101,8 @@ const MobileJobWizard = ({
       return formData.work_location_type && 
              formData.remote_work_possible && 
              formData.workplace_name.trim() && 
-             formData.contact_email.trim() && 
-             formData.workplace_postal_code.trim() && 
+             /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email.trim()) && 
+             isValidSwedishPostalCode(formData.workplace_postal_code) && 
              formData.workplace_city.trim();
     }
     
@@ -2138,8 +2139,8 @@ const MobileJobWizard = ({
       if (!formData.work_location_type) missing.push('Var utförs arbetet');
       if (!formData.remote_work_possible) missing.push('Distansarbete');
       if (!formData.workplace_name.trim()) missing.push('Bolagsnamn');
-      if (!formData.contact_email.trim()) missing.push('Kontakt e-post');
-      if (!formData.workplace_postal_code.trim()) missing.push('Postnummer');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email.trim())) missing.push('Giltig kontakt-e-post');
+      if (!isValidSwedishPostalCode(formData.workplace_postal_code)) missing.push('Giltigt postnummer');
       if (!formData.workplace_city.trim()) missing.push('Ort');
     }
     
@@ -2485,7 +2486,7 @@ const MobileJobWizard = ({
       // Include all job posting fields
       // Check if this is a new job OR if we're publishing a draft (was inactive)
       const isNewJob = !existingJob?.id;
-      const isPublishingDraft = existingJob?.id && existingJob?.is_active === false;
+      const isPublishingDraft = Boolean(existingJob?.id && isEmployerJobDraft(existingJob));
       const now = new Date();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 14);
