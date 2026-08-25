@@ -27,6 +27,8 @@ import { renderOutreachText, type OutreachTemplate } from '@/lib/outreach';
 import { getManualOutreachTemplateGroups, type ManualOutreachActionKey } from '@/lib/outreachManualActions';
 import { readCachedOutreachTemplates, writeCachedOutreachTemplates } from '@/lib/outreachStudioCache';
 
+const MESSAGE_MAX_LENGTH = 2000;
+
 type ManualChannel = 'chat' | 'email' | 'push';
 
 const MANUAL_CHANNELS: Array<{ value: ManualChannel; label: string; icon: typeof MessageSquare }> = [
@@ -364,10 +366,22 @@ export function SendMessageDialog({
               ))}
 
               <div className="space-y-2">
-                <Label className="text-white">{simpleChat ? 'Meddelande' : 'Chattmeddelande'}</Label>
+                <div className="flex items-center justify-between gap-2">
+                  <Label className="text-white">{simpleChat ? 'Meddelande' : 'Chattmeddelande'}</Label>
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 ${
+                      message.length > MESSAGE_MAX_LENGTH * 0.9
+                        ? 'border-amber-300/40 bg-amber-400/15 text-white'
+                        : 'border-primary/40 bg-primary/20 text-white'
+                    }`}
+                  >
+                    {message.length}/{MESSAGE_MAX_LENGTH}
+                  </span>
+                </div>
               <Textarea
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                maxLength={MESSAGE_MAX_LENGTH}
+                onChange={(e) => setMessage(e.target.value.slice(0, MESSAGE_MAX_LENGTH))}
                   placeholder="Skriv ditt meddelande..."
                   className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 focus:border-white/20 text-white placeholder:text-white/50 resize-y text-base outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 transition-none"
               />
