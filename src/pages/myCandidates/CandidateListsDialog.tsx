@@ -100,7 +100,6 @@ const SortableListRow = ({
               if (e.key === 'Enter') onSaveEdit();
               if (e.key === 'Escape') onCancelEdit();
             }}
-            maxLength={40}
             className="h-9 rounded-full text-base bg-white/5 border-white/20 text-white focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
           <button
@@ -334,7 +333,6 @@ export const CandidateListsDialog = ({
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               placeholder={atLimit ? `Max ${MAX_CANDIDATE_LISTS} listor` : 'Namn på ny lista'}
-              maxLength={40}
               disabled={atLimit}
               className="h-11 rounded-full px-5 text-base bg-white/5 border-white/20 text-white placeholder:text-white/70 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             />

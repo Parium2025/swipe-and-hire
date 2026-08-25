@@ -564,7 +564,6 @@ const EmployerProfile = () => {
               <Label htmlFor="location" className="text-sm text-white">Plats</Label>
                 <Input
                   id="location"
-                  maxLength={TEXT_LIMITS.location}
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
                   placeholder="T.ex. Stockholm, Sverige"

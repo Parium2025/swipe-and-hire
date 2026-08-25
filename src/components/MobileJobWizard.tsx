@@ -32,7 +32,6 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedText } from '@/components/TruncatedText';
-import { TEXT_LIMITS } from '@/lib/textLimits';
 import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { celebrate } from '@/lib/celebrate';
