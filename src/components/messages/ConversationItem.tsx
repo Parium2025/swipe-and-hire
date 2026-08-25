@@ -72,7 +72,7 @@ export function ConversationItem({
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-start gap-3 p-3 rounded-lg text-left transition-all focus:outline-none focus-visible:outline-none",
+        "w-full min-w-0 max-w-full overflow-hidden flex items-start gap-3 p-3 rounded-lg text-left transition-all focus:outline-none focus-visible:outline-none",
         isSelected
           ? "bg-white/15 border border-white/20"
           : "md:hover:bg-white/10 border border-transparent"
@@ -105,12 +105,12 @@ export function ConversationItem({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2 mb-0.5">
+        <div className="flex min-w-0 items-center justify-between gap-2 mb-0.5">
           <TruncatedText
             text={displayName}
             insideInteractive
             className={cn(
-              "font-medium text-white",
+              "flex-1 font-medium text-white",
               conversation.unread_count > 0 && "font-semibold"
             )}
           />
@@ -122,8 +122,8 @@ export function ConversationItem({
         </div>
 
         {(snapshot?.job_title || conversation.job?.title) && (
-          <div className="flex items-center gap-1 text-pure-white text-xs mb-0.5">
-            <Briefcase className="h-3 w-3" />
+          <div className="flex min-w-0 items-center gap-1 text-pure-white text-xs mb-0.5">
+            <Briefcase className="h-3 w-3 shrink-0" />
             <TruncatedText
               text={snapshot?.job_title || conversation.job?.title || ''}
               insideInteractive
@@ -132,13 +132,14 @@ export function ConversationItem({
           </div>
         )}
 
-        <p className={cn(
-          "text-sm truncate",
-          conversation.unread_count > 0 ? "text-pure-white font-medium" : "text-pure-white"
-        )}>
-          {isOwnMessage && <span className="text-pure-white">Du: </span>}
-          {lastMessagePreview}
-        </p>
+        <TruncatedText
+          text={`${isOwnMessage ? 'Du: ' : ''}${lastMessagePreview}`}
+          insideInteractive
+          className={cn(
+            "text-sm",
+            conversation.unread_count > 0 ? "text-pure-white font-medium" : "text-pure-white"
+          )}
+        />
       </div>
     </button>
   );

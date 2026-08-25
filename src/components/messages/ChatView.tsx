@@ -733,15 +733,15 @@ export function ChatView({
             </p>
           )}
           {snapshot?.job_title ? (
-            <p className="text-pure-white text-xs flex items-center gap-1">
-              <Briefcase className="h-3 w-3" />
+            <div className="text-pure-white text-xs flex min-w-0 items-center gap-1">
+              <Briefcase className="h-3 w-3 shrink-0" />
               <TruncatedText text={snapshot.job_title} className="min-w-0" />
-            </p>
+            </div>
           ) : conversation.job && (
-            <p className="text-pure-white text-xs flex items-center gap-1">
-              <Briefcase className="h-3 w-3" />
-              {conversation.job.title}
-            </p>
+            <div className="text-pure-white text-xs flex min-w-0 items-center gap-1">
+              <Briefcase className="h-3 w-3 shrink-0" />
+              <TruncatedText text={conversation.job.title} className="min-w-0" />
+            </div>
           )}
         </div>
 
@@ -1058,7 +1058,7 @@ export function ChatView({
 
       {/* Pending file preview */}
       {pendingFile && (
-        <div className="px-4 py-2 border-t border-white/10 flex items-center gap-2">
+        <div className="px-4 py-2 border-t border-white/10 flex min-w-0 items-center gap-2">
           <div className="flex flex-col gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex-1 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <Paperclip className="h-3.5 w-3.5 text-pure-white flex-shrink-0" />
@@ -1096,7 +1096,7 @@ export function ChatView({
       {editingMessageId && (
         <div className="px-4 py-2 border-t border-white/10 flex items-center gap-2">
           <Pencil className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
-          <span className="text-sm text-pure-white flex-1 truncate">Redigerar meddelande</span>
+          <span className="min-w-0 flex-1 truncate text-sm text-pure-white">Redigerar meddelande</span>
           <button
             onClick={handleCancelEdit}
             className="p-1.5 rounded-full md:hover:bg-white/10 text-pure-white active:scale-95 transition-all"

@@ -3,6 +3,7 @@ import { Star, UserPlus, Users, ChevronRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { formatTimeAgo } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
@@ -93,10 +94,12 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-white text-sm truncate">
-              {application.first_name} {application.last_name}
-            </span>
+          <div className="flex min-w-0 items-center gap-2">
+            <TruncatedText
+              text={`${application.first_name} ${application.last_name}`.trim()}
+              insideInteractive
+              className="flex-1 min-w-0 font-medium text-white text-sm"
+            />
             {teamInfo && teamInfo.colleagues.length > 0 && (
               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0">
                 <Users className="h-2.5 w-2.5 text-purple-300" />

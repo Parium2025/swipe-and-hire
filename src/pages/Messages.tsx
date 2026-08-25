@@ -347,8 +347,8 @@ export default function Messages() {
                 />
               </div>
             ) : (
-              <ScrollArea className="h-full no-chrome-pad">
-                <div className="p-2">
+              <ScrollArea className="h-full min-w-0 no-chrome-pad">
+                <div className="w-full min-w-0 overflow-hidden p-2">
                   {filteredConversations.map((conv, index) => {
                     const isLast = index === filteredConversations.length - 1;
                     const { displayMember, isSelf } = resolveDisplayMember(conv.members, user?.id);
@@ -362,7 +362,7 @@ export default function Messages() {
                     });
 
                     return (
-                      <div key={conv.id}>
+                      <div key={conv.id} className="w-full min-w-0 max-w-full overflow-hidden">
                         <SwipeableConversationItem
                           canMarkUnread={conv.unread_count === 0 && !!conv.last_message}
                           onMarkUnread={() => {
