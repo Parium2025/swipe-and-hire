@@ -25,6 +25,7 @@ import { EMPLOYEE_COUNT_OPTIONS } from './companyProfile/types';
 import type { SocialMediaLink, CompanyFormData } from './companyProfile/types';
 
 const CompanyProfile = () => {
+  const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
@@ -768,8 +769,8 @@ const CompanyProfile = () => {
             <CompanyInterviewSettings
               formData={formData}
               onFormDataChange={handleFormDataChange}
-            orgDefaultVideoLink={orgDefaultVideoLink}
-          />
+              orgDefaultVideoLink={orgDefaultVideoLink}
+            />
 
             <div className="flex justify-center pt-6">
               <button
