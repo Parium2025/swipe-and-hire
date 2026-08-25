@@ -418,7 +418,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         console.log('🛰️ Real-time GPS tracking stopped');
       }
       clearInterval(gpsTrackingInterval);
-      window.removeEventListener('online', handleOnline);
+      unsubscribeConnectivity();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback]);
