@@ -733,15 +733,15 @@ export function ChatView({
             </p>
           )}
           {snapshot?.job_title ? (
-            <p className="text-pure-white text-xs flex items-center gap-1">
-              <Briefcase className="h-3 w-3" />
+            <div className="text-pure-white text-xs flex min-w-0 items-center gap-1">
+              <Briefcase className="h-3 w-3 shrink-0" />
               <TruncatedText text={snapshot.job_title} className="min-w-0" />
-            </p>
+            </div>
           ) : conversation.job && (
-            <p className="text-pure-white text-xs flex items-center gap-1">
-              <Briefcase className="h-3 w-3" />
-              {conversation.job.title}
-            </p>
+            <div className="text-pure-white text-xs flex min-w-0 items-center gap-1">
+              <Briefcase className="h-3 w-3 shrink-0" />
+              <TruncatedText text={conversation.job.title} className="min-w-0" />
+            </div>
           )}
         </div>
 
