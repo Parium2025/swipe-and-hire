@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { Button } from '@/components/ui/button';

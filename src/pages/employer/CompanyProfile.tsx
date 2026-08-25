@@ -12,6 +12,7 @@ import { ChevronDown, Search, Check } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
+import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -767,7 +768,8 @@ const CompanyProfile = () => {
             <CompanyInterviewSettings
               formData={formData}
               onFormDataChange={handleFormDataChange}
-            />
+            orgDefaultVideoLink={orgDefaultVideoLink}
+          />
 
             <div className="flex justify-center pt-6">
               <button
