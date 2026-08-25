@@ -113,12 +113,12 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
             )}
 
             {/* Job title */}
-            <h3 className="text-lg font-semibold text-white truncate">
+            <h3 className="text-lg font-semibold text-white break-words">
               {interview.subject || interview.job_postings?.title || 'Intervju'}
             </h3>
 
             {/* Company */}
-            <p className="text-white/80 text-sm mt-0.5">
+            <p className="text-white text-sm mt-0.5 break-words">
               {getEmployerName()}
             </p>
           </div>
