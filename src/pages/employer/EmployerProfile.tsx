@@ -4,28 +4,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { AlertDialogContentNoFocus } from "@/components/ui/alert-dialog-no-focus";
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, AlertTriangle, Camera, Pencil, RotateCcw, WifiOff } from 'lucide-react';
+import { Trash2, Camera, Pencil, RotateCcw, WifiOff } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,25 +19,11 @@ import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
 // localStorage key för draft
 const DRAFT_KEY = 'parium_draft_employer-profile';
 
-interface SocialMediaLink {
-  platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
-  url: string;
-}
-
-const SOCIAL_PLATFORMS = [
-  { value: 'linkedin', label: 'LinkedIn', icon: Linkedin },
-  { value: 'twitter', label: 'Twitter/X', icon: Twitter },
-  { value: 'instagram', label: 'Instagram', icon: Instagram },
-  { value: 'annat', label: 'Annat', icon: Globe },
-];
-
 const EmployerProfile = () => {
   const { profile, updateProfile, user, userRole } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
-  const [linkToDelete, setLinkToDelete] = useState<{ link: SocialMediaLink; index: number } | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -86,18 +56,11 @@ const EmployerProfile = () => {
     location: profile?.location || '',
     phone: profile?.phone || '',
     profile_image_url: profile?.profile_image_url || '',
-    social_media_links: (profile as any)?.social_media_links || [] as SocialMediaLink[],
   });
 
   // Konvertera storage path till signerad URL för visning
   const profileImageUrl = useMediaUrl(formData.profile_image_url, 'profile-image');
 
-  const [newSocialLink, setNewSocialLink] = useState({
-    platform: '' as SocialMediaLink['platform'] | '',
-    url: ''
-  });
-
-  const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
 
   // Update form data when profile changes OR restore from localStorage draft
   useEffect(() => {
@@ -127,15 +90,11 @@ const EmployerProfile = () => {
       location: profile.location || '',
       phone: profile.phone || '',
       profile_image_url: profile.profile_image_url || '',
-      social_media_links: (profile as any)?.social_media_links || [],
     };
 
     // If we have a saved draft with different content, use it
     if (savedDraft && !didInitRef.current) {
       const hasDraftContent = Object.keys(savedDraft).some(key => {
-        if (key === 'social_media_links') {
-          return JSON.stringify(savedDraft[key]) !== JSON.stringify(values[key as keyof typeof values]);
-        }
         return savedDraft[key] !== values[key as keyof typeof values];
       });
 
@@ -156,12 +115,9 @@ const EmployerProfile = () => {
   }, [profile, hasUnsavedChanges, setHasUnsavedChanges]);
 
   const checkForChanges = useCallback(() => {
-    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone && !originalValues.social_media_links) return false;
+    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone) return false;
     
     const hasChanges = Object.keys(formData).some(key => {
-      if (key === 'social_media_links') {
-        return JSON.stringify(formData[key]) !== JSON.stringify(originalValues[key]);
-      }
       return formData[key] !== originalValues[key];
     });
 
@@ -418,134 +374,14 @@ const EmployerProfile = () => {
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
   }, [originalValues, setHasUnsavedChanges]);
 
-  const validateUrl = (url: string, platform: string) => {
-    if (!url.trim()) return true;
-    
-    try {
-      const validUrl = new URL(url);
-      
-      if (platform === 'linkedin') {
-        return validUrl.hostname === 'www.linkedin.com' || validUrl.hostname === 'linkedin.com';
-      }
-      
-      if (platform === 'twitter') {
-        return validUrl.hostname === 'www.twitter.com' || validUrl.hostname === 'twitter.com' || 
-               validUrl.hostname === 'www.x.com' || validUrl.hostname === 'x.com';
-      }
-      
-      if (platform === 'instagram') {
-        return validUrl.hostname === 'www.instagram.com' || validUrl.hostname === 'instagram.com';
-      }
-      
-      return true; // For "annat" allow any valid URL
-    } catch {
-      return false;
-    }
-  };
-
-  const addSocialLink = () => {
-    if (!newSocialLink.platform || !newSocialLink.url.trim()) {
-      toast({
-        title: "Ofullständig information",
-        description: "Välj en plattform och ange en URL",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!validateUrl(newSocialLink.url, newSocialLink.platform)) {
-      toast({
-        title: "Ogiltig URL",
-        description: `Ange en giltig URL för ${SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label}`,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Check if platform already exists (except for "annat" which can have multiple entries)
-    if (newSocialLink.platform !== 'annat') {
-      const existingPlatform = formData.social_media_links.find(link => link.platform === newSocialLink.platform);
-      if (existingPlatform) {
-        toast({
-          title: "Plattform finns redan",
-          description: "Du har redan lagt till denna plattform. Ta bort den först om du vill ändra länken.",
-          variant: "destructive"
-        });
-        return;
-      }
-    }
-
-    const updatedLinks = [...formData.social_media_links, newSocialLink as SocialMediaLink];
-    
-    // Update local state and mark as unsaved
-    setFormData({
-      ...formData,
-      social_media_links: updatedLinks
-    });
-    setHasUnsavedChanges(true);
-    
-    setNewSocialLink({ platform: '', url: '' });
-    
-    toast({
-      title: "Länk tillagd",
-      description: `${SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label}-länken har lagts till. Glöm inte att spara!`,
-    });
-  };
-
-  const handleRemoveLinkClick = (index: number) => {
-    const link = formData.social_media_links[index];
-    setLinkToDelete({ link, index });
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmRemoveSocialLink = () => {
-    if (!linkToDelete) return;
-
-    const updatedLinks = formData.social_media_links.filter((_, i) => i !== linkToDelete.index);
-    
-    const updatedFormData = { 
-      ...formData, 
-      social_media_links: [...updatedLinks]
-    };
-
-    // Update local state only - user must save manually
-    setFormData(updatedFormData);
-    setHasUnsavedChanges(true);
-
-    toast({
-      title: "Länk borttagen",
-      description: `${getPlatformLabel(linkToDelete.link.platform)}-länken har tagits bort. Klicka på Spara ändringar för att bekräfta.`,
-    });
-
-    setDeleteDialogOpen(false);
-    setLinkToDelete(null);
-  };
-
   const { isOnline, showOfflineToast } = useOnline();
 
   const handleSave = async () => {
-
-    // Validate all social media URLs
-    for (const link of formData.social_media_links) {
-      if (!validateUrl(link.url, link.platform)) {
-        toast({
-          title: "Ogiltig URL",
-          description: `Kontrollera URL:en för ${SOCIAL_PLATFORMS.find(p => p.value === link.platform)?.label}`,
-          variant: "destructive"
-        });
-        return;
-      }
-    }
-
     try {
       setLoading(true);
       await updateProfile(formData as any);
 
-      // Deep clone to ensure proper comparison
-      const updatedValues = {
-        ...formData,
-        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links)),
-      };
+      const updatedValues = { ...formData };
 
       // Sync form with saved values to avoid second click
       setFormData(updatedValues);
@@ -573,17 +409,6 @@ const EmployerProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getPlatformIcon = (platform: SocialMediaLink['platform']) => {
-    const platformData = SOCIAL_PLATFORMS.find(p => p.value === platform);
-    if (!platformData) return Globe;
-    return platformData.icon;
-  };
-
-  const getPlatformLabel = (platform: SocialMediaLink['platform']) => {
-    const platformData = SOCIAL_PLATFORMS.find(p => p.value === platform);
-    return platformData?.label || 'Okänd plattform';
   };
 
   return (
@@ -774,134 +599,6 @@ const EmployerProfile = () => {
               </div>
             </div>
 
-            {/* Social Media Links Section */}
-            <div className="border-t border-white/10 pt-5 space-y-4">
-              <div>
-                <h4 className="text-base font-semibold text-white mb-1">Sociala medier</h4>
-                <p className="text-sm text-white">Lägg till dina sociala medier-profiler</p>
-              </div>
-
-              {/* Existing social media links */}
-              {formData.social_media_links.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-sm text-white">Dina sociala medier</Label>
-                  {formData.social_media_links.map((link, index) => {
-                    const Icon = getPlatformIcon(link.platform);
-                    return (
-                      <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-2 gap-2">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <Icon className="h-4 w-4 text-white flex-shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <div className="text-white text-sm font-medium">{getPlatformLabel(link.platform)}</div>
-                            <a 
-                              href={link.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 break-all max-w-full"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">
-                                {link.url}
-                              </span>
-                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                            </a>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveLinkClick(index);
-                          }}
-                          className="border-destructive/40 bg-destructive/20 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white flex-shrink-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Add new social media link */}
-              <div className="space-y-4 md:space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
-                  <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white text-sm h-11 !min-h-0 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-left"
-                      >
-                        <span className="truncate text-left flex-1 px-1 text-sm">
-                          {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
-                        </span>
-                        <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      className="w-80 glass-panel z-50 rounded-md text-white overflow-hidden"
-                      side="top"
-                      align="center"
-                      alignOffset={0}
-                      sideOffset={8}
-                      avoidCollisions={false}
-                      onCloseAutoFocus={(e) => e.preventDefault()}
-                    >
-                      {/* Platform options */}
-                      <div className="p-2">
-                        {SOCIAL_PLATFORMS.map((platform) => {
-                          // Allow multiple "annat" platforms, but only one of each other platform
-                          const isDisabled = platform.value !== 'annat' && formData.social_media_links.some(link => link.platform === platform.value);
-                          return (
-                            <DropdownMenuItem
-                              key={platform.value}
-                              onSelect={(e) => e.preventDefault()}
-                              className={`cursor-pointer hover:bg-white/10  transition-colors px-3 py-2 focus:bg-white/10 rounded-md ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              onClick={() => {
-                                if (!isDisabled) {
-                                  setNewSocialLink({...newSocialLink, platform: platform.value as SocialMediaLink['platform']});
-                                  setPlatformMenuOpen(false);
-                                }
-                              }}
-                              disabled={isDisabled}
-                            >
-                              <div className="flex items-center gap-2 w-full">
-                                <platform.icon className="h-4 w-4 flex-shrink-0" />
-                                <span className="text-white text-sm">
-                                  {platform.label} {isDisabled && '(redan tillagd)'}
-                                </span>
-                              </div>
-                            </DropdownMenuItem>
-                          );
-                        })}
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
-                  <Input
-                    value={newSocialLink.url}
-                    onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})}
-                    placeholder="Klistra in din sociala medier länk här"
-                    className="bg-white/5 border-white/10 hover:border-white/50 text-white text-sm h-11 !min-h-0 placeholder:text-white md:col-span-1"
-                  />
-
-                  <Button
-                    type="button"
-                    onClick={addSocialLink}
-                    disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
-                    variant="glass"
-                    className="h-11 !min-h-0 text-sm"
-                  >
-                    Lägg till
-                    <Plus className="h-3 w-3 ml-1.5" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
             <div className="flex justify-center pt-1">
               <button
                 type="submit"
@@ -921,49 +618,6 @@ const EmployerProfile = () => {
           </form>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContentNoFocus 
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
-        >
-          <AlertDialogHeader className="space-y-4 text-center">
-            <div className="flex items-center justify-center gap-2.5">
-              <div className="bg-red-500/20 p-2 rounded-full">
-                <AlertTriangle className="h-4 w-4 text-white" />
-              </div>
-              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
-                Ta bort social medier-länk
-              </AlertDialogTitle>
-            </div>
-            <AlertDialogDescription className="text-white text-sm leading-relaxed">
-              {linkToDelete && (
-                <>
-                  Är du säker på att du vill ta bort länken till <span className="font-semibold text-white">{getPlatformLabel(linkToDelete.link.platform)}</span>? Denna åtgärd går inte att ångra.
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
-            <AlertDialogCancel 
-              onClick={() => {
-                setDeleteDialogOpen(false);
-                setLinkToDelete(null);
-              }}
-              className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
-            >
-              Avbryt
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmRemoveSocialLink}
-              variant="destructiveSoft"
-              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" />
-              Ta bort
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContentNoFocus>
-      </AlertDialog>
 
       {/* Image Editor */}
       <ImageEditor
