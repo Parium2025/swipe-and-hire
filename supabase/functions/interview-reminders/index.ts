@@ -351,7 +351,9 @@ Deno.serve(async (req) => {
         job_id,
         job_postings(title)
       `)
-      .in("status", ["confirmed", "completed"])
+      // Samma regel som ovan: en obekräftad men genomförd intervju ska också
+      // ge rekryteraren en påminnelse om att lämna besked.
+      .in("status", ["pending", "confirmed", "completed"])
       .gte("scheduled_at", fourDaysAgo.toISOString())
       .lte("scheduled_at", threeDaysAgo.toISOString())
       .is("followup_reminder_sent_at", null);
