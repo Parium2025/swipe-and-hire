@@ -113,12 +113,13 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
 
   const openJob = useCallback(() => {
-    if (isDraft && onEditDraft) {
+    // Skrivskyddat läge (kollegas annons) ska aldrig öppna redigeringsvyn.
+    if (isDraft && onEditDraft && !readOnly) {
       onEditDraft(job);
       return;
     }
     navigate(`/job-details/${job.id}`);
-  }, [isDraft, onEditDraft, job, navigate]);
+  }, [isDraft, onEditDraft, job, navigate, readOnly]);
 
   const handleMediaClick = (e: MouseEvent) => {
     e.stopPropagation();
