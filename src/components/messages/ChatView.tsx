@@ -1063,7 +1063,9 @@ export function ChatView({
           <div className="flex flex-col gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex-1 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <Paperclip className="h-3.5 w-3.5 text-pure-white flex-shrink-0" />
-              <TruncatedText text={pendingFile.name} className="text-sm text-pure-white" />
+              <span className="block min-w-0 flex-1 truncate text-sm text-pure-white">
+                {pendingFile.name}
+              </span>
               <span className="text-pure-white text-xs flex-shrink-0">
                 {pendingFile.size >= 1024 * 1024
                   ? `${(pendingFile.size / (1024 * 1024)).toFixed(1)} MB`
