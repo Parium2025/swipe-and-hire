@@ -5,6 +5,7 @@
 - **Apple / Spotify-standard:** All kod skrivs som om Apple eller Spotify hade byggt det. Pixel-perfekt, detaljfokus, responsivitet och polering från första iteration.
 - **Brödtext på mörk bakgrund ska alltid vara kritvit (#FFFFFF), aldrig white/85 eller annan opacity.**
 - Text får ALDRIG klippas av — den ska brytas/radbrytas korrekt på små skärmar.
+- Inga korta godtyckliga maxgränser för titlar, företagsnamn, listnamn eller orter; layouten ska bära långa värden.
 - Sök-UX: Premium "Enterprise" känsla med smart search (Levenshtein/Synonymer), alias-system och iOS-zoom skydd (16px font).
 - SEO: Värdeerbjudande som H1, välkomsttext som subtitle. Alla SEO-sidor länkade i footern för att undvika "orphan pages".
 - Scroll Restoration: Spara position på `onPointerDown`; dedikerad logik för att återvända till footern vid back-navigering.
@@ -39,6 +40,7 @@
 - [Windows-video fryst](mem://constraints/windows-video-freeze) — Windows/HDMI-uppspelningen ändras aldrig utan test på riktig Windows-maskin.
 - [Ingen cookie-banner](mem://constraints/no-cookie-banner) — Bannern borttagen; endast nödvändig lagring.
 - [Ingen Resend](mem://constraints/no-resend-email-provider) — All e-post via Lovables inbyggda app-mejl; aldrig extern leverantör.
+- [Inga godtyckliga textgränser](mem://constraints/no-arbitrary-text-limits) — Behåll originaltext och lös långa värden med robust layout/trunkering.
 - [Databasbehörigheter](mem://constraints/db-permission-policy) — GRANT/REVOKE-regler, policyroller, auth.uid()-kontroll i SECURITY DEFINER.
 - [Raderingstider](mem://features/data-retention-timings) — 24 mån + 365 dagars frist, påminnelser 180/90/7 dagar, anonym räknare för raderade sökande.
 - [Stripe-lansering: juridik](mem://launch/stripe-legal-reminder) — Policy, DPA, registerförteckning och FAQ måste uppdateras när betalningar aktiveras.
