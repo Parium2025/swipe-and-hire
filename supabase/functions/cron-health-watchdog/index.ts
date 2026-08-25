@@ -248,6 +248,33 @@ serve(async (req) => {
       }
     }
 
+    // 3) Utskickskön: bygger det upp en svans av rader som aldrig går iväg?
+    const stuckCutoff = new Date(Date.now() - STUCK_QUEUE_MINUTES * 60 * 1000).toISOString();
+    const { count: stuckCount, error: stuckError } = await supabase
+      .from("outreach_dispatch_logs")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["pending", "retrying"])
+      .lt("created_at", stuckCutoff);
+
+    if (stuckError) {
+      issues.push({
+        code: "outreach_queue_unreadable",
+        severity: "warning",
+        message: "Kan inte läsa status för utskickskön",
+        summary: "Vi kan inte verifiera att automatiska utskick går iväg.",
+        details: { error_message: stuckError.message },
+      });
+    } else if ((stuckCount ?? 0) >= STUCK_QUEUE_THRESHOLD) {
+      issues.push({
+        code: "outreach_queue_stuck",
+        severity: "critical",
+        message: `${stuckCount} automatiska utskick har legat i kön i över ${STUCK_QUEUE_MINUTES} minuter`,
+        summary:
+          "Mallar och regler ser rätt ut i gränssnittet, men mejlen/chattmeddelandena når inte kandidaterna.",
+        details: { stuck_count: stuckCount, older_than_minutes: STUCK_QUEUE_MINUTES },
+      });
+    }
+
     await Promise.all(issues.map((issue) => sendAlert(supabase, issue)));
 
     return new Response(
