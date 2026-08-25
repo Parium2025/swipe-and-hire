@@ -89,6 +89,28 @@ export const getCachedWeather = (): CachedWeather | null => {
   }
 };
 
+/**
+ * Same as getCachedWeather but accepts entries up to 24 hours old.
+ * Used when the device is offline: a slightly stale reading is better than
+ * removing the weather row entirely.
+ */
+export const getStaleCachedWeather = (): CachedWeather | null => {
+  try {
+    const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+    if (!cached) return null;
+    const data = JSON.parse(cached);
+    if (!data || typeof data !== 'object' || typeof data.timestamp !== 'number') {
+      try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
+    if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) return null;
+    return data;
+  } catch {
+    try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
+    return null;
+  }
+};
+
 export const setCachedWeather = (weather: Omit<CachedWeather, 'timestamp'>) => {
   try {
     const data: CachedWeather = { ...weather, timestamp: Date.now() };
