@@ -15,6 +15,7 @@ import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 
 // Extracted sub-components
 import { CompanyLogoSection } from './companyProfile/CompanyLogoSection';
@@ -26,7 +27,7 @@ import type { SocialMediaLink, CompanyFormData } from './companyProfile/types';
 
 const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
-  const { profile, updateProfile, user } = useAuth();
+  const { profile, updateProfile, user, preloadedCompanyLogoUrl } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
@@ -295,6 +296,8 @@ const CompanyProfile = () => {
       
       import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
         preloadSingleFile(logoUrl).catch(() => {});
+        const transformed = resolveCompanyLogoUrl(logoUrl);
+        if (transformed && transformed !== logoUrl) preloadSingleFile(transformed).catch(() => {});
       }).catch(() => {});
       
       setFormData(prev => ({ 
@@ -528,6 +531,17 @@ const CompanyProfile = () => {
     }
   };
 
+  // Visa loggan via exakt samma transformerade URL som sidebar/header redan
+  // har laddat och cachat — då finns bilden i browser-cachen direkt när sidan
+  // öppnas (ingen ny nedladdning, ingen "pop-in").
+  const resolvedLogoUrl = resolveCompanyLogoUrl(formData.company_logo_url);
+  const sameAsProfileLogo =
+    !!formData.company_logo_url &&
+    formData.company_logo_url === ((profile as any)?.company_logo_url || '');
+  const displayLogoUrl = formData.company_logo_url
+    ? ((sameAsProfileLogo && preloadedCompanyLogoUrl) || resolvedLogoUrl || formData.company_logo_url)
+    : '';
+
   const handleFormDataChange = (updates: Partial<CompanyFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
@@ -536,7 +550,7 @@ const CompanyProfile = () => {
      <div className="space-y-8 responsive-container animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       {/* Logo Section */}
       <CompanyLogoSection
-        companyLogoUrl={formData.company_logo_url}
+        companyLogoUrl={displayLogoUrl}
         companyName={formData.company_name}
         isUploadingLogo={isUploadingLogo}
         uploadProgress={logoProgress}
