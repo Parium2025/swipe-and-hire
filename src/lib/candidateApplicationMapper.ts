@@ -1,5 +1,4 @@
 import type { ApplicationData } from '@/hooks/useApplicationsData';
-import { clampJobTitle } from '@/lib/jobTitle';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 
 /**
@@ -61,7 +60,7 @@ export function mapRawToApplicationData(
     status: raw.status,
     applied_at: raw.applied_at || '',
     updated_at: raw.updated_at,
-    job_title: clampJobTitle(opts.jobTitle) || 'Okänt jobb',
+    job_title: opts.jobTitle || 'Okänt jobb',
     ...resolveCandidateMedia(raw, {
       profile_image_url: opts.fallbackProfileImageUrl ?? null,
       video_url: opts.fallbackVideoUrl ?? null,

@@ -2733,7 +2733,6 @@ const MobileJobWizard = ({
                   <Input
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
-                    maxLength={TEXT_LIMITS.jobTitle}
                     placeholder="t.ex. Lagerarbetare"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                   />

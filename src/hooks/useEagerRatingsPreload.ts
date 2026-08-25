@@ -6,7 +6,6 @@ import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
-import { clampJobTitle } from '@/lib/jobTitle';
 import { warmTeamAvatars } from '@/lib/warmTeamAvatars';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
@@ -453,7 +452,7 @@ export const useEagerRatingsPreload = () => {
     // 4) Bygg items med job_title + rating
     const items = baseData.map((item: any) => ({
       ...item,
-      job_title: clampJobTitle(item.job_postings?.title) || 'Okänt jobb',
+      job_title: item.job_postings?.title || 'Okänt jobb',
       job_occupation: item.job_postings?.occupation || null,
       rating: ratingsMap[item.applicant_id] ?? null,
       job_postings: undefined,
