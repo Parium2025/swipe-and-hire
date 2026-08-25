@@ -414,7 +414,7 @@ function ContactItem({
     <button
       onClick={onToggle}
       className={cn(
-        "w-full flex items-center gap-3 p-2.5 rounded-lg text-left transition-all",
+        "w-full min-w-0 overflow-hidden flex items-center gap-3 p-2.5 rounded-lg text-left transition-all",
         isSelected 
           ? "bg-blue-500/20 border border-blue-500/30" 
           : "hover:bg-white/5 border border-transparent"
@@ -438,9 +438,9 @@ function ContactItem({
           {getDisplayName()}
         </span>
         {contact.type === 'candidate' && contact.jobTitle && (
-          <span className="text-white/40 text-xs flex items-center gap-1">
-            <Briefcase className="h-3 w-3" />
-            {contact.jobTitle}
+          <span className="flex min-w-0 items-center gap-1 text-xs text-white/40">
+            <Briefcase className="h-3 w-3 shrink-0" />
+            <span className="block min-w-0 flex-1 truncate">{contact.jobTitle}</span>
           </span>
         )}
         {contact.type === 'colleague' && (

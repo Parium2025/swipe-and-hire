@@ -5,7 +5,6 @@ import { Briefcase, BellOff } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { TruncatedText } from '@/components/ui/truncated-text';
 import type { Conversation } from '@/hooks/useConversations';
 
 interface ConversationItemProps {
@@ -106,14 +105,14 @@ export function ConversationItem({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex min-w-0 items-center justify-between gap-2 mb-0.5">
-          <TruncatedText
-            text={displayName}
-            insideInteractive
+          <span
             className={cn(
-              "flex-1 font-medium text-white",
+              "block min-w-0 flex-1 truncate font-medium text-white",
               conversation.unread_count > 0 && "font-semibold"
             )}
-          />
+          >
+            {displayName}
+          </span>
           <span className="text-pure-white text-xs flex-shrink-0 flex items-center gap-1">
             {conversation.is_muted && <BellOff className="h-3 w-3" aria-label="Tystad" />}
             {formatTime(conversation.last_message_at)}
@@ -124,22 +123,20 @@ export function ConversationItem({
         {(snapshot?.job_title || conversation.job?.title) && (
           <div className="flex min-w-0 items-center gap-1 text-pure-white text-xs mb-0.5">
             <Briefcase className="h-3 w-3 shrink-0" />
-            <TruncatedText
-              text={snapshot?.job_title || conversation.job?.title || ''}
-              insideInteractive
-              className="min-w-0"
-            />
+            <span className="block min-w-0 flex-1 truncate">
+              {snapshot?.job_title || conversation.job?.title || ''}
+            </span>
           </div>
         )}
 
-        <TruncatedText
-          text={`${isOwnMessage ? 'Du: ' : ''}${lastMessagePreview}`}
-          insideInteractive
+        <span
           className={cn(
-            "text-sm",
+            "block w-full min-w-0 truncate text-sm",
             conversation.unread_count > 0 ? "text-pure-white font-medium" : "text-pure-white"
           )}
-        />
+        >
+          {`${isOwnMessage ? 'Du: ' : ''}${lastMessagePreview}`}
+        </span>
       </div>
     </button>
   );

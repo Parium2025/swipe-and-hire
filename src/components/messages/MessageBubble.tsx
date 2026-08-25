@@ -11,7 +11,6 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useAttachmentUrl } from '@/lib/attachmentUrl';
 import type { ConversationMessage } from '@/hooks/useConversations';
 import type { GroupedReaction } from '@/hooks/useMessageReactions';
-import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface MessageBubbleProps {
   message: ConversationMessage;
@@ -185,7 +184,9 @@ export function MessageBubble({
           </video>
           {message.attachment_name && (
             <div className="px-1 mt-1">
-              <TruncatedText text={message.attachment_name} className="text-pure-white text-xs" />
+              <span className="block w-full min-w-0 truncate text-xs text-pure-white">
+                {message.attachment_name}
+              </span>
             </div>
           )}
         </div>
@@ -200,7 +201,9 @@ export function MessageBubble({
           </audio>
           {message.attachment_name && (
             <div className="px-1 mt-1">
-              <TruncatedText text={message.attachment_name} className="text-pure-white text-xs" />
+              <span className="block w-full min-w-0 truncate text-xs text-pure-white">
+                {message.attachment_name}
+              </span>
             </div>
           )}
         </div>
@@ -220,10 +223,9 @@ export function MessageBubble({
         ) : (
           <Paperclip className="h-4 w-4 text-pure-white flex-shrink-0" />
         )}
-        <TruncatedText
-          text={message.attachment_name || 'Fil'}
-          className="text-sm text-pure-white [overflow-wrap:anywhere]"
-        />
+        <span className="block min-w-0 flex-1 truncate text-sm text-pure-white">
+          {message.attachment_name || 'Fil'}
+        </span>
       </a>
     );
   };
