@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useBackgroundLocation } from './useBackgroundLocation';
 import { isNativeApp, isMobileWeb, getAccuratePosition, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
+import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { isSlowConnection } from '@/hooks/useNetworkAwareFetch';
 import {
   type CachedLocation,
   getCachedLocation,
   setCachedLocation,
   getCachedWeather,
+  getStaleCachedWeather,
   setCachedWeather,
   getWeatherInfo,
   fetchCurrentWeather,
@@ -149,7 +152,24 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     } catch (err) {
       if (seq !== requestSeqRef.current) return;
       console.error('Weather fetch error:', err);
-      updateWeather(safeFallback(city));
+      // If a fresh fetch fails, prefer an older cached reading over hiding the
+      // weather row. This smooths over transient API blips and weak connections.
+      const stale = getStaleCachedWeather();
+      if (stale) {
+        updateWeather({
+          temperature: stale.temperature,
+          feelsLike: stale.feelsLike,
+          temperatureAvailable: stale.temperatureAvailable,
+          weatherCode: stale.weatherCode,
+          description: stale.description,
+          emoji: stale.emoji,
+          city: stale.city || city,
+          isLoading: false,
+          error: null,
+        });
+      } else {
+        updateWeather(safeFallback(city));
+      }
     }
   }, [safeFallback, updateWeather]);
 
@@ -309,8 +329,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       return () => { mountedRef.current = false; };
     }
 
-    // Skip network calls when offline — keep any cached weather visible instead.
-    const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+    // Use the connectivity manager's verdict instead of the unreliable
+    // navigator.onLine. When offline we keep any cached weather visible (even
+    // if it is slightly stale) so the header never flashes to an error state.
+    const isOffline = !getIsOnline();
 
     if (!initializedRef.current) {
       initializedRef.current = true;
@@ -330,12 +352,31 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       } else if (!isOffline) {
         checkForLocationChange(false);
       } else {
-        // Offline with no cache — mark as error so UI can gracefully hide weather row.
-        updateWeather(safeFallback(fallbackCity || ''));
+        // Offline: prefer a stale cached reading over hiding the weather row.
+        const stale = getStaleCachedWeather();
+        if (stale) {
+          updateWeather({
+            temperature: stale.temperature,
+            feelsLike: stale.feelsLike,
+            temperatureAvailable: stale.temperatureAvailable,
+            weatherCode: stale.weatherCode,
+            description: stale.description,
+            emoji: stale.emoji,
+            city: stale.city,
+            isLoading: false,
+            error: null,
+          });
+        } else {
+          // No cache at all — gracefully hide the weather row, but keep
+          // the greeting and clock. The fallback city hint is preserved so a
+          // name can still be shown if the consumer wants it.
+          updateWeather(safeFallback(fallbackCity || ''));
+        }
       }
     }
 
-    // Real-time GPS via watchPosition (browser only)
+    // Real-time GPS via watchPosition (browser only). GPS itself works offline,
+    // but we only push updates to the server when we are online.
     if ('geolocation' in navigator && !isNativeApp() && !isOffline) {
       watchId = navigator.geolocation.watchPosition(
         async (position) => {
@@ -371,22 +412,28 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       console.log('🛰️ Real-time GPS tracking started via watchPosition');
     }
 
-    // Fallback: Check every 10 minutes
+    // Fallback: Check periodically. On slow connections we back off to avoid
+    // stacking requests on an already strained link.
+    const trackingIntervalMs = isSlowConnection() ? 20 * 60 * 1000 : 10 * 60 * 1000;
     const gpsTrackingInterval = setInterval(() => {
-      if (mountedRef.current && navigator.onLine !== false) {
+      if (mountedRef.current && getIsOnline()) {
         checkForLocationChange(true);
       }
-    }, 10 * 60 * 1000);
+    }, trackingIntervalMs);
 
-    const handleOnline = () => {
-      console.log('Network changed - checking location...');
-      retryAttemptRef.current = 0;
-      checkForLocationChange(true);
+    const handleConnectivity = (online: boolean) => {
+      if (online && mountedRef.current) {
+        console.log('Network changed - checking location...');
+        retryAttemptRef.current = 0;
+        checkForLocationChange(true);
+      }
     };
+
+    const unsubscribeConnectivity = onConnectivityChange(handleConnectivity);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && mountedRef.current) {
-        if (navigator.onLine === false) return;
+        if (!getIsOnline()) return;
         const cachedWeather = getCachedWeather();
         if (cachedWeather && Date.now() - cachedWeather.timestamp < 3 * 60 * 1000) {
           return;
@@ -396,7 +443,6 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     };
 
-    window.addEventListener('online', handleOnline);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
@@ -406,7 +452,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         console.log('🛰️ Real-time GPS tracking stopped');
       }
       clearInterval(gpsTrackingInterval);
-      window.removeEventListener('online', handleOnline);
+      unsubscribeConnectivity();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback]);
@@ -418,7 +464,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       retryAttemptRef.current = 0;
       return;
     }
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    if (!getIsOnline()) return;
 
     // Exponential backoff on total failure: 30s → 2min → 5min (capped)
     const delays = [30_000, 120_000, 300_000];
@@ -427,7 +473,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     retryAttemptRef.current = attempt + 1;
 
     const id = setTimeout(() => {
-      if (!mountedRef.current || navigator.onLine === false) return;
+      if (!mountedRef.current || !getIsOnline()) return;
       console.log(`🔁 Weather retry attempt ${attempt + 1}`);
       void checkForLocationChange(true).finally(() => {
         // Re-arm: the error string is identical between failures, so we need an

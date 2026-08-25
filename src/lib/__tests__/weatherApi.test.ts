@@ -1,5 +1,17 @@
-import { describe, it, expect } from 'vitest';
-import { parseWeatherResponse, hasConfirmedWeather } from '../weatherApi';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { parseWeatherResponse, hasConfirmedWeather, setCachedWeather, getCachedWeather, getStaleCachedWeather } from '../weatherApi';
+
+// ─── Mock localStorage ──────────────────────────────────────────────
+const localStorageMap = new Map<string, string>();
+const localStorageMock = {
+  getItem: vi.fn((key: string) => localStorageMap.get(key) ?? null),
+  setItem: vi.fn((key: string, value: string) => { localStorageMap.set(key, value); }),
+  removeItem: vi.fn((key: string) => { localStorageMap.delete(key); }),
+  clear: vi.fn(() => localStorageMap.clear()),
+  get length() { return localStorageMap.size; },
+  key: vi.fn((i: number) => [...localStorageMap.keys()][i] ?? null),
+};
+Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock, writable: true });
 
 const makeResponse = (overrides: Record<string, unknown> = {}) => ({
   current: {
@@ -64,5 +76,42 @@ describe('hasConfirmedWeather', () => {
     expect(hasConfirmedWeather({ city: '', temperatureAvailable: true })).toBe(false);
     expect(hasConfirmedWeather(null)).toBe(false);
     expect(hasConfirmedWeather(undefined)).toBe(false);
+  });
+});
+
+describe('weather cache helpers', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  const sample = {
+    temperature: 18,
+    feelsLike: 17,
+    temperatureAvailable: true,
+    weatherCode: 1,
+    description: 'Mestadels klart',
+    emoji: '🌤️',
+    city: 'Stockholm',
+    isNight: false,
+  };
+
+  it('getCachedWeather returns fresh cache and ignores expired cache', () => {
+    setCachedWeather(sample);
+    expect(getCachedWeather()?.city).toBe('Stockholm');
+
+    // Simulate 6 minutes passing (TTL is 5 minutes)
+    const stale = { ...sample, timestamp: Date.now() - 6 * 60 * 1000 };
+    localStorage.setItem('parium_weather_data', JSON.stringify(stale));
+    expect(getCachedWeather()).toBeNull();
+  });
+
+  it('getStaleCachedWeather accepts older entries up to 24 hours', () => {
+    const stale = { ...sample, timestamp: Date.now() - 6 * 60 * 1000 };
+    localStorage.setItem('parium_weather_data', JSON.stringify(stale));
+    expect(getStaleCachedWeather()?.city).toBe('Stockholm');
+
+    const ancient = { ...sample, timestamp: Date.now() - 25 * 60 * 60 * 1000 };
+    localStorage.setItem('parium_weather_data', JSON.stringify(ancient));
+    expect(getStaleCachedWeather()).toBeNull();
   });
 });
