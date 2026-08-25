@@ -185,6 +185,9 @@ const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel, footn
           {isNew ? 'Nytt' : isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
         </span>
       )}
+      {footnote && (
+        <p className="text-[10px] md:text-[11px] text-white mt-1 leading-snug [overflow-wrap:anywhere]">{footnote}</p>
+      )}
     </div>
   );
 });
