@@ -34,12 +34,16 @@ serve(async (req) => {
     return new Response("Interview not found", { status: 404 });
   }
 
-  if (interview.status === "cancelled") {
+  // Avbokad eller avböjd intervju får aldrig hamna i någons kalender.
+  if (interview.status === "cancelled" || interview.status === "declined") {
     return new Response("Interview cancelled", { status: 410 });
   }
 
+  // job_id saknas för manuellt tillagda kandidater – fråga bara när det finns.
   const [{ data: job }, { data: employerProfile }] = await Promise.all([
-    supabaseAdmin.from("job_postings").select("title").eq("id", interview.job_id).maybeSingle(),
+    interview.job_id
+      ? supabaseAdmin.from("job_postings").select("title").eq("id", interview.job_id).maybeSingle()
+      : Promise.resolve({ data: null as { title?: string } | null }),
     supabaseAdmin.from("profiles").select("company_name").eq("id", interview.employer_id).maybeSingle(),
   ]);
 
@@ -51,9 +55,7 @@ serve(async (req) => {
   const summary = escapeIcs(`Intervju – ${jobTitle}`);
   const locationLabel = interview.location_type === "video" ? "Videointervju" : "På plats";
   const locationDetails = interview.location_details || "";
-  const location = interview.location_type === "video" && locationDetails.startsWith("http")
-    ? escapeIcs(locationDetails)
-    : locationDetails ? escapeIcs(locationDetails) : escapeIcs(locationLabel);
+  const location = locationDetails ? escapeIcs(locationDetails) : escapeIcs(locationLabel);
 
   let description = `${jobTitle}${companyName ? ` hos ${companyName}` : ""}\n\n${locationLabel}: ${locationDetails || "Information meddelas"}`;
   if (interview.message) description += `\n\n${interview.message}`;
@@ -73,7 +75,7 @@ serve(async (req) => {
     `DESCRIPTION:${escapeIcs(description)}`,
     `LOCATION:${location}`,
     companyName ? `ORGANIZER;CN=${escapeIcs(companyName)}:mailto:noreply@parium.se` : "ORGANIZER:mailto:noreply@parium.se",
-    "STATUS:CONFIRMED",
+    interview.status === "confirmed" ? "STATUS:CONFIRMED" : "STATUS:TENTATIVE",
     `SEQUENCE:${(interview as { revision?: number }).revision ?? 0}`,
     "BEGIN:VALARM",
     "TRIGGER:-PT1H",
@@ -87,7 +89,8 @@ serve(async (req) => {
     "END:VALARM",
     "END:VEVENT",
     "END:VCALENDAR",
-  ].join("\r\n");
+  ].map(foldIcsLine).join("\r\n");
+
 
   return new Response(ics, {
     status: 200,
