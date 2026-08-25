@@ -220,6 +220,22 @@ async function dispatchLog(log: OutreachLog) {
     }
   }
 
+  // En avbokad eller avböjd intervju får aldrig generera "din intervju börjar snart".
+  if (log.interview_id) {
+    const { data: interviewRow } = await admin
+      .from('interviews')
+      .select('status')
+      .eq('id', log.interview_id)
+      .maybeSingle();
+    if (!interviewRow || interviewRow.status === 'cancelled' || interviewRow.status === 'declined') {
+      await admin.from('outreach_dispatch_logs').update({
+        status: 'skipped',
+        error_message: 'Intervjun avbokades innan utskicket hann skickas',
+      }).eq('id', log.id);
+      return { skipped: true };
+    }
+  }
+
   const template = log.template_id ? ((await admin.from('outreach_templates').select('*').eq('id', log.template_id).maybeSingle()).data as OutreachTemplate | null) : null;
   const context = await buildContext(log);
   const data = {

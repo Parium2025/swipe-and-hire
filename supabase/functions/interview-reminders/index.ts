@@ -164,7 +164,10 @@ Deno.serve(async (req) => {
       `)
       .eq("status", "confirmed")
       .gte("scheduled_at", nineMinutesFromNow.toISOString())
-      .lte("scheduled_at", elevenMinutesFromNow.toISOString());
+      .lte("scheduled_at", elevenMinutesFromNow.toISOString())
+      // Fönstret är 2 minuter brett men cron kör varje minut – utan denna
+      // markering skulle samma påminnelse skickas två gånger.
+      .is("reminder_sent_at", null);
 
     if (interviewsError) {
       console.error("Error fetching interviews:", interviewsError);
@@ -198,6 +201,16 @@ Deno.serve(async (req) => {
       console.log(`Found ${upcomingInterviews.length} interviews to send reminders for`);
 
       for (const interview of upcomingInterviews as unknown as Interview[]) {
+        // Claim direkt: en samtidig körning får aldrig skicka samma påminnelse.
+        const { data: claimed } = await supabase
+          .from("interviews")
+          .update({ reminder_sent_at: now.toISOString() })
+          .eq("id", interview.id)
+          .is("reminder_sent_at", null)
+          .select("id")
+          .maybeSingle();
+        if (!claimed) continue;
+
         const jobTitle = interview.job_postings?.title || "intervju";
         const scheduledTime = new Date(interview.scheduled_at);
         const timeString = scheduledTime.toLocaleTimeString("sv-SE", {

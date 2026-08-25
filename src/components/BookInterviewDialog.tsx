@@ -156,6 +156,12 @@ export const BookInterviewDialog = ({
       const [hours, minutes] = time.split(':').map(Number);
       const scheduledAt = new Date(date);
       scheduledAt.setHours(hours, minutes, 0, 0);
+      // Dialogen kan ha stått öppen förbi den valda tiden – boka aldrig bakåt.
+      if (scheduledAt.getTime() <= Date.now()) {
+        toast.error('Välj en tid som ligger framåt i tiden');
+        setIsSubmitting(false);
+        return;
+      }
       const normalizedVideoLocationDetails =
         locationType === 'video'
           ? normalizeMeetingLink(editableVideoLink || locationDetails || '')
