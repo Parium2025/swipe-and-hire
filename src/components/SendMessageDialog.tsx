@@ -1,7 +1,7 @@
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
-import { noFocusRingProps } from '@/lib/noFocusRing';
+import { noFocusRingProps, noFlashButtonClass } from '@/lib/noFocusRing';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -266,8 +266,7 @@ export function SendMessageDialog({
                 size="icon"
                 aria-label="Stäng"
                 onClick={handleClose}
-                onMouseDown={(e) => e.currentTarget.blur()}
-                onMouseUp={(e) => e.currentTarget.blur()}
+                {...noFocusRingProps}
                 className={dialogCloseButtonClassName}
               >
                 <X className={dialogCloseIconClassName} />
@@ -293,6 +292,7 @@ export function SendMessageDialog({
                         {...noFocusRingProps}
                         variant={active ? 'glassBlue' : 'glass'}
                         size="sm"
+                        className={noFlashButtonClass}
                         onClick={() => toggleChannel(value)}
                       >
                         <Icon className="h-3.5 w-3.5" />
@@ -346,10 +346,9 @@ export function SendMessageDialog({
 
               <Button
                 onClick={handleSend}
-                onMouseDown={(e) => e.currentTarget.blur()}
-                onMouseUp={(e) => e.currentTarget.blur()}
+                {...noFocusRingProps}
                 disabled={isDisabled}
-                className={`w-full h-11 !min-h-0 rounded-full border transition-[border-color,transform] duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
+                className={`${noFlashButtonClass} w-full h-11 !min-h-0 rounded-full border transition-[border-color,transform] duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
                   !sending && message.trim() ? 'border-white/30' : 'border-transparent'
                 }`}
               >
@@ -381,6 +380,7 @@ export function SendMessageDialog({
           <div className="flex flex-col sm:flex-row gap-2 sm:justify-center pt-2 w-full">
             <AlertDialogCancel
               onClick={() => setShowDiscardConfirm(false)}
+              {...noFocusRingProps}
               className="order-2 sm:order-first w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50 mt-0 outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Fortsätt skriva
@@ -388,6 +388,7 @@ export function SendMessageDialog({
 
             <AlertDialogAction
               onClick={handleDiscardAndClose}
+              {...noFocusRingProps}
               className="order-1 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-red-500/20 backdrop-blur-sm text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Lämna utan att spara
