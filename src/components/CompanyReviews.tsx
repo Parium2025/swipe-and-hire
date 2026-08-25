@@ -88,35 +88,15 @@ const CompanyReviews = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch reviews with React Query - using JOIN to avoid N+1 queries
-  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
-    queryKey: ['company-reviews', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      
-      // Fetch reviews without JOIN since there's no FK relationship
-      const { data, error } = await supabase
-        .from('company_reviews_public')
-        .select('*')
-        .eq('company_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching reviews:', error);
-        return [];
-      }
-
-      return (data || []) as CompanyReview[];
-    },
-    enabled: !!user?.id,
-    staleTime: 2 * 60 * 1000,
-  });
+  // Delad cache + realtime-synk (localStorage-instant load, bakgrundssynk)
+  const { reviews: cachedReviews, avgRating, isLoading: reviewsLoading } =
+    useCompanyReviewsCache(user?.id ?? null);
+  const reviews = (cachedReviews ?? []) as unknown as CompanyReview[];
 
   const loading = companyLoading || reviewsLoading;
 
-
   const averageRating = reviews.length > 0
-    ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
+    ? (avgRating ?? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
     : "0";
 
   const renderStars = (rating: number) => {
@@ -127,8 +107,8 @@ const CompanyReviews = () => {
             key={star}
             className={`h-4 w-4 ${
               star <= rating
-                ? 'fill-yellow-400 text-yellow-400'
-                : 'text-muted-foreground'
+                ? 'fill-[#FFC44D] text-[#FFC44D]'
+                : 'text-white/40'
             }`}
           />
         ))}
