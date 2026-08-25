@@ -16,6 +16,37 @@ const formatIcsDate = (date: Date): string => {
 const escapeIcs = (text: string): string =>
   (text || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 
+/**
+ * RFC 5545: rader får vara max 75 oktetter. Långa meddelanden bröt tidigare
+ * kalenderfilen i Outlook/Google. Vi viker på oktettgräns så att UTF-8-tecken
+ * (å, ä, ö) aldrig delas mitt itu.
+ */
+const foldIcsLine = (line: string): string => {
+  const encoder = new TextEncoder();
+  if (encoder.encode(line).length <= 75) return line;
+
+  const out: string[] = [];
+  let current = "";
+  let currentBytes = 0;
+  let limit = 75;
+
+  for (const char of line) {
+    const size = encoder.encode(char).length;
+    if (currentBytes + size > limit) {
+      out.push(current);
+      current = "";
+      currentBytes = 0;
+      limit = 74; // efterföljande rader inleds med ett mellanslag
+    }
+    current += char;
+    currentBytes += size;
+  }
+  if (current) out.push(current);
+
+  return out.map((part, idx) => (idx === 0 ? part : ` ${part}`)).join("\r\n");
+};
+
+
 serve(async (req) => {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
