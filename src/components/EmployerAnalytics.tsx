@@ -840,7 +840,7 @@ const EmployerAnalytics = memo(() => {
               <CardContent className="p-4 flex flex-col h-full">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <span className="min-w-0 flex-1 text-[11px] font-medium leading-tight text-white [overflow-wrap:anywhere]">
-                    Bästa publiceringsdag
+                    Mest aktiva veckodag
                   </span>
                   <div className="-mt-1 shrink-0">
                     <InlineInfoTooltip content="Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser." />
