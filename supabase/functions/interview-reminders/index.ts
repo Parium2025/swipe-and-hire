@@ -188,7 +188,9 @@ Deno.serve(async (req) => {
         employer_id,
         job_postings(title)
       `)
-      .eq("status", "confirmed")
+      // En bokad intervju gäller tills den avbokas eller tackas nej till.
+      // Kandidaten bekräftar sällan i appen – därför räknas även "pending".
+      .in("status", ["pending", "confirmed"])
       .gte("scheduled_at", nineMinutesFromNow.toISOString())
       .lte("scheduled_at", elevenMinutesFromNow.toISOString())
       // Fönstret är 2 minuter brett men cron kör varje minut – utan denna
@@ -349,7 +351,9 @@ Deno.serve(async (req) => {
         job_id,
         job_postings(title)
       `)
-      .in("status", ["confirmed", "completed"])
+      // Samma regel som ovan: en obekräftad men genomförd intervju ska också
+      // ge rekryteraren en påminnelse om att lämna besked.
+      .in("status", ["pending", "confirmed", "completed"])
       .gte("scheduled_at", fourDaysAgo.toISOString())
       .lte("scheduled_at", threeDaysAgo.toISOString())
       .is("followup_reminder_sent_at", null);
