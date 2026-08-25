@@ -151,14 +151,14 @@ function truncateAtSentence(text: string, maxLen: number): string {
     truncated.lastIndexOf('! '),
     truncated.lastIndexOf('? ')
   );
-  if (lastDot > maxLen * 0.4) {
+  if (lastDot > maxLen * 0.3) {
     return truncated.slice(0, lastDot + 1).trim();
   }
   const lastSpace = truncated.lastIndexOf(' ');
-  if (lastSpace > maxLen * 0.6) {
-    return truncated.slice(0, lastSpace).trim() + '...';
+  if (lastSpace > maxLen * 0.5) {
+    return truncated.slice(0, lastSpace).trim() + '.';
   }
-  return truncated.trim() + '...';
+  return truncated.trim() + '.';
 }
 
 // Count articles per source
@@ -348,7 +348,7 @@ async function fetchRSSWithRetry(
         const full = `${i.title} ${i.description}`;
         return {
           title: i.title,
-          summary: truncateAtSentence(i.description, 250) || i.title,
+          summary: truncateAtSentence(i.description, 420) || i.title,
           source: source.name,
           source_url: i.link || null,
           category: categorize(full),
