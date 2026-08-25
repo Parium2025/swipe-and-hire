@@ -4,28 +4,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { AlertDialogContentNoFocus } from "@/components/ui/alert-dialog-no-focus";
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Trash2, ChevronDown, AlertTriangle, Camera, Pencil, RotateCcw, WifiOff } from 'lucide-react';
+import { Trash2, Camera, Pencil, RotateCcw, WifiOff } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
