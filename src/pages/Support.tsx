@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Clock, CheckCircle, AlertCircle, ChevronDown, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 import { useFieldDraft } from '@/hooks/useFormDraft';
 
@@ -285,8 +286,8 @@ const Support = () => {
                     <div className="flex-shrink-0">
                       {getStatusIcon(ticket.status)}
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-white text-sm truncate">{ticket.subject}</p>
+                    <div className="min-w-0 flex-1">
+                      <TruncatedText text={ticket.subject} className="text-sm font-medium text-white" />
                       <p className="text-sm text-white">
                         Ärende {ticket.id.slice(0, 8)} • Skapad {new Date(ticket.created_at).toLocaleDateString('sv-SE')}
                       </p>

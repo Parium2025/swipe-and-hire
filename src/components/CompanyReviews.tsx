@@ -340,6 +340,7 @@ const CompanyReviews = () => {
                         <p className="text-sm font-medium text-white">{getPlatformLabel()}</p>
                         <a 
                           href={link.url} 
+                          title={link.url}
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 truncate"
