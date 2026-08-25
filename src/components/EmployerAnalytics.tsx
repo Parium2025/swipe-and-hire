@@ -854,7 +854,14 @@ const EmployerAnalytics = memo(() => {
               <>
                 <TrendPill icon={Eye} label="Visningar" current={trends.current_views} previous={trends.prev_views} daysLabel={dl} />
                 <TrendPill icon={Users} label="Ansökningar" current={trends.current_applications} previous={trends.prev_applications} daysLabel={dl} />
-                <TrendPill icon={CalendarCheck} label="Intervjuer" current={trends.current_interviews} previous={trends.prev_interviews} daysLabel={dl} />
+                <TrendPill
+                  icon={CalendarCheck}
+                  label="Intervjuer"
+                  current={trends.current_interviews}
+                  previous={trends.prev_interviews}
+                  daysLabel={dl}
+                  footnote={`varav ${trends.current_interviews_completed ?? 0} genomförda`}
+                />
               </>
             );
           })()}
