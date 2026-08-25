@@ -1,6 +1,7 @@
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
+import { noFocusRingProps } from '@/lib/noFocusRing';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -289,10 +290,10 @@ export function SendMessageDialog({
                       <Button
                         key={value}
                         type="button"
+                        {...noFocusRingProps}
                         variant={active ? 'glassBlue' : 'glass'}
                         size="sm"
                         onClick={() => toggleChannel(value)}
-                        className="outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                       >
                         <Icon className="h-3.5 w-3.5" />
                         {label}

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Trash2, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { noFocusRingProps } from '@/lib/noFocusRing';
 import ProfileVideo from '@/components/ProfileVideo';
 import { formatTimeAgo } from '@/lib/date';
 import { CandidateSummarySection } from '@/components/candidateProfile/CandidateSummarySection';
@@ -232,6 +233,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
 
         <div className="flex justify-center gap-1">
           <Button
+            {...noFocusRingProps}
             onClick={() => {
               setSendMessagePreset(null);
               setSendMessageOpen(true);
@@ -244,6 +246,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
             <span className="whitespace-nowrap text-[clamp(9px,2.5vw,14px)]">Chatta</span>
           </Button>
           <Button
+            {...noFocusRingProps}
             onClick={() => setBookInterviewOpen(true)}
             variant="glassBlue"
             size="sm"
@@ -254,6 +257,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
           </Button>
           {onRemoveFromList && (
             <Button
+              {...noFocusRingProps}
               onClick={onRemoveFromList}
               variant="glassRed"
               size="sm"
