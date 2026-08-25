@@ -51,6 +51,8 @@ interface TrendData {
   prev_applications: number;
   current_interviews: number;
   prev_interviews: number;
+  current_interviews_completed?: number;
+  prev_interviews_completed?: number;
 }
 
 interface BestDay {
@@ -153,8 +155,8 @@ const InlineInfoTooltip = memo(({ content }: { content: string }) => (
 InlineInfoTooltip.displayName = 'InlineInfoTooltip';
 
 /* ─── Trend pill ─── */
-const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
-  current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string;
+const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel, footnote }: {
+  current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string; footnote?: string;
 }) => {
   // Från 0 går det inte att räkna procent — visa "Nytt" i stället för vilseledande tal.
   const isNew = previous === 0 && current > 0;
@@ -182,6 +184,9 @@ const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
           {isUp ? <TrendingUp className="h-3 w-3" /> : isDown ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
           {isNew ? 'Nytt' : isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
         </span>
+      )}
+      {footnote && (
+        <p className="text-[10px] md:text-[11px] text-white mt-1 leading-snug [overflow-wrap:anywhere]">{footnote}</p>
       )}
     </div>
   );
@@ -849,7 +854,14 @@ const EmployerAnalytics = memo(() => {
               <>
                 <TrendPill icon={Eye} label="Visningar" current={trends.current_views} previous={trends.prev_views} daysLabel={dl} />
                 <TrendPill icon={Users} label="Ansökningar" current={trends.current_applications} previous={trends.prev_applications} daysLabel={dl} />
-                <TrendPill icon={CalendarCheck} label="Intervjuer" current={trends.current_interviews} previous={trends.prev_interviews} daysLabel={dl} />
+                <TrendPill
+                  icon={CalendarCheck}
+                  label="Intervjuer"
+                  current={trends.current_interviews}
+                  previous={trends.prev_interviews}
+                  daysLabel={dl}
+                  footnote={`varav ${trends.current_interviews_completed ?? 0} genomförda`}
+                />
               </>
             );
           })()}
