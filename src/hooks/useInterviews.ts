@@ -128,8 +128,9 @@ export const useInterviews = () => {
   useEffect(() => {
     if (!user?.id) return;
 
+    const instanceId = crypto.randomUUID();
     const channel = supabase
-      .channel(`employer-interviews-${user.id}`)
+      .channel(`employer-interviews-ui-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -276,8 +277,9 @@ export const useCandidateInterviews = () => {
   useEffect(() => {
     if (!user?.id) return;
 
+    const instanceId = crypto.randomUUID();
     const channel = supabase
-      .channel('candidate-interviews-realtime')
+      .channel(`candidate-interviews-ui-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
