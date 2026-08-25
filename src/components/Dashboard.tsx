@@ -273,8 +273,12 @@ const Dashboard = memo(() => {
     const totalJobs = activeFromServer + expiredFromServer;
     const activeCount = serverCounts?.active ?? filteredStats.activeJobs;
     const expiredCount = serverCounts?.expired ?? expiredJobs.length;
-    const totalViews = serverStats?.total_views ?? filteredStats.totalViews;
-    const totalApplications = serverStats?.total_applications ?? filteredStats.totalApplications;
+    // Visningar/Ansökningar: server-siffran exkluderar den egna organisationens
+    // interna aktivitet. Faller vi tillbaka på råsummorna i annonsraderna hoppar
+    // talet när serversvaret landar — använd därför i första hand den senast
+    // kända server-siffran (sessionStorage) och råsumman bara som sista utväg.
+    const totalViews = serverStats?.total_views ?? (preloadedEmployerTotalViews || filteredStats.totalViews);
+    const totalApplications = serverStats?.total_applications ?? (preloadedEmployerTotalApplications || filteredStats.totalApplications);
     // Under laddning: server-siffrorna (SWR-seedade från localStorage) är alltid
     // sannare än sessionStorage-fallbacken. "Annonser" = aktiva + utgångna, så
     // fallbacken måste vara dashboard-totalen — inte antalet aktiva.
