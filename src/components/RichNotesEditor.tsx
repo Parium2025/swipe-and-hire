@@ -24,7 +24,7 @@ export interface RichNotesEditorHandle {
   getEditor: () => Editor | null;
 }
 
-const ToolbarButton = memo(({ 
+const ToolbarButton = memo(forwardRef<HTMLButtonElement, { 
   onClick, 
   icon: Icon, 
   title,
