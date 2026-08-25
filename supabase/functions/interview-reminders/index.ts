@@ -65,7 +65,23 @@ Deno.serve(async (req) => {
 
       let queued = 0;
 
+      // En avaktiverad mall får inte skicka något – samma regel som vid ombokning.
+      const templateIds = [...new Set(((automations || []) as InterviewTimelineAutomation[])
+        .map((a) => (a as { template_id?: string | null }).template_id)
+        .filter(Boolean))] as string[];
+      const activeTemplateIds = new Set<string>();
+      if (templateIds.length > 0) {
+        const { data: templates } = await supabase
+          .from("outreach_templates")
+          .select("id")
+          .in("id", templateIds)
+          .eq("is_active", true);
+        for (const t of templates || []) activeTemplateIds.add((t as { id: string }).id);
+      }
+
       for (const automation of (automations || []) as InterviewTimelineAutomation[]) {
+        const tplId = (automation as { template_id?: string | null }).template_id;
+        if (tplId && !activeTemplateIds.has(tplId)) continue;
         const delayMs = Math.max(automation.delay_minutes ?? 0, 0) * 60 * 1000;
         const targetTime = trigger === "interview_before"
           ? new Date(now.getTime() + delayMs)
