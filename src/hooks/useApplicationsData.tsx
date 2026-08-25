@@ -747,7 +747,18 @@ export const useApplicationsData = (
       .on('postgres_changes', filterConfig, () => {
         queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
       })
+      // DELETE-payloads innehåller endast id (REPLICA IDENTITY DEFAULT) av
+      // integritetsskäl, därför matchar de inte job_id-filtret ovan. Vi lyssnar
+      // därför ofiltrerat på DELETE och invaliderar bara cachen (ingen PII läses).
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'job_applications' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
+        }
+      )
       .subscribe();
+
 
     return () => {
       supabase.removeChannel(channel);
