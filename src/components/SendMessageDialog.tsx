@@ -261,7 +261,7 @@ export function SendMessageDialog({
     onOpenChange(false);
   };
 
-  const isDisabled = sending;
+  const isDisabled = sending || (simpleChat && !message.trim());
 
   return (
     <>
@@ -369,16 +369,23 @@ export function SendMessageDialog({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                   placeholder="Skriv ditt meddelande..."
-                  className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white/50 resize-y transition-all duration-150 text-base"
+                  className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 focus:border-white/20 text-white placeholder:text-white/50 resize-y text-base outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 transition-none"
               />
               </div>
 
               <Button
+                onMouseDown={(e) => {
+                  e.currentTarget.blur();
+                  const activeEl = document.activeElement as HTMLElement;
+                  if (activeEl?.blur) activeEl.blur();
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.blur();
+                }}
                 onClick={handleSend}
-                {...noFocusRingProps}
                 disabled={isDisabled}
-                className={`w-full h-11 !min-h-0 rounded-full border transition-colors duration-150 active:scale-95 ${
-                  !sending && message.trim() ? 'border-white/30' : 'border-transparent'
+                className={`w-full h-11 !min-h-0 rounded-full transition-colors duration-150 active:scale-95 ${
+                  !sending && message.trim() ? 'border border-white/30' : 'border border-transparent'
                 }`}
               >
                 {sending ? (
