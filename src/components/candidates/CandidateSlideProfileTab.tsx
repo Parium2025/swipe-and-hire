@@ -232,6 +232,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
 
         <div className="flex justify-center gap-1">
           <Button
+            {...noFocusRingProps}
             onClick={() => {
               setSendMessagePreset(null);
               setSendMessageOpen(true);
@@ -244,6 +245,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
             <span className="whitespace-nowrap text-[clamp(9px,2.5vw,14px)]">Chatta</span>
           </Button>
           <Button
+            {...noFocusRingProps}
             onClick={() => setBookInterviewOpen(true)}
             variant="glassBlue"
             size="sm"
@@ -254,6 +256,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
           </Button>
           {onRemoveFromList && (
             <Button
+              {...noFocusRingProps}
               onClick={onRemoveFromList}
               variant="glassRed"
               size="sm"
