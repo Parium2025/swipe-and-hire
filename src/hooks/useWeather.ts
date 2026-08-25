@@ -311,8 +311,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       return () => { mountedRef.current = false; };
     }
 
-    // Skip network calls when offline — keep any cached weather visible instead.
-    const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+    // Use the connectivity manager's verdict instead of the unreliable
+    // navigator.onLine. When offline we keep any cached weather visible (even
+    // if it is slightly stale) so the header never flashes to an error state.
+    const isOffline = !getIsOnline();
 
     if (!initializedRef.current) {
       initializedRef.current = true;
@@ -332,7 +334,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       } else if (!isOffline) {
         checkForLocationChange(false);
       } else {
-        // Offline with no cache — mark as error so UI can gracefully hide weather row.
+        // Offline with no cache — gracefully hide the weather row, but keep
+        // the greeting and clock. The fallback city hint is preserved so a
+        // name can still be shown if the consumer wants it.
         updateWeather(safeFallback(fallbackCity || ''));
       }
     }
