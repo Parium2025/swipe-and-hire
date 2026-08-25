@@ -70,11 +70,11 @@ export function useJobCounts() {
         const cityKey = citySlug && CITY_BY_SLUG[citySlug] ? citySlug : '';
         const occKey = occSlug && OCCUPATION_BY_SLUG[occSlug] ? occSlug : '';
 
-        if (cityKey) result.byCity[cityKey] = (result.byCity[cityKey] || 0) + 1;
-        if (occKey) result.byOccupation[occKey] = (result.byOccupation[occKey] || 0) + 1;
+        if (cityKey) result.byCity[cityKey] = (result.byCity[cityKey] || 0) + n;
+        if (occKey) result.byOccupation[occKey] = (result.byOccupation[occKey] || 0) + n;
         if (cityKey && occKey) {
           const k = `${cityKey}|${occKey}`;
-          result.byCityOccupation[k] = (result.byCityOccupation[k] || 0) + 1;
+          result.byCityOccupation[k] = (result.byCityOccupation[k] || 0) + n;
         }
       }
 
