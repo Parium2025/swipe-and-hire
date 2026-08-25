@@ -125,7 +125,9 @@ interface ExistingJob {
   job_image_url?: string | null;
   job_image_desktop_url?: string | null;
   overlay_text_color?: string | null;
-  is_active?: boolean;
+  is_active: boolean | null;
+  expires_at?: string | null;
+  published_at?: string | null;
   part_time_days?: string[] | null;
   part_time_shifts?: string[] | null;
   duration_amount?: number | null;
