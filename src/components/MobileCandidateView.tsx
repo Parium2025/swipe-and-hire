@@ -3,6 +3,7 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import type { JobStageSettings } from '@/hooks/useJobStageSettings';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
@@ -139,9 +140,11 @@ const CandidateRow = memo(function CandidateRow({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-white font-medium text-sm truncate">
-          {app.first_name} {app.last_name}
-        </p>
+        <TruncatedText
+          text={`${app.first_name} ${app.last_name}`}
+          className="text-white font-medium text-sm"
+          insideInteractive
+        />
         <StarRating rating={app.rating} />
         <div className="flex items-center gap-2 mt-0.5 text-white text-[11px]">
           {appliedTime && (
@@ -171,7 +174,7 @@ const CandidateRow = memo(function CandidateRow({
                   ) : (
                     <X className={`h-2.5 w-2.5 flex-shrink-0 ${isNoMatch ? 'text-red-400' : 'text-yellow-400'}`} />
                   )}
-                  <span className="text-white/80 truncate max-w-[50px]">{cr.title}</span>
+                  <TruncatedText text={cr.title} className="text-white/80 max-w-[120px]" insideInteractive />
                 </span>
               );
             })}

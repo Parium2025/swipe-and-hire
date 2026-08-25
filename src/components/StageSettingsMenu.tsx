@@ -34,6 +34,7 @@ import {
   getIconByName,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface StageSettingsMenuProps {
   stageKey: string;
@@ -334,7 +335,7 @@ export function StageSettingsMenu({
                   const IconComp = getIconByName(currentConfig?.iconName || 'inbox');
                   return <IconComp className="h-4 w-4 text-white flex-shrink-0" />;
                 })()}
-                <span className="font-medium text-sm text-white truncate max-w-[200px]">{currentConfig?.label || stageKey}</span>
+                <div className="min-w-0 max-w-[240px]"><TruncatedText text={currentConfig?.label || stageKey} className="font-medium text-sm text-white" /></div>
                 <span 
                   className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors flex-shrink-0"
                   style={{ backgroundColor: `${displayColor}66` }}
@@ -407,11 +408,11 @@ export function StageSettingsMenu({
               {hasCandidates ? (
                 <>
                   Det finns <span className="font-semibold text-orange-400">{candidateCount} kandidat{candidateCount > 1 ? 'er' : ''}</span> i detta steg. 
-                  De kommer att flyttas till <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{targetStageLabel}"</span> när du tar bort steget.
+                  De kommer att flyttas till <span className="font-semibold text-white break-words">"{targetStageLabel}"</span> när du tar bort steget.
                 </>
               ) : (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{currentConfig?.label}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{currentConfig?.label}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>

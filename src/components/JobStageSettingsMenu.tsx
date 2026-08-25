@@ -529,11 +529,11 @@ export function JobStageSettingsMenu({
               {hasCandidates ? (
                 <>
                   Det finns <span className="font-semibold text-orange-400">{candidateCount} kandidat{candidateCount > 1 ? 'er' : ''}</span> i detta steg. 
-                  De kommer att flyttas till <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{targetStageLabel}"</span> när du tar bort steget.
+                  De kommer att flyttas till <span className="font-semibold text-white break-words">"{targetStageLabel}"</span> när du tar bort steget.
                 </>
               ) : (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{settings?.label}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{settings?.label}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>

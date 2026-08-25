@@ -46,7 +46,7 @@ export const DeleteSocialLinkDialog = ({ open, onOpenChange, linkToDelete, onCon
         <AlertDialogDescription className="text-white text-sm leading-relaxed">
           {linkToDelete && (
             <>
-              Är du säker på att du vill ta bort länken till <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">{getPlatformLabel(linkToDelete.link.platform)}</span>? Denna åtgärd går inte att ångra.
+              Är du säker på att du vill ta bort länken till <span className="font-semibold text-white break-words">{getPlatformLabel(linkToDelete.link.platform)}</span>? Denna åtgärd går inte att ångra.
             </>
           )}
         </AlertDialogDescription>

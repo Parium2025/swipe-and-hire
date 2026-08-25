@@ -167,7 +167,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
                         `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
                       )}
                     </div>
-                    <span className="text-white text-xs truncate max-w-[60px]">
+                    <span className="text-white text-xs truncate max-w-[120px]">
                       {job.employer_profile.first_name}
                     </span>
                   </div>

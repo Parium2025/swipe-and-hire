@@ -370,7 +370,7 @@ const MyApplications = () => {
             <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {applicationToRemove && (
                 <>
-                  Vill du dölja din ansökan för <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{applicationToRemove.title}"</span> i din lista? Ansökan tas bort från din vy men finns kvar hos arbetsgivaren, och du kan inte söka samma jobb igen.
+                  Vill du dölja din ansökan för <span className="font-semibold text-white break-words">"{applicationToRemove.title}"</span> i din lista? Ansökan tas bort från din vy men finns kvar hos arbetsgivaren, och du kan inte söka samma jobb igen.
                 </>
               )}
             </AlertDialogDescription>

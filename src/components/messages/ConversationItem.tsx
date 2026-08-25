@@ -5,6 +5,7 @@ import { Briefcase, BellOff } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import type { Conversation } from '@/hooks/useConversations';
 
 interface ConversationItemProps {
@@ -105,12 +106,14 @@ export function ConversationItem({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-0.5">
-          <span className={cn(
-            "font-medium truncate text-white",
-            conversation.unread_count > 0 && "font-semibold"
-          )}>
-            {displayName}
-          </span>
+          <TruncatedText
+            text={displayName}
+            insideInteractive
+            className={cn(
+              "font-medium text-white",
+              conversation.unread_count > 0 && "font-semibold"
+            )}
+          />
           <span className="text-pure-white text-xs flex-shrink-0 flex items-center gap-1">
             {conversation.is_muted && <BellOff className="h-3 w-3" aria-label="Tystad" />}
             {formatTime(conversation.last_message_at)}
@@ -121,7 +124,11 @@ export function ConversationItem({
         {(snapshot?.job_title || conversation.job?.title) && (
           <div className="flex items-center gap-1 text-pure-white text-xs mb-0.5">
             <Briefcase className="h-3 w-3" />
-            <span className="truncate">{snapshot?.job_title || conversation.job?.title}</span>
+            <TruncatedText
+              text={snapshot?.job_title || conversation.job?.title || ''}
+              insideInteractive
+              className="min-w-0"
+            />
           </div>
         )}
 
