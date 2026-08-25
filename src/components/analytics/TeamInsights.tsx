@@ -76,7 +76,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
         <div className="flex items-center gap-1.5 mb-1">
           <Users className="h-4 w-4 text-white/70 shrink-0" />
           <h3 className="text-[15px] font-semibold text-white">Lär av varandra</h3>
-          <InfoTip content="Visar hur annonserna presterar per kollega i din organisation. Syftet är att se vad som fungerar bra och kopiera det – inte att ranka personer. Visningar är unika besökare, era egna visningar räknas inte." />
+          <InfoTip content="Visar hur annonserna presterar per kollega i din organisation. Syftet är att se vad som fungerar bra och kopiera det – inte att ranka personer. Visningar är unika besökare. Era egna visningar, ansökningar och intervjuer räknas aldrig med." />
         </div>
         <p className="text-[12px] text-white/70 mb-4">
           Så presterar er organisations annonser – per kollega under vald period.
