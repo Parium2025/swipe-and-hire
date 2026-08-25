@@ -34,6 +34,8 @@ import {
 } from 'lucide-react';
 import { getTimeRemaining } from '@/lib/date';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
+import { useMinuteTick } from '@/hooks/useMinuteTick';
+import { isInterviewOver } from '@/lib/interviewTime';
 import CandidateInterviewCard from '@/components/CandidateInterviewCard';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { toast } from 'sonner';
@@ -117,7 +119,15 @@ const MyApplications = () => {
   }, []);
   
   // Get candidate's interviews
-  const { interviews, isLoading: interviewsLoading } = useCandidateInterviews();
+  const { interviews: allInterviews, isLoading: interviewsLoading } = useCandidateInterviews();
+  const interviewNow = useMinuteTick();
+  // Avslutade intervjuer ska aldrig ligga kvar i listan.
+  const interviews = useMemo(
+    () => (allInterviews as any[]).filter(
+      (i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, interviewNow),
+    ),
+    [allInterviews, interviewNow],
+  );
 
   // Use cached applications hook for instant load + realtime sync
   const { applications, isLoading, error, hideApplication } = useMyApplicationsCache();
