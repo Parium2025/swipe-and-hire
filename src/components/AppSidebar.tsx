@@ -22,6 +22,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
 import { Button } from "@/components/ui/button";
+import { TruncatedText } from "@/components/ui/truncated-text";
 import { 
   User,
   CreditCard,
@@ -234,9 +235,10 @@ export function AppSidebar() {
             )}
             {profile && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
-                {profile?.first_name} {profile?.last_name}
-              </p>
+              <TruncatedText
+                text={`${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()}
+                className="text-sm font-medium text-white"
+              />
               <p className="text-xs text-white truncate">
                 {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
               </p>

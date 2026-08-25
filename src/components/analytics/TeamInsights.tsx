@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Users, Info, Lightbulb, CalendarCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 export interface TeamMemberStats {
   user_id: string;
@@ -104,7 +105,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-medium text-white truncate">{m.name}</p>
+                    <TruncatedText text={m.name} className="text-[13px] font-medium text-white" />
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-white">
                       <span className="whitespace-nowrap">{m.jobs_count} annonser</span>
                       <span aria-hidden className="text-white/40">·</span>
@@ -161,8 +162,11 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
             {traits.examples?.length > 0 && (
               <ul className="mt-2 space-y-1">
                 {traits.examples.slice(0, 3).map((ex, idx) => (
-                  <li key={`${ex.title}-${idx}`} className="text-[11px] text-white/80 truncate">
-                    • {ex.title} — {ex.applications} ans. / {ex.views} vis.
+                  <li key={`${ex.title}-${idx}`} className="min-w-0">
+                    <TruncatedText
+                      text={`• ${ex.title} — ${ex.applications} ans. / ${ex.views} vis.`}
+                      className="text-[11px] text-white/80"
+                    />
                   </li>
                 ))}
               </ul>

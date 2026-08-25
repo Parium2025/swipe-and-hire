@@ -10,6 +10,7 @@ import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Users, UserPlus, Trash2, Crown, Loader2, Mail } from 'lucide-react';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface TeamMember {
   user_id: string;
@@ -335,18 +336,19 @@ const TeamManagement = () => {
               </Avatar>
               
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-white font-medium truncate">
-                    {member.first_name && member.last_name 
+                <div className="flex min-w-0 items-center gap-2">
+                  <TruncatedText
+                    text={member.first_name && member.last_name
                       ? `${member.first_name} ${member.last_name}`
                       : member.email || 'Okänd'}
-                  </span>
+                    className="min-w-0 flex-1 font-medium text-white"
+                  />
                   {member.user_id === user?.id && (
                     <Badge variant="glass" className="text-xs">Du</Badge>
                   )}
                 </div>
                 {member.email && (
-                  <p className="text-sm text-white truncate">{member.email}</p>
+                  <TruncatedText text={member.email} className="text-sm text-white" />
                 )}
               </div>
 

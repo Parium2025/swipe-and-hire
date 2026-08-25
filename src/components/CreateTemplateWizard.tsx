@@ -2285,9 +2285,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                           onClick={() => useQuestionTemplate(template)}
                                           className="text-left hover:opacity-80 transition-opacity min-w-0"
                                         >
-                                          <div className="text-white font-medium text-sm leading-tight truncate">
+                                          <span className="block min-w-0 truncate text-sm font-medium leading-tight text-white" title={template.question_text}>
                                             {template.question_text}
-                                          </div>
+                                          </span>
                                         </button>
                                         <div className="flex items-center justify-center gap-2">
                                           <button
