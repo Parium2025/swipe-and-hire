@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Video, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 import {
