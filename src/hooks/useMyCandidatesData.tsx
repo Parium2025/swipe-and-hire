@@ -12,7 +12,6 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
-import { clampJobTitle } from '@/lib/jobTitle';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { hydrateMyCandidateRows, type RawMyCandidateRow } from '@/lib/myCandidatesHydration';
 

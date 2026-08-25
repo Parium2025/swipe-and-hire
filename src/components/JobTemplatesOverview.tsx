@@ -2,16 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useOnline } from '@/hooks/useOnlineStatus';
-import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Plus, Edit, Trash2, Calendar, Loader2, Star, StarOff, AlertTriangle } from 'lucide-react';
 import { SKELETON_COUNT_KEYS, readCachedCount, writeCachedCount } from '@/lib/skeletonCounts';
 import {
@@ -25,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { TruncatedText } from '@/components/TruncatedText';
+import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 
 interface JobTemplate {
   id: string;
@@ -51,20 +45,6 @@ const JobTemplatesOverview = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<JobTemplate | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    title: '',
-    description: '',
-    requirements: '',
-    location: '',
-    salary_min: '',
-    salary_max: '',
-    employment_type: '',
-    work_schedule: '',
-    contact_email: '',
-    application_instructions: ''
-  });
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -106,128 +86,6 @@ const JobTemplatesOverview = () => {
   useEffect(() => {
     fetchTemplates();
   }, [user]);
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      title: '',
-      description: '',
-      requirements: '',
-      location: '',
-      salary_min: '',
-      salary_max: '',
-      employment_type: '',
-      work_schedule: '',
-      contact_email: '',
-      application_instructions: ''
-    });
-  };
-
-  const handleCreate = async () => {
-    if (!user) return;
-    
-
-    setIsSubmitting(true);
-    try {
-      const templateData = {
-        employer_id: user.id,
-        name: formData.name,
-        title: formData.title,
-        description: formData.description,
-        requirements: formData.requirements || null,
-        location: formData.location,
-        employment_type: formData.employment_type || null,
-        work_schedule: formData.work_schedule || null,
-        salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
-        salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
-        contact_email: formData.contact_email || null,
-        application_instructions: formData.application_instructions || null,
-        is_default: templates.length === 0 // First template becomes default
-      };
-
-      const { error } = await supabase
-        .from('job_templates')
-        .insert([templateData]);
-
-      if (error) {
-        toast({
-          title: "Fel vid skapande av mall",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      toast({
-        title: "Mall skapad",
-        description: `Mallen "${formData.name}" har skapats.`
-      });
-
-      resetForm();
-      setShowCreateDialog(false);
-      fetchTemplates();
-    } catch (error) {
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte skapa mallen.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEdit = async () => {
-    if (!user || !editingTemplate) return;
-    
-
-    setIsSubmitting(true);
-    try {
-      const { error } = await supabase
-        .from('job_templates')
-        .update({
-          name: formData.name,
-          title: formData.title,
-          description: formData.description,
-          requirements: formData.requirements || null,
-          location: formData.location,
-          employment_type: formData.employment_type || null,
-          work_schedule: formData.work_schedule || null,
-          salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
-          salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
-          contact_email: formData.contact_email || null,
-          application_instructions: formData.application_instructions || null
-        })
-        .eq('id', editingTemplate.id);
-
-      if (error) {
-        toast({
-          title: "Fel vid uppdatering av mall",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      toast({
-        title: "Mall uppdaterad",
-        description: `Mallen "${formData.name}" har uppdaterats.`
-      });
-
-      resetForm();
-      setShowEditDialog(false);
-      setEditingTemplate(null);
-      fetchTemplates();
-    } catch (error) {
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte uppdatera mallen.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -308,19 +166,6 @@ const JobTemplatesOverview = () => {
 
   const startEdit = (template: JobTemplate) => {
     setEditingTemplate(template);
-    setFormData({
-      name: template.name,
-      title: template.title,
-      description: template.description,
-      requirements: template.requirements || '',
-      location: template.location,
-      salary_min: template.salary_min?.toString() || '',
-      salary_max: template.salary_max?.toString() || '',
-      employment_type: template.employment_type || '',
-      work_schedule: template.work_schedule || '',
-      contact_email: template.contact_email || '',
-      application_instructions: template.application_instructions || ''
-    });
     setShowEditDialog(true);
   };
 
@@ -386,19 +231,15 @@ const JobTemplatesOverview = () => {
             Hantera dina återanvändbara jobbmallar
           </p>
         </div>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button 
-              onClick={resetForm} 
-              onMouseDown={(e) => e.currentTarget.blur()}
-              onMouseUp={(e) => e.currentTarget.blur()}
-              className="flex items-center gap-2 transition-colors duration-300 focus:outline-none focus:ring-0"
-            >
-              Skapa ny mall
-              <Plus size={16} />
-            </Button>
-          </DialogTrigger>
-        </Dialog>
+        <Button 
+          onClick={() => setShowCreateDialog(true)}
+          onMouseDown={(e) => e.currentTarget.blur()}
+          onMouseUp={(e) => e.currentTarget.blur()}
+          className="flex items-center gap-2 transition-colors duration-300 focus:outline-none focus:ring-0"
+        >
+          Skapa ny mall
+          <Plus size={16} />
+        </Button>
       </div>
 
       {/* Templates Grid */}
@@ -410,19 +251,15 @@ const JobTemplatesOverview = () => {
               <p className="text-white mb-4">
                 Skapa din första jobbmall för att effektivisera ditt rekryteringsarbete.
               </p>
-              <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                <DialogTrigger asChild>
-                  <Button 
-                    onClick={resetForm}
-                    onMouseDown={(e) => e.currentTarget.blur()}
-                    onMouseUp={(e) => e.currentTarget.blur()}
-                    className="transition-colors duration-300 focus:outline-none focus:ring-0"
-                  >
-                    Skapa första mallen
-                    <Plus size={16} className="ml-2" />
-                  </Button>
-                </DialogTrigger>
-              </Dialog>
+              <Button 
+                onClick={() => setShowCreateDialog(true)}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="transition-colors duration-300 focus:outline-none focus:ring-0"
+              >
+                Skapa första mallen
+                <Plus size={16} className="ml-2" />
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -505,225 +342,23 @@ const JobTemplatesOverview = () => {
         )}
       </div>
 
-      {/* Create/Edit Template Dialog */}
-      <Dialog open={showCreateDialog || showEditDialog} onOpenChange={(open) => {
-        if (!open) {
+      <CreateTemplateWizard
+        open={showCreateDialog || showEditDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowCreateDialog(false);
+            setShowEditDialog(false);
+            setEditingTemplate(null);
+          }
+        }}
+        templateToEdit={editingTemplate}
+        onTemplateCreated={() => {
           setShowCreateDialog(false);
           setShowEditDialog(false);
           setEditingTemplate(null);
-          resetForm();
-        }
-      }}>
-        <DialogContentNoFocus className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white">
-          <DialogHeader>
-            <DialogTitle>
-              {editingTemplate ? 'Redigera mall' : 'Skapa ny jobbmall'}
-            </DialogTitle>
-            <DialogDescription className="text-white">
-              {editingTemplate 
-                ? 'Uppdatera din jobbmall med ny information.'
-                : 'Skapa en återanvändbar mall för framtida jobbannonser.'
-              }
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="template-name">Mallnamn *</Label>
-              <Input
-                id="template-name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                placeholder="t.ex. Lagerarbetare standardmall"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white"
-                required
-              />
-            </div>
-
-            <div className="border-t border-white/30 my-4"></div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="job-title">Jobbtitel *</Label>
-                <Input
-                  id="job-title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  placeholder="t.ex. Lagerarbetare"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="location">Plats *</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({...formData, location: e.target.value})}
-                  placeholder="t.ex. Stockholm"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="border-t border-white/30 my-4"></div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Jobbeskrivning *</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
-                rows={4}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white"
-                required
-              />
-            </div>
-
-            <div className="border-t border-white/30 my-4"></div>
-
-            <div className="space-y-2">
-              <Label htmlFor="requirements">Krav och kvalifikationer</Label>
-              <Textarea
-                id="requirements"
-                value={formData.requirements}
-                onChange={(e) => setFormData({...formData, requirements: e.target.value})}
-                placeholder="Beskriv vilka krav och kvalifikationer som krävs..."
-                rows={3}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white"
-              />
-            </div>
-
-            <div className="border-t border-white/30 my-4"></div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="salary_min">Minimilön (kr/mån)</Label>
-                <Input
-                  id="salary_min"
-                  type="number"
-                  value={formData.salary_min}
-                  onChange={(e) => setFormData({...formData, salary_min: e.target.value})}
-                  placeholder="25000"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="salary_max">Maxlön (kr/mån)</Label>
-                <Input
-                  id="salary_max"
-                  type="number"
-                  value={formData.salary_max}
-                  onChange={(e) => setFormData({...formData, salary_max: e.target.value})}
-                  placeholder="35000"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
-                />
-              </div>
-            </div>
-
-            <div className="border-t border-white/30 my-4"></div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="employment_type">Anställningsform</Label>
-                <Select value={formData.employment_type} onValueChange={(value) => setFormData({...formData, employment_type: value})}>
-                  <SelectTrigger 
-                    onMouseDown={(e) => e.currentTarget.blur()}
-                    onMouseUp={(e) => e.currentTarget.blur()}
-                    className="bg-white/10 border-white/20 text-white transition-colors duration-300 focus:outline-none focus:ring-0"
-                  >
-                    <SelectValue placeholder="Välj anställningsform" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-900/85 border-white/20 z-50">
-                    {EMPLOYMENT_TYPES.map(type => (
-                      <SelectItem 
-                        key={type.value} 
-                        value={type.value}
-                        onMouseDown={(e) => e.currentTarget.blur()}
-                        className="text-white hover:bg-white/20 focus:bg-white/20 transition-colors duration-300 focus:outline-none focus:ring-0"
-                      >
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="work_schedule">Arbetstider</Label>
-                <Input
-                  id="work_schedule"
-                  value={formData.work_schedule}
-                  onChange={(e) => setFormData({...formData, work_schedule: e.target.value})}
-                  placeholder="t.ex. 08:00-17:00"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
-                />
-              </div>
-            </div>
-
-            <div className="border-t border-white/30 my-4"></div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contact_email">Kontakt-email</Label>
-              <Input
-                id="contact_email"
-                type="email"
-                value={formData.contact_email}
-                onChange={(e) => setFormData({...formData, contact_email: e.target.value})}
-                placeholder="kontakt@företag.se"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white"
-              />
-            </div>
-
-            <div className="border-t border-white/30 my-4"></div>
-
-            <div className="space-y-2">
-              <Label htmlFor="application_instructions">Ansökningsinstruktioner</Label>
-              <Textarea
-                id="application_instructions"
-                value={formData.application_instructions}
-                onChange={(e) => setFormData({...formData, application_instructions: e.target.value})}
-                placeholder="Hur ska kandidater ansöka?"
-                rows={3}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white"
-              />
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button 
-                onClick={editingTemplate ? handleEdit : handleCreate}
-                onMouseDown={(e) => e.currentTarget.blur()}
-                onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isSubmitting || !formData.name || !formData.title || !formData.description || !formData.location}
-                className={`flex-1 transition-colors duration-300 focus:outline-none focus:ring-0 ${
-                  !isSubmitting && formData.name && formData.title && formData.description && formData.location 
-                    ? 'border border-white/30' 
-                    : ''
-                }`}
-              >
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSubmitting ? 'Sparar...' : (editingTemplate ? 'Uppdatera mall' : 'Skapa mall')}
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setShowCreateDialog(false);
-                  setShowEditDialog(false);
-                  setEditingTemplate(null);
-                  resetForm();
-                }}
-                onMouseDown={(e) => e.currentTarget.blur()}
-                onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isSubmitting}
-                className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 focus:outline-none focus:ring-0"
-              >
-                Avbryt
-              </Button>
-            </div>
-          </div>
-        </DialogContentNoFocus>
-      </Dialog>
+          void fetchTemplates();
+        }}
+      />
     </div>
       {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>

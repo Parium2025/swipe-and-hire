@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCandidateLists, useTeamCandidateLists } from '@/hooks/useCandidateLists';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 export interface CandidateToAdd {
   applicationId: string;
@@ -206,8 +207,8 @@ export function AddToColleagueListDialog({
                     disabled={isAdding !== null}
                   >
                     <UserCheck className="h-5 w-5 text-white flex-shrink-0" />
-                    <div className="text-left min-w-0">
-                      <div className="font-medium break-words">{list.name}</div>
+                    <div className="min-w-0 flex-1 text-left">
+                      <TruncatedText text={list.name} lines={2} className="font-medium" insideInteractive />
                       <div className="text-xs text-white">Min lista</div>
                     </div>
                     {isAdding === `own:${list.id}` && (
@@ -259,11 +260,13 @@ export function AddToColleagueListDialog({
                     className="h-8 w-8 flex-shrink-0"
                     fallbackClassName="text-xs bg-white/20"
                   />
-                  <div className="text-left min-w-0">
-                    <div className="font-medium break-words">{entry.name}</div>
-                    <div className="text-xs text-white">
-                      {member.firstName} {member.lastName}
-                    </div>
+                   <div className="min-w-0 flex-1 text-left">
+                     <TruncatedText text={entry.name} lines={2} className="font-medium" insideInteractive />
+                     <TruncatedText
+                       text={`${member.firstName} ${member.lastName}`.trim() || 'Kollega'}
+                       className="text-xs text-white"
+                       insideInteractive
+                     />
                   </div>
                   {isAdding === key && (
                     <div className="ml-auto animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />

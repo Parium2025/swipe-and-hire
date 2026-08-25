@@ -575,7 +575,6 @@ const CompanyProfile = () => {
                 <Label htmlFor="company_name" className="text-white">Företagsnamn</Label>
                 <Input
                   id="company_name"
-                  maxLength={TEXT_LIMITS.companyName}
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
                   className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"

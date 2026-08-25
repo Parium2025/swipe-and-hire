@@ -1,10 +1,6 @@
-/** Shared limits for short, single-line identity and title fields. */
+/** Shared limits only for fields with a semantic or operational bound. */
 export const TEXT_LIMITS = {
-  jobTitle: 160,
-  templateName: 100,
   personName: 60,
-  companyName: 120,
-  location: 120,
   address: 160,
   website: 200,
   phone: 30,

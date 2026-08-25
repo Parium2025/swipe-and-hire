@@ -32,7 +32,6 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedText } from '@/components/TruncatedText';
-import { TEXT_LIMITS } from '@/lib/textLimits';
 import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { celebrate } from '@/lib/celebrate';
@@ -62,6 +61,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
 import { DEFAULT_JOB_OVERLAY_TEXT_COLOR, getJobOverlayTextStyle, normalizeJobOverlayTextColor } from '@/lib/jobOverlayText';
+import { isEmployerJobDraft } from '@/lib/jobStatus';
 
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
@@ -125,7 +125,9 @@ interface ExistingJob {
   job_image_url?: string | null;
   job_image_desktop_url?: string | null;
   overlay_text_color?: string | null;
-  is_active?: boolean;
+  is_active: boolean | null;
+  expires_at?: string | null;
+  published_at?: string | null;
   part_time_days?: string[] | null;
   part_time_shifts?: string[] | null;
   duration_amount?: number | null;
@@ -2101,8 +2103,8 @@ const MobileJobWizard = ({
       return formData.work_location_type && 
              formData.remote_work_possible && 
              formData.workplace_name.trim() && 
-             formData.contact_email.trim() && 
-             formData.workplace_postal_code.trim() && 
+             /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email.trim()) && 
+             isValidSwedishPostalCode(formData.workplace_postal_code) && 
              formData.workplace_city.trim();
     }
     
@@ -2139,8 +2141,8 @@ const MobileJobWizard = ({
       if (!formData.work_location_type) missing.push('Var utförs arbetet');
       if (!formData.remote_work_possible) missing.push('Distansarbete');
       if (!formData.workplace_name.trim()) missing.push('Bolagsnamn');
-      if (!formData.contact_email.trim()) missing.push('Kontakt e-post');
-      if (!formData.workplace_postal_code.trim()) missing.push('Postnummer');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email.trim())) missing.push('Giltig kontakt-e-post');
+      if (!isValidSwedishPostalCode(formData.workplace_postal_code)) missing.push('Giltigt postnummer');
       if (!formData.workplace_city.trim()) missing.push('Ort');
     }
     
@@ -2486,7 +2488,7 @@ const MobileJobWizard = ({
       // Include all job posting fields
       // Check if this is a new job OR if we're publishing a draft (was inactive)
       const isNewJob = !existingJob?.id;
-      const isPublishingDraft = existingJob?.id && existingJob?.is_active === false;
+      const isPublishingDraft = Boolean(existingJob?.id && isEmployerJobDraft(existingJob));
       const now = new Date();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 14);
@@ -2733,7 +2735,6 @@ const MobileJobWizard = ({
                   <Input
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
-                    maxLength={TEXT_LIMITS.jobTitle}
                     placeholder="t.ex. Lagerarbetare"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                   />
