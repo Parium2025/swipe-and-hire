@@ -4082,6 +4082,15 @@ export type Database = {
         }[]
       }
       get_profile_view_stats: { Args: { p_user_id: string }; Returns: Json }
+      get_public_job: { Args: { p_job_id: string }; Returns: Json }
+      get_public_job_facets: {
+        Args: never
+        Returns: {
+          city: string
+          job_count: number
+          occupation: string
+        }[]
+      }
       get_user_organization_id: { Args: { p_user_id: string }; Returns: string }
       has_active_plan: { Args: { _user_id: string }; Returns: boolean }
       has_applied_to_employer: {
