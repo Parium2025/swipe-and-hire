@@ -213,19 +213,24 @@ const CompanyReviews = () => {
         {/* Header med Logo och Namn */}
         <div className="mb-6">
           <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 bg-transparent">
-              <AvatarImage src={company.company_logo_url || ''} alt={company.company_name} />
+            <Avatar className="h-12 w-12 bg-transparent shrink-0">
+              <AvatarImage
+                src={resolveCompanyLogoUrl(company.company_logo_url) || ''}
+                alt={company.company_name}
+                loading="eager"
+                decoding="async"
+              />
               <AvatarFallback className="bg-transparent" delayMs={150}>
                 <Building2 className="h-8 w-8 text-white" />
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="min-w-0 flex-1">
               <TruncatedText
                 text={company.company_name}
                 className="text-xl font-semibold text-white line-clamp-2 tracking-tight"
               />
               <div className="flex items-center gap-2 mt-0.5">
-                <Star className="h-3.5 w-3.5 fill-transparent text-white stroke-white stroke-[1.5]" />
+                <Star className="h-3.5 w-3.5 fill-[#FFC44D] text-[#FFC44D] shrink-0" />
                 <span className="text-sm text-white">
                   {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
                 </span>
