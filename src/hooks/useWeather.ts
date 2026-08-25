@@ -430,7 +430,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       retryAttemptRef.current = 0;
       return;
     }
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    if (!getIsOnline()) return;
 
     // Exponential backoff on total failure: 30s → 2min → 5min (capped)
     const delays = [30_000, 120_000, 300_000];
@@ -439,7 +439,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     retryAttemptRef.current = attempt + 1;
 
     const id = setTimeout(() => {
-      if (!mountedRef.current || navigator.onLine === false) return;
+      if (!mountedRef.current || !getIsOnline()) return;
       console.log(`🔁 Weather retry attempt ${attempt + 1}`);
       void checkForLocationChange(true).finally(() => {
         // Re-arm: the error string is identical between failures, so we need an
