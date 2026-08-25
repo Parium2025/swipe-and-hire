@@ -6,11 +6,34 @@ import { useRef, useSyncExternalStore } from 'react';
 // instead of rendering a cramped desktop header.
 const MOBILE_BREAKPOINT = 1180;
 
+// Overflow guard: the top nav reports the width it actually needs (measured
+// with a ResizeObserver). If real content needs more than the static
+// breakpoint - e.g. a very long company name or a future nav item - we raise
+// the effective breakpoint so we flip to the mobile layout *before* anything
+// visually collides. The +48px is breathing room, and since the value only
+// ever grows there is built-in hysteresis (no flip-flop loop).
+let measuredBreakpoint = 0;
+
+export function reportNavRequiredWidth(requiredPx: number): void {
+  const next = Math.round(requiredPx) + 48;
+  if (next <= measuredBreakpoint || next <= MOBILE_BREAKPOINT) return;
+  measuredBreakpoint = next;
+  const confirmed = getDeviceType();
+  if (confirmed !== stableDevice) {
+    stableDevice = confirmed;
+    deviceListeners?.forEach(fn => fn());
+  }
+}
+
+function effectiveBreakpoint(): number {
+  return Math.max(MOBILE_BREAKPOINT, measuredBreakpoint);
+}
+
 export type DeviceType = 'mobile' | 'desktop';
 
 function getDeviceType(): DeviceType {
   if (typeof window === 'undefined') return 'desktop';
-  return window.innerWidth < MOBILE_BREAKPOINT ? 'mobile' : 'desktop';
+  return window.innerWidth < effectiveBreakpoint() ? 'mobile' : 'desktop';
 }
 
 // Debounced singleton: prevents transient resize events (e.g. iOS address bar

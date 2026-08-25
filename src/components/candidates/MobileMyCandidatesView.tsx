@@ -148,7 +148,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
         {candidate.job_title && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-white text-[11px] truncate max-w-[120px] block cursor-default">
+              <span className="text-white text-[11px] truncate block w-full cursor-default">
                 {candidate.job_title}
               </span>
             </TooltipTrigger>

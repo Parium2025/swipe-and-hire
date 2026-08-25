@@ -36,6 +36,7 @@ import { PariumLogoButton } from "@/components/PariumLogoButton";
 import NotificationCenter from "@/components/NotificationCenter";
 import { resetPageCoachMarks } from "@/components/onboarding/PageIntroCoach";
 import { replayWelcomeCard } from "@/components/AppOnboardingTour";
+import { useNavOverflowGuard } from '@/hooks/useNavOverflowGuard';
 
 
 // Jobb dropdown items
@@ -183,9 +184,11 @@ function JobSeekerTopNav() {
     return total > 0 ? total : null;
   };
 
+  const navContentRef = useNavOverflowGuard<HTMLDivElement>();
+
   return (
     <nav className="h-14 flex items-center border-b border-white/20 bg-transparent overflow-hidden">
-      <div className="w-full responsive-container-wide flex items-center justify-between">
+      <div ref={navContentRef} className="w-full responsive-container-wide flex items-center justify-between">
       {/* Left side: Logo + Main Nav */}
       <div className="flex items-center gap-1">
         {/* Parium Logo - Home Button */}

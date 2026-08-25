@@ -42,6 +42,7 @@ import { PariumLogoButton } from "@/components/PariumLogoButton";
 import NotificationCenter from "@/components/NotificationCenter";
 import { TruncatedText } from "@/components/TruncatedText";
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
+import { useNavOverflowGuard } from '@/hooks/useNavOverflowGuard';
 
 // Dashboard dropdown items
 const dashboardItems = [
@@ -209,9 +210,11 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
     return total > 0 ? total : null;
   };
 
+  const navContentRef = useNavOverflowGuard<HTMLDivElement>();
+
   return (
     <nav className="h-16 flex items-center border-b border-white/20 bg-transparent overflow-hidden">
-      <div className="w-full responsive-container-wide flex items-center justify-between gap-2 min-w-0">
+      <div ref={navContentRef} className="w-full responsive-container-wide flex items-center justify-between gap-2 min-w-0">
       {/* Left side: Logo + Main Nav */}
       <div className="flex items-center gap-1 min-w-0">
         {/* Parium Logo - Home Button */}
