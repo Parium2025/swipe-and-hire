@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Trash2, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { noFocusRingProps } from '@/lib/noFocusRing';
+import { noFocusRingProps, noFlashButtonClass } from '@/lib/noFocusRing';
+import { cn } from '@/lib/utils';
 import ProfileVideo from '@/components/ProfileVideo';
 import { formatTimeAgo } from '@/lib/date';
 import { CandidateSummarySection } from '@/components/candidateProfile/CandidateSummarySection';
@@ -240,7 +241,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
             }}
             variant="glassPurple"
             size="sm"
-            className="min-w-0 flex-1"
+            className={cn("min-w-0 flex-1", noFlashButtonClass)}
           >
             <MessageSquare className="h-4 w-4 mr-1 shrink-0" />
             <span className="whitespace-nowrap text-[clamp(9px,2.5vw,14px)]">Chatta</span>
@@ -250,7 +251,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
             onClick={() => setBookInterviewOpen(true)}
             variant="glassBlue"
             size="sm"
-            className="min-w-0 flex-1"
+            className={cn("min-w-0 flex-1", noFlashButtonClass)}
           >
             <CalendarPlus className="h-4 w-4 mr-1 shrink-0" />
             <span className="whitespace-nowrap text-[clamp(9px,2.5vw,14px)]">Boka möte</span>
@@ -261,7 +262,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
               onClick={onRemoveFromList}
               variant="glassRed"
               size="sm"
-              className="min-w-0 flex-1"
+              className={cn("min-w-0 flex-1", noFlashButtonClass)}
             >
               <Trash2 className="h-4 w-4 mr-1 shrink-0" />
               <span className="whitespace-nowrap text-[clamp(9px,2.5vw,14px)]">Ta bort</span>
