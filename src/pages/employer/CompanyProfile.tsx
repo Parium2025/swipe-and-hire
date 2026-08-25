@@ -96,7 +96,7 @@ const CompanyProfile = () => {
       employee_count: profile?.employee_count || '',
       company_logo_url: (profile as any)?.company_logo_url || '',
       company_logo_original_url: (profile as any)?.company_logo_original_url || '',
-      social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
+      company_social_media_links: ((profile as any)?.company_social_media_links || []) as SocialMediaLink[],
       interview_default_message: (profile as any)?.interview_default_message || '',
       interview_video_default_message: (profile as any)?.interview_video_default_message || '',
       interview_video_link: normalizeMeetingLink((profile as any)?.interview_video_link || ''),
@@ -155,7 +155,7 @@ const CompanyProfile = () => {
         employee_count: profile.employee_count || '',
         company_logo_url: (profile as any)?.company_logo_url || '',
         company_logo_original_url: (profile as any)?.company_logo_original_url || '',
-        social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
+        company_social_media_links: ((profile as any)?.company_social_media_links || []) as SocialMediaLink[],
         interview_default_message: (profile as any)?.interview_default_message || '',
         interview_video_default_message: (profile as any)?.interview_video_default_message || '',
         interview_video_link: normalizeMeetingLink((profile as any)?.interview_video_link || ''),
@@ -175,7 +175,7 @@ const CompanyProfile = () => {
     if (!originalValues.company_name) return false;
     
     const hasChanges = Object.keys(formData).some(key => {
-      if (key === 'social_media_links') {
+      if (key === 'company_social_media_links') {
         return JSON.stringify(formData[key as keyof CompanyFormData]) !== JSON.stringify(originalValues[key]);
       }
       return formData[key as keyof CompanyFormData] !== originalValues[key];
@@ -410,7 +410,7 @@ const CompanyProfile = () => {
   };
 
   const handleRemoveLinkClick = (index: number) => {
-    const link = formData.social_media_links[index];
+    const link = formData.company_social_media_links[index];
     setLinkToDelete({ link, index });
     setDeleteDialogOpen(true);
   };
@@ -418,11 +418,11 @@ const CompanyProfile = () => {
   const confirmRemoveSocialLink = () => {
     if (!linkToDelete) return;
 
-    const updatedLinks = formData.social_media_links.filter((_, i) => i !== linkToDelete.index);
+    const updatedLinks = formData.company_social_media_links.filter((_, i) => i !== linkToDelete.index);
     
     setFormData(prev => ({ 
       ...prev, 
-      social_media_links: [...updatedLinks]
+      company_social_media_links: [...updatedLinks]
     }));
     setHasUnsavedChanges(true);
 
@@ -450,7 +450,7 @@ const CompanyProfile = () => {
       return;
     }
 
-    for (const link of sanitizedFormData.social_media_links) {
+    for (const link of sanitizedFormData.company_social_media_links) {
       if (!validateUrl(link.url, link.platform)) {
         toast({
           title: "Ogiltig URL",
@@ -502,7 +502,7 @@ const CompanyProfile = () => {
 
       const updatedValues = {
         ...sanitizedFormData,
-        social_media_links: JSON.parse(JSON.stringify(sanitizedFormData.social_media_links)),
+        company_social_media_links: JSON.parse(JSON.stringify(sanitizedFormData.company_social_media_links)),
       };
 
       setFormData(updatedValues);
@@ -771,9 +771,9 @@ const CompanyProfile = () => {
 
             {/* Social Media Links */}
             <CompanySocialMediaSection
-              links={formData.social_media_links}
+              links={formData.company_social_media_links}
               onLinksChange={(links) => {
-                setFormData(prev => ({ ...prev, social_media_links: links }));
+                setFormData(prev => ({ ...prev, company_social_media_links: links }));
                 setHasUnsavedChanges(true);
               }}
               onRemoveLinkClick={handleRemoveLinkClick}

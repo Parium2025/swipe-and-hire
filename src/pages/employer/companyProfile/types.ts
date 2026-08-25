@@ -30,7 +30,7 @@ export interface CompanyFormData {
   employee_count: string;
   company_logo_url: string;
   company_logo_original_url: string;
-  social_media_links: SocialMediaLink[];
+  company_social_media_links: SocialMediaLink[];
   interview_default_message: string;
   interview_video_default_message: string;
   interview_video_link: string;
