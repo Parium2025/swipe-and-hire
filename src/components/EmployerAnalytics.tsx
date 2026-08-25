@@ -51,6 +51,8 @@ interface TrendData {
   prev_applications: number;
   current_interviews: number;
   prev_interviews: number;
+  current_interviews_completed?: number;
+  prev_interviews_completed?: number;
 }
 
 interface BestDay {
@@ -153,8 +155,8 @@ const InlineInfoTooltip = memo(({ content }: { content: string }) => (
 InlineInfoTooltip.displayName = 'InlineInfoTooltip';
 
 /* ─── Trend pill ─── */
-const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
-  current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string;
+const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel, footnote }: {
+  current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string; footnote?: string;
 }) => {
   // Från 0 går det inte att räkna procent — visa "Nytt" i stället för vilseledande tal.
   const isNew = previous === 0 && current > 0;
