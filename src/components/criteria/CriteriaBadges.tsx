@@ -33,13 +33,13 @@ export function CriterionResultBadge({ result, title, reasoning }: CriterionResu
 
   return (
     <div
-      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg}`}
+      className={`inline-flex min-w-0 max-w-full items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg}`}
       title={reasoning}
     >
       <span className={`flex items-center justify-center h-3.5 w-3.5 rounded-full ring-1 ${ringColor} ${bg}`}>
         <Icon className={`h-2 w-2 ${iconColor}`} />
       </span>
-      <span className="text-white/80 truncate max-w-[140px]" title={title}>{title}</span>
+      <span className="text-white/80 truncate min-w-0" title={title}>{title}</span>
     </div>
   );
 }
@@ -75,9 +75,9 @@ export function CriterionIconBadge({ result, title }: CriterionIconBadgeProps) {
   const { icon: Icon, iconColor, bg, border } = config[result];
 
   return (
-    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg} ring-1 ring-inset ${border}`}>
+    <span className={`inline-flex min-w-0 max-w-full items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg} ring-1 ring-inset ${border}`}>
       <Icon className={`h-3 w-3 ${iconColor} flex-shrink-0`} />
-      <span className="text-white/80 truncate max-w-[140px]" title={title}>{title}</span>
+      <span className="text-white/80 truncate min-w-0" title={title}>{title}</span>
     </span>
   );
 }

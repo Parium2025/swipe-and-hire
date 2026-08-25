@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Video, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 import {
@@ -119,15 +120,17 @@ export const JobSeekerInterviewsCard = memo(() => {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <p
-                          className="text-xs font-semibold text-white truncate"
-                          title={interview.job_postings?.title || 'Intervju'}
-                        >
-                          {interview.job_postings?.title || 'Intervju'}
-                        </p>
-                        <p className="text-[10px] text-white truncate" title={companyName}>
-                          {companyName}
-                        </p>
+                        <TruncatedText
+                          text={interview.job_postings?.title || 'Intervju'}
+                          className="text-xs font-semibold text-white"
+                          insideInteractive
+                        />
+                        <TruncatedText
+                          text={companyName}
+                          className="text-[10px] text-white"
+                          insideInteractive
+                        />
+
                       </div>
                       
                       <span className={cn(

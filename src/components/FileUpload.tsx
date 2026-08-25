@@ -248,12 +248,15 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
     return (
       <div className="border border-white/10 rounded-md p-4 bg-white/5 backdrop-blur-sm space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+
             {getFileIcon(currentFile.name)}
             <a
               href="#"
-              className="text-sm font-medium truncate max-w-[320px] text-white hover:text-white underline cursor-pointer"
+              className="text-sm font-medium truncate min-w-0 flex-1 text-white hover:text-white underline cursor-pointer"
+              title={currentFile.name}
+
               onClick={async (e) => {
                 e.preventDefault();
                 if (isPdf) return; // Inline viewer below

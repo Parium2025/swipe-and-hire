@@ -421,14 +421,15 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                   <div className="flex flex-col min-w-0 flex-1">
                     <TruncatedText
                       text={getUserDisplayName()}
-                      className="text-white font-medium text-sm truncate max-w-[140px] block cursor-default"
+                      className="text-white font-medium text-sm truncate w-full min-w-0 block cursor-default"
                       tooltipSide="bottom"
                     />
                     <TruncatedText
                       text={user?.email || ''}
-                      className="text-white text-xs truncate max-w-[140px] block cursor-default"
+                      className="text-white text-xs truncate w-full min-w-0 block cursor-default"
                       tooltipSide="bottom"
                     />
+
                   </div>
                 </div>
               </div>
