@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -307,6 +307,9 @@ DeviceDonut.displayName = 'DeviceDonut';
 
 /* ─── Daily sparkline ─── */
 const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+
   if (!data.length) return null;
 
   const maxCount = Math.max(...data.map(d => d.count), 1);
@@ -323,26 +326,71 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
   const areaD = pathD + ` L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
 
+  const handlePointer = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const f = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+    const inner = (f * width - padding) / Math.max(width - padding * 2, 1);
+    const idx = Math.round(Math.min(Math.max(inner, 0), 1) * (data.length - 1));
+    setActiveIdx(idx);
+  };
+
+  const active = activeIdx != null ? data[activeIdx] : null;
+  const activePoint = activeIdx != null ? points[activeIdx] : null;
+
   return (
     <div>
       <div className="flex items-baseline justify-between mb-2">
         <span className="text-2xl font-bold text-white tabular-nums">{totalViews}</span>
         <span className="text-[11px] text-white">visningar under perioden</span>
       </div>
-      <svg width="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
-        <defs>
-          <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--secondary))" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={areaD} fill="url(#sparkFill)" />
-        <path d={pathD} fill="none" stroke="hsl(var(--secondary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        {points.length > 0 && (
-          <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3"
-            fill="hsl(var(--secondary))" stroke="white" strokeWidth="1.5" />
+      <div
+        ref={wrapRef}
+        className="relative touch-none select-none"
+        onPointerMove={handlePointer}
+        onPointerDown={handlePointer}
+        onPointerLeave={() => setActiveIdx(null)}
+        onPointerCancel={() => setActiveIdx(null)}
+        onPointerUp={(e) => { if (e.pointerType !== 'mouse') setActiveIdx(null); }}
+      >
+        <svg width="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible block">
+          <defs>
+            <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(var(--secondary))" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={areaD} fill="url(#sparkFill)" />
+          <path d={pathD} fill="none" stroke="hsl(var(--secondary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {activePoint && (
+            <>
+              <line
+                x1={activePoint.x} y1={0} x2={activePoint.x} y2={height}
+                stroke="white" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="2 2"
+              />
+              <circle cx={activePoint.x} cy={activePoint.y} r="4"
+                fill="hsl(var(--secondary))" stroke="white" strokeWidth="1.5" />
+            </>
+          )}
+          {points.length > 0 && (
+            <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3"
+              fill="hsl(var(--secondary))" stroke="white" strokeWidth="1.5" />
+          )}
+        </svg>
+        {active && activePoint && (
+          <div
+            className="pointer-events-none absolute -top-2 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg border border-white/15 bg-black/80 px-2.5 py-1.5 shadow-lg backdrop-blur-md"
+            style={{ left: `${Math.min(Math.max((activePoint.x / width) * 100, 8), 92)}%` }}
+          >
+            <div className="text-[10px] leading-none text-white/80">{active.date?.slice(5)}</div>
+            <div className="mt-0.5 text-[13px] font-semibold leading-none text-white tabular-nums">
+              {active.count} {active.count === 1 ? 'visning' : 'visningar'}
+            </div>
+          </div>
         )}
-      </svg>
+      </div>
       <div className="flex justify-between mt-1">
         <span className="text-[10px] text-white">{data[0]?.date?.slice(5)}</span>
         <span className="text-[10px] text-white">{data[data.length - 1]?.date?.slice(5)}</span>
@@ -351,6 +399,7 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
   );
 });
 DailySparkline.displayName = 'DailySparkline';
+
 
 /* ─── TTFA expandable list ─── */
 const isExpiredJob = (expiresAt: string | null, publishedAt: string): boolean => {
