@@ -16,6 +16,7 @@ import {
   Square,
 } from 'lucide-react';
 import { getIconByName } from '@/hooks/useStageSettings';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { useDevice } from '@/hooks/use-device';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 
@@ -224,7 +225,7 @@ export const MyCandidatesMobileActionBar = ({
                         className="text-white hover:text-white cursor-pointer min-h-[44px]"
                       >
                         <ListChecks className="h-4 w-4 mr-2 text-white/70 flex-shrink-0" />
-                        <span className="truncate min-w-0">{list.name}</span>
+                        <TruncatedText text={list.name} className="truncate min-w-0" insideInteractive />
                       </DropdownMenuItem>
                     ))}
                   </>

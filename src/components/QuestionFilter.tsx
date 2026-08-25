@@ -502,10 +502,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[200px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
           >
             <span className="truncate min-w-0">
-              {filter.question.length > 15 
-                ? filter.question.slice(0, 15) + '...' 
-                : filter.question
-              }
+              {filter.question}
             </span>
             <span className="flex-shrink-0 text-white">: {displayText}</span>
             <span
