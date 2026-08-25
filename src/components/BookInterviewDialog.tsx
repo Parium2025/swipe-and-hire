@@ -541,36 +541,36 @@ export const BookInterviewDialog = ({
           {/* Location type */}
           <div className="space-y-2">
             <Label className="text-white">Plats</Label>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 className={cn(
-                  "h-[var(--control-height-sm)] inline-flex items-center gap-1.5 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
-                  locationType === 'video' 
-                    ? "bg-white/20 border-white/40 text-white" 
+                  "h-11 inline-flex items-center justify-center gap-2 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
+                  locationType === 'video'
+                    ? "bg-white/20 border-white/40 text-white"
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('video')}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
               >
-                <Video className="h-3.5 w-3.5" />
-                <span>Video</span>
+                <Video className="h-4 w-4" />
+                <span>Videomöte</span>
               </button>
               <button
                 type="button"
                 className={cn(
-                  "h-[var(--control-height-sm)] inline-flex items-center gap-1.5 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
-                  locationType === 'office' 
-                    ? "bg-white/20 border-white/40 text-white" 
+                  "h-11 inline-flex items-center justify-center gap-2 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
+                  locationType === 'office'
+                    ? "bg-white/20 border-white/40 text-white"
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('office')}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
               >
-                <Building2 className="h-3.5 w-3.5" />
-                <span>Kontor</span>
+                <Building2 className="h-4 w-4" />
+                <span>På plats</span>
               </button>
             </div>
           </div>
@@ -579,15 +579,29 @@ export const BookInterviewDialog = ({
           {locationType === 'video' && (
             <div className="space-y-2">
               <Label className="text-white">Videolänk</Label>
-              {editableVideoLink && !videoLinkEditing ? (
-                <button
-                  type="button"
-                  onClick={() => setVideoLinkEditing(true)}
-                  className="w-full flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 h-11 text-left text-white text-sm transition-colors hover:bg-white/15"
-                >
-                  <Video className="h-4 w-4 shrink-0 text-white" />
-                  <span className="truncate">{getVideoLinkLabel(editableVideoLink)}</span>
-                </button>
+
+              {trimmedVideoLink && !videoLinkEditing ? (
+                <div className="rounded-md border border-white/20 bg-white/10 px-3 py-2.5 flex items-center gap-2.5">
+                  {videoLinkIsValid ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-green-400" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-white text-sm truncate">{getVideoLinkLabel(trimmedVideoLink)}</p>
+                    <p className="text-white/70 text-xs truncate">{trimmedVideoLink.replace(/^https?:\/\//, '')}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setVideoLinkEditing(true)}
+                    onMouseDown={(e) => e.currentTarget.blur()}
+                    onMouseUp={(e) => e.currentTarget.blur()}
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-2.5 py-1.5 text-xs text-white transition-colors hover:bg-white/20 focus:outline-none focus:ring-0"
+                  >
+                    <Pencil className="h-3 w-3" />
+                    Ändra
+                  </button>
+                </div>
               ) : (
                 <Input
                   value={editableVideoLink}
@@ -598,13 +612,46 @@ export const BookInterviewDialog = ({
                     if (normalized) setVideoLinkEditing(false);
                   }}
                   autoFocus={videoLinkEditing}
-                  placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                  inputMode="url"
+                  placeholder="Klistra in din möteslänk"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                 />
               )}
-              <p className="text-white text-xs">Din Teams, Zoom eller Google Meet-länk</p>
+
+              {trimmedVideoLink && !videoLinkIsValid && (
+                <p className="text-amber-400 text-xs">
+                  Länken känns inte igen som Teams, Zoom, Google Meet, Webex eller Whereby. Kontrollera att du klistrat in hela länken.
+                </p>
+              )}
+
+              {!trimmedVideoLink && (
+                <p className="text-white text-xs">
+                  Ingen länk angiven – kandidaten får kallelsen med texten “Videointervju – länk skickas separat”.
+                </p>
+              )}
+
+              {videoLinkIsValid && videoLinkDiffersFromDefault && (
+                <button
+                  type="button"
+                  onClick={() => setSaveVideoLinkAsDefault((v) => !v)}
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  onMouseUp={(e) => e.currentTarget.blur()}
+                  className="flex items-center gap-2 text-xs text-white transition-colors focus:outline-none focus:ring-0"
+                >
+                  <span
+                    className={cn(
+                      "h-4 w-4 rounded border flex items-center justify-center transition-colors",
+                      saveVideoLinkAsDefault ? "bg-white/30 border-white/50" : "border-white/30 bg-white/10"
+                    )}
+                  >
+                    {saveVideoLinkAsDefault && <Check className="h-3 w-3 text-white" />}
+                  </span>
+                  Spara som min standardlänk
+                </button>
+              )}
             </div>
           )}
+
 
           {/* Location details - Address and Instructions */}
           {locationType === 'office' && (
