@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { MapPin, Loader2, Check, X, ChevronDown, ChevronRight, Search } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -205,9 +206,11 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
             aria-label="Välj plats"
             type="button"
           >
-            <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
-              {triggerLabel}
-            </span>
+            <TruncatedText
+              text={triggerLabel}
+              className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0"
+              insideInteractive
+            />
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-white flex-shrink-0" />
             ) : values.length > 0 ? (
@@ -312,9 +315,11 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                               selectedRowRefs.current[item.municipality] = element;
                             }}
                           >
-                            <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">
-                              {item.municipality}
-                            </span>
+                            <TruncatedText
+                              text={item.municipality}
+                              className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5"
+                              insideInteractive
+                            />
                             <span className="text-xs text-white/80 leading-tight">{item.county}</span>
                             {renderSelectionIndicator(isSelected)}
                           </button>
@@ -338,7 +343,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                           className="w-full flex items-center gap-3 px-2 py-3 md:py-2 text-left text-white active:bg-white/10 [@media(hover:hover)]:hover:bg-white/10 touch-manipulation"
                         >
                           <MapPin className="h-4 w-4 flex-shrink-0" />
-                          <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">{county}</span>
+                          <TruncatedText text={county} className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5" insideInteractive />
                           <ChevronRight
                             className={cn(
                               'h-4 w-4 flex-shrink-0 transition-transform duration-200',
@@ -397,9 +402,11 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                                     selectedRowRefs.current[municipality] = element;
                                   }}
                                 >
-                                  <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">
-                                    {municipality}
-                                  </span>
+                                  <TruncatedText
+                                    text={municipality}
+                                    className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5"
+                                    insideInteractive
+                                  />
                                   {renderSelectionIndicator(isSelected)}
                                 </button>
                                 {municipalityIndex < municipalityArray.length - 1 && (

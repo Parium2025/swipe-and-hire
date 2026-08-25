@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { TruncatedText } from '@/components/TruncatedText';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { useCandidateListCounts } from '@/hooks/useCandidateListCounts';
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 import {
@@ -128,7 +128,7 @@ export const MyCandidatesHeader = ({
                 <TruncatedText
                   text={title}
                   className="truncate min-w-0 text-white"
-                  tooltipSide="bottom"
+                  side="bottom"
                 />
                 <span className="text-white flex-shrink-0">({totalCount})</span>
                 <ChevronDown
@@ -157,7 +157,7 @@ export const MyCandidatesHeader = ({
                     ) : (
                       <UserCheck className="h-4 w-4 flex-shrink-0 text-white/70" />
                     )}
-                    <span className="truncate min-w-0">{list.name}</span>
+                    <TruncatedText text={list.name} className="truncate min-w-0" insideInteractive />
                     <span className="ml-auto pl-2 flex-shrink-0 text-white tabular-nums">
                       ({countByList[list.id] ?? 0})
                     </span>
@@ -196,7 +196,7 @@ export const MyCandidatesHeader = ({
                           className={`flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${viewingColleagueId === member.userId ? 'bg-white/15' : ''}`}
                         >
                           {avatar}
-                          <span className="truncate min-w-0">{member.firstName} {member.lastName}</span>
+                          <TruncatedText text={`${member.firstName} ${member.lastName}`} className="truncate min-w-0" insideInteractive />
                         </DropdownMenuItem>
                       );
                     }
@@ -205,7 +205,7 @@ export const MyCandidatesHeader = ({
                       <DropdownMenuSub key={member.userId}>
                         <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors">
                           {avatar}
-                          <span className="truncate min-w-0">{member.firstName} {member.lastName}</span>
+                          <TruncatedText text={`${member.firstName} ${member.lastName}`} className="truncate min-w-0" insideInteractive />
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent className="min-w-[200px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-xl rounded-lg p-1 [&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10">
                           {memberLists.map(list => (
@@ -216,7 +216,7 @@ export const MyCandidatesHeader = ({
                                 viewingColleagueId === member.userId && viewingColleagueList?.id === list.id ? 'bg-white/15' : ''
                               }`}
                             >
-                              <span className="truncate min-w-0">{list.name}</span>
+                              <TruncatedText text={list.name} className="truncate min-w-0" insideInteractive />
                             </DropdownMenuItem>
                           ))}
                         </DropdownMenuSubContent>
