@@ -45,21 +45,21 @@ export const ProfileActions = ({
 
 
         <div className="flex justify-center gap-1">
-          <Button onClick={onSendMessage} variant="glassPurple" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+          <Button {...noFocusRingProps} onClick={onSendMessage} variant="glassPurple" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
             <MessageSquare className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
             <span className="truncate">Chatta</span>
           </Button>
-          <Button onClick={onBookInterview} variant="glassBlue" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+          <Button {...noFocusRingProps} onClick={onBookInterview} variant="glassBlue" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
             <CalendarPlus className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
             <span className="truncate">Boka möte</span>
           </Button>
           {hasTeam && (
-            <Button onClick={onShare} variant="glassAmber" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+            <Button {...noFocusRingProps} onClick={onShare} variant="glassAmber" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
               <Users className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
               <span className="truncate">Dela</span>
             </Button>
           )}
-          <Button onClick={onRemove} variant="glassRed" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+          <Button {...noFocusRingProps} onClick={onRemove} variant="glassRed" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
             <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
             <span className="truncate">Ta bort</span>
           </Button>
