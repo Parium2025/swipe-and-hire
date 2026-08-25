@@ -8,7 +8,6 @@ import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import CompanyReviews from '@/components/CompanyReviews';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useIsPlatformAdmin } from '@/hooks/useIsPlatformAdmin';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +20,6 @@ import EmployerDashboard from '@/components/EmployerDashboard';
 import EmployerHome from '@/components/EmployerHome';
 import JobSeekerHome from '@/components/JobSeekerHome';
 // ProfileSetup removed - employers use EmployerWelcomeTunnel only
-import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
 import { isTunnelReplayAccount, hasCompletedTunnelThisSession, markTunnelCompletedThisSession, isWelcomeCardReplayAccount, isEmployerWelcomeCardReplayAccount } from '@/lib/tunnelTestAccounts';
 
@@ -44,7 +42,6 @@ import AiUsage from '@/pages/AiUsage';
 import EmployerProfile from '@/pages/employer/EmployerProfile';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
-import DeveloperControls from '@/components/DeveloperControls';
 import EmployerAnalytics from '@/components/EmployerAnalytics';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft, Search } from 'lucide-react';
@@ -386,8 +383,7 @@ const introTourKey = (userId: string) => `parium_intro_tour_done:${userId}`;
 const employerIntroTourKey = (userId: string) => `parium_emp_intro_tour_done:${userId}`;
 
 const Index = () => {
-  const { user, profile, userRole, signOut, loading, authAction, switchRole } = useAuth();
-  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
+  const { user, profile, userRole, loading, authAction } = useAuth();
   const { isPlatformAdmin, loading: platformAdminLoading } = useIsPlatformAdmin();
 
   // Förhämta prenumerationsplanerna i bakgrunden så /valj-plan aldrig visar skelett.
@@ -397,9 +393,6 @@ const Index = () => {
     prefetchSubscriptionPlans(queryClient);
   }, [user, queryClient]);
 
-  const [switching, setSwitching] = useState(false);
-  const [showProfileSelector, setShowProfileSelector] = useState(false);
-  const [developerView, setDeveloperView] = useState<string>('dashboard');
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
   const [showEmployerIntroTutorial, setShowEmployerIntroTutorial] = useState(false);
 
@@ -550,7 +543,6 @@ const Index = () => {
       return;
     }
 
-    // Profilväljaren visas inte längre automatiskt — admins växlar roll via Utvecklarvy-knappen i toppnavigationen
     setIsInitializing(false);
   }, [user, loading, navigate, profile, location.pathname]);
 
@@ -591,12 +583,6 @@ const Index = () => {
     }
   }
 
-  // Show profile selector first (admin only)
-  // Show profile selector for admins (database-based check)
-  if (showProfileSelector && isPlatformAdmin) {
-    return <ProfileSelector onProfileSelected={() => setShowProfileSelector(false)} />;
-  }
-
   // Check if user needs to complete onboarding
   // Testkonton (t.ex. axelanderssonparium@gmail.com) kör tunneln på nytt varje inloggning.
   const tunnelReplay = isTunnelReplayAccount(user?.email);
@@ -604,37 +590,6 @@ const Index = () => {
     ? !hasCompletedTunnelThisSession()
     : !profile?.onboarding_completed;
 
-  
-  // Developer overrides for admin users (database-based check)
-  if (isPlatformAdmin) {
-    // Support "welcome_tunnel:<step>" / "employer_welcome_tunnel:<step>" syntax
-    // so admins can jump directly to a specific step from DeveloperControls.
-    const [devViewName, devStepRaw] = (developerView || '').split(':');
-    const devStep = devStepRaw !== undefined ? parseInt(devStepRaw, 10) : undefined;
-
-    if (devViewName === 'welcome_tunnel') {
-      return (
-        <WelcomeTunnel
-          initialStep={Number.isFinite(devStep) ? devStep : undefined}
-          previewMode
-          onComplete={() => setDeveloperView('dashboard')}
-        />
-      );
-    }
-    if (devViewName === 'employer_welcome_tunnel') {
-      return (
-        <EmployerWelcomeTunnel
-          initialStep={Number.isFinite(devStep) ? devStep : undefined}
-          previewMode
-          onComplete={() => setDeveloperView('dashboard')}
-        />
-      );
-    }
-    if (developerView === 'intro_tutorial') {
-      setShowIntroTutorial(true);
-      setDeveloperView('dashboard');
-    }
-  }
   
   // For job seekers, show WelcomeTunnel if onboarding not completed
   if (needsOnboarding && (profile as any)?.role === 'job_seeker') {
@@ -817,11 +772,7 @@ const Index = () => {
     };
 
     return (
-      <JobSeekerLayout
-        developerView={developerView}
-        onViewChange={setDeveloperView}
-        overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}
-      >
+      <JobSeekerLayout overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}>
         <KeepAlive
           activeKey={activeKeepKey}
           render={(key) => renderSidebarContent(key)}
@@ -909,9 +860,6 @@ const Index = () => {
     const employerKeepKey = isJobViewOverlay ? lastEmployerPathRef.current : location.pathname;
     return (
       <EmployerLayout
-        developerView={developerView}
-        onViewChange={setDeveloperView}
-        isOrgAdmin={isOrgAdmin}
         overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}
       >
         <KeepAlive

@@ -1,10 +1,8 @@
 import EmployerDashboard from '@/components/EmployerDashboard';
 import EmployerLayout from '@/components/EmployerLayout';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 const MyJobs = () => {
-  const [developerView, setDeveloperView] = useState('dashboard');
-
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
       requestAnimationFrame(() => {
@@ -14,7 +12,7 @@ const MyJobs = () => {
   }, []);
 
   return (
-    <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
+    <EmployerLayout>
       <EmployerDashboard />
     </EmployerLayout>
   );

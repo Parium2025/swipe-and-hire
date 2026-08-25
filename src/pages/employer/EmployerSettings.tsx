@@ -29,7 +29,7 @@ const EmployerSettings = () => {
   const [backgroundLocationEnabled, setBackgroundLocationEnabled] = useState(false);
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
-  const [openSection, setOpenSection] = useState<string>('konto');
+  const [openSection, setOpenSection] = useState<string>('');
 
   useEffect(() => {
     if (location.hash !== '#notifications') return;
@@ -189,7 +189,7 @@ const EmployerSettings = () => {
             <AccordionTrigger className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-6 md:px-4 py-4 text-sm font-medium text-white no-underline hover:no-underline hover:bg-white/10 transition-colors data-[state=open]:rounded-b-none">
               {section.label}
             </AccordionTrigger>
-            <AccordionContent className="pb-0 pt-4">
+            <AccordionContent forceMount className="pb-0 pt-4 data-[state=closed]:hidden">
               {section.content}
             </AccordionContent>
           </AccordionItem>

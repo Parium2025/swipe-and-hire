@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,39 @@ interface TeamMember {
   email: string | null;
 }
 
+interface TeamCache {
+  userId: string;
+  organizationId: string;
+  members: TeamMember[];
+}
+
+const TEAM_CACHE_PREFIX = 'parium-team-cache:';
+
+const readTeamCache = (userId?: string): TeamCache | null => {
+  if (!userId) return null;
+  try {
+    const parsed = JSON.parse(localStorage.getItem(`${TEAM_CACHE_PREFIX}${userId}`) || 'null') as TeamCache | null;
+    if (!parsed || parsed.userId !== userId || typeof parsed.organizationId !== 'string' || !Array.isArray(parsed.members)) {
+      return null;
+    }
+    return parsed;
+  } catch {
+    try { localStorage.removeItem(`${TEAM_CACHE_PREFIX}${userId}`); } catch { /* ignore */ }
+    return null;
+  }
+};
+
+const writeTeamCache = (userId: string, organizationId: string, members: TeamMember[]) => {
+  try {
+    localStorage.setItem(
+      `${TEAM_CACHE_PREFIX}${userId}`,
+      JSON.stringify({ userId, organizationId, members } satisfies TeamCache),
+    );
+  } catch {
+    // Cache is only a fast path; the database remains the source of truth.
+  }
+};
+
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Admin',
   recruiter: 'Rekryterare',
@@ -35,22 +68,19 @@ const ROLE_COLORS: Record<string, string> = {
 const TeamManagement = () => {
   const { user, profile } = useAuth();
   const { isAdmin } = useIsOrgAdmin();
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialCache = readTeamCache(user?.id);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialCache?.members ?? []);
+  const [loading, setLoading] = useState(!initialCache);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('recruiter');
   const [inviting, setInviting] = useState(false);
-  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(initialCache?.organizationId ?? null);
   
 
-  useEffect(() => {
-    fetchTeamMembers();
-  }, [user?.id]);
-
-  const fetchTeamMembers = async () => {
+  const fetchTeamMembers = useCallback(async (silent = false) => {
     if (!user?.id) return;
-    
-    setLoading(true);
+
+    if (!silent) setLoading(true);
     try {
       // Get user's organization
       const { data: orgData } = await supabase.rpc('get_user_organization_id', {
@@ -58,6 +88,9 @@ const TeamManagement = () => {
       });
       
       if (!orgData) {
+        setOrganizationId(null);
+        setTeamMembers([]);
+        try { localStorage.removeItem(`${TEAM_CACHE_PREFIX}${user.id}`); } catch { /* ignore */ }
         setLoading(false);
         return;
       }
@@ -73,14 +106,19 @@ const TeamManagement = () => {
 
       if (error) throw error;
 
-      // Get profile info for each team member
-      const memberPromises = (roles || []).map(async (role) => {
-        const { data: profileData } = await supabase
+      const userIds = (roles || []).map((role) => role.user_id);
+      const { data: profileRows, error: profilesError } = userIds.length > 0
+        ? await supabase
           .from('profiles')
-          .select('first_name, last_name, email')
-          .eq('user_id', role.user_id)
-          .single();
-        
+          .select('user_id, first_name, last_name, email')
+          .in('user_id', userIds)
+        : { data: [], error: null };
+
+      if (profilesError) throw profilesError;
+
+      const profilesByUser = new Map((profileRows || []).map((row) => [row.user_id, row]));
+      const members = (roles || []).map((role) => {
+        const profileData = profilesByUser.get(role.user_id);
         return {
           ...role,
           first_name: profileData?.first_name || null,
@@ -88,9 +126,8 @@ const TeamManagement = () => {
           email: profileData?.email || null
         };
       });
-
-      const members = await Promise.all(memberPromises);
       setTeamMembers(members);
+      writeTeamCache(user.id, orgData, members);
     } catch (error) {
       console.error('Error fetching team:', error);
       toast({
@@ -99,9 +136,20 @@ const TeamManagement = () => {
         variant: "destructive"
       });
     } finally {
+      if (!silent) setLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const cached = readTeamCache(user.id);
+    if (cached) {
+      setTeamMembers(cached.members);
+      setOrganizationId(cached.organizationId);
       setLoading(false);
     }
-  };
+    void fetchTeamMembers(Boolean(cached));
+  }, [user?.id, fetchTeamMembers]);
 
   const handleInvite = async () => {
     if (!inviteEmail.trim() || !organizationId) {
@@ -158,7 +206,7 @@ const TeamManagement = () => {
         description: "Teammedlemmen har tagits bort."
       });
       
-      fetchTeamMembers();
+      void fetchTeamMembers(true);
     } catch (error) {
       console.error('Error removing member:', error);
       toast({
@@ -193,7 +241,7 @@ const TeamManagement = () => {
         description: `Rollen har ändrats till ${ROLE_LABELS[newRole]}.`
       });
       
-      fetchTeamMembers();
+      void fetchTeamMembers(true);
     } catch (error) {
       console.error('Error updating role:', error);
       toast({

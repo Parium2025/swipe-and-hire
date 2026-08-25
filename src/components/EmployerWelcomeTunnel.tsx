@@ -35,19 +35,13 @@ export const clearEmployerWelcomeDraft = (uid?: string | null) => {
 
 interface EmployerWelcomeTunnelProps {
   onComplete: () => void;
-  /** Developer-only: jump directly to a given step on mount */
-  initialStep?: number;
-  /** Developer-only: when true, no data is written to the database (Spara is mocked) */
-  previewMode?: boolean;
 }
 
-const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: EmployerWelcomeTunnelProps) => {
+const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(
-    typeof initialStep === 'number' ? Math.min(Math.max(initialStep, 0), 2) : 0
-  );
+  const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [logoProgress, setLogoProgress] = useState(0);
@@ -242,16 +236,6 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
 
     setIsSubmitting(true);
     try {
-      // 🛠️ Preview mode (DeveloperControls) – do NOT touch the database
-      if (previewMode) {
-        toast({
-          title: "Förhandsgranskning",
-          description: "Sparat (preview) – ingen data skrevs till databasen."
-        });
-        onComplete();
-        return;
-      }
-
       const result = await updateProfile({
         company_logo_url: formData.companyLogoUrl,
         interview_video_link: formData.interviewVideoLink

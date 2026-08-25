@@ -31,10 +31,6 @@ import WizardFooter from '@/components/wizard/WizardFooter';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
-  /** Developer-only: jump directly to a given step on mount */
-  initialStep?: number;
-  /** Developer-only: when true, no data is written to the database (Spara is mocked) */
-  previewMode?: boolean;
 }
 
 // 🔒 Alla utkastnycklar är kontospecifika — ett nytt konto i samma flik/enhet
@@ -64,7 +60,7 @@ const purgeForeignWelcomeDrafts = (uid: string) => {
   }
 };
 
-const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: WelcomeTunnelProps) => {
+const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const { profile, updateProfile, refreshProfile, user, signOut } = useAuth();
   const { toast } = useToast();
   const userId = user?.id ?? null;
@@ -79,7 +75,6 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const WELCOME_STEP_KEY = scopedKey(STEP_KEY_PREFIX, userId);
 
   const [currentStep, setCurrentStep] = useState(() => {
-    if (typeof initialStep === 'number') return initialStep;
     try {
       const stored = Number(sessionStorage.getItem(scopedKey(STEP_KEY_PREFIX, userId)));
       // Återuppta bara på ett synligt ifyllnadssteg (1–6)
@@ -174,10 +169,10 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   // Om användaren går igenom välkomsttunneln ska introduktionsguiden alltid
   // kunna visas efteråt för det kontot — även i en webbläsare som sett den förut.
   useEffect(() => {
-    if (previewMode || !user?.id) return;
+    if (!user?.id) return;
     try { localStorage.removeItem(`parium_intro_tour_done:${user.id}`); } catch { /* ignorera */ }
     import('@/lib/onboardingState').then(({ resetIntroTourDone }) => resetIntroTourDone().catch(() => {}));
-  }, [previewMode, user?.id]);
+  }, [user?.id]);
 
 
   
@@ -1120,19 +1115,6 @@ const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: Welcome
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // 🛠️ Preview mode (DeveloperControls) – do NOT touch the database
-      if (previewMode) {
-        setCurrentStep(totalSteps - 1);
-        setTimeout(() => {
-          toast({
-            title: "Förhandsgranskning",
-            description: "Sparat (preview) – ingen data skrevs till databasen."
-          });
-          onComplete();
-        }, 1500);
-        return;
-      }
-
       // 🔒 Säkerhetsventil: om profilen redan är slutförd på annan enhet/flik,
       // skriv aldrig över den. Rensa utkast och omdirigera istället.
       if (profile?.onboarding_completed) {

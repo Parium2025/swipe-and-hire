@@ -1,15 +1,11 @@
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import EmployerTopNav from '@/components/EmployerTopNav';
-import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import { FloatingBubbles } from '@/components/FloatingBubbles';
 
 interface EmployerDesktopShellProps {
   children: ReactNode;
-  isOrgAdmin: boolean;
-  developerView: string;
-  onViewChange: (view: string) => void;
   createJobButtonRef: RefObject<HTMLButtonElement>;
   mainScrollRef: RefObject<HTMLElement>;
   onJobCreated: () => void;
@@ -17,9 +13,6 @@ interface EmployerDesktopShellProps {
 
 const EmployerDesktopShell = ({
   children,
-  isOrgAdmin,
-  developerView,
-  onViewChange,
   createJobButtonRef,
   mainScrollRef,
   onJobCreated,
@@ -40,13 +33,6 @@ const EmployerDesktopShell = ({
           <EmployerTopNav
             extraRight={
               <div className="flex items-center gap-3">
-                {isOrgAdmin && (
-                  <DeveloperControls
-                    onViewChange={onViewChange}
-                    currentView={developerView}
-                    forceVisible={isOrgAdmin}
-                  />
-                )}
                 <CreateJobSimpleDialog
                   onJobCreated={onJobCreated}
                   triggerRef={createJobButtonRef}
