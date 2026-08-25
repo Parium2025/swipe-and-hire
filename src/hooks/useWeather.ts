@@ -341,7 +341,8 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     }
 
-    // Real-time GPS via watchPosition (browser only)
+    // Real-time GPS via watchPosition (browser only). GPS itself works offline,
+    // but we only push updates to the server when we are online.
     if ('geolocation' in navigator && !isNativeApp() && !isOffline) {
       watchId = navigator.geolocation.watchPosition(
         async (position) => {
@@ -377,22 +378,28 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       console.log('🛰️ Real-time GPS tracking started via watchPosition');
     }
 
-    // Fallback: Check every 10 minutes
+    // Fallback: Check periodically. On slow connections we back off to avoid
+    // stacking requests on an already strained link.
+    const trackingIntervalMs = isSlowConnection() ? 20 * 60 * 1000 : 10 * 60 * 1000;
     const gpsTrackingInterval = setInterval(() => {
-      if (mountedRef.current && navigator.onLine !== false) {
+      if (mountedRef.current && getIsOnline()) {
         checkForLocationChange(true);
       }
-    }, 10 * 60 * 1000);
+    }, trackingIntervalMs);
 
-    const handleOnline = () => {
-      console.log('Network changed - checking location...');
-      retryAttemptRef.current = 0;
-      checkForLocationChange(true);
+    const handleConnectivity = (online: boolean) => {
+      if (online && mountedRef.current) {
+        console.log('Network changed - checking location...');
+        retryAttemptRef.current = 0;
+        checkForLocationChange(true);
+      }
     };
+
+    const unsubscribeConnectivity = onConnectivityChange(handleConnectivity);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && mountedRef.current) {
-        if (navigator.onLine === false) return;
+        if (!getIsOnline()) return;
         const cachedWeather = getCachedWeather();
         if (cachedWeather && Date.now() - cachedWeather.timestamp < 3 * 60 * 1000) {
           return;
@@ -402,7 +409,6 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     };
 
-    window.addEventListener('online', handleOnline);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
