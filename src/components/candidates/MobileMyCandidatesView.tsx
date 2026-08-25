@@ -145,10 +145,11 @@ const MyCandidateRow = memo(function MyCandidateRow({
         <TruncatedText
           text={`${candidate.first_name} ${candidate.last_name}`}
           className="text-white font-medium text-sm"
+          insideInteractive
         />
         <StarRating rating={candidate.rating} />
         {candidate.job_title && (
-          <TruncatedText text={candidate.job_title} className="text-white text-[11px]" />
+          <TruncatedText text={candidate.job_title} className="text-white text-[11px]" insideInteractive />
         )}
         {(appliedTime || lastActiveTime) && (
           <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">

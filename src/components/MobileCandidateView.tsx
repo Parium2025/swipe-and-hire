@@ -143,6 +143,7 @@ const CandidateRow = memo(function CandidateRow({
         <TruncatedText
           text={`${app.first_name} ${app.last_name}`}
           className="text-white font-medium text-sm"
+          insideInteractive
         />
         <StarRating rating={app.rating} />
         <div className="flex items-center gap-2 mt-0.5 text-white text-[11px]">
@@ -173,7 +174,7 @@ const CandidateRow = memo(function CandidateRow({
                   ) : (
                     <X className={`h-2.5 w-2.5 flex-shrink-0 ${isNoMatch ? 'text-red-400' : 'text-yellow-400'}`} />
                   )}
-                  <TruncatedText text={cr.title} className="text-white/80 max-w-[120px]" />
+                  <TruncatedText text={cr.title} className="text-white/80 max-w-[120px]" insideInteractive />
                 </span>
               );
             })}
