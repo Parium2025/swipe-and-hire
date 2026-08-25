@@ -348,6 +348,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                       <p className="text-xs font-medium text-white uppercase tracking-wide">Webbplats</p>
                       <a
                         href={company.website.startsWith('http') ? company.website : `https://${company.website}`}
+                        title={company.website}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-white hover:underline truncate block"

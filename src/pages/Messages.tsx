@@ -316,8 +316,8 @@ export default function Messages() {
                 </p>
                 <div className="flex flex-col gap-1.5">
                   {blockedUsers.map((block) => (
-                    <div key={block.id} className="flex items-center justify-between gap-2">
-                      <span className="min-w-0 break-words text-xs text-white">
+                    <div key={block.id} className="flex min-w-0 items-center justify-between gap-2 overflow-hidden">
+                      <span className="block min-w-0 flex-1 truncate text-xs text-white">
                         {blockedNames[block.blocked_id] || 'Användare'}
                       </span>
                       <button

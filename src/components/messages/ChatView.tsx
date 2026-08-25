@@ -33,7 +33,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { TruncatedText } from '@/components/ui/truncated-text';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { MessageBubble } from '@/components/messages/MessageBubble';
@@ -724,7 +723,9 @@ export function ChatView({
             {displayName === 'Okänd användare' ? (
               <Skeleton className="h-4 w-28 bg-white/10 rounded inline-block" />
             ) : (
-              <TruncatedText text={displayName} className="font-semibold text-pure-white" />
+              <span className="block w-full min-w-0 truncate font-semibold text-pure-white">
+                {displayName}
+              </span>
             )}
           </h2>
           {conversation.is_group && (
@@ -735,12 +736,12 @@ export function ChatView({
           {snapshot?.job_title ? (
             <div className="text-pure-white text-xs flex min-w-0 items-center gap-1">
               <Briefcase className="h-3 w-3 shrink-0" />
-              <TruncatedText text={snapshot.job_title} className="min-w-0" />
+              <span className="block min-w-0 flex-1 truncate">{snapshot.job_title}</span>
             </div>
           ) : conversation.job && (
             <div className="text-pure-white text-xs flex min-w-0 items-center gap-1">
               <Briefcase className="h-3 w-3 shrink-0" />
-              <TruncatedText text={conversation.job.title} className="min-w-0" />
+              <span className="block min-w-0 flex-1 truncate">{conversation.job.title}</span>
             </div>
           )}
         </div>
@@ -1062,7 +1063,9 @@ export function ChatView({
           <div className="flex flex-col gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex-1 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <Paperclip className="h-3.5 w-3.5 text-pure-white flex-shrink-0" />
-              <TruncatedText text={pendingFile.name} className="text-sm text-pure-white" />
+              <span className="block min-w-0 flex-1 truncate text-sm text-pure-white">
+                {pendingFile.name}
+              </span>
               <span className="text-pure-white text-xs flex-shrink-0">
                 {pendingFile.size >= 1024 * 1024
                   ? `${(pendingFile.size / (1024 * 1024)).toFixed(1)} MB`

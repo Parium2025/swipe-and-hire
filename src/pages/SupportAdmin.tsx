@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, CheckCircle, AlertCircle, MessageCircle, User, Calendar, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface SupportTicket {
   id: string;
@@ -289,9 +290,7 @@ const SupportAdmin = () => {
                         </Badge>
                       </div>
                     </div>
-                    <p className="text-white font-medium text-sm truncate mb-1">
-                      {ticket.subject}
-                    </p>
+                    <TruncatedText text={ticket.subject} className="mb-1 text-sm font-medium text-white" />
                     <p className="text-white text-sm mb-2">
                       {ticket.profiles?.first_name} {ticket.profiles?.last_name}
                     </p>

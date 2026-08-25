@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Activity, Zap, DollarSign, TrendingUp, ShieldCheck } from 'lucide-react';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 /**
  * Owner-only AI usage dashboard.
@@ -242,7 +243,7 @@ export default function AiUsage() {
             <div className="space-y-2">
               {stats.models.map(([model, count]) => (
                 <div key={model} className="flex items-center gap-3 text-sm">
-                  <div className="flex-1 truncate text-white/80 font-mono text-xs">{model}</div>
+                  <TruncatedText text={model} className="min-w-0 flex-1 font-mono text-xs text-white/80" />
                   <div className="text-amber-300 tabular-nums">{count}</div>
                 </div>
               ))}

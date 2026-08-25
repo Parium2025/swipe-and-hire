@@ -129,6 +129,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
                     <div className="text-white text-sm font-medium">{getPlatformLabel(link.platform)}</div>
                     <a 
                       href={link.url} 
+                      title={link.url}
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 break-all max-w-full"
