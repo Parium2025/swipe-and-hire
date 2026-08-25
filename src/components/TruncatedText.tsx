@@ -214,6 +214,60 @@ export function TruncatedText({
     return () => cancelAnimationFrame(id);
   }, [text, tooltipForcedOn, supportsHover, isTouch, hasMeasured, measureTruncation]);
 
+  // RE-MEASURE WHEN THE AVAILABLE WIDTH CHANGES
+  // Window resize, iPad/Android rotation, sidebar collapse, dialog resize and
+  // late font loading all change whether the text actually fits. Without this
+  // the cached measurement goes stale and the tooltip either stops appearing
+  // (text now clipped) or appears on text that fits. We only invalidate the
+  // cached flag — no layout work happens until the next hover/tap (desktop) or
+  // the eager touch pass (mobile).
+  useEffect(() => {
+    if (tooltipForcedOn) return;
+    const element = textRef.current;
+    if (!element || typeof ResizeObserver === 'undefined') return;
+
+    let lastWidth = element.getBoundingClientRect().width;
+    let frame: number | null = null;
+
+    const invalidate = () => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        const node = textRef.current;
+        if (!node) return;
+        const width = node.getBoundingClientRect().width;
+        if (Math.abs(width - lastWidth) < 1) return;
+        lastWidth = width;
+        setHasMeasured(false);
+        setIsTruncated(false);
+      });
+    };
+
+    const observer = new ResizeObserver(invalidate);
+    observer.observe(element);
+    window.addEventListener('orientationchange', invalidate);
+
+    // Late webfont swap changes text metrics without changing box width.
+    let cancelled = false;
+    const fonts = (document as any).fonts;
+    if (fonts?.ready?.then) {
+      fonts.ready.then(() => {
+        if (cancelled) return;
+        setHasMeasured(false);
+        setIsTruncated(false);
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      if (frame !== null) cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('orientationchange', invalidate);
+    };
+  }, [tooltipForcedOn]);
+
+
+
   useEffect(() => {
     if (supportsHover || !isTouch || !isOpen) return;
 
