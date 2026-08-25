@@ -82,7 +82,7 @@ export const MyCandidatesDesktopActionBar = ({
                 >
                   <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: settings?.color || '#6366F1' }} />
                   <Icon className="h-4 w-4 mr-2 text-white/70" />
-                  <span className="truncate">{settings?.label || stage}</span>
+                  <TruncatedText text={settings?.label || stage} className="truncate min-w-0" insideInteractive />"
                 </DropdownMenuItem>
               );
             })}
