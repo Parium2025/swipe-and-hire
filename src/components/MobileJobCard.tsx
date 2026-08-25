@@ -75,6 +75,9 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const { user } = useAuth();
   // Endast annonsens ägare får återpublicera – kollegor får skapa en egen annons istället.
   const isOwner = !job.employer_id || job.employer_id === user?.id;
+  // Kollegors annonser är skrivskyddade: databasen tillåter bara ägaren att
+  // ändra eller ta bort en annons, så knapparna får inte ens visas för andra.
+  const readOnly = hideActions || !isOwner;
   // Textetiketter kräver plats för "Återpublicera" + "Ta bort" utan avklippning;
   // under detta går knapparna över till rena ikoner (med tooltip vid hover).
   const { ref: actionsRef, compact: compactActions } = useCompactWidth(380);
@@ -110,12 +113,13 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
 
   const openJob = useCallback(() => {
-    if (isDraft && onEditDraft) {
+    // Skrivskyddat läge (kollegas annons) ska aldrig öppna redigeringsvyn.
+    if (isDraft && onEditDraft && !readOnly) {
       onEditDraft(job);
       return;
     }
     navigate(`/job-details/${job.id}`);
-  }, [isDraft, onEditDraft, job, navigate]);
+  }, [isDraft, onEditDraft, job, navigate, readOnly]);
 
   const handleMediaClick = (e: MouseEvent) => {
     e.stopPropagation();
@@ -229,11 +233,11 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         </div>
 
 
-        {!(hideActions && isDraft) && (
+        {!(readOnly && isDraft) && (
           <div>
 
             <div ref={actionsRef} className={`-mt-2 flex gap-2 px-2 pt-0 pb-2.5 ${compactActions ? 'justify-center' : ''}`}>
-              {!hideActions && !isExpired && (
+              {!readOnly && !isExpired && (
                 <ActionTip label={isDraft ? 'Redigera utkast' : 'Redigera annons'}>
                   <Button
                     variant="glass"
@@ -254,7 +258,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   </Button>
                 </ActionTip>
               )}
-              {!hideActions && isExpired && isOwner && onRepublish && (
+              {!readOnly && isExpired && onRepublish && (
                 <ActionTip label="Återpublicera annons">
                   <Button
                     size="sm"
@@ -277,14 +281,14 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                     size="sm"
                     aria-label="Förhandsgranska annons"
                     onClick={handlePreviewClick}
-                    className={`${hideActions && !compactActions ? 'flex-1 min-w-0 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
+                    className={`${readOnly && !compactActions ? 'flex-1 min-w-0 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
                   >
                     <Eye className="h-4 w-4" />
-                    {hideActions && !compactActions && <span className="text-sm truncate">Visa annons</span>}
+                    {readOnly && !compactActions && <span className="text-sm truncate">Visa annons</span>}
                   </Button>
                 </ActionTip>
               )}
-              {!hideActions && (
+              {!readOnly && (
                 <ActionTip label="Ta bort annons">
                   <Button
                     variant="glass"
