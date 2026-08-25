@@ -37,7 +37,7 @@ interface CompanyProfile {
   industry?: string;
   employee_count?: string;
   address?: string;
-  social_media_links?: SocialMediaLink[];
+  company_social_media_links?: SocialMediaLink[];
 }
 
 interface CompanyReview {
@@ -81,7 +81,7 @@ const CompanyReviews = () => {
       return data ? {
         ...data,
         // Map the correct field names from profiles table
-        social_media_links: (data.social_media_links as unknown as SocialMediaLink[]) || []
+        company_social_media_links: ((data as any).company_social_media_links as unknown as SocialMediaLink[]) || []
       } as CompanyProfile : null;
     },
     enabled: !!user?.id,
@@ -304,7 +304,7 @@ const CompanyReviews = () => {
         </div>
 
         {/* Sociala medier */}
-        {company.social_media_links && company.social_media_links.length > 0 && (
+        {company.company_social_media_links && company.company_social_media_links.length > 0 && (
           <>
             <Separator className="my-6 bg-white/10" />
             
@@ -312,7 +312,7 @@ const CompanyReviews = () => {
               <h3 className="font-semibold text-base text-white">Sociala medier</h3>
               
               <div className="grid gap-2.5">
-                {company.social_media_links.map((link, index) => {
+                {company.company_social_media_links.map((link, index) => {
                   const getPlatformIcon = () => {
                     switch(link.platform) {
                       case 'linkedin': return Linkedin;
