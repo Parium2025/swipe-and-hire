@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { forwardRef, ReactNode } from 'react';
 
 interface AuthFieldNoticeProps {
   show: boolean;
@@ -9,8 +9,9 @@ interface AuthFieldNoticeProps {
  * Mjuk in-/utfasning för hjälptexter under auth-fält.
  * Håller innehållet monterat så att både in- och utgången animeras.
  */
-export const AuthFieldNotice = ({ show, children }: AuthFieldNoticeProps) => (
+export const AuthFieldNotice = forwardRef<HTMLDivElement, AuthFieldNoticeProps>(({ show, children }, ref) => (
   <div
+    ref={ref}
     aria-hidden={!show}
     className={`grid transition-all duration-300 ease-out motion-reduce:transition-none ${
       show ? 'grid-rows-[1fr] opacity-100 mt-1.5' : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
@@ -18,6 +19,8 @@ export const AuthFieldNotice = ({ show, children }: AuthFieldNoticeProps) => (
   >
     <div className="overflow-hidden">{children}</div>
   </div>
-);
+));
+
+AuthFieldNotice.displayName = 'AuthFieldNotice';
 
 export default AuthFieldNotice;
