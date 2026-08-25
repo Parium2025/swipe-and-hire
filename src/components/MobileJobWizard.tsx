@@ -32,6 +32,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedText } from '@/components/TruncatedText';
+import { TEXT_LIMITS } from '@/lib/textLimits';
 import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { celebrate } from '@/lib/celebrate';
@@ -2732,6 +2733,7 @@ const MobileJobWizard = ({
                   <Input
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
+                    maxLength={TEXT_LIMITS.jobTitle}
                     placeholder="t.ex. Lagerarbetare"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                   />

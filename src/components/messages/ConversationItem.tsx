@@ -103,7 +103,7 @@ export function ConversationItem({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0">
+      <div className="w-0 min-w-0 flex-1 overflow-hidden">
         <div className="flex min-w-0 items-center justify-between gap-2 mb-0.5">
           <span
             className={cn(

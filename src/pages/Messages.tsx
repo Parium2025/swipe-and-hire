@@ -347,7 +347,7 @@ export default function Messages() {
                 />
               </div>
             ) : (
-              <ScrollArea className="h-full min-w-0 no-chrome-pad">
+              <ScrollArea className="h-full w-full min-w-0 max-w-full overflow-x-hidden no-chrome-pad [&_[data-radix-scroll-area-viewport]]:overflow-x-hidden [&_[data-radix-scroll-area-viewport]>div]:!block [&_[data-radix-scroll-area-viewport]>div]:!w-full [&_[data-radix-scroll-area-viewport]>div]:!min-w-0 [&_[data-radix-scroll-area-viewport]>div]:!max-w-full">
                 <div className="w-full min-w-0 overflow-hidden p-2">
                   {filteredConversations.map((conv, index) => {
                     const isLast = index === filteredConversations.length - 1;

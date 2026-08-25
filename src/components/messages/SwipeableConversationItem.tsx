@@ -276,7 +276,7 @@ export function SwipeableConversationItem({
         {/* Content layer – slides LEFT to reveal delete on right */}
         <div
           ref={contentRef}
-          className="relative z-10 w-full min-w-0 max-w-full overflow-hidden"
+          className="relative z-10 block w-full min-w-0 max-w-full overflow-hidden"
           style={{ transform: 'translate3d(0,0,0)', willChange: 'transform' }}
         >
           {children}

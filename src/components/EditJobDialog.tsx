@@ -24,6 +24,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedText } from '@/components/TruncatedText';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
+import { TEXT_LIMITS } from '@/lib/textLimits';
 import { WizardSwipePreview, WizardListPreview, buildWizardPreviewData } from '@/components/wizard/WizardCardPreview';
 import { celebrate } from '@/lib/celebrate';
 import { useToast } from '@/hooks/use-toast';
@@ -2044,6 +2045,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                         <Input
                           value={formData.title}
                           onChange={(e) => handleInputChange('title', e.target.value)}
+                          maxLength={TEXT_LIMITS.jobTitle}
                           placeholder="t.ex. Lagerarbetare"
                           className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm focus:border-white/40"
                         />
