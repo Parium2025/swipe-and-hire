@@ -765,7 +765,11 @@ const EmployerProfile = () => {
                 />
               <div className="text-right">
                 <span className="text-white text-sm">
-                  {formData.bio.trim() === '' ? 0 : formData.bio.trim().split(/\s+/).length} ord
+                  {(() => {
+                    const text = formData.bio.replace(/\s+/g, ' ').trim();
+                    const words = text ? text.split(/\s+/).length : 0;
+                    return `${words} ord · ${text.length} tecken`;
+                  })()}
                 </span>
               </div>
             </div>
