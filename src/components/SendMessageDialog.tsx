@@ -1,7 +1,7 @@
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
-import { noFocusRingProps, noFlashButtonClass } from '@/lib/noFocusRing';
+import { noFocusRingProps } from '@/lib/noFocusRing';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -292,7 +292,6 @@ export function SendMessageDialog({
                         {...noFocusRingProps}
                         variant={active ? 'glassBlue' : 'glass'}
                         size="sm"
-                        className={noFlashButtonClass}
                         onClick={() => toggleChannel(value)}
                       >
                         <Icon className="h-3.5 w-3.5" />
@@ -348,7 +347,7 @@ export function SendMessageDialog({
                 onClick={handleSend}
                 {...noFocusRingProps}
                 disabled={isDisabled}
-                className={`${noFlashButtonClass} w-full h-11 !min-h-0 rounded-full border transition-[border-color,transform] duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
+                className={`w-full h-11 !min-h-0 rounded-full border transition-colors duration-150 active:scale-95 ${
                   !sending && message.trim() ? 'border-white/30' : 'border-transparent'
                 }`}
               >
