@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
 
         const { data: interviews, error: interviewsError } = await supabase
           .from("interviews")
-          .select("id, applicant_id, employer_id, job_id, scheduled_at, location_type, location_details")
+          .select("id, applicant_id, employer_id, job_id, scheduled_at, location_type, location_details, revision")
           .eq("employer_id", automation.owner_user_id)
           .in("status", interviewStatuses)
           .gte("scheduled_at", rangeStart)
@@ -90,17 +90,25 @@ Deno.serve(async (req) => {
         }
 
         for (const interview of interviews || []) {
-          const { data: existingLog } = await supabase
+          // Revisionen gör att en ombokad intervju får en ny påminnelse –
+          // utan den blockerar den redan skickade loggen alltid nya tider.
+          const revision = (interview as { revision?: number }).revision ?? 0;
+
+          const { data: existingLogs } = await supabase
             .from("outreach_dispatch_logs")
-            .select("id")
+            .select("id, payload")
             .eq("automation_id", automation.id)
             .eq("interview_id", interview.id)
             .eq("recipient_user_id", interview.applicant_id)
-            .eq("trigger", trigger)
-            .limit(1)
-            .maybeSingle();
+            .eq("trigger", trigger);
 
-          if (existingLog) continue;
+          const alreadyQueued = (existingLogs || []).some((log) => {
+            const payload = (log as { payload?: Record<string, unknown> | null }).payload;
+            const loggedRevision = Number(payload?.revision ?? 0);
+            return loggedRevision === revision;
+          });
+
+          if (alreadyQueued) continue;
 
           const { error: insertError } = await supabase.from("outreach_dispatch_logs").insert({
             owner_user_id: automation.owner_user_id,
@@ -115,6 +123,7 @@ Deno.serve(async (req) => {
             payload: {
               source: "interview-reminders",
               queued_at: now.toISOString(),
+              revision,
               delay_minutes: automation.delay_minutes,
               filters: automation.filters,
               location_type: interview.location_type,
@@ -122,6 +131,7 @@ Deno.serve(async (req) => {
             },
             status: "pending",
           });
+
 
           if (!insertError) queued += 1;
         }
@@ -336,14 +346,28 @@ Deno.serve(async (req) => {
       for (const interview of pastInterviews) {
         const jobTitle = (interview.job_postings as any)?.title || "tjänsten";
 
+        // Claim först: samtidiga körningar får aldrig skicka dubbla påminnelser.
+        const { data: claimedFollowup } = await supabase
+          .from("interviews")
+          .update({ followup_reminder_sent_at: now.toISOString() })
+          .eq("id", interview.id)
+          .is("followup_reminder_sent_at", null)
+          .select("id")
+          .maybeSingle();
+        if (!claimedFollowup) continue;
+
         // Check if the recruiter has already taken action on this candidate
         // (changed status from pending/reviewed, or added to my_candidates with stage change)
-        const { data: application } = await supabase
-          .from("job_applications")
-          .select("status")
-          .eq("job_id", interview.job_id!)
-          .eq("applicant_id", interview.applicant_id)
-          .single();
+        // maybeSingle: intervjun kan sakna koppling till en ansökan (manuellt tillagd kandidat).
+        const { data: application } = interview.job_id
+          ? await supabase
+              .from("job_applications")
+              .select("status")
+              .eq("job_id", interview.job_id)
+              .eq("applicant_id", interview.applicant_id)
+              .limit(1)
+              .maybeSingle()
+          : { data: null };
 
         // If the candidate is still in "interview" status, the recruiter hasn't acted
         const needsReminder = application?.status === "interview" || application?.status === "pending" || application?.status === "reviewed";
@@ -354,7 +378,8 @@ Deno.serve(async (req) => {
             .from("profiles")
             .select("first_name, last_name")
             .eq("user_id", interview.applicant_id)
-            .single();
+            .maybeSingle();
+
 
           const candidateName = candidateProfile
             ? `${candidateProfile.first_name || ""} ${candidateProfile.last_name || ""}`.trim()
@@ -392,13 +417,8 @@ Deno.serve(async (req) => {
             errors.push(`Followup ${interview.id}: ${message}`);
           }
         }
-
-        // Mark reminder as sent regardless (to avoid re-sending)
-        await supabase
-          .from("interviews")
-          .update({ followup_reminder_sent_at: now.toISOString() })
-          .eq("id", interview.id);
       }
+
     }
 
     const beforeInterviewQueued = await queueInterviewTimelineDispatches("interview_before");
