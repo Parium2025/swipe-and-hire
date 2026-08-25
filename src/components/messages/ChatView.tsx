@@ -33,6 +33,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { MessageBubble } from '@/components/messages/MessageBubble';
@@ -719,8 +720,12 @@ export function ChatView({
         )}
 
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-pure-white truncate">
-            {displayName === 'Okänd användare' ? <Skeleton className="h-4 w-28 bg-white/10 rounded inline-block" /> : displayName}
+          <h2 className="font-semibold text-pure-white min-w-0">
+            {displayName === 'Okänd användare' ? (
+              <Skeleton className="h-4 w-28 bg-white/10 rounded inline-block" />
+            ) : (
+              <TruncatedText text={displayName} className="font-semibold text-pure-white" />
+            )}
           </h2>
           {conversation.is_group && (
             <p className="text-pure-white text-xs">
@@ -730,7 +735,7 @@ export function ChatView({
           {snapshot?.job_title ? (
             <p className="text-pure-white text-xs flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
-              <span className="truncate">{snapshot.job_title}</span>
+              <TruncatedText text={snapshot.job_title} className="min-w-0" />
             </p>
           ) : conversation.job && (
             <p className="text-pure-white text-xs flex items-center gap-1">
@@ -1057,7 +1062,7 @@ export function ChatView({
           <div className="flex flex-col gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex-1 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <Paperclip className="h-3.5 w-3.5 text-pure-white flex-shrink-0" />
-              <span className="text-sm text-pure-white truncate">{pendingFile.name}</span>
+              <TruncatedText text={pendingFile.name} className="text-sm text-pure-white" />
               <span className="text-pure-white text-xs flex-shrink-0">
                 {pendingFile.size >= 1024 * 1024
                   ? `${(pendingFile.size / (1024 * 1024)).toFixed(1)} MB`
