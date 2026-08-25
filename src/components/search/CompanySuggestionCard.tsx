@@ -42,7 +42,7 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
                   <Building2 className="h-4 w-4 text-white flex-shrink-0" />
                   <span className="text-xs text-white uppercase tracking-wide">Företag</span>
                 </div>
-                <h3 className="text-base font-semibold text-white truncate mt-1">
+                <h3 className="text-base font-semibold text-white mt-1 min-w-0 break-words [overflow-wrap:anywhere] line-clamp-2">
                   {company.name} - {company.jobCount} aktiv{company.jobCount !== 1 ? 'a' : 't'} jobb
                 </h3>
                 <div className="flex items-center gap-1 text-sm text-white flex-wrap">

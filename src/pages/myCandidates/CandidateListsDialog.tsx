@@ -132,7 +132,7 @@ const SortableListRow = ({
             </div>
           )}
           <div className="min-w-0 flex-1 py-0.5">
-            <p className="truncate text-sm font-medium text-white">{list.name}</p>
+            <p className="text-sm font-medium text-white break-words [overflow-wrap:anywhere] line-clamp-2">{list.name}</p>
             <p className="text-xs text-white">
               {count} kandidater
               {list.is_default ? ' · standardlista' : ''}

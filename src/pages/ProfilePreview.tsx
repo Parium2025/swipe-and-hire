@@ -675,7 +675,7 @@ export default function ProfilePreview() {
               <CardHeader className="pb-1.5 pt-2 px-2 sm:px-4">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <User className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                  <h3 className="text-[10px] sm:text-xs font-semibold leading-snug tracking-tight text-white truncate">
+                  <h3 className="text-[10px] sm:text-xs font-semibold leading-snug tracking-tight text-white min-w-0 break-words [overflow-wrap:anywhere]">
                     Personlig information
                   </h3>
                 </div>
@@ -727,7 +727,7 @@ export default function ProfilePreview() {
               <CardHeader className="pb-1.5 pt-2 px-2 sm:px-4">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <Briefcase className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                  <h3 className="text-[10px] sm:text-xs font-semibold leading-snug tracking-tight text-white truncate">
+                  <h3 className="text-[10px] sm:text-xs font-semibold leading-snug tracking-tight text-white min-w-0 break-words [overflow-wrap:anywhere]">
                     Anställningsinformation
                   </h3>
                 </div>
