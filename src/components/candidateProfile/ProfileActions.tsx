@@ -114,11 +114,11 @@ export const ProfileActions = ({
 
 
       <div className="flex flex-wrap justify-center gap-2">
-        <Button onClick={onSendMessage} variant="glassPurple" size="default">
+        <Button {...noFocusRingProps} onClick={onSendMessage} variant="glassPurple" size="default">
           <MessageSquare className="h-4 w-4 mr-1.5" />
           Meddelande
         </Button>
-        <Button onClick={onBookInterview} variant="glassBlue" size="default">
+        <Button {...noFocusRingProps} onClick={onBookInterview} variant="glassBlue" size="default">
           <CalendarPlus className="h-4 w-4 mr-1.5" />
           Boka möte
         </Button>
