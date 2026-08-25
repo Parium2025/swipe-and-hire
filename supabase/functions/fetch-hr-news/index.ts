@@ -348,7 +348,7 @@ async function fetchRSSWithRetry(
         const full = `${i.title} ${i.description}`;
         return {
           title: i.title,
-          summary: truncateAtSentence(i.description, 250) || i.title,
+          summary: truncateAtSentence(i.description, 420) || i.title,
           source: source.name,
           source_url: i.link || null,
           category: categorize(full),
