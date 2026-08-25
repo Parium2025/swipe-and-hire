@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.handle_interview_reschedule() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.clear_pending_interview_dispatches() FROM PUBLIC, anon, authenticated;
