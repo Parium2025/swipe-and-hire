@@ -26,12 +26,8 @@ export function RealtimeKeepAlive() {
         supabase.realtime.disconnect();
         supabase.realtime.connect();
       } catch {
-        // Fallback: ensure disconnected channels attempt to rejoin
-        channels.forEach(channel => {
-          if (channel.state !== 'joined' && channel.state !== 'joining') {
-            channel.subscribe();
-          }
-        });
+        // The realtime client owns channel rejoin state. Calling subscribe()
+        // again on an existing channel is unsafe and can duplicate bindings.
       }
     };
 

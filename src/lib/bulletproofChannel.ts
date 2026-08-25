@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 /**
@@ -86,7 +87,7 @@ export function createBulletproofChannel(options: RealtimeChannelOptions): () =>
     if (cancelled) return;
     teardownCurrent();
 
-    let ch = supabase.channel(channelName);
+    let ch = createRealtimeChannel(channelName);
 
     for (const sub of subscriptions) {
       ch = ch.on(
