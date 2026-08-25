@@ -210,10 +210,10 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   };
 
   return (
-    <nav className="h-16 flex items-center border-b border-white/20 bg-transparent">
-      <div className="w-full responsive-container-wide flex items-center justify-between">
+    <nav className="h-16 flex items-center border-b border-white/20 bg-transparent overflow-hidden">
+      <div className="w-full responsive-container-wide flex items-center justify-between gap-2 min-w-0">
       {/* Left side: Logo + Main Nav */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 min-w-0">
         {/* Parium Logo - Home Button */}
         <PariumLogoButton
           onClick={() => handleNavigation('/home')}
