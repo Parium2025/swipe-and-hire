@@ -376,6 +376,12 @@ const EmployerDashboard = memo(() => {
    */
   const bulkSelectable = activeTab === 'expired' || activeTab === 'draft';
 
+  // Endast egna annonser kan massmarkeras — databasen tillåter bara ägaren att
+  // ta bort en annons, så kollegors annonser får inte kunna bockas i.
+  const isOwnJob = useCallback((j: { employer_id?: string | null }) => !j.employer_id || j.employer_id === user?.id, [user?.id]);
+  const ownPageJobs = useMemo(() => pageJobs.filter(isOwnJob), [pageJobs, isOwnJob]);
+  const ownTabJobs = useMemo(() => tabFilteredJobs.filter(isOwnJob), [tabFilteredJobs, isOwnJob]);
+
   const toggleSelected = useCallback((jobId: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
@@ -684,7 +690,7 @@ const EmployerDashboard = memo(() => {
               <button
                 type="button"
                 onClick={() => {
-                  const pageIds = pageJobs.map(j => j.id);
+                  const pageIds = ownPageJobs.map(j => j.id);
                   const allSelected = pageIds.every(id => selectedIds.has(id));
                   setSelectedIds(prev => {
                     const next = new Set(prev);
@@ -696,14 +702,14 @@ const EmployerDashboard = memo(() => {
                 }}
                 className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
               >
-                {pageJobs.length > 0 && pageJobs.every(j => selectedIds.has(j.id)) ? 'Avmarkera sidan' : 'Markera sidan'}
+                {ownPageJobs.length > 0 && ownPageJobs.every(j => selectedIds.has(j.id)) ? 'Avmarkera sidan' : 'Markera sidan'}
               </button>
               <button
                 type="button"
-                onClick={() => setSelectedIds(new Set(tabFilteredJobs.map(j => j.id)))}
+                onClick={() => setSelectedIds(new Set(ownTabJobs.map(j => j.id)))}
                 className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
               >
-                Markera alla ({tabFilteredJobs.length})
+                Markera alla ({ownTabJobs.length})
               </button>
               <button
                 type="button"
@@ -781,7 +787,7 @@ const EmployerDashboard = memo(() => {
                       collapsible
                       expanded={expandAll}
                     />
-                    {selectionMode && bulkSelectable && (
+                    {selectionMode && bulkSelectable && isOwnJob(job) && (
                       <button
                         type="button"
                         onClick={() => toggleSelected(job.id)}
@@ -869,7 +875,7 @@ const EmployerDashboard = memo(() => {
                       collapsible
                       expanded={expandAll}
                     />
-                    {selectionMode && bulkSelectable && (
+                    {selectionMode && bulkSelectable && isOwnJob(job) && (
                       <button
                         type="button"
                         onClick={() => toggleSelected(job.id)}
