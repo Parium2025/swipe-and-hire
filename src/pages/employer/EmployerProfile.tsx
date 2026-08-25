@@ -25,7 +25,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, AlertTriangle, Camera, Pencil, RotateCcw, WifiOff } from 'lucide-react';
+import { Trash2, ChevronDown, AlertTriangle, Camera, Pencil, RotateCcw, WifiOff } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,25 +35,11 @@ import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
 // localStorage key för draft
 const DRAFT_KEY = 'parium_draft_employer-profile';
 
-interface SocialMediaLink {
-  platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
-  url: string;
-}
-
-const SOCIAL_PLATFORMS = [
-  { value: 'linkedin', label: 'LinkedIn', icon: Linkedin },
-  { value: 'twitter', label: 'Twitter/X', icon: Twitter },
-  { value: 'instagram', label: 'Instagram', icon: Instagram },
-  { value: 'annat', label: 'Annat', icon: Globe },
-];
-
 const EmployerProfile = () => {
   const { profile, updateProfile, user, userRole } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
-  const [linkToDelete, setLinkToDelete] = useState<{ link: SocialMediaLink; index: number } | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -86,18 +72,11 @@ const EmployerProfile = () => {
     location: profile?.location || '',
     phone: profile?.phone || '',
     profile_image_url: profile?.profile_image_url || '',
-    social_media_links: (profile as any)?.social_media_links || [] as SocialMediaLink[],
   });
 
   // Konvertera storage path till signerad URL för visning
   const profileImageUrl = useMediaUrl(formData.profile_image_url, 'profile-image');
 
-  const [newSocialLink, setNewSocialLink] = useState({
-    platform: '' as SocialMediaLink['platform'] | '',
-    url: ''
-  });
-
-  const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
 
   // Update form data when profile changes OR restore from localStorage draft
   useEffect(() => {
@@ -127,15 +106,11 @@ const EmployerProfile = () => {
       location: profile.location || '',
       phone: profile.phone || '',
       profile_image_url: profile.profile_image_url || '',
-      social_media_links: (profile as any)?.social_media_links || [],
     };
 
     // If we have a saved draft with different content, use it
     if (savedDraft && !didInitRef.current) {
       const hasDraftContent = Object.keys(savedDraft).some(key => {
-        if (key === 'social_media_links') {
-          return JSON.stringify(savedDraft[key]) !== JSON.stringify(values[key as keyof typeof values]);
-        }
         return savedDraft[key] !== values[key as keyof typeof values];
       });
 
@@ -156,12 +131,9 @@ const EmployerProfile = () => {
   }, [profile, hasUnsavedChanges, setHasUnsavedChanges]);
 
   const checkForChanges = useCallback(() => {
-    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone && !originalValues.social_media_links) return false;
+    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone) return false;
     
     const hasChanges = Object.keys(formData).some(key => {
-      if (key === 'social_media_links') {
-        return JSON.stringify(formData[key]) !== JSON.stringify(originalValues[key]);
-      }
       return formData[key] !== originalValues[key];
     });
 
