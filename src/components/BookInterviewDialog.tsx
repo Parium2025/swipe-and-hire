@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X, Pencil, CheckCircle2, AlertCircle, Check } from 'lucide-react';
 import { format, startOfDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { normalizeMeetingLink } from '@/lib/meetingLink';
+import { normalizeMeetingLink, isSupportedMeetingLink } from '@/lib/meetingLink';
 
 interface BookInterviewDialogProps {
   open: boolean;
@@ -87,6 +87,14 @@ export const BookInterviewDialog = ({
   // State for editable video link
   const [editableVideoLink, setEditableVideoLink] = useState(savedVideoLink);
   const [videoLinkEditing, setVideoLinkEditing] = useState(false);
+  const [saveVideoLinkAsDefault, setSaveVideoLinkAsDefault] = useState(false);
+
+  const trimmedVideoLink = editableVideoLink.trim();
+  const videoLinkIsValid = trimmedVideoLink
+    ? isSupportedMeetingLink(normalizeMeetingLink(trimmedVideoLink))
+    : false;
+  const videoLinkDiffersFromDefault =
+    !!trimmedVideoLink && normalizeMeetingLink(trimmedVideoLink) !== savedVideoLink;
 
   // Get the correct default message based on location type
   const getDefaultMessageForType = (type: 'video' | 'office') => {
@@ -105,6 +113,8 @@ export const BookInterviewDialog = ({
       setLocationDetails('');
       setEditableAddress(savedOfficeAddress);
       setEditableVideoLink(savedVideoLink);
+      setVideoLinkEditing(false);
+      setSaveVideoLinkAsDefault(false);
       setMessage(videoDefaultMessage);
       setSubject('');
     }
@@ -136,9 +146,12 @@ export const BookInterviewDialog = ({
 
   const isReschedule = !!existingInterview;
 
-  // Set default values when dialog opens — always sync from latest profile
+  // Set default values when dialog OPENS (transition false → true).
+  // Får aldrig köra om på profil-refetch — då skulle en bakgrundsuppdatering
+  // nollställa datum, platstyp, meddelande och rekryterarens inskrivna länk.
+  const wasOpenRef = useRef(false);
   useEffect(() => {
-    if (open) {
+    if (open && !wasOpenRef.current) {
       setSubject(`Intervju för ${jobTitle}`);
       setDate(new Date());
       setLocationType('video');
@@ -146,8 +159,12 @@ export const BookInterviewDialog = ({
       // Sync editable fields from latest profile values
       setEditableAddress(savedOfficeAddress);
       setEditableVideoLink(savedVideoLink);
+      setVideoLinkEditing(false);
+      setSaveVideoLinkAsDefault(false);
     }
-  }, [open, jobTitle, videoDefaultMessage, savedOfficeAddress, savedVideoLink]);
+    wasOpenRef.current = open;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Förifyll med den befintliga bokningen när det är en ombokning.
   // Får bara ske EN gång per öppning – annars skriver en bakgrundsrefetch
@@ -193,7 +210,15 @@ export const BookInterviewDialog = ({
         skipNextMessageResetRef.current = false;
         return;
       }
-      setMessage(getDefaultMessageForType(locationType));
+      // Byt bara ut texten om den fortfarande är en oredigerad standardmall.
+      setMessage((current) => {
+        const untouched =
+          current.trim() === '' ||
+          current === videoDefaultMessage ||
+          current === officeDefaultMessage ||
+          current === FALLBACK_MESSAGE;
+        return untouched ? getDefaultMessageForType(locationType) : current;
+      });
     }
   }, [locationType]);
 
@@ -209,7 +234,7 @@ export const BookInterviewDialog = ({
     } else if (locationType === 'video') {
       const normalizedVideoLink = normalizeMeetingLink(editableVideoLink);
       // Use video link if available, otherwise show generic message
-      setLocationDetails(normalizedVideoLink || 'Videosamtal via Parium');
+      setLocationDetails(normalizedVideoLink || 'Videointervju – länk skickas separat');
     }
   }, [locationType, editableAddress, officeInstructions, editableVideoLink]);
 
