@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useBackgroundLocation } from './useBackgroundLocation';
 import { isNativeApp, isMobileWeb, getAccuratePosition, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
+import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { isSlowConnection } from '@/hooks/useNetworkAwareFetch';
 import {
   type CachedLocation,
   getCachedLocation,
