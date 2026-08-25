@@ -3,6 +3,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { warmActivityAvatars } from '@/lib/warmTeamAvatars';
 
 export type ActivityType =
   | 'rating_changed'
@@ -91,6 +92,8 @@ async function fetchActivitiesQueryFn(applicantId: string): Promise<CandidateAct
   })) as CandidateActivity[];
 
   writeActivityCache(applicantId, result);
+  // Signera + dekoda avatarerna direkt så de aldrig "poppar in" efter initialerna.
+  warmActivityAvatars(result.map((a) => a.user_profile_image_url));
   return result;
 }
 
@@ -105,7 +108,9 @@ export function useCandidateActivities(applicantId: string | null) {
     staleTime: 30 * 1000,
     initialData: () => {
       if (!applicantId) return undefined;
-      return readActivityCache(applicantId) ?? undefined;
+      const cached = readActivityCache(applicantId);
+      if (cached) warmActivityAvatars(cached.map((a) => a.user_profile_image_url));
+      return cached ?? undefined;
     },
     initialDataUpdatedAt: () => {
       if (!applicantId) return undefined;
