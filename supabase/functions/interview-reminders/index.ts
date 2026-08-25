@@ -417,13 +417,8 @@ Deno.serve(async (req) => {
             errors.push(`Followup ${interview.id}: ${message}`);
           }
         }
-
-        // Mark reminder as sent regardless (to avoid re-sending)
-        await supabase
-          .from("interviews")
-          .update({ followup_reminder_sent_at: now.toISOString() })
-          .eq("id", interview.id);
       }
+
     }
 
     const beforeInterviewQueued = await queueInterviewTimelineDispatches("interview_before");
