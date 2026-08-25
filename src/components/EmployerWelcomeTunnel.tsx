@@ -35,16 +35,13 @@ export const clearEmployerWelcomeDraft = (uid?: string | null) => {
 
 interface EmployerWelcomeTunnelProps {
   onComplete: () => void;
-  initialStep?: number;
 }
 
-const EmployerWelcomeTunnel = ({ onComplete, initialStep }: EmployerWelcomeTunnelProps) => {
+const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(
-    typeof initialStep === 'number' ? Math.min(Math.max(initialStep, 0), 2) : 0
-  );
+  const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [logoProgress, setLogoProgress] = useState(0);

@@ -31,7 +31,6 @@ import WizardFooter from '@/components/wizard/WizardFooter';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
-  initialStep?: number;
 }
 
 // 🔒 Alla utkastnycklar är kontospecifika — ett nytt konto i samma flik/enhet
@@ -61,7 +60,7 @@ const purgeForeignWelcomeDrafts = (uid: string) => {
   }
 };
 
-const WelcomeTunnel = ({ onComplete, initialStep }: WelcomeTunnelProps) => {
+const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const { profile, updateProfile, refreshProfile, user, signOut } = useAuth();
   const { toast } = useToast();
   const userId = user?.id ?? null;
@@ -76,7 +75,6 @@ const WelcomeTunnel = ({ onComplete, initialStep }: WelcomeTunnelProps) => {
   const WELCOME_STEP_KEY = scopedKey(STEP_KEY_PREFIX, userId);
 
   const [currentStep, setCurrentStep] = useState(() => {
-    if (typeof initialStep === 'number') return initialStep;
     try {
       const stored = Number(sessionStorage.getItem(scopedKey(STEP_KEY_PREFIX, userId)));
       // Återuppta bara på ett synligt ifyllnadssteg (1–6)
