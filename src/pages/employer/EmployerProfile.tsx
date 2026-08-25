@@ -418,27 +418,14 @@ const EmployerProfile = () => {
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
   }, [originalValues, setHasUnsavedChanges]);
 
-    // Validate all social media URLs
-    for (const link of formData.social_media_links) {
-      if (!validateUrl(link.url, link.platform)) {
-        toast({
-          title: "Ogiltig URL",
-          description: `Kontrollera URL:en för ${SOCIAL_PLATFORMS.find(p => p.value === link.platform)?.label}`,
-          variant: "destructive"
-        });
-        return;
-      }
-    }
+  const { isOnline, showOfflineToast } = useOnline();
 
+  const handleSave = async () => {
     try {
       setLoading(true);
       await updateProfile(formData as any);
 
-      // Deep clone to ensure proper comparison
-      const updatedValues = {
-        ...formData,
-        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links)),
-      };
+      const updatedValues = { ...formData };
 
       // Sync form with saved values to avoid second click
       setFormData(updatedValues);
