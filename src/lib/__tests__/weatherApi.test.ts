@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { parseWeatherResponse, hasConfirmedWeather } from '../weatherApi';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { parseWeatherResponse, hasConfirmedWeather, setCachedWeather, getCachedWeather, getStaleCachedWeather } from '../weatherApi';
 
 const makeResponse = (overrides: Record<string, unknown> = {}) => ({
   current: {
