@@ -4065,6 +4065,7 @@ export type Database = {
           schedule: string
         }[]
       }
+      get_org_default_interview_video_link: { Args: never; Returns: string }
       get_outreach_automation_for_event: {
         Args: {
           p_channel: Database["public"]["Enums"]["outreach_channel"]

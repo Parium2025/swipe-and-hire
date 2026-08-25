@@ -18,6 +18,8 @@ import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { normalizeMeetingLink, isSupportedMeetingLink } from '@/lib/meetingLink';
+import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface BookInterviewDialogProps {
   open: boolean;
@@ -70,7 +72,11 @@ export const BookInterviewDialog = ({
   const savedOfficeAddress = (profile as any)?.interview_office_address || profile?.address || '';
   const officeDefaultMessage = (profile as any)?.interview_default_message || FALLBACK_MESSAGE;
   const videoDefaultMessage = (profile as any)?.interview_video_default_message || FALLBACK_MESSAGE;
-  const savedVideoLink = normalizeMeetingLink((profile as any)?.interview_video_link || '');
+  const orgDefaultVideoLink = useOrgDefaultVideoLink();
+  // Egen sparad länk vinner; annars ärvs organisationens standardlänk
+  // (så en nyinbjuden kollega slipper leta upp den själv).
+  const savedVideoLink =
+    normalizeMeetingLink((profile as any)?.interview_video_link || '') || orgDefaultVideoLink;
   const officeInstructions = (profile as any)?.interview_office_instructions || '';
   const companyName = profile?.company_name || '';
   
@@ -587,10 +593,21 @@ export const BookInterviewDialog = ({
                   ) : (
                     <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
                   )}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-white text-sm truncate">{getVideoLinkLabel(trimmedVideoLink)}</p>
-                    <p className="text-white/70 text-xs truncate">{trimmedVideoLink.replace(/^https?:\/\//, '')}</p>
-                  </div>
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="min-w-0 flex-1 cursor-help text-left">
+                          <p className="text-white text-sm truncate">{getVideoLinkLabel(trimmedVideoLink)}</p>
+                          <p className="text-white/70 text-xs line-clamp-2 break-all">
+                            {trimmedVideoLink.replace(/^https?:\/\//, '')}
+                          </p>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[min(22rem,80vw)] break-all">
+                        {trimmedVideoLink}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <button
                     type="button"
                     onClick={() => setVideoLinkEditing(true)}

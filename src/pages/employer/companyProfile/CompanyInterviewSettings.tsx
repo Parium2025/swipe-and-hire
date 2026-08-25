@@ -13,9 +13,11 @@ import type { CompanyFormData } from './types';
 interface CompanyInterviewSettingsProps {
   formData: CompanyFormData;
   onFormDataChange: (updates: Partial<CompanyFormData>) => void;
+  /** Företagets befintliga standardlänk (från en kollega i samma organisation). */
+  orgDefaultVideoLink?: string;
 }
 
-export const CompanyInterviewSettings = ({ formData, onFormDataChange }: CompanyInterviewSettingsProps) => {
+export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaultVideoLink = '' }: CompanyInterviewSettingsProps) => {
   const [interviewType, setInterviewType] = useState<InterviewType>('video');
 
   return (
@@ -76,6 +78,16 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange }: Company
               
               {formData.interview_video_link && isValidMeetingLink(formData.interview_video_link) && (
                 <p className="text-green-400 text-xs">Giltig möteslänk</p>
+              )}
+
+              {!formData.interview_video_link.trim() && orgDefaultVideoLink && (
+                <button
+                  type="button"
+                  onClick={() => onFormDataChange({ interview_video_link: orgDefaultVideoLink })}
+                  className="text-xs text-white underline underline-offset-2 hover:text-white/80 transition-colors text-left break-all"
+                >
+                  Använd företagets standardlänk ({orgDefaultVideoLink.replace(/^https?:\/\//, '')})
+                </button>
               )}
               
               <Collapsible>

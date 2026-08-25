@@ -12,6 +12,7 @@ import { ChevronDown, Search, Check } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
+import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -24,6 +25,7 @@ import { EMPLOYEE_COUNT_OPTIONS } from './companyProfile/types';
 import type { SocialMediaLink, CompanyFormData } from './companyProfile/types';
 
 const CompanyProfile = () => {
+  const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
@@ -767,6 +769,7 @@ const CompanyProfile = () => {
             <CompanyInterviewSettings
               formData={formData}
               onFormDataChange={handleFormDataChange}
+              orgDefaultVideoLink={orgDefaultVideoLink}
             />
 
             <div className="flex justify-center pt-6">
