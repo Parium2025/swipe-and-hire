@@ -152,7 +152,24 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     } catch (err) {
       if (seq !== requestSeqRef.current) return;
       console.error('Weather fetch error:', err);
-      updateWeather(safeFallback(city));
+      // If a fresh fetch fails, prefer an older cached reading over hiding the
+      // weather row. This smooths over transient API blips and weak connections.
+      const stale = getStaleCachedWeather();
+      if (stale) {
+        updateWeather({
+          temperature: stale.temperature,
+          feelsLike: stale.feelsLike,
+          temperatureAvailable: stale.temperatureAvailable,
+          weatherCode: stale.weatherCode,
+          description: stale.description,
+          emoji: stale.emoji,
+          city: stale.city || city,
+          isLoading: false,
+          error: null,
+        });
+      } else {
+        updateWeather(safeFallback(city));
+      }
     }
   }, [safeFallback, updateWeather]);
 
