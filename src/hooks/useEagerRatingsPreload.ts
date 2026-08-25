@@ -696,6 +696,7 @@ export const useEagerRatingsPreload = () => {
         preloadConversations(userId),
         preloadInterviews(userId),
         preloadJobTemplates(userId),
+        warmTeamAvatars(userId, profile?.organization_id),
       ]);
 
       hasPreloadedRef.current = true;
