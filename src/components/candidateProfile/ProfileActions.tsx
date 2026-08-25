@@ -3,7 +3,7 @@ import { MessageSquare, CalendarPlus, Users, Trash2, ChevronLeft, ChevronRight }
 import type { StageSettings } from '@/hooks/useStageSettings';
 import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
 import type { ButtonProps } from '@/components/ui/button';
-import { noFocusRingProps } from '@/lib/noFocusRing';
+import { noFocusRingProps, noFlashButtonClass } from '@/lib/noFocusRing';
 
 interface QuickAction {
   key: ManualOutreachActionKey;
@@ -46,21 +46,21 @@ export const ProfileActions = ({
 
 
         <div className="flex justify-center gap-1">
-          <Button {...noFocusRingProps} onClick={onSendMessage} variant="glassPurple" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+          <Button {...noFocusRingProps} onClick={onSendMessage} variant="glassPurple" className={cn("min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm", noFlashButtonClass)}>
             <MessageSquare className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
             <span className="truncate">Chatta</span>
           </Button>
-          <Button {...noFocusRingProps} onClick={onBookInterview} variant="glassBlue" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+          <Button {...noFocusRingProps} onClick={onBookInterview} variant="glassBlue" className={cn("min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm", noFlashButtonClass)}>
             <CalendarPlus className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
             <span className="truncate">Boka möte</span>
           </Button>
           {hasTeam && (
-            <Button {...noFocusRingProps} onClick={onShare} variant="glassAmber" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+            <Button {...noFocusRingProps} onClick={onShare} variant="glassAmber" className={cn("min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm", noFlashButtonClass)}>
               <Users className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
               <span className="truncate">Dela</span>
             </Button>
           )}
-          <Button {...noFocusRingProps} onClick={onRemove} variant="glassRed" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+          <Button {...noFocusRingProps} onClick={onRemove} variant="glassRed" className={cn("min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm", noFlashButtonClass)}>
             <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
             <span className="truncate">Ta bort</span>
           </Button>
