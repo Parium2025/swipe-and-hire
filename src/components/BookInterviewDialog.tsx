@@ -148,8 +148,17 @@ export const BookInterviewDialog = ({
   }, [open, jobTitle, videoDefaultMessage, savedOfficeAddress, savedVideoLink]);
 
   // Förifyll med den befintliga bokningen när det är en ombokning.
+  // Får bara ske EN gång per öppning – annars skriver en bakgrundsrefetch
+  // (t.ex. när fönstret får fokus igen) över rekryterarens pågående ändringar.
   useEffect(() => {
-    if (!open || !existingInterview) return;
+    if (!open) {
+      prefilledInterviewIdRef.current = null;
+      skipNextMessageResetRef.current = false;
+      return;
+    }
+    if (!existingInterview) return;
+    if (prefilledInterviewIdRef.current === existingInterview.id) return;
+    prefilledInterviewIdRef.current = existingInterview.id;
     const scheduled = new Date(existingInterview.scheduled_at);
     if (!Number.isNaN(scheduled.getTime())) {
       setDate(scheduled);
@@ -170,6 +179,7 @@ export const BookInterviewDialog = ({
       setMessage(existingInterview.message);
     }
   }, [open, existingInterview]);
+
 
 
   // Update message when location type changes
