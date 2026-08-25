@@ -1493,6 +1493,7 @@ export type Database = {
           location_type: string
           message: string | null
           reminder_sent_at: string | null
+          revision: number
           scheduled_at: string
           status: string
           subject: string | null
@@ -1511,6 +1512,7 @@ export type Database = {
           location_type?: string
           message?: string | null
           reminder_sent_at?: string | null
+          revision?: number
           scheduled_at: string
           status?: string
           subject?: string | null
@@ -1529,6 +1531,7 @@ export type Database = {
           location_type?: string
           message?: string | null
           reminder_sent_at?: string | null
+          revision?: number
           scheduled_at?: string
           status?: string
           subject?: string | null

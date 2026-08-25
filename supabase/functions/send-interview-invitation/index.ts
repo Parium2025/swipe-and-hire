@@ -133,12 +133,15 @@ const handler = async (req: Request): Promise<Response> => {
       employerEmail, employerName, interviewId,
     } = parsed.data;
 
+    // Ombokning måste kunna skicka en ny kallelse – nyckeln versioneras.
+    let interviewRevision = 0;
+
     // === AUTHORIZATION: caller MUST own the interview (or its job/org) ===
     // interviewId is required — no anonymous "send email to anyone" path.
     {
       const { data: interview } = await supabaseAdmin
         .from('interviews')
-        .select('employer_id, job_id')
+        .select('employer_id, job_id, revision')
         .eq('id', interviewId)
         .maybeSingle();
       if (!interview) {
@@ -147,6 +150,7 @@ const handler = async (req: Request): Promise<Response> => {
           { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
+      interviewRevision = (interview as { revision?: number }).revision ?? 0;
       let allowed = interview.employer_id === callerId;
       if (!allowed && interview.job_id) {
         const { data: job } = await supabaseAdmin
@@ -208,7 +212,7 @@ const handler = async (req: Request): Promise<Response> => {
       maps_url: mapsUrl,
     };
 
-    const idBase = interviewId || `${candidateEmail}-${scheduledAt}`;
+    const idBase = `${interviewId || `${candidateEmail}-${scheduledAt}`}-r${interviewRevision}`;
 
     // Candidate email — respect notification preference
     let candidateResult: any = { skipped: false };

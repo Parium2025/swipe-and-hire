@@ -26,7 +26,7 @@ serve(async (req) => {
 
   const { data: interview, error } = await supabaseAdmin
     .from("interviews")
-    .select("id, scheduled_at, duration_minutes, location_type, location_details, message, subject, job_id, employer_id, status")
+    .select("id, scheduled_at, duration_minutes, location_type, location_details, message, subject, job_id, employer_id, status, revision")
     .eq("id", id)
     .maybeSingle();
 
@@ -74,7 +74,7 @@ serve(async (req) => {
     `LOCATION:${location}`,
     companyName ? `ORGANIZER;CN=${escapeIcs(companyName)}:mailto:noreply@parium.se` : "ORGANIZER:mailto:noreply@parium.se",
     "STATUS:CONFIRMED",
-    "SEQUENCE:0",
+    `SEQUENCE:${(interview as { revision?: number }).revision ?? 0}`,
     "BEGIN:VALARM",
     "TRIGGER:-PT1H",
     "ACTION:DISPLAY",
