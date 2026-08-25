@@ -296,6 +296,8 @@ const CompanyProfile = () => {
       
       import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
         preloadSingleFile(logoUrl).catch(() => {});
+        const transformed = resolveCompanyLogoUrl(logoUrl);
+        if (transformed && transformed !== logoUrl) preloadSingleFile(transformed).catch(() => {});
       }).catch(() => {});
       
       setFormData(prev => ({ 
