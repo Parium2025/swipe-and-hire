@@ -113,12 +113,12 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
             )}
 
             {/* Job title */}
-            <h3 className="text-lg font-semibold text-white truncate">
+            <h3 className="text-lg font-semibold text-white break-words">
               {interview.subject || interview.job_postings?.title || 'Intervju'}
             </h3>
 
             {/* Company */}
-            <p className="text-white/80 text-sm mt-0.5">
+            <p className="text-white text-sm mt-0.5 break-words">
               {getEmployerName()}
             </p>
           </div>
@@ -170,7 +170,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
               {interview.location_type === 'video' ? 'Videomöte' : 'På plats'}
             </p>
             {interview.location_details && (
-              <p className="text-white/70 text-sm mt-0.5 break-words whitespace-pre-wrap">
+              <p className="text-white text-sm mt-0.5 break-words whitespace-pre-wrap">
                 {interview.location_type === 'video' && hasVideoLink
                   ? 'Länk tillgänglig - klicka för att ansluta'
                   : interview.location_details}
@@ -183,7 +183,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
         {interview.message && (
           <button
             onClick={() => setShowMessage(!showMessage)}
-            className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors w-full"
+            className="flex items-center gap-2 text-sm text-white hover:text-white transition-colors w-full"
           >
             <MessageSquare className="w-4 h-4" />
             <span>Meddelande från arbetsgivaren</span>
@@ -198,7 +198,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
         {/* Message content */}
         {showMessage && interview.message && (
           <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-            <p className="text-white/90 text-sm whitespace-pre-wrap">
+            <p className="text-white text-sm whitespace-pre-wrap break-words">
               {interview.message}
             </p>
           </div>
