@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useCallback, useRef } from 'react';
 import { imageCache } from '@/lib/imageCache';
@@ -177,8 +178,7 @@ export function useMyApplicationsCache() {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel('my-applications-realtime')
+    const channel = createRealtimeChannel('my-applications-realtime')
       .on(
         'postgres_changes',
         {
@@ -206,8 +206,7 @@ export function useMyApplicationsCache() {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel('my-applications-jobs')
+    const channel = createRealtimeChannel('my-applications-jobs')
       .on(
         'postgres_changes',
         {

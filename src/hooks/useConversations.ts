@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { fetchCachedProfile, fetchCachedProfiles, rateLimited } from '@/lib/performanceGuards';
 import { measurePerformance } from '@/lib/realtimePerformance';
@@ -571,8 +572,7 @@ export function useConversations() {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel('conversations-realtime')
+    const channel = createRealtimeChannel('conversations-realtime')
       .on(
         'postgres_changes',
         {
@@ -824,8 +824,7 @@ export function useConversationMessages(conversationId: string | null) {
 
     activeConversationId = conversationId;
 
-    const channel = supabase
-      .channel(`messages-${conversationId}`)
+    const channel = createRealtimeChannel(`messages-${conversationId}`)
       .on(
         'postgres_changes',
         {

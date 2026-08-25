@@ -9,6 +9,7 @@
  */
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useCandidateActivities } from '@/hooks/useCandidateActivities';
@@ -124,8 +125,7 @@ export function useCandidateNotes({ applicantId, jobId, enabled = true }: UseCan
   // ─── Realtime: keep notes in sync across colleagues/devices ─────
   useEffect(() => {
     if (!enabled || !applicantId || !user) return;
-    const channel = supabase
-      .channel(`candidate-notes-${applicantId}`)
+    const channel = createRealtimeChannel(`candidate-notes-${applicantId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'candidate_notes', filter: `applicant_id=eq.${applicantId}` },

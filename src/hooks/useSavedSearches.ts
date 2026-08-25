@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useOnline } from '@/hooks/useOnlineStatus';
@@ -203,8 +204,7 @@ export const useSavedSearches = () => {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel(`saved-searches-${user.id}`)
+    const channel = createRealtimeChannel(`saved-searches-${user.id}`)
       .on(
         'postgres_changes',
         {

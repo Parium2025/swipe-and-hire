@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { StageSettings, DEFAULT_STAGE_KEYS, getIconByName } from '@/hooks/useStageSettings';
 
 // Default settings for built-in stages
@@ -54,8 +55,7 @@ export function useColleagueStageSettings(colleagueId: string | null, listId: st
   useEffect(() => {
     if (!colleagueId) return;
 
-    const channel = supabase
-      .channel(`colleague-stages-${colleagueId}`)
+    const channel = createRealtimeChannel(`colleague-stages-${colleagueId}`)
       .on(
         'postgres_changes',
         {

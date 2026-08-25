@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
@@ -837,8 +838,7 @@ export function MessageTemplatesSettings() {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel(`outreach-studio-${user.id}`)
+    const channel = createRealtimeChannel(`outreach-studio-${user.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'outreach_templates' },

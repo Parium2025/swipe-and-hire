@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useMemo, useEffect } from 'react';
 import { isEmployerJobActive } from '@/lib/jobStatus';
 
@@ -440,8 +441,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       }, 3000);
     };
 
-    const channel = supabase
-      .channel(`job-postings-rt-${channelSuffix}`)
+    const channel = createRealtimeChannel(`job-postings-rt-${channelSuffix}`)
       .on(
         'postgres_changes',
         jobFilter
@@ -517,8 +517,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       ? `job_id=in.(${idsArr.join(',')})`
       : undefined;
 
-    const applicationsChannel = supabase
-      .channel(`job-apps-rt-${channelSuffix}`)
+    const applicationsChannel = createRealtimeChannel(`job-apps-rt-${channelSuffix}`)
       .on(
         'postgres_changes',
         appsFilter

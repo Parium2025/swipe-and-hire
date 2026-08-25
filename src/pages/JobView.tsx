@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { JOB_VIEW_HERO_TRANSFORM as JOB_VIEW_IMAGE_TRANSFORM, COMPANY_LOGO_TRANSFORM } from '@/lib/imageTransforms';
 import { useJobViewTracker } from '@/hooks/useJobViewTracker';
@@ -273,8 +274,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       if (jobId) _jobCache.delete(jobId);
       fetchJob();
     };
-    const channel = supabase
-      .channel(`job-view-live-${jobId}`)
+    const channel = createRealtimeChannel(`job-view-live-${jobId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_postings', filter: `id=eq.${jobId}` },

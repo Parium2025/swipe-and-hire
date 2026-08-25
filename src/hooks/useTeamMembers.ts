@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
 
@@ -159,8 +160,7 @@ export function useTeamMembers() {
         }, 2000);
       };
 
-      channel = supabase
-        .channel(`team-members-realtime-${userRole.organization_id}`)
+      channel = createRealtimeChannel(`team-members-realtime-${userRole.organization_id}`)
         .on(
           'postgres_changes',
           {

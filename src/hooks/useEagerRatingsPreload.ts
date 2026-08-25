@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
@@ -802,8 +803,7 @@ export const useEagerRatingsPreload = () => {
     const instanceId = crypto.randomUUID();
 
     // Realtime för intervjuer
-    const interviewsChannel = supabase
-      .channel(`employer-interviews-preload-${user.id}-${instanceId}`)
+    const interviewsChannel = createRealtimeChannel(`employer-interviews-preload-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -819,8 +819,7 @@ export const useEagerRatingsPreload = () => {
       .subscribe();
 
     // Realtime för jobbmallar
-    const templatesChannel = supabase
-      .channel(`employer-templates-preload-${user.id}-${instanceId}`)
+    const templatesChannel = createRealtimeChannel(`employer-templates-preload-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -836,8 +835,7 @@ export const useEagerRatingsPreload = () => {
       .subscribe();
 
     // Realtime för stage-settings
-    const stageSettingsChannel = supabase
-      .channel(`employer-stage-settings-preload-${user.id}-${instanceId}`)
+    const stageSettingsChannel = createRealtimeChannel(`employer-stage-settings-preload-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
         {

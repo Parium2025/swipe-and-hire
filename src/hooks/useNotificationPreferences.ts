@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 
 export type NotificationType = 
@@ -73,8 +74,7 @@ export const useNotificationPreferences = () => {
   useEffect(() => {
     if (!user?.id) return;
 
-    const channel = supabase
-      .channel(`notif-prefs-${user.id}`)
+    const channel = createRealtimeChannel(`notif-prefs-${user.id}`)
       .on(
         'postgres_changes',
         {

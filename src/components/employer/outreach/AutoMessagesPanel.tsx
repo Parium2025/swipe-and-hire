@@ -5,6 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import SettingsPanel from '@/components/employer/settings/SettingsPanel';
@@ -153,8 +154,7 @@ export function AutoMessagesPanel() {
 
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
-      .channel(`auto-rules-${user.id}`)
+    const channel = createRealtimeChannel(`auto-rules-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'outreach_automations' }, () => void fetchData())
       .subscribe();
     return () => {

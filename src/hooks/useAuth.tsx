@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef, ReactNode, useC
 import { safeSetItem } from '@/lib/safeStorage';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
@@ -2265,8 +2266,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }, 3000);
     };
 
-    const jobChannel = supabase
-      .channel(`auth-job-count-${user.id}`)
+    const jobChannel = createRealtimeChannel(`auth-job-count-${user.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_postings', filter: `employer_id=eq.${user.id}` },
@@ -2276,8 +2276,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       .subscribe((status) => handleChannelStatus('job', status));
 
-    const savedChannel = supabase
-      .channel(`auth-saved-jobs-${user.id}`)
+    const savedChannel = createRealtimeChannel(`auth-saved-jobs-${user.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
@@ -2288,8 +2287,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .subscribe((status) => handleChannelStatus('saved', status));
 
     // Real-time för ansökningar (uppdaterar jobbsökarens räknare)
-    const applicationsChannel = supabase
-      .channel(`auth-applications-${user.id}`)
+    const applicationsChannel = createRealtimeChannel(`auth-applications-${user.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
@@ -2325,8 +2323,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }, 5000);
     };
 
-    const employerApplicationsChannel = supabase
-      .channel(`auth-employer-applications-${user.id}`)
+    const employerApplicationsChannel = createRealtimeChannel(`auth-employer-applications-${user.id}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'job_applications' },
@@ -2353,8 +2350,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     //  Det räcker för att hålla badge-fallback-värdet i sessionStorage färskt.
 
     // Real-time för company reviews (uppdaterar recensionsräknare för arbetsgivare)
-    const reviewsChannel = supabase
-      .channel(`auth-reviews-${user.id}`)
+    const reviewsChannel = createRealtimeChannel(`auth-reviews-${user.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${user.id}` },
@@ -2365,8 +2361,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .subscribe((status) => handleChannelStatus('reviews', status));
 
     // Real-time för my_candidates (uppdaterar "Mina kandidater" räknare i sidebaren)
-    const myCandidatesChannel = supabase
-      .channel(`auth-my-candidates-${user.id}`)
+    const myCandidatesChannel = createRealtimeChannel(`auth-my-candidates-${user.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'my_candidates', filter: `recruiter_id=eq.${user.id}` },

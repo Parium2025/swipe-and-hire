@@ -3,6 +3,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { Send, Calendar, Heart, MessageSquare, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatsCarousel } from './StatsCarousel';
 import { useProfileViewStats } from '@/hooks/useProfileViewStats';
@@ -70,8 +71,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     const invalidateStats = () => {
       queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats'] });
     };
-    const statsChannel = supabase
-      .channel(`jobseeker-stats-${user.id}`)
+    const statsChannel = createRealtimeChannel(`jobseeker-stats-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
         invalidateStats
       )

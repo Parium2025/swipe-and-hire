@@ -2,6 +2,7 @@ import { useInfiniteQuery, useQueryClient, useMutation } from '@tanstack/react-q
 import { safeSetItem, safeReadJsonCache } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
@@ -742,8 +743,7 @@ export const useApplicationsData = (
     }
     // else: no filter — listen to all job_applications changes (RLS still protects data)
 
-    const channel = supabase
-      .channel(channelName)
+    const channel = createRealtimeChannel(channelName)
       .on('postgres_changes', filterConfig, () => {
         queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
       })
@@ -789,8 +789,7 @@ export const useApplicationsData = (
       filterConfig.filter = `id=in.(${applicantIds.join(',')})`;
     }
 
-    const channel = supabase
-      .channel(channelName)
+    const channel = createRealtimeChannel(channelName)
       .on('postgres_changes', filterConfig, () => {
         if (profilesInvalidateTimerRef.current) {
           window.clearTimeout(profilesInvalidateTimerRef.current);

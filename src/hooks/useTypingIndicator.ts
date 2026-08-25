@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from './useAuth';
 
 interface TypingUser {
@@ -17,7 +18,7 @@ export function useTypingIndicator(conversationId: string | null) {
   useEffect(() => {
     if (!conversationId || !user) return;
 
-    const channel = supabase.channel(`typing-${conversationId}`, {
+    const channel = createRealtimeChannel(`typing-${conversationId}`, {
       config: {
         presence: {
           key: user.id,

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
@@ -102,8 +103,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // Realtime sync — listen for changes from other devices
   useEffect(() => {
     if (!user?.id) return;
-    const channel = supabase
-      .channel(`${table}-${user.id}`)
+    const channel = createRealtimeChannel(`${table}-${user.id}`)
       .on(
         'postgres_changes',
         {

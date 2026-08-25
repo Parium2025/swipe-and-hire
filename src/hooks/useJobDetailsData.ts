@@ -3,6 +3,7 @@ import { fetchCachedProfile, readPersistentCache, writePersistentCache } from '@
 import { measurePerformance } from '@/lib/realtimePerformance';
 import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { chunk } from '@/lib/fetchAllPages';
@@ -512,8 +513,7 @@ export function useJobDetailsData(jobId: string | undefined) {
       }, 1200);
     };
 
-    const channel = supabase
-      .channel(`job-applications-${jobId}`)
+    const channel = createRealtimeChannel(`job-applications-${jobId}`)
       .on(
         'postgres_changes',
         {

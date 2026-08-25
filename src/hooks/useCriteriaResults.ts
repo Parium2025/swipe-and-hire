@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
@@ -120,8 +121,7 @@ export function useCriteriaResultsForCandidates(candidates: { applicant_id: stri
   useEffect(() => {
     if (!user || pairs.length === 0 || jobIds.length === 0) return;
 
-    const channel = supabase
-      .channel(`criteria-rt-${jobIds.sort().join('-').slice(0, 50)}`)
+    const channel = createRealtimeChannel(`criteria-rt-${jobIds.sort().join('-').slice(0, 50)}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'candidate_evaluations' },
