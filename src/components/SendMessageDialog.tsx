@@ -286,7 +286,14 @@ export function SendMessageDialog({
                   {MANUAL_CHANNELS.map(({ value, label, icon: Icon }) => {
                     const active = selectedChannels.includes(value);
                     return (
-                      <Button key={value} type="button" variant={active ? 'glassBlue' : 'glass'} size="sm" onClick={() => toggleChannel(value)}>
+                      <Button
+                        key={value}
+                        type="button"
+                        variant={active ? 'glassBlue' : 'glass'}
+                        size="sm"
+                        onClick={() => toggleChannel(value)}
+                        className="outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                      >
                         <Icon className="h-3.5 w-3.5" />
                         {label}
                       </Button>
