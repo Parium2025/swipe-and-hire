@@ -428,7 +428,7 @@ const JobApplication = () => {
     try {
       const { error } = await supabase
         .from('job_applications')
-        .insert(applicationPayload);
+        .insert(applicationPayload as never);
 
       if (error) throw error;
 
