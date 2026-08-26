@@ -878,6 +878,9 @@ const MobileJobWizard = ({
         currentStep,
         customQuestions,
         savedAt: Date.now(),
+        // Stämpel på mallen som utkastet bygger på. Ändras mallen efteråt är
+        // utkastet inaktuellt och får inte skriva över mallens nya värden.
+        templateStamp: (selectedTemplate as any)?.updated_at ?? null,
       });
 
       const draftKeys = getCreateDraftKeys(selectedTemplate?.id);
