@@ -1108,6 +1108,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       salarySearch?.isMinimumSearch,
       employerIdsKey,
       createdAfter || '',
+      sort,
     ],
     queryFn: async ({ pageParam }) => {
       if (abortControllerRef.current) abortControllerRef.current.abort();
