@@ -62,8 +62,10 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SKELETON_SHAPE}`} />
         </div>
       </header>
+      )}
       {/* DESKTOP chrome — mirrors JobSeekerTopNav exactly (h-14, left-aligned pills) */}
-      <header className="hidden lg:flex shrink-0 h-14 items-center border-b border-white/20 bg-transparent">
+      {isDesktop && (
+      <header className="flex shrink-0 h-14 items-center border-b border-white/20 bg-transparent">
         <div className="w-full responsive-container-wide flex items-center justify-between">
           <div className="flex items-center gap-1">
             <div className={`h-10 w-10 rounded-lg ${SKELETON_SHAPE}`} />
