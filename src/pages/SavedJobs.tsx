@@ -574,6 +574,9 @@ const SavedJobs = () => {
                 ))}
               </div>
 
+            {selectionToolbar}
+
+
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {filteredSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
