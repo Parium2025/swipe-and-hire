@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useAuth } from '@/hooks/useAuth';
+import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import { readCachedSupportTickets, writeCachedSupportTickets } from '@/lib/supportPrewarm';
@@ -51,6 +52,8 @@ const Support = () => {
   const [ticketsLoading, setTicketsLoading] = useState(
     () => !readCachedSupportTickets(user?.id),
   );
+  // Skelettet renderar lika många rader som användaren faktiskt hade sist.
+  const ticketSkeletonCount = readCachedCount(SKELETON_COUNT_KEYS.supportTickets, 2, 6);
 
   const normalizedMessage = message.trim();
   const wordCount = normalizedMessage ? normalizedMessage.split(/\s+/).length : 0;
@@ -85,6 +88,7 @@ const Support = () => {
 
       if (error) throw error;
       setTickets(data || []);
+      writeCachedCount(SKELETON_COUNT_KEYS.supportTickets, (data || []).length);
       if (user?.id) writeCachedSupportTickets(user.id, (data || []) as never);
     } catch (error) {
       console.error('Error fetching tickets:', error);
