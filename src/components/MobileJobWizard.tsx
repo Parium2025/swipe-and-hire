@@ -2518,7 +2518,11 @@ const MobileJobWizard = ({
   
   const performPublish = async () => {
     if (!user) return;
-    
+    // Synkron spärr: setLoading är asynkron, så två snabba klick hann tidigare
+    // starta två publiceringar och skapa dubbletter.
+    if (isPublishingRef.current) return;
+    isPublishingRef.current = true;
+
     setLoading(true);
 
     try {
