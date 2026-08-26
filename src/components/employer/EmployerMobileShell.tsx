@@ -26,6 +26,7 @@ const EmployerMobileShell = ({
   mainScrollRef,
   onJobCreated,
 }: EmployerMobileShellProps) => {
+  const navigate = useNavigate();
   // Chattsidan är en fullhöjdsvy — extra bottenutrymme skulle lämna en tom yta.
   const { pathname } = useLocation();
   const isMessages = pathname.startsWith('/messages');
