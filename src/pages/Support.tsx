@@ -17,6 +17,7 @@ import { TruncatedText } from '@/components/ui/truncated-text';
 import { useAuth } from '@/hooks/useAuth';
 
 import { useFieldDraft } from '@/hooks/useFormDraft';
+import { readCachedSupportTickets, writeCachedSupportTickets } from '@/lib/supportPrewarm';
 
 interface SupportTicket {
   id: string;
@@ -41,10 +42,15 @@ const Support = () => {
   // Auto-save message draft to localStorage
   const [message, setMessage, clearMessageDraft, hasMessageDraft] = useFieldDraft('support-message');
   const [loading, setLoading] = useState(false);
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [ticketsLoading, setTicketsLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
+  // Synkron läsning av förvärmd cache — inga skelett om datan redan finns
+  const [tickets, setTickets] = useState<SupportTicket[]>(
+    () => (readCachedSupportTickets(user?.id) as unknown as SupportTicket[]) ?? [],
+  );
+  const [ticketsLoading, setTicketsLoading] = useState(
+    () => !readCachedSupportTickets(user?.id),
+  );
 
   const normalizedMessage = message.trim();
   const wordCount = normalizedMessage ? normalizedMessage.split(/\s+/).length : 0;
