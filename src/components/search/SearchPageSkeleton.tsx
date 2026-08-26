@@ -1,6 +1,7 @@
 import { memo, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
 import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 /**
@@ -75,8 +76,55 @@ const SkeletonChrome = memo(function SkeletonChrome() {
   );
 });
 
+/**
+ * Hur många kort som realistiskt syns i första vyn (kolumner × rader).
+ * Skelettet ska aldrig rendera fler placeholders än vad som får plats.
+ */
+function viewportCardCap(): number {
+  if (typeof window === 'undefined') return 6;
+  const w = window.innerWidth;
+  const cols = w >= 1024 ? 3 : w >= 640 ? 2 : 1;
+  return cols === 1 ? 3 : cols * 2;
+}
+
+function isTouchDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Live-antal från React Query-cachen (samma mönster som arbetsgivarsidans
+ * EmployerPageSkeleton) → skelettet speglar exakt antalet kort som kommer
+ * renderas. Faller tillbaka på senast cachade antal vid kallstart.
+ */
+function useLiveSearchJobCount(): number {
+  const qc = useQueryClient();
+  const cap = viewportCardCap();
+  for (const key of ['optimized-job-search', 'infinite-job-search']) {
+    const entries = qc.getQueriesData<any>({ queryKey: [key] });
+    for (const [, data] of entries) {
+      const pages = (data as any)?.pages;
+      if (Array.isArray(pages)) {
+        const n = pages.reduce(
+          (acc: number, p: any) =>
+            acc + (Array.isArray(p) ? p.length : Array.isArray(p?.jobs) ? p.jobs.length : 0),
+          0,
+        );
+        return Math.min(cap, n);
+      }
+      if (Array.isArray(data)) return Math.min(cap, data.length);
+    }
+  }
+  return Math.min(cap, readCachedCount(SKELETON_COUNT_KEYS.searchJobs, cap, 18));
+}
+
 export const JobListSkeleton = memo(function JobListSkeleton() {
-  const cardCount = readCachedCount(SKELETON_COUNT_KEYS.searchJobs);
+  const cardCount = useLiveSearchJobCount();
+  const touch = isTouchDevice();
   return (
     <FullscreenSkeletonPortal>
       <motion.div
@@ -92,6 +140,13 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
           {/* "Sök Jobb" title */}
           <div className="flex items-center justify-center">
             <div className={`h-6 w-24 rounded ${SKELETON_SHAPE}`} />
+          </div>
+
+          {/* StatsGrid — endast desktop (md+), precis som riktiga sidan */}
+          <div className="hidden md:grid md:grid-cols-3 gap-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className={`h-[76px] rounded-lg ${SKELETON_SHAPE}`} />
+            ))}
           </div>
 
           {/* Search card: input + saved-searches pill + two filter pills */}
@@ -117,14 +172,25 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
             <div className={`h-8 w-24 rounded-full ${SKELETON_SHAPE}`} />
           </div>
 
-          {/* Swipe Mode button */}
-          <div className="flex items-center justify-center">
-            <div className={`h-11 w-44 rounded-full ${SKELETON_SHAPE}`} />
-          </div>
+          {/* Swipe Mode button — bara på touch-enheter (som riktiga sidan) */}
+          {touch && cardCount > 0 && (
+            <div className="flex items-center justify-center">
+              <div className={`h-11 w-44 rounded-full ${SKELETON_SHAPE}`} />
+            </div>
+          )}
+
+          {/* Inga träffar: spegla tomtext-raden i stället för kort */}
+          {cardCount === 0 && (
+            <div className="flex flex-col items-center gap-3 py-16">
+              <div className={`h-5 w-44 rounded ${SKELETON_SHAPE}`} />
+              <div className={`h-4 w-64 max-w-[80%] rounded ${SKELETON_SHAPE}`} />
+            </div>
+          )}
 
           <div className="flex-1 overflow-hidden">
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${cardCount === 1 ? ' job-card-grid-single' : cardCount === 2 ? ' job-card-grid-double' : ''}`}>
               {Array.from({ length: cardCount }).map((_, i) => (
+
                 <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
                   {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
                   <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
