@@ -92,7 +92,9 @@ const EmployerProfile = () => {
       });
 
       if (hasDraftContent) {
-        setFormData(savedDraft);
+        // Plocka bara kända nycklar — gamla drafts kan innehålla borttagna fält (bio/location/phone)
+        const { first_name = '', last_name = '', profile_image_url = '' } = savedDraft;
+        setFormData({ first_name, last_name, profile_image_url });
         setOriginalValues(values);
         setHasUnsavedChanges(true);
         didInitRef.current = true;
