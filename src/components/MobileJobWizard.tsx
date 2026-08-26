@@ -2696,6 +2696,16 @@ const MobileJobWizard = ({
       // Vänta tills mobil-dialogens overlay och viewport har stabiliserats.
       // Annars börjar canvas-animationen bakom stängningsövergången på iOS.
       window.setTimeout(() => {
+        if (!questionsSaved) {
+          toast({
+            title: "Annonsen är publicerad – men frågorna sparades inte",
+            description: "Öppna annonsen och spara ansökningsfrågorna igen.",
+            variant: "destructive",
+            duration: 9000,
+            route: jobPost?.id ? `/job/${jobPost.id}` : '/my-jobs'
+          });
+          return;
+        }
         celebrate({ intensity: 'big' });
         toast({
           title: "Jobbannons skapad!",
