@@ -21,6 +21,15 @@ interface TeamMember {
   email: string | null;
 }
 
+interface PendingInvitation {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  expires_at: string;
+  created_at: string;
+}
+
 interface TeamCache {
   userId: string;
   organizationId: string;
