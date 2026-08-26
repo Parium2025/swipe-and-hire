@@ -76,7 +76,6 @@ const SkeletonChrome = memo(function SkeletonChrome() {
   );
 });
 
-export const JobListSkeleton = memo(function JobListSkeleton() {
 /**
  * Hur många kort som realistiskt syns i första vyn (kolumner × rader).
  * Skelettet ska aldrig rendera fler placeholders än vad som får plats.
