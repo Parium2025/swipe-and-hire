@@ -2151,8 +2151,8 @@ const MobileJobWizard = ({
       if (!formData.salary_type) missing.push('Lönetyp');
       if (!formData.salary_transparency) missing.push('Lönetransparens');
       if (!(parseInt(formData.positions_count) > 0)) missing.push('Antal personer att rekrytera');
-      if (!formData.work_start_time.trim()) missing.push('Arbetstid (starttid)');
-      if (!formData.work_end_time.trim()) missing.push('Arbetstid (sluttid)');
+      if (!isValidClockTime(formData.work_start_time)) missing.push(formData.work_start_time.trim() ? 'Giltig starttid (00:00–23:59)' : 'Arbetstid (starttid)');
+      if (!isValidClockTime(formData.work_end_time)) missing.push(formData.work_end_time.trim() ? 'Giltig sluttid (00:00–23:59)' : 'Arbetstid (sluttid)');
     }
     
     if (currentStep === 1) {
