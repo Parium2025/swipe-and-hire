@@ -1079,8 +1079,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       salarySearch?.isMinimumSearch,
       employerIdsKey,
       createdAfter || '',
+      sort,
     ]),
-    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, employerIdsKey, createdAfter]
+    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, employerIdsKey, createdAfter, sort]
   );
 
   // 🔥 SCALE: useInfiniteQuery med cursor-paginering på created_at.
