@@ -142,6 +142,13 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
             <div className={`h-6 w-24 rounded ${SKELETON_SHAPE}`} />
           </div>
 
+          {/* StatsGrid — endast desktop (md+), precis som riktiga sidan */}
+          <div className="hidden md:grid md:grid-cols-3 gap-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className={`h-[76px] rounded-lg ${SKELETON_SHAPE}`} />
+            ))}
+          </div>
+
           {/* Search card: input + saved-searches pill + two filter pills */}
           <div className="rounded-2xl p-3 space-y-3">
             <div className={`h-11 w-full rounded-xl ${SKELETON_SHAPE}`} />
@@ -165,14 +172,25 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
             <div className={`h-8 w-24 rounded-full ${SKELETON_SHAPE}`} />
           </div>
 
-          {/* Swipe Mode button */}
-          <div className="flex items-center justify-center">
-            <div className={`h-11 w-44 rounded-full ${SKELETON_SHAPE}`} />
-          </div>
+          {/* Swipe Mode button — bara på touch-enheter (som riktiga sidan) */}
+          {touch && cardCount > 0 && (
+            <div className="flex items-center justify-center">
+              <div className={`h-11 w-44 rounded-full ${SKELETON_SHAPE}`} />
+            </div>
+          )}
+
+          {/* Inga träffar: spegla tomtext-raden i stället för kort */}
+          {cardCount === 0 && (
+            <div className="flex flex-col items-center gap-3 py-16">
+              <div className={`h-5 w-44 rounded ${SKELETON_SHAPE}`} />
+              <div className={`h-4 w-64 max-w-[80%] rounded ${SKELETON_SHAPE}`} />
+            </div>
+          )}
 
           <div className="flex-1 overflow-hidden">
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${cardCount === 1 ? ' job-card-grid-single' : cardCount === 2 ? ' job-card-grid-double' : ''}`}>
               {Array.from({ length: cardCount }).map((_, i) => (
+
                 <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
                   {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
                   <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
