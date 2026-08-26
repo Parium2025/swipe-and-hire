@@ -2724,6 +2724,7 @@ const MobileJobWizard = ({
         variant: "destructive"
       });
     } finally {
+      isPublishingRef.current = false;
       // Ensure loading is reset even if error occurs
       setTimeout(() => setLoading(false), 100);
     }
