@@ -551,7 +551,7 @@ export const CandidateProfileDialog = ({
                                   text={app.job_title || 'Okänt jobb'}
                                   lines={2}
                                   className="text-sm text-white leading-snug break-words"
-                                />ex
+                                />
                                 <p className="text-xs text-white mt-0.5">Sökte {formatTimeAgo(app.applied_at)}</p>
                               </div>
                               {isActive && <Check className="h-4 w-4 text-white shrink-0 mt-0.5" />}
