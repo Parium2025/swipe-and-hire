@@ -513,6 +513,8 @@ const SavedJobs = () => {
                         onUnsaveClick={handleUnsaveClick}
                         onCardClick={(jobId, imageState) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true, background: location, ...imageState } })}
                       />
+                      {renderSelectionOverlay(job.id, job.title)}
+                     </div>
                     </CardErrorBoundary>
                   );
                 })}
