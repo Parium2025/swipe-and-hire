@@ -198,6 +198,103 @@ const SavedJobs = () => {
 
   const activeJobsForMedia = activeTab === 'saved' ? sortedJobs : filteredSkippedJobs;
 
+  // Alla jobb som just nu syns i aktiv flik (respekterar sortering + filter)
+  const visibleIds = useMemo(
+    () => activeJobsForMedia.map((entry) => entry.job_postings!.id),
+    [activeJobsForMedia],
+  );
+
+  const confirmBulkDelete = useCallback(async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkDeleting(true);
+    try {
+      if (activeTab === 'saved') {
+        await bulkRemoveSaved(ids);
+      } else {
+        await bulkRemoveSkipped(ids);
+      }
+      toast.success(`${ids.length} ${ids.length === 1 ? 'jobb borttaget' : 'jobb borttagna'}`);
+      refreshSidebarCounts();
+      setBulkDeleteOpen(false);
+      exitSelectionMode();
+    } catch {
+      toast.error('Kunde inte ta bort alla jobb — försök igen');
+    } finally {
+      setBulkDeleting(false);
+    }
+  }, [selectedIds, activeTab, bulkRemoveSaved, bulkRemoveSkipped, refreshSidebarCounts, exitSelectionMode]);
+
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedIds.has(id));
+
+  const selectionToolbar = visibleIds.length > 0 ? (
+    <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+      {!selectionMode ? (
+        <button
+          type="button"
+          onClick={() => setSelectionMode(true)}
+          className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white transition-colors md:hover:bg-white/15"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+          Rensa
+        </button>
+      ) : (
+        <>
+          <span className="text-xs sm:text-sm font-medium text-white">{selectedIds.size} markerade</span>
+          <button
+            type="button"
+            onClick={() => setSelectedIds(allVisibleSelected ? new Set() : new Set(visibleIds))}
+            className="inline-flex items-center rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white transition-colors md:hover:bg-white/15"
+          >
+            {allVisibleSelected ? 'Avmarkera alla' : `Markera alla (${visibleIds.length})`}
+          </button>
+          <button
+            type="button"
+            disabled={selectedIds.size === 0}
+            onClick={() => setBulkDeleteOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 border border-red-400/40 px-3 py-1.5 text-xs font-medium text-white transition-colors md:hover:bg-red-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Ta bort markerade
+          </button>
+          <button
+            type="button"
+            onClick={exitSelectionMode}
+            aria-label="Avbryt markering"
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white transition-colors md:hover:bg-white/15"
+          >
+            <X className="h-3.5 w-3.5" />
+            Avbryt
+          </button>
+        </>
+      )}
+    </div>
+  ) : null;
+
+  const renderSelectionOverlay = (jobId: string, title: string) => {
+    if (!selectionMode) return null;
+    const checked = selectedIds.has(jobId);
+    return (
+      <button
+        type="button"
+        onClick={() => toggleSelected(jobId)}
+        aria-pressed={checked}
+        aria-label={`${checked ? 'Avmarkera' : 'Markera'} ${title}`}
+        className={`absolute inset-0 z-20 flex items-start justify-end rounded-2xl p-3 transition-colors ${
+          checked ? 'bg-primary/25 ring-2 ring-white/70' : 'bg-black/25 md:hover:bg-black/15'
+        }`}
+      >
+        <span
+          className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
+            checked ? 'bg-white border-white' : 'bg-white/15 border-white/60 backdrop-blur-sm'
+          }`}
+        >
+          {checked && <Check className="h-4 w-4 text-primary" />}
+        </span>
+      </button>
+    );
+  };
+
   const prewarmEntries = useMemo(() => {
     return activeJobsForMedia.slice(0, 8).flatMap((entry) => {
       const posting = entry.job_postings;
