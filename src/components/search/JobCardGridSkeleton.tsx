@@ -19,7 +19,10 @@ interface Props {
 }
 
 export const JobCardGridSkeleton = memo(function JobCardGridSkeleton({ count }: Props) {
-  const safeCount = Math.min(9, Math.max(1, count));
+  // 0 träffar ⇒ inga placeholders. Skelettet ska aldrig låtsas att det finns
+  // innehåll som inte finns — annars blinkar ett kort förbi på en tom lista.
+  const safeCount = Math.max(0, Math.min(9, count));
+  if (safeCount === 0) return null;
   return (
     <div
       className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${

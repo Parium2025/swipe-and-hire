@@ -23,6 +23,7 @@ import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { TruncatedText } from '@/components/TruncatedText';
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { useLiveSkeletonCount } from '@/lib/useLiveSkeletonCount';
 
 
 type SortOption = 'newest' | 'oldest';
@@ -194,12 +195,19 @@ const SavedJobs = () => {
     if (!isLoadingSkipped) writeCachedCount(SKELETON_COUNT_KEYS.skippedJobs, skippedJobs.length);
   }, [isLoadingSkipped, skippedJobs.length]);
 
+  // Skelettet speglar det faktiska antalet kort: live ur cachen, annars
+  // senast kända antal — aldrig ett gissat fast antal.
+  const savedSkeletonCount = useLiveSkeletonCount({
+    queryKeys: ['saved-jobs'],
+    fallbackKey: SKELETON_COUNT_KEYS.savedJobs,
+  });
+  const skippedSkeletonCount = useLiveSkeletonCount({
+    queryKeys: ['skipped-jobs'],
+    fallbackKey: SKELETON_COUNT_KEYS.skippedJobs,
+  });
 
   if (!showContent) {
-    const skeletonCount = readCachedCount(
-      activeTab === 'skipped' ? SKELETON_COUNT_KEYS.skippedJobs : SKELETON_COUNT_KEYS.savedJobs,
-      3,
-    );
+    const skeletonCount = activeTab === 'skipped' ? skippedSkeletonCount : savedSkeletonCount;
     return (
       <div className="responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         <div className="text-center mb-5">
@@ -257,7 +265,7 @@ const SavedJobs = () => {
       {activeTab === 'saved' && (
         <>
           {(isLoading && savedJobs.length === 0) ? (
-            <JobCardGridSkeleton count={readCachedCount(SKELETON_COUNT_KEYS.savedJobs, 3)} />
+            <JobCardGridSkeleton count={savedSkeletonCount} />
           ) : savedJobs.filter(hasRenderableJobPosting).length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
@@ -389,7 +397,7 @@ const SavedJobs = () => {
       {activeTab === 'skipped' && (
         <>
           {isLoadingSkipped ? (
-            <JobCardGridSkeleton count={readCachedCount(SKELETON_COUNT_KEYS.skippedJobs, 3)} />
+            <JobCardGridSkeleton count={skippedSkeletonCount} />
           ) : filteredSkippedJobs.length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">

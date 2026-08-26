@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { useLiveSkeletonCount, viewportRowCap } from '@/lib/useLiveSkeletonCount';
 import { isEmployerJobActive, isEmployerJobExpired, isEmployerJobDraft } from '@/lib/jobStatus';
 
 /**
@@ -484,7 +485,13 @@ export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkelet
  * Skeleton for /messages — mirrors conversation list (mobile) / split view (desktop).
  */
 export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton() {
-  const messageCount = readCachedCount(SKELETON_COUNT_KEYS.messages, 7);
+  // Live-antal konversationer ur cachen → exakt lika många rader som listan
+  // faktiskt renderar, clampat till vad som får plats i vyn.
+  const messageCount = useLiveSkeletonCount({
+    queryKeys: ['conversations'],
+    fallbackKey: SKELETON_COUNT_KEYS.messages,
+    cap: viewportRowCap(76),
+  });
   return (
     <FullscreenSkeletonPortal>
       <motion.div
