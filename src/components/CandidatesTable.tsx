@@ -776,10 +776,18 @@ export function CandidatesTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedApplications.map((application) => {
+              {virtualPaddingTop > 0 && (
+                <tr aria-hidden style={{ height: virtualPaddingTop }} />
+              )}
+              {(useVirtualRendering
+                ? virtualRows.map((v) => sortedApplications[v.index])
+                : sortedApplications
+              ).map((application, rowIdx) => {
+                const trueIndex = useVirtualRendering ? virtualRows[rowIdx].index : rowIdx;
                 const isAlreadyAdded = isInMyCandidates(application.id);
                 const teamInfo = getTeamInfo(application.id);
                 const isSelected = selectedIds.has(application.id);
+
                 
                 return (
                   <TableRow
