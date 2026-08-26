@@ -42,12 +42,18 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 };
 
 const SkeletonChrome = memo(function SkeletonChrome() {
+  // Samma brytpunkt som appen (1180px + overflow-guard), inte Tailwinds `lg`
+  // (1024px). Annars ritar skelettet desktop-navigering medan den riktiga
+  // sidan renderar mobil-headern — exakt den blinkningen användaren såg.
+  const device = useDevice();
+  const isDesktop = device === 'desktop';
   return (
     <>
       {/* MOBILE chrome — mirrors JobSeekerLayout header exactly:
           rings-logo (h-10 w-12) | absolute-centered "Parium" text |
           [Search 9x9] [Notification 9x9] [Avatar 8x8 ring-2] */}
-      <header className="lg:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
+      {!isDesktop && (
+      <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
         <div className={`h-10 w-12 rounded-md ${SKELETON_SHAPE}`} />
         <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SKELETON_SHAPE}`} />
         <div className="flex items-center gap-2">
