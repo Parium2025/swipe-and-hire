@@ -238,11 +238,12 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
   const bodyTruncated = useTruncation(bodyRef);
   const [expanded, setExpanded] = useState(false);
   const canExpand = titleTruncated || bodyTruncated || expanded;
-  const reportable = isReportable(item.kind === 'error' || item.kind === 'warning', item.title, item.body) && !item.route;
+  const route = item.route ?? resolveToastRoute(item.title, item.body);
+  const reportable = isReportable(item.kind === 'error' || item.kind === 'warning', item.title, item.body) && !route;
 
   const activate = () => {
     if (!item.is_read) onRead(item.id);
-    if (item.route) { onNavigate(item.route); return; }
+    if (route) { onNavigate(route); return; }
     if (canExpand) setExpanded(v => !v);
   };
 
