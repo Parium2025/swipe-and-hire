@@ -815,7 +815,7 @@ export default function ProfilePreview() {
 
   return (
     <div className="min-h-screen w-full">
-       <div className="py-6 responsive-container-wide space-y-6 animate-fade-in">
+       <div className="py-6 responsive-container-wide space-y-6">
         {/* Header */}
         <div className="text-center space-y-4 mb-6">
           <h1 className="text-2xl font-semibold text-white">Förhandsgranska Profil</h1>

@@ -181,7 +181,7 @@ const EmployerSettings = () => {
   ];
 
   return (
-    <div className="space-y-4 responsive-container animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+    <div className="space-y-4 responsive-container [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Inställningar</h1>
       </div>

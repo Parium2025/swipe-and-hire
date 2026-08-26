@@ -548,7 +548,7 @@ const CompanyProfile = () => {
   };
 
   return (
-     <div className="space-y-8 responsive-container animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+     <div className="space-y-8 responsive-container [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       {/* Logo Section */}
       <CompanyLogoSection
         companyLogoUrl={displayLogoUrl}

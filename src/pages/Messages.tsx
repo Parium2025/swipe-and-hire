@@ -245,7 +245,7 @@ export default function Messages() {
 
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col animate-fade-in messages-container overflow-x-hidden">
+    <div className="flex-1 min-h-0 flex flex-col messages-container overflow-x-hidden">
       {/* Header */}
       <div className={cn("flex items-center justify-center mb-4 flex-shrink-0 relative", showMobileChat && "hidden md:flex")}>
         <div className="flex items-center gap-3">
@@ -276,7 +276,7 @@ export default function Messages() {
         {/* Conversation List */}
         <div className={cn(
           "w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col",
-          showMobileChat ? "hidden md:flex" : "animate-fade-in md:animate-none"
+          showMobileChat ? "hidden md:flex" : ""
         )}>
           <div className="flex-shrink-0">
             {hasTeam ? (

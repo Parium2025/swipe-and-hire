@@ -736,7 +736,7 @@ const MyCandidates = () => {
 
 
   return (
-     <div className="responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+     <div className="responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       {/* Header with Search and Stage Filters */}
       <MyCandidatesHeader
         totalCount={stats.total}

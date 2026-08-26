@@ -209,7 +209,7 @@ const MyApplications = () => {
 
   if (error) {
     return (
-       <div className="responsive-container-wide animate-fade-in">
+       <div className="responsive-container-wide">
         <div className="text-center py-12 text-red-400">
           Något gick fel vid hämtning av ansökningar
         </div>
@@ -218,7 +218,7 @@ const MyApplications = () => {
   }
 
   return (
-     <div className="responsive-container-wide animate-fade-in space-y-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+     <div className="responsive-container-wide space-y-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       {/* Interviews Section */}
       {interviews && interviews.length > 0 && (
         <section>

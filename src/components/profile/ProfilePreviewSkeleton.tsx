@@ -6,7 +6,7 @@
 const SHAPE = 'bg-white/10 animate-pulse';
 
 export const ProfilePreviewSkeleton = () => (
-  <div className="p-6 responsive-container-wide animate-fade-in">
+  <div className="p-6 responsive-container-wide">
     {/* Header */}
     <div className="flex items-center justify-between mb-6">
       <div className={`h-8 w-40 rounded ${SHAPE}`} />

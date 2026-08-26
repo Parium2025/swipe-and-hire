@@ -579,7 +579,7 @@ const JobDetails = () => {
 
   if (!job) {
     return (
-      <div className="flex items-center justify-center min-h-screen animate-fade-in">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-white">Jobbet hittades inte</div>
       </div>
     );
@@ -590,7 +590,7 @@ const JobDetails = () => {
        ref={pageRef}
        {...pullHandlers}
        style={pullStyle}
-       className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
+       className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
 
         <JobDetailsHeader
           jobId={jobId!}
