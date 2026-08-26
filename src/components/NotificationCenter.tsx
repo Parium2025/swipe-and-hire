@@ -131,7 +131,8 @@ function NotificationItem({
 }) {
   const Icon = typeIcons[notification.type] || Bell;
   const colorClass = typeColors[notification.type] || 'text-white';
-  const route = resolveRoute(notification.type, notification.metadata as Record<string, unknown> | null);
+  const route = resolveRoute(notification.type, notification.metadata as Record<string, unknown> | null)
+    ?? resolveToastRoute(notification.title, notification.body);
 
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: sv });
 
