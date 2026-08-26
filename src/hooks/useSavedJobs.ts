@@ -220,6 +220,14 @@ export const useSavedJobs = () => {
         }
         if (error) throw error;
         toast.success('Jobbet har sparats till dina favoriter');
+        // 🔗 DB-triggern enforce_saved_skipped_exclusivity tog bort ev. skip-rad
+        // för detta jobb — håll skippade-listan och swipe-kön i synk.
+        queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('parium:swipe-action-removed', { detail: { jobId } }),
+          );
+        }
       }
       // 🔗 Synka SavedJobs-sidans react-query cache
       queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });

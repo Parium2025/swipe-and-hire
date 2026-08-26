@@ -297,10 +297,23 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     if (!user?.id || safeSavedJobs.length === 0) return;
     const ids = new Set(safeSavedJobs.map(sj => sj.job_id));
 
+    // 📡 Skal-skydd: prenumerera bara på uppdateringar för användarens egna
+    // sparade jobb. Utan server-side filter skulle VARJE job_postings-uppdatering
+    // i hela systemet (t.ex. applications_count vid varje ansökan) pushas till
+    // varje klient som har sidan öppen. Över 100 id:n (extremfall) faller vi
+    // tillbaka på ofiltrerad kanal + klientfiltrering.
+    const idList = Array.from(ids);
+    const serverFilter = idList.length <= 100 ? `id=in.(${idList.join(',')})` : undefined;
+
     const channel = createRealtimeChannel(`saved-jobs-postings-${user.id}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'job_postings' },
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'job_postings',
+          ...(serverFilter ? { filter: serverFilter } : {}),
+        },
         (payload) => {
           if (!ids.has(payload.new.id)) return;
           queryClient.setQueryData(['saved-jobs', user.id], (oldData: SavedJob[] | undefined) => {
@@ -399,6 +412,12 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
       return next;
     });
 
+    // 🔗 Ett jobb kan aldrig vara både sparat och skippat — DB-triggern
+    // enforce_saved_skipped_exclusivity rensar skip-raden, spegla det optimistiskt.
+    if (!wasSaved) {
+      removeSkippedJobLocally(jobId);
+    }
+
     try {
       if (wasSaved) {
         const { error } = await supabase
@@ -418,11 +437,19 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
       if (error && error.code !== '23505') throw error;
 
       queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+      // Triggern tog bort ev. skip-rad → håll skippade-listan och swipe-kön i synk
+      queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('parium:swipe-action-removed', { detail: { jobId } }),
+        );
+      }
     } catch (error) {
       queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
       throw error;
     }
-  }, [user?.id, queryClient, savedJobIds, isPremium]);
+  }, [user?.id, queryClient, savedJobIds, isPremium, removeSkippedJobLocally]);
 
   const restoreSkippedJob = useCallback(async (jobId: string) => {
     if (!user?.id) return;

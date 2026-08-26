@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.enforce_saved_skipped_exclusivity() FROM PUBLIC, anon, authenticated;
