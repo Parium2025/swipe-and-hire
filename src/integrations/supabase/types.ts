@@ -4347,6 +4347,77 @@ export type Database = {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
       }
+      save_owned_job_with_questions: {
+        Args: {
+          p_job_data: Json
+          p_job_id: string
+          p_questions: Json
+          p_replace_with_new: boolean
+        }
+        Returns: {
+          application_instructions: string | null
+          applications_count: number | null
+          auto_close_notified_at: string | null
+          benefits: string[] | null
+          category: string | null
+          company_logo_url: string | null
+          contact_email: string | null
+          content_fingerprint: string | null
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          duration_amount: number | null
+          duration_unit: string | null
+          employer_id: string
+          employment_type: string | null
+          expires_at: string | null
+          id: string
+          image_focus_position: string
+          image_focus_position_card: string
+          image_focus_position_desktop: string
+          image_updated_at: string
+          is_active: boolean | null
+          job_image_card_url: string | null
+          job_image_desktop_url: string | null
+          job_image_url: string | null
+          location: string | null
+          occupation: string | null
+          overlay_text_color: string
+          part_time_days: string[] | null
+          part_time_shifts: string[] | null
+          pitch: string | null
+          positions_count: number | null
+          published_at: string | null
+          remote_work_possible: string | null
+          removed_applicants_count: number
+          requirements: string | null
+          salary_max: number | null
+          salary_min: number | null
+          salary_transparency: string | null
+          salary_type: string | null
+          search_vector: unknown
+          start_date: string | null
+          title: string
+          updated_at: string
+          views_count: number | null
+          work_end_time: string | null
+          work_location_type: string | null
+          work_schedule: string | null
+          work_start_time: string | null
+          workplace_address: string | null
+          workplace_city: string | null
+          workplace_county: string | null
+          workplace_municipality: string | null
+          workplace_name: string | null
+          workplace_postal_code: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "job_postings"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       search_employer_candidates: {
         Args: {
           p_count_cap?: number
