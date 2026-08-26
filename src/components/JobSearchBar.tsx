@@ -120,7 +120,6 @@ export const JobSearchBar = memo(({
                   : 'bg-white/5 border-white/20 md:hover:bg-white/10 md:hover:border-white/50'
               }`}
             >
-              <ArrowUpDown className="mr-1 h-4 w-4 flex-shrink-0 text-white" />
               <span className="truncate">{sortLabels[sortBy]}</span>
               <ChevronDown className={`ml-auto h-3 w-3 flex-shrink-0 text-white transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
             </button>
