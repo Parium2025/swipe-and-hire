@@ -159,6 +159,20 @@ export interface SearchJob {
   company_review_count?: number;
 }
 
+export type JobSearchSort = 'newest' | 'oldest' | 'most-views';
+
+/**
+ * Keyset-markör. Måste innehålla ALLA fält som ingår i serverns ORDER BY,
+ * annars kan rader hoppas över eller dubbleras när flera jobb delar samma
+ * created_at (vanligt vid massimport).
+ */
+interface SearchCursor {
+  createdAt: string;
+  id: string;
+  rank: number;
+  views: number;
+}
+
 interface UseOptimizedJobSearchOptions {
   searchQuery: string;
   city: string;
@@ -172,6 +186,8 @@ interface UseOptimizedJobSearchOptions {
   createdAfter?: string | null;
   /** Antal jobb per batch. Default 100. */
   pageSize?: number;
+  /** Sortering körs i databasen — gäller hela resultatet, inte bara laddade sidor. */
+  sort?: JobSearchSort;
 }
 
 const normalizeSwedish = (text: string): string => {
