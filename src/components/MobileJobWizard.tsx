@@ -202,6 +202,8 @@ const MobileJobWizard = ({
   const hasBeenOpenRef = useRef(false);
   // Guard: don't persist draft until restore has completed (prevents overwriting saved draft with empty data)
   const hasCompletedRestoreRef = useRef(false);
+  // Synkron spärr mot dubbelpublicering (setLoading hinner inte uppdateras).
+  const isPublishingRef = useRef(false);
   const editDraftKey = existingJob?.id ? getEditJobDraftKey(existingJob.id) : null;
   
   // Reset state when dialog ACTUALLY closes (not on initial mount)
@@ -242,6 +244,7 @@ const MobileJobWizard = ({
             customQuestions: Array.isArray(parsed.customQuestions) ? parsed.customQuestions : [],
             currentStep: restoredStep,
             savedAt,
+            templateStamp: parsed.templateStamp ?? null,
           };
         } catch {
           return null;
@@ -254,9 +257,18 @@ const MobileJobWizard = ({
         const draftKeys = getCreateDraftKeys(selectedTemplate?.id);
         const sessionDraft = parseDraftState(sessionStorage.getItem(draftKeys.session));
         const localDraft = parseDraftState(localStorage.getItem(draftKeys.local));
+        const currentTemplateStamp = (selectedTemplate as any)?.updated_at ?? null;
         const bestDraft = [sessionDraft, localDraft]
           .filter((draft): draft is NonNullable<typeof draft> => !!draft)
+          // Har mallen ändrats sedan utkastet sparades är utkastet inaktuellt.
+          .filter((draft) => !selectedTemplate || draft.templateStamp === currentTemplateStamp)
           .sort((a, b) => b.savedAt - a.savedAt)[0];
+
+        if (!bestDraft && selectedTemplate) {
+          // Rensa bort det inaktuella mall-utkastet så det inte kan dyka upp igen.
+          try { sessionStorage.removeItem(draftKeys.session); } catch {}
+          try { localStorage.removeItem(draftKeys.local); } catch {}
+        }
 
         if (bestDraft) {
           setFormData(bestDraft.formData);
@@ -878,6 +890,9 @@ const MobileJobWizard = ({
         currentStep,
         customQuestions,
         savedAt: Date.now(),
+        // Stämpel på mallen som utkastet bygger på. Ändras mallen efteråt är
+        // utkastet inaktuellt och får inte skriva över mallens nya värden.
+        templateStamp: (selectedTemplate as any)?.updated_at ?? null,
       });
 
       const draftKeys = getCreateDraftKeys(selectedTemplate?.id);
@@ -2505,7 +2520,11 @@ const MobileJobWizard = ({
   
   const performPublish = async () => {
     if (!user) return;
-    
+    // Synkron spärr: setLoading är asynkron, så två snabba klick hann tidigare
+    // starta två publiceringar och skapa dubbletter.
+    if (isPublishingRef.current) return;
+    isPublishingRef.current = true;
+
     setLoading(true);
 
     try {
@@ -2636,12 +2655,24 @@ const MobileJobWizard = ({
         return;
       }
 
-      // Save questions to job_questions table if there are any
+      // Save questions to job_questions table if there are any.
+      // Vid tillfälligt nätfel gör vi tre försök med backoff. Misslyckas det
+      // ändå får arbetsgivaren veta det — annonsen får aldrig se "klar" ut
+      // medan ansökningsfrågorna saknas.
+      let questionsSaved = true;
       if (jobPost) {
-        try {
-          await syncJobQuestions(jobPost.id, customQuestions);
-        } catch (questionsError) {
-          console.error('Error saving questions:', questionsError);
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            await syncJobQuestions(jobPost.id, customQuestions);
+            questionsSaved = true;
+            break;
+          } catch (questionsError) {
+            questionsSaved = false;
+            console.error('Error saving questions (attempt ' + (attempt + 1) + '):', questionsError);
+            if (attempt < 2) {
+              await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+            }
+          }
         }
       }
 
@@ -2665,6 +2696,16 @@ const MobileJobWizard = ({
       // Vänta tills mobil-dialogens overlay och viewport har stabiliserats.
       // Annars börjar canvas-animationen bakom stängningsövergången på iOS.
       window.setTimeout(() => {
+        if (!questionsSaved) {
+          toast({
+            title: "Annonsen är publicerad – men frågorna sparades inte",
+            description: "Öppna annonsen och spara ansökningsfrågorna igen.",
+            variant: "destructive",
+            duration: 9000,
+            route: jobPost?.id ? `/job/${jobPost.id}` : '/my-jobs'
+          });
+          return;
+        }
         celebrate({ intensity: 'big' });
         toast({
           title: "Jobbannons skapad!",
@@ -2683,6 +2724,7 @@ const MobileJobWizard = ({
         variant: "destructive"
       });
     } finally {
+      isPublishingRef.current = false;
       // Ensure loading is reset even if error occurs
       setTimeout(() => setLoading(false), 100);
     }
