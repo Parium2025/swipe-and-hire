@@ -693,6 +693,7 @@ const SavedJobs = () => {
                  );
                })}
              </div>
+             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </>
            )}
          </>
