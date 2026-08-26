@@ -63,31 +63,36 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const applicationsCount = dashStats?.applications ?? cachedStats['applications'] ?? 0;
   const interviewsCount = dashStats?.interviews ?? cachedStats['interviews'] ?? 0;
   const savedJobsCount = dashStats?.saved_jobs ?? cachedStats['saved'] ?? 0;
-  const unreadMessagesCount = dashStats?.unread_messages ?? cachedStats['messages'] ?? 0;
+  // Olästa meddelanden kommer från den enda globala chattkanalen
+  // (ConversationsProvider). Kortet prenumererar därför INTE själv på
+  // conversation_messages – vid 100 000 inloggade skulle varje meddelande
+  // på hela plattformen annars trigga en RPC per öppen hemvy.
+  const conversationsCtx = useConversationsContext();
+  const unreadMessagesCount =
+    conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cachedStats['messages'] ?? 0;
+  useEffect(() => { writeCachedStats('messages', unreadMessagesCount); }, [unreadMessagesCount]);
 
-  // Single consolidated realtime channel
+  // Single consolidated realtime channel – alla lyssnare är användarfiltrerade
+  // på servern, och händelser koalesceras så en burst ger EN omhämtning.
   useEffect(() => {
     if (!user?.id) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     const invalidateStats = () => {
-      queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats'] });
+      if (timer) return;
+      timer = setTimeout(() => {
+        timer = null;
+        queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats'] });
+      }, 1200);
     };
     const statsChannel = createRealtimeChannel(`jobseeker-stats-${user.id}`)
+      // job_applications har REPLICA IDENTITY FULL → filtret gäller även DELETE.
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
         invalidateStats
       )
-      // DELETE-payloads innehåller endast id (REPLICA IDENTITY DEFAULT) och matchar
-      // därför inte filtret ovan — lyssna ofiltrerat och invalidera bara cachen.
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'job_applications' },
-        invalidateStats
-      )
-
       .on('postgres_changes', { event: '*', schema: 'public', table: 'interviews', filter: `applicant_id=eq.${user.id}` },
         invalidateStats
       )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
-        invalidateStats
-      )
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
         invalidateStats
       )
       .subscribe();
@@ -96,6 +101,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => {
+      if (timer) clearTimeout(timer);
       supabase.removeChannel(statsChannel);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
