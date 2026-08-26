@@ -845,13 +845,10 @@ const Profile = () => {
     const newErrors: typeof errors = {};
     if (!firstName.trim()) newErrors.firstName = 'Förnamn är obligatoriskt.';
     if (!lastName.trim()) newErrors.lastName = 'Efternamn är obligatoriskt.';
-    // Plats & telefon är endast relevanta för jobbsökare — arbetsgivare styr allt via företagsprofilen.
-    if (!isEmployer) {
-      if (!postalCode.trim()) newErrors.userLocation = 'Postnummer är obligatoriskt.';
-      else if (!hasValidLocation) newErrors.userLocation = 'Ange ett giltigt postnummer som finns i Sverige';
-      if (!phone.trim()) newErrors.phone = 'Telefonnummer är obligatoriskt.';
-      else if (!isValidSwedishPhone(phone)) newErrors.phone = 'Ange ett giltigt svenskt nummer (+46 eller 0).';
-    }
+    if (!postalCode.trim()) newErrors.userLocation = 'Postnummer är obligatoriskt.';
+    else if (!hasValidLocation) newErrors.userLocation = 'Ange ett giltigt postnummer som finns i Sverige';
+    if (!phone.trim()) newErrors.phone = 'Telefonnummer är obligatoriskt.';
+    else if (!isValidSwedishPhone(phone)) newErrors.phone = 'Ange ett giltigt svenskt nummer (+46 eller 0).';
     if (!birthDate) newErrors.birthDate = 'Födelsedatum är obligatoriskt.';
     if (!isEmployer && !employmentStatus) newErrors.employmentStatus = 'Anställningsstatus är obligatorisk.';
     setErrors(newErrors);
@@ -2157,7 +2154,7 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className={`grid grid-cols-1 ${isEmployer ? '' : 'md:grid-cols-2'} gap-4 md:gap-3`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                   <div className="space-y-2 md:space-y-1.5">
                     <Label htmlFor="birthDate" className="text-white text-sm">
                       Födelsedatum <span className="text-white">*</span>
@@ -2176,7 +2173,6 @@ const Profile = () => {
                     {errors.birthDate && <p className="text-sm text-red-300">{errors.birthDate}</p>}
                   </div>
 
-                  {!isEmployer && (
                   <div className="space-y-2 md:space-y-1.5">
                     <Label htmlFor="phone" className="text-white text-sm">
                       Telefon <span className="text-white">*</span>
@@ -2201,7 +2197,6 @@ const Profile = () => {
                     </div>
                     {errors.phone && <p className="text-sm text-red-300">{errors.phone}</p>}
                   </div>
-                  )}
                 </div>
               </div>
 
@@ -2219,9 +2214,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Postnummer & Ort — endast jobbsökare */}
-              {!isEmployer && (
-              <>
+              {/* Postnummer & Ort */}
               <WorkplacePostalCodeSelector
                 postalCodeValue={postalCode}
                 cityValue={userLocation}
@@ -2233,11 +2226,8 @@ const Profile = () => {
                 onValidationChange={setHasValidLocation}
               />
               {errors.userLocation && !hasValidLocation && <p className="text-sm text-red-300">{errors.userLocation}</p>}
-              </>
-              )}
 
-              {/* Bio — endast jobbsökare (arbetsgivare använder företagsbeskrivningen) */}
-              {!isEmployer && (
+              {/* Bio */}
               <div className="space-y-2 md:space-y-1.5 pt-4 md:pt-3 border-t border-white/10">
                 <Label htmlFor="bio" className="text-white text-sm">Presentation / Om mig</Label>
                 <Textarea
@@ -2254,7 +2244,6 @@ const Profile = () => {
                   </span>
                 </div>
               </div>
-              )}
 
               {/* Job Seeker Specific Information */}
               {!isEmployer && (
