@@ -51,10 +51,15 @@ const formatDate = (dateString: string): string => {
   });
 };
 
+// Mejlet renderas serverside och kan inte veta mottagarens tidszon, därför
+// märks klockslaget alltid ut som svensk tid. Kalenderfilen (.ics) och
+// Google Calendar-länken bär UTC och konverteras automatiskt av mottagarens
+// kalender, så den som sitter utomlands får rätt lokal tid där.
 const formatTime = (dateString: string): string => {
-  return new Date(dateString).toLocaleTimeString('sv-SE', {
+  const time = new Date(dateString).toLocaleTimeString('sv-SE', {
     hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm'
   });
+  return `${time} (svensk tid)`;
 };
 
 const generateGoogleCalendarUrl = (

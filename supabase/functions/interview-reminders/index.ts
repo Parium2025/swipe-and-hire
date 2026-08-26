@@ -241,11 +241,12 @@ Deno.serve(async (req) => {
 
         const jobTitle = interview.job_postings?.title || "intervju";
         const scheduledTime = new Date(interview.scheduled_at);
-        const timeString = scheduledTime.toLocaleTimeString("sv-SE", {
+        // Alltid utmärkt som svensk tid – mottagaren kan sitta i en annan tidszon.
+        const timeString = `${scheduledTime.toLocaleTimeString("sv-SE", {
           hour: "2-digit",
           minute: "2-digit",
           timeZone: "Europe/Stockholm",
-        });
+        })} (svensk tid)`;
 
         const locationInfo = interview.location_type === "video"
           ? "Videomöte"
