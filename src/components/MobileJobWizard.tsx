@@ -248,10 +248,12 @@ const MobileJobWizard = ({
         }
       };
 
-      // Restore draft only for create flow (not when editing existing job or creating from template)
-      if (!existingJob && !selectedTemplate) {
-        const sessionDraft = parseDraftState(sessionStorage.getItem(JOB_WIZARD_SESSION_KEY));
-        const localDraft = parseDraftState(localStorage.getItem(JOB_WIZARD_DRAFT_KEY));
+      // Restore draft for the create flow — blank runs use the base slot,
+      // template runs use their own slot keyed on the template id.
+      if (!existingJob) {
+        const draftKeys = getCreateDraftKeys(selectedTemplate?.id);
+        const sessionDraft = parseDraftState(sessionStorage.getItem(draftKeys.session));
+        const localDraft = parseDraftState(localStorage.getItem(draftKeys.local));
         const bestDraft = [sessionDraft, localDraft]
           .filter((draft): draft is NonNullable<typeof draft> => !!draft)
           .sort((a, b) => b.savedAt - a.savedAt)[0];
