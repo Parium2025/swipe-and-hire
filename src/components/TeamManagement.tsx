@@ -152,8 +152,29 @@ const TeamManagement = () => {
     void fetchTeamMembers(Boolean(cached));
   }, [user?.id, fetchTeamMembers]);
 
+  const fetchInvitations = useCallback(async () => {
+    if (!organizationId) return;
+    const { data, error } = await supabase
+      .from('organization_invitations')
+      .select('id, email, role, status, expires_at, created_at')
+      .eq('organization_id', organizationId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching invitations:', error);
+      return;
+    }
+    setInvitations(data ?? []);
+  }, [organizationId]);
+
+  useEffect(() => {
+    void fetchInvitations();
+  }, [fetchInvitations]);
+
   const handleInvite = async () => {
-    if (!inviteEmail.trim() || !organizationId) {
+    const email = inviteEmail.trim().toLowerCase();
+    if (!email || !organizationId) {
       toast({
         title: "Fel",
         description: "Ange en e-postadress.",
@@ -161,25 +182,71 @@ const TeamManagement = () => {
       });
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      toast({
+        title: "Ogiltig e-postadress",
+        description: "Kontrollera adressen och försök igen.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setInviting(true);
     try {
-      // For now, show a message that invite functionality requires email setup
-      // In a full implementation, this would send an invite email
+      const { error } = await supabase.functions.invoke('team-invite', {
+        body: { email, role: inviteRole, origin: window.location.origin },
+      });
+
+      if (error) {
+        let serverMessage = "Kunde inte skicka inbjudan.";
+        const context = (error as { context?: Response }).context;
+        if (context && typeof context.json === 'function') {
+          try {
+            const body = await context.json();
+            if (typeof body?.error === 'string') serverMessage = body.error;
+          } catch {
+            // Keep the generic message.
+          }
+        }
+        throw new Error(serverMessage);
+      }
+
       toast({
         title: "Inbjudan skickad",
-        description: `En inbjudan har skickats till ${inviteEmail} som ${ROLE_LABELS[inviteRole]}.`,
+        description: `En inbjudan har skickats till ${email} som ${ROLE_LABELS[inviteRole]}.`,
       });
       setInviteEmail('');
+      void fetchInvitations();
     } catch (error) {
       console.error('Error inviting:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte skicka inbjudan.",
+        description: error instanceof Error ? error.message : "Kunde inte skicka inbjudan.",
         variant: "destructive"
       });
     } finally {
       setInviting(false);
+    }
+  };
+
+  const handleRevokeInvitation = async (invitationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('organization_invitations')
+        .update({ status: 'revoked' })
+        .eq('id', invitationId);
+
+      if (error) throw error;
+
+      toast({ title: "Inbjudan återkallad", description: "Länken fungerar inte längre." });
+      void fetchInvitations();
+    } catch (error) {
+      console.error('Error revoking invitation:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte återkalla inbjudan.",
+        variant: "destructive"
+      });
     }
   };
 
