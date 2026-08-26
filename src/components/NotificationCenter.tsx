@@ -83,6 +83,35 @@ function resolveRoute(type: string, metadata?: Record<string, unknown> | null): 
   }
 }
 
+// Äldre arkiverade toaster saknar `route` (de skapades innan notiserna blev
+// klickbara). Här härleds målet från titeln så att även historiken går att
+// klicka på – inget "händer ingenting" på gamla notiser.
+const TOAST_ROUTE_RULES: Array<[RegExp, string]> = [
+  [/utkast (sparat|uppdaterat|sparad)/i, '/my-jobs?tab=draft'],
+  [/annons(en)? (publicerad|återpublicerad|uppdaterad|skapad)/i, '/my-jobs'],
+  [/jobbannons/i, '/my-jobs'],
+  [/ansökan skickad/i, '/my-applications'],
+  [/intervju (bokad|ombokad|inbokad|flyttad)/i, '/my-candidates'],
+  [/kandidat (tillagd|flyttad|sparad)/i, '/my-candidates'],
+  [/mall (skapad|uppdaterad|sparad)/i, '/templates'],
+  [/meddelande(n)? (skickat|skickade|köat)/i, '/messages'],
+  [/profil(en)? (uppdaterad|sparad)/i, '/profile'],
+  [/supportärende|supportmeddelande/i, '/support'],
+  [/sparade jobb synkroniserade|jobb sparat/i, '/saved-jobs'],
+];
+
+// Felnotiser ("Kunde inte spara annonsen") ska aldrig navigera någonstans.
+const FAILURE_PATTERN = /kunde inte|misslyckades|gick inte|fel vid|något gick fel/i;
+
+function resolveToastRoute(title: string, body?: string | null): string | undefined {
+  const text = `${title} ${body ?? ''}`;
+  if (FAILURE_PATTERN.test(text)) return undefined;
+  for (const [pattern, route] of TOAST_ROUTE_RULES) {
+    if (pattern.test(text)) return route;
+  }
+  return undefined;
+}
+
 // Notiser som handlar om AI-problem ska kunna rapporteras direkt till supporten.
 const REPORTABLE_PATTERN = /\bai\b|utvärder|kriteri|analys|sammanfattning/i;
 
@@ -106,7 +135,8 @@ function NotificationItem({
 }) {
   const Icon = typeIcons[notification.type] || Bell;
   const colorClass = typeColors[notification.type] || 'text-white';
-  const route = resolveRoute(notification.type, notification.metadata as Record<string, unknown> | null);
+  const route = resolveRoute(notification.type, notification.metadata as Record<string, unknown> | null)
+    ?? resolveToastRoute(notification.title, notification.body);
 
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: sv });
 
@@ -213,11 +243,12 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
   const bodyTruncated = useTruncation(bodyRef);
   const [expanded, setExpanded] = useState(false);
   const canExpand = titleTruncated || bodyTruncated || expanded;
-  const reportable = isReportable(item.kind === 'error' || item.kind === 'warning', item.title, item.body) && !item.route;
+  const route = item.route ?? resolveToastRoute(item.title, item.body);
+  const reportable = isReportable(item.kind === 'error' || item.kind === 'warning', item.title, item.body) && !route;
 
   const activate = () => {
     if (!item.is_read) onRead(item.id);
-    if (item.route) { onNavigate(item.route); return; }
+    if (route) { onNavigate(route); return; }
     if (canExpand) setExpanded(v => !v);
   };
 
@@ -257,7 +288,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
         {item.body && <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
-          {!item.route && canExpand && (
+          {!route && canExpand && (
             <span className="text-xs font-medium text-white/80 underline underline-offset-2">
               {expanded ? 'Visa mindre' : 'Visa mer'}
             </span>
