@@ -20,7 +20,8 @@ import {
   Hash,
   Linkedin,
   Twitter,
-  Instagram
+  Instagram,
+  Share2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
