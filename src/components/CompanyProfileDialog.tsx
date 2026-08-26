@@ -356,6 +356,18 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
               <h3 className="font-semibold text-lg text-white">Företagsinformation</h3>
 
               <div className="grid gap-2.5">
+                {company.org_number && (
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Hash className="h-[18px] w-[18px] text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-white uppercase tracking-wide">Organisationsnummer</p>
+                      <p className="text-sm text-white">{company.org_number}</p>
+                    </div>
+                  </div>
+                )}
+
                 {company.website && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] transition-colors">
                     <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
