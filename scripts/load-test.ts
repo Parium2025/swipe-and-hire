@@ -48,6 +48,7 @@ const AUTH_USERS = parseUsers(env('PARIUM_LOAD_TEST_AUTH_USERS', ''));
 const searchQueries = ['säljare', 'utvecklare', 'lager', 'kundtjänst', 'ekonomi', 'projektledare', 'chaufför', ''];
 const cities = ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Västerås', ''];
 const categories = ['Försäljning', 'IT', 'Administration', 'Transport', ''];
+const sortModes = ['newest', 'oldest', 'most-views'];
 
 const samples: Sample[] = [];
 const startedAt = new Date();
@@ -129,6 +130,7 @@ async function runSearchScenario(ctx: VirtualUserContext): Promise<string> {
   const query = ctx.pick(searchQueries);
   const city = ctx.pick(cities);
   const category = ctx.pick(categories);
+  const sort = ctx.pick(sortModes);
   const { error } = await ctx.client.rpc('search_jobs', {
     p_search_query: query || null,
     p_city: city || null,
@@ -142,9 +144,27 @@ async function runSearchScenario(ctx: VirtualUserContext): Promise<string> {
     p_cursor_created_at: null,
     p_employer_ids: null,
     p_created_after: null,
+    p_sort: sort,
+    p_cursor_id: null,
+    p_cursor_rank: null,
+    p_cursor_views: null,
   } as any);
   if (error) throw error;
-  return `q=${query || '*'} city=${city || '*'}`;
+
+  const count = await ctx.client.rpc('count_search_jobs', {
+    p_search_query: query || null,
+    p_city: city || null,
+    p_county: null,
+    p_employment_types: null,
+    p_category: category || null,
+    p_salary_min: null,
+    p_salary_max: null,
+    p_employer_ids: null,
+    p_created_after: null,
+  } as any);
+  if (count.error) throw count.error;
+
+  return `q=${query || '*'} city=${city || '*'} sort=${sort}`;
 }
 
 async function runMatchScenario(ctx: VirtualUserContext): Promise<string> {

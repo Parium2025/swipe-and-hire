@@ -42,6 +42,8 @@ interface SwipeFullscreenProps {
   skippedJobIds?: Set<string>;
   onRecordSwipeAction?: (jobId: string, action: 'skipped' | 'liked' | 'applied') => void;
   onUndoSwipeAction?: (jobId: string) => void;
+  /** Anropas när användaren närmar sig slutet av stacken — laddar nästa sida. */
+  onNeedMore?: () => void;
 }
 
 /* ── Timing constants ────────────────────────────────────── */
@@ -62,6 +64,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   skippedJobIds,
   onRecordSwipeAction,
   onUndoSwipeAction,
+  onNeedMore,
 }: SwipeFullscreenProps) {
   /* ── Refs ─────────────────────────────────────────────── */
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -159,6 +162,15 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const currentJob = jobs[currentIndex];
   const isEndStateActive = endStateVisible || showEndBounce;
   const displayIndex = Math.min(currentIndex + 1, jobs.length);
+
+  /* ── Infinite stack: hämta nästa sida innan korten tar slut ──
+     Utan detta stannar swipe-stacken på första sidan (100 jobb) även
+     om databasen har 100 000 träffar. */
+  useEffect(() => {
+    if (!onNeedMore || jobs.length === 0) return;
+    if (currentIndex >= jobs.length - 8) onNeedMore();
+  }, [currentIndex, jobs.length, onNeedMore]);
+
 
   /* ── Stabila callbacks för persistent action-bar ─────────
    * Utan dessa skapades onSave/onDislike/onLike som inline-arrows i JSX

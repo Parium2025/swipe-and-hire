@@ -798,6 +798,12 @@ const SearchJobs = memo(() => {
     }
   }, [filteredAndSortedJobs.length, loadMoreSize, hasMoreJobs, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
+  const handleSwipeNeedMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+
   // formatSalary moved to top-level scope for performance
 
   // jobs from useOptimizedJobSearch already filters expired — use directly
@@ -1138,6 +1144,7 @@ const SearchJobs = memo(() => {
           skippedJobIds={skippedJobIds}
           onRecordSwipeAction={recordSwipeAction}
           onUndoSwipeAction={undoSwipeAction}
+          onNeedMore={handleSwipeNeedMore}
           filterState={{
             searchInput,
             onSearchInputChange: setSearchInput,
