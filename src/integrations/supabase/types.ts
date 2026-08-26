@@ -4046,10 +4046,12 @@ export type Database = {
           company_description: string
           company_logo_url: string
           company_name: string
+          company_social_media_links: Json
           employee_count: string
           first_name: string
           industry: string
           last_name: string
+          org_number: string
           role: Database["public"]["Enums"]["user_role"]
           user_id: string
           website: string
@@ -4062,10 +4064,12 @@ export type Database = {
           company_description: string
           company_logo_url: string
           company_name: string
+          company_social_media_links: Json
           employee_count: string
           first_name: string
           industry: string
           last_name: string
+          org_number: string
           role: Database["public"]["Enums"]["user_role"]
           user_id: string
           website: string
