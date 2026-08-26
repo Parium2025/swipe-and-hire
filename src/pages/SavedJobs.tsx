@@ -203,6 +203,39 @@ const SavedJobs = () => {
 
   const activeJobsForMedia = activeTab === 'saved' ? sortedJobs : filteredSkippedJobs;
 
+  // 📄 Sidnavigering — exakt samma modell som Mina annonser/Dashboard:
+  // 18 kort per sida, sidan nollställs vid flik-, sorterings- och filterbyte
+  // och klampas alltid inom listans längd.
+  const [page, setPage] = useState(1);
+  const didMountRef = useRef(false);
+  const totalPages = Math.max(1, Math.ceil(activeJobsForMedia.length / PAGE_SIZE));
+
+  useEffect(() => { setPage(1); }, [activeTab]);
+  useEffect(() => { setPage(1); }, [sortBy, statusFilter, skippedSort]);
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  useEffect(() => {
+    if (!didMountRef.current) { didMountRef.current = true; return; }
+    if (typeof window === 'undefined') return;
+    getManagedScrollContainer()?.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const positions = readPositions();
+    positions[window.location.pathname] = { top: 0 };
+    writePositions(positions);
+  }, [page]);
+
+  const pagedSavedJobs = useMemo(
+    () => sortedJobs.slice((page - 1) * PAGE_SIZE, (page - 1) * PAGE_SIZE + PAGE_SIZE),
+    [sortedJobs, page],
+  );
+  const pagedSkippedJobs = useMemo(
+    () => filteredSkippedJobs.slice((page - 1) * PAGE_SIZE, (page - 1) * PAGE_SIZE + PAGE_SIZE),
+    [filteredSkippedJobs, page],
+  );
+  const pagedActiveJobs = activeTab === 'saved' ? pagedSavedJobs : pagedSkippedJobs;
+
   // Alla jobb som just nu syns i aktiv flik (respekterar sortering + filter)
   const visibleIds = useMemo(
     () => activeJobsForMedia.map((entry) => entry.job_postings!.id),
