@@ -150,6 +150,21 @@ const JOB_WIZARD_DRAFT_KEY = 'parium_draft_job-wizard';
 const JOB_WIZARD_INTENTIONAL_CLOSE_KEY = 'parium_job_wizard_intentional_close';
 const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 const getEditJobDraftKey = (jobId: string) => `parium_draft_edit-job-${jobId}`;
+// Template runs get their own draft slot so an unfinished run from a template
+// is restored when the SAME template is picked again — and never leaks into
+// the blank "Skapa jobb" flow.
+const getCreateDraftKeys = (templateId?: string | null) =>
+  templateId
+    ? {
+        session: `${JOB_WIZARD_SESSION_KEY}-tpl-${templateId}`,
+        local: `${JOB_WIZARD_DRAFT_KEY}-tpl-${templateId}`,
+      }
+    : { session: JOB_WIZARD_SESSION_KEY, local: JOB_WIZARD_DRAFT_KEY };
+
+// Valid clock time in HH:MM (00:00–23:59)
+export const isValidClockTime = (value: string): boolean =>
+  /^([01]\d|2[0-3]):([0-5]\d)$/.test((value || '').trim());
+
 
 const MobileJobWizard = ({
   open, 
@@ -233,10 +248,12 @@ const MobileJobWizard = ({
         }
       };
 
-      // Restore draft only for create flow (not when editing existing job or creating from template)
-      if (!existingJob && !selectedTemplate) {
-        const sessionDraft = parseDraftState(sessionStorage.getItem(JOB_WIZARD_SESSION_KEY));
-        const localDraft = parseDraftState(localStorage.getItem(JOB_WIZARD_DRAFT_KEY));
+      // Restore draft for the create flow — blank runs use the base slot,
+      // template runs use their own slot keyed on the template id.
+      if (!existingJob) {
+        const draftKeys = getCreateDraftKeys(selectedTemplate?.id);
+        const sessionDraft = parseDraftState(sessionStorage.getItem(draftKeys.session));
+        const localDraft = parseDraftState(localStorage.getItem(draftKeys.local));
         const bestDraft = [sessionDraft, localDraft]
           .filter((draft): draft is NonNullable<typeof draft> => !!draft)
           .sort((a, b) => b.savedAt - a.savedAt)[0];
@@ -425,7 +442,7 @@ const MobileJobWizard = ({
           workplace_city: selectedTemplate.workplace_city || '',
           workplace_county: (selectedTemplate as any).workplace_county || '',
           workplace_municipality: (selectedTemplate as any).workplace_municipality || '',
-          positions_count: selectedTemplate.positions_count || '',
+          positions_count: selectedTemplate.positions_count || '1',
           work_schedule: selectedTemplate.work_schedule || '',
           contact_email: selectedTemplate.contact_email || '',
           application_instructions: selectedTemplate.application_instructions || '',
@@ -863,15 +880,28 @@ const MobileJobWizard = ({
         savedAt: Date.now(),
       });
 
-      sessionStorage.setItem(JOB_WIZARD_SESSION_KEY, draftData);
-      const localSaved = safeSetItem(JOB_WIZARD_DRAFT_KEY, draftData);
+      const draftKeys = getCreateDraftKeys(selectedTemplate?.id);
+      sessionStorage.setItem(draftKeys.session, draftData);
+      const localSaved = safeSetItem(draftKeys.local, draftData);
       if (!localSaved) {
         console.warn('Failed to persist job wizard draft to localStorage');
       }
     } catch {
       console.warn('Failed to save job wizard state');
     }
-  }, [open, existingJob, currentStep, formData, customQuestions, jobTitle]);
+  }, [open, existingJob, selectedTemplate, currentStep, formData, customQuestions, jobTitle]);
+
+  // Clear both the base slot and the current template slot so no stale draft
+  // can resurface in a later run.
+  const clearCreateDraftSlots = useCallback(() => {
+    const keys = [getCreateDraftKeys(null), getCreateDraftKeys(selectedTemplate?.id)];
+    keys.forEach(({ session, local }) => {
+      try { sessionStorage.removeItem(session); } catch {}
+      try { localStorage.removeItem(local); } catch {}
+    });
+  }, [selectedTemplate]);
+
+
 
   // Save on every relevant state change
   useEffect(() => {
@@ -2095,8 +2125,8 @@ const MobileJobWizard = ({
              formData.salary_type &&
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0 &&
-             formData.work_start_time.trim() &&
-             formData.work_end_time.trim();
+             isValidClockTime(formData.work_start_time) &&
+             isValidClockTime(formData.work_end_time);
     }
     
     if (currentStep === 1) {
@@ -2133,8 +2163,8 @@ const MobileJobWizard = ({
       if (!formData.salary_type) missing.push('Lönetyp');
       if (!formData.salary_transparency) missing.push('Lönetransparens');
       if (!(parseInt(formData.positions_count) > 0)) missing.push('Antal personer att rekrytera');
-      if (!formData.work_start_time.trim()) missing.push('Arbetstid (starttid)');
-      if (!formData.work_end_time.trim()) missing.push('Arbetstid (sluttid)');
+      if (!isValidClockTime(formData.work_start_time)) missing.push(formData.work_start_time.trim() ? 'Giltig starttid (00:00–23:59)' : 'Arbetstid (starttid)');
+      if (!isValidClockTime(formData.work_end_time)) missing.push(formData.work_end_time.trim() ? 'Giltig sluttid (00:00–23:59)' : 'Arbetstid (sluttid)');
     }
     
     if (currentStep === 1) {
@@ -2302,12 +2332,7 @@ const MobileJobWizard = ({
     setShowCompanyTooltip(false);
     
     // Clear sessionStorage and localStorage drafts when user confirms close ("Lämna utan att spara")
-    try {
-      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-    } catch {}
-    try {
-      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
-    } catch {}
+    clearCreateDraftSlots();
     try {
       sessionStorage.setItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY, '1');
       localStorage.setItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY, '1');
@@ -2428,8 +2453,7 @@ const MobileJobWizard = ({
       });
 
       // Clear both sessionStorage and localStorage drafts after successful save
-      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
+      clearCreateDraftSlots();
       try {
         sessionStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
         localStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
@@ -2626,8 +2650,7 @@ const MobileJobWizard = ({
 
       // Clear both sessionStorage and localStorage drafts BEFORE calling handleClose
       // This prevents the unsaved changes dialog from appearing
-      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
+      clearCreateDraftSlots();
       try {
         sessionStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
         localStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
