@@ -167,8 +167,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
      Utan detta stannar swipe-stacken på första sidan (100 jobb) även
      om databasen har 100 000 träffar. */
   useEffect(() => {
-    if (!onNeedMore || jobs.length === 0) return;
-    if (currentIndex >= jobs.length - 8) onNeedMore();
+    if (!onNeedMore) return;
+    // jobs.length === 0 kan betyda att hela sidan filtrerats bort (redan
+    // svepta/sökta jobb) — då måste vi fortsätta hämta, inte visa "slut".
+    if (jobs.length === 0 || currentIndex >= jobs.length - 8) onNeedMore();
   }, [currentIndex, jobs.length, onNeedMore]);
 
 
