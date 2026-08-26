@@ -86,6 +86,8 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
       if (error) throw error;
       if (!data) return null;
+      const row = data as unknown as Record<string, unknown>;
+      const rawLinks = row.company_social_media_links;
       return {
         company_name: data.company_name,
         company_logo_url: data.company_logo_url,
@@ -94,6 +96,10 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
         industry: data.industry,
         employee_count: data.employee_count,
         address: data.address,
+        org_number: (row.org_number as string) || undefined,
+        company_social_media_links: Array.isArray(rawLinks)
+          ? (rawLinks as SocialMediaLink[]).filter((l) => l && typeof l.url === 'string' && l.url.trim())
+          : [],
       };
     },
 
