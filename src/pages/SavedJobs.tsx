@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { Heart, Loader2, Trash2, AlertTriangle, ArrowDownUp, Undo2, EyeOff } from 'lucide-react';
+import { Heart, Loader2, Trash2, AlertTriangle, ArrowDownUp, Undo2, EyeOff, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
@@ -54,7 +54,33 @@ const SavedJobs = () => {
     removeSavedJobLocally,
     toggleSavedJob,
     restoreSkippedJob,
+    bulkRemoveSaved,
+    bulkRemoveSkipped,
   } = useSavedJobsCache({ enableSkipped: activeTab === 'skipped' });
+
+  // 🗑️ Rensa-läge (samma mönster som arbetsgivarens utgångna annonser)
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  const exitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  // Byte av flik nollställer markeringen så inget råkar raderas i fel lista
+  useEffect(() => {
+    exitSelectionMode();
+  }, [activeTab, exitSelectionMode]);
+
+  const toggleSelected = useCallback((jobId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(jobId)) next.delete(jobId); else next.add(jobId);
+      return next;
+    });
+  }, []);
 
   const [showContent, setShowContent] = useState(false);
 
@@ -171,6 +197,103 @@ const SavedJobs = () => {
   }, [skippedJobs, hasRenderableJobPosting, skippedSort]);
 
   const activeJobsForMedia = activeTab === 'saved' ? sortedJobs : filteredSkippedJobs;
+
+  // Alla jobb som just nu syns i aktiv flik (respekterar sortering + filter)
+  const visibleIds = useMemo(
+    () => activeJobsForMedia.map((entry) => entry.job_postings!.id),
+    [activeJobsForMedia],
+  );
+
+  const confirmBulkDelete = useCallback(async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkDeleting(true);
+    try {
+      if (activeTab === 'saved') {
+        await bulkRemoveSaved(ids);
+      } else {
+        await bulkRemoveSkipped(ids);
+      }
+      toast.success(`${ids.length} ${ids.length === 1 ? 'jobb borttaget' : 'jobb borttagna'}`);
+      refreshSidebarCounts();
+      setBulkDeleteOpen(false);
+      exitSelectionMode();
+    } catch {
+      toast.error('Kunde inte ta bort alla jobb — försök igen');
+    } finally {
+      setBulkDeleting(false);
+    }
+  }, [selectedIds, activeTab, bulkRemoveSaved, bulkRemoveSkipped, refreshSidebarCounts, exitSelectionMode]);
+
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedIds.has(id));
+
+  const selectionToolbar = visibleIds.length > 0 ? (
+    <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+      {!selectionMode ? (
+        <button
+          type="button"
+          onClick={() => setSelectionMode(true)}
+          className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white transition-colors md:hover:bg-white/15"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+          Rensa
+        </button>
+      ) : (
+        <>
+          <span className="text-xs sm:text-sm font-medium text-white">{selectedIds.size} markerade</span>
+          <button
+            type="button"
+            onClick={() => setSelectedIds(allVisibleSelected ? new Set() : new Set(visibleIds))}
+            className="inline-flex items-center rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white transition-colors md:hover:bg-white/15"
+          >
+            {allVisibleSelected ? 'Avmarkera alla' : `Markera alla (${visibleIds.length})`}
+          </button>
+          <button
+            type="button"
+            disabled={selectedIds.size === 0}
+            onClick={() => setBulkDeleteOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 border border-red-400/40 px-3 py-1.5 text-xs font-medium text-white transition-colors md:hover:bg-red-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Ta bort markerade
+          </button>
+          <button
+            type="button"
+            onClick={exitSelectionMode}
+            aria-label="Avbryt markering"
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white transition-colors md:hover:bg-white/15"
+          >
+            <X className="h-3.5 w-3.5" />
+            Avbryt
+          </button>
+        </>
+      )}
+    </div>
+  ) : null;
+
+  const renderSelectionOverlay = (jobId: string, title: string) => {
+    if (!selectionMode) return null;
+    const checked = selectedIds.has(jobId);
+    return (
+      <button
+        type="button"
+        onClick={() => toggleSelected(jobId)}
+        aria-pressed={checked}
+        aria-label={`${checked ? 'Avmarkera' : 'Markera'} ${title}`}
+        className={`absolute inset-0 z-20 flex items-start justify-end rounded-2xl p-3 transition-colors ${
+          checked ? 'bg-primary/25 ring-2 ring-white/70' : 'bg-black/25 md:hover:bg-black/15'
+        }`}
+      >
+        <span
+          className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
+            checked ? 'bg-white border-white' : 'bg-white/15 border-white/60 backdrop-blur-sm'
+          }`}
+        >
+          {checked && <Check className="h-4 w-4 text-primary" />}
+        </span>
+      </button>
+    );
+  };
 
   const prewarmEntries = useMemo(() => {
     return activeJobsForMedia.slice(0, 8).flatMap((entry) => {
@@ -333,6 +456,8 @@ const SavedJobs = () => {
                 ))}
               </div>
 
+              {selectionToolbar}
+
               {sortedJobs.length === 0 ? (
                 <Card className="bg-white/5 border-white/10">
                   <CardContent className="p-8 text-center">
@@ -355,6 +480,7 @@ const SavedJobs = () => {
 
                   return (
                     <CardErrorBoundary key={job.id}>
+                     <div className="relative">
                       <ReadOnlyMobileJobCard
                         job={{
                           id: job.id,
@@ -389,6 +515,8 @@ const SavedJobs = () => {
                         onUnsaveClick={handleUnsaveClick}
                         onCardClick={(jobId, imageState) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true, background: location, ...imageState } })}
                       />
+                      {renderSelectionOverlay(job.id, job.title)}
+                     </div>
                     </CardErrorBoundary>
                   );
                 })}
@@ -448,6 +576,9 @@ const SavedJobs = () => {
                 ))}
               </div>
 
+            {selectionToolbar}
+
+
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {filteredSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
@@ -502,6 +633,7 @@ const SavedJobs = () => {
                         <Undo2 className="h-3.5 w-3.5" />
                         Återställ
                       </button>
+                      {renderSelectionOverlay(job.id, job.title)}
                     </div>
                   </CardErrorBoundary>
                  );
@@ -511,6 +643,47 @@ const SavedJobs = () => {
            )}
          </>
        )}
+
+      {/* Bekräftelsedialog för massrensning */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(open) => { if (!bulkDeleting) setBulkDeleteOpen(open); }}>
+        <AlertDialogContentNoFocus
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+        >
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-white" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort {selectedIds.size} {selectedIds.size === 1 ? 'jobb' : 'jobb'}
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white text-sm leading-relaxed">
+              {activeTab === 'saved'
+                ? 'De markerade jobben tas bort från dina sparade jobb. Annonserna finns kvar i sök.'
+                : 'De markerade jobben tas bort från din skippade-lista och kan dyka upp igen i swipe-läget.'}
+              {' '}Denna åtgärd går inte att ångra.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel
+              disabled={bulkDeleting}
+              className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); void confirmBulkDelete(); }}
+              disabled={bulkDeleting}
+              variant="destructiveSoft"
+              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
+            >
+              {bulkDeleting ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Trash2 className="h-4 w-4 mr-1.5" />}
+              {bulkDeleting ? 'Tar bort…' : 'Ta bort'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
 
       {/* Bekräftelsedialog för borttagning */}
       <AlertDialog open={!!jobToRemove} onOpenChange={(open) => { if (!open) setJobToRemove(null); }}>

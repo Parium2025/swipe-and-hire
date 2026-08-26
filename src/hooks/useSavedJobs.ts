@@ -91,6 +91,26 @@ export const useSavedJobs = () => {
     }
   }, [user?.id]);
 
+  // 🔔 Jobbet skippades i Swipe Mode → databasens exklusivitetstrigger har
+  // redan raderat sparningen. Ta bort den lokalt direkt så hjärtat inte
+  // fortsätter visa "sparad" för ett jobb som inte längre är sparat.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (e: Event) => {
+      const jobId = (e as CustomEvent<{ jobId: string }>).detail?.jobId;
+      if (!jobId || !user?.id) return;
+      setSavedJobIds(prev => {
+        if (!prev.has(jobId)) return prev;
+        const next = new Set(prev);
+        next.delete(jobId);
+        saveToCache(user.id, next);
+        return next;
+      });
+    };
+    window.addEventListener('parium:job-unsaved', handler);
+    return () => window.removeEventListener('parium:job-unsaved', handler);
+  }, [user?.id]);
+
   const fetchSavedJobs = useCallback(async () => {
     if (!user) {
       setSavedJobIds(new Set());

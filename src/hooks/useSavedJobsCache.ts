@@ -376,6 +376,19 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     });
   }, [user?.id, queryClient]);
 
+  // 🔔 Jobbet skippades i Swipe Mode → DB-triggern har redan tagit bort
+  // sparningen. Spegla det direkt så Sparade-listan aldrig visar ett jobb
+  // som inte längre är sparat i databasen.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (e: Event) => {
+      const jobId = (e as CustomEvent<{ jobId: string }>).detail?.jobId;
+      if (jobId) removeSavedJobLocally(jobId);
+    };
+    window.addEventListener('parium:job-unsaved', handler);
+    return () => window.removeEventListener('parium:job-unsaved', handler);
+  }, [removeSavedJobLocally]);
+
   const { isPremium } = useIsPremium();
 
   const toggleSavedJob = useCallback(async (jobId: string, jobPosting?: JobPostingInput) => {
@@ -451,6 +464,75 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     }
   }, [user?.id, queryClient, savedJobIds, isPremium, removeSkippedJobLocally]);
 
+  /**
+   * 🗑️ Massrensning — tar bort flera sparade jobb i en och samma runda.
+   * Chunkat i grupper om 200 id:n så URL:en aldrig blir för lång även om
+   * användaren markerar tiotusentals rader.
+   */
+  const bulkRemoveSaved = useCallback(async (jobIds: string[]) => {
+    if (!user?.id || jobIds.length === 0) return;
+    const ids = Array.from(new Set(jobIds));
+
+    queryClient.setQueryData(['saved-jobs', user.id], (old: SavedJob[] | undefined) => {
+      const current = sanitizeSavedJobsList<SavedJob>(old);
+      const removal = new Set(ids);
+      const next = current.filter((sj) => !removal.has(sj.job_id));
+      writeCache<SavedJob>(SAVED_CACHE_KEY, user.id, next);
+      return next;
+    });
+
+    try {
+      for (let i = 0; i < ids.length; i += 200) {
+        const chunk = ids.slice(i, i + 200);
+        const { error } = await supabase
+          .from('saved_jobs')
+          .delete()
+          .eq('user_id', user.id)
+          .in('job_id', chunk);
+        if (error) throw error;
+      }
+    } finally {
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+    }
+  }, [user?.id, queryClient]);
+
+  /** 🗑️ Massrensning av skippade jobb (swipe_actions, action='skipped'). */
+  const bulkRemoveSkipped = useCallback(async (jobIds: string[]) => {
+    if (!user?.id || jobIds.length === 0) return;
+    const ids = Array.from(new Set(jobIds));
+
+    queryClient.setQueryData(['skipped-jobs', user.id], (old: SkippedJob[] | undefined) => {
+      const current = sanitizeSavedJobsList<SkippedJob>(old);
+      const removal = new Set(ids);
+      const next = current.filter((sj) => !removal.has(sj.job_id));
+      writeCache<SkippedJob>(SKIPPED_CACHE_KEY, user.id, next);
+      return next;
+    });
+
+    try {
+      for (let i = 0; i < ids.length; i += 200) {
+        const chunk = ids.slice(i, i + 200);
+        const { error } = await supabase
+          .from('swipe_actions')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('action', 'skipped')
+          .in('job_id', chunk);
+        if (error) throw error;
+      }
+      // Jobben återgår till swipe-kön — meddela öppna vyer.
+      if (typeof window !== 'undefined') {
+        for (const jobId of ids) {
+          window.dispatchEvent(
+            new CustomEvent('parium:swipe-action-removed', { detail: { jobId } }),
+          );
+        }
+      }
+    } finally {
+      queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
+    }
+  }, [user?.id, queryClient]);
+
   const restoreSkippedJob = useCallback(async (jobId: string) => {
     if (!user?.id) return;
 
@@ -491,5 +573,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     removeSkippedJobLocally,
     toggleSavedJob,
     restoreSkippedJob,
+    bulkRemoveSaved,
+    bulkRemoveSkipped,
   };
 }

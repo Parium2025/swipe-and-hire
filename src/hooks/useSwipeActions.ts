@@ -110,6 +110,16 @@ export function useSwipeActions() {
       // gammal placeholderData från localStorage och saknar det jobbet).
       if (action === 'skipped') {
         queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
+        // 🔗 DB-triggern enforce_saved_skipped_exclusivity tar bort ev. sparning
+        // för samma jobb. Spegla det direkt i alla öppna vyer (Sparade-sidan,
+        // hjärt-ikoner i sök/swipe) så inget "moment 22" uppstår där jobbet
+        // ser sparat ut men inte längre finns i saved_jobs.
+        queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('parium:job-unsaved', { detail: { jobId } }),
+          );
+        }
       }
     } catch (err) {
       console.error('Error recording swipe action:', err);
