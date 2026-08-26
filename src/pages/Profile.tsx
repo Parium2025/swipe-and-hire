@@ -2205,12 +2205,10 @@ const Profile = () => {
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white z-10" />
                   <div className="flex h-11 !min-h-0 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm items-center min-w-0 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 transition-all duration-150">
-                    <span 
-                      className="truncate" 
-                      title={user?.email || ''}
-                    >
-                      {user?.email || ''}
-                    </span>
+                    <TruncatedText
+                      text={user?.email || ''}
+                      className="truncate min-w-0 max-w-full"
+                    />
                   </div>
                 </div>
               </div>
