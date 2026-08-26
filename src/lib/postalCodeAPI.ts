@@ -138,7 +138,7 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
   try {
     const { data, error } = await supabase
       .from('swedish_postal_codes')
-      .select('postal_code, city')
+      .select('postal_code, city, county')
       .eq('postal_code', cleanedCode)
       .maybeSingle();
 
@@ -147,7 +147,7 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
         postalCode: formatPostalCodeDisplay(data.postal_code),
         city: formatCityName(data.city),
         municipality: '',
-        county: '',
+        county: data.county || '',
         area: formatCityName(data.city),
       };
     }
