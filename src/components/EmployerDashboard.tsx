@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, ChevronsDownUp, ChevronsUpDown, Check, ListChecks, X } from 'lucide-react';
+import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, ChevronsDownUp, ChevronsUpDown, Check, X } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, removeJobFromJobsCache, removeJobsFromJobsCache, type JobPosting } from '@/hooks/useJobsData';
 
@@ -677,9 +677,8 @@ const EmployerDashboard = memo(() => {
             <button
               type="button"
               onClick={() => setSelectionMode(true)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+              className="inline-flex items-center rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
             >
-              <ListChecks className="h-3.5 w-3.5" />
               Markera flera
             </button>
           ) : (
