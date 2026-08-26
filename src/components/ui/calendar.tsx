@@ -6,6 +6,7 @@ import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { isSwedishHoliday } from "@/lib/swedishHolidays";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
