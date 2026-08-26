@@ -32,6 +32,11 @@ interface CompanyProfileDialogProps {
   companyId: string;
 }
 
+interface SocialMediaLink {
+  platform: 'linkedin' | 'twitter' | 'instagram' | 'annat' | string;
+  url: string;
+}
+
 interface CompanyProfile {
   company_name: string;
   company_logo_url?: string;
@@ -40,6 +45,8 @@ interface CompanyProfile {
   industry?: string;
   employee_count?: string;
   address?: string;
+  org_number?: string;
+  company_social_media_links?: SocialMediaLink[];
 }
 
 interface CompanyReview {
