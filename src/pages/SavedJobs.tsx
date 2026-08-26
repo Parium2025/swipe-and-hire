@@ -478,6 +478,7 @@ const SavedJobs = () => {
 
                   return (
                     <CardErrorBoundary key={job.id}>
+                     <div className="relative">
                       <ReadOnlyMobileJobCard
                         job={{
                           id: job.id,
