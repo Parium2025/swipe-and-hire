@@ -628,6 +628,7 @@ const SavedJobs = () => {
                         <Undo2 className="h-3.5 w-3.5" />
                         Återställ
                       </button>
+                      {renderSelectionOverlay(job.id, job.title)}
                     </div>
                   </CardErrorBoundary>
                  );
