@@ -76,3 +76,47 @@ export const getLocalTimeZone = (): string => {
     return 'Europe/Stockholm';
   }
 };
+
+/* ------------------------------------------------------------------ *
+ * Cross-timezone hints
+ *
+ * Intervjutider lagras som absoluta ögonblick (UTC) och visas alltid på
+ * betraktarens egen klocka. Sitter du i New York och mötet är 14:00 svensk
+ * tid ser du 08:00 — men då måste det också framgå att 14:00 svensk tid är
+ * samma stund, annars uppstår tveksamhet. Hinten visas därför bara när
+ * enhetens tidszon inte är svensk.
+ * ------------------------------------------------------------------ */
+
+const SWEDISH_TIME_ZONE = 'Europe/Stockholm';
+
+const swedishTimeFormatter = new Intl.DateTimeFormat('sv-SE', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+  timeZone: SWEDISH_TIME_ZONE,
+});
+
+/** True när enheten redan står på svensk tid (då behövs ingen hint). */
+export const isSwedishTimeZone = (): boolean => getLocalTimeZone() === SWEDISH_TIME_ZONE;
+
+/** "14:00" i svensk tid, oavsett var enheten befinner sig. */
+export const formatSwedishTime = (date: Date | number = Date.now()): string =>
+  swedishTimeFormatter.format(partsOf(date));
+
+/**
+ * "(14:00 svensk tid)" — tom sträng när enheten redan är i Sverige eller när
+ * klockslaget råkar vara identiskt (t.ex. Oslo/Berlin).
+ */
+export const swedishTimeHint = (date: Date | number = Date.now()): string => {
+  if (isSwedishTimeZone()) return '';
+  const swedish = formatSwedishTime(date);
+  if (swedish === formatLocalTime(date)) return '';
+  return `${swedish} svensk tid`;
+};
+
+/** Stadsnamnet ur enhetens tidszon, t.ex. "New York". */
+export const getLocalTimeZoneCity = (): string => {
+  const zone = getLocalTimeZone();
+  const city = zone.split('/').pop() ?? zone;
+  return city.replace(/_/g, ' ');
+};
