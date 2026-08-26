@@ -311,7 +311,7 @@ const Support = () => {
           <p className="text-sm text-white">Översikt över dina tidigare och pågående supportärenden</p>
         </div>
         <div className="p-6">
-          {ticketsLoading ? (
+          {ticketsLoading && ticketSkeletonCount > 0 ? (
             <div className="space-y-3" aria-busy="true" aria-label="Laddar supportärenden">
               {Array.from({ length: ticketSkeletonCount }).map((_, i) => (
                 <div
