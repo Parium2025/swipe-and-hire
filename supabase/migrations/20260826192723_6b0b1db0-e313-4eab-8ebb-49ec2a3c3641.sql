@@ -1,0 +1,1 @@
+ALTER TABLE public.swedish_postal_codes ADD COLUMN IF NOT EXISTS county text;
