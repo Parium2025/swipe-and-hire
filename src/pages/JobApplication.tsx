@@ -385,7 +385,8 @@ const JobApplication = () => {
         isStudying: formData.isStudying,
         additionalDocuments: formData.additionalDocuments,
         ...formData.customAnswers
-      }
+      },
+      questions_snapshot: questions,
     };
 
     const emailPayload = {
@@ -418,6 +419,7 @@ const JobApplication = () => {
       });
 
       setSubmitting(false);
+      submitInProgressRef.current = false;
       navigate('/dashboard');
       return;
     }
