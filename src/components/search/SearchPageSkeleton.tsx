@@ -118,10 +118,10 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
             <div className={`h-6 w-24 rounded ${SKELETON_SHAPE}`} />
           </div>
 
-          {/* StatsGrid — endast desktop (md+), precis som riktiga sidan */}
-          <div className="hidden md:grid md:grid-cols-3 gap-2">
+          {/* StatsGrid — visas i alla vyer, precis som riktiga sidan */}
+          <div className="grid grid-cols-3 gap-2">
             {[1, 2, 3].map(i => (
-              <div key={i} className={`h-[76px] rounded-lg ${SKELETON_SHAPE}`} />
+              <div key={i} className={`h-[60px] md:h-[76px] rounded-lg ${SKELETON_SHAPE}`} />
             ))}
           </div>
 
