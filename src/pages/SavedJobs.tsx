@@ -24,6 +24,11 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount } from '@/lib/useLiveSkeletonCount';
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
+import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
+
+/** Samma sidstorlek som Mina annonser / Dashboard — 18 kort per sida (6 rader × 3 kolumner). */
+const PAGE_SIZE = 18;
 
 
 type SortOption = 'newest' | 'oldest';
@@ -198,6 +203,39 @@ const SavedJobs = () => {
 
   const activeJobsForMedia = activeTab === 'saved' ? sortedJobs : filteredSkippedJobs;
 
+  // 📄 Sidnavigering — exakt samma modell som Mina annonser/Dashboard:
+  // 18 kort per sida, sidan nollställs vid flik-, sorterings- och filterbyte
+  // och klampas alltid inom listans längd.
+  const [page, setPage] = useState(1);
+  const didMountRef = useRef(false);
+  const totalPages = Math.max(1, Math.ceil(activeJobsForMedia.length / PAGE_SIZE));
+
+  useEffect(() => { setPage(1); }, [activeTab]);
+  useEffect(() => { setPage(1); }, [sortBy, statusFilter, skippedSort]);
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  useEffect(() => {
+    if (!didMountRef.current) { didMountRef.current = true; return; }
+    if (typeof window === 'undefined') return;
+    getManagedScrollContainer()?.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const positions = readPositions();
+    positions[window.location.pathname] = { top: 0 };
+    writePositions(positions);
+  }, [page]);
+
+  const pagedSavedJobs = useMemo(
+    () => sortedJobs.slice((page - 1) * PAGE_SIZE, (page - 1) * PAGE_SIZE + PAGE_SIZE),
+    [sortedJobs, page],
+  );
+  const pagedSkippedJobs = useMemo(
+    () => filteredSkippedJobs.slice((page - 1) * PAGE_SIZE, (page - 1) * PAGE_SIZE + PAGE_SIZE),
+    [filteredSkippedJobs, page],
+  );
+  const pagedActiveJobs = activeTab === 'saved' ? pagedSavedJobs : pagedSkippedJobs;
+
   // Alla jobb som just nu syns i aktiv flik (respekterar sortering + filter)
   const visibleIds = useMemo(
     () => activeJobsForMedia.map((entry) => entry.job_postings!.id),
@@ -295,8 +333,11 @@ const SavedJobs = () => {
     );
   };
 
+  // Förvärm bilder för aktuell sida + nästa sida, så "Nästa" känns instant
+  // utan att vi någonsin drar ner tusentals bilder i onödan.
   const prewarmEntries = useMemo(() => {
-    return activeJobsForMedia.slice(0, 8).flatMap((entry) => {
+    const start = (page - 1) * PAGE_SIZE;
+    return activeJobsForMedia.slice(start, start + PAGE_SIZE * 2).flatMap((entry) => {
       const posting = entry.job_postings;
       if (!posting) return [];
 
@@ -305,7 +346,7 @@ const SavedJobs = () => {
         { path: posting.company_logo_url, bucket: 'company-logos' as const },
       ].filter((item) => Boolean(item.path));
     });
-  }, [activeJobsForMedia]);
+  }, [activeJobsForMedia, page]);
 
   useImagePrewarm(prewarmEntries);
 
@@ -472,8 +513,14 @@ const SavedJobs = () => {
                 </Card>
               ) : (
 
-              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-                {sortedJobs.map((savedJob, index) => {
+              <>
+              {totalPages > 1 && (
+                <p className="mb-3 text-center text-xs text-white/80">
+                  Visar {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, sortedJobs.length)} av {sortedJobs.length} jobb
+                </p>
+              )}
+              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pagedSavedJobs.length === 1 ? ' job-card-grid-single' : pagedSavedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+                {pagedSavedJobs.map((savedJob, index) => {
                   const job = savedJob.job_postings!;
                   // 🚇 SINGLE TUNNEL: workplace_name + company_logo_url come from job_postings.
                   const companyName = job.workplace_name?.trim() || 'Företag';
@@ -521,6 +568,8 @@ const SavedJobs = () => {
                   );
                 })}
               </div>
+              <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+              </>
               )}
             </>
 
@@ -579,8 +628,13 @@ const SavedJobs = () => {
             {selectionToolbar}
 
 
-            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {filteredSkippedJobs.map((skippedJob, index) => {
+            {totalPages > 1 && (
+              <p className="mb-3 text-center text-xs text-white/80">
+                Visar {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredSkippedJobs.length)} av {filteredSkippedJobs.length} jobb
+              </p>
+            )}
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pagedSkippedJobs.length === 1 ? ' job-card-grid-single' : pagedSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+              {pagedSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
                 // 🚇 SINGLE TUNNEL
                 const companyName = job.workplace_name?.trim() || 'Företag';
@@ -639,6 +693,7 @@ const SavedJobs = () => {
                  );
                })}
              </div>
+             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </>
            )}
          </>
