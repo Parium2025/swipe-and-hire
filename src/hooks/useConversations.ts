@@ -91,7 +91,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 10; // v10: remove aggressive cache filtering + preserve previous data on transient empty fetch
+const CACHE_VERSION = 11; // v11: hide self-conversations (provutskick) from inbox
 
 interface CachedConversations {
   userId: string;
@@ -474,7 +474,16 @@ export function useConversations() {
       );
 
       // Build final conversation objects
-      const result = conversations.filter((c) => !hiddenConversationIds.has(c.id)).map((conv) => {
+      const result = conversations
+        .filter((c) => !hiddenConversationIds.has(c.id))
+        .filter((c) => {
+          // Provutskick till sig själv (du är enda medlemmen) ska aldrig synas i inkorgen.
+          const memberIds = (allMembers || [])
+            .filter((m) => m.conversation_id === c.id)
+            .map((m) => m.user_id);
+          return memberIds.length === 0 || memberIds.some((id) => id !== user.id);
+        })
+        .map((conv) => {
         const members = (allMembers || [])
           .filter((m) => m.conversation_id === conv.id)
           .map((m) => ({
