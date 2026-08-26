@@ -16,6 +16,12 @@ import type { SearchCriteria } from '@/hooks/useSavedSearches';
 
 export type TimeFilter = 'all' | '12h' | '24h' | '3d' | '7d';
 
+// Neutral wrapper istället för React.Fragment i .map()-listor.
+// Dev-taggern injicerar data-lov-id på JSX-element, vilket React.Fragment
+// varnar för. MenuRow slukar extra props och renderar bara barnen — noll
+// visuell skillnad, men konsollen blir ren.
+const MenuRow = ({ children }: { children: React.ReactNode; [key: string]: unknown }) => <>{children}</>;
+
 interface SearchFiltersPanelProps {
   // Search
   searchInput: string;
@@ -238,7 +244,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 { value: '7d' as TimeFilter, label: '7 dagar' },
                 { value: 'all' as TimeFilter, label: 'Alla' },
               ]).map(({ value, label }, index, arr) => (
-                <React.Fragment key={value}>
+                <MenuRow key={value}>
                   <DropdownMenuItem
                     onClick={() => onTimeFilterChange(value)}
                     className="text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white"
@@ -247,7 +253,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     {timeFilter === value && <Check className="h-4 w-4 text-white ml-2" />}
                   </DropdownMenuItem>
                   {index < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
-                </React.Fragment>
+                </MenuRow>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -341,7 +347,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/20" />
                   {OCCUPATION_CATEGORIES.map((category, index) => (
-                    <React.Fragment key={category.value}>
+                    <MenuRow key={category.value}>
                       <DropdownMenuItem
                         onClick={() => {
                           onCategoryChange(category.value);
@@ -357,7 +363,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       {index < OCCUPATION_CATEGORIES.length - 1 && (
                         <DropdownMenuSeparator className="bg-white/20" />
                       )}
-                    </React.Fragment>
+                    </MenuRow>
                   ))}
                 </DropdownMenuContent>
 
@@ -399,7 +405,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/20" />
                   {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.map((subcat, index, array) => (
-                    <React.Fragment key={subcat}>
+                    <MenuRow key={subcat}>
                       <DropdownMenuItem
                         onClick={() => {
                           onSubcategoriesChange(
@@ -418,7 +424,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       {index < array.length - 1 && (
                         <DropdownMenuSeparator className="bg-white/20" />
                       )}
-                    </React.Fragment>
+                    </MenuRow>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -481,7 +487,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/20" />
                   {employmentTypes.map((type, index) => (
-                    <React.Fragment key={type.value}>
+                    <MenuRow key={type.value}>
                       <DropdownMenuItem
                         onClick={() => {
                           const isSelected = selectedEmploymentTypes.includes(type.value);
@@ -501,7 +507,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       {index < employmentTypes.length - 1 && (
                         <DropdownMenuSeparator className="bg-white/20" />
                       )}
-                    </React.Fragment>
+                    </MenuRow>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -523,14 +529,18 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       {activeSalaryLabel}
                     </span>
                     {salaryRange ? (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); onSalaryRangeChange(''); }}
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSalaryRangeChange(''); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); e.preventDefault(); onSalaryRangeChange(''); } }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors cursor-pointer"
                         aria-label="Rensa lönefilter"
                       >
                         <X className="h-4 w-4" />
-                      </button>
+                      </span>
+
                     ) : (
                       <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                     )}
@@ -538,7 +548,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
                   {salaryOptions.map((opt, idx, arr) => (
-                    <React.Fragment key={opt.value || 'all'}>
+                    <MenuRow key={opt.value || 'all'}>
                       <DropdownMenuItem
                         onClick={() => onSalaryRangeChange(opt.value)}
                         className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 md:py-2 text-[15px] md:text-sm leading-tight"
@@ -547,7 +557,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         {salaryRange === opt.value && <Check className="h-4 w-4 text-white" />}
                       </DropdownMenuItem>
                       {idx < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
-                    </React.Fragment>
+                    </MenuRow>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
