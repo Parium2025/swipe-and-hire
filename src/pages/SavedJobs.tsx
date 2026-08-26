@@ -24,6 +24,11 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount } from '@/lib/useLiveSkeletonCount';
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
+import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
+
+/** Samma sidstorlek som Mina annonser / Dashboard — 18 kort per sida (6 rader × 3 kolumner). */
+const PAGE_SIZE = 18;
 
 
 type SortOption = 'newest' | 'oldest';
