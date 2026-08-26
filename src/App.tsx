@@ -35,6 +35,7 @@ import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 import ValjPlan from "./pages/ValjPlan";
 import Unsubscribe from "./pages/Unsubscribe";
+import TeamInvite from "./pages/TeamInvite";
 
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
 // imported module" errors from freezing the app on a dark Suspense fallback.
@@ -266,6 +267,7 @@ const AnimatedRoutes = () => {
           <Route path="/migrate-media" element={<MediaMigration />} />
           <Route path="/cv-tunnel" element={<CvTunnel />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
+          <Route path="/team-invite" element={<TeamInvite />} />
           
           
           <Route path="*" element={<NotFound />} />
