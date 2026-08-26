@@ -64,6 +64,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   skippedJobIds,
   onRecordSwipeAction,
   onUndoSwipeAction,
+  onNeedMore,
 }: SwipeFullscreenProps) {
   /* ── Refs ─────────────────────────────────────────────── */
   const scrollRef = useRef<HTMLDivElement>(null);
