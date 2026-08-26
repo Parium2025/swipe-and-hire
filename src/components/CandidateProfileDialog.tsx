@@ -1,4 +1,5 @@
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
+import { TruncatedText } from '@/components/TruncatedText';
 import { cn } from '@/lib/utils';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { ApplicationData } from '@/hooks/useApplicationsData';

@@ -1,3 +1,4 @@
+import { TruncatedText } from '@/components/TruncatedText';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { looksLikeVideoFile } from '@/lib/videoInput';
 import { useAuth } from '@/hooks/useAuth';
