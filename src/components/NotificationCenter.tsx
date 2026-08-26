@@ -100,8 +100,12 @@ const TOAST_ROUTE_RULES: Array<[RegExp, string]> = [
   [/sparade jobb synkroniserade|jobb sparat/i, '/saved-jobs'],
 ];
 
+// Felnotiser ("Kunde inte spara annonsen") ska aldrig navigera någonstans.
+const FAILURE_PATTERN = /kunde inte|misslyckades|gick inte|fel vid|något gick fel/i;
+
 function resolveToastRoute(title: string, body?: string | null): string | undefined {
   const text = `${title} ${body ?? ''}`;
+  if (FAILURE_PATTERN.test(text)) return undefined;
   for (const [pattern, route] of TOAST_ROUTE_RULES) {
     if (pattern.test(text)) return route;
   }
