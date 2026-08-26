@@ -345,9 +345,11 @@ const TeamManagement = () => {
       <div className="flex items-center gap-2 mb-6">
         <Users className="h-5 w-5 text-white" />
         <h2 className="text-lg font-semibold text-white">Team</h2>
-        <Badge variant="glass" className="ml-auto">
-          {teamMembers.length} {teamMembers.length === 1 ? 'medlem' : 'medlemmar'}
-        </Badge>
+        {!loading && (
+          <Badge variant="glass" className="ml-auto">
+            {teamMembers.length} {teamMembers.length === 1 ? 'medlem' : 'medlemmar'}
+          </Badge>
+        )}
       </div>
 
       {/* Invite Section */}

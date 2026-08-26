@@ -16,6 +16,7 @@ import EmployerAccountEmailPanel from '@/components/employer/settings/EmployerAc
 import EmployerPasswordPanel from '@/components/employer/settings/EmployerPasswordPanel';
 import EmployerNotificationsPanel from '@/components/employer/settings/EmployerNotificationsPanel';
 import EmployerLocationPanel from '@/components/employer/settings/EmployerLocationPanel';
+import { prewarmEmployerSettings } from '@/lib/settingsPrewarm';
 
 const EmployerSettings = () => {
   const { user, profile, updateProfile, updatePassword } = useAuth();
@@ -30,6 +31,12 @@ const EmployerSettings = () => {
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
   const [openSection, setOpenSection] = useState<string>('');
+
+  // Förvärm panelernas data direkt när sidan öppnas, medan dragspelen är stängda.
+  // Då finns team, regler och mallar redan i cache när användaren fäller ut dem.
+  useEffect(() => {
+    prewarmEmployerSettings(user?.id);
+  }, [user?.id]);
 
   useEffect(() => {
     if (location.hash !== '#notifications') return;
