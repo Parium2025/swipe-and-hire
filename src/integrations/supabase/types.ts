@@ -3903,6 +3903,7 @@ export type Database = {
         }
         Returns: number
       }
+      county_for_postal_code: { Args: { p_code: string }; Returns: string }
       create_system_performance_alert: {
         Args: { _body: string; _metadata?: Json; _title: string }
         Returns: string
