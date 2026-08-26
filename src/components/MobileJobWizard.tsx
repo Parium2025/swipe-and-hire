@@ -2113,8 +2113,8 @@ const MobileJobWizard = ({
              formData.salary_type &&
              formData.salary_transparency &&
              parseInt(formData.positions_count) > 0 &&
-             formData.work_start_time.trim() &&
-             formData.work_end_time.trim();
+             isValidClockTime(formData.work_start_time) &&
+             isValidClockTime(formData.work_end_time);
     }
     
     if (currentStep === 1) {
