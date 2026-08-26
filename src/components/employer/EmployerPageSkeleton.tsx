@@ -124,6 +124,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           </div>
         </div>
       </header>
+      )}
     </>
   );
 });
