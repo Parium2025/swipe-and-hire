@@ -4,6 +4,7 @@ import { Send, Calendar, Heart, MessageSquare, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
+import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatsCarousel } from './StatsCarousel';
 import { useProfileViewStats } from '@/hooks/useProfileViewStats';
