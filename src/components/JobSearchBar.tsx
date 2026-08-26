@@ -174,11 +174,12 @@ export const JobSearchBar = memo(({
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
-                  className="dashboard-icon-control absolute right-1.5 top-1/2 transform -translate-y-1/2 flex items-center justify-center text-white focus:outline-none"
-                >
-                  <ArrowUpDown className="h-3.5 w-3.5" />
-                </button>
+                  <button
+                    aria-label="Sortera"
+                    className="dashboard-icon-control absolute right-1.5 top-1/2 transform -translate-y-1/2 flex items-center justify-center text-white focus:outline-none"
+                  >
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
