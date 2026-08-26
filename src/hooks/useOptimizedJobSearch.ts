@@ -159,6 +159,20 @@ export interface SearchJob {
   company_review_count?: number;
 }
 
+export type JobSearchSort = 'newest' | 'oldest' | 'most-views';
+
+/**
+ * Keyset-markör. Måste innehålla ALLA fält som ingår i serverns ORDER BY,
+ * annars kan rader hoppas över eller dubbleras när flera jobb delar samma
+ * created_at (vanligt vid massimport).
+ */
+interface SearchCursor {
+  createdAt: string;
+  id: string;
+  rank: number;
+  views: number;
+}
+
 interface UseOptimizedJobSearchOptions {
   searchQuery: string;
   city: string;
@@ -172,6 +186,8 @@ interface UseOptimizedJobSearchOptions {
   createdAfter?: string | null;
   /** Antal jobb per batch. Default 100. */
   pageSize?: number;
+  /** Sortering körs i databasen — gäller hela resultatet, inte bara laddade sidor. */
+  sort?: JobSearchSort;
 }
 
 const normalizeSwedish = (text: string): string => {
@@ -1026,7 +1042,7 @@ function useCompanyReviews(employerIds: string[]) {
 }
 
 export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
-  const { enabled = true, employerIds: employerIdsFilter, createdAfter, pageSize = 100 } = options;
+  const { enabled = true, employerIds: employerIdsFilter, createdAfter, pageSize = 100, sort = 'newest' } = options;
   const queryClient = useQueryClient();
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -1063,8 +1079,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       salarySearch?.isMinimumSearch,
       employerIdsKey,
       createdAfter || '',
+      sort,
     ]),
-    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, employerIdsKey, createdAfter]
+    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, employerIdsKey, createdAfter, sort]
   );
 
   // 🔥 SCALE: useInfiniteQuery med cursor-paginering på created_at.
@@ -1091,14 +1108,17 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       salarySearch?.isMinimumSearch,
       employerIdsKey,
       createdAfter || '',
+      sort,
     ],
     queryFn: async ({ pageParam }) => {
       if (abortControllerRef.current) abortControllerRef.current.abort();
       abortControllerRef.current = new AbortController();
 
+      const cursor = pageParam as SearchCursor | null;
+
       try {
         return readThroughCache<SearchJob[]>(
-          searchCacheKey([HOT_SEARCH_CACHE_PREFIX, fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, pageSize, pageParam || '', employerIdsKey, createdAfter || '']),
+          searchCacheKey([HOT_SEARCH_CACHE_PREFIX, fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, pageSize, sort, cursor ? `${cursor.createdAt}|${cursor.id}` : '', employerIdsKey, createdAfter || '']),
           HOT_SEARCH_CACHE_TTL,
           async () => {
             const { data, error } = await measurePerformance('search', () => supabase.rpc('search_jobs', {
@@ -1111,7 +1131,11 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
               p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
               p_limit: pageSize,
               p_offset: 0,
-              p_cursor_created_at: (pageParam as string | null) || null,
+              p_cursor_created_at: cursor?.createdAt ?? null,
+              p_cursor_id: cursor?.id ?? null,
+              p_cursor_rank: cursor?.rank ?? null,
+              p_cursor_views: cursor?.views ?? null,
+              p_sort: sort,
               p_employer_ids: employerIdsArray,
               p_created_after: createdAfter || null,
             } as any));
@@ -1123,7 +1147,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         );
       } catch (err) {
         // Vid första sidan + nätverksfel: använd cachad data om den finns
-        if (!pageParam) {
+        if (!cursor) {
           const cached = readSearchCache(cacheKey);
           if (cached && cached.length > 0) {
             warmCompanyLogos(cached);
@@ -1133,10 +1157,17 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         throw err;
       }
     },
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => {
+    initialPageParam: null as SearchCursor | null,
+    getNextPageParam: (lastPage): SearchCursor | undefined => {
       if (!lastPage || lastPage.length < pageSize) return undefined;
-      return lastPage[lastPage.length - 1]?.created_at || undefined;
+      const last = lastPage[lastPage.length - 1];
+      if (!last?.created_at || !last?.id) return undefined;
+      return {
+        createdAt: last.created_at,
+        id: last.id,
+        rank: typeof last.search_rank === 'number' ? last.search_rank : 0,
+        views: typeof last.views_count === 'number' ? last.views_count : 0,
+      };
     },
     enabled,
     staleTime: 30 * 1000,
@@ -1284,124 +1315,4 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     hasNextPage: !!hasNextPage,
     isFetchingNextPage,
   };
-}
-
-interface UseInfiniteJobSearchOptions extends UseOptimizedJobSearchOptions {
-  pageSize?: number;
-}
-
-export function useInfiniteJobSearch(options: UseInfiniteJobSearchOptions) {
-  const { enabled = true, pageSize = 18 } = options;
-  const queryClient = useQueryClient();
-  const { cityFilter, countyFilter, employmentCodes, categoryFilter, fullSearchQuery, salarySearch } = useSearchParamsState(options);
-
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    error,
-    refetch,
-  } = useInfiniteQuery({
-    queryKey: [
-      'infinite-job-search',
-      fullSearchQuery,
-      cityFilter,
-      countyFilter,
-      employmentCodes,
-      categoryFilter,
-      salarySearch?.targetSalary,
-    ],
-    queryFn: async ({ pageParam }) => {
-      const { data, error } = await measurePerformance('search', () => supabase.rpc('search_jobs', {
-        p_search_query: fullSearchQuery || null,
-        p_city: cityFilter || null,
-        p_county: countyFilter || null,
-        p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
-        p_category: categoryFilter || null,
-        p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
-        p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
-        p_limit: pageSize,
-        p_offset: 0,
-        p_cursor_created_at: pageParam || null,
-      }));
-
-      if (error) throw error;
-      return (data || []) as unknown as SearchJob[];
-    },
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => {
-      if (lastPage.length < pageSize) return undefined;
-      return lastPage[lastPage.length - 1]?.created_at || undefined;
-    },
-    enabled,
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
-  });
-
-  const allJobs = useMemo(() => data?.pages.flat() || [], [data]);
-
-  useEffect(() => {
-    const channel = createRealtimeChannel('infinite-search-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, () => {
-        queryClient.invalidateQueries({ queryKey: ['infinite-job-search'] });
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-
-  return {
-    jobs: allJobs,
-    isLoading,
-    error,
-    refetch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    totalCount: allJobs.length,
-  };
-}
-
-export function useJobSearchCount(options: Omit<UseOptimizedJobSearchOptions, 'enabled'>) {
-  const { cityFilter, countyFilter, employmentCodes, categoryFilter, fullSearchQuery, salarySearch } = useSearchParamsState({
-    ...options,
-    enabled: true,
-  });
-
-  const { data: count = 0 } = useQuery({
-    queryKey: ['job-search-count', fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary],
-    queryFn: async () => {
-      return readThroughCache<number>(
-        searchCacheKey([COUNT_CACHE_PREFIX, fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch]),
-        COUNT_CACHE_TTL,
-        async () => {
-          const { data, error } = await supabase.rpc('count_search_jobs', {
-            p_search_query: fullSearchQuery || null,
-            p_city: cityFilter || null,
-            p_county: countyFilter || null,
-            p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
-            p_category: categoryFilter || null,
-            p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
-            p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
-          });
-
-          if (error) {
-            console.error('Count search jobs error:', error);
-            return 0;
-          }
-
-          return data || 0;
-        },
-        (data): data is number => typeof data === 'number',
-      );
-    },
-    staleTime: 60000,
-    gcTime: 5 * 60 * 1000,
-  });
-
-  return count;
 }

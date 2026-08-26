@@ -388,6 +388,9 @@ const SearchJobs = memo(() => {
     subcategories: selectedSubcategories,
     employerIds: selectedEmployerIds,
     createdAfter,
+    // 🔥 Sorteringen sker i databasen — gäller hela träffmängden, inte bara
+    // de sidor som råkar vara laddade.
+    sort: sortBy,
     enabled: true,
   });
 

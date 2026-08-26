@@ -3891,6 +3891,8 @@ export type Database = {
           p_category?: string
           p_city?: string
           p_county?: string
+          p_created_after?: string
+          p_employer_ids?: string[]
           p_employment_types?: string[]
           p_salary_max?: number
           p_salary_min?: number
@@ -4531,6 +4533,9 @@ export type Database = {
           p_county?: string
           p_created_after?: string
           p_cursor_created_at?: string
+          p_cursor_id?: string
+          p_cursor_rank?: number
+          p_cursor_views?: number
           p_employer_ids?: string[]
           p_employment_types?: string[]
           p_limit?: number
@@ -4538,6 +4543,7 @@ export type Database = {
           p_salary_max?: number
           p_salary_min?: number
           p_search_query?: string
+          p_sort?: string
         }
         Returns: {
           application_instructions: string
