@@ -2593,7 +2593,9 @@ const MobileJobWizard = ({
         job_image_desktop_url: formData.job_image_desktop_url || null,
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
-        is_active: true
+        // Nya/återpublicerade annonser aktiveras först när frågorna har sparats.
+        // En aktiv redigering ligger kvar aktiv under den transaktionella frågesynken.
+        is_active: Boolean(existingJob?.id && !isPublishingDraft)
       };
       
       // Set created_at and expires_at when:
@@ -2631,13 +2633,6 @@ const MobileJobWizard = ({
         jobPost = data;
         error = insertError;
 
-        // If republishing, soft-delete the old job so it doesn't linger
-        if (isPublishingDraft && existingJob?.id && !insertError) {
-          await supabase
-            .from('job_postings')
-            .update({ deleted_at: new Date().toISOString(), is_active: false })
-            .eq('id', existingJob.id);
-        }
       }
 
       if (error) {
@@ -2655,24 +2650,30 @@ const MobileJobWizard = ({
         return;
       }
 
-      // Save questions to job_questions table if there are any.
-      // Vid tillfälligt nätfel gör vi tre försök med backoff. Misslyckas det
-      // ändå får arbetsgivaren veta det — annonsen får aldrig se "klar" ut
-      // medan ansökningsfrågorna saknas.
-      let questionsSaved = true;
+      // Frågorna synkas i en enda databastransaktion. Nya annonser är dolda
+      // tills både annons och frågor är klara, så halvpublicering är omöjlig.
       if (jobPost) {
-        for (let attempt = 0; attempt < 3; attempt++) {
-          try {
-            await syncJobQuestions(jobPost.id, customQuestions);
-            questionsSaved = true;
-            break;
-          } catch (questionsError) {
-            questionsSaved = false;
-            console.error('Error saving questions (attempt ' + (attempt + 1) + '):', questionsError);
-            if (attempt < 2) {
-              await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
-            }
-          }
+        await syncJobQuestions(jobPost.id, customQuestions);
+
+        if (!shouldUpdateExisting) {
+          const { data: activatedJob, error: activateError } = await supabase
+            .from('job_postings')
+            .update({ is_active: true })
+            .eq('id', jobPost.id)
+            .select()
+            .single();
+          if (activateError) throw activateError;
+          jobPost = activatedJob;
+        }
+
+        // Den gamla utkast-raden tas bort först när den nya annonsen och dess
+        // frågor är fullständigt sparade och den nya annonsen är aktiv.
+        if (isPublishingDraft && existingJob?.id) {
+          const { error: archiveError } = await supabase
+            .from('job_postings')
+            .update({ deleted_at: new Date().toISOString(), is_active: false })
+            .eq('id', existingJob.id);
+          if (archiveError) throw archiveError;
         }
       }
 
@@ -2696,16 +2697,6 @@ const MobileJobWizard = ({
       // Vänta tills mobil-dialogens overlay och viewport har stabiliserats.
       // Annars börjar canvas-animationen bakom stängningsövergången på iOS.
       window.setTimeout(() => {
-        if (!questionsSaved) {
-          toast({
-            title: "Annonsen är publicerad – men frågorna sparades inte",
-            description: "Öppna annonsen och spara ansökningsfrågorna igen.",
-            variant: "destructive",
-            duration: 9000,
-            route: jobPost?.id ? `/job/${jobPost.id}` : '/my-jobs'
-          });
-          return;
-        }
         celebrate({ intensity: 'big' });
         toast({
           title: "Jobbannons skapad!",

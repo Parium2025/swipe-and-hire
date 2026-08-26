@@ -30,26 +30,11 @@ const WorkplacePostalCodeSelector = ({
   const [isValid, setIsValid] = useState(false);
   const lastUserEditedPostalCodeRef = useRef('');
 
-  // Helper to validate city name (only letters, spaces, and hyphens)
-  const isValidCityName = useCallback((city: string) => {
-    if (!city || city.trim().length === 0) return false;
-    // Allow only letters (including Swedish åäöÅÄÖ), spaces, and hyphens
-    return /^[a-zA-ZåäöÅÄÖ\s-]+$/.test(city.trim());
-  }, []);
-
   // Memoized validation status
-  // Valid if: (1) postal code found automatically, OR (2) postal code valid format + city manually entered with only letters
+  // Ett postnummer är giltigt först när det finns i det gemensamma registret.
   const hasValidLocation = useMemo(() => {
-    // Scenario 1: Postal code found automatically
-    if (foundLocation !== null && isValid) return true;
-    
-    // Scenario 2: Valid postal code format + manually entered city (with only letters)
-    if (isValid && postalCodeValue.replace(/\D/g, '').length === 5 && isValidCityName(cityValue)) {
-      return true;
-    }
-    
-    return false;
-  }, [foundLocation, isValid, postalCodeValue, cityValue, isValidCityName]);
+    return foundLocation !== null && isValid;
+  }, [foundLocation, isValid]);
 
   // Report validation status to parent
   useEffect(() => {
@@ -131,13 +116,6 @@ const WorkplacePostalCodeSelector = ({
     }
   }, [onPostalCodeChange]);
 
-  const handleCityChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Only allow letters (including Swedish åäöÅÄÖ), spaces, and hyphens - filter out numbers
-    const filtered = value.replace(/[^a-zA-ZåäöÅÄÖ\s-]/g, '');
-    onLocationChange(filtered, undefined, undefined, undefined, 'user');
-  }, [onLocationChange]);
-
   return (
     <div className={`grid grid-cols-2 gap-3 ${className}`}>
       {/* Postnummer input */}
@@ -180,14 +158,10 @@ const WorkplacePostalCodeSelector = ({
         <Label className="text-white text-sm">Ort<RequiredMark filled={!!cityValue.trim()} /></Label>
         <Input
           value={cityValue}
-          onChange={handleCityChange}
-          placeholder={
-            isValid && !foundLocation && !isLoading && postalCodeValue.replace(/\D/g, '').length === 5
-              ? "Ange ort manuellt"
-              : "Fylls i automatiskt"
-          }
+          onChange={() => {}}
+          placeholder="Fylls i automatiskt"
           className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm transition-colors duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 focus:ring-0 focus:outline-none focus:border-white/50"
-          readOnly={foundLocation !== null}
+          readOnly
           autoComplete="off"
           autoCorrect="off"
           spellCheck="false"
@@ -224,7 +198,7 @@ const WorkplacePostalCodeSelector = ({
                 Postnummer {postalCodeValue} hittades inte
               </p>
               <p className="text-sm text-white mt-0.5">
-                Du kan ange orten manuellt ovan
+                Kontrollera postnumret och försök igen
               </p>
             </div>
           </div>

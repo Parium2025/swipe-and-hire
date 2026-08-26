@@ -26,7 +26,7 @@ const isUuid = (value?: string) =>
  */
 export async function syncJobQuestions(jobId: string, questions: SyncableJobQuestion[]) {
   const normalize = (q: SyncableJobQuestion) => ({
-    job_id: jobId,
+    id: q.id,
     question_text: q.question_text,
     question_type: q.question_type,
     options: q.options && q.options.length > 0 ? q.options : null,
@@ -37,32 +37,14 @@ export async function syncJobQuestions(jobId: string, questions: SyncableJobQues
     placeholder_text: q.placeholder_text ?? null,
   });
 
-  const { data: existing, error: existingError } = await supabase
-    .from('job_questions')
-    .select('id')
-    .eq('job_id', jobId);
-  if (existingError) throw existingError;
+  const payload = questions.map((question) => {
+    const normalized = normalize(question);
+    return isUuid(question.id) ? normalized : { ...normalized, id: undefined };
+  });
 
-  const existingIds = new Set((existing || []).map((q) => q.id));
-  const keptIds = new Set(
-    questions.map((q) => q.id).filter((id): id is string => isUuid(id) && existingIds.has(id!))
-  );
-
-  const removedIds = [...existingIds].filter((id) => !keptIds.has(id));
-  if (removedIds.length > 0) {
-    const { error } = await supabase.from('job_questions').delete().in('id', removedIds);
-    if (error) throw error;
-  }
-
-  const updates = questions.filter((q) => isUuid(q.id) && keptIds.has(q.id!));
-  for (const q of updates) {
-    const { error } = await supabase.from('job_questions').update(normalize(q)).eq('id', q.id!);
-    if (error) throw error;
-  }
-
-  const inserts = questions.filter((q) => !isUuid(q.id) || !keptIds.has(q.id!)).map(normalize);
-  if (inserts.length > 0) {
-    const { error } = await supabase.from('job_questions').insert(inserts);
-    if (error) throw error;
-  }
+  const { error } = await supabase.rpc('sync_owned_job_questions', {
+    p_job_id: jobId,
+    p_questions: payload,
+  });
+  if (error) throw error;
 }

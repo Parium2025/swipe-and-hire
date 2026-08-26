@@ -5,6 +5,7 @@ import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
 import { safeSetItem } from '@/lib/safeStorage';
+import { isPermanentApplicationError } from '@/lib/applicationAnswerValidation';
 
 /**
  * 🚀 OFFLINE JOB APPLICATION QUEUE
@@ -51,6 +52,7 @@ export interface QueuedApplication {
   };
   queuedAt: number;
   attempts: number;
+  failedPermanently?: boolean;
 }
 
 const QUEUE_KEY = 'parium_offline_application_queue';
@@ -132,7 +134,7 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
   }, []);
 
   // Sync a single application
-  const syncApplication = async (app: QueuedApplication): Promise<boolean> => {
+  const syncApplication = async (app: QueuedApplication): Promise<'success' | 'retry' | 'permanent'> => {
     try {
       const { error } = await supabase
         .from('job_applications')
@@ -140,7 +142,8 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
 
       if (error) {
         // Duplicate key = already submitted (success)
-        if (error.code === '23505') return true;
+        if (error.code === '23505') return 'success';
+        if (isPermanentApplicationError(error)) return 'permanent';
         throw error;
       }
 
@@ -152,10 +155,10 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
         })
         .catch((e) => console.error('❌ Offline app confirmation email network error:', e));
 
-      return true;
+      return 'success';
     } catch (error) {
       console.error('Failed to sync queued application:', error);
-      return false;
+      return 'retry';
     }
   };
 
@@ -176,13 +179,17 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
     for (let i = 0; i < currentQueue.length; i++) {
       const app = currentQueue[i];
       // Exponential backoff for retried operations
+      if (app.failedPermanently) {
+        remaining.push(app);
+        continue;
+      }
       if (app.attempts > 0) {
         const delay = Math.min(1000 * Math.pow(2, app.attempts - 1), 30000);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
-      const success = await syncApplication(app);
+      const result = await syncApplication(app);
 
-      if (success) {
+      if (result === 'success') {
         synced++;
         syncedJobIds.push(app.jobId);
 
@@ -190,15 +197,21 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
         try {
           localStorage.removeItem(`parium_draft_job-application-${app.jobId}`);
         } catch { /* ignore */ }
+      } else if (result === 'permanent') {
+        remaining.push({ ...app, failedPermanently: true });
+        toast.error(`Ansökan till "${app.jobTitle}" behöver kontrolleras`, {
+          description: 'Öppna ansökan och kontrollera de obligatoriska svaren innan du försöker igen.',
+          duration: 8000,
+        });
       } else {
         const updated = { ...app, attempts: app.attempts + 1 };
         if (updated.attempts < MAX_ATTEMPTS) {
           remaining.push(updated);
         } else {
-          console.warn('Application exceeded max attempts, dropping:', app.jobId);
-          // Notify user about the failed application
+          console.warn('Application exceeded max attempts, keeping for recovery:', app.jobId);
+          remaining.push({ ...updated, failedPermanently: true });
           toast.error(`Ansökan till "${app.jobTitle}" kunde inte skickas`, {
-            description: 'Vänligen försök igen manuellt.',
+            description: 'Ansökan finns kvar sparad på enheten så att du kan försöka igen.',
             duration: 8000,
           });
         }
