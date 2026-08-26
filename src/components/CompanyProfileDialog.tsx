@@ -8,15 +8,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { getCompanyInitials } from "@/lib/companyInitials";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Building2, 
-  Globe, 
-  Users, 
-  MapPin, 
-  Briefcase, 
+import {
+  Building2,
+  Globe,
+  Users,
+  MapPin,
+  Briefcase,
   Star,
   Send,
-  ChevronDown
+  ChevronDown,
+  Hash,
+  Linkedin,
+  Twitter,
+  Instagram
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
