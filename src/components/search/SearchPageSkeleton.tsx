@@ -303,7 +303,16 @@ export const MyApplicationsSkeleton = memo(function MyApplicationsSkeleton({
     activeTab === 'expired'
       ? SKELETON_COUNT_KEYS.myApplicationsExpired
       : SKELETON_COUNT_KEYS.myApplicationsActive;
-  const cardCount = readCachedCount(key, 3);
+  // Live-antal ur cachen (samma split som sidan gör: utgången/borttagen annons)
+  const cardCount = useLiveSkeletonCount({
+    queryKeys: ['my-applications'],
+    fallbackKey: key,
+    filter: (app: any) => {
+      const job = app?.job_postings;
+      const expired = !!(job?.deleted_at || (job?.expires_at && new Date(job.expires_at).getTime() < Date.now()));
+      return activeTab === 'expired' ? expired : !expired;
+    },
+  });
   const interviewCount = readCachedCount(SKELETON_COUNT_KEYS.myApplicationsInterviews, 0, 3);
   return (
     <FullscreenSkeletonPortal>
