@@ -21,6 +21,15 @@ interface TeamMember {
   email: string | null;
 }
 
+interface PendingInvitation {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  expires_at: string;
+  created_at: string;
+}
+
 interface TeamCache {
   userId: string;
   organizationId: string;
@@ -75,6 +84,7 @@ const TeamManagement = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('recruiter');
   const [inviting, setInviting] = useState(false);
+  const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
   const [organizationId, setOrganizationId] = useState<string | null>(initialCache?.organizationId ?? null);
   
 
@@ -152,8 +162,29 @@ const TeamManagement = () => {
     void fetchTeamMembers(Boolean(cached));
   }, [user?.id, fetchTeamMembers]);
 
+  const fetchInvitations = useCallback(async () => {
+    if (!organizationId) return;
+    const { data, error } = await supabase
+      .from('organization_invitations')
+      .select('id, email, role, status, expires_at, created_at')
+      .eq('organization_id', organizationId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching invitations:', error);
+      return;
+    }
+    setInvitations(data ?? []);
+  }, [organizationId]);
+
+  useEffect(() => {
+    void fetchInvitations();
+  }, [fetchInvitations]);
+
   const handleInvite = async () => {
-    if (!inviteEmail.trim() || !organizationId) {
+    const email = inviteEmail.trim().toLowerCase();
+    if (!email || !organizationId) {
       toast({
         title: "Fel",
         description: "Ange en e-postadress.",
@@ -161,25 +192,71 @@ const TeamManagement = () => {
       });
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      toast({
+        title: "Ogiltig e-postadress",
+        description: "Kontrollera adressen och försök igen.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setInviting(true);
     try {
-      // For now, show a message that invite functionality requires email setup
-      // In a full implementation, this would send an invite email
+      const { error } = await supabase.functions.invoke('team-invite', {
+        body: { email, role: inviteRole, origin: window.location.origin },
+      });
+
+      if (error) {
+        let serverMessage = "Kunde inte skicka inbjudan.";
+        const context = (error as { context?: Response }).context;
+        if (context && typeof context.json === 'function') {
+          try {
+            const body = await context.json();
+            if (typeof body?.error === 'string') serverMessage = body.error;
+          } catch {
+            // Keep the generic message.
+          }
+        }
+        throw new Error(serverMessage);
+      }
+
       toast({
         title: "Inbjudan skickad",
-        description: `En inbjudan har skickats till ${inviteEmail} som ${ROLE_LABELS[inviteRole]}.`,
+        description: `En inbjudan har skickats till ${email} som ${ROLE_LABELS[inviteRole]}.`,
       });
       setInviteEmail('');
+      void fetchInvitations();
     } catch (error) {
       console.error('Error inviting:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte skicka inbjudan.",
+        description: error instanceof Error ? error.message : "Kunde inte skicka inbjudan.",
         variant: "destructive"
       });
     } finally {
       setInviting(false);
+    }
+  };
+
+  const handleRevokeInvitation = async (invitationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('organization_invitations')
+        .update({ status: 'revoked' })
+        .eq('id', invitationId);
+
+      if (error) throw error;
+
+      toast({ title: "Inbjudan återkallad", description: "Länken fungerar inte längre." });
+      void fetchInvitations();
+    } catch (error) {
+      console.error('Error revoking invitation:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte återkalla inbjudan.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -314,6 +391,38 @@ const TeamManagement = () => {
           </Button>
         </div>
       </div>
+
+      {/* Pending invitations */}
+      {invitations.length > 0 && (
+        <div className="mb-6 space-y-2">
+          <p className="text-sm font-medium text-white">Väntande inbjudningar</p>
+          {invitations.map((invitation) => (
+            <div
+              key={invitation.id}
+              className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
+                <Mail className="h-4 w-4 text-white" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <TruncatedText text={invitation.email} className="min-w-0 font-medium text-white" />
+                <p className="text-sm text-white">
+                  {ROLE_LABELS[invitation.role] || invitation.role} · väntar på svar
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Återkalla inbjudan"
+                onClick={() => handleRevokeInvitation(invitation.id)}
+                className="h-8 w-8 shrink-0 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Team Members List */}
       <div className="space-y-3">
