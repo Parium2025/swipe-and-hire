@@ -3,6 +3,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
+import { ProfileFormSkeleton } from '@/components/profile/ProfileFormSkeleton';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -18,7 +19,7 @@ import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
 const DRAFT_KEY = 'parium_draft_employer-profile';
 
 const EmployerProfile = () => {
-  const { profile, updateProfile, user, userRole } = useAuth();
+  const { profile, updateProfile, user, userRole, loading: authLoading } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
@@ -405,6 +406,11 @@ const EmployerProfile = () => {
       setLoading(false);
     }
   };
+
+  // Kallstart: visa innehållsformat skelett istället för tomma fält.
+  if (authLoading && !profile) {
+    return <ProfileFormSkeleton variant="employer" />;
+  }
 
   return (
      <div className="space-y-8 responsive-container [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">

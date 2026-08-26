@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ProfileFormSkeleton } from '@/components/profile/ProfileFormSkeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -1826,7 +1827,9 @@ const Profile = () => {
   };
 
   if (!showContent) {
-    return <div className="responsive-container-wide space-y-6 opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true" />;
+    // Innehållsformat skelett istället för en tom osynlig yta — samma
+    // standard som övriga sidor.
+    return <ProfileFormSkeleton variant="job_seeker" />;
   }
 
    return (
