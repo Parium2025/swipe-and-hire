@@ -456,6 +456,8 @@ const SavedJobs = () => {
                 ))}
               </div>
 
+              {selectionToolbar}
+
               {sortedJobs.length === 0 ? (
                 <Card className="bg-white/5 border-white/10">
                   <CardContent className="p-8 text-center">
