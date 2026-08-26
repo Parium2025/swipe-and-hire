@@ -8,15 +8,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { getCompanyInitials } from "@/lib/companyInitials";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Building2, 
-  Globe, 
-  Users, 
-  MapPin, 
-  Briefcase, 
+import {
+  Building2,
+  Globe,
+  Users,
+  MapPin,
+  Briefcase,
   Star,
   Send,
-  ChevronDown
+  ChevronDown,
+  Hash,
+  Linkedin,
+  Twitter,
+  Instagram,
+  Share2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
@@ -32,6 +37,11 @@ interface CompanyProfileDialogProps {
   companyId: string;
 }
 
+interface SocialMediaLink {
+  platform: 'linkedin' | 'twitter' | 'instagram' | 'annat' | string;
+  url: string;
+}
+
 interface CompanyProfile {
   company_name: string;
   company_logo_url?: string;
@@ -40,6 +50,8 @@ interface CompanyProfile {
   industry?: string;
   employee_count?: string;
   address?: string;
+  org_number?: string;
+  company_social_media_links?: SocialMediaLink[];
 }
 
 interface CompanyReview {
@@ -79,6 +91,8 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
       if (error) throw error;
       if (!data) return null;
+      const row = data as unknown as Record<string, unknown>;
+      const rawLinks = row.company_social_media_links;
       return {
         company_name: data.company_name,
         company_logo_url: data.company_logo_url,
@@ -87,6 +101,10 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
         industry: data.industry,
         employee_count: data.employee_count,
         address: data.address,
+        org_number: (row.org_number as string) || undefined,
+        company_social_media_links: Array.isArray(rawLinks)
+          ? (rawLinks as SocialMediaLink[]).filter((l) => l && typeof l.url === 'string' && l.url.trim())
+          : [],
       };
     },
 
@@ -339,6 +357,18 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
               <h3 className="font-semibold text-lg text-white">Företagsinformation</h3>
 
               <div className="grid gap-2.5">
+                {company.org_number && (
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Hash className="h-[18px] w-[18px] text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-white uppercase tracking-wide">Organisationsnummer</p>
+                      <p className="text-sm text-white">{company.org_number}</p>
+                    </div>
+                  </div>
+                )}
+
                 {company.website && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] transition-colors">
                     <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
@@ -391,6 +421,45 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-white uppercase tracking-wide">Huvudkontor</p>
                       <p className="text-sm text-white">{company.address}</p>
+                    </div>
+                  </div>
+                )}
+
+                {company.company_social_media_links && company.company_social_media_links.length > 0 && (
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Share2 className="h-[18px] w-[18px] text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-white uppercase tracking-wide">Sociala medier</p>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        {company.company_social_media_links.map((link, i) => {
+                          const href = link.url.startsWith('http') ? link.url : `https://${link.url}`;
+                          const Icon =
+                            link.platform === 'linkedin' ? Linkedin :
+                            link.platform === 'twitter' ? Twitter :
+                            link.platform === 'instagram' ? Instagram :
+                            Globe;
+                          const label =
+                            link.platform === 'linkedin' ? 'LinkedIn' :
+                            link.platform === 'twitter' ? 'Twitter/X' :
+                            link.platform === 'instagram' ? 'Instagram' :
+                            'Länk';
+                          return (
+                            <a
+                              key={`${link.platform}-${i}`}
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={link.url}
+                              aria-label={label}
+                              className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-colors"
+                            >
+                              <Icon className="h-4 w-4 text-white" />
+                            </a>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 )}
