@@ -2,8 +2,12 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-// Minimum interval between activity updates (5 minutes)
-const UPDATE_INTERVAL_MS = 5 * 60 * 1000;
+// Minimum interval between activity updates.
+// Skalning: vid 100 000 samtidiga användare blir varje minskning här en direkt
+// minskning av skrivlasten på `profiles`. 15 min ger fortfarande korrekt
+// "senast aktiv"-precision för inaktivitetsflödet (som räknar i dagar).
+const UPDATE_INTERVAL_MS = 15 * 60 * 1000;
+const storageKey = (userId: string) => `parium_last_active_${userId}`;
 
 export function useActivityTracker() {
   const { user } = useAuth();
@@ -12,15 +16,26 @@ export function useActivityTracker() {
   useEffect(() => {
     if (!user?.id) return;
 
+    // Persistera över omladdningar — annars skriver varje reload en ny rad-uppdatering.
+    try {
+      const stored = Number(localStorage.getItem(storageKey(user.id)) || 0);
+      if (Number.isFinite(stored) && stored > lastUpdateRef.current) lastUpdateRef.current = stored;
+    } catch { /* storage kan vara blockerad */ }
+
     const updateActivity = async () => {
       const now = Date.now();
-      
+
       // Only update if enough time has passed
       if (now - lastUpdateRef.current < UPDATE_INTERVAL_MS) {
         return;
       }
+      // Skriv aldrig i bakgrundsflik — sparar onödig last vid massuppvaknande.
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+        return;
+      }
 
       lastUpdateRef.current = now;
+      try { localStorage.setItem(storageKey(user.id), String(now)); } catch { /* ignore */ }
 
       try {
         await supabase
