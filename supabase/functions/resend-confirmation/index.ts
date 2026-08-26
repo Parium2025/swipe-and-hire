@@ -44,8 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
         {
           scope: "email",
           identifier: normalizedEmail,
-          // TODO: sänk till 5 efter testperioden.
-          limit: 10,
+          limit: 5,
           windowSeconds: 60 * 60,
           message:
             "Du har begärt ett nytt bekräftelsemejl flera gånger den senaste timmen. Vänta en stund och försök igen – kolla under tiden skräpposten, mejlet kan redan ligga där.",
