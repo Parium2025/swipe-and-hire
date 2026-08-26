@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, ArrowUpDown, UserCheck, X, ChevronDown } from 'lucide-react';
+import { Search, UserCheck, X, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
