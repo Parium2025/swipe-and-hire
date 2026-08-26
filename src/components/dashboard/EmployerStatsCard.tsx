@@ -3,6 +3,7 @@ import { Briefcase, Heart, UserPlus, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
+import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEmployerJobsCounts } from '@/hooks/useEmployerScaleStats';
 import { StatsCarousel } from './StatsCarousel';
@@ -78,7 +79,15 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
 
   const newApplicationsCount = dashStats?.new_applications ?? cachedStats['new_applications'] ?? 0;
   const savedFavoritesCount = dashStats?.saved_favorites ?? cachedStats['saved_favorites'] ?? 0;
-  const unreadMessagesCount = dashStats?.unread_messages ?? cachedStats['unread_messages'] ?? 0;
+  // Olästa meddelanden läses från den enda globala chattkanalen i stället för
+  // en egen prenumeration på conversation_messages – annars skulle varje
+  // meddelande på hela plattformen trigga en RPC per öppen hemvy.
+  const conversationsCtx = useConversationsContext();
+  const unreadMessagesCount =
+    conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cachedStats['unread_messages'] ?? 0;
+  useEffect(() => {
+    writeEmployerCachedStat(user?.id, 'unread_messages', unreadMessagesCount);
+  }, [unreadMessagesCount, user?.id]);
 
   // Serverfunktionen avgör själv vilka annonser som räknas — vi behöver inte
   // längre hålla en lokal id-lista för att filtrera realtime-händelser.
@@ -98,9 +107,6 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     // Bara ansökningar på våra egna annonser är relevanta.
     const onApplication = () => invalidateStats();
     const msgChannel = createRealtimeChannel(`employer-conv-messages-${user.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
-        invalidateStats
-      )
       // "Nya ansökningar" ska tickas upp live, inte först vid fliksbyte.
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' },
         onApplication
