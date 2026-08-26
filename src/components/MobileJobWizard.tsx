@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useHasActivePlan } from '@/hooks/useHasActivePlan';
 import { supabase } from '@/integrations/supabase/client';
-import { syncJobQuestions } from '@/lib/jobQuestionsSync';
+import { prepareJobQuestions, syncJobQuestions } from '@/lib/jobQuestionsSync';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -2593,9 +2593,9 @@ const MobileJobWizard = ({
         job_image_desktop_url: formData.job_image_desktop_url || null,
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
-        // Nya/återpublicerade annonser aktiveras först när frågorna har sparats.
-        // En aktiv redigering ligger kvar aktiv under den transaktionella frågesynken.
-        is_active: Boolean(existingJob?.id && !isPublishingDraft)
+        // Databasen håller nya/återpublicerade annonser dolda tills både annons
+        // och frågor är färdigsparade i samma transaktion.
+        is_active: true
       };
       
       // Set created_at and expires_at when:
@@ -2606,34 +2606,17 @@ const MobileJobWizard = ({
         jobData.expires_at = expiresAt.toISOString();
       }
 
-      let jobPost;
-      let error;
-
       // When publishing a draft that was previously inactive, ALWAYS create a new job
       // with a fresh ID. This ensures old applications don't carry over to the new posting.
       // Only update in-place when editing an active job's details (not republishing).
-      const shouldUpdateExisting = existingJob?.id && !isPublishingDraft;
-
-      if (shouldUpdateExisting) {
-        const { data, error: updateError } = await supabase
-          .from('job_postings')
-          .update(jobData as never)
-          .eq('id', existingJob.id)
-          .select()
-          .single();
-        jobPost = data;
-        error = updateError;
-      } else {
-        // New job or republishing a draft — always insert with fresh UUID
-        const { data, error: insertError } = await supabase
-          .from('job_postings')
-          .insert([jobData as any])
-          .select()
-          .single();
-        jobPost = data;
-        error = insertError;
-
-      }
+      const { data: jobPost, error } = await supabase
+        .rpc('save_owned_job_with_questions', {
+          p_job_id: existingJob?.id ?? null,
+          p_replace_with_new: isPublishingDraft,
+          p_job_data: jobData,
+          p_questions: prepareJobQuestions(customQuestions),
+        } as never)
+        .single();
 
       if (error) {
         const msg = error.message || '';
@@ -2648,33 +2631,6 @@ const MobileJobWizard = ({
         }
         toast({ title, description, variant: "destructive" });
         return;
-      }
-
-      // Frågorna synkas i en enda databastransaktion. Nya annonser är dolda
-      // tills både annons och frågor är klara, så halvpublicering är omöjlig.
-      if (jobPost) {
-        await syncJobQuestions(jobPost.id, customQuestions);
-
-        if (!shouldUpdateExisting) {
-          const { data: activatedJob, error: activateError } = await supabase
-            .from('job_postings')
-            .update({ is_active: true })
-            .eq('id', jobPost.id)
-            .select()
-            .single();
-          if (activateError) throw activateError;
-          jobPost = activatedJob;
-        }
-
-        // Den gamla utkast-raden tas bort först när den nya annonsen och dess
-        // frågor är fullständigt sparade och den nya annonsen är aktiv.
-        if (isPublishingDraft && existingJob?.id) {
-          const { error: archiveError } = await supabase
-            .from('job_postings')
-            .update({ deleted_at: new Date().toISOString(), is_active: false })
-            .eq('id', existingJob.id);
-          if (archiveError) throw archiveError;
-        }
       }
 
       // Note: Template questions are now managed separately via job_question_templates table

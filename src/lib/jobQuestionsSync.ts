@@ -24,7 +24,7 @@ const isUuid = (value?: string) =>
  * arbetsgivaren. Nu uppdateras befintliga frågor på plats (samma id),
  * nya läggs till och bara borttagna frågor raderas.
  */
-export async function syncJobQuestions(jobId: string, questions: SyncableJobQuestion[]) {
+export function prepareJobQuestions(questions: SyncableJobQuestion[]) {
   const normalize = (q: SyncableJobQuestion) => ({
     id: q.id,
     question_text: q.question_text,
@@ -37,10 +37,14 @@ export async function syncJobQuestions(jobId: string, questions: SyncableJobQues
     placeholder_text: q.placeholder_text ?? null,
   });
 
-  const payload = questions.map((question) => {
+  return questions.map((question) => {
     const normalized = normalize(question);
     return isUuid(question.id) ? normalized : { ...normalized, id: undefined };
   });
+}
+
+export async function syncJobQuestions(jobId: string, questions: SyncableJobQuestion[]) {
+  const payload = prepareJobQuestions(questions);
 
   const { error } = await supabase.rpc('sync_owned_job_questions', {
     p_job_id: jobId,
