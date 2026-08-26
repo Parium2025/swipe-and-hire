@@ -138,6 +138,19 @@ const CandidatesContent = () => {
   if (!isBusy) stableSearchRef.current = debouncedSearch;
   const appliedSearch = stableSearchRef.current;
 
+  // Diskret signal om att ett nytt sökresultat är på väg. 200 ms fördröjning
+  // gör att snabba svar aldrig hinner flimra.
+  const [showSearchBusy, setShowSearchBusy] = useState(false);
+  useEffect(() => {
+    if (!isBusy) {
+      setShowSearchBusy(false);
+      return;
+    }
+    const t = setTimeout(() => setShowSearchBusy(true), 200);
+    return () => clearTimeout(t);
+  }, [isBusy]);
+
+
 
   
   // Instant render när datan redan finns i cache — fade-in bara vid cold load.
