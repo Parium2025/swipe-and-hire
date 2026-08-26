@@ -255,9 +255,18 @@ const MobileJobWizard = ({
         const draftKeys = getCreateDraftKeys(selectedTemplate?.id);
         const sessionDraft = parseDraftState(sessionStorage.getItem(draftKeys.session));
         const localDraft = parseDraftState(localStorage.getItem(draftKeys.local));
+        const currentTemplateStamp = (selectedTemplate as any)?.updated_at ?? null;
         const bestDraft = [sessionDraft, localDraft]
           .filter((draft): draft is NonNullable<typeof draft> => !!draft)
+          // Har mallen ändrats sedan utkastet sparades är utkastet inaktuellt.
+          .filter((draft) => !selectedTemplate || draft.templateStamp === currentTemplateStamp)
           .sort((a, b) => b.savedAt - a.savedAt)[0];
+
+        if (!bestDraft && selectedTemplate) {
+          // Rensa bort det inaktuella mall-utkastet så det inte kan dyka upp igen.
+          try { sessionStorage.removeItem(draftKeys.session); } catch {}
+          try { localStorage.removeItem(draftKeys.local); } catch {}
+        }
 
         if (bestDraft) {
           setFormData(bestDraft.formData);
