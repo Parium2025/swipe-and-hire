@@ -3352,6 +3352,21 @@ export type Database = {
         }
         Relationships: []
       }
+      swedish_postal_codes: {
+        Row: {
+          city: string
+          postal_code: string
+        }
+        Insert: {
+          city: string
+          postal_code: string
+        }
+        Update: {
+          city?: string
+          postal_code?: string
+        }
+        Relationships: []
+      }
       swipe_actions: {
         Row: {
           action: Database["public"]["Enums"]["swipe_action_type"]
@@ -3658,6 +3673,10 @@ export type Database = {
       }
     }
     Functions: {
+      application_answer_is_present: {
+        Args: { answer: Json }
+        Returns: boolean
+      }
       auth_email_registered: {
         Args: { _email: string }
         Returns: {
