@@ -522,7 +522,6 @@ const EmployerProfile = () => {
                 <Label htmlFor="first_name" className="text-sm text-white">Förnamn</Label>
                 <Input
                   id="first_name"
-                  maxLength={TEXT_LIMITS.personName}
                   value={formData.first_name}
                   onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                   className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
@@ -532,7 +531,6 @@ const EmployerProfile = () => {
                 <Label htmlFor="last_name" className="text-sm text-white">Efternamn</Label>
                 <Input
                   id="last_name"
-                  maxLength={TEXT_LIMITS.personName}
                   value={formData.last_name}
                   onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                   className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
