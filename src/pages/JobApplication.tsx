@@ -23,6 +23,9 @@ import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDia
 import CandidateProfilePicker from '@/components/candidateProfiles/CandidateProfilePicker';
 import { useCandidateProfiles, type CandidateProfile } from '@/hooks/useCandidateProfiles';
 import { hasAllRequiredApplicationAnswers, isPermanentApplicationError } from '@/lib/applicationAnswerValidation';
+import type { Database, Json } from '@/integrations/supabase/types';
+
+type JobApplicationInsert = Database['public']['Tables']['job_applications']['Insert'];
 
 
 // Draft key for localStorage
@@ -373,7 +376,7 @@ const JobApplication = () => {
 
 
 
-    const applicationPayload = {
+    const applicationPayload: JobApplicationInsert = {
       job_id: job.id,
       applicant_id: user.id,
       first_name: formData.firstName,
@@ -399,7 +402,7 @@ const JobApplication = () => {
         additionalDocuments: formData.additionalDocuments,
         ...formData.customAnswers
       },
-      questions_snapshot: questions,
+      questions_snapshot: questions as unknown as Json,
     };
 
     const emailPayload = {

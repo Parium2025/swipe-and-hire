@@ -28,7 +28,7 @@ import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { Helmet } from 'react-helmet-async';
 import { fetchPriority } from '@/lib/fetchPriority';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database, Json } from '@/integrations/supabase/types';
 
 type JobApplicationInsert = Database['public']['Tables']['job_applications']['Insert'];
 
@@ -566,7 +566,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         availability: profile?.availability || null,
         employment_status: profile?.employment_type || null,
         custom_answers: answers,
-        questions_snapshot: jobQuestions,
+        questions_snapshot: jobQuestions as unknown as Json,
         status: 'pending'
       };
 
