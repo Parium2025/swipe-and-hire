@@ -185,6 +185,28 @@ function writeCache<T>(key: string, userId: string, items: T[]): void {
   }
 }
 
+// 📚 PostgREST returnerar max 1000 rader per anrop. Användare med tusentals
+// sparade/skippade jobb skulle annars tappa rader tyst. Vi hämtar i block om
+// 1000 upp till ett tak (skyddar minnet på klienten).
+const FETCH_CHUNK = 1000;
+const FETCH_MAX_ROWS = 20000;
+
+async function fetchAllRows(
+  fetchRange: (from: number, to: number) => PromiseLike<{ data: unknown[] | null; error: { message: string } | null }>,
+): Promise<unknown[]> {
+  const all: unknown[] = [];
+  for (let from = 0; from < FETCH_MAX_ROWS; from += FETCH_CHUNK) {
+    const { data, error } = await fetchRange(from, from + FETCH_CHUNK - 1);
+    if (error) throw new Error(error.message);
+    const batch = Array.isArray(data) ? data : [];
+    all.push(...batch);
+    if (batch.length < FETCH_CHUNK) break;
+  }
+  return all;
+}
+
+
+
 const SAVED_SELECT = `
   id,
   job_id,
@@ -229,16 +251,19 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     queryKey: ['saved-jobs', user?.id],
     queryFn: async (): Promise<SavedJob[]> => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from('saved_jobs')
-        .select(SAVED_SELECT)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      const items = sanitizeSavedJobsList<SavedJob>(data);
+      const rows = await fetchAllRows((from, to) =>
+        supabase
+          .from('saved_jobs')
+          .select(SAVED_SELECT)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .range(from, to),
+      );
+      const items = sanitizeSavedJobsList<SavedJob>(rows);
       writeCache<SavedJob>(SAVED_CACHE_KEY, user.id, items);
       return items;
     },
+
     enabled: !!user,
     staleTime: 60_000,
     gcTime: Infinity,
@@ -262,14 +287,17 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     queryKey: ['skipped-jobs', user?.id],
     queryFn: async (): Promise<SkippedJob[]> => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from('swipe_actions')
-        .select(SAVED_SELECT)
-        .eq('user_id', user.id)
-        .eq('action', 'skipped')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      const items = sanitizeSavedJobsList<SkippedJob>(data);
+      const rows = await fetchAllRows((from, to) =>
+        supabase
+          .from('swipe_actions')
+          .select(SAVED_SELECT)
+          .eq('user_id', user.id)
+          .eq('action', 'skipped')
+          .order('created_at', { ascending: false })
+          .range(from, to),
+      );
+      const items = sanitizeSavedJobsList<SkippedJob>(rows);
+
       writeCache<SkippedJob>(SKIPPED_CACHE_KEY, user.id, items);
       return items;
     },
