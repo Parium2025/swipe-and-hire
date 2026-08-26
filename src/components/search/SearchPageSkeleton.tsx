@@ -76,17 +76,6 @@ const SkeletonChrome = memo(function SkeletonChrome() {
   );
 });
 
-/**
- * Hur många kort som realistiskt syns i första vyn (kolumner × rader).
- * Skelettet ska aldrig rendera fler placeholders än vad som får plats.
- */
-function viewportCardCap(): number {
-  if (typeof window === 'undefined') return 6;
-  const w = window.innerWidth;
-  const cols = w >= 1024 ? 3 : w >= 640 ? 2 : 1;
-  return cols === 1 ? 3 : cols * 2;
-}
-
 function isTouchDevice(): boolean {
   if (typeof window === 'undefined') return false;
   try {
@@ -96,34 +85,11 @@ function isTouchDevice(): boolean {
   }
 }
 
-/**
- * Live-antal från React Query-cachen (samma mönster som arbetsgivarsidans
- * EmployerPageSkeleton) → skelettet speglar exakt antalet kort som kommer
- * renderas. Faller tillbaka på senast cachade antal vid kallstart.
- */
-function useLiveSearchJobCount(): number {
-  const qc = useQueryClient();
-  const cap = viewportCardCap();
-  for (const key of ['optimized-job-search', 'infinite-job-search']) {
-    const entries = qc.getQueriesData<any>({ queryKey: [key] });
-    for (const [, data] of entries) {
-      const pages = (data as any)?.pages;
-      if (Array.isArray(pages)) {
-        const n = pages.reduce(
-          (acc: number, p: any) =>
-            acc + (Array.isArray(p) ? p.length : Array.isArray(p?.jobs) ? p.jobs.length : 0),
-          0,
-        );
-        return Math.min(cap, n);
-      }
-      if (Array.isArray(data)) return Math.min(cap, data.length);
-    }
-  }
-  return Math.min(cap, readCachedCount(SKELETON_COUNT_KEYS.searchJobs, cap, 18));
-}
-
 export const JobListSkeleton = memo(function JobListSkeleton() {
-  const cardCount = useLiveSearchJobCount();
+  const cardCount = useLiveSkeletonCount({
+    queryKeys: ['optimized-job-search', 'infinite-job-search'],
+    fallbackKey: SKELETON_COUNT_KEYS.searchJobs,
+  });
   const touch = isTouchDevice();
   return (
     <FullscreenSkeletonPortal>
