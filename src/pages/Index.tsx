@@ -345,22 +345,24 @@ const CandidatesContent = () => {
             )}
           </div>
         ) : (
-          <CandidatesTable 
-            applications={filteredApplications} 
-            onUpdate={refetch}
-            onLoadMore={fetchNextPage}
-            hasMore={hasNextPage}
-            isLoadingMore={isFetchingNextPage}
-            selectionMode={selectionMode}
-            onSelectionModeChange={setSelectionMode}
-            hasReachedLimit={hasReachedLimit}
-            onContinueLoading={continueLoading}
-            loadedCount={loadedCount}
-            onRatingUpdate={(applicantId, rating) => updateRating.mutate({ applicantId, rating })}
-            onServerSortChange={setSortBy}
-
-          />
+          <div className={`transition-opacity duration-200 ${showSearchBusy ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
+            <CandidatesTable 
+              applications={filteredApplications} 
+              onUpdate={refetch}
+              onLoadMore={fetchNextPage}
+              hasMore={hasNextPage}
+              isLoadingMore={isFetchingNextPage}
+              selectionMode={selectionMode}
+              onSelectionModeChange={setSelectionMode}
+              hasReachedLimit={hasReachedLimit}
+              onContinueLoading={continueLoading}
+              loadedCount={loadedCount}
+              onRatingUpdate={(applicantId, rating) => updateRating.mutate({ applicantId, rating })}
+              onServerSortChange={setSortBy}
+            />
+          </div>
         )}
+
       </div>
     </div>
   );
