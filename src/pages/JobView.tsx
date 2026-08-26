@@ -565,6 +565,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           availability: profile?.availability || null,
           employment_status: profile?.employment_type || null,
           custom_answers: answers,
+          questions_snapshot: jobQuestions,
           status: 'pending'
         });
 

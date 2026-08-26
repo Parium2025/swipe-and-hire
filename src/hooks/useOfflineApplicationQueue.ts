@@ -43,6 +43,7 @@ export interface QueuedApplication {
     video_snapshot_url: string | null;
     candidate_profile_label?: string | null;
     custom_answers: Record<string, any>;
+    questions_snapshot?: unknown[];
   };
   emailPayload: {
     applicant_email: string;
@@ -136,9 +137,24 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
   // Sync a single application
   const syncApplication = async (app: QueuedApplication): Promise<'success' | 'retry' | 'permanent'> => {
     try {
+      let payload = app.payload;
+
+      // Äldre offlineköer skapades innan frågeögonblicksbilden blev obligatorisk.
+      // Hämta den aktuella listan en gång vid replay så att de inte fastnar permanent.
+      if (!Array.isArray(payload.questions_snapshot)) {
+        const { data: questions, error: questionsError } = await supabase
+          .from('job_questions')
+          .select('*')
+          .eq('job_id', app.jobId)
+          .order('order_index');
+
+        if (questionsError) throw questionsError;
+        payload = { ...payload, questions_snapshot: questions ?? [] };
+      }
+
       const { error } = await supabase
         .from('job_applications')
-        .insert(app.payload);
+        .insert(payload);
 
       if (error) {
         // Duplicate key = already submitted (success)
