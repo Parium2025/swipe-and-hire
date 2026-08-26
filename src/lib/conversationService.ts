@@ -130,9 +130,22 @@ export async function createConversationForCandidate(
     convError = retry.error;
   }
 
+  // Attempt 5: transient errors (serialization failure, deadlock, RLS race,
+  // nätverksglapp) — ett kort återförsök med samma kontext.
+  if (convError && isRetryableError(convError)) {
+    await new Promise((r) => setTimeout(r, 250));
+    const retry = await tryInsert({
+      job_id: jobId || null,
+      application_id: applicationId || null,
+    });
+    created = retry.data;
+    convError = retry.error;
+  }
+
   if (convError) throw convError;
   return created!.id;
 }
+
 
 /**
  * Ensure both parties are members of the conversation.
