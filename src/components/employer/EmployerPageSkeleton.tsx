@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount, viewportRowCap } from '@/lib/useLiveSkeletonCount';
 import { isEmployerJobActive, isEmployerJobExpired, isEmployerJobDraft } from '@/lib/jobStatus';
+import { useDevice } from '@/hooks/use-device';
 
 /**
  * Hybrid skeleton count: read live from React Query cache first (accurate
@@ -72,12 +73,16 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 };
 
 const SkeletonChrome = memo(function SkeletonChrome() {
+  // Följ appens riktiga brytpunkt (1180px + overflow-guard) i stället för
+  // Tailwinds `lg` (1024px), annars visar skelettet fel header.
+  const isDesktop = useDevice() === 'desktop';
   return (
     <>
       {/* MOBILE chrome — mirrors EmployerMobileShell header exactly:
           logo (h-10 w-40 bg image) | absolute-centered "Parium" text |
           [Plus 9x9] [Notification 9x9] [Avatar 8x8 ring-2 rounded-full] */}
-      <header className="lg:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
+      {!isDesktop && (
+      <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
         <div className={`h-10 w-40 rounded-md ${SHAPE}`} />
         <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SHAPE}`} />
         <div className="flex items-center gap-2">
@@ -86,11 +91,13 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
         </div>
       </header>
+      )}
       {/* DESKTOP chrome — mirrors EmployerTopNav layout exactly.
           Real order (left→right):
             LEFT: logo | Annonser | Kandidater | Chattar | Företag | Notif | Profil-avatar
             RIGHT (extraRight): Skapa ny annons */}
-      <header className="hidden lg:flex shrink-0 h-16 items-center border-b border-white/20 bg-transparent">
+      {isDesktop && (
+      <header className="flex shrink-0 h-16 items-center border-b border-white/20 bg-transparent">
         <div className="w-full responsive-container-wide flex items-center justify-between">
           {/* Left group — allt sitter i samma gap-1 block som i EmployerTopNav */}
           <div className="flex items-center gap-1">
@@ -117,6 +124,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           </div>
         </div>
       </header>
+      )}
     </>
   );
 });

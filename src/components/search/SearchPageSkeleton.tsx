@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount } from '@/lib/useLiveSkeletonCount';
+import { useDevice } from '@/hooks/use-device';
 
 /**
  * Full-screen skeleton overlay for SearchJobs.
@@ -42,12 +43,18 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 };
 
 const SkeletonChrome = memo(function SkeletonChrome() {
+  // Samma brytpunkt som appen (1180px + overflow-guard), inte Tailwinds `lg`
+  // (1024px). Annars ritar skelettet desktop-navigering medan den riktiga
+  // sidan renderar mobil-headern — exakt den blinkningen användaren såg.
+  const device = useDevice();
+  const isDesktop = device === 'desktop';
   return (
     <>
       {/* MOBILE chrome — mirrors JobSeekerLayout header exactly:
           rings-logo (h-10 w-12) | absolute-centered "Parium" text |
           [Search 9x9] [Notification 9x9] [Avatar 8x8 ring-2] */}
-      <header className="lg:hidden relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
+      {!isDesktop && (
+      <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
         <div className={`h-10 w-12 rounded-md ${SKELETON_SHAPE}`} />
         <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SKELETON_SHAPE}`} />
         <div className="flex items-center gap-2">
@@ -56,8 +63,10 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SKELETON_SHAPE}`} />
         </div>
       </header>
+      )}
       {/* DESKTOP chrome — mirrors JobSeekerTopNav exactly (h-14, left-aligned pills) */}
-      <header className="hidden lg:flex shrink-0 h-14 items-center border-b border-white/20 bg-transparent">
+      {isDesktop && (
+      <header className="flex shrink-0 h-14 items-center border-b border-white/20 bg-transparent">
         <div className="w-full responsive-container-wide flex items-center justify-between">
           <div className="flex items-center gap-1">
             <div className={`h-10 w-10 rounded-lg ${SKELETON_SHAPE}`} />
@@ -72,6 +81,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           </div>
         </div>
       </header>
+      )}
     </>
   );
 });
@@ -108,10 +118,10 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
             <div className={`h-6 w-24 rounded ${SKELETON_SHAPE}`} />
           </div>
 
-          {/* StatsGrid — endast desktop (md+), precis som riktiga sidan */}
-          <div className="hidden md:grid md:grid-cols-3 gap-2">
+          {/* StatsGrid — visas i alla vyer, precis som riktiga sidan */}
+          <div className="grid grid-cols-3 gap-2">
             {[1, 2, 3].map(i => (
-              <div key={i} className={`h-[76px] rounded-lg ${SKELETON_SHAPE}`} />
+              <div key={i} className={`h-[60px] md:h-[76px] rounded-lg ${SKELETON_SHAPE}`} />
             ))}
           </div>
 
