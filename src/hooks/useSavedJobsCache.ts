@@ -399,6 +399,12 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
       return next;
     });
 
+    // 🔗 Ett jobb kan aldrig vara både sparat och skippat — DB-triggern
+    // enforce_saved_skipped_exclusivity rensar skip-raden, spegla det optimistiskt.
+    if (!wasSaved) {
+      removeSkippedJobLocally(jobId);
+    }
+
     try {
       if (wasSaved) {
         const { error } = await supabase
@@ -418,11 +424,19 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
       if (error && error.code !== '23505') throw error;
 
       queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+      // Triggern tog bort ev. skip-rad → håll skippade-listan och swipe-kön i synk
+      queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('parium:swipe-action-removed', { detail: { jobId } }),
+        );
+      }
     } catch (error) {
       queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
       throw error;
     }
-  }, [user?.id, queryClient, savedJobIds, isPremium]);
+  }, [user?.id, queryClient, savedJobIds, isPremium, removeSkippedJobLocally]);
 
   const restoreSkippedJob = useCallback(async (jobId: string) => {
     if (!user?.id) return;
