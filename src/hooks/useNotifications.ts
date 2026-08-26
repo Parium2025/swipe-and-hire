@@ -173,11 +173,11 @@ export function useNotifications() {
           event: 'DELETE',
           schema: 'public',
           table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
           const removed = payload.old as Partial<AppNotification>;
           if (!removed?.id) return;
-          if (removed.user_id && removed.user_id !== user.id) return;
           setNotifications(prev => {
             if (!prev.some(n => n.id === removed.id)) return prev;
             const updated = prev.filter(n => n.id !== removed.id);
