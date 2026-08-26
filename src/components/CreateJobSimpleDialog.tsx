@@ -1,3 +1,4 @@
+import { TruncatedText } from '@/components/TruncatedText';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -587,9 +588,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           title={selectedTemplate?.name || 'Välj mall...'}
                         >
                           <div className="flex items-center gap-2 w-full min-w-0">
-                            <span className="text-base truncate font-normal text-white flex-1 min-w-0 text-left">
-                              {selectedTemplate?.name || 'Välj mall...'}
-                            </span>
+                            <TruncatedText
+                              text={selectedTemplate?.name || 'Välj mall...'}
+                              className="text-base truncate font-normal text-white flex-1 min-w-0 text-left"
+                            />
                             <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
                           </div>
                         </button>
