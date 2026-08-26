@@ -42,6 +42,8 @@ interface SwipeFullscreenProps {
   skippedJobIds?: Set<string>;
   onRecordSwipeAction?: (jobId: string, action: 'skipped' | 'liked' | 'applied') => void;
   onUndoSwipeAction?: (jobId: string) => void;
+  /** Anropas när användaren närmar sig slutet av stacken — laddar nästa sida. */
+  onNeedMore?: () => void;
 }
 
 /* ── Timing constants ────────────────────────────────────── */
