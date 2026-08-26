@@ -96,7 +96,8 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           Real order (left→right):
             LEFT: logo | Annonser | Kandidater | Chattar | Företag | Notif | Profil-avatar
             RIGHT (extraRight): Skapa ny annons */}
-      <header className="hidden lg:flex shrink-0 h-16 items-center border-b border-white/20 bg-transparent">
+      {isDesktop && (
+      <header className="flex shrink-0 h-16 items-center border-b border-white/20 bg-transparent">
         <div className="w-full responsive-container-wide flex items-center justify-between">
           {/* Left group — allt sitter i samma gap-1 block som i EmployerTopNav */}
           <div className="flex items-center gap-1">
