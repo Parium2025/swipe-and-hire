@@ -58,22 +58,32 @@ function resolveRoute(type: string, metadata?: Record<string, unknown> | null): 
     return `/messages?conversation=${conversationId}`;
   }
 
-  const jobId = typeof metadata?.job_id === 'string' ? metadata.job_id : undefined;
+  const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined);
+  const jobId = str(metadata?.job_id);
+  const applicationId = str(metadata?.application_id) ?? str(metadata?.job_application_id);
+  const candidateId = str(metadata?.candidate_id) ?? str(metadata?.applicant_id);
+  const interviewId = str(metadata?.interview_id);
+  const ticketId = str(metadata?.ticket_id) ?? str(metadata?.support_ticket_id);
 
   switch (type) {
     case 'message':
     case 'new_message':
       return '/messages';
     case 'new_application':
+      if (applicationId) return `/candidates?application=${applicationId}`;
       return jobId ? `/job-details/${jobId}` : '/candidates';
     case 'application_status':
-      return '/my-applications';
+      return applicationId ? `/my-applications?application=${applicationId}` : '/my-applications';
     case 'interview_scheduled':
     case 'interview_reminder':
-      return '/my-candidates';
+      if (interviewId) return `/my-candidates?interview=${interviewId}`;
+      return candidateId ? `/my-candidates?candidate=${candidateId}` : '/my-candidates';
     case 'job_expired':
     case 'job_closed':
-      return '/my-jobs';
+      return jobId ? `/job-details/${jobId}` : '/my-jobs';
+    case 'support_reply':
+    case 'support_message':
+      return ticketId ? `/support?ticket=${ticketId}` : '/support';
     case 'saved_search_match':
       return '/search-jobs';
     case 'saved_job_expiring':
