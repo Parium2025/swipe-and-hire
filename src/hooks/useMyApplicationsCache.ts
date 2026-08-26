@@ -264,7 +264,7 @@ export function useMyApplicationsCache() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient]);
+  }, [user, queryClient, applicationsJobIdsKey]);
 
 
   // Dölj ansökan (aldrig hard delete — arbetsgivaren behåller ansökan).
