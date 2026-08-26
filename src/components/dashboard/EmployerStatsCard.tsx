@@ -3,6 +3,7 @@ import { Briefcase, Heart, UserPlus, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
+import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEmployerJobsCounts } from '@/hooks/useEmployerScaleStats';
 import { StatsCarousel } from './StatsCarousel';
