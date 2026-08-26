@@ -48,6 +48,7 @@ const AUTH_USERS = parseUsers(env('PARIUM_LOAD_TEST_AUTH_USERS', ''));
 const searchQueries = ['säljare', 'utvecklare', 'lager', 'kundtjänst', 'ekonomi', 'projektledare', 'chaufför', ''];
 const cities = ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Västerås', ''];
 const categories = ['Försäljning', 'IT', 'Administration', 'Transport', ''];
+const sortModes = ['newest', 'oldest', 'most-views'];
 
 const samples: Sample[] = [];
 const startedAt = new Date();
