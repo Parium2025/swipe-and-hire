@@ -54,7 +54,33 @@ const SavedJobs = () => {
     removeSavedJobLocally,
     toggleSavedJob,
     restoreSkippedJob,
+    bulkRemoveSaved,
+    bulkRemoveSkipped,
   } = useSavedJobsCache({ enableSkipped: activeTab === 'skipped' });
+
+  // 🗑️ Rensa-läge (samma mönster som arbetsgivarens utgångna annonser)
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  const exitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  // Byte av flik nollställer markeringen så inget råkar raderas i fel lista
+  useEffect(() => {
+    exitSelectionMode();
+  }, [activeTab, exitSelectionMode]);
+
+  const toggleSelected = useCallback((jobId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(jobId)) next.delete(jobId); else next.add(jobId);
+      return next;
+    });
+  }, []);
 
   const [showContent, setShowContent] = useState(false);
 
