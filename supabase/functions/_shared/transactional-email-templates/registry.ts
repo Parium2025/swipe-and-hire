@@ -11,6 +11,7 @@ import { template as employerAccountConfirmation } from './employer-account-conf
 import { template as passwordReset } from './password-reset.tsx'
 import { template as outreachMessage } from './outreach-message.tsx'
 import { template as accountInactivityWarning } from './account-inactivity-warning.tsx'
+import { template as teamInvitation } from './team-invitation.tsx'
 
 export interface TemplateEntry {
   component: (props: any) => React.ReactElement
@@ -32,4 +33,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'password-reset': passwordReset,
   'outreach-message': outreachMessage,
   'account-inactivity-warning': accountInactivityWarning,
+  'team-invitation': teamInvitation,
 }
