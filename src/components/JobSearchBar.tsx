@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, ArrowUpDown, UserCheck, X, ChevronDown } from 'lucide-react';
+import { Search, UserCheck, X, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -120,7 +120,6 @@ export const JobSearchBar = memo(({
                   : 'bg-white/5 border-white/20 md:hover:bg-white/10 md:hover:border-white/50'
               }`}
             >
-              <ArrowUpDown className="mr-1 h-4 w-4 flex-shrink-0 text-white" />
               <span className="truncate">{sortLabels[sortBy]}</span>
               <ChevronDown className={`ml-auto h-3 w-3 flex-shrink-0 text-white transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -175,11 +174,12 @@ export const JobSearchBar = memo(({
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
-                  className="dashboard-icon-control absolute right-1.5 top-1/2 transform -translate-y-1/2 flex items-center justify-center text-white focus:outline-none"
-                >
-                  <ArrowUpDown className="h-3.5 w-3.5" />
-                </button>
+                  <button
+                    aria-label="Sortera"
+                    className="dashboard-icon-control absolute right-1.5 top-1/2 transform -translate-y-1/2 flex items-center justify-center text-white focus:outline-none"
+                  >
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
