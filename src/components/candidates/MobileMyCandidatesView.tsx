@@ -577,7 +577,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
             onScrollCapture={handleListScroll}
           >
             <div className="flex flex-col gap-2">
-              {currentCandidates.length === 0 ? (
+              {currentCandidates.length === 0 && loadingStage !== activeTab && loadingStage !== '__all__' ? (
                 <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center">
                   <span>Inga kandidater i detta steg</span>
                 </div>
