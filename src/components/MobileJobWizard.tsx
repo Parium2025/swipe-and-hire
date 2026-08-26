@@ -150,6 +150,21 @@ const JOB_WIZARD_DRAFT_KEY = 'parium_draft_job-wizard';
 const JOB_WIZARD_INTENTIONAL_CLOSE_KEY = 'parium_job_wizard_intentional_close';
 const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 const getEditJobDraftKey = (jobId: string) => `parium_draft_edit-job-${jobId}`;
+// Template runs get their own draft slot so an unfinished run from a template
+// is restored when the SAME template is picked again — and never leaks into
+// the blank "Skapa jobb" flow.
+const getCreateDraftKeys = (templateId?: string | null) =>
+  templateId
+    ? {
+        session: `${JOB_WIZARD_SESSION_KEY}-tpl-${templateId}`,
+        local: `${JOB_WIZARD_DRAFT_KEY}-tpl-${templateId}`,
+      }
+    : { session: JOB_WIZARD_SESSION_KEY, local: JOB_WIZARD_DRAFT_KEY };
+
+// Valid clock time in HH:MM (00:00–23:59)
+export const isValidClockTime = (value: string): boolean =>
+  /^([01]\d|2[0-3]):([0-5]\d)$/.test((value || '').trim());
+
 
 const MobileJobWizard = ({
   open, 
