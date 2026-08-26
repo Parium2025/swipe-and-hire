@@ -891,6 +891,18 @@ const MobileJobWizard = ({
     }
   }, [open, existingJob, selectedTemplate, currentStep, formData, customQuestions, jobTitle]);
 
+  // Clear both the base slot and the current template slot so no stale draft
+  // can resurface in a later run.
+  const clearCreateDraftSlots = useCallback(() => {
+    const keys = [getCreateDraftKeys(null), getCreateDraftKeys(selectedTemplate?.id)];
+    keys.forEach(({ session, local }) => {
+      try { sessionStorage.removeItem(session); } catch {}
+      try { localStorage.removeItem(local); } catch {}
+    });
+  }, [selectedTemplate]);
+
+
+
   // Save on every relevant state change
   useEffect(() => {
     persistCreateDraftSnapshot();
