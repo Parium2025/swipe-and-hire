@@ -129,6 +129,11 @@ function isReportable(kindIsError: boolean, title: string, body?: string | null)
   return kindIsError && REPORTABLE_PATTERN.test(`${title} ${body ?? ''}`);
 }
 
+function notificationLooksError(type: string, title: string, body?: string | null): boolean {
+  if (type.includes('error') || type.includes('failure') || type.includes('failed')) return true;
+  return FAILURE_PATTERN.test(`${title} ${body ?? ''}`);
+}
+
 function supportReportRoute(title: string, body?: string | null): string {
   const message = `Jag vill rapportera ett problem med AI-funktionen.\n\nNotis: ${title}${body ? `\nDetaljer: ${body}` : ''}\nTidpunkt: ${new Date().toLocaleString('sv-SE')}\n\nBeskriv gärna vad du gjorde när det hände:\n`;
   return `/support?category=technical&message=${encodeURIComponent(message)}`;
