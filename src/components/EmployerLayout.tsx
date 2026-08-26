@@ -10,6 +10,7 @@ import { useEagerRatingsPreload } from '@/hooks/useEagerRatingsPreload';
 import { useEmployerBackgroundSync } from '@/hooks/useEmployerBackgroundSync';
 import { useEmployerPrefetch } from '@/hooks/useEmployerPrefetch';
 import { useEmployerWarmupOrchestrator } from '@/hooks/useEmployerWarmupOrchestrator';
+import { useSecondaryPagesPrewarm } from '@/hooks/useSecondaryPagesPrewarm';
 import EmployerDesktopShell from '@/components/employer/EmployerDesktopShell';
 import EmployerMobileShell from '@/components/employer/EmployerMobileShell';
 import { NoPlanBanner } from '@/components/NoPlanBanner';
@@ -95,6 +96,9 @@ const EmployerLayoutInner = memo(({ children, overlay }: EmployerLayoutProps) =>
   // 🚀 SPOTIFY-NIVÅ: Trappa-prefetch (sida 2-5) + mediawarmup för profilbilder
   // Ger "warm app"-känsla — inga laddspinners eller popping bilder vid flikbyten
   useEmployerWarmupOrchestrator();
+
+  // 🔥 Sekundärsidor (Support, Inställningar, Statistik) — cachas i idle
+  useSecondaryPagesPrewarm();
 
   // Desktop layout with top navigation
   if (isDesktop) {

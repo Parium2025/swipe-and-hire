@@ -17,6 +17,7 @@ import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
 import { useJobSeekerWarmupOrchestrator } from '@/hooks/useJobSeekerWarmupOrchestrator';
+import { useSecondaryPagesPrewarm } from '@/hooks/useSecondaryPagesPrewarm';
 import { useDevice } from '@/hooks/use-device';
 
 
@@ -110,6 +111,9 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
   // 🪜 SPOTIFY-NIVÅ: Trappa-prefetch (sökresultat sida 2-3) + mediawarmup
   // för logos/avatars i listor & meddelanden. Helt additivt — 0 UI/UX-påverkan.
   useJobSeekerWarmupOrchestrator();
+
+  // 🔥 Sekundärsidor (Support) — cachas i idle så hela menyn känns lugn
+  useSecondaryPagesPrewarm();
 
 
   // Desktop layout with top navigation
