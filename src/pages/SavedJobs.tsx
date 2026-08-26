@@ -504,12 +504,13 @@ const SavedJobs = () => {
                       </button>
                     </div>
                   </CardErrorBoundary>
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
+                 );
+               })}
+             </div>
+            </>
+           )}
+         </>
+       )}
 
       {/* Bekräftelsedialog för borttagning */}
       <AlertDialog open={!!jobToRemove} onOpenChange={(open) => { if (!open) setJobToRemove(null); }}>
