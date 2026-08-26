@@ -145,6 +145,7 @@ const MyCandidates = () => {
     markAsViewed: hookMarkAsViewed,
     loadMoreStage,
     hasMoreInStage,
+    loadingStage,
   } = useMyCandidatesData(debouncedSearchQuery, activeListId, activeStageOrder);
 
   // Sanna totalsiffror per kolumn (räknas i databasen, inte på nedladdade rader)
@@ -795,6 +796,7 @@ const MyCandidates = () => {
           stageCounts={debouncedSearchQuery ? undefined : stageCounts}
           hasMoreInStage={hasMoreInStage}
           onLoadMore={loadMoreStage}
+          loadingStage={loadingStage}
           renderActionBar={isSelectionMode ? (
             <MyCandidatesMobileActionBar
               selectedCount={selectedCandidateIds.size}
@@ -861,6 +863,7 @@ const MyCandidates = () => {
                   totalCount={debouncedSearchQuery ? undefined : stageCounts?.[stage]}
                   hasMore={hasMoreInStage(stage)}
                   onLoadMore={loadMoreStage}
+                   isLoadingMore={loadingStage === stage || loadingStage === '__all__'}
                 />
               );
             })}

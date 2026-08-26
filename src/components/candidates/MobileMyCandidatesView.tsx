@@ -20,6 +20,7 @@ import {
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
 import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /* ── Star Rating ─────────────────────────────────────── */
 const StarRating = ({ rating = 0 }: { rating?: number }) => (
@@ -270,6 +271,8 @@ interface MobileMyCandidatesViewProps {
   hasMoreInStage?: (stage: string) => boolean;
   /** Hämtar nästa sida när användaren scrollat nära botten. */
   onLoadMore?: (stage: string) => void;
+  /** Steget vars nästa sida hämtas just nu. */
+  loadingStage?: string | null;
 }
 
 export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
@@ -289,6 +292,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   stageCounts,
   hasMoreInStage,
   onLoadMore,
+  loadingStage,
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
@@ -593,6 +597,19 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                     onMarkAsViewed={() => onMarkAsViewed?.(candidate.application_id)}
                   />
                 ))
+              )}
+              {(loadingStage === activeTab || loadingStage === '__all__') && (
+                <div className="space-y-2" aria-label="Laddar fler kandidater">
+                  {[0, 1, 2].map((item) => (
+                    <div key={item} className="flex min-h-touch items-center gap-3 rounded-lg bg-white/5 px-3 py-2.5 ring-1 ring-inset ring-white/10">
+                      <Skeleton className="h-10 w-10 flex-shrink-0 rounded-full bg-white/10" />
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <Skeleton className="h-3.5 w-2/3 bg-white/10" />
+                        <Skeleton className="h-2.5 w-1/2 bg-white/10" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
               {isSelectionMode && currentCandidates.length > 0 && <div className="h-2" />}
             </div>
