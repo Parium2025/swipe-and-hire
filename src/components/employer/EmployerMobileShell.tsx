@@ -43,9 +43,13 @@ const EmployerMobileShell = ({
             <div className="flex items-center">
               <EmployerLogoSidebarTrigger />
             </div>
-            <span className="absolute left-1/2 -translate-x-1/2 text-white text-base font-semibold tracking-tight select-none pointer-events-none">
+            <button
+              onClick={() => navigate('/home')}
+              className="absolute left-1/2 -translate-x-1/2 text-white text-base font-semibold tracking-tight select-none hover:opacity-80 active:scale-[0.97] transition-all"
+              aria-label="Gå till startsidan"
+            >
               Parium
-            </span>
+            </button>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => createJobButtonRef.current?.click()}
