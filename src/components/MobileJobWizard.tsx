@@ -2332,12 +2332,7 @@ const MobileJobWizard = ({
     setShowCompanyTooltip(false);
     
     // Clear sessionStorage and localStorage drafts when user confirms close ("Lämna utan att spara")
-    try {
-      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-    } catch {}
-    try {
-      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
-    } catch {}
+    clearCreateDraftSlots();
     try {
       sessionStorage.setItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY, '1');
       localStorage.setItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY, '1');
