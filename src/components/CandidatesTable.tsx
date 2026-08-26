@@ -942,7 +942,11 @@ export function CandidatesTable({
                   </TableRow>
                 );
               })}
+              {virtualPaddingBottom > 0 && (
+                <tr aria-hidden style={{ height: virtualPaddingBottom }} />
+              )}
             </TableBody>
+
           </Table>
         </div>
       )}
