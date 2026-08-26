@@ -17,9 +17,10 @@ import EmployerPasswordPanel from '@/components/employer/settings/EmployerPasswo
 import EmployerNotificationsPanel from '@/components/employer/settings/EmployerNotificationsPanel';
 import EmployerLocationPanel from '@/components/employer/settings/EmployerLocationPanel';
 import { prewarmEmployerSettings } from '@/lib/settingsPrewarm';
+import { EmployerSettingsSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
 const EmployerSettings = () => {
-  const { user, profile, updateProfile, updatePassword } = useAuth();
+  const { user, profile, updateProfile, updatePassword, loading: authLoading } = useAuth();
   const location = useLocation();
   const notificationSettingsRef = useRef<HTMLDivElement>(null);
   const [passwordData, setPasswordData] = useState({
@@ -179,6 +180,10 @@ const EmployerSettings = () => {
       content: <TeamManagement />,
     },
   ];
+
+  if (authLoading && !profile) {
+    return <EmployerSettingsSkeleton />;
+  }
 
   return (
     <div className="space-y-4 responsive-container [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
