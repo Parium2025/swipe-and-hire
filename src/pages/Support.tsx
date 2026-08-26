@@ -307,8 +307,22 @@ const Support = () => {
         </div>
         <div className="p-6">
           {ticketsLoading ? (
-            <div className="text-center text-white py-8 text-sm">
-              Laddar ärenden...
+            <div className="space-y-3" aria-busy="true" aria-label="Laddar supportärenden">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-3 p-3 border border-white/10 rounded-lg bg-white/5 animate-pulse"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="h-4 w-4 rounded-full bg-white/10 flex-shrink-0" />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="h-3.5 w-2/5 rounded bg-white/10" />
+                      <div className="h-3 w-3/5 rounded bg-white/10" />
+                    </div>
+                  </div>
+                  <div className="h-5 w-20 rounded-full bg-white/10 flex-shrink-0" />
+                </div>
+              ))}
             </div>
           ) : tickets.length === 0 ? (
             <div className="text-center text-white py-8 text-sm">
