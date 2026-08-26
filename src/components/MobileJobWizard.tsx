@@ -2453,8 +2453,7 @@ const MobileJobWizard = ({
       });
 
       // Clear both sessionStorage and localStorage drafts after successful save
-      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
+      clearCreateDraftSlots();
       try {
         sessionStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
         localStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
@@ -2651,8 +2650,7 @@ const MobileJobWizard = ({
 
       // Clear both sessionStorage and localStorage drafts BEFORE calling handleClose
       // This prevents the unsaved changes dialog from appearing
-      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
+      clearCreateDraftSlots();
       try {
         sessionStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
         localStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
