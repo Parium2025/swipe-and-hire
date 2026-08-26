@@ -262,6 +262,7 @@ const AnimatedRoutes = () => {
           <Route path="/company-profile" element={<Index />} />
           <Route path="/employer-profile" element={<Index />} />
           <Route path="/reviews" element={<Index />} />
+          <Route path="/templates" element={<Index />} />
           <Route path="/job-application/:jobId" element={<JobApplication />} />
           <Route path="/reset-redirect" element={<ResetRedirect />} />
           <Route path="/migrate-media" element={<MediaMigration />} />
