@@ -28,7 +28,6 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
-import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import {
