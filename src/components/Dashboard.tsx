@@ -315,7 +315,7 @@ const Dashboard = memo(() => {
   
 
   return (
-    <div className="dashboard-page-stack responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+    <div className="dashboard-page-stack responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       <div className="text-center mb-6">
         <h1 className="text-page-title font-semibold tracking-tight">Dashboard</h1>
       </div>

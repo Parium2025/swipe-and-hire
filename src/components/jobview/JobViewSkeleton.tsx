@@ -20,7 +20,7 @@ export const JobViewSkeleton = ({ asOverlay = false }: JobViewSkeletonProps) => 
       }
       style={{ isolation: 'isolate' }}
     >
-      <div className="jobview-container py-4 animate-fade-in">
+      <div className="jobview-container py-4">
         {/* Header pill: back + share */}
         <div className="flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg gap-3 justify-between">
           <div className={`h-11 w-28 rounded-full ${SHAPE}`} />

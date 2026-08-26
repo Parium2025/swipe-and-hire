@@ -616,7 +616,7 @@ const EmployerDashboard = memo(() => {
   }
 
   // Always fade in on mount — symmetric with dashboard
-  const fadeClass = 'animate-fade-in';
+  const fadeClass = '';
 
   return (
      <div className={`space-y-4 responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)] ${fadeClass}`}>

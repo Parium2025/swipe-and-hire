@@ -66,7 +66,7 @@ export const JobDetailsSkeleton = ({ jobId }: JobDetailsSkeletonProps = {}) => {
   );
 
   return (
-    <div className="responsive-container-wide py-4 pb-safe min-h-screen animate-fade-in space-y-4">
+    <div className="responsive-container-wide py-4 pb-safe min-h-screen space-y-4">
       {/* Header card — matches JobDetailsHeader */}
       <div className="rounded-lg border border-white/20 bg-white/5 p-3 md:p-4">
         <div className="flex items-start justify-between gap-2">

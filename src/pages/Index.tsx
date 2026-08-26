@@ -228,7 +228,7 @@ const CandidatesContent = () => {
 
 
   return (
-     <div className="responsive-container-wide animate-fade-in">
+     <div className="responsive-container-wide">
       {/* Main Content */}
       <div className="space-y-4">
         {/* Header */}
