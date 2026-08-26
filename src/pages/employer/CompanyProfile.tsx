@@ -26,9 +26,11 @@ import { DeleteSocialLinkDialog, DeleteLogoDialog } from './companyProfile/Compa
 import { EMPLOYEE_COUNT_OPTIONS } from './companyProfile/types';
 import type { SocialMediaLink, CompanyFormData } from './companyProfile/types';
 
+import { EmployerCompanyProfileSkeleton } from '@/components/employer/EmployerPageSkeleton';
+
 const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
-  const { profile, updateProfile, user, preloadedCompanyLogoUrl } = useAuth();
+  const { profile, updateProfile, user, preloadedCompanyLogoUrl, loading: authLoading } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
@@ -546,6 +548,10 @@ const CompanyProfile = () => {
   const handleFormDataChange = (updates: Partial<CompanyFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
+
+  if (authLoading && !profile) {
+    return <EmployerCompanyProfileSkeleton />;
+  }
 
   return (
      <div className="space-y-8 responsive-container [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
