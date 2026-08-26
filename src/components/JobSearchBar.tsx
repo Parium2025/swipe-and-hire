@@ -114,7 +114,7 @@ export const JobSearchBar = memo(({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className={`dashboard-control w-auto min-w-[180px] flex items-center justify-center gap-1.5 px-4 border text-sm font-medium text-white transition-all whitespace-nowrap ${
+              className={`dashboard-control w-auto min-w-[180px] flex items-center justify-center gap-1.5 rounded-md px-4 border text-sm font-medium text-white transition-all whitespace-nowrap ${
                 sortOpen
                   ? 'bg-white/20 border-white/30'
                   : 'bg-white/5 border-white/20 md:hover:bg-white/10 md:hover:border-white/50'
