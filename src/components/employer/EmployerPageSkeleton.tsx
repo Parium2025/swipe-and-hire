@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount, viewportRowCap } from '@/lib/useLiveSkeletonCount';
 import { isEmployerJobActive, isEmployerJobExpired, isEmployerJobDraft } from '@/lib/jobStatus';
+import { useDevice } from '@/hooks/use-device';
 
 /**
  * Hybrid skeleton count: read live from React Query cache first (accurate
