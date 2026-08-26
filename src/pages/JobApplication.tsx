@@ -310,8 +310,21 @@ const JobApplication = () => {
   const handleSubmit = async () => {
     if (!user || !job || submitInProgressRef.current) return;
 
-    // Basic validation
-    if (!formData.firstName || !formData.lastName || !formData.email) {
+    const requiredStandardFieldsPresent = [
+      formData.firstName,
+      formData.lastName,
+      formData.email,
+      formData.phone,
+      formData.age,
+      formData.location,
+      formData.hasOwnCar,
+      formData.whenCanStart,
+      formData.isStudying,
+      formData.personalLetter,
+      selectedProfile?.cv_url || formData.cvUrl,
+    ].every((value) => typeof value === 'string' && value.trim().length > 0);
+
+    if (!requiredStandardFieldsPresent) {
       toast({
         title: "Obligatoriska fält saknas",
         description: "Vänligen fyll i alla obligatoriska fält",
