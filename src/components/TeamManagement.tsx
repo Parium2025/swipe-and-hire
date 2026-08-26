@@ -75,6 +75,7 @@ const TeamManagement = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('recruiter');
   const [inviting, setInviting] = useState(false);
+  const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
   const [organizationId, setOrganizationId] = useState<string | null>(initialCache?.organizationId ?? null);
   
 
