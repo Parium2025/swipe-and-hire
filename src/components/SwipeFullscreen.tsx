@@ -163,6 +163,15 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const isEndStateActive = endStateVisible || showEndBounce;
   const displayIndex = Math.min(currentIndex + 1, jobs.length);
 
+  /* ── Infinite stack: hämta nästa sida innan korten tar slut ──
+     Utan detta stannar swipe-stacken på första sidan (100 jobb) även
+     om databasen har 100 000 träffar. */
+  useEffect(() => {
+    if (!onNeedMore || jobs.length === 0) return;
+    if (currentIndex >= jobs.length - 8) onNeedMore();
+  }, [currentIndex, jobs.length, onNeedMore]);
+
+
   /* ── Stabila callbacks för persistent action-bar ─────────
    * Utan dessa skapades onSave/onDislike/onLike som inline-arrows i JSX
    * varje render → memo(SwipeActionsBar) blev värdelös → knapparna
