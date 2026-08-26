@@ -23,6 +23,7 @@ import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { TruncatedText } from '@/components/TruncatedText';
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { useLiveSkeletonCount } from '@/lib/useLiveSkeletonCount';
 
 
 type SortOption = 'newest' | 'oldest';
@@ -257,7 +258,7 @@ const SavedJobs = () => {
       {activeTab === 'saved' && (
         <>
           {(isLoading && savedJobs.length === 0) ? (
-            <JobCardGridSkeleton count={readCachedCount(SKELETON_COUNT_KEYS.savedJobs, 3)} />
+            <JobCardGridSkeleton count={savedSkeletonCount} />
           ) : savedJobs.filter(hasRenderableJobPosting).length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
@@ -389,7 +390,7 @@ const SavedJobs = () => {
       {activeTab === 'skipped' && (
         <>
           {isLoadingSkipped ? (
-            <JobCardGridSkeleton count={readCachedCount(SKELETON_COUNT_KEYS.skippedJobs, 3)} />
+            <JobCardGridSkeleton count={skippedSkeletonCount} />
           ) : filteredSkippedJobs.length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
