@@ -161,7 +161,7 @@ function NotificationItem({
   const bodyTruncated = useTruncation(bodyRef);
   const [expanded, setExpanded] = useState(false);
   const canExpand = titleTruncated || bodyTruncated || expanded;
-  const reportable = isReportable(true, notification.title, notification.body) && !route;
+  const reportable = isReportable(notificationLooksError(notification.type, notification.title, notification.body), notification.title, notification.body) && !route;
 
   return (
     <motion.div
