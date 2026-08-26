@@ -91,10 +91,6 @@ const MyCandidates = () => {
   const colleagueLists = viewingColleagueId ? (teamListsByOwner[viewingColleagueId] ?? []) : [];
   const viewingColleagueList = colleagueLists.find(l => l.id === viewingColleagueListId) ?? null;
 
-  const handleViewColleague = useCallback((colleagueId: string | null, listId: string | null = null) => {
-    setViewingColleagueId(colleagueId);
-    setViewingColleagueListId(colleagueId ? listId : null);
-  }, []);
   const isViewingColleague = !!viewingColleagueId;
   
   // Colleague's candidates and stage settings
@@ -106,6 +102,13 @@ const MyCandidates = () => {
     removeCandidateFromColleagueList,
     setCandidates: setColleagueCandidates,
   } = useColleagueCandidates(viewingColleagueId, viewingColleagueListId);
+
+  const handleViewColleague = useCallback((colleagueId: string | null, listId: string | null = null) => {
+    // Rensa föregående kollegas rader i samma event innan den nya vyn målas.
+    setColleagueCandidates([]);
+    setViewingColleagueId(colleagueId);
+    setViewingColleagueListId(colleagueId ? listId : null);
+  }, [setColleagueCandidates]);
   
   const { 
     stageConfig: colleagueStageConfig, 
@@ -731,7 +734,7 @@ const MyCandidates = () => {
     return mapCandidateToAppData(selectedCandidate);
   }, [selectedCandidate, mapCandidateToAppData]);
 
-  if (isLoading || !showContent) {
+  if ((isViewingColleague ? loadingColleagueCandidates : isLoading) || !showContent) {
     return <EmployerMyCandidatesSkeleton />;
   }
 

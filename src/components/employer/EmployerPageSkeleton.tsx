@@ -433,6 +433,54 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
 });
 
 /**
+ * Skeleton for /candidates — mirrors the page header, filters and candidate rows.
+ */
+export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkeleton() {
+  const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.allCandidates, 5, 8);
+  return (
+    <FullscreenSkeletonPortal>
+      <motion.div
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
+        style={fullscreenSkeletonStyle}
+      >
+        <SkeletonChrome />
+        <div className="flex-1 min-h-0 overflow-hidden p-3">
+          <div className="responsive-container-wide space-y-4">
+            <div className="mb-6 flex flex-col items-center gap-2">
+              <div className={`h-7 w-56 max-w-full rounded ${SHAPE}`} />
+              <div className={`h-4 w-80 max-w-full rounded ${SHAPE}`} />
+            </div>
+            <div className="space-y-3">
+              <div className={`h-11 w-full rounded-xl ${SHAPE}`} />
+              <div className="flex justify-center gap-2">
+                <div className={`h-9 w-40 rounded-full ${SHAPE}`} />
+                <div className={`h-9 w-36 rounded-full ${SHAPE}`} />
+              </div>
+            </div>
+            <div className="space-y-3">
+              {Array.from({ length: candidateCount }).map((_, index) => (
+                <div key={index} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                  <div className={`h-12 w-12 flex-shrink-0 rounded-full ${SHAPE}`} />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className={`h-4 w-40 max-w-full rounded ${SHAPE}`} />
+                    <div className={`h-3 w-24 rounded ${SHAPE}`} />
+                    <div className={`h-3 w-56 max-w-full rounded ${SHAPE}`} />
+                  </div>
+                  <div className={`h-8 w-8 flex-shrink-0 rounded-full ${SHAPE}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </FullscreenSkeletonPortal>
+  );
+});
+
+/**
  * Skeleton for /messages — mirrors conversation list (mobile) / split view (desktop).
  */
 export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton() {
