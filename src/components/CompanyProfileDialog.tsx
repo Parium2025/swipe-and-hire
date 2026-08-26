@@ -423,6 +423,45 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                     </div>
                   </div>
                 )}
+
+                {company.company_social_media_links && company.company_social_media_links.length > 0 && (
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Share2 className="h-[18px] w-[18px] text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-white uppercase tracking-wide">Sociala medier</p>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        {company.company_social_media_links.map((link, i) => {
+                          const href = link.url.startsWith('http') ? link.url : `https://${link.url}`;
+                          const Icon =
+                            link.platform === 'linkedin' ? Linkedin :
+                            link.platform === 'twitter' ? Twitter :
+                            link.platform === 'instagram' ? Instagram :
+                            Globe;
+                          const label =
+                            link.platform === 'linkedin' ? 'LinkedIn' :
+                            link.platform === 'twitter' ? 'Twitter/X' :
+                            link.platform === 'instagram' ? 'Instagram' :
+                            'Länk';
+                          return (
+                            <a
+                              key={`${link.platform}-${i}`}
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={link.url}
+                              aria-label={label}
+                              className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-colors"
+                            >
+                              <Icon className="h-4 w-4 text-white" />
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
