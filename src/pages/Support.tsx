@@ -85,6 +85,7 @@ const Support = () => {
 
       if (error) throw error;
       setTickets(data || []);
+      if (user?.id) writeCachedSupportTickets(user.id, (data || []) as never);
     } catch (error) {
       console.error('Error fetching tickets:', error);
     } finally {
