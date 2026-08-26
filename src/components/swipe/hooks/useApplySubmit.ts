@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { useApplicationQuota } from '@/hooks/useApplicationQuota';
+import { hasAllRequiredApplicationAnswers } from '@/lib/applicationAnswerValidation';
 
 interface UseApplySubmitOptions {
   jobId: string;
@@ -38,9 +39,10 @@ export function useApplySubmit({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const submitInProgressRef = useRef(false);
 
   const handleSubmit = useCallback(async () => {
-    if (!userId || submitting) return;
+    if (!userId || submitInProgressRef.current) return;
 
     // 🔒 Premium-gate
     if (!quota.allowed && !quota.is_premium) {
@@ -48,6 +50,7 @@ export function useApplySubmit({
       return;
     }
 
+    submitInProgressRef.current = true;
     // 🚀 Optimistic UI
     setSubmitting(true);
     setSubmitted(true);
@@ -77,6 +80,11 @@ export function useApplySubmit({
       const profileRows = profileRes.data;
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
       const questionsSnapshot = questionsRes.data ?? [];
+      if (!hasAllRequiredApplicationAnswers(questionsSnapshot, answers)) {
+        throw Object.assign(new Error('Besvara alla obligatoriska frågor innan du skickar ansökan.'), {
+          code: '23514',
+        });
+      }
       const candidateProfile = candidateProfileRes.data ?? null;
       const snapshotCvUrl = candidateProfile
         ? candidateProfile.cv_url ?? null
@@ -168,6 +176,13 @@ export function useApplySubmit({
         return;
       }
 
+      if (err?.code === '23505') {
+        setSubmitted(true);
+        toast({ title: 'Du har redan sökt det här jobbet' });
+        onApplied();
+        return;
+      }
+
       toast({
         title: 'Kunde inte skicka ansökan',
         description: err.message || 'Försök igen',
@@ -175,12 +190,12 @@ export function useApplySubmit({
       });
 
     } finally {
+      submitInProgressRef.current = false;
       setSubmitting(false);
     }
   }, [
     userId,
     userEmail,
-    submitting,
     quota.allowed,
     quota.is_premium,
     jobId,

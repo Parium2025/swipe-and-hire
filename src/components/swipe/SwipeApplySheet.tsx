@@ -9,6 +9,7 @@ import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDia
 import type { SwipeJob } from './types';
 import { useApplyData } from './hooks/useApplyData';
 import { useApplySubmit } from './hooks/useApplySubmit';
+import { hasAllRequiredApplicationAnswers } from '@/lib/applicationAnswerValidation';
 
 interface SwipeApplySheetProps {
   jobId: string;
@@ -84,12 +85,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
   }, [handleSheetClose]);
 
   const canSubmit = useMemo(() => {
-    return questions
-      .filter((q) => q.is_required)
-      .every((q) => {
-        const a = answers[q.id];
-        return a !== undefined && a !== null && a !== '' && (typeof a !== 'string' || a.trim() !== '');
-      });
+    return hasAllRequiredApplicationAnswers(questions, answers);
   }, [questions, answers]);
 
   return (

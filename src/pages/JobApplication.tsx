@@ -22,6 +22,7 @@ import { useApplicationQuota } from '@/hooks/useApplicationQuota';
 import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
 import CandidateProfilePicker from '@/components/candidateProfiles/CandidateProfilePicker';
 import { useCandidateProfiles, type CandidateProfile } from '@/hooks/useCandidateProfiles';
+import { hasAllRequiredApplicationAnswers, isPermanentApplicationError } from '@/lib/applicationAnswerValidation';
 
 
 // Draft key for localStorage
@@ -67,6 +68,7 @@ const JobApplication = () => {
   const { setHasUnsavedChanges } = useUnsavedChanges();
   const { enqueueApplication } = useOfflineApplicationQueue(user?.id);
   const viewRecorded = useRef(false);
+  const submitInProgressRef = useRef(false);
   
   // Record a job view when user opens the application page (implies they saw the job)
   useEffect(() => {
@@ -306,7 +308,7 @@ const JobApplication = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user || !job) return;
+    if (!user || !job || submitInProgressRef.current) return;
 
     // Basic validation
     if (!formData.firstName || !formData.lastName || !formData.email) {
@@ -318,12 +320,22 @@ const JobApplication = () => {
       return;
     }
 
+    if (!hasAllRequiredApplicationAnswers(questions, formData.customAnswers)) {
+      toast({
+        title: 'Obligatoriska frågor saknas',
+        description: 'Besvara alla obligatoriska frågor innan du skickar ansökan.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // 🔒 Premium-gate: max 3 ansökningar/vecka på gratisplan.
     if (!quota.allowed && !quota.is_premium) {
       setShowLimitDialog(true);
       return;
     }
 
+    submitInProgressRef.current = true;
     setSubmitting(true);
 
     // Build the application payload
@@ -474,7 +486,7 @@ const JobApplication = () => {
       }
 
       // Behörighets-/valideringsfel går inte över av sig självt — köa inte.
-      if (code === '42501' || code.startsWith('23')) {
+      if (isPermanentApplicationError(error)) {
         toast({
           title: 'Kunde inte skicka ansökan',
           description: msg || 'Försök igen',
@@ -505,6 +517,7 @@ const JobApplication = () => {
       navigate('/dashboard');
 
     } finally {
+      submitInProgressRef.current = false;
       setSubmitting(false);
     }
   };
