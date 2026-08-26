@@ -28,6 +28,9 @@ import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { Helmet } from 'react-helmet-async';
 import { fetchPriority } from '@/lib/fetchPriority';
+import type { Database, Json } from '@/integrations/supabase/types';
+
+type JobApplicationInsert = Database['public']['Tables']['job_applications']['Insert'];
 
 interface JobPosting {
   id: string;
@@ -549,24 +552,27 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         age = new Date().getFullYear() - birthYear;
       }
       
+      const applicationPayload: JobApplicationInsert = {
+        job_id: jobId,
+        applicant_id: user?.id,
+        first_name: profile?.first_name || null,
+        last_name: profile?.last_name || null,
+        email: user?.email || profile?.email || null,
+        phone: profile?.phone || null,
+        location: profile?.home_location || profile?.location || null,
+        age: age,
+        bio: profile?.bio || null,
+        cv_url: profile?.cv_url || null,
+        availability: profile?.availability || null,
+        employment_status: profile?.employment_type || null,
+        custom_answers: answers,
+        questions_snapshot: jobQuestions as unknown as Json,
+        status: 'pending'
+      };
+
       const { error } = await supabase
         .from('job_applications')
-        .insert({
-          job_id: jobId,
-          applicant_id: user?.id,
-          first_name: profile?.first_name || null,
-          last_name: profile?.last_name || null,
-          email: user?.email || profile?.email || null,
-          phone: profile?.phone || null,
-          location: profile?.home_location || profile?.location || null,
-          age: age,
-          bio: profile?.bio || null,
-          cv_url: profile?.cv_url || null,
-          availability: profile?.availability || null,
-          employment_status: profile?.employment_type || null,
-          custom_answers: answers,
-          status: 'pending'
-        });
+        .insert(applicationPayload);
 
       if (error) throw error;
 

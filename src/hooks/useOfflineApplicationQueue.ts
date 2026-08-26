@@ -6,6 +6,9 @@ import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
 import { safeSetItem } from '@/lib/safeStorage';
 import { isPermanentApplicationError } from '@/lib/applicationAnswerValidation';
+import type { Database } from '@/integrations/supabase/types';
+
+type JobApplicationInsert = Database['public']['Tables']['job_applications']['Insert'];
 
 /**
  * 🚀 OFFLINE JOB APPLICATION QUEUE
@@ -28,22 +31,7 @@ export interface QueuedApplication {
   jobTitle: string;
   companyName: string;
   applicantId: string;
-  payload: {
-    job_id: string;
-    applicant_id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone: string;
-    age: number | null;
-    location: string;
-    bio: string;
-    cv_url: string;
-    profile_image_snapshot_url: string | null;
-    video_snapshot_url: string | null;
-    candidate_profile_label?: string | null;
-    custom_answers: Record<string, any>;
-  };
+  payload: JobApplicationInsert;
   emailPayload: {
     applicant_email: string;
     applicant_first_name: string;
@@ -136,9 +124,24 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
   // Sync a single application
   const syncApplication = async (app: QueuedApplication): Promise<'success' | 'retry' | 'permanent'> => {
     try {
+      let payload = app.payload;
+
+      // Äldre offlineköer skapades innan frågeögonblicksbilden blev obligatorisk.
+      // Hämta den aktuella listan en gång vid replay så att de inte fastnar permanent.
+      if (!Array.isArray(payload.questions_snapshot)) {
+        const { data: questions, error: questionsError } = await supabase
+          .from('job_questions')
+          .select('*')
+          .eq('job_id', app.jobId)
+          .order('order_index');
+
+        if (questionsError) throw questionsError;
+        payload = { ...payload, questions_snapshot: questions ?? [] };
+      }
+
       const { error } = await supabase
         .from('job_applications')
-        .insert(app.payload);
+        .insert(payload);
 
       if (error) {
         // Duplicate key = already submitted (success)
