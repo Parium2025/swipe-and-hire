@@ -39,13 +39,21 @@ const EmployerSettings = () => {
   }, [user?.id]);
 
   useEffect(() => {
-    if (location.hash !== '#notifications') return;
-    setOpenSection('notifications');
-    const frame = requestAnimationFrame(() => {
-      notificationSettingsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [location.hash]);
+    if (location.pathname !== '/settings') {
+      setOpenSection('');
+      return;
+    }
+
+    if (location.hash === '#notifications') {
+      setOpenSection('notifications');
+      const frame = requestAnimationFrame(() => {
+        notificationSettingsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+
+    setOpenSection('');
+  }, [location.pathname, location.hash]);
 
 
   // Load background location preference from profile
