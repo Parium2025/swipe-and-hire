@@ -333,8 +333,11 @@ const SavedJobs = () => {
     );
   };
 
+  // Förvärm bilder för aktuell sida + nästa sida, så "Nästa" känns instant
+  // utan att vi någonsin drar ner tusentals bilder i onödan.
   const prewarmEntries = useMemo(() => {
-    return activeJobsForMedia.slice(0, 8).flatMap((entry) => {
+    const start = (page - 1) * PAGE_SIZE;
+    return activeJobsForMedia.slice(start, start + PAGE_SIZE * 2).flatMap((entry) => {
       const posting = entry.job_postings;
       if (!posting) return [];
 
