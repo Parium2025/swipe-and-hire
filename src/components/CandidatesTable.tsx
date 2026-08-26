@@ -542,6 +542,43 @@ export function CandidatesTable({
     });
   }, [applications, sortField, sortDirection, getDisplayRating]);
 
+  // ─── Virtualisering av desktoplistan ────────────────────────────────────────
+  // Under tröskeln renderas listan exakt som förut (identisk DOM). Över tröskeln
+  // renderas bara raderna i/nära vyn, med spacer-rader som håller scrollhöjden.
+  const VIRTUALIZE_THRESHOLD = 120;
+  const ROW_HEIGHT = 57;
+  const tableWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
+  const isVirtualized = !isMobile && sortedApplications.length > VIRTUALIZE_THRESHOLD;
+
+  useEffect(() => {
+    if (!isVirtualized) return;
+    let el = tableWrapperRef.current?.parentElement as HTMLElement | null;
+    while (el && el !== document.body) {
+      const style = window.getComputedStyle(el);
+      if (/(auto|scroll)/.test(style.overflowY)) break;
+      el = el.parentElement as HTMLElement | null;
+    }
+    setScrollElement(el && el !== document.body ? el : null);
+  }, [isVirtualized]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: isVirtualized ? sortedApplications.length : 0,
+    getScrollElement: () => scrollElement,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 14,
+    measureElement: (el) => el.getBoundingClientRect().height || ROW_HEIGHT,
+  });
+
+  const virtualRows = isVirtualized && scrollElement ? rowVirtualizer.getVirtualItems() : [];
+  const virtualPaddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const virtualPaddingBottom =
+    virtualRows.length > 0
+      ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
+      : 0;
+  const useVirtualRendering = isVirtualized && scrollElement !== null && virtualRows.length > 0;
+
+
   // Grannkandidaternas porträtt (±3) förladdas så pilnavigeringen blir omedelbar.
   const adjacentCandidateMedia = useMemo(() => {
     if (!selectedApplicationId) return undefined;
