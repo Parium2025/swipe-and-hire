@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useMemo } from 'react';
 import { imageCache } from '@/lib/imageCache';
 import { fetchAllPages } from '@/lib/fetchAllPages';
 import { getIsOnline } from '@/lib/connectivityManager';
@@ -200,11 +200,30 @@ export function useMyApplicationsCache() {
 
   // Real-time subscription for job posting updates (applications_count,
   // deleted_at, expires_at, image fields, etc.).
-  // Subscribed ONCE per user — no `applications.length` in deps, otherwise
-  // the channel tears down and re-subscribes on every application change,
-  // which is expensive on Realtime quota and causes brief update gaps.
+  //
+  // 📡 Skal-skydd (samma mönster som useSavedJobsCache): prenumerera BARA på
+  // uppdateringar för jobb användaren faktiskt sökt. Utan server-side filter
+  // skulle VARJE job_postings-uppdatering i hela systemet (applications_count
+  // bumpas vid varje ansökan var som helst) pushas till varje klient som har
+  // sidan öppen. Över 100 id:n (extremfall) faller vi tillbaka på ofiltrerad
+  // kanal + klientfiltrering.
+  //
+  // Stabil nyckel av sorterade id:n — kanalen återprenumererar bara när
+  // användaren faktiskt söker/döljer ett jobb, inte vid varje refetch.
+  const applicationsJobIdsKey = useMemo(() => {
+    const ids = new Set<string>();
+    for (const app of applications) {
+      if (app.job_postings?.id) ids.add(app.job_postings.id);
+    }
+    return Array.from(ids).sort().join(',');
+  }, [applications]);
+
   useEffect(() => {
-    if (!user) return;
+    if (!user || !applicationsJobIdsKey) return;
+
+    const idList = applicationsJobIdsKey.split(',');
+    const ids = new Set(idList);
+    const serverFilter = idList.length <= 100 ? `id=in.(${idList.join(',')})` : undefined;
 
     const channel = createRealtimeChannel('my-applications-jobs')
       .on(
@@ -213,8 +232,10 @@ export function useMyApplicationsCache() {
           event: 'UPDATE',
           schema: 'public',
           table: 'job_postings',
+          ...(serverFilter ? { filter: serverFilter } : {}),
         },
         (payload) => {
+          if (!ids.has((payload.new as { id: string }).id)) return;
           // Merge full row from realtime payload — spreading payload.new
           // guarantees we never miss a field (payload.new contains ALL columns).
           queryClient.setQueryData(['my-applications', user.id], (oldData: Application[] | undefined) => {
@@ -243,7 +264,7 @@ export function useMyApplicationsCache() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient]);
+  }, [user, queryClient, applicationsJobIdsKey]);
 
 
   // Dölj ansökan (aldrig hard delete — arbetsgivaren behåller ansökan).
