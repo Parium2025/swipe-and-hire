@@ -3400,14 +3400,17 @@ export type Database = {
       swedish_postal_codes: {
         Row: {
           city: string
+          county: string | null
           postal_code: string
         }
         Insert: {
           city: string
+          county?: string | null
           postal_code: string
         }
         Update: {
           city?: string
+          county?: string | null
           postal_code?: string
         }
         Relationships: []
