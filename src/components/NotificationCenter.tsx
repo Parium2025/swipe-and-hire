@@ -1,7 +1,7 @@
 import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { Bell, Check, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { useNotificationPreferences, type NotificationType } from '@/hooks/useNotificationPreferences';
@@ -486,7 +486,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                       onClick={() => { markAllAsRead(); toastArchive.markAllAsRead(); }}
                       className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:bg-white/10 transition-colors"
                     >
-                      <CheckCheck className="h-3.5 w-3.5" />
+                      <Check className="h-3.5 w-3.5" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs">
