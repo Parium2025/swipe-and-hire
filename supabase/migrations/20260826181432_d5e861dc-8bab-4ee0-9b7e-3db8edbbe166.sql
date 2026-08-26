@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_email_send_log_status_created ON public.email_send_log (status, created_at);
