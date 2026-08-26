@@ -2742,6 +2742,42 @@ export type Database = {
           },
         ]
       }
+      payment_webhook_events: {
+        Row: {
+          created_at: string
+          error: string | null
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json
+          processed_at: string | null
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          event_id: string
+          event_type: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          provider?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profile_cv_summaries: {
         Row: {
           analyzed_at: string
@@ -3213,6 +3249,7 @@ export type Database = {
         Row: {
           billing_period: Database["public"]["Enums"]["plan_billing_period"]
           created_at: string
+          currency: string
           description: string | null
           features: Json
           id: string
@@ -3223,12 +3260,15 @@ export type Database = {
           name: string
           price_sek: number
           sort_order: number
+          stripe_price_id: string | null
+          stripe_product_id: string | null
           tier: Database["public"]["Enums"]["plan_tier"]
           updated_at: string
         }
         Insert: {
           billing_period: Database["public"]["Enums"]["plan_billing_period"]
           created_at?: string
+          currency?: string
           description?: string | null
           features?: Json
           id?: string
@@ -3239,12 +3279,15 @@ export type Database = {
           name: string
           price_sek: number
           sort_order?: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           tier: Database["public"]["Enums"]["plan_tier"]
           updated_at?: string
         }
         Update: {
           billing_period?: Database["public"]["Enums"]["plan_billing_period"]
           created_at?: string
+          currency?: string
           description?: string | null
           features?: Json
           id?: string
@@ -3255,6 +3298,8 @@ export type Database = {
           name?: string
           price_sek?: number
           sort_order?: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           tier?: Database["public"]["Enums"]["plan_tier"]
           updated_at?: string
         }
