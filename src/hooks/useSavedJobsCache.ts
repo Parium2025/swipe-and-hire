@@ -185,6 +185,28 @@ function writeCache<T>(key: string, userId: string, items: T[]): void {
   }
 }
 
+// 📚 PostgREST returnerar max 1000 rader per anrop. Användare med tusentals
+// sparade/skippade jobb skulle annars tappa rader tyst. Vi hämtar i block om
+// 1000 upp till ett tak (skyddar minnet på klienten).
+const FETCH_CHUNK = 1000;
+const FETCH_MAX_ROWS = 20000;
+
+async function fetchAllRows(
+  fetchRange: (from: number, to: number) => PromiseLike<{ data: unknown[] | null; error: { message: string } | null }>,
+): Promise<unknown[]> {
+  const all: unknown[] = [];
+  for (let from = 0; from < FETCH_MAX_ROWS; from += FETCH_CHUNK) {
+    const { data, error } = await fetchRange(from, from + FETCH_CHUNK - 1);
+    if (error) throw new Error(error.message);
+    const batch = Array.isArray(data) ? data : [];
+    all.push(...batch);
+    if (batch.length < FETCH_CHUNK) break;
+  }
+  return all;
+}
+
+
+
 const SAVED_SELECT = `
   id,
   job_id,
