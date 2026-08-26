@@ -30,6 +30,10 @@ function Calendar({
       formatters={{
         formatCaption,
       }}
+      modifiers={{ holiday: isSwedishHoliday }}
+      modifiersClassNames={{
+        holiday: "text-destructive hover:text-destructive focus:text-destructive",
+      }}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
