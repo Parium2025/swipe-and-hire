@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,6 +21,10 @@ export function useSwipeActions() {
   const queryClient = useQueryClient();
   const [actions, setActions] = useState<Map<string, SwipeActionType>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
+  // Synkron spegling av `actions` — setState-uppdateraren körs asynkront,
+  // så vi kan inte läsa förra värdet inuti den. Ref:en ger oss alltid det
+  // färska värdet direkt i event-handlern.
+  const actionsRef = useRef<Map<string, SwipeActionType>>(new Map());
   
   
 
@@ -45,6 +49,7 @@ export function useSwipeActions() {
 
         const map = new Map<string, SwipeActionType>();
         data?.forEach((row: any) => map.set(row.job_id, row.action as SwipeActionType));
+        actionsRef.current = map;
         setActions(map);
       } catch (err) {
         console.error('Error fetching swipe actions:', err);
@@ -67,6 +72,7 @@ export function useSwipeActions() {
         if (!prev.has(jobId)) return prev;
         const next = new Map(prev);
         next.delete(jobId);
+        actionsRef.current = next;
         return next;
       });
     };
@@ -81,6 +87,7 @@ export function useSwipeActions() {
     setActions(prev => {
       const next = new Map(prev);
       next.set(jobId, action);
+      actionsRef.current = next;
       return next;
     });
 
@@ -106,6 +113,7 @@ export function useSwipeActions() {
       setActions(prev => {
         const next = new Map(prev);
         next.delete(jobId);
+        actionsRef.current = next;
         return next;
       });
     }
@@ -114,19 +122,18 @@ export function useSwipeActions() {
   const undoAction = useCallback(async (jobId: string) => {
     if (!user?.id) return;
 
-    // Snapshot previous action via functional setState — undviker stale closure
-    // om användaren swipar/undo:ar snabbt efter varandra (deps inkluderar inte
-    // `actions` med flit; setActions ger oss alltid den färska Mapen).
-    let previousAction: SwipeActionType | undefined;
+    // Snapshot previous action från ref:en — setState-uppdateraren körs inte
+    // synkront, så att läsa värdet där gav alltid undefined och DB-raderingen
+    // hoppades över (jobbet dök upp som skippat igen efter reload).
+    const previousAction = actionsRef.current.get(jobId);
+    if (!previousAction) return; // inget att ångra
+
     setActions(prev => {
-      previousAction = prev.get(jobId);
-      if (!previousAction) return prev;
       const next = new Map(prev);
       next.delete(jobId);
+      actionsRef.current = next;
       return next;
     });
-
-    if (!previousAction) return; // inget att ångra
 
     try {
       const { error } = await supabase
@@ -141,7 +148,8 @@ export function useSwipeActions() {
       // Rollback
       setActions(prev => {
         const next = new Map(prev);
-        next.set(jobId, previousAction!);
+        next.set(jobId, previousAction);
+        actionsRef.current = next;
         return next;
       });
     }
