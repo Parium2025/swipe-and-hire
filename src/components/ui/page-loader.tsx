@@ -54,28 +54,6 @@ export const PageLoader = ({
           />
         </div>
 
-        {/* Lugn, pulserande våg med mjuk glow */}
-        <div className="relative flex items-end gap-2" aria-hidden="true">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <span key={i} className="relative flex h-3 w-1.5 items-end justify-center">
-              <span
-                className="absolute h-2 w-1.5 origin-bottom rounded-full bg-primary-foreground/30 blur-[3px] motion-reduce:animate-none"
-                style={{
-                  animation: 'parium-wave 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite',
-                  animationDelay: `${i * 0.18}s`,
-                }}
-              />
-              <span
-                className="block h-2 w-1.5 origin-bottom rounded-full bg-primary-foreground/70 motion-reduce:animate-none"
-                style={{
-                  animation: 'parium-wave 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite',
-                  animationDelay: `${i * 0.18}s`,
-                }}
-              />
-            </span>
-          ))}
-        </div>
-
         {showProgress && (
           <div className="h-[3px] w-40 overflow-hidden rounded-full bg-primary-foreground/15" aria-hidden="true">
             <div
@@ -85,8 +63,7 @@ export const PageLoader = ({
           </div>
         )}
 
-
-        <p className="text-sm font-medium text-primary-foreground/90">{label}</p>
+        <p className="text-sm font-medium text-primary-foreground">{label}</p>
       </div>
     </div>
   );
