@@ -1,6 +1,7 @@
 import { TEXT_LIMITS } from '@/lib/textLimits';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { z } from 'zod';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { Clock, CheckCircle, AlertCircle, ChevronDown, Check } from 'lucide-reac
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import { useAuth } from '@/hooks/useAuth';
 
 import { useFieldDraft } from '@/hooks/useFormDraft';
 
@@ -26,15 +28,27 @@ interface SupportTicket {
   updated_at: string;
 }
 
+const supportCategories = ['technical', 'billing', 'account', 'other'] as const;
+const supportMessageSchema = z.object({
+  category: z.enum(supportCategories),
+  message: z.string().trim().min(1).max(TEXT_LIMITS.supportMessage),
+});
+
 const Support = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [category, setCategory] = useState('');
+  const [categoryOpen, setCategoryOpen] = useState(false);
   // Auto-save message draft to localStorage
   const [message, setMessage, clearMessageDraft, hasMessageDraft] = useFieldDraft('support-message');
   const [loading, setLoading] = useState(false);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [ticketsLoading, setTicketsLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const normalizedMessage = message.trim();
+  const wordCount = normalizedMessage ? normalizedMessage.split(/\s+/).length : 0;
+  const characterCount = message.length;
   
   // Förifyll formuläret när man kommer hit via "Rapportera" i en notis
   useEffect(() => {
@@ -76,10 +90,13 @@ const Support = () => {
     e.preventDefault();
     
     
-    if (!category || !message) {
+    const parsed = supportMessageSchema.safeParse({ category, message });
+    if (!parsed.success || !user) {
       toast({
         title: "Fel",
-        description: "Vänligen fyll i alla fält",
+        description: !user
+          ? "Du behöver vara inloggad för att skicka ett supportärende."
+          : "Välj en kategori och skriv ett meddelande.",
         variant: "destructive"
       });
       return;
@@ -91,9 +108,10 @@ const Support = () => {
       const { data: newTicket, error } = await supabase
         .from('support_tickets')
         .insert({
-          category,
-          subject: categoryOptions.find(opt => opt.value === category)?.label || 'Supportärende',
-          message,
+          user_id: user.id,
+          category: parsed.data.category,
+          subject: categoryOptions.find(opt => opt.value === parsed.data.category)?.label || 'Supportärende',
+          message: parsed.data.message,
           status: 'open'
         })
         .select()
@@ -197,7 +215,7 @@ const Support = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="category" className="text-sm text-white">Kategori</Label>
-              <DropdownMenu modal={false}>
+              <DropdownMenu modal={false} open={categoryOpen} onOpenChange={setCategoryOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
@@ -206,7 +224,7 @@ const Support = () => {
                     <span className="truncate text-left flex-1 px-1">
                       {categoryOptions.find(o => o.value === category)?.label || 'Välj kategori'}
                     </span>
-                    <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2" />
+                    <ChevronDown className={`h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-200 ${categoryOpen ? 'rotate-180' : 'rotate-0'}`} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -249,6 +267,11 @@ const Support = () => {
                 required
                 className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none text-sm"
               />
+              <div className="flex justify-end min-h-4">
+                <span className="text-[11px] font-medium tabular-nums text-white">
+                  {wordCount} ord · {characterCount} tecken
+                </span>
+              </div>
             </div>
 
             <div className="flex justify-center">
@@ -256,7 +279,7 @@ const Support = () => {
                 type="submit" 
                 variant="glass"
                 className="h-11 !min-h-0 px-6 text-sm"
-                disabled={loading}
+                disabled={loading || !user || !supportMessageSchema.safeParse({ category, message }).success}
               >
                 {loading ? 'Skickar...' : 'Skicka meddelande'}
               </Button>
