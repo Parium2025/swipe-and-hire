@@ -513,8 +513,14 @@ const SavedJobs = () => {
                 </Card>
               ) : (
 
-              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-                {sortedJobs.map((savedJob, index) => {
+              <>
+              {totalPages > 1 && (
+                <p className="mb-3 text-center text-xs text-white/80">
+                  Visar {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, sortedJobs.length)} av {sortedJobs.length} jobb
+                </p>
+              )}
+              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pagedSavedJobs.length === 1 ? ' job-card-grid-single' : pagedSavedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+                {pagedSavedJobs.map((savedJob, index) => {
                   const job = savedJob.job_postings!;
                   // 🚇 SINGLE TUNNEL: workplace_name + company_logo_url come from job_postings.
                   const companyName = job.workplace_name?.trim() || 'Företag';
