@@ -202,6 +202,8 @@ const MobileJobWizard = ({
   const hasBeenOpenRef = useRef(false);
   // Guard: don't persist draft until restore has completed (prevents overwriting saved draft with empty data)
   const hasCompletedRestoreRef = useRef(false);
+  // Synkron spärr mot dubbelpublicering (setLoading hinner inte uppdateras).
+  const isPublishingRef = useRef(false);
   const editDraftKey = existingJob?.id ? getEditJobDraftKey(existingJob.id) : null;
   
   // Reset state when dialog ACTUALLY closes (not on initial mount)
