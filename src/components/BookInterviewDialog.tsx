@@ -19,6 +19,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { normalizeMeetingLink, isSupportedMeetingLink } from '@/lib/meetingLink';
 import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
+import { formatSwedishTime, isSwedishTimeZone, getLocalTimeZoneCity } from '@/lib/localTime';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface BookInterviewDialogProps {
@@ -435,6 +436,19 @@ export const BookInterviewDialog = ({
 
   const endTime = getEndTime(time, duration);
 
+  // Tidsvalet tolkas i rekryterarens egen tidszon. Sitter man utomlands visas
+  // motsvarande svensk tid automatiskt, så ingen bokar fel timme.
+  const zoneNotice = (() => {
+    if (!date || isSwedishTimeZone()) return null;
+    const [h, m] = time.split(':').map(Number);
+    const start = new Date(date);
+    start.setHours(h, m, 0, 0);
+    const end = new Date(start.getTime() + parseInt(duration) * 60_000);
+    const swedishStart = formatSwedishTime(start);
+    if (swedishStart === time) return null;
+    return `${time}\u2013${endTime} i ${getLocalTimeZoneCity()} = ${swedishStart}\u2013${formatSwedishTime(end)} svensk tid`;
+  })();
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContentNoFocus 
@@ -543,6 +557,12 @@ export const BookInterviewDialog = ({
               </Select>
             </div>
           </div>
+
+          {zoneNotice && (
+            <p className="-mt-1 text-xs text-white/80 break-words leading-snug">
+              {zoneNotice}
+            </p>
+          )}
 
           {/* Location type */}
           <div className="space-y-2">

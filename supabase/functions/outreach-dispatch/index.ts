@@ -62,7 +62,9 @@ const getToken = (request: Request) => {
 };
 
 const formatDate = (iso?: string | null) => iso ? new Date(iso).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Stockholm' }) : '';
-const formatTime = (iso?: string | null) => iso ? new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' }) : '';
+// Utskicken kan nå mottagare var som helst i världen – klockslaget märks
+// därför alltid ut som svensk tid.
+const formatTime = (iso?: string | null) => iso ? `${new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' })} (svensk tid)` : '';
 
 async function getUserFromRequest(request: Request) {
   const token = getToken(request);

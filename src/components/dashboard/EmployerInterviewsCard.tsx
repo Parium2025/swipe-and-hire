@@ -10,7 +10,7 @@ import { useInterviews, Interview } from '@/hooks/useInterviews';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 import {
   formatInterviewDate,
-  formatInterviewTime,
+  formatInterviewTimeWithZone,
   getTimeUntil,
   isInterviewUrgent,
   isInterviewOver,
@@ -118,7 +118,7 @@ export const EmployerInterviewsCard = memo(() => {
                     </div>
                     <div className="flex items-center gap-2 mt-1 text-[10px] text-white">
                       <span>{formatInterviewDate(interview.scheduled_at)}</span>
-                      <span>kl {formatInterviewTime(interview.scheduled_at)}</span>
+                      <span>kl {formatInterviewTimeWithZone(interview.scheduled_at)}</span>
                       <span className="flex items-center gap-0.5">
                         <LocationIcon className="h-2.5 w-2.5" />
                         {getLocationLabel(interview.location_type)}
