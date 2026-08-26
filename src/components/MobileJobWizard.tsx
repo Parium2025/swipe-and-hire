@@ -242,6 +242,7 @@ const MobileJobWizard = ({
             customQuestions: Array.isArray(parsed.customQuestions) ? parsed.customQuestions : [],
             currentStep: restoredStep,
             savedAt,
+            templateStamp: parsed.templateStamp ?? null,
           };
         } catch {
           return null;
