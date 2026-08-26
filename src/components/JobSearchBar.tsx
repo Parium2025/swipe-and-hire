@@ -1,7 +1,7 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, ArrowUpDown, UserCheck, X } from 'lucide-react';
+import { Search, ArrowUpDown, UserCheck, X, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +45,7 @@ export const JobSearchBar = memo(({
   hasDrafts = false,
 }: JobSearchBarProps) => {
   const showRecruiterFilter = recruiters.length > 1;
+  const [sortOpen, setSortOpen] = useState(false);
 
   const sortLabels: Record<SortOption, string> = {
     newest: 'Nyast först',
@@ -109,15 +110,20 @@ export const JobSearchBar = memo(({
         )}
 
         {/* Sort menu */}
-        <DropdownMenu>
+        <DropdownMenu open={sortOpen} onOpenChange={setSortOpen}>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="outline" 
-              className="dashboard-control w-auto min-w-[180px] bg-white/5 border-white/20 text-white transition-colors duration-150 will-change-transform md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus-visible:outline-none focus:ring-0 ring-0 outline-none active:border-white/20 active:shadow-none data-[state=open]:bg-white/5 data-[state=open]:border-white/20"
+            <button
+              type="button"
+              className={`dashboard-control w-auto min-w-[180px] flex items-center justify-center gap-1.5 px-4 border text-sm font-medium text-white transition-all whitespace-nowrap ${
+                sortOpen
+                  ? 'bg-white/20 border-white/30'
+                  : 'bg-white/5 border-white/20 md:hover:bg-white/10 md:hover:border-white/50'
+              }`}
             >
-              <ArrowUpDown className="mr-2 h-4 w-4" />
-              {sortLabels[sortBy]}
-            </Button>
+              <ArrowUpDown className="mr-1 h-4 w-4 flex-shrink-0 text-white" />
+              <span className="truncate">{sortLabels[sortBy]}</span>
+              <ChevronDown className={`ml-auto h-3 w-3 flex-shrink-0 text-white transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[200px] z-[10000] glass-panel rounded-md">
             <DropdownMenuItem 
