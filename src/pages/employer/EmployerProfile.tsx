@@ -1,8 +1,5 @@
-import { TEXT_LIMITS } from '@/lib/textLimits';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
@@ -53,9 +50,6 @@ const EmployerProfile = () => {
   const [formData, setFormData] = useState({
     first_name: profile?.first_name || '',
     last_name: profile?.last_name || '',
-    bio: profile?.bio || '',
-    location: profile?.location || '',
-    phone: profile?.phone || '',
     profile_image_url: profile?.profile_image_url || '',
   });
 
@@ -87,9 +81,6 @@ const EmployerProfile = () => {
     const values = {
       first_name: profile.first_name || '',
       last_name: profile.last_name || '',
-      bio: profile.bio || '',
-      location: profile.location || '',
-      phone: profile.phone || '',
       profile_image_url: profile.profile_image_url || '',
     };
 
@@ -100,7 +91,9 @@ const EmployerProfile = () => {
       });
 
       if (hasDraftContent) {
-        setFormData(savedDraft);
+        // Plocka bara kända nycklar — gamla drafts kan innehålla borttagna fält (bio/location/phone)
+        const { first_name = '', last_name = '', profile_image_url = '' } = savedDraft;
+        setFormData({ first_name, last_name, profile_image_url });
         setOriginalValues(values);
         setHasUnsavedChanges(true);
         didInitRef.current = true;
@@ -116,7 +109,7 @@ const EmployerProfile = () => {
   }, [profile, hasUnsavedChanges, setHasUnsavedChanges]);
 
   const checkForChanges = useCallback(() => {
-    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone) return false;
+    if (!originalValues.first_name && !originalValues.last_name) return false;
     
     const hasChanges = Object.keys(formData).some(key => {
       return formData[key] !== originalValues[key];
@@ -556,50 +549,6 @@ const EmployerProfile = () => {
                 readOnly
                 className="bg-white/5 border-white/10 text-white h-11 !min-h-0 text-sm cursor-not-allowed"
               />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="location" className="text-sm text-white">Plats</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({...formData, location: e.target.value})}
-                  placeholder="T.ex. Stockholm, Sverige"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
-                />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-sm text-white">Telefonnummer (frivilligt)</Label>
-                <Input
-                  id="phone"
-                  maxLength={TEXT_LIMITS.phone}
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  placeholder="T.ex. 070-123 45 67"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
-                />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="bio" className="text-sm text-white">Om mig</Label>
-                <Textarea
-                  id="bio"
-                  maxLength={TEXT_LIMITS.bio}
-                  value={formData.bio}
-                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                  rows={3}
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white text-sm"
-                />
-              <div className="text-right">
-                <span className="text-white text-sm">
-                  {(() => {
-                    const text = formData.bio.replace(/\s+/g, ' ').trim();
-                    const words = text ? text.split(/\s+/).length : 0;
-                    return `${words} ord · ${text.length} tecken`;
-                  })()}
-                </span>
-              </div>
             </div>
 
             <div className="flex justify-center pt-1">
