@@ -346,7 +346,7 @@ const SavedJobs = () => {
         { path: posting.company_logo_url, bucket: 'company-logos' as const },
       ].filter((item) => Boolean(item.path));
     });
-  }, [activeJobsForMedia]);
+  }, [activeJobsForMedia, page]);
 
   useImagePrewarm(prewarmEntries);
 
