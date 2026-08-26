@@ -334,7 +334,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             {hasFilters && (
               <span className="text-white text-xs">({value.length})</span>
             )}
-            <ChevronDown className="h-3 w-3 text-white" />
+            <ChevronDown className={`h-3 w-3 text-white transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
           </button>
         </PopoverTrigger>
         <PopoverContent 
