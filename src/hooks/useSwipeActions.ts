@@ -83,6 +83,10 @@ export function useSwipeActions() {
   const recordAction = useCallback(async (jobId: string, action: SwipeActionType) => {
     if (!user?.id) return;
 
+    // Spara föregående värde så att en misslyckad skrivning återställer exakt
+    // det som gällde innan (tidigare raderades posten helt = fel state).
+    const previousAction = actionsRef.current.get(jobId);
+
     // Optimistic update
     setActions(prev => {
       const next = new Map(prev);
@@ -109,15 +113,17 @@ export function useSwipeActions() {
       }
     } catch (err) {
       console.error('Error recording swipe action:', err);
-      // Revert optimistic update
+      // Revert till föregående state (inte blank)
       setActions(prev => {
         const next = new Map(prev);
-        next.delete(jobId);
+        if (previousAction) next.set(jobId, previousAction);
+        else next.delete(jobId);
         actionsRef.current = next;
         return next;
       });
     }
   }, [user?.id, queryClient]);
+
 
   const undoAction = useCallback(async (jobId: string) => {
     if (!user?.id) return;

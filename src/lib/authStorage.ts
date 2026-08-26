@@ -223,10 +223,18 @@ export class AuthStorageAdapter implements Storage {
         console.log('⏰ Session expired due to 24h inactivity (detected in authStorage) - logging out');
         console.log(`📊 Last activity: ${getTimeSinceLastActivity()}`);
         _inactivityLogoutFromStorage = true;
-        this.clearAuthData();
-        clearActivityTracking();
+        // Rensa ASYNKRONT: en läsning ska aldrig mutera lagringen mitt i
+        // GoTrue:s init-flöde (det kunde ge halvrensad session och
+        // inloggningsproblem). Vi returnerar null direkt och städar efteråt.
+        setTimeout(() => {
+          try {
+            this.clearAuthData();
+            clearActivityTracking();
+          } catch {}
+        }, 0);
         return null;
       }
+
 
       // 1. Primary: per-tab sessionStorage
       let value: string | null = null;
