@@ -231,9 +231,16 @@ const CandidatesContent = () => {
                 placeholder="Sök på namn, email, telefon, plats, jobb..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="dashboard-control-compact pl-11 pr-4 text-base font-medium bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:font-normal transition-colors"
+                className="dashboard-control-compact pl-11 pr-11 text-base font-medium bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:font-normal transition-colors"
               />
+              {showSearchBusy && (
+                <span
+                  aria-hidden="true"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"
+                />
+              )}
             </div>
+
             <div className="space-y-2">
               <div className="flex items-center justify-center gap-2">
                 <QuestionFilter 
