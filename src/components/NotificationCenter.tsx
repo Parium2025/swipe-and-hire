@@ -484,9 +484,9 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => { markAllAsRead(); toastArchive.markAllAsRead(); }}
-                      className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:bg-white/10 transition-colors"
+                      className="flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-medium text-white hover:bg-white/10 transition-colors"
                     >
-                      <Check className="h-3.5 w-3.5" />
+                      Markera alla som lästa
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs">
