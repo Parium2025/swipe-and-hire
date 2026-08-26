@@ -376,6 +376,19 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     });
   }, [user?.id, queryClient]);
 
+  // 🔔 Jobbet skippades i Swipe Mode → DB-triggern har redan tagit bort
+  // sparningen. Spegla det direkt så Sparade-listan aldrig visar ett jobb
+  // som inte längre är sparat i databasen.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (e: Event) => {
+      const jobId = (e as CustomEvent<{ jobId: string }>).detail?.jobId;
+      if (jobId) removeSavedJobLocally(jobId);
+    };
+    window.addEventListener('parium:job-unsaved', handler);
+    return () => window.removeEventListener('parium:job-unsaved', handler);
+  }, [removeSavedJobLocally]);
+
   const { isPremium } = useIsPremium();
 
   const toggleSavedJob = useCallback(async (jobId: string, jobPosting?: JobPostingInput) => {
