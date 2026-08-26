@@ -2232,7 +2232,7 @@ const Profile = () => {
                 <Label htmlFor="bio" className="text-white text-sm">Presentation / Om mig</Label>
                 <Textarea
                   id="bio"
-                  placeholder="Berätta kort om dig själv..."
+                  placeholder={isEmployer ? "Berätta om ditt företag..." : "Berätta kort om dig själv..."}
                   value={bio}
                   onChange={(e) => handleBioChange(e.target.value)}
                   rows={4}
