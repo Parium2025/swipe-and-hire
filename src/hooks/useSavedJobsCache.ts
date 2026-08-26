@@ -560,5 +560,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     removeSkippedJobLocally,
     toggleSavedJob,
     restoreSkippedJob,
+    bulkRemoveSaved,
+    bulkRemoveSkipped,
   };
 }
