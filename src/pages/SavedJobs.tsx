@@ -195,12 +195,19 @@ const SavedJobs = () => {
     if (!isLoadingSkipped) writeCachedCount(SKELETON_COUNT_KEYS.skippedJobs, skippedJobs.length);
   }, [isLoadingSkipped, skippedJobs.length]);
 
+  // Skelettet speglar det faktiska antalet kort: live ur cachen, annars
+  // senast kända antal — aldrig ett gissat fast antal.
+  const savedSkeletonCount = useLiveSkeletonCount({
+    queryKeys: ['saved-jobs'],
+    fallbackKey: SKELETON_COUNT_KEYS.savedJobs,
+  });
+  const skippedSkeletonCount = useLiveSkeletonCount({
+    queryKeys: ['skipped-jobs'],
+    fallbackKey: SKELETON_COUNT_KEYS.skippedJobs,
+  });
 
   if (!showContent) {
-    const skeletonCount = readCachedCount(
-      activeTab === 'skipped' ? SKELETON_COUNT_KEYS.skippedJobs : SKELETON_COUNT_KEYS.savedJobs,
-      3,
-    );
+    const skeletonCount = activeTab === 'skipped' ? skippedSkeletonCount : savedSkeletonCount;
     return (
       <div className="responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         <div className="text-center mb-5">
