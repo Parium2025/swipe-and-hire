@@ -1,8 +1,8 @@
 import { memo, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { useQueryClient } from '@tanstack/react-query';
 import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { useLiveSkeletonCount } from '@/lib/useLiveSkeletonCount';
 
 /**
  * Full-screen skeleton overlay for SearchJobs.
