@@ -6,6 +6,7 @@ import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { isSwedishHoliday } from "@/lib/swedishHolidays";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -28,6 +29,10 @@ function Calendar({
       className={cn("p-3", className)}
       formatters={{
         formatCaption,
+      }}
+      modifiers={{ holiday: isSwedishHoliday }}
+      modifiersClassNames={{
+        holiday: "text-destructive hover:text-destructive focus:text-destructive",
       }}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
