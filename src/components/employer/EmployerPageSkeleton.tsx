@@ -91,6 +91,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
         </div>
       </header>
+      )}
       {/* DESKTOP chrome — mirrors EmployerTopNav layout exactly.
           Real order (left→right):
             LEFT: logo | Annonser | Kandidater | Chattar | Företag | Notif | Profil-avatar
