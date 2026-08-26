@@ -2655,12 +2655,24 @@ const MobileJobWizard = ({
         return;
       }
 
-      // Save questions to job_questions table if there are any
+      // Save questions to job_questions table if there are any.
+      // Vid tillfälligt nätfel gör vi tre försök med backoff. Misslyckas det
+      // ändå får arbetsgivaren veta det — annonsen får aldrig se "klar" ut
+      // medan ansökningsfrågorna saknas.
+      let questionsSaved = true;
       if (jobPost) {
-        try {
-          await syncJobQuestions(jobPost.id, customQuestions);
-        } catch (questionsError) {
-          console.error('Error saving questions:', questionsError);
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            await syncJobQuestions(jobPost.id, customQuestions);
+            questionsSaved = true;
+            break;
+          } catch (questionsError) {
+            questionsSaved = false;
+            console.error('Error saving questions (attempt ' + (attempt + 1) + '):', questionsError);
+            if (attempt < 2) {
+              await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+            }
+          }
         }
       }
 
