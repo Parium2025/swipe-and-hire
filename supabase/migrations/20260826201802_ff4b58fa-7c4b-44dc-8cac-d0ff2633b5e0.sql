@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_saved_jobs_user_created ON public.saved_jobs USING btree (user_id, created_at DESC);
