@@ -83,6 +83,31 @@ function resolveRoute(type: string, metadata?: Record<string, unknown> | null): 
   }
 }
 
+// Äldre arkiverade toaster saknar `route` (de skapades innan notiserna blev
+// klickbara). Här härleds målet från titeln så att även historiken går att
+// klicka på – inget "händer ingenting" på gamla notiser.
+const TOAST_ROUTE_RULES: Array<[RegExp, string]> = [
+  [/utkast (sparat|uppdaterat|sparad)/i, '/my-jobs?tab=draft'],
+  [/annons(en)? (publicerad|återpublicerad|uppdaterad|skapad)/i, '/my-jobs'],
+  [/jobbannons/i, '/my-jobs'],
+  [/ansökan skickad/i, '/my-applications'],
+  [/intervju (bokad|ombokad|inbokad|flyttad)/i, '/my-candidates'],
+  [/kandidat (tillagd|flyttad|sparad)/i, '/my-candidates'],
+  [/mall (skapad|uppdaterad|sparad)/i, '/templates'],
+  [/meddelande(n)? (skickat|skickade|köat)/i, '/messages'],
+  [/profil(en)? (uppdaterad|sparad)/i, '/profile'],
+  [/supportärende|supportmeddelande/i, '/support'],
+  [/sparade jobb synkroniserade|jobb sparat/i, '/saved-jobs'],
+];
+
+function resolveToastRoute(title: string, body?: string | null): string | undefined {
+  const text = `${title} ${body ?? ''}`;
+  for (const [pattern, route] of TOAST_ROUTE_RULES) {
+    if (pattern.test(text)) return route;
+  }
+  return undefined;
+}
+
 // Notiser som handlar om AI-problem ska kunna rapporteras direkt till supporten.
 const REPORTABLE_PATTERN = /\bai\b|utvärder|kriteri|analys|sammanfattning/i;
 
