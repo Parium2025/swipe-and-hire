@@ -89,6 +89,8 @@ export interface JobTemplate {
   workplace_address?: string;
   workplace_postal_code?: string;
   workplace_city?: string;
+  workplace_county?: string;
+  workplace_municipality?: string;
   positions_count?: string;
   pitch?: string;
   contact_email?: string;

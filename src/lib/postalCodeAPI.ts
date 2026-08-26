@@ -1,3 +1,5 @@
+import { supabase } from '@/integrations/supabase/client';
+
 // API för alla svenska postnummer
 export interface PostalCodeResponse {
   postalCode: string;
@@ -130,6 +132,28 @@ if (typeof window !== 'undefined' && window.location.pathname !== '/auth') {
 
 async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse | null> {
   const cleanedCode = postalCode.replace(/\s+/g, '');
+
+  // Backendregistret är den auktoritativa källan. Samma register verifierar
+  // värdet igen i databastriggern när annonsen eller mallen sparas.
+  try {
+    const { data, error } = await supabase
+      .from('swedish_postal_codes')
+      .select('postal_code, city')
+      .eq('postal_code', cleanedCode)
+      .maybeSingle();
+
+    if (!error && data) {
+      return {
+        postalCode: formatPostalCodeDisplay(data.postal_code),
+        city: formatCityName(data.city),
+        municipality: '',
+        county: '',
+        area: formatCityName(data.city),
+      };
+    }
+  } catch {
+    // Offline/långsam anslutning: den identiska CSV-källan nedan håller formuläret användbart.
+  }
   
   // Använd cachad databas (laddades vid sidstart)
   try {
@@ -141,8 +165,8 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
         return {
           postalCode: formatPostalCodeDisplay(cleanedCode),
           city: formatCityName(city),
-          municipality: formatCityName(city),
-          county: getCountyByPostalCode(cleanedCode),
+          municipality: '',
+          county: '',
           area: formatCityName(city)
         };
       }
@@ -155,19 +179,6 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
   const localData = localPostalCodes[cleanedCode];
   if (localData) {
     return localData;
-  }
-  
-  // Sista utvägen: regionuppskattning
-  const regionCode = cleanedCode.substring(0, 3);
-  const regionEstimate = getRegionEstimate(regionCode);
-  if (regionEstimate) {
-    return {
-      postalCode: formatPostalCodeDisplay(cleanedCode),
-      city: formatCityName(regionEstimate.city),
-      municipality: formatCityName(regionEstimate.city),
-      county: regionEstimate.county,
-      area: formatCityName(regionEstimate.area)
-    };
   }
   
   return null;
