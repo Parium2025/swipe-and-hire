@@ -442,7 +442,7 @@ const MobileJobWizard = ({
           workplace_city: selectedTemplate.workplace_city || '',
           workplace_county: (selectedTemplate as any).workplace_county || '',
           workplace_municipality: (selectedTemplate as any).workplace_municipality || '',
-          positions_count: selectedTemplate.positions_count || '',
+          positions_count: selectedTemplate.positions_count || '1',
           work_schedule: selectedTemplate.work_schedule || '',
           contact_email: selectedTemplate.contact_email || '',
           application_instructions: selectedTemplate.application_instructions || '',
