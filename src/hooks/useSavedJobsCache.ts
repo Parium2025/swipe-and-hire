@@ -297,10 +297,23 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     if (!user?.id || safeSavedJobs.length === 0) return;
     const ids = new Set(safeSavedJobs.map(sj => sj.job_id));
 
+    // 📡 Skal-skydd: prenumerera bara på uppdateringar för användarens egna
+    // sparade jobb. Utan server-side filter skulle VARJE job_postings-uppdatering
+    // i hela systemet (t.ex. applications_count vid varje ansökan) pushas till
+    // varje klient som har sidan öppen. Över 100 id:n (extremfall) faller vi
+    // tillbaka på ofiltrerad kanal + klientfiltrering.
+    const idList = Array.from(ids);
+    const serverFilter = idList.length <= 100 ? `id=in.(${idList.join(',')})` : undefined;
+
     const channel = createRealtimeChannel(`saved-jobs-postings-${user.id}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'job_postings' },
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'job_postings',
+          ...(serverFilter ? { filter: serverFilter } : {}),
+        },
         (payload) => {
           if (!ids.has(payload.new.id)) return;
           queryClient.setQueryData(['saved-jobs', user.id], (oldData: SavedJob[] | undefined) => {
