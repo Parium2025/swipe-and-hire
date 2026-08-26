@@ -217,15 +217,19 @@ const Support = () => {
               <Label htmlFor="category" className="text-sm text-white">Kategori</Label>
               <DropdownMenu modal={false} open={categoryOpen} onOpenChange={setCategoryOpen}>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full h-11 !min-h-0 bg-white/5 border-white/10 text-white transition-colors justify-between text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
+                  <button
+                    type="button"
+                    className={`w-full h-11 min-h-0 flex items-center justify-between gap-1.5 px-4 rounded-md border text-sm font-medium text-white transition-all whitespace-nowrap min-w-0 ${
+                      categoryOpen
+                        ? 'bg-white/20 border-white/30'
+                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/50'
+                    }`}
                   >
                     <span className="truncate text-left flex-1 px-1">
                       {categoryOptions.find(o => o.value === category)?.label || 'Välj kategori'}
                     </span>
-                    <ChevronDown className="h-4 w-4 flex-shrink-0 text-white ml-2" />
-                  </Button>
+                    <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white ml-2 transition-transform duration-200 ${categoryOpen ? 'rotate-180' : ''}`} />
+                  </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   className="w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white"
