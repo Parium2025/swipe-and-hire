@@ -529,14 +529,18 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       {activeSalaryLabel}
                     </span>
                     {salaryRange ? (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); onSalaryRangeChange(''); }}
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSalaryRangeChange(''); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); e.preventDefault(); onSalaryRangeChange(''); } }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors cursor-pointer"
                         aria-label="Rensa lönefilter"
                       >
                         <X className="h-4 w-4" />
-                      </button>
+                      </span>
+
                     ) : (
                       <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                     )}
