@@ -792,15 +792,23 @@ export function CandidatesTable({
                 return (
                   <TableRow
                     key={application.id}
+                    data-index={trueIndex}
+                    ref={useVirtualRendering ? rowVirtualizer.measureElement : undefined}
                     className={cn(
                       "group border-white/10 cursor-pointer transition-[background-color] duration-150",
                       !selectionMode && "hover:bg-white/5 active:scale-[0.98]",
                       isSelected && "bg-white/10"
                     )}
-                    // contentVisibility: webbläsaren hoppar över layout/paint för rader
-                    // utanför skärmen. Identisk rendering, men 20 000 rader kostar
-                    // som en skärmfull. contain-intrinsic-size håller scrollhöjden stabil.
-                    style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: '0 57px' } as React.CSSProperties}
+                    // Utan virtualisering: contentVisibility låter webbläsaren hoppa över
+                    // layout/paint för rader utanför skärmen. Med virtualisering finns bara
+                    // de synliga raderna i DOM:en, och då måste höjden mätas på riktigt.
+                    style={
+                      useVirtualRendering
+                        ? ({ contain: 'layout style paint' } as React.CSSProperties)
+                        : ({ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: '0 57px' } as React.CSSProperties)
+                    }
+
+
 
                     onClick={() => handleRowClick(application)}
                     onMouseEnter={() => handlePrefetchCandidate(application)}
