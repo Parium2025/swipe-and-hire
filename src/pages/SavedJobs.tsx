@@ -40,6 +40,7 @@ const SavedJobs = () => {
     setSearchParams({ tab }, { replace: true });
   }, [setSearchParams]);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [skippedSort, setSkippedSort] = useState<SortOption>('newest');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
@@ -155,13 +156,19 @@ const SavedJobs = () => {
   }, [savedJobs, sortBy, statusFilter]);
 
   const filteredSkippedJobs = useMemo(() => {
-    return skippedJobs.filter(sj => {
+    const visible = skippedJobs.filter(sj => {
       if (!hasRenderableJobPosting(sj)) return false;
       if (!sj.job_postings.is_active) return false;
       if (sj.job_postings.expires_at && new Date(sj.job_postings.expires_at) < new Date()) return false;
       return true;
     });
-  }, [skippedJobs, hasRenderableJobPosting]);
+    const ascending = skippedSort === 'oldest';
+    return [...visible].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return ascending ? dateA - dateB : dateB - dateA;
+    });
+  }, [skippedJobs, hasRenderableJobPosting, skippedSort]);
 
   const activeJobsForMedia = activeTab === 'saved' ? sortedJobs : filteredSkippedJobs;
 
@@ -412,6 +419,35 @@ const SavedJobs = () => {
               </CardContent>
             </Card>
           ) : (
+            <>
+              {/* Sort chips — speglar Sparade-fliken */}
+              <div
+                ref={chipsRef}
+                className="flex items-center justify-start md:justify-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              >
+                <ArrowDownUp className="h-4 w-4 text-white shrink-0" />
+                {([
+                  { key: 'newest', label: 'Nyast först' },
+                  { key: 'oldest', label: 'Äldst först' },
+                ] as const).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setSkippedSort(key)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                      skippedSort === key
+                        ? 'bg-white/20 text-white border border-white/30'
+                        : 'bg-white/5 text-white border border-white/10 md:hover:bg-white/10'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {filteredSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
