@@ -744,7 +744,7 @@ export function CandidatesTable({
         />
       ) : (
         /* Desktop table view */
-        <div className="rounded-lg border border-white/10 bg-white/5 overflow-hidden" style={{ contain: 'layout style' }}>
+        <div ref={tableWrapperRef} className="rounded-lg border border-white/10 bg-white/5 overflow-hidden" style={{ contain: 'layout style' }}>
           <Table>
             <TableHeader>
               <TableRow className="border-white/10">
