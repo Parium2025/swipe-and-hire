@@ -134,28 +134,66 @@ export async function createConversationForCandidate(
   return created!.id;
 }
 
-/** Ensure both parties are members of the conversation. */
+/**
+ * Ensure both parties are members of the conversation.
+ * Retries once on transient errors (serialization/deadlock/RLS race). If it
+ * still fails, we remove the just-created empty conversation so we never leave
+ * a member-less "ghost"-tråd i listan.
+ */
 export async function ensureConversationMemberships(
   conversationId: string,
   userId: string,
   candidateId: string
 ): Promise<void> {
-  const { error: addSelfError } = await supabase
-    .from('conversation_members')
-    .upsert(
-      { conversation_id: conversationId, user_id: userId, is_admin: true },
-      { onConflict: 'conversation_id,user_id' }
-    );
-  if (addSelfError) throw addSelfError;
+  const attempt = async () => {
+    const { error: addSelfError } = await supabase
+      .from('conversation_members')
+      .upsert(
+        { conversation_id: conversationId, user_id: userId, is_admin: true },
+        { onConflict: 'conversation_id,user_id' }
+      );
+    if (addSelfError) throw addSelfError;
 
-  const { error: addCandidateError } = await supabase
-    .from('conversation_members')
-    .insert({ conversation_id: conversationId, user_id: candidateId, is_admin: false });
+    const { error: addCandidateError } = await supabase
+      .from('conversation_members')
+      .insert({ conversation_id: conversationId, user_id: candidateId, is_admin: false });
 
-  if (addCandidateError && addCandidateError.code !== '23505') {
-    throw addCandidateError;
+    if (addCandidateError && addCandidateError.code !== '23505') {
+      throw addCandidateError;
+    }
+  };
+
+  try {
+    await attempt();
+  } catch (first) {
+    if (!isRetryableError(first)) {
+      await discardEmptyConversation(conversationId);
+      throw first;
+    }
+    await new Promise((r) => setTimeout(r, 250));
+    try {
+      await attempt();
+    } catch (second) {
+      await discardEmptyConversation(conversationId);
+      throw second;
+    }
   }
 }
+
+/** Delete a conversation only if it has no messages (safe cleanup). */
+async function discardEmptyConversation(conversationId: string): Promise<void> {
+  try {
+    const { count } = await supabase
+      .from('conversation_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('conversation_id', conversationId);
+    if ((count ?? 0) > 0) return;
+    await supabase.from('conversations').delete().eq('id', conversationId);
+  } catch {
+    // Städning är best-effort — aldrig kasta vidare härifrån.
+  }
+}
+
 
 /** Check if an error is retryable (transient DB/network issue). */
 export function isRetryableError(error: any): boolean {
