@@ -1,4 +1,5 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { formatTimeAgo } from '@/lib/date';
@@ -541,6 +542,43 @@ export function CandidatesTable({
     });
   }, [applications, sortField, sortDirection, getDisplayRating]);
 
+  // ─── Virtualisering av desktoplistan ────────────────────────────────────────
+  // Under tröskeln renderas listan exakt som förut (identisk DOM). Över tröskeln
+  // renderas bara raderna i/nära vyn, med spacer-rader som håller scrollhöjden.
+  const VIRTUALIZE_THRESHOLD = 120;
+  const ROW_HEIGHT = 57;
+  const tableWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
+  const isVirtualized = !isMobile && sortedApplications.length > VIRTUALIZE_THRESHOLD;
+
+  useEffect(() => {
+    if (!isVirtualized) return;
+    let el = tableWrapperRef.current?.parentElement as HTMLElement | null;
+    while (el && el !== document.body) {
+      const style = window.getComputedStyle(el);
+      if (/(auto|scroll)/.test(style.overflowY)) break;
+      el = el.parentElement as HTMLElement | null;
+    }
+    setScrollElement(el && el !== document.body ? el : null);
+  }, [isVirtualized]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: isVirtualized ? sortedApplications.length : 0,
+    getScrollElement: () => scrollElement,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 14,
+    measureElement: (el) => el.getBoundingClientRect().height || ROW_HEIGHT,
+  });
+
+  const virtualRows = isVirtualized && scrollElement ? rowVirtualizer.getVirtualItems() : [];
+  const virtualPaddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const virtualPaddingBottom =
+    virtualRows.length > 0
+      ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
+      : 0;
+  const useVirtualRendering = isVirtualized && scrollElement !== null && virtualRows.length > 0;
+
+
   // Grannkandidaternas porträtt (±3) förladdas så pilnavigeringen blir omedelbar.
   const adjacentCandidateMedia = useMemo(() => {
     if (!selectedApplicationId) return undefined;
@@ -706,7 +744,7 @@ export function CandidatesTable({
         />
       ) : (
         /* Desktop table view */
-        <div className="rounded-lg border border-white/10 bg-white/5 overflow-hidden" style={{ contain: 'layout style' }}>
+        <div ref={tableWrapperRef} className="rounded-lg border border-white/10 bg-white/5 overflow-hidden" style={{ contain: 'layout style' }}>
           <Table>
             <TableHeader>
               <TableRow className="border-white/10">
@@ -738,23 +776,39 @@ export function CandidatesTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedApplications.map((application) => {
+              {virtualPaddingTop > 0 && (
+                <tr aria-hidden style={{ height: virtualPaddingTop }} />
+              )}
+              {(useVirtualRendering
+                ? virtualRows.map((v) => sortedApplications[v.index])
+                : sortedApplications
+              ).map((application, rowIdx) => {
+                const trueIndex = useVirtualRendering ? virtualRows[rowIdx].index : rowIdx;
                 const isAlreadyAdded = isInMyCandidates(application.id);
                 const teamInfo = getTeamInfo(application.id);
                 const isSelected = selectedIds.has(application.id);
+
                 
                 return (
                   <TableRow
                     key={application.id}
+                    data-index={trueIndex}
+                    ref={useVirtualRendering ? rowVirtualizer.measureElement : undefined}
                     className={cn(
                       "group border-white/10 cursor-pointer transition-[background-color] duration-150",
                       !selectionMode && "hover:bg-white/5 active:scale-[0.98]",
                       isSelected && "bg-white/10"
                     )}
-                    // contentVisibility: webbläsaren hoppar över layout/paint för rader
-                    // utanför skärmen. Identisk rendering, men 20 000 rader kostar
-                    // som en skärmfull. contain-intrinsic-size håller scrollhöjden stabil.
-                    style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: '0 57px' } as React.CSSProperties}
+                    // Utan virtualisering: contentVisibility låter webbläsaren hoppa över
+                    // layout/paint för rader utanför skärmen. Med virtualisering finns bara
+                    // de synliga raderna i DOM:en, och då måste höjden mätas på riktigt.
+                    style={
+                      useVirtualRendering
+                        ? ({ contain: 'layout style paint' } as React.CSSProperties)
+                        : ({ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: '0 57px' } as React.CSSProperties)
+                    }
+
+
 
                     onClick={() => handleRowClick(application)}
                     onMouseEnter={() => handlePrefetchCandidate(application)}
@@ -888,7 +942,11 @@ export function CandidatesTable({
                   </TableRow>
                 );
               })}
+              {virtualPaddingBottom > 0 && (
+                <tr aria-hidden style={{ height: virtualPaddingBottom }} />
+              )}
             </TableBody>
+
           </Table>
         </div>
       )}
