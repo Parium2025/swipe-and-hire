@@ -87,14 +87,12 @@ const MyCandidates = () => {
   // State for viewing a colleague's list
   const [viewingColleagueId, setViewingColleagueId] = useState<string | null>(null);
   const [viewingColleagueListId, setViewingColleagueListId] = useState<string | null>(null);
+  const [isSwitchingColleague, setIsSwitchingColleague] = useState(false);
+  const colleagueLoadStartedRef = useRef(false);
   const viewingColleague = teamMembers.find(m => m.userId === viewingColleagueId);
   const colleagueLists = viewingColleagueId ? (teamListsByOwner[viewingColleagueId] ?? []) : [];
   const viewingColleagueList = colleagueLists.find(l => l.id === viewingColleagueListId) ?? null;
 
-  const handleViewColleague = useCallback((colleagueId: string | null, listId: string | null = null) => {
-    setViewingColleagueId(colleagueId);
-    setViewingColleagueListId(colleagueId ? listId : null);
-  }, []);
   const isViewingColleague = !!viewingColleagueId;
   
   // Colleague's candidates and stage settings
@@ -106,6 +104,24 @@ const MyCandidates = () => {
     removeCandidateFromColleagueList,
     setCandidates: setColleagueCandidates,
   } = useColleagueCandidates(viewingColleagueId, viewingColleagueListId);
+
+  const handleViewColleague = useCallback((colleagueId: string | null, listId: string | null = null) => {
+    // Rensa föregående kollegas rader i samma event innan den nya vyn målas.
+    setColleagueCandidates([]);
+    colleagueLoadStartedRef.current = false;
+    setIsSwitchingColleague(!!colleagueId);
+    setViewingColleagueId(colleagueId);
+    setViewingColleagueListId(colleagueId ? listId : null);
+  }, [setColleagueCandidates]);
+
+  useEffect(() => {
+    if (!isSwitchingColleague) return;
+    if (loadingColleagueCandidates) {
+      colleagueLoadStartedRef.current = true;
+    } else if (colleagueLoadStartedRef.current) {
+      setIsSwitchingColleague(false);
+    }
+  }, [isSwitchingColleague, loadingColleagueCandidates]);
   
   const { 
     stageConfig: colleagueStageConfig, 
@@ -145,6 +161,7 @@ const MyCandidates = () => {
     markAsViewed: hookMarkAsViewed,
     loadMoreStage,
     hasMoreInStage,
+    loadingStage,
   } = useMyCandidatesData(debouncedSearchQuery, activeListId, activeStageOrder);
 
   // Sanna totalsiffror per kolumn (räknas i databasen, inte på nedladdade rader)
@@ -730,7 +747,7 @@ const MyCandidates = () => {
     return mapCandidateToAppData(selectedCandidate);
   }, [selectedCandidate, mapCandidateToAppData]);
 
-  if (isLoading || !showContent) {
+  if ((isViewingColleague ? loadingColleagueCandidates || isSwitchingColleague : isLoading) || !showContent) {
     return <EmployerMyCandidatesSkeleton />;
   }
 
@@ -795,6 +812,7 @@ const MyCandidates = () => {
           stageCounts={debouncedSearchQuery ? undefined : stageCounts}
           hasMoreInStage={hasMoreInStage}
           onLoadMore={loadMoreStage}
+          loadingStage={loadingStage}
           renderActionBar={isSelectionMode ? (
             <MyCandidatesMobileActionBar
               selectedCount={selectedCandidateIds.size}
@@ -861,6 +879,7 @@ const MyCandidates = () => {
                   totalCount={debouncedSearchQuery ? undefined : stageCounts?.[stage]}
                   hasMore={hasMoreInStage(stage)}
                   onLoadMore={loadMoreStage}
+                   isLoadingMore={loadingStage === stage || loadingStage === '__all__'}
                 />
               );
             })}

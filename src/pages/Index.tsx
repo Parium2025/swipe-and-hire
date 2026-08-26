@@ -59,6 +59,7 @@ import RealtimeStatusPage from '@/components/RealtimeStatusPage';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 import { useDevice } from '@/hooks/use-device';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { EmployerCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
 // 🔥 Persistent-mount routes — these pages stay alive across navigation so that
 // data + DOM is loaded once per session and re-visiting feels instant.
@@ -190,40 +191,7 @@ const CandidatesContent = () => {
 
 
   if (isLoading || !showContent) {
-    const skeletonRows = readCachedCount(SKELETON_COUNT_KEYS.allCandidates, 5, 8);
-    return (
-      <div className="responsive-container-wide">
-        <div className="space-y-4">
-          <div className="text-center mb-6 space-y-2">
-            <Skeleton className="h-7 w-56 mx-auto bg-white/10" />
-            <Skeleton className="h-4 w-80 max-w-full mx-auto bg-white/10" />
-          </div>
-          <div className="mb-6 space-y-3">
-            <Skeleton className="h-11 w-full rounded-xl bg-white/10" />
-            <div className="flex items-center justify-center gap-2">
-              <Skeleton className="h-9 w-40 rounded-full bg-white/10" />
-              <Skeleton className="h-9 w-36 rounded-full bg-white/10" />
-            </div>
-          </div>
-          <div className="space-y-3">
-            {Array.from({ length: skeletonRows }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4"
-              >
-                <Skeleton className="h-12 w-12 rounded-full bg-white/10 flex-shrink-0" />
-                <div className="flex-1 space-y-2 min-w-0">
-                  <Skeleton className="h-4 w-40 max-w-full bg-white/10" />
-                  <Skeleton className="h-3 w-24 bg-white/10" />
-                  <Skeleton className="h-3 w-56 max-w-full bg-white/10" />
-                </div>
-                <Skeleton className="h-8 w-8 rounded-full bg-white/10 flex-shrink-0" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <EmployerCandidatesSkeleton />;
   }
 
 
@@ -234,7 +202,7 @@ const CandidatesContent = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
-            Alla kandidater ({isLoading ? '...' : displayTotalLabel})
+            Alla kandidater ({displayTotalLabel})
           </h1>
           <p className="text-sm text-white mt-1">
             Hantera och granska kandidater som sökt till dina jobbannonser

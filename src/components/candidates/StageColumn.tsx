@@ -7,6 +7,7 @@ import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
 import { SortableCandidateCard } from './KanbanCandidateCard';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface StageColumnProps {
   stage: CandidateStage;
@@ -30,6 +31,8 @@ export interface StageColumnProps {
   hasMore?: boolean;
   /** Anropas när användaren scrollat nära botten (med kolumnens steg). */
   onLoadMore?: (stage: string) => void;
+  /** Visar stabil platshållare medan nästa sida för kolumnen hämtas. */
+  isLoadingMore?: boolean;
 }
 
 export const StageColumn = ({
@@ -50,6 +53,7 @@ export const StageColumn = ({
   totalCount,
   hasMore,
   onLoadMore,
+  isLoadingMore,
 }: Omit<StageColumnProps, 'onMoveCandidate'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
@@ -247,8 +251,21 @@ export const StageColumn = ({
 
           {bottomSpacer > 0 && <div data-spacer="bottom" style={{ height: bottomSpacer }} aria-hidden />}
 
+          {isLoadingMore && (
+            <div className="space-y-1.5" aria-label="Laddar fler kandidater">
+              {[0, 1, 2].map((item) => (
+                <div key={item} className="flex min-h-14 items-center gap-2 rounded-md bg-white/5 px-2 py-1.5">
+                  <Skeleton className="h-9 w-9 flex-shrink-0 rounded-full bg-white/10" />
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <Skeleton className="h-3 w-2/3 bg-white/10" />
+                    <Skeleton className="h-2.5 w-1/2 bg-white/10" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-          {candidates.length === 0 && !isOver && (
+          {candidates.length === 0 && !isOver && !isLoadingMore && (
             <div className="text-center py-8 text-xs text-white">
               Inga kandidater i detta steg
             </div>

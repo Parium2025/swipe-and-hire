@@ -274,6 +274,7 @@ export function useMyCandidatesData(
   // 🔥 Auto-sync queued candidate operations when connectivity returns
   useCandidateOperationQueue(user?.id);
   const [isDragging, setIsDragging] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<string | null>(null);
 
   // Check for cached data BEFORE query runs (only for non-search queries)
   const hasCachedData = user && !searchQuery ? readMyCandidatesCache(user.id, listId) !== null : false;
@@ -395,8 +396,10 @@ export function useMyCandidatesData(
     if (!hasNextPage || isFetchingNextPage) return;
     // Endast den kolumn som scrollades hämtar nästa sida.
     requestedStagesRef.current = stage ? new Set([stage]) : new Set();
+    setLoadingStage(stage ?? ALL_STAGES);
     void fetchNextPage().finally(() => {
       requestedStagesRef.current = new Set();
+      setLoadingStage(null);
     });
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
@@ -1246,6 +1249,7 @@ export function useMyCandidatesData(
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    loadingStage,
     /** Hämtar nästa 50 i varje kolumn som fortfarande har fler kandidater. */
     loadMoreStage,
     /** Har den här kolumnen fler kandidater kvar på servern? */
