@@ -4501,6 +4501,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      sync_owned_job_questions: {
+        Args: { p_job_id: string; p_questions: Json }
+        Returns: undefined
+      }
       trigger_career_tips_fetch: { Args: never; Returns: undefined }
       trigger_cron_health_watchdog: { Args: never; Returns: undefined }
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
