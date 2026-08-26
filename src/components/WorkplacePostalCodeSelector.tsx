@@ -216,9 +216,6 @@ const WorkplacePostalCodeSelector = ({
               <p className="text-sm text-white font-medium">
                 Söker i svensk postnummerdatabas...
               </p>
-              <p className="text-sm text-white mt-0.5">
-                16,000+ postnummer tillgängliga
-              </p>
             </div>
           </div>
         </Card>
