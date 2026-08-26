@@ -283,7 +283,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
         {item.body && <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
-          {!item.route && canExpand && (
+          {!route && canExpand && (
             <span className="text-xs font-medium text-white/80 underline underline-offset-2">
               {expanded ? 'Visa mindre' : 'Visa mer'}
             </span>
