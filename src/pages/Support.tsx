@@ -309,7 +309,7 @@ const Support = () => {
         <div className="p-6">
           {ticketsLoading ? (
             <div className="space-y-3" aria-busy="true" aria-label="Laddar supportärenden">
-              {[0, 1, 2].map((i) => (
+              {Array.from({ length: ticketSkeletonCount }).map((_, i) => (
                 <div
                   key={i}
                   className="flex items-center justify-between gap-3 p-3 border border-white/10 rounded-lg bg-white/5 animate-pulse"
