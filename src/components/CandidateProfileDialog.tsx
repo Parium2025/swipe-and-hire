@@ -1,4 +1,5 @@
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
+import { TruncatedText } from '@/components/TruncatedText';
 import { cn } from '@/lib/utils';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -547,7 +548,11 @@ export const CandidateProfileDialog = ({
                               }`}
                             >
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm text-white leading-snug break-words line-clamp-2">{app.job_title || 'Okänt jobb'}</p>
+                                <TruncatedText
+                                  text={app.job_title || 'Okänt jobb'}
+                                  lines={2}
+                                  className="text-sm text-white leading-snug break-words"
+                                />
                                 <p className="text-xs text-white mt-0.5">Sökte {formatTimeAgo(app.applied_at)}</p>
                               </div>
                               {isActive && <Check className="h-4 w-4 text-white shrink-0 mt-0.5" />}
