@@ -880,15 +880,16 @@ const MobileJobWizard = ({
         savedAt: Date.now(),
       });
 
-      sessionStorage.setItem(JOB_WIZARD_SESSION_KEY, draftData);
-      const localSaved = safeSetItem(JOB_WIZARD_DRAFT_KEY, draftData);
+      const draftKeys = getCreateDraftKeys(selectedTemplate?.id);
+      sessionStorage.setItem(draftKeys.session, draftData);
+      const localSaved = safeSetItem(draftKeys.local, draftData);
       if (!localSaved) {
         console.warn('Failed to persist job wizard draft to localStorage');
       }
     } catch {
       console.warn('Failed to save job wizard state');
     }
-  }, [open, existingJob, currentStep, formData, customQuestions, jobTitle]);
+  }, [open, existingJob, selectedTemplate, currentStep, formData, customQuestions, jobTitle]);
 
   // Save on every relevant state change
   useEffect(() => {
