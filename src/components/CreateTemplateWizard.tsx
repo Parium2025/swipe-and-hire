@@ -1112,7 +1112,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
         toast({
           title: "Mall uppdaterad!",
-          description: `Mallen "${formData.name}" har uppdaterats.`
+          description: `Mallen "${formData.name}" har uppdaterats.`,
+          route: '/templates'
         });
       } else {
         // Create new template
@@ -1131,7 +1132,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
         toast({
           title: "Mall skapad!",
-          description: `Mallen "${formData.name}" har skapats.`
+          description: `Mallen "${formData.name}" har skapats.`,
+          route: '/templates'
         });
       }
 

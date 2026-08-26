@@ -602,6 +602,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       toast({
         title: 'Ansökan skickad!',
         description: 'Din ansökan har skickats till arbetsgivaren',
+        route: '/my-applications',
       });
 
       setJustApplied(true);

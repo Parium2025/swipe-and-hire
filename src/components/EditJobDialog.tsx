@@ -1169,7 +1169,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       // Save questions too (id-bevarande — raderar inte historiken)
       await syncJobQuestions(job.id, customQuestions);
 
-      toast({ title: 'Utkast sparat', description: 'Dina ändringar har sparats.' });
+      toast({ title: 'Utkast sparat', description: 'Dina ändringar har sparats.', route: '/my-jobs?tab=draft' });
       clearEditJobDraft();
       setShowUnsavedDialog(false);
       setPendingClose(false);
@@ -1949,6 +1949,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
           description: publishMode ? 'Din annons är nu publicerad och synlig för jobbsökare.' : 'Dina ändringar har sparats.',
           variant: 'success',
           duration: publishMode ? 5000 : undefined,
+          route: job?.id ? `/job/${job.id}` : '/my-jobs',
         });
       };
       if (typeof window !== 'undefined') window.setTimeout(finish, 320);

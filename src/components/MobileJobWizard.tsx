@@ -2464,7 +2464,8 @@ const MobileJobWizard = ({
         title: existingJob?.id ? "Utkast uppdaterat" : "Utkast sparat",
         description: existingJob?.id 
           ? "Dina ändringar har sparats." 
-          : "Annonsen har sparats som utkast. Du hittar den i 'Mina annonser'."
+          : "Annonsen har sparats som utkast. Du hittar den i 'Mina annonser'.",
+        route: '/my-jobs?tab=draft'
       });
 
       // Clear both sessionStorage and localStorage drafts after successful save

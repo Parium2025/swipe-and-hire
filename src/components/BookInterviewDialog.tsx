@@ -381,7 +381,7 @@ export const BookInterviewDialog = ({
 
       toast.success(
         isReschedule ? `Intervju ombokad för ${candidateName}` : `Intervju bokad för ${candidateName}`,
-        { description },
+        { description, route: '/my-candidates' } as Parameters<typeof toast.success>[1],
       );
 
       queryClient.invalidateQueries({ queryKey: ['interviews'] });

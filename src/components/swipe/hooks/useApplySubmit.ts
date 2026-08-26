@@ -155,7 +155,7 @@ export function useApplySubmit({
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
       queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId] });
 
-      toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats` });
+      toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats`, route: '/my-applications' });
       refreshQuota();
 
       setTimeout(() => {
