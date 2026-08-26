@@ -44,6 +44,8 @@ interface SwipeFullscreenProps {
   onUndoSwipeAction?: (jobId: string) => void;
   /** Anropas när användaren närmar sig slutet av stacken — laddar nästa sida. */
   onNeedMore?: () => void;
+  /** Sant när fler sidor finns kvar att hämta — hindrar felaktigt "slut"-läge. */
+  moreAvailable?: boolean;
 }
 
 /* ── Timing constants ────────────────────────────────────── */
@@ -65,6 +67,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   onRecordSwipeAction,
   onUndoSwipeAction,
   onNeedMore,
+  moreAvailable = false,
 }: SwipeFullscreenProps) {
   /* ── Refs ─────────────────────────────────────────────── */
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -621,6 +624,17 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   ) : null;
 
   /* ── Empty state (behåller sin egen render-väg för att inte påverka UX) ── */
+  if (jobs.length === 0 && moreAvailable) {
+    // Hela sidan filtrerades bort (redan svepta/sökta jobb) men fler finns —
+    // visa laddning istället för "Inga fler jobb".
+    return createPortal(
+      <div className="fixed inset-0 z-[9999] bg-parium-gradient flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+      </div>,
+      document.body,
+    );
+  }
+
   if (jobs.length === 0) {
     return createPortal(
       <>
