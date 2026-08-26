@@ -1809,7 +1809,8 @@ const Profile = () => {
         toast({
           title: "Profil uppdaterad",
           description: "Dina ändringar har sparats",
-          duration: 2000
+          duration: 2000,
+          route: '/profile'
         });
       }
     } catch (error) {

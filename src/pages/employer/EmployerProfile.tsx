@@ -392,7 +392,8 @@ const EmployerProfile = () => {
 
       toast({
         title: "Profil uppdaterad",
-        description: "Din profil har uppdaterats"
+        description: "Din profil har uppdaterats",
+        route: '/profile'
       });
     } catch (error) {
       toast({

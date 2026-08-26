@@ -138,7 +138,8 @@ const Support = () => {
 
       toast({
         title: "Meddelande skickat!",
-        description: "Vi kommer att svara inom 24 timmar."
+        description: "Vi kommer att svara inom 24 timmar.",
+        route: '/support'
       });
       
       setCategory('');

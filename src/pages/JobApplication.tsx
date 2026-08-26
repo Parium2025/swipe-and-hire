@@ -474,7 +474,8 @@ const JobApplication = () => {
 
       toast({
         title: "Ansökan skickad!",
-        description: "Din ansökan har skickats till arbetsgivaren"
+        description: "Din ansökan har skickats till arbetsgivaren",
+        route: '/my-applications'
       });
 
       navigate('/dashboard');
