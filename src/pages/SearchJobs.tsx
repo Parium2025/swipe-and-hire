@@ -1145,6 +1145,7 @@ const SearchJobs = memo(() => {
           onRecordSwipeAction={recordSwipeAction}
           onUndoSwipeAction={undoSwipeAction}
           onNeedMore={handleSwipeNeedMore}
+          moreAvailable={!!hasNextPage}
           filterState={{
             searchInput,
             onSearchInputChange: setSearchInput,

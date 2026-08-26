@@ -263,11 +263,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     }
 
-    // Client-side IP lookup (works when Private Relay is off)
-    const ipLocation = await getLocationByIP().catch((error) => {
-      console.warn('IP location lookup failed, continuing with fallbacks:', error);
-      return null;
-    });
+    // Server-side IP lookup first — one shared edge function with per-IP cache
+    // instead of every client hitting free third-party IP APIs directly.
+    const ipLocation = (await getServerSideIPLocation().catch(() => null))
+      ?? (await getLocationByIP().catch((error) => {
+        console.warn('IP location lookup failed, continuing with fallbacks:', error);
+        return null;
+      }));
     if (ipLocation && mountedRef.current) {
       if (cached && cached.source === 'gps') {
         console.log('⚠️ Ignoring IP location (might be datacenter), using GPS cache');
@@ -278,17 +280,6 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       console.log(`📡 Using IP geolocation: ${ipLocation.city} (accuracy may vary)`);
       await updateLocation(ipLocation.lat, ipLocation.lon, ipLocation.city, 'ip');
       return;
-    }
-
-    // Server-side IP lookup — bypasses iCloud Private Relay blocking of client-side APIs.
-    // Edge function reads request IP; Private Relay egress still resolves to region.
-    if (mountedRef.current) {
-      const serverIp = await getServerSideIPLocation().catch(() => null);
-      if (serverIp && mountedRef.current) {
-        console.log(`🌐 Server-side IP geolocation: ${serverIp.city}`);
-        await updateLocation(serverIp.lat, serverIp.lon, serverIp.city, 'ip');
-        return;
-      }
     }
 
     if (cached && mountedRef.current) {
@@ -519,7 +510,8 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
   }
 
   if (!location) {
-    const ipLocation = await getLocationByIP();
+    const ipLocation = (await getServerSideIPLocation().catch(() => null))
+      ?? (await getLocationByIP().catch(() => null));
     if (ipLocation) {
       location = { ...ipLocation, source: 'ip', timestamp: Date.now() };
       setCachedLocation(location);

@@ -49,6 +49,7 @@ class LRUCache<K, V> {
 
 const weatherCache = new LRUCache<string, WeatherEntry>(5000);
 const cityCache = new LRUCache<string, CityEntry>(5000);
+const ipCache = new LRUCache<string, { data: { lat: number; lon: number; city: string }; timestamp: number }>(20000);
 
 // ─── TTLs ─────────────────────────────────────────────────────────
 
@@ -56,6 +57,7 @@ const WEATHER_TTL = 15 * 60 * 1000; // 15 minutes
 const WEATHER_FALLBACK_TTL = 60 * 1000; // 1 min — never poison the grid with a neutral 0°
 const CITY_TTL = 60 * 60 * 1000; // 1 hour (cities don't move)
 const CITY_EMPTY_TTL = 5 * 60 * 1000; // retry unknown city sooner
+const IP_TTL = 6 * 60 * 60 * 1000; // 6h — an IP's city rarely changes
 const OPEN_METEO_TIMEOUT_MS = 4500;
 // The client aborts at 5s; leave room so a slow geocode never costs the weather.
 const CITY_LOOKUP_BUDGET_MS = 2000;
@@ -198,6 +200,13 @@ async function fetchCity(lat: number, lon: number): Promise<string> {
 async function ipLookup(req: Request) {
   const ip = getClientIP(req);
 
+  if (ip && ip !== 'unknown') {
+    const hit = ipCache.get(ip);
+    if (hit && Date.now() - hit.timestamp < IP_TTL) {
+      return jsonResponse(hit.data, 200, { 'Cache-Control': 'no-store' });
+    }
+  }
+
   let result: { lat: number; lon: number; city: string } | null = null;
 
   // Try ipapi.co first (city-level accuracy, generous free tier)
@@ -240,6 +249,10 @@ async function ipLookup(req: Request) {
 
   if (!result) {
     return errorResponse('ip-lookup-failed', 404, { 'Cache-Control': 'no-store' });
+  }
+
+  if (ip && ip !== 'unknown') {
+    ipCache.set(ip, { data: result, timestamp: Date.now() });
   }
 
   return jsonResponse(result, 200, { 'Cache-Control': 'no-store' });
