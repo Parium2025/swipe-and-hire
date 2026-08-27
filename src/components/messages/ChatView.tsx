@@ -864,10 +864,13 @@ export function ChatView({
                 onBack();
               }}
             >
-              {confirmAction === 'block' ? 'Blockera' : 'Radera'}
+              {confirmAction === 'block'
+                ? <ShieldBan className="h-4 w-4 mr-1.5" />
+                : <Trash2 className="h-4 w-4 mr-1.5" />}
+              {confirmAction === 'block' ? 'Blockera' : 'Ta bort'}
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
 
 
