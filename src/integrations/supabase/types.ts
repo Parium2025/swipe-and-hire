@@ -540,6 +540,7 @@ export type Database = {
           hidden_author_id: string | null
           id: string
           is_anonymous: boolean | null
+          public_author_id: string | null
           rating: number
           updated_at: string
           user_id: string | null
@@ -551,6 +552,7 @@ export type Database = {
           hidden_author_id?: string | null
           id?: string
           is_anonymous?: boolean | null
+          public_author_id?: string | null
           rating: number
           updated_at?: string
           user_id?: string | null
@@ -562,6 +564,7 @@ export type Database = {
           hidden_author_id?: string | null
           id?: string
           is_anonymous?: boolean | null
+          public_author_id?: string | null
           rating?: number
           updated_at?: string
           user_id?: string | null
@@ -3705,7 +3708,7 @@ export type Database = {
           is_anonymous?: boolean | null
           rating?: number | null
           updated_at?: string | null
-          user_id?: never
+          user_id?: string | null
         }
         Update: {
           comment?: string | null
@@ -3715,7 +3718,7 @@ export type Database = {
           is_anonymous?: boolean | null
           rating?: number | null
           updated_at?: string | null
-          user_id?: never
+          user_id?: string | null
         }
         Relationships: []
       }
