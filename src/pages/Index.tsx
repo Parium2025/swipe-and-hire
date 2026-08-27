@@ -218,7 +218,7 @@ const CandidatesContent = () => {
             Alla kandidater ({displayTotalLabel})
           </h1>
           <p className="text-sm text-white mt-1">
-            Hantera och granska kandidater som sökt till dina jobbannonser
+            Hantera och granska kandidater som sökt till dina jobbannonser.
           </p>
         </div>
 

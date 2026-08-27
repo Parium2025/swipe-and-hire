@@ -443,7 +443,7 @@ const SavedJobs = () => {
                 <Heart className="h-12 w-12 text-white mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-white mb-2">Inga sparade jobb än</h3>
                 <p className="text-white mb-4">
-                  När du hittar intressanta jobb kan du spara dem här för enkel åtkomst
+                  När du hittar intressanta jobb kan du spara dem här för enkel åtkomst.
                 </p>
                 <Button onClick={() => navigate('/search-jobs')} variant="glass">
                   Sök jobb
@@ -507,7 +507,7 @@ const SavedJobs = () => {
                       {statusFilter === 'active' ? 'Inga aktiva jobb' : statusFilter === 'expired' ? 'Inga utgångna jobb' : 'Inga jobb att visa'}
                     </h3>
                     <p className="text-white text-sm">
-                      Justera filtret ovan för att visa fler jobb
+                      Justera filtret ovan för att visa fler jobb.
                     </p>
                   </CardContent>
                 </Card>
@@ -588,7 +588,7 @@ const SavedJobs = () => {
                 <EyeOff className="h-12 w-12 text-white mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-white mb-2">Inga skippade jobb</h3>
                 <p className="text-white mb-4">
-                  Jobb du svipat förbi i swipe-läget hamnar här
+                  Jobb du svipat förbi i swipe-läget hamnar här.
                 </p>
                 <Button onClick={() => navigate('/search-jobs')} variant="glass">
                   Sök jobb

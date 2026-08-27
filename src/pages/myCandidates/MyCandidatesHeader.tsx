@@ -356,7 +356,7 @@ export const MyCandidatesHeader = ({
                 </div>
                 <p className="text-white font-medium text-sm">Inga kandidater hittades</p>
                 <p className="text-white/60 text-xs mt-1 text-center max-w-xs">
-                  Försök med ett annat sökord eller kontrollera stavningen
+                  Försök med ett annat sökord eller kontrollera stavningen.
                 </p>
                 <Button
                   variant="ghost"

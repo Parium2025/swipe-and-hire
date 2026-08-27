@@ -521,7 +521,7 @@ const CompanyProfile = () => {
 
       toast({
         title: "Företagsprofil uppdaterad",
-        description: "Din företagsprofil har uppdaterats"
+        description: "Din företagsprofil har uppdaterats."
       });
     } catch (error) {
       toast({
@@ -571,7 +571,7 @@ const CompanyProfile = () => {
       <div className="mt-8">
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
-          <p className="text-white">Uppdatera företagsprofil för att synas bättre för kandidater</p>
+          <p className="text-white">Uppdatera företagsprofil för att synas bättre för kandidater.</p>
         </div>
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">

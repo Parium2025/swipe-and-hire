@@ -865,7 +865,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         console.error('Error loading profile image for editing:', error);
         toast({
           title: "Fel",
-          description: "Kunde inte ladda bilden för redigering",
+          description: "Kunde inte ladda bilden för redigering.",
           variant: "destructive"
         });
       }
@@ -1025,12 +1025,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     if (isVideoWithCover) {
       toast({
         title: "Video borttagen",
-        description: "Din cover-bild är nu din profilbild"
+        description: "Din cover-bild är nu din profilbild."
       });
     } else {
       toast({
         title: "Media borttagen",
-        description: "Din profilvideo har tagits bort"
+        description: "Din profilvideo har tagits bort."
       });
     }
 
@@ -1065,7 +1065,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     toast({
       title: "Återställd!",
-      description: "Din profilvideo har återställts"
+      description: "Din profilvideo har återställts."
     });
   };
 
@@ -1085,7 +1085,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     toast({
       title: "Cover-bild borttagen", 
-      description: "Din cover-bild har tagits bort"
+      description: "Din cover-bild har tagits bort."
     });
   };
 
@@ -1108,7 +1108,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     toast({
       title: "Återställd!",
-      description: "Din cover-bild har återställts"
+      description: "Din cover-bild har återställts."
     });
   };
 
@@ -1273,7 +1273,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             <FileText className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">CV</h2>
-          <p className="text-sm text-white">Ladda upp ditt CV för att visa din erfarenhet</p>
+          <p className="text-sm text-white">Ladda upp ditt CV för att visa din erfarenhet.</p>
         </div>
 
         <div className="flex flex-col items-center space-y-4">
@@ -1367,7 +1367,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             </div>
 
             <div className="text-center mt-8">
-              <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold">Låt oss skapa din profil tillsammans</p>
+              <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold">Låt oss skapa din profil tillsammans.</p>
             </div>
           </div>
         );
@@ -1520,7 +1520,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
           <div className="space-y-6">
             <div className="text-center mb-6">
               <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Profilbild/Profilvideo</h2>
-              <p className="text-sm text-white">Ladda upp en kort profilvideo/profilbild – eller båda – och gör ditt första intryck minnesvärt</p>
+              <p className="text-sm text-white">Ladda upp en kort profilvideo/profilbild – eller båda – och gör ditt första intryck minnesvärt.</p>
             </div>
 
             {/* Profile Image/Video Card - matching structure from Profile.tsx */}
@@ -1771,7 +1771,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Briefcase className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Din presentation</h2>
-              <p className="text-sm text-white">Några rader om dig gör att arbetsgivare kommer ihåg dig</p>
+              <p className="text-sm text-white">Några rader om dig gör att arbetsgivare kommer ihåg dig.</p>
             </div>
 
             <div className="space-y-4 max-w-md mx-auto">

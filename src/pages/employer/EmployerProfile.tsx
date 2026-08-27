@@ -393,7 +393,7 @@ const EmployerProfile = () => {
 
       toast({
         title: "Profil uppdaterad",
-        description: "Din profil har uppdaterats",
+        description: "Din profil har uppdaterats.",
         route: '/profile'
       });
     } catch (error) {
@@ -436,7 +436,7 @@ const EmployerProfile = () => {
                 Profilbild
               </h3>
               <p className="text-white text-center text-sm -mt-2">
-                Ladda upp en profilbild som syns för kandidater
+                Ladda upp en profilbild som syns för kandidater.
               </p>
               
               

@@ -151,7 +151,7 @@ const Subscription = () => {
       <div className="text-center mb-2">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Abonnemang</h1>
         <p className="text-sm text-white mt-1">
-          Hantera ditt abonnemang och uppgradera din plan
+          Hantera ditt abonnemang och uppgradera din plan.
         </p>
 
       </div>

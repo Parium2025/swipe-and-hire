@@ -330,7 +330,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                     ) : (
                       <>
                         <Upload className="w-8 h-8 text-white mb-2" />
-                        <p className="text-sm text-white">Klicka för att ladda upp logga</p>
+                        <p className="text-sm text-white">Klicka för att ladda upp logga.</p>
                         <p className="text-sm text-white mt-1">PNG, JPG eller GIF (max 10MB)</p>
                       </>
                     )}

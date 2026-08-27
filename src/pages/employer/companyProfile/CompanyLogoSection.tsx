@@ -29,7 +29,7 @@ export const CompanyLogoSection = ({
     <>
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Företagslogga</h1>
-        <p className="text-sm text-white mt-1">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
+        <p className="text-sm text-white mt-1">Ladda upp din företagslogga för att bygga kännedom och förtroende.</p>
       </div>
 
       <div className="flex flex-col items-center space-y-4 py-6">

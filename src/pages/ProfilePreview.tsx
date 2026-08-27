@@ -186,7 +186,7 @@ export default function ProfilePreview() {
         navigator.clipboard.writeText(data.phone);
         toast({
           title: "Telefonnummer kopierat",
-          description: "Telefonnumret har kopierats till urklipp",
+          description: "Telefonnumret har kopierats till urklipp.",
         });
       }
     };
@@ -196,7 +196,7 @@ export default function ProfilePreview() {
         navigator.clipboard.writeText(user.email);
         toast({
           title: "E-post kopierad",
-          description: "E-postadressen har kopierats till urklipp",
+          description: "E-postadressen har kopierats till urklipp.",
         });
       }
     };
@@ -629,7 +629,7 @@ export default function ProfilePreview() {
         navigator.clipboard.writeText(consentedData.phone);
         toast({
           title: "Telefonnummer kopierat",
-          description: "Telefonnumret har kopierats till urklipp",
+          description: "Telefonnumret har kopierats till urklipp.",
         });
       }
     };
@@ -639,7 +639,7 @@ export default function ProfilePreview() {
         navigator.clipboard.writeText(user.email);
         toast({
           title: "E-post kopierad",
-          description: "E-postadressen har kopierats till urklipp",
+          description: "E-postadressen har kopierats till urklipp.",
         });
       }
     };

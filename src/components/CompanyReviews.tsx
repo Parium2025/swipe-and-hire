@@ -72,7 +72,7 @@ const CompanyReviews = () => {
         console.error('Error fetching company data:', error);
         toast({
           title: "Fel",
-          description: "Kunde inte hämta företagsinformation",
+          description: "Kunde inte hämta företagsinformation.",
           variant: "destructive"
         });
         return null;
@@ -192,7 +192,7 @@ const CompanyReviews = () => {
             Företagsinformation saknas
           </h3>
           <p className="text-white">
-            Fyll i din företagsprofil för att se recensioner
+            Fyll i din företagsprofil för att se recensioner.
           </p>
         </div>
       </div>
@@ -204,7 +204,7 @@ const CompanyReviews = () => {
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Recensioner</h1>
         <p className="text-sm text-white">
-          Se hur ditt företag upplevs av jobbsökare
+          Se hur ditt företag upplevs av jobbsökare.
         </p>
       </div>
 

@@ -74,7 +74,7 @@ const EmailVerification = () => {
     if (pinCode.length !== 6) {
       toast({
         title: "Fel PIN-kod",
-        description: "PIN-koden ska vara 6 siffror",
+        description: "PIN-koden ska vara 6 siffror.",
         variant: "destructive"
       });
       return;
@@ -92,7 +92,7 @@ const EmailVerification = () => {
       await navigator.clipboard.writeText(confirmationUrl);
       toast({
         title: "Länk kopierad!",
-        description: "Öppna Safari och klistra in länken",
+        description: "Öppna Safari och klistra in länken.",
       });
     } catch (err) {
       toast({
@@ -224,7 +224,7 @@ const EmailVerification = () => {
                 </Button>
               </div>
               <p className="text-sm text-primary-foreground/60 text-center">
-                Kolla din inkorg och följ länken i emailet
+                Kolla din inkorg och följ länken i emailet.
               </p>
             </div>
           )}

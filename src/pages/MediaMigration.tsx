@@ -21,7 +21,7 @@ export default function MediaMigration() {
           <div>
             <h1 className="text-3xl font-bold">Media-migrering</h1>
             <p className="text-muted-foreground">
-              Migrera befintlig media till rätt buckets
+              Migrera befintlig media till rätt buckets.
             </p>
           </div>
         </div>

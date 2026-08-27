@@ -73,7 +73,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
     if (!newSocialLink.platform || !newSocialLink.url.trim()) {
       toast({
         title: "Ofullständig information",
-        description: "Välj en plattform och ange en URL",
+        description: "Välj en plattform och ange en URL.",
         variant: "destructive"
       });
       return;
@@ -113,7 +113,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
     <div className="border-t border-white/10 pt-5 space-y-4">
       <div>
         <h4 className="text-base font-semibold text-white mb-1">Sociala medier</h4>
-        <p className="text-sm text-white">Lägg till företagets sociala medier-profiler</p>
+        <p className="text-sm text-white">Lägg till företagets sociala medier-profiler.</p>
       </div>
 
       {links.length > 0 && (

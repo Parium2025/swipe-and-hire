@@ -183,7 +183,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     if (newRating < 1) {
       toast({
         title: "Betyg krävs",
-        description: "Vänligen välj minst 1 stjärna",
+        description: "Vänligen välj minst 1 stjärna.",
         variant: "destructive",
       });
       return;
@@ -192,7 +192,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     if (!newComment.trim()) {
       toast({
         title: "Kommentar krävs",
-        description: "Vänligen skriv en kommentar",
+        description: "Vänligen skriv en kommentar.",
         variant: "destructive",
       });
       return;
@@ -205,7 +205,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       if (!user) {
         toast({
           title: "Inte inloggad",
-          description: "Du måste vara inloggad för att lämna en kommentar",
+          description: "Du måste vara inloggad för att lämna en kommentar.",
           variant: "destructive",
         });
         return;
@@ -226,7 +226,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
         if (error.code === '23505') {
           toast({
             title: "Du har redan recenserat",
-            description: "Du kan bara lämna en recension per företag",
+            description: "Du kan bara lämna en recension per företag.",
             variant: "destructive",
           });
           return;
@@ -236,7 +236,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
       toast({
         title: "Kommentar skickad",
-        description: "Din kommentar har publicerats",
+        description: "Din kommentar har publicerats.",
       });
 
       setNewComment("");
@@ -247,7 +247,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       console.error("Error submitting review:", error);
       toast({
         title: "Fel",
-        description: "Kunde inte skicka kommentaren",
+        description: "Kunde inte skicka kommentaren.",
         variant: "destructive",
       });
     } finally {

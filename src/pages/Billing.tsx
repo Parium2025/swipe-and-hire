@@ -132,7 +132,7 @@ const Billing = () => {
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Betalningar</h1>
         <p className="text-sm text-white mt-1">
-          Hantera dina betalningsmetoder och se din betalningshistorik
+          Hantera dina betalningsmetoder och se din betalningshistorik.
         </p>
       </div>
 

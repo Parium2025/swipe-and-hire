@@ -198,7 +198,7 @@ const WorkplacePostalCodeSelector = ({
                 Postnummer {postalCodeValue} hittades inte
               </p>
               <p className="text-sm text-white mt-0.5">
-                Kontrollera postnumret och försök igen
+                Kontrollera postnumret och försök igen.
               </p>
             </div>
           </div>

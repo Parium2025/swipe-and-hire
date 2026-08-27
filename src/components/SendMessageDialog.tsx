@@ -279,7 +279,7 @@ export function SendMessageDialog({
         >
           <DialogHeader className="sr-only">
             <DialogTitle className="sr-only">Chatta</DialogTitle>
-            <DialogDescription className="sr-only">Skriv ditt meddelande till {recipientName}</DialogDescription>
+            <DialogDescription className="sr-only">Skriv ditt meddelande till {recipientName}.</DialogDescription>
           </DialogHeader>
           <AnimatedBackground showBubbles={false} />
 

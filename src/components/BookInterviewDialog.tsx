@@ -458,7 +458,7 @@ export const BookInterviewDialog = ({
       >
         <DialogHeader className="sr-only">
           <DialogTitle className="sr-only">{isReschedule ? 'Boka om intervju' : 'Boka intervju'}</DialogTitle>
-          <DialogDescription className="sr-only">Skicka en intervjukallelse till {candidateName}</DialogDescription>
+          <DialogDescription className="sr-only">Skicka en intervjukallelse till {candidateName}.</DialogDescription>
         </DialogHeader>
         <AnimatedBackground showBubbles={false} />
 

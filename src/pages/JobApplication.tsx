@@ -275,7 +275,7 @@ const JobApplication = () => {
       console.error('Error fetching job:', error);
       toast({
         title: "Fel vid hämtning",
-        description: "Kunde inte hämta jobbinformation",
+        description: "Kunde inte hämta jobbinformation.",
         variant: "destructive"
       });
       navigate('/dashboard');
@@ -330,7 +330,7 @@ const JobApplication = () => {
     if (!requiredStandardFieldsPresent) {
       toast({
         title: "Obligatoriska fält saknas",
-        description: "Vänligen fyll i alla obligatoriska fält",
+        description: "Vänligen fyll i alla obligatoriska fält.",
         variant: "destructive"
       });
       return;
@@ -431,7 +431,7 @@ const JobApplication = () => {
 
       toast({
         title: "Ansökan köad ✓",
-        description: "Skickas automatiskt när du är online igen"
+        description: "Skickas automatiskt när du är online igen."
       });
 
       setSubmitting(false);
@@ -474,7 +474,7 @@ const JobApplication = () => {
 
       toast({
         title: "Ansökan skickad!",
-        description: "Din ansökan har skickats till arbetsgivaren",
+        description: "Din ansökan har skickats till arbetsgivaren.",
         route: '/my-applications'
       });
 
@@ -526,7 +526,7 @@ const JobApplication = () => {
 
       toast({
         title: "Ansökan köad",
-        description: "Nätverksfel – skickas automatiskt när anslutningen är stabil"
+        description: "Nätverksfel – skickas automatiskt när anslutningen är stabil."
       });
 
       if (jobId) {
