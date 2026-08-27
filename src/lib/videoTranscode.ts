@@ -687,7 +687,7 @@ async function runTranscode(
   if (audioTrack && audioSamples.length > 0) {
     const description = getAudioDescription(mp4boxFile, audioTrack.id);
     const meta = description
-      ? ({ decoderConfig: { codec: 'mp4a.40.2', description } } as unknown as EncodedAudioChunkMetadata)
+      ? { decoderConfig: { codec: 'mp4a.40.2', description } }
       : undefined;
     for (const sample of audioSamples) {
       muxer.addAudioChunkRaw(
