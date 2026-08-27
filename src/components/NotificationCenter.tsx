@@ -47,6 +47,23 @@ function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>) {
   return truncated;
 }
 
+/**
+ * Visar hela texten i en tooltip när notistexten är klippt. Tooltip renderas bara
+ * när texten faktiskt inte får plats, så inget "tomt" hover-brus uppstår.
+ */
+function ClampTooltip({ show, text, children }: { show: boolean; text: string; children: React.ReactNode }) {
+  if (!show) return <>{children}</>;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side="bottom" align="start" className="max-w-[280px] whitespace-pre-wrap break-words text-xs leading-snug">
+        {text}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+
 // Notiser saknar ofta en explicit route i metadata (t.ex. chattnotiser som bara
 // bär conversation_id). Här härleds målet så att varje notis alltid går att klicka på.
 function resolveRoute(type: string, metadata?: Record<string, unknown> | null): string | undefined {
