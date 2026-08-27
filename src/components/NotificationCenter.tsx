@@ -413,6 +413,29 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
     [merged],
   );
 
+  // Vid "rensa"/"markera alla" hinner lokal och server-state gå isär i några
+  // frames — utan spärren blinkar badgen till en felaktig siffra innan den
+  // landar på noll.
+  const [pendingClear, setPendingClear] = useState(false);
+  const displayCount = pendingClear ? 0 : unreadCount;
+  const prevCountRef = useRef(displayCount);
+  const [popKey, setPopKey] = useState(0);
+
+  useEffect(() => {
+    // Poppa bara när siffran ökar. Vid minskning byts talet utan animation.
+    if (displayCount > prevCountRef.current) setPopKey((k) => k + 1);
+    prevCountRef.current = displayCount;
+  }, [displayCount]);
+
+  useEffect(() => {
+    if (!pendingClear) return;
+    if (unreadCount === 0) { setPendingClear(false); return; }
+    const t = window.setTimeout(() => setPendingClear(false), 4000);
+    return () => window.clearTimeout(t);
+  }, [pendingClear, unreadCount]);
+
+
+
 
 
   const navigate = useNavigate();
