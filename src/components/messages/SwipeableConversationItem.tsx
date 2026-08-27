@@ -54,7 +54,11 @@ export function SwipeableConversationItem({
   const thresholdPassedRef = useRef(false);
   const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   const lockOffsetRef = useRef(0);
+  const velocityRef = useRef(0);
+  const lastXRef = useRef(0);
+  const lastTRef = useRef(0);
   const suppressClickRef = useRef(false);
+
   // Ökas vid varje ny gest så att timers från en pågående animation
   // aldrig skriver över en ny dragning.
   const gestureIdRef = useRef(0);
@@ -216,7 +220,11 @@ export function SwipeableConversationItem({
     isSwipingRef.current = false;
     directionLockedRef.current = null;
     lockOffsetRef.current = 0;
+    velocityRef.current = 0;
+    lastXRef.current = clientX;
+    lastTRef.current = performance.now();
     if (contentRef.current) contentRef.current.style.transition = '';
+
   }, []);
 
   const moveDrag = useCallback((clientX: number, clientY: number) => {
@@ -262,44 +270,67 @@ export function SwipeableConversationItem({
 
     const x = swipingRight ? resisted : -resisted;
     currentXRef.current = x;
+
+    // Rullande hastighet (px/ms) — används för att känna igen en snabb flick.
+    const now = performance.now();
+    const dt = now - lastTRef.current;
+    if (dt > 0) {
+      const v = (clientX - lastXRef.current) / dt;
+      velocityRef.current = velocityRef.current * 0.6 + v * 0.4;
+      lastXRef.current = clientX;
+      lastTRef.current = now;
+    }
+
     setX(x);
   }, [onMarkUnread, canMarkUnread, setX]);
+
 
   const endDrag = useCallback(() => {
     if (!isSwipingRef.current) return;
 
     const offset = currentXRef.current;
-    const committed =
-      offset <= -DELETE_THRESHOLD ||
-      (offset >= UNREAD_THRESHOLD && !!onMarkUnread && canMarkUnread);
+    // Snabb flick ska kännas exakt lika tydlig som en lång dragning: vi väger
+    // in hastigheten (px/ms) precis som iOS gör, så en kvick svepning också
+    // utlöser åtgärden istället för att bara studsa tillbaka.
+    const velocity = velocityRef.current;
+    const flickRight = velocity > 0.45 && offset >= 26;
+    const flickLeft = velocity < -0.45 && offset <= -26;
 
-    if (committed) {
-      animateBack(true);
+    const canUnread = !!onMarkUnread && canMarkUnread;
+    const commitUnread = (offset >= UNREAD_THRESHOLD || flickRight) && canUnread;
+    const commitDelete = offset <= -DELETE_THRESHOLD || flickLeft;
+
+    if (commitDelete || commitUnread) {
+      // Samma lugna rörelse oavsett om man drog hela vägen eller flickade:
+      // kortet glider ut, visar pillret helt, pausar och glider hem.
+      animatePeek(commitDelete ? 'delete' : 'unread');
     } else if (offset <= -8) {
       // Släppt tidigt åt vänster: visa ändå hela rörelsen (peek) — lugnt och proffsigt.
       animatePeek('delete');
-    } else if (offset >= 8 && onMarkUnread && canMarkUnread) {
+    } else if (offset >= 8 && canUnread) {
       animatePeek('unread');
     } else {
       animateBack(false);
     }
 
-    if (offset <= -DELETE_THRESHOLD) {
+    if (commitDelete) {
       setShowConfirm(true);
-    } else if (offset >= UNREAD_THRESHOLD && onMarkUnread && canMarkUnread) {
+    } else if (commitUnread) {
       // Kör i samma frame som fingret släpps. Tillbakafjädringen sker via
       // inline-transform på contentRef och påverkas inte av omrenderingen.
-      onMarkUnread();
+      onMarkUnread?.();
     }
     thresholdPassedRef.current = false;
 
     isSwipingRef.current = false;
     directionLockedRef.current = null;
     lockOffsetRef.current = 0;
+    velocityRef.current = 0;
     // Blockera klicket som annars öppnar konversationen direkt efter dragningen.
     suppressClickRef.current = true;
     window.setTimeout(() => { suppressClickRef.current = false; }, 250);
   }, [animateBack, animatePeek, onMarkUnread, canMarkUnread]);
+
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     beginDrag(e.touches[0].clientX, e.touches[0].clientY);
