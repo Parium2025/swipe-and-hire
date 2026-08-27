@@ -90,10 +90,10 @@ const EmployerSettings = () => {
   };
 
   const handlePasswordUpdate = async () => {
-    if (passwordData.newPassword.length < 6) {
+    if (passwordData.newPassword.length < 7) {
       toast({
         title: "Fel",
-        description: "Lösenordet måste vara minst 6 tecken.",
+        description: "Lösenordet måste vara minst 7 tecken.",
         variant: "destructive"
       });
       return;
