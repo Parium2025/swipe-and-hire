@@ -285,17 +285,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     queryKey: ['saved-jobs', user?.id],
     queryFn: async (): Promise<SavedJob[]> => {
       if (!user) return [];
-      const rows = await fetchAllRows((from, to) =>
-        supabase
-          .from('saved_jobs')
-          .select(SAVED_SELECT)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .range(from, to),
-      );
-      const items = sanitizeSavedJobsList<SavedJob>(rows);
-      writeCache<SavedJob>(SAVED_CACHE_KEY, user.id, items);
-      return items;
+      return fetchSavedJobsForUser(user.id);
     },
 
     enabled: !!user,
