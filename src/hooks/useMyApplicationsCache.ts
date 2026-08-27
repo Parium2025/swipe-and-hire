@@ -80,6 +80,28 @@ function writeCacheDebounced(userId: string, applications: Application[]): void 
 }
 
 /**
+ * Kanonisk hämtare — delas med förvärmningen så att en prefetch alltid har
+ * exakt samma form, filtrering och paginering som sidans egen query.
+ */
+export async function fetchMyApplicationsForUser(userId: string): Promise<Application[]> {
+  const rows = (await fetchAllPages<any>((from, to) =>
+    supabase
+      .from('job_applications')
+      .select(MY_APPLICATIONS_SELECT)
+      .eq('applicant_id', userId)
+      .is('hidden_by_applicant_at', null)
+      .order('applied_at', { ascending: false })
+      .order('id', { ascending: false })
+      .range(from, to),
+  )) as Application[];
+
+  const pendingHidden = new Set(getQueuedHiddenIds(userId));
+  const apps = pendingHidden.size ? rows.filter((a) => !pendingHidden.has(a.id)) : rows;
+  writeCacheDebounced(userId, apps);
+  return apps;
+}
+
+/**
  * Hook to fetch job seeker's applications with instant load from localStorage
  * and real-time background sync.
  */
