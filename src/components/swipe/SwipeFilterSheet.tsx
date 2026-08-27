@@ -1,12 +1,14 @@
 import { useState, useLayoutEffect, useRef, useCallback, type MouseEvent, type PointerEvent, type TouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { X, Search, MapPin, Briefcase, Clock, ArrowUpDown, Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { X, Search, MapPin, Briefcase, Clock, ArrowUpDown, Check, ChevronDown, SlidersHorizontal, Users, Wallet, Timer } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import LocationSearchInput from '@/components/LocationSearchInput';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
+import { SALARY_OPTIONS, TIME_FILTER_OPTIONS, type TimeFilterValue } from '@/lib/salaryRanges';
 
 interface SwipeFilterSheetProps {
   open: boolean;
@@ -18,8 +20,14 @@ interface SwipeFilterSheetProps {
   onLocationChange: (location: string) => void;
   selectedCategory: string;
   onCategoryChange: (value: string) => void;
+  selectedSubcategories: string[];
+  onSubcategoriesChange: (value: string[]) => void;
   selectedEmploymentTypes: string[];
   onEmploymentTypesChange: (value: string[]) => void;
+  salaryRange: string;
+  onSalaryRangeChange: (value: string) => void;
+  timeFilter: TimeFilterValue;
+  onTimeFilterChange: (value: TimeFilterValue) => void;
   sortBy: 'newest' | 'oldest' | 'most-views';
   onSortChange: (value: 'newest' | 'oldest' | 'most-views') => void;
   onClearAll: () => void;
@@ -35,6 +43,7 @@ const sortLabels: Record<string, string> = {
   oldest: 'Äldst först',
   'most-views': 'Mest visade',
 };
+
 
 export function SwipeFilterSheet({
   open,
