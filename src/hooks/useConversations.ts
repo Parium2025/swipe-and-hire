@@ -10,6 +10,8 @@ import { useAuth } from './useAuth';
 import { prefetchMediaUrl } from './useMediaUrl';
 import { CHAT_AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { toast } from 'sonner';
+import { chunk } from '@/lib/fetchAllPages';
+
 
 export interface ConversationMember {
   user_id: string;
@@ -307,7 +309,17 @@ export function applyIncomingMessageToConversations(
   return true;
 }
 
+/**
+ * Hårt tak för hur många konversationer inkorgen laddar i ett svep.
+ * Nyast först — äldre chattar nås via sökfältet. Skyddar både PostgREST:s
+ * 1000-radersgräns och renderingen i listan.
+ */
+const CONVERSATIONS_LIMIT = 300;
+/** Max antal id:n per `in()`-filter så URL:en aldrig blir för lång. */
+const ID_CHUNK = 100;
+
 export function useConversations() {
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -320,15 +332,25 @@ export function useConversations() {
     queryFn: async () => {
       if (!user) return [];
 
-      // First get all conversation IDs where user is a member
-      const { data: memberships, error: memberError } = await supabase
-        .from('conversation_members')
-        .select('conversation_id, last_read_at, muted_at, manually_unread')
-        .eq('user_id', user.id);
+      // 🚨 Tidigare hämtades ALLA medlemsrader först och därefter
+      // `conversations` med `.in(<alla id>)`. PostgREST kapar tyst vid 1000
+      // rader — en arbetsgivare med >1000 chattar tappade konversationer, och
+      // medlemsuppslaget (2+ rader per chatt) kapades redan runt 500 chattar
+      // vilket gav "Okänd användare". Nu styr `conversations` urvalet:
+      // RLS begränsar redan till chattar användaren är medlem i, så vi kan
+      // sortera nyast först och ta ett hårt, deterministiskt tak.
+      const { data: conversations, error: convError } = await supabase
+        .from('conversations')
+        .select(`
+          *,
+          job:job_id (title)
+        `)
+        .order('last_message_at', { ascending: false, nullsFirst: false })
+        .limit(CONVERSATIONS_LIMIT);
 
-      if (memberError) throw memberError;
+      if (convError) throw convError;
 
-      if (!memberships || memberships.length === 0) {
+      if (!conversations || conversations.length === 0) {
         // Avoid flash-to-empty on transient backend hiccups.
         const previous = queryClient.getQueryData<Conversation[]>(['conversations', user.id]);
         if (previous && previous.length > 0) return previous;
@@ -339,24 +361,31 @@ export function useConversations() {
         return [];
       }
 
-      const conversationIds = memberships.map(m => m.conversation_id);
+      const conversationIds = conversations.map((c) => c.id);
+
+      // Egna medlemsrader (läsmarkering, tystning) — chunkat så URL:en aldrig
+      // blir för lång och radtaket aldrig nås.
+      const memberships: Array<{
+        conversation_id: string;
+        last_read_at: string | null;
+        muted_at?: string | null;
+        manually_unread?: boolean | null;
+      }> = [];
+      for (const idChunk of chunk(conversationIds, ID_CHUNK)) {
+        const { data, error: memberError } = await supabase
+          .from('conversation_members')
+          .select('conversation_id, last_read_at, muted_at, manually_unread')
+          .eq('user_id', user.id)
+          .in('conversation_id', idChunk);
+        if (memberError) throw memberError;
+        memberships.push(...((data || []) as typeof memberships));
+      }
+
       const mutedIds = new Set(
-        memberships.filter((m) => (m as { muted_at?: string | null }).muted_at).map((m) => m.conversation_id),
+        memberships.filter((m) => m.muted_at).map((m) => m.conversation_id),
       );
 
 
-      // Fetch conversations with job info
-      const { data: conversations, error: convError } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          job:job_id (title)
-        `)
-        .in('id', conversationIds)
-        .order('last_message_at', { ascending: false, nullsFirst: false });
-
-      if (convError) throw convError;
-      if (!conversations) return [];
 
       // Gather last-known-good identities from cache + current query data for merge/recovery.
       // Deduplicate by conversation ID (prefer query data over stale cache).
@@ -378,7 +407,7 @@ export function useConversations() {
 
       // Fetch application snapshots for frozen profile data
       const applicationSnapshotMap = new Map<string, ApplicationSnapshot>();
-      if (applicationIds.length > 0) {
+      for (const idChunk of chunk(applicationIds, ID_CHUNK)) {
         const { data: applications, error: applicationsError } = await supabase
           .from('job_applications')
           .select(`
@@ -392,7 +421,7 @@ export function useConversations() {
             cv_url,
             job:job_id (title)
           `)
-          .in('id', applicationIds);
+          .in('id', idChunk);
 
         if (applicationsError) throw applicationsError;
 
@@ -411,13 +440,26 @@ export function useConversations() {
         });
       }
 
-      // Fetch all members for these conversations
-      const { data: allMembers, error: membersError } = await supabase
-        .from('conversation_members')
-        .select('conversation_id, user_id, is_admin, last_read_at')
-        .in('conversation_id', conversationIds);
 
-      if (membersError) throw membersError;
+      // Fetch all members for these conversations.
+      // Chunkat: 2+ rader per konversation gjorde att ett enda `.in()` slog i
+      // 1000-raderstaket redan runt 500 chattar → medlemmar saknades och
+      // motparten visades som "Okänd användare".
+      const allMembers: Array<{
+        conversation_id: string;
+        user_id: string;
+        is_admin: boolean | null;
+        last_read_at: string | null;
+      }> = [];
+      for (const idChunk of chunk(conversationIds, ID_CHUNK)) {
+        const { data, error: membersError } = await supabase
+          .from('conversation_members')
+          .select('conversation_id, user_id, is_admin, last_read_at')
+          .in('conversation_id', idChunk);
+        if (membersError) throw membersError;
+        allMembers.push(...((data || []) as typeof allMembers));
+      }
+
 
       // Get unique user IDs to fetch profiles
       const allUserIds = [...new Set((allMembers || []).map((m) => m.user_id))];
@@ -432,7 +474,14 @@ export function useConversations() {
       let summaries: any[] = [];
       try {
         const { data: summariesData, error: summariesError } = await supabase
-          .rpc('get_conversation_summaries', { p_user_id: user.id });
+          .rpc('get_conversation_summaries', {
+            p_user_id: user.id,
+            // Begränsa till de konversationer vi faktiskt visar — annars kan
+            // RPC:ns 1000-radersgräns kapa bort förhandsvisningar för
+            // användare med väldigt många chattar.
+            p_conversation_ids: conversationIds,
+          });
+
         if (!summariesError && summariesData) {
           summaries = summariesData;
         }
