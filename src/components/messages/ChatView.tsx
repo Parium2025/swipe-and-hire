@@ -35,6 +35,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
+import { TruncatedText } from '@/components/ui/truncated-text';
+
 import { MessageBubble } from '@/components/messages/MessageBubble';
 import { getConversationDisplayName, getConversationAvatarProfile, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import { toast } from 'sonner';
