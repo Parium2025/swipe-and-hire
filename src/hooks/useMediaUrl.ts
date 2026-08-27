@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { getMediaUrl, type MediaType, type ImageTransformOptions } from '@/lib/mediaManager';
+import { getMediaUrl, isKnownMissingMedia, clearMissingMedia, type MediaType, type ImageTransformOptions } from '@/lib/mediaManager';
 import { imageCache } from '@/lib/imageCache';
 
 // In-memory cache för signed URLs (överlever re-renders och tab switches)
@@ -256,6 +256,9 @@ export function clearMediaUrlCache(
 ) {
   if (!storagePath) return;
   const normalizedStoragePath = normalizeStoragePath(storagePath);
+
+  // Ny fil på samma path (t.ex. nyuppladdad poster) ska få försöka igen.
+  clearMissingMedia(normalizedStoragePath);
 
   const mediaPrefix = mediaType ? `media_url_${mediaType}` : 'media_url_';
   const matchesStoragePath = (key: string) =>
