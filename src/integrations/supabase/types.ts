@@ -4009,7 +4009,7 @@ export type Database = {
         }[]
       }
       get_conversation_summaries: {
-        Args: { p_user_id: string }
+        Args: { p_conversation_ids?: string[]; p_user_id: string }
         Returns: {
           conversation_id: string
           last_message_content: string
