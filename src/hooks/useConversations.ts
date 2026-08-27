@@ -10,6 +10,8 @@ import { useAuth } from './useAuth';
 import { prefetchMediaUrl } from './useMediaUrl';
 import { CHAT_AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { toast } from 'sonner';
+import { chunk } from '@/lib/fetchAllPages';
+
 
 export interface ConversationMember {
   user_id: string;
