@@ -15,7 +15,8 @@ interface Props {
   onSave: (input: CandidateProfileInput) => void;
 }
 
-const MAX_LABEL = 40;
+/** Samma solida kortyta som profilsidans sektioner – ingen streckad ram. */
+const DROPZONE = 'rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-5 md:hover:bg-white/10';
 
 /** Dialog för att skapa eller redigera en kandidatprofil (namn, CV, video, bild). */
 export function CandidateProfileEditor({ open, onOpenChange, profile, saving, onSave }: Props) {
