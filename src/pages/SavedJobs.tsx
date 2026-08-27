@@ -379,11 +379,14 @@ const SavedJobs = () => {
 
   if (!showContent) {
     const skeletonCount = activeTab === 'skipped' ? skippedSkeletonCount : savedSkeletonCount;
+    // Siffran ska ligga på plats direkt vid ankomst — aldrig poppa in efter laddning.
     return (
       <div className="responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         <div className="text-center mb-5">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
-            {activeTab === 'skipped' ? 'Skippade Jobb' : 'Sparade Jobb'}
+            {activeTab === 'skipped'
+              ? (skeletonCount > 0 ? `Skippade Jobb (${skeletonCount})` : 'Skippade Jobb')
+              : (skeletonCount > 0 ? `Sparade Jobb (${skeletonCount})` : 'Sparade Jobb')}
           </h1>
           <p className="text-sm text-white">
             {activeTab === 'skipped' ? 'Jobb du har svipat förbi — återställ de du ångrar' : 'Dina favorit-jobb samlade på ett ställe'}
