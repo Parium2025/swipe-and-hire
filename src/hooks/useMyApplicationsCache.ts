@@ -27,6 +27,18 @@ export function clearMyApplicationsLocalCache(): void {
   try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
 }
 
+/** True if a localStorage cache exists for the given user. */
+export function hasMyApplicationsLocalCache(userId: string): boolean {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return false;
+    const cached: CachedData = JSON.parse(raw);
+    return cached?.userId === userId && Array.isArray(cached.applications);
+  } catch {
+    return false;
+  }
+}
+
 interface CachedData {
   applications: Application[];
   userId: string;

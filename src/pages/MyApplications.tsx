@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { useMyApplicationsCache } from '@/hooks/useMyApplicationsCache';
+import { useMyApplicationsCache, hasMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MyApplicationsSkeleton } from '@/components/search/SearchPageSkeleton';
@@ -33,7 +33,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { getTimeRemaining } from '@/lib/date';
-import { useCandidateInterviews } from '@/hooks/useInterviews';
+import { useCandidateInterviews, hasCandidateInterviewsLocalCache } from '@/hooks/useInterviews';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 import { isInterviewOver } from '@/lib/interviewTime';
 import CandidateInterviewCard from '@/components/CandidateInterviewCard';
@@ -117,8 +117,12 @@ const MyApplications = () => {
   // helt — inget skelett hinner ritas och därmed ingen "blixt" vid växlingen.
   const [showContent, setShowContent] = useState(() => {
     if (!user?.id) return false;
-    const cached = queryClient.getQueryData<unknown[]>(['my-applications', user.id]);
-    return Array.isArray(cached);
+    // Om React Query-cachen är varm kan vi rita direkt.
+    if (queryClient.getQueryData<unknown[]>(['my-applications', user.id]) !== undefined) return true;
+    if (queryClient.getQueryData<unknown[]>(['candidate-interviews', user.id]) !== undefined) return true;
+    // På riktig kallstart (app-restart) finns bara localStorage kvar.
+    // Om båda listorna finns där kan vi också rita direkt — ingen 100 ms-blixt.
+    return hasMyApplicationsLocalCache(user.id) && hasCandidateInterviewsLocalCache(user.id);
   });
   useEffect(() => {
     if (showContent) return;

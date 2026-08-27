@@ -235,6 +235,19 @@ export async function fetchCandidateInterviewsForUser(userId: string) {
   return data || [];
 }
 
+/** True if a localStorage cache exists for the given candidate's interviews. */
+export function hasCandidateInterviewsLocalCache(userId: string): boolean {
+  try {
+    const cacheKey = `job_seeker_interviews_${userId}`;
+    const raw = localStorage.getItem(cacheKey);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    return parsed && Array.isArray(parsed.items);
+  } catch {
+    return false;
+  }
+}
+
 // Hook for candidate's interviews
 export const useCandidateInterviews = () => {
   const { user } = useAuth();
