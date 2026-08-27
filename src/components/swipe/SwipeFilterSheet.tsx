@@ -318,6 +318,78 @@ export function SwipeFilterSheet({
                 </DropdownMenu>
               </div>
 
+              {/* Roll (underkategori) */}
+              {selectedCategory && selectedCategory !== 'all-categories' && (
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium text-white inline-flex items-center gap-2 pl-1">
+                    <Users className="h-3.5 w-3.5" />
+                    Roll
+                  </Label>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <button className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 text-left touch-manipulation">
+                        <Users className="h-4 w-4 text-white flex-shrink-0" />
+                        <span className="text-[15px] text-white flex-1 truncate">
+                          {selectedSubcategories.length === 0
+                            ? 'Alla roller'
+                            : selectedSubcategories.length === 1
+                            ? selectedSubcategories[0]
+                            : `${selectedSubcategories.length} roller valda`}
+                        </span>
+                        <ChevronDown className="h-4 w-4 text-white" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-60 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
+                      <DropdownMenuItem onClick={() => onSubcategoriesChange([])} className="cursor-pointer active:bg-white/10 text-white font-medium touch-manipulation py-3 text-[15px] leading-tight">
+                        Alla roller
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-white/20" />
+                      {(OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories ?? []).map((subcat, i, arr) => (
+                        <div key={subcat}>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              onSubcategoriesChange(
+                                selectedSubcategories.includes(subcat)
+                                  ? selectedSubcategories.filter(s => s !== subcat)
+                                  : [...selectedSubcategories, subcat]
+                              );
+                            }}
+                            className="cursor-pointer active:bg-white/10 text-white flex items-center justify-between gap-2 min-w-0 touch-manipulation py-3 text-[15px] leading-tight"
+                          >
+                            <span className="min-w-0 line-clamp-2 break-words">{subcat}</span>
+                            {selectedSubcategories.includes(subcat) && <Check className="h-4 w-4" />}
+                          </DropdownMenuItem>
+                          {i < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
+                        </div>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {selectedSubcategories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {selectedSubcategories.map((subcat) => (
+                        <Badge
+                          key={subcat}
+                          variant="secondary"
+                          className="bg-white/10 text-white flex items-center gap-1 cursor-pointer"
+                        >
+                          {subcat}
+                          <X
+                            className="h-3 w-3"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSubcategoriesChange(selectedSubcategories.filter(s => s !== subcat));
+                            }}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+
+
               {/* Employment type */}
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium text-white inline-flex items-center gap-2 pl-1">
