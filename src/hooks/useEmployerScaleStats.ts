@@ -84,6 +84,39 @@ function writeCache<T>(prefix: string, userId: string, scope: string, orgId: str
  * Utgångna annonser byter status via tid, inte via ett DB-event — därför
  * kompletterar vi med en tyst refetch var 60:e sekund och vid fönsterfokus.
  */
+type LiveListener = () => void;
+
+// En enda delad kanal för hela appen, oavsett hur många komponenter/hooks
+// som prenumererar. Ref-räknad så den stängs när sista lyssnaren försvinner.
+const liveListeners = new Set<LiveListener>();
+let liveChannel: ReturnType<typeof supabase.channel> | null = null;
+let liveChannelUserId: string | null = null;
+
+const notifyLiveListeners = () => {
+  liveListeners.forEach((listener) => listener());
+};
+
+const ensureLiveChannel = (userId: string) => {
+  if (liveChannel && liveChannelUserId === userId) return;
+  if (liveChannel) {
+    supabase.removeChannel(liveChannel);
+    liveChannel = null;
+  }
+  liveChannelUserId = userId;
+  liveChannel = supabase
+    .channel(`employer-stats-live-${userId}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, notifyLiveListeners)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, notifyLiveListeners)
+    .subscribe();
+};
+
+const teardownLiveChannel = () => {
+  if (liveListeners.size > 0) return;
+  if (liveChannel) supabase.removeChannel(liveChannel);
+  liveChannel = null;
+  liveChannelUserId = null;
+};
+
 const useEmployerStatsLiveSync = (userId: string | undefined) => {
   const queryClient = useQueryClient();
 
@@ -99,11 +132,8 @@ const useEmployerStatsLiveSync = (userId: string | undefined) => {
       }, 300);
     };
 
-    const channel = supabase
-      .channel(`employer-stats-live-${userId}-${Math.random().toString(36).slice(2)}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, invalidate)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, invalidate)
-      .subscribe();
+    liveListeners.add(invalidate);
+    ensureLiveChannel(userId);
 
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') invalidate();
@@ -113,7 +143,8 @@ const useEmployerStatsLiveSync = (userId: string | undefined) => {
     return () => {
       if (timer) clearTimeout(timer);
       document.removeEventListener('visibilitychange', handleVisibility);
-      supabase.removeChannel(channel);
+      liveListeners.delete(invalidate);
+      teardownLiveChannel();
     };
   }, [userId, queryClient]);
 };
