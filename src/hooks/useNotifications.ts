@@ -19,6 +19,10 @@ export interface AppNotification {
 
 const CACHE_KEY = 'parium_notifications_cache';
 
+// Hur många notiser som hämtas per sida. Fler laddas automatiskt när
+// användaren scrollar ner i klockan.
+const PAGE_SIZE = 200;
+
 // Chattmeddelanden räknas redan i sidomenyns chattbadge — de ska aldrig
 // dyka upp i klockan/notiscentret.
 const HIDDEN_TYPES = new Set(['message', 'new_message', 'chat_message']);
@@ -65,7 +69,13 @@ export function useNotifications() {
   // Typer där användaren själv stängt av in-app-notiser. Raden finns kvar i
   // databasen (push/mejl styrs separat), men klockan ska hållas tyst.
   const mutedTypesRef = useRef<Set<string>>(new Set());
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadingMoreRef = useRef(false);
+  const notificationsRef = useRef<AppNotification[]>([]);
   const broadcastRef = useRef<RealtimeChannel | null>(null);
+
+  useEffect(() => { notificationsRef.current = notifications; }, [notifications]);
 
   const loadMutedTypes = useCallback(async () => {
     if (!user) return;
@@ -323,6 +333,9 @@ export function useNotifications() {
 
   return {
     notifications,
+    hasMore,
+    isLoadingMore,
+    loadMore,
     unreadCount,
     markAsRead,
     markAllAsRead,
