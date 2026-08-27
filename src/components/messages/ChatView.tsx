@@ -975,27 +975,18 @@ export function ChatView({
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Load older messages button */}
+            {/* Äldre meddelanden laddas automatiskt vid uppscroll */}
             {hasMore && !isLoading && messages.length >= MESSAGES_PAGE_SIZE && (
-              <div className="flex justify-center py-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={fetchOlderMessages}
-                  disabled={loadingOlder}
-                  className="text-pure-white hover:bg-white/10 text-xs gap-2"
-                >
-                  {loadingOlder ? (
-                    <>
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Laddar äldre meddelanden...
-                    </>
-                  ) : (
-                    'Visa äldre meddelanden'
-                  )}
-                </Button>
+              <div className="flex justify-center py-2 min-h-[28px]">
+                {loadingOlder && (
+                  <span className="flex items-center gap-2 text-xs text-pure-white">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Laddar äldre meddelanden...
+                  </span>
+                )}
               </div>
             )}
+
             {Object.entries(groupedMessages).map(([date, msgs]) => (
               <div key={date}>
                 <div className="flex items-center gap-3 my-4">
