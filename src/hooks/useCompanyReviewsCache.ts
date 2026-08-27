@@ -236,9 +236,10 @@ export function useCompanyReviewsCache(companyId: string | null) {
  */
 export function useBatchPrefetchReviews() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useCallback(async (companyIds: string[]) => {
-    if (companyIds.length === 0) return;
+    if (!user?.id || companyIds.length === 0) return;
 
     // Only prefetch for companies not already cached
     const uncachedIds = companyIds.filter(id => {
