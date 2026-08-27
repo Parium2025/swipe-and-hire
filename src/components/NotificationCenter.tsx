@@ -229,11 +229,16 @@ function NotificationItem({
 
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
-          {!route && canExpand && (
-            <span className="text-xs font-medium text-white/80 underline underline-offset-2">
+          {canExpand && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+              className="text-xs font-medium text-white/80 underline underline-offset-2"
+            >
               {expanded ? 'Visa mindre' : 'Visa mer'}
-            </span>
+            </button>
           )}
+
           {reportable && (
             <button
               type="button"
