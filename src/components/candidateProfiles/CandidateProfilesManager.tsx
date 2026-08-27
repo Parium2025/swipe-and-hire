@@ -145,16 +145,19 @@ export function CandidateProfilesManager({ userId }: Props) {
         ))}
       </div>
 
-      {/* Samma knappstruktur som "Visa filter" – ren <button> utan fokusring, så den inte blixtrar vid tryck. */}
-      <button
-        type="button"
-        disabled={!canCreateMore}
-        onClick={openNew}
-        className="w-full h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation outline-none focus:outline-none focus-visible:outline-none disabled:opacity-50 disabled:active:scale-100"
-      >
-        <Plus className="h-4 w-4" />
-        <span>{canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
-      </button>
+      {/* Samma struktur som flikarna "Under granskning"/"Utgångna" – ingen fokusram, normal knappstorlek. */}
+      <div className="flex justify-center">
+        <button
+          type="button"
+          disabled={!canCreateMore}
+          onClick={openNew}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white bg-white/5 border border-white/10 md:hover:bg-white/10 transition-all duration-200 touch-manipulation outline-none focus:outline-none focus-visible:outline-none disabled:opacity-50"
+        >
+          <Plus className="h-4 w-4" />
+          <span>{canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
+        </button>
+      </div>
+
 
       <CandidateProfileEditor
         open={editorOpen}
