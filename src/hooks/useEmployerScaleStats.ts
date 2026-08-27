@@ -102,7 +102,6 @@ const useEmployerStatsLiveSync = (userId: string | undefined) => {
     const channel = supabase
       .channel(`employer-stats-live-${userId}-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, invalidate)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_views' }, invalidate)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, invalidate)
       .subscribe();
 
