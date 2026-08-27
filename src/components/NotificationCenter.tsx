@@ -185,10 +185,10 @@ function NotificationItem({
           if (canExpand) setExpanded(v => !v);
         }
       }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-xl cursor-pointer ${
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer ${
         notification.is_read 
           ? 'opacity-60 hover:bg-white/5' 
-          : 'hover:bg-white/10 bg-white/5'
+          : 'hover:bg-white/5'
       }`}
     >
       <div className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 ${colorClass}`}>
@@ -280,8 +280,8 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-xl cursor-pointer ${
-        item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer ${
+        item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/5'
       }`}
     >
       <span className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
@@ -547,7 +547,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                 <p className="text-sm">Inga notifikationer</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="divide-y divide-white/10">
                 {merged.map(entry => entry.kind === 'server' ? (
                   <NotificationItem
                     key={`s-${entry.n.id}`}
