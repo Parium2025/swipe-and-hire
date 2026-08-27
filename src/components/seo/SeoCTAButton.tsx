@@ -64,7 +64,8 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
           // Snabbare svar än onClick (mobile premium-ergonomi)
           if (rest.disabled) return;
           e.preventDefault();
-          if (onClick) onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
+          if (isAuthed) navigate('/dashboard');
+          else if (onClick) onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
           else navigate(to, navState ? { state: navState } : undefined);
         }}
         onClick={(e) => e.preventDefault()}
