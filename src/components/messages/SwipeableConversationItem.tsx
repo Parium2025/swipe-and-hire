@@ -68,19 +68,22 @@ export function SwipeableConversationItem({
 
     const del = deleteRef.current;
     if (del) {
-      const p = Math.min(Math.max(-x, 0) / DELETE_THRESHOLD, 1);
+      // Snabbare intoning: pillret är helt synligt redan innan tröskeln,
+      // så det känns som att det ligger under kortet i stället för att tona in.
+      const p = Math.min(Math.max(-x, 0) / (DELETE_THRESHOLD * 0.6), 1);
       del.style.opacity = `${p}`;
-      del.style.transform = `scale(${0.6 + p * 0.4})`;
+      del.style.transform = `scale(${0.82 + p * 0.18})`;
       if (p > 0.02 && revealedSide !== 'delete') setRevealedSide('delete');
     }
     const un = unreadRef.current;
     if (un) {
-      const p = Math.min(Math.max(x, 0) / UNREAD_THRESHOLD, 1);
+      const p = Math.min(Math.max(x, 0) / (UNREAD_THRESHOLD * 0.6), 1);
       un.style.opacity = `${p}`;
-      un.style.transform = `scale(${0.6 + p * 0.4})`;
+      un.style.transform = `scale(${0.82 + p * 0.18})`;
       if (p > 0.02 && revealedSide !== 'unread') setRevealedSide('unread');
     }
   }, [revealedSide]);
+
 
   const setX = useCallback((x: number) => {
     pendingXRef.current = x;
