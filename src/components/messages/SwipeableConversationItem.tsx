@@ -266,7 +266,7 @@ export function SwipeableConversationItem({
         onTouchEnd={endDrag}
         onMouseDown={handleMouseDown}
         onClickCapture={handleClickCapture}
-        onTouchCancel={animateBack}
+        onTouchCancel={() => animateBack(false)}
       >
         {/* Markera som oläst — visas vid drag åt höger */}
         {onMarkUnread && canMarkUnread && (
