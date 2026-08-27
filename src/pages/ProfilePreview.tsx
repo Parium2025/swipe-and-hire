@@ -439,10 +439,8 @@ export default function ProfilePreview() {
                   {data.location && (
                     <div>
                       <p className="text-xs text-white">Ort:</p>
-                      <p className="text-[11px] text-white">{data.location}</p>
-                      {profile?.home_location && (
-                        <p className="text-[11px] text-white">{profile.home_location}</p>
-                      )}
+                      <p className="text-[11px] text-white break-words">{formatResidence(data.location, profile?.home_location)}</p>
+
                     </div>
                   )}
                 </div>
