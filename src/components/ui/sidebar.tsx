@@ -280,8 +280,9 @@ const Sidebar = React.forwardRef<
             }
           >
             <div
-              className="flex h-full min-h-0 w-full flex-col overflow-x-hidden overflow-y-auto [overscroll-behavior:none] touch-pan-y [&_[data-sidebar=content]]:min-h-max [&_[data-sidebar=content]]:flex-none [&_[data-sidebar=content]]:overflow-visible"
+              className="flex h-full min-h-0 w-full flex-col overflow-x-hidden overflow-y-auto [overscroll-behavior:contain] [-webkit-overflow-scrolling:touch] touch-pan-y [&_[data-sidebar=content]]:min-h-max [&_[data-sidebar=content]]:flex-none [&_[data-sidebar=content]]:overflow-visible"
             >
+
 
               {children}
             </div>
