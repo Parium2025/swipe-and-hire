@@ -234,16 +234,12 @@ export function SwipeableConversationItem({
     if (!isSwipingRef.current) return;
 
     const offset = currentXRef.current;
-    // Snabb flick ska kännas exakt lika tydlig som en lång dragning: vi väger
-    // in hastigheten (px/ms) precis som iOS gör, så en kvick svepning också
-    // utlöser åtgärden istället för att bara studsa tillbaka.
-    const velocity = velocityRef.current;
-    const flickRight = velocity > 0.45 && offset >= 26;
-    const flickLeft = velocity < -0.45 && offset <= -26;
-
+    // Endast en medveten dragning förbi tröskeln utlöser åtgärden.
+    // Snabba flick-rörelser gör INGENTING — de snappar bara tillbaka.
     const canUnread = !!onMarkUnread && canMarkUnread;
-    const commitUnread = (offset >= UNREAD_THRESHOLD || flickRight) && canUnread;
-    const commitDelete = offset <= -DELETE_THRESHOLD || flickLeft;
+    const commitUnread = offset >= UNREAD_THRESHOLD && canUnread;
+    const commitDelete = offset <= -DELETE_THRESHOLD;
+
 
     // Direkt respons som iOS Mail: kortet snappar tillbaka omedelbart —
     // ingen lång "peek"-sekvens som får gesten att kännas trög.
