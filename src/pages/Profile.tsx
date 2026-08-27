@@ -391,7 +391,7 @@ const Profile = () => {
   
   // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
   // This prevents DB sync from overwriting local changes when screenshot tools or tab switches cause remounts
-  const LOCAL_MEDIA_KEY = 'parium_local_media_state';
+  const LOCAL_MEDIA_KEY = `parium_local_media_state${user?.id ? `:${user.id}` : ''}`;
   
   interface LocalMediaState {
     profileImageUrl: string;
@@ -604,7 +604,7 @@ const Profile = () => {
         coverFileName: '',
       };
 
-      const draftData = isDiscardingChangesRef.current ? null : readProfileDraft();
+      const draftData = isDiscardingChangesRef.current ? null : readProfileDraft(user?.id);
       const draftValue = (key: keyof ProfileDraftData, fallback: string) => {
         const value = draftData?.[key];
         return typeof value === 'string' && value !== fallback ? value : fallback;
@@ -743,7 +743,7 @@ const Profile = () => {
     const hasContent = firstName || lastName || bio || userLocation || postalCode || phone || birthDate;
     
     if (hasContent) {
-      const saved = safeSetItem(PROFILE_DRAFT_KEY, JSON.stringify({
+      const saved = safeSetItem(draftKeyFor(user?.id), JSON.stringify({
           firstName,
           lastName,
           bio,
@@ -797,7 +797,7 @@ const Profile = () => {
       isDiscardingChangesRef.current = true;
       // IMPORTANT: user chose to discard changes -> clear all local drafts first,
       // before React effects can write the old unsaved state back to storage.
-      clearProfileDraft();
+      clearProfileDraft(user?.id);
       setLocalMediaState(null);
 
       resetProfileFormToValues(originalValues);
@@ -805,7 +805,7 @@ const Profile = () => {
       setDeletedCoverImage(null);
       setHasUnsavedChanges(false);
       window.setTimeout(() => {
-        clearProfileDraft();
+        clearProfileDraft(user?.id);
         setLocalMediaState(null);
         isDiscardingChangesRef.current = false;
         setHasUnsavedChanges(false);
@@ -1805,7 +1805,7 @@ const Profile = () => {
         setOriginalValues(newOriginalValues);
         setHasUnsavedChanges(false);
         setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
-        clearProfileDraft(); // 🔒 Clear localStorage draft after successful save
+        clearProfileDraft(user?.id); // 🔒 Clear localStorage draft after successful save
         console.log('💾 Profile draft cleared after save');
         
         // Clear undo states after successful save
