@@ -861,15 +861,16 @@ export default function ProfilePreview() {
                 {/* iPhone notch */}
                 <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-1.5 w-10 rounded-full bg-black border border-gray-800"></div>
 
-                {/* Innehåll med Parium bakgrund */}
+                {/* Innehåll med Parium bakgrund – ramen scrollar aldrig själv (all scroll sker i detaljvyn) */}
                 <div 
-                  className="absolute inset-0 rounded-[2rem] overflow-y-auto overflow-x-hidden custom-scrollbar"
-                  style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', touchAction: 'pan-y', overscrollBehaviorX: 'none' }}
+                  className="absolute inset-0 rounded-[2rem] overflow-hidden"
+                  style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', overscrollBehavior: 'contain' }}
                 >
                   <div className="h-full p-0">
                     <ProfileView data={consentedData} isConsented={true} />
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
