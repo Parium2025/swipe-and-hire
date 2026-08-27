@@ -153,9 +153,9 @@ export function CandidateProfilesManager({ userId }: Props) {
           onClick={openNew}
           className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation bg-white/5 text-white border border-white/10 md:hover:bg-white/10 disabled:opacity-50"
         >
-          <span className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center justify-center gap-2 w-full">
             <Plus className="h-4 w-4" />
-            <span>{canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
+            <span>{canCreateMore ? 'Lägg till profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
           </span>
         </button>
       </div>
