@@ -40,8 +40,6 @@ export function useMuteConversation() {
         prev?.map((c) => (c.id === conversationId ? { ...c, is_muted: muted } : c))
       );
 
-      // Direkt återkoppling — inte efter serversvaret.
-      try { navigator.vibrate?.(muted ? 8 : 6); } catch { /* ignoreras */ }
       toast.success(muted ? 'Konversationen är tystad' : 'Notiser påslagna igen', {
         description: muted
           ? 'Du får inga notiser härifrån. Meddelanden syns fortfarande i chatten.'
