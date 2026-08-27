@@ -75,6 +75,67 @@ function writeCache<T>(prefix: string, userId: string, scope: string, orgId: str
 }
 
 /**
+ * 🔴 Live-synk för arbetsgivarsiffrorna.
+ * En delad kanal (per användare) som lyssnar på annonser, visningar och
+ * ansökningar. RLS filtrerar payloads per prenumerant, så vi ser bara
+ * händelser vi har rätt till. Invalidering är debouncad så en burst av
+ * events bara ger en refetch.
+ *
+ * Utgångna annonser byter status via tid, inte via ett DB-event — därför
+ * kompletterar vi med en tyst refetch var 60:e sekund och vid fönsterfokus.
+ */
+let liveSyncRefs = 0;
+let liveSyncChannel: ReturnType<typeof supabase.channel> | null = null;
+
+const useEmployerStatsLiveSync = (userId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!userId) return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const invalidate = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
+        queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+      }, 300);
+    };
+
+    liveSyncRefs += 1;
+    if (!liveSyncChannel) {
+      liveSyncChannel = supabase
+        .channel(`employer-stats-live-${userId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, invalidate)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_views' }, invalidate)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, invalidate)
+        .subscribe();
+    } else {
+      liveSyncChannel
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, invalidate)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_views' }, invalidate)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, invalidate);
+    }
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') invalidate();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      liveSyncRefs -= 1;
+      if (liveSyncRefs <= 0 && liveSyncChannel) {
+        supabase.removeChannel(liveSyncChannel);
+        liveSyncChannel = null;
+        liveSyncRefs = 0;
+      }
+    };
+  }, [userId, queryClient]);
+};
+
+/**
  * Server-side counts för aktiva/utgångna/utkast.
  * Använd när orgen kan ha 5–10k+ jobb och klient-side räkning blir för dyr.
  * Returnerar exakta totaler oavsett hur mycket som är laddat lokalt.
