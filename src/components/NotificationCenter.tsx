@@ -153,11 +153,11 @@ function supportReportRoute(title: string, body?: string | null): string {
   return `/support?category=technical&message=${encodeURIComponent(message)}`;
 }
 
-function NotificationItem({ 
-  notification, 
-  onRead, 
-  onNavigate 
-}: { 
+function NotificationItem({
+  notification,
+  onRead,
+  onNavigate
+}: {
   notification: AppNotification;
   onRead: (id: string) => void;
   onNavigate: (route: string) => void;
@@ -169,12 +169,6 @@ function NotificationItem({
 
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: sv });
 
-  const titleRef = useRef<HTMLSpanElement>(null);
-  const bodyRef = useRef<HTMLParagraphElement>(null);
-  const titleTruncated = useTruncation(titleRef, notification.title);
-  const bodyTruncated = useTruncation(bodyRef, notification.body);
-  const [expanded, setExpanded] = useState(false);
-  const canExpand = titleTruncated || bodyTruncated || expanded;
   const reportable = isReportable(notificationLooksError(notification.type, notification.title, notification.body), notification.title, notification.body) && !route;
 
   return (
