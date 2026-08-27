@@ -2,6 +2,8 @@ import { useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchSavedJobsForUser } from '@/hooks/useSavedJobsCache';
+import { fetchMyApplicationsForUser } from '@/hooks/useMyApplicationsCache';
 
 /**
  * Hover/touchstart-baserad route-prefetch för sidebar-länkar.
