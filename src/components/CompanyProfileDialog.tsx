@@ -308,30 +308,32 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                       className="text-2xl font-semibold text-white leading-tight tracking-tight line-clamp-2"
                     />
                   </DialogTitle>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <div className="flex items-center gap-0.5">
-                      {[1, 2, 3, 4, 5].map((star) => {
-                        const rating = avgRating || 0;
-                        const filled = star <= Math.round(rating);
-                        return (
-                          <Star
-                            key={star}
-                            className={`h-4 w-4 ${
-                              filled
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "fill-transparent text-white/40 stroke-white/40 stroke-[1.5]"
-                            }`}
-                          />
-                        );
-                      })}
+                  {user && (
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const rating = avgRating || 0;
+                          const filled = star <= Math.round(rating);
+                          return (
+                            <Star
+                              key={star}
+                              className={`h-4 w-4 ${
+                                filled
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "fill-transparent text-white/40 stroke-white/40 stroke-[1.5]"
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+                      <span className="text-sm text-white font-medium">
+                        {averageRating}
+                      </span>
+                      <span className="text-sm text-white">
+                        ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
+                      </span>
                     </div>
-                    <span className="text-sm text-white font-medium">
-                      {averageRating}
-                    </span>
-                    <span className="text-sm text-white">
-                      ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
-                    </span>
-                  </div>
+                  )}
                 </div>
               </div>
             </DialogHeader>
