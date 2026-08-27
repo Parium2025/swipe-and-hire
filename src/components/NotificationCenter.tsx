@@ -291,7 +291,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
           <ClampTooltip text={item.title}>
-            <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
+            <span className="text-sm font-medium text-white break-words leading-snug line-clamp-2">{item.title}</span>
           </ClampTooltip>
           {item.count > 1 && (
             <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
@@ -304,21 +304,12 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
         </div>
         {item.body && (
           <ClampTooltip text={item.body}>
-            <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>
+            <p className="text-xs text-white mt-3 break-words line-clamp-2">{item.body}</p>
           </ClampTooltip>
         )}
 
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
-          {canExpand && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
-              className="text-xs font-medium text-white/80 underline underline-offset-2"
-            >
-              {expanded ? 'Visa mindre' : 'Visa mer'}
-            </button>
-          )}
 
           {reportable && (
             <button
