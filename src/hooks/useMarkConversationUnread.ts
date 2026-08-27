@@ -44,8 +44,6 @@ export function useMarkConversationUnread() {
         return next;
       });
 
-      // Direkt återkoppling i samma frame som fingret släpps.
-      try { navigator.vibrate?.(8); } catch { /* ignoreras */ }
 
       if (!getIsOnline()) return;
 
