@@ -204,7 +204,7 @@ function NotificationItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
           <ClampTooltip text={notification.title}>
-            <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{notification.title}</span>
+            <span className="text-sm font-medium text-white break-words leading-snug line-clamp-2">{notification.title}</span>
           </ClampTooltip>
           {!notification.is_read && (
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
@@ -212,21 +212,12 @@ function NotificationItem({
         </div>
         {notification.body && (
           <ClampTooltip text={notification.body}>
-            <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
+            <p className="text-xs text-white mt-3 break-words line-clamp-2">{notification.body}</p>
           </ClampTooltip>
         )}
 
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
-          {canExpand && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
-              className="text-xs font-medium text-white/80 underline underline-offset-2"
-            >
-              {expanded ? 'Visa mindre' : 'Visa mer'}
-            </button>
-          )}
 
           {reportable && (
             <button
