@@ -73,7 +73,7 @@ export function CandidateProfilesManager({ userId }: Props) {
       </p>
 
       {!loading && profiles.length === 0 && (
-        <p className="text-sm text-white/70">
+        <p className="text-sm text-white">
           Du har inga extra profiler ännu. Ansökningar använder ditt vanliga CV och din vanliga video.
         </p>
       )}
