@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { getMediaUrl, type MediaType, type ImageTransformOptions } from '@/lib/mediaManager';
+import { getMediaUrl, isKnownMissingMedia, clearMissingMedia, type MediaType, type ImageTransformOptions } from '@/lib/mediaManager';
 import { imageCache } from '@/lib/imageCache';
 
 // In-memory cache för signed URLs (överlever re-renders och tab switches)
@@ -146,6 +146,11 @@ function getOrCreateSignedUrlLoad(
     return existing;
   }
 
+  // Objektet är känt borta (404) – försök aldrig igen den här sessionen.
+  if (isKnownMissingMedia(storagePath, mediaType)) {
+    return Promise.resolve<string | null>(null);
+  }
+
   const failedAt = failedLoads.get(cacheKey);
   // Negativ cache skyddar endast bakgrundsförladdningen. En avatar som är
   // synlig måste alltid få försöka självläka efter nät-/tokenproblem.
@@ -172,6 +177,7 @@ function getOrCreateSignedUrlLoad(
           failedLoads.delete(cacheKey);
           return signedUrl;
         }
+        if (isKnownMissingMedia(storagePath, mediaType)) break;
         if (attempt < attempts - 1) await sleep(250 * (attempt + 1));
       }
       failedLoads.set(cacheKey, Date.now());
@@ -250,6 +256,9 @@ export function clearMediaUrlCache(
 ) {
   if (!storagePath) return;
   const normalizedStoragePath = normalizeStoragePath(storagePath);
+
+  // Ny fil på samma path (t.ex. nyuppladdad poster) ska få försöka igen.
+  clearMissingMedia(normalizedStoragePath);
 
   const mediaPrefix = mediaType ? `media_url_${mediaType}` : 'media_url_';
   const matchesStoragePath = (key: string) =>

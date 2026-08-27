@@ -23,6 +23,7 @@ const SECTION_LABELS: Record<string, string> = {
   support_tickets: 'Supportärenden',
   support_messages: 'Supportmeddelanden',
   company_reviews: 'Omdömen du lämnat',
+  candidate_profiles: 'Dina kandidatprofiler (CV, video, bild)',
   personal_notes: 'Dina egna anteckningar',
   employer_notes: 'Anteckningar du skrivit som arbetsgivare',
   job_views: 'Jobb du tittat på',

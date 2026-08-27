@@ -86,7 +86,10 @@ export function useNotifications() {
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        // Klockan visar en lista, inte ett arkiv. Utan tak skulle ett konto med
+        // tiotusentals notiser hämta allt vid varje mount och fliksbyte.
+        .limit(200);
 
       if (error) throw error;
       const items = ((data || []) as AppNotification[]).filter(
