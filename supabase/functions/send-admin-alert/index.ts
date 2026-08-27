@@ -16,7 +16,7 @@ const ADMIN_EMAIL = Deno.env.get("ADMIN_ALERT_EMAIL") || "pariumab@hotmail.com";
 const MAX_ALERTS_PER_DAY = 20;
 
 interface AlertPayload {
-  type: 'rss_source_failure' | 'system_critical' | 'storage_warning' | 'news_watchdog';
+  type: 'rss_source_failure' | 'system_critical' | 'storage_warning' | 'news_watchdog' | 'cron_watchdog' | 'app_exception';
   source_name?: string;
   consecutive_failures?: number;
   error_message?: string;
