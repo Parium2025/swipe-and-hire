@@ -213,7 +213,7 @@ const Sidebar = React.forwardRef<
           <div
             className={cn(
               "fixed inset-0 z-50 bg-[hsl(215_85%_10%)]/70",
-              transitionsReady && "transition-opacity [transition-duration:200ms] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]",
+              transitionsReady && "transition-opacity [transition-duration:150ms] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]",
               openMobile ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
             onClick={() => setOpenMobile(false)}
@@ -231,7 +231,7 @@ const Sidebar = React.forwardRef<
               // den ändå) — under in/ut-animation och när stängd kör vi utan
               // blur så transform-animationen blir helt mjuk.
               openMobile && "supports-[backdrop-filter]:backdrop-blur-xl",
-              transitionsReady && "transition-transform [transition-duration:200ms] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] will-change-transform",
+              transitionsReady && "transition-transform [transition-duration:150ms] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] will-change-transform",
               side === "left" ? "left-0" : "right-0",
               openMobile
                 ? "translate-x-0"
