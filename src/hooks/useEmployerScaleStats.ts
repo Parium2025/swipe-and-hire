@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { safeSetItem } from '@/lib/safeStorage';
@@ -74,6 +75,50 @@ function writeCache<T>(prefix: string, userId: string, scope: string, orgId: str
 }
 
 /**
+ * 🔴 Live-synk för arbetsgivarsiffrorna.
+ * En delad kanal (per användare) som lyssnar på annonser, visningar och
+ * ansökningar. RLS filtrerar payloads per prenumerant, så vi ser bara
+ * händelser vi har rätt till. Invalidering är debouncad så en burst av
+ * events bara ger en refetch.
+ *
+ * Utgångna annonser byter status via tid, inte via ett DB-event — därför
+ * kompletterar vi med en tyst refetch var 60:e sekund och vid fönsterfokus.
+ */
+const useEmployerStatsLiveSync = (userId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!userId) return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const invalidate = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
+        queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+      }, 300);
+    };
+
+    const channel = supabase
+      .channel(`employer-stats-live-${userId}-${Math.random().toString(36).slice(2)}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, invalidate)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, invalidate)
+      .subscribe();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') invalidate();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      supabase.removeChannel(channel);
+    };
+  }, [userId, queryClient]);
+};
+
+/**
  * Server-side counts för aktiva/utgångna/utkast.
  * Använd när orgen kan ha 5–10k+ jobb och klient-side räkning blir för dyr.
  * Returnerar exakta totaler oavsett hur mycket som är laddat lokalt.
@@ -81,6 +126,7 @@ function writeCache<T>(prefix: string, userId: string, scope: string, orgId: str
 export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'personal') => {
   const { user, profile } = useAuth();
   const orgId = profile?.organization_id || null;
+  useEmployerStatsLiveSync(user?.id);
 
   return useQuery<EmployerJobsCounts>({
     queryKey: ['employer-jobs-counts', scope, orgId, user?.id],
@@ -94,7 +140,10 @@ export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'pers
     enabled: !!user,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
-    refetchOnWindowFocus: false,
+    // Live: fokus + tyst intervall fångar tidsbaserade statusbyten (utgångna annonser)
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
     // 🔥 SWR-seed: visa senast kända counts direkt utan blink
     placeholderData: () => {
       if (!user) return undefined;
@@ -110,6 +159,7 @@ export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'pers
 export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = 'personal') => {
   const { user, profile } = useAuth();
   const orgId = profile?.organization_id || null;
+  useEmployerStatsLiveSync(user?.id);
 
   return useQuery<EmployerDashboardStats>({
     queryKey: ['employer-dashboard-stats', scope, orgId, user?.id],
@@ -123,7 +173,10 @@ export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = '
     enabled: !!user,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
-    refetchOnWindowFocus: false,
+    // Live: fokus + tyst intervall fångar tidsbaserade statusbyten (utgångna annonser)
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
     // 🔥 SWR-seed: visa senast kända stats direkt utan blink
     placeholderData: () => {
       if (!user) return undefined;
