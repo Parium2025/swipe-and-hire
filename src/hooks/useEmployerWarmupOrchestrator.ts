@@ -55,4 +55,7 @@ export function useEmployerWarmupOrchestrator() {
   // Notifikations-preload: fyller localStorage så NotificationCenter
   // öppnas instant utan spinner
   useNotificationsPreload();
+
+  // Kallstart: Mina annonser + Företagets annonser värms i idle efter inloggning
+  useEmployerPagePrewarm();
 }
