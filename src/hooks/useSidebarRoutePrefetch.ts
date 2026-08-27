@@ -32,16 +32,11 @@ export function useSidebarRoutePrefetch() {
     // resultatet återanvänds 1:1 när sidan monteras.
     switch (url) {
       case '/saved-jobs': {
+        // 🔒 Skriv aldrig över en lista som sidan redan äger.
+        if (queryClient.getQueryData(['saved-jobs', user.id])) break;
         queryClient.prefetchQuery({
           queryKey: ['saved-jobs', user.id],
-          queryFn: async () => {
-            const { data } = await supabase
-              .from('saved_jobs')
-              .select('id, job_id, created_at, job_postings(*)')
-              .eq('user_id', user.id)
-              .order('created_at', { ascending: false });
-            return data ?? [];
-          },
+          queryFn: () => fetchSavedJobsForUser(user.id),
           staleTime: 60_000,
         }).catch(() => {
           prefetchedRef.current.delete(key);
@@ -49,16 +44,10 @@ export function useSidebarRoutePrefetch() {
         break;
       }
       case '/my-applications': {
+        if (queryClient.getQueryData(['my-applications', user.id])) break;
         queryClient.prefetchQuery({
           queryKey: ['my-applications', user.id],
-          queryFn: async () => {
-            const { data } = await supabase
-              .from('job_applications')
-              .select('*, job_postings(*)')
-              .eq('applicant_id', user.id)
-              .order('applied_at', { ascending: false });
-            return data ?? [];
-          },
+          queryFn: () => fetchMyApplicationsForUser(user.id),
           staleTime: 60_000,
         }).catch(() => {
           prefetchedRef.current.delete(key);
