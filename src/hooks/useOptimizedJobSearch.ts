@@ -1194,7 +1194,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   // 🔥 SCALE: useLiveJobBranding togs bort — RPC:n search_jobs returnerar redan
   // workplace_name + company_logo_url + alla branding-fält. Realtime-listenern
   // nedan håller datan färsk om en arbetsgivare byter logo eller namn.
-  const { data: reviewsData = {} } = useCompanyReviews(employerIds);
+  const { data: reviewsData = {} } = useCompanyReviews(employerIds, !!user);
 
   const enrichedJobs = useMemo(() => {
     const jobs = rawJobs
