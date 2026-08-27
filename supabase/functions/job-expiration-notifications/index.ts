@@ -183,20 +183,31 @@ const handler = async (req: Request): Promise<Response> => {
           messageContent = defaultTemplate.content.replace(/\{job_title\}/g, job.title);
         }
 
+        let failedForJob = 0;
+
         for (const applicant of uniqueApplicants) {
           let conversationId: string | null = null;
 
-          const { data: existingConversation, error: existingConversationError } = await supabase
+          // Viktigt: matcha konversationen på BÅDE jobb och kandidat.
+          // (Tidigare matchades bara candidate_id, vilket kraschade maybeSingle()
+          //  så fort kandidaten hade fler än en konversation → ingen återkoppling.)
+          const { data: existingConversations, error: existingConversationError } = await supabase
             .from("conversations")
-            .select("id")
+            .select("id, created_at")
             .eq("candidate_id", applicant.applicant_id)
-            .not("candidate_id", "is", null)
-            .maybeSingle();
+            .eq("job_id", job.id)
+            .order("created_at", { ascending: true })
+            .limit(1);
+
+          const existingConversation = existingConversations?.[0] ?? null;
 
           if (existingConversationError) {
             console.error(`Error finding conversation for candidate ${applicant.applicant_id}:`, existingConversationError);
+            failedForJob++;
             continue;
           }
+
+
 
           if (existingConversation?.id) {
             conversationId = existingConversation.id;
@@ -216,6 +227,7 @@ const handler = async (req: Request): Promise<Response> => {
 
             if (createConversationError || !createdConversation?.id) {
               console.error(`Error creating conversation for candidate ${applicant.applicant_id}:`, createConversationError);
+              failedForJob++;
               continue;
             }
 
@@ -242,6 +254,7 @@ const handler = async (req: Request): Promise<Response> => {
 
           if (membersError) {
             console.error(`Error ensuring conversation members for ${conversationId}:`, membersError);
+            failedForJob++;
             continue;
           }
 
@@ -255,6 +268,7 @@ const handler = async (req: Request): Promise<Response> => {
 
           if (msgError) {
             console.error(`Error sending auto-close message for conversation ${conversationId}:`, msgError);
+            failedForJob++;
             continue;
           }
 
@@ -318,13 +332,17 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
 
-        // Mark job as notified
-        await supabase
-          .from("job_postings")
-          .update({ auto_close_notified_at: now.toISOString() })
-          .eq("id", job.id);
-
-        console.log(`Auto-close messages sent for "${job.title}" to ${uniqueApplicants.length} candidates`);
+        // Markera jobbet som notifierat ENDAST om alla kandidater fick sin återkoppling.
+        // Annars lämnas det öppet så nästa körning gör ett nytt försök.
+        if (failedForJob === 0) {
+          await supabase
+            .from("job_postings")
+            .update({ auto_close_notified_at: now.toISOString() })
+            .eq("id", job.id);
+          console.log(`Auto-close messages sent for "${job.title}" to ${uniqueApplicants.length} candidates`);
+        } else {
+          console.warn(`Auto-close incomplete for "${job.title}": ${failedForJob}/${uniqueApplicants.length} failed — will retry next run`);
+        }
       }
     }
 
