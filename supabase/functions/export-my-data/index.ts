@@ -108,6 +108,7 @@ Deno.serve(async (req) => {
       supportTickets,
       supportMessages,
       reviews,
+      candidateProfiles,
       notesAboutMe,
       ratingsAboutMe,
       evaluationsAboutMe,
@@ -137,6 +138,7 @@ Deno.serve(async (req) => {
       grab('support_tickets', 'user_id'),
       grab('support_messages', 'user_id'),
       grab('company_reviews', 'user_id'),
+      grab('candidate_profiles', 'user_id'),
       // Material som arbetsgivare registrerat OM användaren (art. 15.1)
       grabAbout('candidate_notes', 'applicant_id'),
       grabAbout('candidate_ratings', 'applicant_id'),
@@ -227,6 +229,7 @@ Deno.serve(async (req) => {
       support_tickets: supportTickets,
       support_messages: supportMessages,
       company_reviews: reviews,
+      candidate_profiles: candidateProfiles,
       personal_notes: personalNotes,
       employer_notes: employerNotes,
       job_views: jobViews,
