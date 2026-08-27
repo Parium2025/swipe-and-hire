@@ -218,7 +218,7 @@ export function useCompanyReviewsCache(companyId: string | null) {
       },
       staleTime: 30 * 1000,
     });
-  }, [queryClient]);
+  }, [queryClient, user?.id]);
 
   return {
     reviews: data?.reviews || [],
