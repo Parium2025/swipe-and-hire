@@ -270,8 +270,20 @@ export function SwipeableConversationItem({
 
     const x = swipingRight ? resisted : -resisted;
     currentXRef.current = x;
+
+    // Rullande hastighet (px/ms) — används för att känna igen en snabb flick.
+    const now = performance.now();
+    const dt = now - lastTRef.current;
+    if (dt > 0) {
+      const v = (clientX - lastXRef.current) / dt;
+      velocityRef.current = velocityRef.current * 0.6 + v * 0.4;
+      lastXRef.current = clientX;
+      lastTRef.current = now;
+    }
+
     setX(x);
   }, [onMarkUnread, canMarkUnread, setX]);
+
 
   const endDrag = useCallback(() => {
     if (!isSwipingRef.current) return;
