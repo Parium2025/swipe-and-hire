@@ -73,7 +73,7 @@ function ClampTooltip({ text, children }: { text: string; children: React.ReactN
       }}
       disableHoverableContent
     >
-      <TooltipTrigger asChild ref={ref as React.Ref<HTMLElement>}>{children}</TooltipTrigger>
+      <TooltipTrigger asChild ref={ref as unknown as React.Ref<HTMLButtonElement>}>{children}</TooltipTrigger>
       <TooltipContent side="bottom" align="start" className="max-w-[280px] whitespace-pre-wrap break-words text-xs leading-snug">
         {text}
       </TooltipContent>
@@ -232,7 +232,7 @@ function NotificationItem({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
-          <ClampTooltip show={titleTruncated && !expanded} text={notification.title}>
+          <ClampTooltip text={notification.title}>
             <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{notification.title}</span>
           </ClampTooltip>
           {!notification.is_read && (
@@ -240,7 +240,7 @@ function NotificationItem({
           )}
         </div>
         {notification.body && (
-          <ClampTooltip show={bodyTruncated && !expanded} text={notification.body}>
+          <ClampTooltip text={notification.body}>
             <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
           </ClampTooltip>
         )}
@@ -335,7 +335,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
-          <ClampTooltip show={titleTruncated && !expanded} text={item.title}>
+          <ClampTooltip text={item.title}>
             <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
           </ClampTooltip>
           {item.count > 1 && (
@@ -348,7 +348,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
           )}
         </div>
         {item.body && (
-          <ClampTooltip show={bodyTruncated && !expanded} text={item.body}>
+          <ClampTooltip text={item.body}>
             <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>
           </ClampTooltip>
         )}
