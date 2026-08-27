@@ -104,8 +104,9 @@ export function SwipeableConversationItem({
    */
   const animateBack = useCallback((committed = false) => {
     const gestureId = gestureIdRef.current;
-    const contentMs = committed ? 340 : 240;
+    const contentMs = committed ? 260 : 200;
     const easing = 'cubic-bezier(0.32, 0.72, 0, 1)'; // iOS "sheet"-kurva
+
 
     // Avbryt ev. köad rAF-paint så den inte skriver över transitionen.
     if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
