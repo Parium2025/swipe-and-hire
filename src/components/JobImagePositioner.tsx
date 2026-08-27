@@ -51,7 +51,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
 
   return (
     <div className="space-y-2">
-      <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt</p>
+      <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt.</p>
       {/* Match job card & hero aspect ratio (2:1) exakt — annars croppar
           samma object-position olika mycket i preview vs kort vs hero. */}
       <div
@@ -97,7 +97,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
         />
       </div>
       <p className="text-white text-[10px] text-center">
-        Så här kommer bilden att klippas i jobbkorten
+        Så här kommer bilden att klippas i jobbkorten.
       </p>
     </div>
   );

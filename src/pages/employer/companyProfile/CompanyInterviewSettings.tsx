@@ -27,7 +27,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
           <CalendarDays className="h-5 w-5 text-white" />
           <h4 className="text-base font-semibold text-white">Intervjuinställningar</h4>
         </div>
-        <p className="text-sm text-white">Standardvärden som fylls i automatiskt när du bokar intervjuer</p>
+        <p className="text-sm text-white">Standardvärden som fylls i automatiskt när du bokar intervjuer.</p>
       </div>
 
       <div className="space-y-4">
@@ -149,7 +149,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                 rows={4}
                 className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
               />
-              <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid videobokning</p>
+              <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid videobokning.</p>
             </div>
           </motion.div>
         )}
@@ -173,7 +173,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                 placeholder="Storgatan 1, 111 22 Stockholm"
                 className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
               />
-              <p className="text-xs text-white">Adressen som visas för kandidater vid fysiska intervjuer</p>
+              <p className="text-xs text-white">Adressen som visas för kandidater vid fysiska intervjuer.</p>
             </div>
 
             <div className="space-y-1.5">
@@ -203,7 +203,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                 rows={4}
                 className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
               />
-              <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid kontorsbokning</p>
+              <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid kontorsbokning.</p>
             </div>
           </motion.div>
         )}

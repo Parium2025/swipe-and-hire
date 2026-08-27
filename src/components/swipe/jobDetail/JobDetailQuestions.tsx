@@ -21,7 +21,7 @@ export const JobDetailQuestions = memo(function JobDetailQuestions({
     <div className="bg-white/10 rounded-lg p-4">
       <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Ansökningsfrågor</h3>
       {!hasApplied && (
-        <p className="text-white text-[13px] sm:text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
+        <p className="text-white text-[13px] sm:text-xs mb-3">Dessa frågor besvaras när du ansöker.</p>
       )}
       {hasApplied && myAnswers && (
         <p className="text-white text-[13px] sm:text-xs mb-3">Dina svar</p>

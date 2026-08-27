@@ -193,7 +193,7 @@ const ProfileSetup = () => {
                 />
               </div>
               <p className="text-sm text-muted-foreground text-center">
-                Klicka på kameraikon för att ladda upp en profilbild
+                Klicka på kameraikon för att ladda upp en profilbild.
               </p>
             </div>
 
@@ -402,7 +402,7 @@ const ProfileSetup = () => {
               </Button>
               
               <p className="text-sm text-muted-foreground text-center">
-                Du kan alltid uppdatera din profil senare
+                Du kan alltid uppdatera din profil senare.
               </p>
             </div>
           </form>

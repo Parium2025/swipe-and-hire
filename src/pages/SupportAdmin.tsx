@@ -433,7 +433,7 @@ const SupportAdmin = () => {
           ) : (
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="flex items-center justify-center h-96">
-                <p className="text-white">Välj ett ärende för att visa detaljer</p>
+                <p className="text-white">Välj ett ärende för att visa detaljer.</p>
               </CardContent>
             </Card>
           )}

@@ -224,7 +224,7 @@ const EmailVerification = () => {
                 </Button>
               </div>
               <p className="text-sm text-primary-foreground/60 text-center">
-                Kolla din inkorg och följ länken i emailet
+                Kolla din inkorg och följ länken i emailet.
               </p>
             </div>
           )}

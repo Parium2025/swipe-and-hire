@@ -411,7 +411,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           </div>
 
           <p className="text-sm text-white text-center font-medium">
-            Dra för att flytta bild och använd knapparna för att zooma in eller ut
+            Dra för att flytta bild och använd knapparna för att zooma in eller ut.
           </p>
 
           {/* Action buttons */}

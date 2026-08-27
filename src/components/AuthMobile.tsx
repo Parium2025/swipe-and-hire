@@ -875,7 +875,7 @@ const AuthMobile = ({
                             <p className="text-sm mb-3 font-medium text-white">Återställningsmail skickat!</p>
                             <div className="text-sm text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
                               <p className="font-medium text-white">Tips:</p>
-                              <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
+                              <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                             </div>
                              <Button
                                variant="glass"
@@ -1275,7 +1275,7 @@ const AuthMobile = ({
                       />
                     </div>
                     <div className="text-sm text-primary-foreground/80 bg-primary/10 p-2 rounded border-l-4 border-primary mb-3">
-                      <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
+                      <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                     </div>
                     <Button
                       variant="glass"

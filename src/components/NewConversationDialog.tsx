@@ -271,7 +271,7 @@ export function NewConversationDialog({
                   <Users className="h-10 w-10 text-white/20 mb-2" />
                   <p className="text-white/50 text-sm">Inga kontakter att visa</p>
                   <p className="text-white/30 text-xs">
-                    Lägg till kollegor i ditt team eller spara kandidater först
+                    Lägg till kollegor i ditt team eller spara kandidater först.
                   </p>
                 </div>
               ) : (

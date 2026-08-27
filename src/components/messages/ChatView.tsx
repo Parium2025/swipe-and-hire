@@ -990,7 +990,7 @@ export function ChatView({
               <MessageSquare className="h-6 w-6 text-white" />
             </div>
             <p className="text-pure-white text-sm">Inga meddelanden ännu</p>
-            <p className="text-pure-white text-xs">Skriv ett meddelande för att starta konversationen</p>
+            <p className="text-pure-white text-xs">Skriv ett meddelande för att starta konversationen.</p>
           </div>
         ) : (
           <div className="space-y-4">

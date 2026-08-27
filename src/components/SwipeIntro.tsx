@@ -94,7 +94,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 Profilbild/Profilvideo
               </h3>
               <p className="text-white text-center text-base">
-                Ladda upp en profilbild/profilvideo och gör ditt första intryck minnesvärt
+                Ladda upp en profilbild/profilvideo och gör ditt första intryck minnesvärt.
               </p>
               
               {/* Video and Camera Icons - larger */}
@@ -131,7 +131,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             </div>
             <div className="p-6 pt-0 flex flex-col items-center">
               <p className="text-white text-center text-base">
-                Din personlighet säger mer än ett CV
+                Din personlighet säger mer än ett CV.
               </p>
             </div>
           </div>
@@ -457,7 +457,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               </div>
               {/* Helper text under dots */}
               <p className="text-white text-sm">
-                Nästa generations jobbsök är här
+                Nästa generations jobbsök är här.
               </p>
             </div>
           </div>

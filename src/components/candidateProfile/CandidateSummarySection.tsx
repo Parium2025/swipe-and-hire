@@ -120,7 +120,7 @@ export const CandidateSummarySection = ({
             </div>
           ) : (
             <p className="text-sm text-white text-center">
-              Kandidaten har inte laddat upp något CV
+              Kandidaten har inte laddat upp något CV.
             </p>
           )}
         </div>

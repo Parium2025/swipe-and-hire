@@ -436,7 +436,7 @@ const EmployerProfile = () => {
                 Profilbild
               </h3>
               <p className="text-white text-center text-sm -mt-2">
-                Ladda upp en profilbild som syns för kandidater
+                Ladda upp en profilbild som syns för kandidater.
               </p>
               
               
