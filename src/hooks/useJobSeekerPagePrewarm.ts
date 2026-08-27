@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchSavedJobsForUser, fetchSkippedJobsForUser } from '@/hooks/useSavedJobsCache';
 import { fetchMyApplicationsForUser } from '@/hooks/useMyApplicationsCache';
+import { fetchCandidateInterviewsForUser } from '@/hooks/useInterviews';
 import { getIsOnline } from '@/lib/connectivityManager';
 
 /**
