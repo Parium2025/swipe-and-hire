@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsPremium } from '@/hooks/useIsPremium';
 import { PremiumUpgradeDialog } from '@/components/PremiumUpgradeDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -97,12 +98,13 @@ const Subscription = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [currentPlan] = useState<'basic' | 'premium'>('basic');
+  // Verklig premiumstatus från databasen — inte ett hårdkodat värde.
+  const { isPremium } = useIsPremium();
+  const currentPlan: 'basic' | 'premium' = isPremium ? 'premium' : 'basic';
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('premium');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  const isPremium = currentPlan === 'premium';
   const nextBillingDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toLocaleDateString('sv-SE', {
     year: 'numeric',
     month: 'long',
@@ -290,7 +292,7 @@ const Subscription = () => {
                 <button
                   type="button"
                   onPointerDown={(e) => e.stopPropagation()}
-                  onClick={(e) => { e.stopPropagation(); }}
+                  onClick={(e) => { e.stopPropagation(); navigate('/billing'); }}
                   className="mt-4 w-full text-center text-xs font-medium text-white/60 underline-offset-4 hover:text-white hover:underline transition-colors"
                 >
                   Hantera betalmetod
@@ -313,7 +315,14 @@ const Subscription = () => {
             <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/15 hover:text-white">
               Behåll Premium
             </AlertDialogCancel>
-            <AlertDialogAction className="bg-red-500/80 text-white hover:bg-red-500/80 hover:text-white border-0">
+            <AlertDialogAction
+              className="bg-red-500/80 text-white hover:bg-red-500/80 hover:text-white border-0"
+              onClick={() =>
+                navigate(
+                  `/support?category=billing&message=${encodeURIComponent('Jag vill avsluta min Premium-prenumeration.')}`,
+                )
+              }
+            >
               Avbryt prenumeration
             </AlertDialogAction>
           </AlertDialogFooter>
