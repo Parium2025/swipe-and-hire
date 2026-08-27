@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProgressivePagination } from '@/hooks/useProgressivePagination';
 import { useEmployerMediaWarmup } from '@/hooks/useEmployerMediaWarmup';
 import { useNotificationsPreload } from '@/hooks/useNotificationsPreload';
+import { useEmployerPagePrewarm } from '@/hooks/useEmployerPagePrewarm';
 
 /**
  * 🚀 EMPLOYER WARMUP ORCHESTRATOR
@@ -54,4 +55,7 @@ export function useEmployerWarmupOrchestrator() {
   // Notifikations-preload: fyller localStorage så NotificationCenter
   // öppnas instant utan spinner
   useNotificationsPreload();
+
+  // Kallstart: Mina annonser + Företagets annonser värms i idle efter inloggning
+  useEmployerPagePrewarm();
 }
