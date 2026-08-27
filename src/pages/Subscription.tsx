@@ -315,7 +315,14 @@ const Subscription = () => {
             <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/15 hover:text-white">
               Behåll Premium
             </AlertDialogCancel>
-            <AlertDialogAction className="bg-red-500/80 text-white hover:bg-red-500/80 hover:text-white border-0">
+            <AlertDialogAction
+              className="bg-red-500/80 text-white hover:bg-red-500/80 hover:text-white border-0"
+              onClick={() =>
+                navigate(
+                  `/support?category=billing&message=${encodeURIComponent('Jag vill avsluta min Premium-prenumeration.')}`,
+                )
+              }
+            >
               Avbryt prenumeration
             </AlertDialogAction>
           </AlertDialogFooter>
