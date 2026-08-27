@@ -96,8 +96,6 @@ export const SwipeDots = memo(function SwipeDots({
     isScrubbingRef.current = true;
     scrubStartYRef.current = clientY;
     scrubStartIndexRef.current = scrubIndexRef.current;
-
-    if (navigator.vibrate) navigator.vibrate(12);
   }, []);
 
   const stopScrub = useCallback((session: number) => {
@@ -183,7 +181,6 @@ export const SwipeDots = memo(function SwipeDots({
         scrubIndexRef.current = nextIndex;
         setScrubIndex(nextIndex);
         onScrubTo?.(nextIndex);
-        if (navigator.vibrate) navigator.vibrate(5);
       }
     },
     [count, onScrubTo],
