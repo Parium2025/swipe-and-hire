@@ -31,27 +31,6 @@ const typeColors: Record<string, string> = {
 };
 
 
-function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>, text?: string | null) {
-  const [truncated, setTruncated] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const check = () => setTruncated(el.scrollHeight > el.clientHeight + 1);
-    check();
-    // Mät om efter att öppningsanimationen och webbtypsnitt landat – annars kan
-    // den första mätningen ske innan layouten är stabil och tooltips uteblir.
-    const raf = requestAnimationFrame(() => requestAnimationFrame(check));
-    const t = window.setTimeout(check, 300);
-    const ro = new ResizeObserver(check);
-    ro.observe(el);
-    if (document.fonts?.ready) document.fonts.ready.then(check).catch(() => {});
-    return () => { cancelAnimationFrame(raf); window.clearTimeout(t); ro.disconnect(); };
-  }, [text]);
-
-  return truncated;
-}
-
 /**
  * Visar hela texten i en tooltip när notistexten är klippt.
  * Trunkeringen mäts i samma ögonblick som muspekaren når texten – då är layouten
