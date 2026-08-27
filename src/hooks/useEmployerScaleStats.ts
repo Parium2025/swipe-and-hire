@@ -141,7 +141,10 @@ export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'pers
     enabled: !!user,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
-    refetchOnWindowFocus: false,
+    // Live: fokus + tyst intervall fångar tidsbaserade statusbyten (utgångna annonser)
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
     // 🔥 SWR-seed: visa senast kända counts direkt utan blink
     placeholderData: () => {
       if (!user) return undefined;
@@ -157,6 +160,7 @@ export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'pers
 export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = 'personal') => {
   const { user, profile } = useAuth();
   const orgId = profile?.organization_id || null;
+  useEmployerStatsLiveSync(user?.id);
 
   return useQuery<EmployerDashboardStats>({
     queryKey: ['employer-dashboard-stats', scope, orgId, user?.id],
@@ -170,7 +174,10 @@ export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = '
     enabled: !!user,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
-    refetchOnWindowFocus: false,
+    // Live: fokus + tyst intervall fångar tidsbaserade statusbyten (utgångna annonser)
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
     // 🔥 SWR-seed: visa senast kända stats direkt utan blink
     placeholderData: () => {
       if (!user) return undefined;
