@@ -31,27 +31,6 @@ const typeColors: Record<string, string> = {
 };
 
 
-function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>, text?: string | null) {
-  const [truncated, setTruncated] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const check = () => setTruncated(el.scrollHeight > el.clientHeight + 1);
-    check();
-    // Mät om efter att öppningsanimationen och webbtypsnitt landat – annars kan
-    // den första mätningen ske innan layouten är stabil och tooltips uteblir.
-    const raf = requestAnimationFrame(() => requestAnimationFrame(check));
-    const t = window.setTimeout(check, 300);
-    const ro = new ResizeObserver(check);
-    ro.observe(el);
-    if (document.fonts?.ready) document.fonts.ready.then(check).catch(() => {});
-    return () => { cancelAnimationFrame(raf); window.clearTimeout(t); ro.disconnect(); };
-  }, [text]);
-
-  return truncated;
-}
-
 /**
  * Visar hela texten i en tooltip när notistexten är klippt.
  * Trunkeringen mäts i samma ögonblick som muspekaren når texten – då är layouten
@@ -174,11 +153,11 @@ function supportReportRoute(title: string, body?: string | null): string {
   return `/support?category=technical&message=${encodeURIComponent(message)}`;
 }
 
-function NotificationItem({ 
-  notification, 
-  onRead, 
-  onNavigate 
-}: { 
+function NotificationItem({
+  notification,
+  onRead,
+  onNavigate
+}: {
   notification: AppNotification;
   onRead: (id: string) => void;
   onNavigate: (route: string) => void;
@@ -190,12 +169,6 @@ function NotificationItem({
 
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: sv });
 
-  const titleRef = useRef<HTMLSpanElement>(null);
-  const bodyRef = useRef<HTMLParagraphElement>(null);
-  const titleTruncated = useTruncation(titleRef, notification.title);
-  const bodyTruncated = useTruncation(bodyRef, notification.body);
-  const [expanded, setExpanded] = useState(false);
-  const canExpand = titleTruncated || bodyTruncated || expanded;
   const reportable = isReportable(notificationLooksError(notification.type, notification.title, notification.body), notification.title, notification.body) && !route;
 
   return (
@@ -209,15 +182,13 @@ function NotificationItem({
       whileTap={{ scale: 0.98 }}
       onClick={() => {
         if (!notification.is_read) onRead(notification.id);
-        if (route) { onNavigate(route); return; }
-        if (canExpand) setExpanded(v => !v);
+        if (route) onNavigate(route);
       }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           if (!notification.is_read) onRead(notification.id);
-          if (route) { onNavigate(route); return; }
-          if (canExpand) setExpanded(v => !v);
+          if (route) onNavigate(route);
         }
       }}
       className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer ${
@@ -233,7 +204,7 @@ function NotificationItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
           <ClampTooltip text={notification.title}>
-            <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{notification.title}</span>
+            <span className="text-sm font-medium text-white break-words leading-snug line-clamp-2">{notification.title}</span>
           </ClampTooltip>
           {!notification.is_read && (
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
@@ -241,21 +212,12 @@ function NotificationItem({
         </div>
         {notification.body && (
           <ClampTooltip text={notification.body}>
-            <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
+            <p className="text-xs text-white mt-3 break-words line-clamp-2">{notification.body}</p>
           </ClampTooltip>
         )}
 
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
-          {canExpand && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
-              className="text-xs font-medium text-white/80 underline underline-offset-2"
-            >
-              {expanded ? 'Visa mindre' : 'Visa mer'}
-            </button>
-          )}
 
           {reportable && (
             <button
@@ -297,19 +259,12 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
   const Icon = toastIcons[item.kind] ?? Info;
   const timeAgo = formatDistanceToNow(new Date(item.at), { addSuffix: true, locale: sv });
 
-  const titleRef = useRef<HTMLSpanElement>(null);
-  const bodyRef = useRef<HTMLParagraphElement>(null);
-  const titleTruncated = useTruncation(titleRef, item.title);
-  const bodyTruncated = useTruncation(bodyRef, item.body);
-  const [expanded, setExpanded] = useState(false);
-  const canExpand = titleTruncated || bodyTruncated || expanded;
   const route = item.route ?? resolveToastRoute(item.title, item.body);
   const reportable = isReportable(item.kind === 'error' || item.kind === 'warning', item.title, item.body) && !route;
 
   const activate = () => {
     if (!item.is_read) onRead(item.id);
-    if (route) { onNavigate(route); return; }
-    if (canExpand) setExpanded(v => !v);
+    if (route) onNavigate(route);
   };
 
   return (
@@ -336,7 +291,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
           <ClampTooltip text={item.title}>
-            <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
+            <span className="text-sm font-medium text-white break-words leading-snug line-clamp-2">{item.title}</span>
           </ClampTooltip>
           {item.count > 1 && (
             <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
@@ -349,21 +304,12 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
         </div>
         {item.body && (
           <ClampTooltip text={item.body}>
-            <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>
+            <p className="text-xs text-white mt-3 break-words line-clamp-2">{item.body}</p>
           </ClampTooltip>
         )}
 
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
-          {canExpand && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
-              className="text-xs font-medium text-white/80 underline underline-offset-2"
-            >
-              {expanded ? 'Visa mindre' : 'Visa mer'}
-            </button>
-          )}
 
           {reportable && (
             <button
