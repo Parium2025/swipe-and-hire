@@ -50,8 +50,11 @@ import CandidateProfilesManager from '@/components/candidateProfiles/CandidatePr
 
 import { fetchPriority } from '@/lib/fetchPriority';
 
-// Draft key for localStorage
-const PROFILE_DRAFT_KEY = 'parium_draft_profile';
+// Draft key for localStorage — kontospecifik så att två konton (arbetsgivare/jobbsökare)
+// på samma enhet aldrig kan skriva över varandras osparade profilutkast.
+const PROFILE_DRAFT_KEY_BASE = 'parium_draft_profile';
+const draftKeyFor = (userId?: string | null) =>
+  userId ? `${PROFILE_DRAFT_KEY_BASE}:${userId}` : PROFILE_DRAFT_KEY_BASE;
 
 interface ProfileDraftData {
   firstName?: string;
