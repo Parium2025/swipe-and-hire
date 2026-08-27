@@ -145,10 +145,13 @@ export default function ProfilePreview() {
   }, [preloadedVideoUrl, profile?.video_url]);
 
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
-    if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
+    // Hooks måste alltid köras i samma ordning – aldrig efter en villkorlig return.
     const { toast } = useToast();
     const device = useDevice();
     const isMobile = device === 'mobile';
+
+    if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
+
 
     // Ordräknare för bio
     const countWords = (text: string) => {
