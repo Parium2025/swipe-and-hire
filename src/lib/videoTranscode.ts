@@ -686,8 +686,9 @@ async function runTranscode(
   /* --- ljud: kopiera AAC rakt av (ingen kvalitetsförlust) ---------------- */
   if (audioTrack && audioSamples.length > 0) {
     const description = getAudioDescription(mp4boxFile, audioTrack.id);
+    // OBS: DOM-typen EncodedAudioChunkMetadata saknas i vår TS-lib — casta via mp4-muxers parametertyp.
     const meta = description
-      ? ({ decoderConfig: { codec: 'mp4a.40.2', description } } as unknown as EncodedAudioChunkMetadata)
+      ? ({ decoderConfig: { codec: 'mp4a.40.2', description } } as unknown as Parameters<Muxer<ArrayBufferTarget>['addAudioChunkRaw']>[4])
       : undefined;
     for (const sample of audioSamples) {
       muxer.addAudioChunkRaw(
