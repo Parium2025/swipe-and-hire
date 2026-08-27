@@ -1154,8 +1154,14 @@ const SearchJobs = memo(() => {
             onLocationChange: (loc) => { setSelectedPostalCode(''); setSelectedCity(loc); },
             selectedCategory,
             onCategoryChange: (val) => { setSelectedCategory(val); setSelectedSubcategories([]); },
+            selectedSubcategories,
+            onSubcategoriesChange: setSelectedSubcategories,
             selectedEmploymentTypes,
             onEmploymentTypesChange: setSelectedEmploymentTypes,
+            salaryRange,
+            onSalaryRangeChange: setSalaryRange,
+            timeFilter,
+            onTimeFilterChange: setTimeFilter,
             sortBy,
             onSortChange: setSortBy,
             onClearAll: () => {
@@ -1165,6 +1171,8 @@ const SearchJobs = memo(() => {
               setSelectedCategory('all-categories');
               setSelectedSubcategories([]);
               setSelectedEmploymentTypes([]);
+              setSalaryRange('');
+              setTimeFilter('all');
               setSortBy('newest');
               try { sessionStorage.removeItem('parium-search-filters'); } catch {}
             },
@@ -1172,8 +1180,12 @@ const SearchJobs = memo(() => {
               (searchInput ? 1 : 0) +
               (selectedCity ? 1 : 0) +
               (selectedCategory !== 'all-categories' ? 1 : 0) +
+              (selectedSubcategories.length > 0 ? 1 : 0) +
               (selectedEmploymentTypes.length > 0 ? 1 : 0) +
+              (salaryRange ? 1 : 0) +
+              (timeFilter !== 'all' ? 1 : 0) +
               (sortBy !== 'newest' ? 1 : 0),
+
           }}
         />
       )}
