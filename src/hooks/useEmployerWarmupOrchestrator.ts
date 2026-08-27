@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProgressivePagination } from '@/hooks/useProgressivePagination';
 import { useEmployerMediaWarmup } from '@/hooks/useEmployerMediaWarmup';
 import { useNotificationsPreload } from '@/hooks/useNotificationsPreload';
+import { useEmployerPagePrewarm } from '@/hooks/useEmployerPagePrewarm';
 
 /**
  * 🚀 EMPLOYER WARMUP ORCHESTRATOR
