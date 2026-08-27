@@ -60,7 +60,9 @@ import {
   MoreVertical,
   Trash2,
   ShieldBan,
+  AlertTriangle,
 } from 'lucide-react';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 
 import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
