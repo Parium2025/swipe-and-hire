@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, X, AlertCircle } from 'lucide-react';
 import { checkGpsPermission, requestGpsPermission, isNativeApp } from '@/lib/gpsUtils';
@@ -8,6 +8,11 @@ import GpsHelpModal from '@/components/GpsHelpModal';
 // 2–3s) hinner landa först. När vädret finns tillgängligt returnerar
 // komponenten null via `weatherAvailable`, så ikonen visas aldrig alls i
 // normalfallet. Endast om vädret verkligen misslyckas dyker den upp.
+//
+// Gäller ALLA lägen — även `denied`. Tidigare poppade den upp direkt när
+// platsåtkomst var blockerad, trots att vädret ofta landar ändå via
+// IP-uppslag. Det gav en stressig varning på hemskärmen som försvann
+// någon sekund senare. Nu får systemet alltid boota klart först.
 const GPS_PROMPT_DELAY_MS = 10000;
 
 // Dismissed state that survives SPA navigation but resets on full page reload
@@ -26,11 +31,16 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
   const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
   const [showHelpModal, setShowHelpModal] = useState(false);
 
+  // Läses vid timerns utlösning — vädret kan ha landat under väntetiden.
+  const weatherAvailableRef = useRef(weatherAvailable);
+  weatherAvailableRef.current = weatherAvailable;
+
   useEffect(() => {
     if (gpsPromptHasBeenShown && !gpsPromptDismissedUntilReload) {
       setExpanded(false);
     }
   }, []);
+
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -46,28 +56,26 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
         return;
       }
       
-      if (status === 'denied') {
-        if (!gpsPromptDismissedUntilReload) {
-          setVisible(true);
-          gpsPromptHasBeenShown = true;
-        }
-        return;
-      }
-      
-      if (status === 'prompt' && !gpsPromptDismissedUntilReload) {
+      if (gpsPromptDismissedUntilReload) return;
+
+      if (status === 'denied' || status === 'prompt') {
         timeoutId = setTimeout(() => {
+          // Vädret hann landa under väntetiden → ingen varning behövs.
+          if (weatherAvailableRef.current) return;
           checkGpsPermission().then(currentStatus => {
-            if (currentStatus === 'prompt') {
-              setVisible(true);
-              gpsPromptHasBeenShown = true;
-            } else if (currentStatus === 'granted') {
+            if (currentStatus === 'granted') {
               setGpsStatus('granted');
               setVisible(false);
               gpsPromptDismissedUntilReload = false;
+              return;
             }
+            setGpsStatus(currentStatus);
+            setVisible(true);
+            gpsPromptHasBeenShown = true;
           });
         }, GPS_PROMPT_DELAY_MS);
       }
+
     };
     
     const setupPermissionListener = async () => {
