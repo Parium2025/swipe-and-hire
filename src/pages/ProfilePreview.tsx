@@ -765,7 +765,7 @@ export default function ProfilePreview() {
                     </p>
                   </div>
                 )}
-                {consentedData?.work_schedule && (
+                {consentedData?.employment_type !== 'arbetssokande' && consentedData?.work_schedule && (
                   <div className="flex flex-col items-start gap-0.5 min-w-0">
                     <p className="text-[10px] sm:text-xs text-white font-medium break-words">Hur mycket jobbar du idag?</p>
                     <p className="text-white text-[9px] sm:text-[10px] break-words">Svar: {getWorkingHoursLabel(consentedData.work_schedule)}</p>
