@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchSavedJobsForUser } from '@/hooks/useSavedJobsCache';
 import { fetchMyApplicationsForUser } from '@/hooks/useMyApplicationsCache';
+import { fetchCandidateInterviewsForUser } from '@/hooks/useInterviews';
 
 /**
  * Hover/touchstart-baserad route-prefetch för sidebar-länkar.
