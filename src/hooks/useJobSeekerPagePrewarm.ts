@@ -40,9 +40,13 @@ export function useJobSeekerPagePrewarm() {
 
     const run = async () => {
       await warm(['my-applications', userId], () => fetchMyApplicationsForUser(userId));
+      // Intervjusektionen ligger ÖVANFÖR ansökningarna — utan förvärmning
+      // puttas listan nedåt när intervjuerna landar (upplevs som en blixt).
+      await warm(['candidate-interviews', userId], () => fetchCandidateInterviewsForUser(userId));
       await warm(['saved-jobs', userId], () => fetchSavedJobsForUser(userId));
       await warm(['skipped-jobs', userId], () => fetchSkippedJobsForUser(userId));
     };
+
 
     type IdleWindow = Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
