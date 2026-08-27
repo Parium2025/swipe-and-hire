@@ -69,11 +69,12 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg bg-card-parium border-0 text-white">
         <DialogHeader>
-          <DialogTitle>{profile ? 'Redigera profil' : 'Ny profil'}</DialogTitle>
-          <DialogDescription>
-            Ge profilen ett namn och välj vilket CV, vilken video och vilken bild som ska följa med när du söker jobb.
+          <DialogTitle className="text-white">{profile ? 'Redigera profil' : 'Ny profil'}</DialogTitle>
+          <DialogDescription className="text-white">
+            Dina personuppgifter är alltid desamma. Här väljer du bara vilket CV, vilken video och vilken bild som ska
+            följa med när du söker jobb.
           </DialogDescription>
         </DialogHeader>
 
@@ -87,8 +88,11 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               maxLength={MAX_LABEL}
               placeholder="T.ex. Lagermedarbetare"
               onChange={(e) => setLabel(e.target.value)}
+              className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
             />
-            <p className="text-xs text-white/60">{label.length}/{MAX_LABEL}</p>
+            <p className="text-xs text-white">
+              Namnet är bara till för dig, så att du snabbt hittar rätt profil när du söker jobb. {label.length}/{MAX_LABEL}
+            </p>
           </div>
 
           {row(
@@ -140,9 +144,10 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
           )}
         </div>
 
-        <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Avbryt</Button>
+        <DialogFooter className="flex-col items-stretch gap-2 sm:flex-col sm:space-x-0">
           <Button
+            variant="glass"
+            className="w-full h-12 text-sm"
             disabled={!labelFilled || saving}
             onClick={() => onSave({
               label,
@@ -153,6 +158,9 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
             })}
           >
             {saving ? 'Sparar…' : 'Spara profil'}
+          </Button>
+          <Button variant="glass" className="w-full h-12 text-sm" onClick={() => onOpenChange(false)}>
+            Avbryt
           </Button>
         </DialogFooter>
       </DialogContent>
