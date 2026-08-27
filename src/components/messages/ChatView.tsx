@@ -86,7 +86,7 @@ export function ChatView({
   const { getReactionsForMessage, toggleReaction } = useMessageReactions(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
-  const { setMuted, isUpdating: isUpdatingMute } = useMuteConversation();
+  const { setMuted } = useMuteConversation();
   const { deleteConversation, isDeleting } = useDeleteConversation();
   const { blockConversation, isBlocking } = useBlockConversation();
   const [confirmAction, setConfirmAction] = useState<'delete' | 'block' | null>(null);
@@ -768,7 +768,7 @@ export function ChatView({
         <button
           type="button"
           onClick={() => setMuted({ conversationId: conversation.id, muted: !conversation.is_muted })}
-          disabled={isUpdatingMute}
+          /* Optimistisk uppdatering — knappen ska alltid kännas direkt. */
           aria-label={conversation.is_muted ? 'Slå på notiser för konversationen' : 'Tysta konversationen'}
           title={conversation.is_muted ? 'Notiser är avstängda för den här chatten' : 'Tysta den här chatten'}
           className={cn(
