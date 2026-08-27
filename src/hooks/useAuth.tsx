@@ -1993,6 +1993,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  // 🔗 Exakt spegling av sparade jobb-listan → sidomenyns siffra.
+  // Listan (useSavedJobsCache) är sanningen i klienten; när den ändras optimistiskt
+  // (spara/ta bort/swipe) uppdateras siffran omedelbart, utan att vänta på en ny count-query.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (e: Event) => {
+      const count = (e as CustomEvent<{ count?: number }>).detail?.count;
+      if (typeof count !== 'number' || !Number.isFinite(count) || count < 0) return;
+      setPreloadedSavedJobs(count);
+      try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(count)); } catch { /* ignore */ }
+    };
+    window.addEventListener('parium:saved-jobs-count', handler);
+    return () => window.removeEventListener('parium:saved-jobs-count', handler);
+  }, []);
+
   // Funktion för att uppdatera employer stats (används av realtime + initial load)
   // OBS: För Dashboard-konsistens hämtar vi organisations-jobb om användaren tillhör en org
   const refreshEmployerStats = useCallback(async () => {
