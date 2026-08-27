@@ -55,6 +55,9 @@ export function SwipeableConversationItem({
   const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   const lockOffsetRef = useRef(0);
   const suppressClickRef = useRef(false);
+  // Ökas vid varje ny gest så att timers från en pågående animation
+  // aldrig skriver över en ny dragning.
+  const gestureIdRef = useRef(0);
   const [showConfirm, setShowConfirm] = useState(false);
   const [revealedSide, setRevealedSide] = useState<'delete' | 'unread' | null>(null);
 
@@ -96,14 +99,19 @@ export function SwipeableConversationItem({
    * det tonar bort — istället för att snärta tillbaka direkt.
    */
   const animateBack = useCallback((committed = false) => {
+    const gestureId = gestureIdRef.current;
     const contentMs = committed ? 340 : 240;
     const easing = 'cubic-bezier(0.32, 0.72, 0, 1)'; // iOS "sheet"-kurva
+
+    // Avbryt ev. köad rAF-paint så den inte skriver över transitionen.
+    if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
 
     const content = contentRef.current;
     if (content) {
       content.style.transition = `transform ${contentMs}ms ${easing}`;
       content.style.transform = 'translate3d(0,0,0)';
       window.setTimeout(() => {
+        if (gestureId !== gestureIdRef.current) return;
         if (contentRef.current) contentRef.current.style.transition = '';
       }, contentMs + 20);
     }
@@ -115,18 +123,78 @@ export function SwipeableConversationItem({
       el.style.opacity = '0';
       el.style.transform = 'scale(0.82)';
       window.setTimeout(() => {
+        if (gestureId !== gestureIdRef.current) return;
         if (el) el.style.transition = '';
       }, fadeMs + delay + 20);
     });
     // Behåll pillret monterat tills det tonat klart.
     if (committed) {
-      window.setTimeout(() => setRevealedSide(null), 340);
+      window.setTimeout(() => {
+        if (gestureId === gestureIdRef.current) setRevealedSide(null);
+      }, 340);
     } else {
       setRevealedSide(null);
     }
 
     pendingXRef.current = 0;
     currentXRef.current = 0;
+  }, []);
+
+  /**
+   * "Peek": även en kort svepning som släpps innan tröskeln spelar upp HELA
+   * rörelsen — kortet glider ut och visar pillret fullt, pausar ett ögonblick
+   * och glider sedan tillbaka med den tunga iOS-kurvan. Det ger en lugn,
+   * proffsig känsla istället för en snabb, hackig tillbakasnärt.
+   */
+  const animatePeek = useCallback((direction: 'delete' | 'unread') => {
+    const gestureId = gestureIdRef.current;
+    const easing = 'cubic-bezier(0.32, 0.72, 0, 1)';
+    if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+
+    const content = contentRef.current;
+    const pill = direction === 'delete' ? deleteRef.current : unreadRef.current;
+    const peekX = direction === 'delete' ? -(DELETE_THRESHOLD + 10) : UNREAD_THRESHOLD + 10;
+    setRevealedSide(direction);
+
+    // Fas 1: glid ut och visa hela pillret.
+    if (content) {
+      content.style.transition = `transform 280ms ${easing}`;
+      content.style.transform = `translate3d(${peekX}px,0,0)`;
+    }
+    if (pill) {
+      pill.style.transition = `opacity 200ms ease-out, transform 280ms ${easing}`;
+      pill.style.opacity = '1';
+      pill.style.transform = 'scale(1)';
+    }
+
+    // Fas 2: kort paus, sedan mjuk hemglidning + uttoning.
+    window.setTimeout(() => {
+      if (gestureId !== gestureIdRef.current) return;
+      const c = contentRef.current;
+      if (c) {
+        c.style.transition = `transform 360ms ${easing}`;
+        c.style.transform = 'translate3d(0,0,0)';
+        window.setTimeout(() => {
+          if (gestureId !== gestureIdRef.current) return;
+          if (contentRef.current) contentRef.current.style.transition = '';
+        }, 380);
+      }
+      [deleteRef.current, unreadRef.current].forEach((el) => {
+        if (!el) return;
+        el.style.transition = `opacity 220ms ease-out 80ms, transform 220ms ${easing} 80ms`;
+        el.style.opacity = '0';
+        el.style.transform = 'scale(0.82)';
+        window.setTimeout(() => {
+          if (gestureId !== gestureIdRef.current) return;
+          if (el) el.style.transition = '';
+        }, 320);
+      });
+      window.setTimeout(() => {
+        if (gestureId === gestureIdRef.current) setRevealedSide(null);
+      }, 380);
+      pendingXRef.current = 0;
+      currentXRef.current = 0;
+    }, 320);
   }, []);
 
   useEffect(() => {
@@ -139,9 +207,12 @@ export function SwipeableConversationItem({
   }, [conversationName]);
 
   const beginDrag = useCallback((clientX: number, clientY: number) => {
+    gestureIdRef.current += 1; // ogiltigförklarar timers från ev. pågående animation
+    if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     startXRef.current = clientX;
     startYRef.current = clientY;
     currentXRef.current = 0;
+    pendingXRef.current = 0;
     isSwipingRef.current = false;
     directionLockedRef.current = null;
     lockOffsetRef.current = 0;
@@ -201,7 +272,17 @@ export function SwipeableConversationItem({
     const committed =
       offset <= -DELETE_THRESHOLD ||
       (offset >= UNREAD_THRESHOLD && !!onMarkUnread && canMarkUnread);
-    animateBack(committed);
+
+    if (committed) {
+      animateBack(true);
+    } else if (offset <= -8) {
+      // Släppt tidigt åt vänster: visa ändå hela rörelsen (peek) — lugnt och proffsigt.
+      animatePeek('delete');
+    } else if (offset >= 8 && onMarkUnread && canMarkUnread) {
+      animatePeek('unread');
+    } else {
+      animateBack(false);
+    }
 
     if (offset <= -DELETE_THRESHOLD) {
       setShowConfirm(true);
@@ -218,7 +299,7 @@ export function SwipeableConversationItem({
     // Blockera klicket som annars öppnar konversationen direkt efter dragningen.
     suppressClickRef.current = true;
     window.setTimeout(() => { suppressClickRef.current = false; }, 250);
-  }, [animateBack, onMarkUnread, canMarkUnread]);
+  }, [animateBack, animatePeek, onMarkUnread, canMarkUnread]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     beginDrag(e.touches[0].clientX, e.touches[0].clientY);
