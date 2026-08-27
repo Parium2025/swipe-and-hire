@@ -292,7 +292,7 @@ const Subscription = () => {
                 <button
                   type="button"
                   onPointerDown={(e) => e.stopPropagation()}
-                  onClick={(e) => { e.stopPropagation(); }}
+                  onClick={(e) => { e.stopPropagation(); navigate('/billing'); }}
                   className="mt-4 w-full text-center text-xs font-medium text-white/60 underline-offset-4 hover:text-white hover:underline transition-colors"
                 >
                   Hantera betalmetod
