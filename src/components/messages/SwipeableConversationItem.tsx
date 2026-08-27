@@ -206,11 +206,9 @@ export function SwipeableConversationItem({
       Math.min(absDelta, threshold) +
       (MAX_TRANSLATE - threshold) * (1 - Math.exp(-over / (MAX_TRANSLATE - threshold)));
 
-    // Haptik exakt när tröskeln passeras — som iOS Mail. Endast vid övergången.
     const passed = absDelta >= threshold;
     if (passed !== thresholdPassedRef.current) {
       thresholdPassedRef.current = passed;
-      if (passed) { try { navigator.vibrate?.(6); } catch { /* ignoreras */ } }
     }
 
     const x = swipingRight ? resisted : -resisted;
