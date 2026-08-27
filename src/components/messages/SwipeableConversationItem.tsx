@@ -104,8 +104,9 @@ export function SwipeableConversationItem({
    */
   const animateBack = useCallback((committed = false) => {
     const gestureId = gestureIdRef.current;
-    const contentMs = committed ? 340 : 240;
+    const contentMs = committed ? 260 : 200;
     const easing = 'cubic-bezier(0.32, 0.72, 0, 1)'; // iOS "sheet"-kurva
+
 
     // Avbryt ev. köad rAF-paint så den inte skriver över transitionen.
     if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
@@ -121,21 +122,20 @@ export function SwipeableConversationItem({
     }
     [deleteRef.current, unreadRef.current].forEach((el) => {
       if (!el) return;
-      const fadeMs = committed ? 220 : 170;
-      const delay = committed ? 60 : 0;
-      el.style.transition = `opacity ${fadeMs}ms ease-out ${delay}ms, transform ${fadeMs}ms ${easing} ${delay}ms`;
+      const fadeMs = committed ? 180 : 150;
+      el.style.transition = `opacity ${fadeMs}ms ease-out, transform ${fadeMs}ms ${easing}`;
       el.style.opacity = '0';
       el.style.transform = 'scale(0.82)';
       window.setTimeout(() => {
         if (gestureId !== gestureIdRef.current) return;
         if (el) el.style.transition = '';
-      }, fadeMs + delay + 20);
+      }, fadeMs + 20);
     });
     // Behåll pillret monterat tills det tonat klart.
     if (committed) {
       window.setTimeout(() => {
         if (gestureId === gestureIdRef.current) setRevealedSide(null);
-      }, 340);
+      }, 200);
     } else {
       setRevealedSide(null);
     }
@@ -144,62 +144,7 @@ export function SwipeableConversationItem({
     currentXRef.current = 0;
   }, []);
 
-  /**
-   * "Peek": även en kort svepning som släpps innan tröskeln spelar upp HELA
-   * rörelsen — kortet glider ut och visar pillret fullt, pausar ett ögonblick
-   * och glider sedan tillbaka med den tunga iOS-kurvan. Det ger en lugn,
-   * proffsig känsla istället för en snabb, hackig tillbakasnärt.
-   */
-  const animatePeek = useCallback((direction: 'delete' | 'unread') => {
-    const gestureId = gestureIdRef.current;
-    const easing = 'cubic-bezier(0.32, 0.72, 0, 1)';
-    if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
 
-    const content = contentRef.current;
-    const pill = direction === 'delete' ? deleteRef.current : unreadRef.current;
-    const peekX = direction === 'delete' ? -(DELETE_THRESHOLD + 10) : UNREAD_THRESHOLD + 10;
-    setRevealedSide(direction);
-
-    // Fas 1: glid ut och visa hela pillret.
-    if (content) {
-      content.style.transition = `transform 280ms ${easing}`;
-      content.style.transform = `translate3d(${peekX}px,0,0)`;
-    }
-    if (pill) {
-      pill.style.transition = `opacity 200ms ease-out, transform 280ms ${easing}`;
-      pill.style.opacity = '1';
-      pill.style.transform = 'scale(1)';
-    }
-
-    // Fas 2: kort paus, sedan mjuk hemglidning + uttoning.
-    window.setTimeout(() => {
-      if (gestureId !== gestureIdRef.current) return;
-      const c = contentRef.current;
-      if (c) {
-        c.style.transition = `transform 360ms ${easing}`;
-        c.style.transform = 'translate3d(0,0,0)';
-        window.setTimeout(() => {
-          if (gestureId !== gestureIdRef.current) return;
-          if (contentRef.current) contentRef.current.style.transition = '';
-        }, 380);
-      }
-      [deleteRef.current, unreadRef.current].forEach((el) => {
-        if (!el) return;
-        el.style.transition = `opacity 220ms ease-out 80ms, transform 220ms ${easing} 80ms`;
-        el.style.opacity = '0';
-        el.style.transform = 'scale(0.82)';
-        window.setTimeout(() => {
-          if (gestureId !== gestureIdRef.current) return;
-          if (el) el.style.transition = '';
-        }, 320);
-      });
-      window.setTimeout(() => {
-        if (gestureId === gestureIdRef.current) setRevealedSide(null);
-      }, 380);
-      pendingXRef.current = 0;
-      currentXRef.current = 0;
-    }, 320);
-  }, []);
 
   useEffect(() => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -300,18 +245,10 @@ export function SwipeableConversationItem({
     const commitUnread = (offset >= UNREAD_THRESHOLD || flickRight) && canUnread;
     const commitDelete = offset <= -DELETE_THRESHOLD || flickLeft;
 
-    if (commitDelete || commitUnread) {
-      // Samma lugna rörelse oavsett om man drog hela vägen eller flickade:
-      // kortet glider ut, visar pillret helt, pausar och glider hem.
-      animatePeek(commitDelete ? 'delete' : 'unread');
-    } else if (offset <= -8) {
-      // Släppt tidigt åt vänster: visa ändå hela rörelsen (peek) — lugnt och proffsigt.
-      animatePeek('delete');
-    } else if (offset >= 8 && canUnread) {
-      animatePeek('unread');
-    } else {
-      animateBack(false);
-    }
+    // Direkt respons som iOS Mail: kortet snappar tillbaka omedelbart —
+    // ingen lång "peek"-sekvens som får gesten att kännas trög.
+    animateBack(commitDelete || commitUnread);
+
 
     if (commitDelete) {
       setShowConfirm(true);
@@ -329,7 +266,7 @@ export function SwipeableConversationItem({
     // Blockera klicket som annars öppnar konversationen direkt efter dragningen.
     suppressClickRef.current = true;
     window.setTimeout(() => { suppressClickRef.current = false; }, 250);
-  }, [animateBack, animatePeek, onMarkUnread, canMarkUnread]);
+  }, [animateBack, onMarkUnread, canMarkUnread]);
 
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
