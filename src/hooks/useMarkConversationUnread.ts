@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { getIsOnline } from '@/lib/connectivityManager';
@@ -43,6 +44,12 @@ export function useMarkConversationUnread() {
         }
         return next;
       });
+
+      // Direkt återkoppling i samma frame som fingret släpps.
+      try { navigator.vibrate?.(8); } catch { /* ignoreras */ }
+      toast.success('Markerad som oläst', {
+        route: `/messages?conversation=${conversationId}`,
+      } as Parameters<typeof toast.success>[1]);
 
       if (!getIsOnline()) return;
 

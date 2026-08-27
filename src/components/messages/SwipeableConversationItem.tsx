@@ -86,25 +86,42 @@ export function SwipeableConversationItem({
     if (rafRef.current === null) rafRef.current = requestAnimationFrame(paint);
   }, [paint]);
 
-  const animateBack = useCallback(() => {
+  /**
+   * `committed` = gesten utlöste en åtgärd. Då glider kortet tillbaka med
+   * iOS-kurvan (långsam, tyngdkänsla) och pillret hänger kvar en aning innan
+   * det tonar bort — istället för att snärta tillbaka direkt.
+   */
+  const animateBack = useCallback((committed = false) => {
+    const contentMs = committed ? 460 : 280;
+    const easing = committed
+      ? 'cubic-bezier(0.32, 0.72, 0, 1)'   // iOS "sheet"-kurva
+      : 'cubic-bezier(0.25, 1, 0.4, 1)';
+
     const content = contentRef.current;
     if (content) {
-      content.style.transition = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
+      content.style.transition = `transform ${contentMs}ms ${easing}`;
       content.style.transform = 'translate3d(0,0,0)';
       window.setTimeout(() => {
         if (contentRef.current) contentRef.current.style.transition = '';
-      }, 280);
+      }, contentMs + 20);
     }
     [deleteRef.current, unreadRef.current].forEach((el) => {
       if (!el) return;
-      el.style.transition = 'opacity 200ms ease-out, transform 200ms ease-out';
+      const fadeMs = committed ? 320 : 200;
+      const delay = committed ? 120 : 0;
+      el.style.transition = `opacity ${fadeMs}ms ease-out ${delay}ms, transform ${fadeMs}ms ${easing} ${delay}ms`;
       el.style.opacity = '0';
       el.style.transform = 'scale(0.6)';
       window.setTimeout(() => {
         if (el) el.style.transition = '';
-      }, 220);
+      }, fadeMs + delay + 20);
     });
-    setRevealedSide(null);
+    // Behåll pillret monterat tills det tonat klart.
+    if (committed) {
+      window.setTimeout(() => setRevealedSide(null), 460);
+    } else {
+      setRevealedSide(null);
+    }
     pendingXRef.current = 0;
     currentXRef.current = 0;
   }, []);
@@ -178,7 +195,10 @@ export function SwipeableConversationItem({
     if (!isSwipingRef.current) return;
 
     const offset = currentXRef.current;
-    animateBack();
+    const committed =
+      offset <= -DELETE_THRESHOLD ||
+      (offset >= UNREAD_THRESHOLD && !!onMarkUnread && canMarkUnread);
+    animateBack(committed);
 
     if (offset <= -DELETE_THRESHOLD) {
       setShowConfirm(true);
@@ -246,7 +266,7 @@ export function SwipeableConversationItem({
         onTouchEnd={endDrag}
         onMouseDown={handleMouseDown}
         onClickCapture={handleClickCapture}
-        onTouchCancel={animateBack}
+        onTouchCancel={() => animateBack(false)}
       >
         {/* Markera som oläst — visas vid drag åt höger */}
         {onMarkUnread && canMarkUnread && (
@@ -259,7 +279,7 @@ export function SwipeableConversationItem({
                 className="rounded-full flex items-center gap-1 px-3 py-2 bg-blue-500/20 border border-blue-500/40 text-white font-medium text-xs"
                 onClick={(e) => {
                   e.stopPropagation();
-                  animateBack();
+                  animateBack(true);
                   onMarkUnread?.();
                 }}
                 tabIndex={-1}
