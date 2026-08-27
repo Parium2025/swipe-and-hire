@@ -122,21 +122,20 @@ export function SwipeableConversationItem({
     }
     [deleteRef.current, unreadRef.current].forEach((el) => {
       if (!el) return;
-      const fadeMs = committed ? 220 : 170;
-      const delay = committed ? 60 : 0;
-      el.style.transition = `opacity ${fadeMs}ms ease-out ${delay}ms, transform ${fadeMs}ms ${easing} ${delay}ms`;
+      const fadeMs = committed ? 180 : 150;
+      el.style.transition = `opacity ${fadeMs}ms ease-out, transform ${fadeMs}ms ${easing}`;
       el.style.opacity = '0';
       el.style.transform = 'scale(0.82)';
       window.setTimeout(() => {
         if (gestureId !== gestureIdRef.current) return;
         if (el) el.style.transition = '';
-      }, fadeMs + delay + 20);
+      }, fadeMs + 20);
     });
     // Behåll pillret monterat tills det tonat klart.
     if (committed) {
       window.setTimeout(() => {
         if (gestureId === gestureIdRef.current) setRevealedSide(null);
-      }, 340);
+      }, 200);
     } else {
       setRevealedSide(null);
     }
@@ -144,6 +143,7 @@ export function SwipeableConversationItem({
     pendingXRef.current = 0;
     currentXRef.current = 0;
   }, []);
+
 
   /**
    * "Peek": även en kort svepning som släpps innan tröskeln spelar upp HELA
