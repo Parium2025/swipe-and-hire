@@ -332,6 +332,15 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
   const isLoadingSkipped = enableSkipped && queryLoadingSkipped && safeSkippedJobs.length === 0;
   const savedJobIds = useMemo(() => new Set(safeSavedJobs.map((job) => job.job_id)), [safeSavedJobs]);
 
+  // 🔢 Håll sidomenyns siffra exakt i takt med listan (även optimistiska ändringar).
+  // Utan detta kunde badge och sidrubrik visa olika värden en kort stund.
+  useEffect(() => {
+    if (!user?.id || queryLoadingSaved) return;
+    window.dispatchEvent(
+      new CustomEvent('parium:saved-jobs-count', { detail: { count: safeSavedJobs.length } }),
+    );
+  }, [user?.id, queryLoadingSaved, safeSavedJobs.length]);
+
   // ── Realtime: job_postings updates for saved jobs only ──
   useEffect(() => {
     if (!user?.id || safeSavedJobs.length === 0) return;
