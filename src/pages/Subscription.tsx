@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsPremium } from '@/hooks/useIsPremium';
 import { PremiumUpgradeDialog } from '@/components/PremiumUpgradeDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
