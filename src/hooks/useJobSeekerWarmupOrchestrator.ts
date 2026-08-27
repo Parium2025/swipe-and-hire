@@ -1,6 +1,7 @@
 import { useJobSeekerMediaWarmup } from '@/hooks/useJobSeekerMediaWarmup';
 import { useJobSearchProgressivePagination } from '@/hooks/useJobSearchProgressivePagination';
 import { useNotificationsPreload } from '@/hooks/useNotificationsPreload';
+import { useJobSeekerPagePrewarm } from '@/hooks/useJobSeekerPagePrewarm';
 
 /**
  * 🚀 JOB SEEKER WARMUP ORCHESTRATOR
@@ -27,4 +28,6 @@ export function useJobSeekerWarmupOrchestrator() {
   useJobSeekerMediaWarmup();
   useJobSearchProgressivePagination();
   useNotificationsPreload();
+  // 4. Kallstart för Sparade jobb / Mina ansökningar — samma nycklar som sidorna.
+  useJobSeekerPagePrewarm();
 }
