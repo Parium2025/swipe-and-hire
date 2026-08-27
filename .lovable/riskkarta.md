@@ -47,7 +47,7 @@ Status per område. Skala:
 | Realtid | V | Publikationer + REPLICA IDENTITY FULL där det behövs. |
 | Mobil/responsivt (≤1180px) | V | Nav overflow-guard, TruncatedText, safe-area. |
 | Betalning (Stripe) | Ö | Backend förberedd, ej aktiverad. Juridik måste uppdateras först. |
-| Kapacitet / kostnadstak | Ö | Se pre-launch-checklistan: Resend Pro, Cloud-uppgradering. |
+| Kapacitet / kostnadstak | Ö | Se pre-launch-checklistan: Cloud-uppgradering (e-post går via Lovables app-mejl, ingen extern leverantör). |
 | Felövervakning i prod | A | app_exceptions loggar, men ingen larmkanal till dig. |
 | Lasttest i verklig miljö | Ö | Allt är simulerat/analyserat, inget riktigt lasttest kört. |
 
@@ -58,7 +58,7 @@ Status per område. Skala:
 1. **Push på iOS/web** — avgör om notiser räknas som en funktion vi säljer.
 2. **Larmkanal för fel** — app_exceptions → mail/Slack när något smäller i prod.
 3. **Stripe + juridik** — policy, DPA, registerförteckning (GDPR art. 30).
-4. **Kapacitetströsklar** — Resend Pro + Cloud-plan innan trafik.
+4. **Kapacitetströsklar** — Cloud-plan och sändningstak innan trafik.
 5. **Riktigt lasttest** — ett skarpt test mot söket och kandidatlistorna.
 
 ## Kvar på jobbsökarsidan (ej granskat än)
@@ -66,3 +66,4 @@ Status per område. Skala:
 - Onboarding-flödet för ny jobbsökare (första inloggning → första ansökan).
 - Ansökningsflödet i sig (frågor, snapshot, kvot, bekräftelse).
 - Landing/SEO-sidor sett från inloggad jobbsökare.
+- Min profil, Ekonomi/Prenumeration och Support på jobbsökarsidan.
