@@ -472,150 +472,152 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
             <Separator className="my-6" />
 
-            {/* Kommentarer / Recensioner */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg text-white">Kommentarer</h3>
+            {/* Kommentarer / Recensioner — endast synliga för inloggade */}
+            {user && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg text-white">Kommentarer</h3>
 
-              {/* Kommentarsfält eller informationstext */}
-              {isOwnProfile ? (
-                <div className="bg-white/5 p-3 rounded-lg">
-                  <p className="text-sm text-white text-center">
-                    (Här lämnar jobbsökarna kommentarer om de vill samt betyg)
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <button 
-                    onClick={() => setIsFormOpen(!isFormOpen)}
-                    className="flex items-center justify-between w-full bg-white/5 hover:bg-white/10 p-3 rounded-lg transition-colors"
-                  >
-                    <span className="text-sm font-medium text-white">Lämna en recension</span>
-                    <ChevronDown 
-                      className={`h-4 w-4 text-white transition-transform duration-300 ${
-                        isFormOpen ? 'rotate-180' : ''
-                      }`} 
-                    />
-                  </button>
-                  
-                  <div className={`overflow-hidden transition-[max-height,margin] duration-300 ease-out ${
-                    isFormOpen ? 'max-h-[600px] mt-3' : 'max-h-0 mt-0'
-                  }`}>
-                    <div className="bg-white/5 p-4 rounded-lg space-y-3">
-                      <div>
-                        <label className="text-sm font-medium mb-2 block text-white">Betyg</label>
-                        <div className="flex gap-2">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              type="button"
-                              onClick={() => setNewRating(star)}
-                              className="transition-colors"
-                            >
-                              <Star
-                                className={`h-5 w-5 ${
-                                  star <= newRating
-                                    ? "fill-yellow-400 text-yellow-400"
-                                    : "fill-transparent text-white stroke-white stroke-[1.5]"
-                                }`}
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-medium mb-2 block text-white">Din kommentar</label>
-                        <Textarea
-                          value={newComment}
-                          onChange={(e) => setNewComment(e.target.value)}
-                          placeholder="Dela dina erfarenheter av detta företag..."
-                          className="min-h-[100px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="anonymous"
-                          checked={isAnonymous}
-                          onChange={(e) => setIsAnonymous(e.target.checked)}
-                          className="rounded"
-                        />
-                        <label htmlFor="anonymous" className="text-sm text-white">
-                          Publicera anonymt
-                        </label>
-                      </div>
-
-                      <Button 
-                        onClick={handleSubmitReview} 
-                        disabled={submitting}
-                        variant="glass"
-                        className="w-full"
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        {submitting ? "Skickar..." : "Skicka kommentar"}
-                      </Button>
-                    </div>
+                {/* Kommentarsfält eller informationstext */}
+                {isOwnProfile ? (
+                  <div className="bg-white/5 p-3 rounded-lg">
+                    <p className="text-sm text-white text-center">
+                      (Här lämnar jobbsökarna kommentarer om de vill samt betyg)
+                    </p>
                   </div>
-                </div>
-              )}
-
-              {/* Lista med kommentarer */}
-              <div className="space-y-4 mt-6">
-                {cachedReviews.length === 0 ? (
-                  <p className="text-center text-white py-8">
-                    Inga kommentarer än. Var först med att dela dina erfarenheter!
-                  </p>
                 ) : (
-                  cachedReviews.map((review) => (
-                    <div key={review.id} className="border border-white/10 rounded-lg p-4 space-y-2">
-                      <div>
-                        <p className="font-medium text-white">
-                          {review.is_anonymous
-                            ? "Anonym"
-                            : `${review.profiles?.first_name || ""} ${
-                                review.profiles?.last_name?.[0] || ""
-                              }.`}
-                        </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${
-                                  i < (review.rating || 0)
-                                    ? "fill-yellow-400 text-yellow-400"
-                                    : "fill-transparent text-white stroke-white stroke-[1.5]"
-                                }`}
-                              />
+                  <div>
+                    <button 
+                      onClick={() => setIsFormOpen(!isFormOpen)}
+                      className="flex items-center justify-between w-full bg-white/5 hover:bg-white/10 p-3 rounded-lg transition-colors"
+                    >
+                      <span className="text-sm font-medium text-white">Lämna en recension</span>
+                      <ChevronDown 
+                        className={`h-4 w-4 text-white transition-transform duration-300 ${
+                          isFormOpen ? 'rotate-180' : ''
+                        }`} 
+                      />
+                    </button>
+                    
+                    <div className={`overflow-hidden transition-[max-height,margin] duration-300 ease-out ${
+                      isFormOpen ? 'max-h-[600px] mt-3' : 'max-h-0 mt-0'
+                    }`}>
+                      <div className="bg-white/5 p-4 rounded-lg space-y-3">
+                        <div>
+                          <label className="text-sm font-medium mb-2 block text-white">Betyg</label>
+                          <div className="flex gap-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                onClick={() => setNewRating(star)}
+                                className="transition-colors"
+                              >
+                                <Star
+                                  className={`h-5 w-5 ${
+                                    star <= newRating
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : "fill-transparent text-white stroke-white stroke-[1.5]"
+                                  }`}
+                                />
+                              </button>
                             ))}
                           </div>
-                          <span className="text-sm text-white">
-                            {new Date(review.created_at).toLocaleDateString("sv-SE")}
-                          </span>
                         </div>
-                      </div>
-                      {review.comment && (
-                        <div className="text-sm text-white mt-2">
-                          <span className="text-white">Kommentar: </span>
-                          <TruncatedText
-                            text={review.comment}
-                            className="text-white inline-block align-bottom max-w-full [overflow-wrap:anywhere]"
-                            tooltipSide="top"
-                            style={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
+
+                        <div>
+                          <label className="text-sm font-medium mb-2 block text-white">Din kommentar</label>
+                          <Textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Dela dina erfarenheter av detta företag..."
+                            className="min-h-[100px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white"
                           />
                         </div>
-                      )}
+
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="anonymous"
+                            checked={isAnonymous}
+                            onChange={(e) => setIsAnonymous(e.target.checked)}
+                            className="rounded"
+                          />
+                          <label htmlFor="anonymous" className="text-sm text-white">
+                            Publicera anonymt
+                          </label>
+                        </div>
+
+                        <Button 
+                          onClick={handleSubmitReview} 
+                          disabled={submitting}
+                          variant="glass"
+                          className="w-full"
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          {submitting ? "Skickar..." : "Skicka kommentar"}
+                        </Button>
+                      </div>
                     </div>
-                  ))
+                  </div>
                 )}
+
+                {/* Lista med kommentarer */}
+                <div className="space-y-4 mt-6">
+                  {cachedReviews.length === 0 ? (
+                    <p className="text-center text-white py-8">
+                      Inga kommentarer än. Var först med att dela dina erfarenheter!
+                    </p>
+                  ) : (
+                    cachedReviews.map((review) => (
+                      <div key={review.id} className="border border-white/10 rounded-lg p-4 space-y-2">
+                        <div>
+                          <p className="font-medium text-white">
+                            {review.is_anonymous
+                              ? "Anonym"
+                              : `${review.profiles?.first_name || ""} ${
+                                  review.profiles?.last_name?.[0] || ""
+                                }.`}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${
+                                    i < (review.rating || 0)
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : "fill-transparent text-white stroke-white stroke-[1.5]"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-sm text-white">
+                              {new Date(review.created_at).toLocaleDateString("sv-SE")}
+                            </span>
+                          </div>
+                        </div>
+                        {review.comment && (
+                          <div className="text-sm text-white mt-2">
+                            <span className="text-white">Kommentar: </span>
+                            <TruncatedText
+                              text={review.comment}
+                              className="text-white inline-block align-bottom max-w-full [overflow-wrap:anywhere]"
+                              tooltipSide="top"
+                              style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </ScrollArea>
       </DialogContentNoFocus>
