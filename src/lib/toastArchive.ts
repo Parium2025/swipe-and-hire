@@ -20,18 +20,34 @@ export interface ArchivedToast {
   route?: string;
 }
 
-const KEY = "parium_toast_archive_v1";
+const BASE_KEY = "parium_toast_archive_v1";
 const MAX = 50;
 const MERGE_WINDOW = 60_000;
 const SYNC_DEBOUNCE = 1400;
 
+/**
+ * Arkivet är kontospecifikt. Två flikar på samma enhet kan vara inloggade med
+ * olika konton (t.ex. arbetsgivare + jobbsökare) — utan denna nyckelseparation
+ * skulle de dela samma lokala notislista.
+ */
+let currentUserId: string | null = null;
+const storageKey = () => (currentUserId ? `${BASE_KEY}:${currentUserId}` : BASE_KEY);
+
 let items: ArchivedToast[] = load();
 const listeners = new Set<() => void>();
+
+/** Byt aktivt konto för arkivet (anropas när auth-användaren ändras). */
+export function setToastArchiveUser(userId: string | null): void {
+  if (currentUserId === userId) return;
+  currentUserId = userId;
+  items = load();
+  listeners.forEach((l) => l());
+}
 
 function load(): ArchivedToast[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(storageKey());
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
