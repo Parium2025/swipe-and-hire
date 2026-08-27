@@ -195,12 +195,30 @@ export function ChatView({
 
   // Track if user is near bottom of scroll area
 
+  // Auto-ladda äldre meddelanden när användaren närmar sig toppen.
+  // Refs så att scroll-handlern aldrig behöver återskapas.
+  const hasMoreRef = useRef(hasMore);
+  const loadingOlderRef = useRef(loadingOlder);
+  const fetchOlderRef = useRef(fetchOlderMessages);
+  useEffect(() => {
+    hasMoreRef.current = hasMore;
+    loadingOlderRef.current = loadingOlder;
+    fetchOlderRef.current = fetchOlderMessages;
+  }, [hasMore, loadingOlder, fetchOlderMessages]);
+
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement | null;
     if (!target) return;
     const threshold = 100;
     isNearBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < threshold;
+
+    // Hämta nästa sida i god tid innan toppen nås — scrollpositionen
+    // kompenseras redan i layout-effekten nedan, så vyn står stilla.
+    if (target.scrollTop < 400 && hasMoreRef.current && !loadingOlderRef.current) {
+      void fetchOlderRef.current();
+    }
   }, []);
+
 
   // Smart scroll. Radix-viewporten kan fortfarande ha 0px höjd under den första
   // layoutpassagen på mobil. Vänta därför tills både viewport och hela innehållet
@@ -957,27 +975,18 @@ export function ChatView({
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Load older messages button */}
+            {/* Äldre meddelanden laddas automatiskt vid uppscroll */}
             {hasMore && !isLoading && messages.length >= MESSAGES_PAGE_SIZE && (
-              <div className="flex justify-center py-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={fetchOlderMessages}
-                  disabled={loadingOlder}
-                  className="text-pure-white hover:bg-white/10 text-xs gap-2"
-                >
-                  {loadingOlder ? (
-                    <>
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Laddar äldre meddelanden...
-                    </>
-                  ) : (
-                    'Visa äldre meddelanden'
-                  )}
-                </Button>
+              <div className="flex justify-center py-2 min-h-[28px]">
+                {loadingOlder && (
+                  <span className="flex items-center gap-2 text-xs text-pure-white">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Laddar äldre meddelanden...
+                  </span>
+                )}
               </div>
             )}
+
             {Object.entries(groupedMessages).map(([date, msgs]) => (
               <div key={date}>
                 <div className="flex items-center gap-3 my-4">
