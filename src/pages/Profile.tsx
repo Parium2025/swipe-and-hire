@@ -2226,7 +2226,14 @@ const Profile = () => {
                 cityValue={userLocation}
                 onPostalCodeChange={setPostalCode}
                 onLocationChange={(city, _postalCode, _municipality, _county, source) => {
-                  if (source === 'auto') return;
+                  // Användarens egen redigering vinner alltid. Automatiska
+                  // uppslag (t.ex. vid inladdning av sparat postnummer) får bara
+                  // fylla i orten när fältet är tomt — annars skulle ett sparat
+                  // ortnamn skrivas över utan att användaren gjort något.
+                  if (source === 'auto') {
+                    setUserLocation((prev) => (prev.trim() ? prev : city));
+                    return;
+                  }
                   setUserLocation(city);
                 }}
                 onValidationChange={setHasValidLocation}
