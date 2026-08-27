@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { getIsOnline } from '@/lib/connectivityManager';
@@ -576,10 +576,28 @@ export function useConversations() {
 
   // Avatar prefetch is handled inside queryFn — no duplicate useEffect needed
 
+  // Stabil nyckel av användarens konversations-id:n. Används för att sätta ett
+  // SERVER-SIDE filter på meddelandekanalen — utan det skulle varje
+  // conversation_messages-INSERT i hela plattformen skickas till varje ansluten
+  // klient (RLS utvärderas per prenumerant → O(klienter × meddelanden)).
+  const conversationIdsKey = useMemo(() => {
+    const ids = (conversationsQuery.data || []).map((c) => c.id);
+    return Array.from(new Set(ids)).sort().join(',');
+  }, [conversationsQuery.data]);
+
   // Subscribe to realtime updates for new messages
   // Debounced to prevent refetch storms at scale (1M+ users)
   useEffect(() => {
     if (!user) return;
+
+    const idList = conversationIdsKey ? conversationIdsKey.split(',') : [];
+    const knownIds = new Set(idList);
+    // Postgres-filter har en längdgräns; över 100 id:n faller vi tillbaka på
+    // ofiltrerad kanal + klientfiltrering (extremfall).
+    const messageFilter =
+      idList.length > 0 && idList.length <= 100
+        ? `conversation_id=in.(${idList.join(',')})`
+        : undefined;
 
     const channel = createRealtimeChannel('conversations-realtime')
       .on(
@@ -588,10 +606,16 @@ export function useConversations() {
           event: 'INSERT',
           schema: 'public',
           table: 'conversation_messages',
+          ...(messageFilter ? { filter: messageFilter } : {}),
         },
+
         (payload) => {
           const msg = payload.new as IncomingRealtimeMessage;
           if (!msg?.conversation_id) return;
+          // Klientspärr när kanalen gick ofiltrerad (>100 konversationer).
+          if (!messageFilter && knownIds.size > 0 && !knownIds.has(msg.conversation_id)) return;
+
+
 
           // 1) Snabbaste vägen: patcha listan i minnet (ingen nätverksrundtur).
           //    Vid bulkutskick (tusentals meddelanden) blir detta O(1) per event
@@ -679,6 +703,21 @@ export function useConversations() {
           );
         }
       )
+      // ➕ Nya konversationer: eftersom meddelandekanalen nu är filtrerad på
+      //    kända id:n måste vi fånga när användaren läggs till i en ny chatt,
+      //    annars syns första meddelandet inte förrän nästa omhämtning.
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'conversation_members',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+        }
+      )
       .subscribe();
 
 
@@ -687,7 +726,8 @@ export function useConversations() {
       if (maxWaitRef.current) clearTimeout(maxWaitRef.current);
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient]);
+  }, [user, queryClient, conversationIdsKey]);
+
 
   // Total unread count across all conversations
   const totalUnreadCount = conversationsQuery.data?.reduce((sum, c) => sum + c.unread_count, 0) || 0;
