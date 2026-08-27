@@ -312,7 +312,9 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
-          <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
+          <ClampTooltip show={titleTruncated && !expanded} text={item.title}>
+            <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
+          </ClampTooltip>
           {item.count > 1 && (
             <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
               {item.count}×
@@ -322,7 +324,12 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
-        {item.body && <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
+        {item.body && (
+          <ClampTooltip show={bodyTruncated && !expanded} text={item.body}>
+            <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>
+          </ClampTooltip>
+        )}
+
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
           {!route && canExpand && (
