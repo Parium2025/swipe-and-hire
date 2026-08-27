@@ -407,7 +407,7 @@ export function useConversations() {
 
       // Fetch application snapshots for frozen profile data
       const applicationSnapshotMap = new Map<string, ApplicationSnapshot>();
-      if (applicationIds.length > 0) {
+      for (const idChunk of chunk(applicationIds, ID_CHUNK)) {
         const { data: applications, error: applicationsError } = await supabase
           .from('job_applications')
           .select(`
@@ -421,7 +421,7 @@ export function useConversations() {
             cv_url,
             job:job_id (title)
           `)
-          .in('id', applicationIds);
+          .in('id', idChunk);
 
         if (applicationsError) throw applicationsError;
 
@@ -439,6 +439,7 @@ export function useConversations() {
           });
         });
       }
+
 
       // Fetch all members for these conversations.
       // Chunkat: 2+ rader per konversation gjorde att ett enda `.in()` slog i
