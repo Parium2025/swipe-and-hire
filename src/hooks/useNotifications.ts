@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { safeReadArrayCache } from '@/lib/safeStorage';
-import { toastArchive } from '@/lib/toastArchive';
+import { toastArchive, setToastArchiveUser } from '@/lib/toastArchive';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface AppNotification {
@@ -39,6 +39,9 @@ const setCache = (userId: string, items: AppNotification[]) => {
 
 export function useNotifications() {
   const { user } = useAuth();
+  // Kontospecifikt lokalt notisarkiv — två flikar med olika konton på samma
+  // enhet får aldrig dela lokala toaster.
+  if (typeof window !== 'undefined') setToastArchiveUser(user?.id ?? null);
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     if (user) return getCached(user.id) || [];
     return [];
