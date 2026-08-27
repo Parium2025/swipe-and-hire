@@ -399,7 +399,17 @@ export default function Messages() {
                     );
                   })}
 
+                  {/* Oändlig lista: laddar nästa 300 innan användaren nått botten */}
+                  {hasMoreConversations && !searchQuery.trim() && (
+                    <div ref={loadMoreSentinelRef} className="flex justify-center py-4">
+                      {loadingMoreConversations && (
+                        <span className="text-xs text-white/70">Laddar fler chattar…</span>
+                      )}
+                    </div>
+                  )}
+
                 </div>
+
               </ScrollArea>
             )}
           </div>
