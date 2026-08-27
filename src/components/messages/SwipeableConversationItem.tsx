@@ -276,7 +276,7 @@ export function SwipeableConversationItem({
           <div className={cn("absolute inset-y-0 left-0 z-0 flex items-center pl-3", revealedSide === 'unread' ? 'visible' : 'invisible')}>
             <div
               ref={unreadRef}
-              style={{ opacity: 0, transform: 'scale(0.6)', willChange: 'transform, opacity' }}
+              style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
             >
               <button
                 className="rounded-full flex items-center gap-1 px-3 py-2 bg-blue-500/20 border border-blue-500/40 text-white font-medium text-xs"
@@ -298,7 +298,7 @@ export function SwipeableConversationItem({
         <div className={cn("absolute inset-y-0 right-0 z-0 flex items-center pr-3", revealedSide === 'delete' ? 'visible' : 'invisible')}>
           <div
             ref={deleteRef}
-            style={{ opacity: 0, transform: 'scale(0.6)', willChange: 'transform, opacity' }}
+            style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
           >
             <button
               className="rounded-full flex items-center gap-1 px-3 py-2 bg-destructive/20 border border-destructive/40 text-white font-medium text-xs"
