@@ -1811,9 +1811,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
+        // Översätt Supabases engelska felmeddelanden till begriplig svenska.
+        const raw = (error.message || '').toLowerCase();
+        let description = error.message;
+        if (raw.includes('current password')) {
+          description = 'Du behöver ange ditt nuvarande lösenord för att byta lösenord.';
+        } else if (raw.includes('should be different') || raw.includes('same as')) {
+          description = 'Det nya lösenordet måste vara annorlunda än ditt nuvarande.';
+        } else if (raw.includes('password should be') || raw.includes('at least')) {
+          description = 'Lösenordet är för svagt. Välj ett längre lösenord.';
+        } else if (raw.includes('pwned') || raw.includes('compromised')) {
+          description = 'Lösenordet finns i kända dataläckor. Välj ett annat lösenord.';
+        }
+
         toast({
           title: "Fel vid uppdatering av lösenord",
-          description: error.message,
+          description,
           variant: "destructive"
         });
         return { error };
