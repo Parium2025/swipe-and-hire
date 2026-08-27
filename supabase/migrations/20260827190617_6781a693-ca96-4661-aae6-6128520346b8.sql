@@ -1,0 +1,1 @@
+ALTER TABLE public.swipe_actions REPLICA IDENTITY FULL;
