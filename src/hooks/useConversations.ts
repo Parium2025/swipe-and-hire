@@ -730,19 +730,33 @@ export function useConversations() {
 
           queryClient.setQueryData<Conversation[]>(['conversations', user.id], (prev) => {
             if (!prev) return prev;
-            return prev.map((conv) => {
+            const next = prev.map((conv) => {
               if (conv.id !== row.conversation_id) return conv;
               const lastMessageAt = conv.last_message?.created_at || conv.last_message_at;
               const isRead =
                 !row.manually_unread &&
                 !!row.last_read_at &&
                 (!lastMessageAt || new Date(row.last_read_at) >= new Date(lastMessageAt));
+              // Manuellt markerad som oläst ⇒ alltid minst 1, även om denna
+              // enhet/klient hade 0 sedan tidigare (annars "hänger" röda pricken).
+              const unread = isRead
+                ? 0
+                : row.manually_unread
+                  ? Math.max(1, conv.unread_count || 0)
+                  : conv.unread_count;
               return {
                 ...conv,
                 is_muted: !!row.muted_at,
-                unread_count: isRead ? 0 : conv.unread_count,
+                unread_count: unread,
               };
             });
+            // Håll sessionStorage-fallbacken (topnav/sidebar-badge) i synk direkt.
+            try {
+              const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+              sessionStorage.setItem('parium_job_seeker_unread_messages', String(total));
+              sessionStorage.setItem('parium_unread_messages', String(total));
+            } catch { /* privat läge */ }
+            return next;
           });
         }
       )

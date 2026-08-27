@@ -311,22 +311,61 @@ export function SwipeableConversationItem({
 
   // Mus: exakt samma gest som med fingret — dra åt vänster för att ta bort,
   // åt höger för att markera som oläst.
+  // Robusthet: gesten avslutas ALLTID, även om musknappen släpps utanför
+  // fönstret/iframen, fönstret tappar fokus eller webbläsaren äter mouseup.
+  // Annars skulle kortet "fastna" och följa muspekaren utan nedtryckt knapp.
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     beginDrag(e.clientX, e.clientY);
 
+    let cleanup = () => { /* ersätts nedan */ };
+
+    const finish = () => {
+      cleanup();
+      endDrag();
+    };
+
     const onMove = (ev: MouseEvent) => {
+      // Knappen är inte längre nedtryckt (mouseup missades) → avsluta direkt.
+      if (ev.buttons === 0) { finish(); return; }
       ev.preventDefault();
       moveDrag(ev.clientX, ev.clientY);
     };
-    const onUp = () => {
+    const onUp = () => finish();
+    const onLeaveDocument = (ev: MouseEvent) => {
+      if (ev.relatedTarget === null) finish();
+    };
+
+    cleanup = () => {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
-      endDrag();
+      window.removeEventListener('blur', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      document.removeEventListener('mouseleave', onLeaveDocument);
     };
+
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
+    window.addEventListener('blur', onUp);
+    window.addEventListener('pointercancel', onUp);
+    document.addEventListener('mouseleave', onLeaveDocument);
   }, [beginDrag, moveDrag, endDrag]);
+
+  /**
+   * Skyddsnät: om kortet av någon anledning ligger kvar utdraget utan aktiv
+   * gest (t.ex. mouseup förlorades helt) så glider det hem så fort pekaren
+   * rör kortet utan nedtryckt knapp. Man ska alltid kunna "få tag i" det igen.
+   */
+  const handleMouseEnter = useCallback((e: React.MouseEvent) => {
+    if (e.buttons !== 0 || isSwipingRef.current) return;
+    const content = contentRef.current;
+    if (!content) return;
+    const t = content.style.transform;
+    if (t && t !== 'translate3d(0,0,0)' && t !== 'translate3d(0px, 0px, 0px)') {
+      gestureIdRef.current += 1;
+      animateBack(false);
+    }
+  }, [animateBack]);
 
   const handleClickCapture = useCallback((e: React.MouseEvent) => {
     if (suppressClickRef.current) {
@@ -349,6 +388,7 @@ export function SwipeableConversationItem({
         onTouchMove={handleTouchMove}
         onTouchEnd={endDrag}
         onMouseDown={handleMouseDown}
+        onMouseEnter={handleMouseEnter}
         onClickCapture={handleClickCapture}
         onTouchCancel={() => animateBack(false)}
       >
