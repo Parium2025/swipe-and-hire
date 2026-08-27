@@ -140,16 +140,16 @@ export function CandidateProfilesManager({ userId }: Props) {
         ))}
       </div>
 
-      <Button
+      {/* Samma knappstruktur som "Visa filter" – ren <button> utan fokusring, så den inte blixtrar vid tryck. */}
+      <button
         type="button"
-        variant="glass"
         disabled={!canCreateMore}
         onClick={openNew}
-        className="w-full h-12 text-sm"
+        className="w-full h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation outline-none focus:outline-none focus-visible:outline-none disabled:opacity-50 disabled:active:scale-100"
       >
-        <Plus className="mr-2 h-4 w-4" />
-        {canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}
-      </Button>
+        <Plus className="h-4 w-4" />
+        <span>{canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
+      </button>
 
       <CandidateProfileEditor
         open={editorOpen}
