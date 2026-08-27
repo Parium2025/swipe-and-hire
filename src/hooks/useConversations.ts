@@ -440,13 +440,25 @@ export function useConversations() {
         });
       }
 
-      // Fetch all members for these conversations
-      const { data: allMembers, error: membersError } = await supabase
-        .from('conversation_members')
-        .select('conversation_id, user_id, is_admin, last_read_at')
-        .in('conversation_id', conversationIds);
+      // Fetch all members for these conversations.
+      // Chunkat: 2+ rader per konversation gjorde att ett enda `.in()` slog i
+      // 1000-raderstaket redan runt 500 chattar → medlemmar saknades och
+      // motparten visades som "Okänd användare".
+      const allMembers: Array<{
+        conversation_id: string;
+        user_id: string;
+        is_admin: boolean | null;
+        last_read_at: string | null;
+      }> = [];
+      for (const idChunk of chunk(conversationIds, ID_CHUNK)) {
+        const { data, error: membersError } = await supabase
+          .from('conversation_members')
+          .select('conversation_id, user_id, is_admin, last_read_at')
+          .in('conversation_id', idChunk);
+        if (membersError) throw membersError;
+        allMembers.push(...((data || []) as typeof allMembers));
+      }
 
-      if (membersError) throw membersError;
 
       // Get unique user IDs to fetch profiles
       const allUserIds = [...new Set((allMembers || []).map((m) => m.user_id))];
