@@ -122,30 +122,8 @@ export function useMyApplicationsCache() {
     queryKey: ['my-applications', user?.id],
     queryFn: async () => {
       if (!user) return [];
-
       // Paginerat — utan detta kapades listan tyst vid 1000 ansökningar.
-      const rows = (await fetchAllPages<any>((from, to) =>
-        supabase
-          .from('job_applications')
-          .select(MY_APPLICATIONS_SELECT)
-          .eq('applicant_id', user.id)
-          .is('hidden_by_applicant_at', null)
-          .order('applied_at', { ascending: false })
-          .order('id', { ascending: false })
-          .range(from, to),
-      )) as Application[];
-
-      // Åtgärder som ännu inte synkats (offline) döljs lokalt direkt
-      const pendingHidden = new Set(getQueuedHiddenIds(user.id));
-      const apps = pendingHidden.size
-        ? rows.filter(a => !pendingHidden.has(a.id))
-        : rows;
-
-      // Debounced write to localStorage (batches bursts from realtime)
-      writeCacheDebounced(user.id, apps);
-
-      return apps;
-
+      return fetchMyApplicationsForUser(user.id);
     },
     enabled: !!user,
     staleTime: 0,
