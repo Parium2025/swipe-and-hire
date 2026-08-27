@@ -90,10 +90,10 @@ const EmployerSettings = () => {
   };
 
   const handlePasswordUpdate = async () => {
-    if (passwordData.newPassword.length < 6) {
+    if (passwordData.newPassword.length < 7) {
       toast({
         title: "Fel",
-        description: "Lösenordet måste vara minst 6 tecken.",
+        description: "Lösenordet måste vara minst 7 tecken.",
         variant: "destructive"
       });
       return;
@@ -109,12 +109,10 @@ const EmployerSettings = () => {
     }
 
     try {
-      await updatePassword(passwordData.newPassword);
+      // updatePassword kastar inte — den returnerar { error } och visar egen toast.
+      const result = await updatePassword(passwordData.newPassword);
+      if (result?.error) return;
       setPasswordData({ newPassword: '', confirmPassword: '' });
-      toast({
-        title: "Lösenord uppdaterat",
-        description: "Ditt lösenord har uppdaterats framgångsrikt."
-      });
     } catch (error) {
       toast({
         title: "Fel",

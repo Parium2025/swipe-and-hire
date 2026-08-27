@@ -1086,6 +1086,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch { /* localStorage kan vara blockerad */ }
 
+      if (!data?.user) {
+        // Servern svarar medvetet neutralt när adressen redan har ett bekräftat
+        // konto (skydd mot e-postuppräkning). Då skickas inget nytt mejl —
+        // därför får användaren en beskrivning som stämmer i båda fallen.
+        toast({
+          title: "Kolla din e-post",
+          description: "Om adressen kan användas har vi skickat nästa steg dit. Har du redan ett konto kan du logga in eller återställa lösenordet.",
+          duration: 10000
+        });
+        return { user: undefined };
+      }
+
       toast({
         title: "Registrering lyckad!",
         description: "Kontrollera din e-post för att aktivera ditt konto.",
@@ -1811,9 +1823,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
+        // Översätt Supabases engelska felmeddelanden till begriplig svenska.
+        const raw = (error.message || '').toLowerCase();
+        let description = error.message;
+        if (raw.includes('current password')) {
+          description = 'Du behöver ange ditt nuvarande lösenord för att byta lösenord.';
+        } else if (raw.includes('should be different') || raw.includes('same as')) {
+          description = 'Det nya lösenordet måste vara annorlunda än ditt nuvarande.';
+        } else if (raw.includes('password should be') || raw.includes('at least')) {
+          description = 'Lösenordet är för svagt. Välj ett längre lösenord.';
+        } else if (raw.includes('pwned') || raw.includes('compromised')) {
+          description = 'Lösenordet finns i kända dataläckor. Välj ett annat lösenord.';
+        }
+
         toast({
           title: "Fel vid uppdatering av lösenord",
-          description: error.message,
+          description,
           variant: "destructive"
         });
         return { error };
