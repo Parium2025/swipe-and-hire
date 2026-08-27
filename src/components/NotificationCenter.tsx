@@ -31,7 +31,7 @@ const typeColors: Record<string, string> = {
 };
 
 
-function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>) {
+function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>, text?: string | null) {
   const [truncated, setTruncated] = useState(false);
 
   useEffect(() => {
@@ -39,10 +39,15 @@ function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>) {
     if (!el) return;
     const check = () => setTruncated(el.scrollHeight > el.clientHeight + 1);
     check();
+    // Mät om efter att öppningsanimationen och webbtypsnitt landat – annars kan
+    // den första mätningen ske innan layouten är stabil och tooltips uteblir.
+    const raf = requestAnimationFrame(() => requestAnimationFrame(check));
+    const t = window.setTimeout(check, 300);
     const ro = new ResizeObserver(check);
     ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+    if (document.fonts?.ready) document.fonts.ready.then(check).catch(() => {});
+    return () => { cancelAnimationFrame(raf); window.clearTimeout(t); ro.disconnect(); };
+  }, [text]);
 
   return truncated;
 }
@@ -546,19 +551,12 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
             <h3 className="text-sm font-semibold text-white">Notifikationer</h3>
             <div className="flex items-center gap-1">
               {unreadCount > 0 && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => { setPendingClear(true); markAllAsRead(); toastArchive.markAllAsRead(); }}
-                      className="flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-medium text-white hover:bg-white/10 transition-colors"
-                    >
-                      Markera alla som lästa
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">
-                    Markera alla som lästa
-                  </TooltipContent>
-                </Tooltip>
+                <button
+                  onClick={() => { setPendingClear(true); markAllAsRead(); toastArchive.markAllAsRead(); }}
+                  className="flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-medium text-white hover:bg-white/10 transition-colors"
+                >
+                  Markera alla som lästa
+                </button>
               )}
               {merged.length > 0 && (
                 <Tooltip>
