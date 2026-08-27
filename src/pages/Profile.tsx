@@ -522,7 +522,7 @@ const Profile = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(profile?.profile_image_url || '');
   const [videoUrl, setVideoUrl] = useState(profile?.video_url || '');
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
-  const [cvFileName, setCvFileName] = useState((profile as any)?.cv_filename || '');
+  const [cvFileName, setCvFileName] = useState(((profile as any)?.cv_filename || (profile as any)?.profile_file_name || ''));
   
   // 🎯 Generera signed URLs (hooks måste alltid anropas, inte villkorligt)
   // Om profilbilden har markerats för borttagning ska vi INTE falla tillbaka till värdet från databasen
@@ -655,11 +655,8 @@ const Profile = () => {
         setCvUrl(values.cvUrl);
       }
       // Only extract from URL if no filename in DB (for old records)
-      if ((profile as any)?.cv_filename) {
-        setCvFileName((profile as any).cv_filename);
-      } else {
-        setCvFileName('');
-      }
+      const dbCvFileName = (profile as any)?.cv_filename || (profile as any)?.profile_file_name || '';
+      setCvFileName(dbCvFileName);
       
       // Restore employer fields from draft if different
       setCompanyName(draftValue('companyName', values.companyName));
