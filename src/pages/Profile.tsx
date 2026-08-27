@@ -102,12 +102,14 @@ const isProfileDraftData = (value: unknown): value is ProfileDraftData => {
     (draft.savedAt === undefined || typeof draft.savedAt === 'number');
 };
 
-const readProfileDraft = () => safeReadJsonCache<ProfileDraftData>(PROFILE_DRAFT_KEY, isProfileDraftData);
+const readProfileDraft = (userId?: string | null) =>
+  safeReadJsonCache<ProfileDraftData>(draftKeyFor(userId), isProfileDraftData);
 
-// Clear draft
-export const clearProfileDraft = () => {
+// Clear draft (både kontospecifik och äldre delad nyckel)
+export const clearProfileDraft = (userId?: string | null) => {
   try {
-    localStorage.removeItem(PROFILE_DRAFT_KEY);
+    localStorage.removeItem(draftKeyFor(userId));
+    localStorage.removeItem(PROFILE_DRAFT_KEY_BASE);
   } catch (e) {
     console.warn('Failed to clear profile draft');
   }
