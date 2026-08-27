@@ -6,6 +6,16 @@ import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { useNotificationPreferences, type NotificationType } from '@/hooks/useNotificationPreferences';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
@@ -431,6 +441,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
   // frames — utan spärren blinkar badgen till en felaktig siffra innan den
   // landar på noll.
   const [pendingClear, setPendingClear] = useState(false);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
   const displayCount = pendingClear ? 0 : unreadCount;
   const prevCountRef = useRef(displayCount);
   const [popKey, setPopKey] = useState(0);
