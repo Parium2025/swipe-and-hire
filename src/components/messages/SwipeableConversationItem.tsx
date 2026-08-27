@@ -50,6 +50,7 @@ export function SwipeableConversationItem({
   const rafRef = useRef<number | null>(null);
   const pendingXRef = useRef(0);
   const isSwipingRef = useRef(false);
+  const thresholdPassedRef = useRef(false);
   const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   const lockOffsetRef = useRef(0);
   const suppressClickRef = useRef(false);
