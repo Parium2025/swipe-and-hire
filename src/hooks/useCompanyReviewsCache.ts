@@ -168,6 +168,7 @@ export function useCompanyReviewsCache(companyId: string | null) {
 
   // Prefetch reviews for a company (call when hovering over company card)
   const prefetchReviews = useCallback((targetCompanyId: string) => {
+    if (!user?.id) return Promise.resolve();
     queryClient.prefetchQuery({
       queryKey: ['company-reviews-cached', targetCompanyId],
       queryFn: async () => {
