@@ -62,6 +62,14 @@ Status per område. Skala:
 
 ## Kvar på jobbsökarsidan (ej granskat än)
 
-- Onboarding-flödet för ny jobbsökare (första inloggning → första ansökan).
-- Ansökningsflödet: granskat (snapshot, dubbelspärr, kvot serverside, bekräftelse) — kvarstår skarpt test med riktig användare.
 - Min profil, Ekonomi/Prenumeration och Support på jobbsökarsidan.
+
+## Onboarding (granskat 2026-08-27) — V
+
+- Registrering → profil-triggern skapar profil, samtyckeslogg (GDPR art. 7.1), och för arbetsgivare organisation + admin-roll atomärt. Återregistrering lyfter e-postspärr.
+- E-postbekräftelse: egen confirm-funktion med tydliga statussidor (ok / redan klar / utgången) + omsändning.
+- Välkomsttunnel per roll (jobbsökare/arbetsgivare), utkast molnsynkat (enhetsbyte mitt i), `onboarding_completed` skrivs före onComplete.
+- Introguiden molnsynkad per konto — visas exakt en gång oavsett enhet (verifierat i Index.tsx).
+- Intents överlever hela kedjan: jobb-intent, SEO-sökintent och pending plan (prisknapp → checkout) konsumeras i rätt ordning efter tunneln.
+- Lösenordsåterställning hanterar expired/used/consumed med egna sidor och omsändning.
+- Kvarstår: skarpt test med helt nytt konto end-to-end (kan inte simuleras fullt utan riktig mejl).
