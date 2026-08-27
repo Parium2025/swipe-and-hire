@@ -155,11 +155,13 @@ export const toastArchive = {
     let localId: string;
     if (
       existing &&
+      !existing.is_read &&
       existing.kind === kind &&
       existing.title === clean &&
       (existing.body || "") === (body || "") &&
       now - existing.at < MERGE_WINDOW
     ) {
+
       localId = existing.id;
       items = [{ ...existing, count: existing.count + 1, at: now, is_read: false, route: route ?? existing.route }, ...items.slice(1)];
     } else {
