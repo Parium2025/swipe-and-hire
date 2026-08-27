@@ -343,10 +343,18 @@ export class AuthStorageAdapter implements Storage {
         console.warn('Failed to write auth key to sessionStorage:', ssError);
       }
 
-      // Snapshot in localStorage under renamed key — only if Remember Me is on.
+      // Snapshot in localStorage under renamed key — only if Remember Me is on
+      // AND denna session äger snapshoten. En gammal flik med ett annat konto
+      // får aldrig skriva över det senast inloggade kontots snapshot.
       if (shouldRememberUser()) {
-        writeLocal(snapshotKey(key), value);
+        const owner = readLocal(SNAPSHOT_OWNER_KEY);
+        const sessionUserId = extractUserId(value);
+        if (!owner || !sessionUserId || owner === sessionUserId) {
+          writeLocal(snapshotKey(key), value);
+          if (sessionUserId && !owner) writeLocal(SNAPSHOT_OWNER_KEY, sessionUserId);
+        }
       }
+
 
       updateLastActivity();
     } else {
