@@ -44,6 +44,29 @@ interface ProfileViewData {
   cover_image_url?: string;
 }
 
+// Exakt ålder – tar hänsyn till om födelsedagen passerat i år.
+const calcAge = (birthDate?: string | null): number | undefined => {
+  if (!birthDate) return undefined;
+  const born = new Date(birthDate);
+  if (Number.isNaN(born.getTime())) return undefined;
+  const today = new Date();
+  let age = today.getFullYear() - born.getFullYear();
+  const monthDiff = today.getMonth() - born.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < born.getDate())) age -= 1;
+  return age >= 0 && age < 130 ? age : undefined;
+};
+
+// Visar ort + hemort utan dubblett ("Vega, Vega").
+const formatResidence = (location?: string | null, homeLocation?: string | null): string => {
+  const primary = (location || '').trim();
+  const secondary = (homeLocation || '').trim();
+  if (!primary) return secondary;
+  if (!secondary) return primary;
+  if (primary.toLowerCase() === secondary.toLowerCase()) return primary;
+  if (primary.toLowerCase().includes(secondary.toLowerCase())) return primary;
+  return `${primary}, ${secondary}`;
+};
+
 export default function ProfilePreview() {
   const { profile, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl } = useAuth();
   const [consentedData, setConsentedData] = useState<ProfileViewData | null>(null);
