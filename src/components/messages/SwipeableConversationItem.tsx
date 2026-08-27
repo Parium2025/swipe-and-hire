@@ -54,7 +54,11 @@ export function SwipeableConversationItem({
   const thresholdPassedRef = useRef(false);
   const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   const lockOffsetRef = useRef(0);
+  const velocityRef = useRef(0);
+  const lastXRef = useRef(0);
+  const lastTRef = useRef(0);
   const suppressClickRef = useRef(false);
+
   // Ökas vid varje ny gest så att timers från en pågående animation
   // aldrig skriver över en ny dragning.
   const gestureIdRef = useRef(0);
