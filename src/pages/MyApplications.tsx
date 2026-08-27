@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { useMyApplicationsCache } from '@/hooks/useMyApplicationsCache';
+import { useMyApplicationsCache, hasMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MyApplicationsSkeleton } from '@/components/search/SearchPageSkeleton';
@@ -33,7 +33,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { getTimeRemaining } from '@/lib/date';
-import { useCandidateInterviews } from '@/hooks/useInterviews';
+import { useCandidateInterviews, hasCandidateInterviewsLocalCache } from '@/hooks/useInterviews';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 import { isInterviewOver } from '@/lib/interviewTime';
 import CandidateInterviewCard from '@/components/CandidateInterviewCard';
