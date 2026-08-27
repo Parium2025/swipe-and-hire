@@ -55,7 +55,10 @@ const businessItems = [
 
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
+  const navTimerRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => { navTimerRef.current?.(); }, []);
   const collapsed = state === 'collapsed';
+
   const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages, preloadedMyApplications } = useAuth();
   // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt)
   // Viktigt: när context är mountad (även med värde 0) ska live alltid vinna över preloaded,
