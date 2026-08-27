@@ -26,6 +26,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { TruncatedText } from "@/components/TruncatedText";
