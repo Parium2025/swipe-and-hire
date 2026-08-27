@@ -305,7 +305,7 @@ export function useBatchPrefetchReviews() {
       queryClient.setQueryData(['company-reviews-cached', companyId], result);
       setLocalCache(companyId, result);
     });
-  }, [queryClient]);
+  }, [queryClient, user?.id]);
 }
 
 /**
