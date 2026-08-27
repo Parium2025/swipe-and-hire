@@ -10,6 +10,7 @@ import { Users, Plus, Star, Pencil, Trash2, FileText, Video, Image as ImageIcon,
 import { useToast } from '@/hooks/use-toast';
 import { useCandidateProfiles, MAX_CANDIDATE_PROFILES, type CandidateProfile, type CandidateProfileInput } from '@/hooks/useCandidateProfiles';
 import CandidateProfileEditor from './CandidateProfileEditor';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface Props {
   userId?: string;
@@ -87,7 +88,11 @@ export function CandidateProfilesManager({ userId }: Props) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="break-words text-sm font-medium text-white">{p.label}</span>
+                  <TruncatedText
+                    text={p.label}
+                    className="max-w-full truncate text-sm font-medium text-white"
+                  />
+
                   {p.is_default && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] text-white">
                       <Star className="h-3 w-3 fill-current" /> Standard
@@ -140,16 +145,16 @@ export function CandidateProfilesManager({ userId }: Props) {
         ))}
       </div>
 
-      <Button
+      {/* Samma knappstruktur som "Visa filter" – ren <button> utan fokusring, så den inte blixtrar vid tryck. */}
+      <button
         type="button"
-        variant="glass"
         disabled={!canCreateMore}
         onClick={openNew}
-        className="w-full h-12 text-sm"
+        className="w-full h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation outline-none focus:outline-none focus-visible:outline-none disabled:opacity-50 disabled:active:scale-100"
       >
-        <Plus className="mr-2 h-4 w-4" />
-        {canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}
-      </Button>
+        <Plus className="h-4 w-4" />
+        <span>{canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
+      </button>
 
       <CandidateProfileEditor
         open={editorOpen}

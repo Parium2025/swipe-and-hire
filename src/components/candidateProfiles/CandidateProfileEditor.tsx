@@ -15,7 +15,8 @@ interface Props {
   onSave: (input: CandidateProfileInput) => void;
 }
 
-const MAX_LABEL = 40;
+/** Samma solida kortyta som profilsidans sektioner – ingen streckad ram. */
+const DROPZONE = 'rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-5 md:hover:bg-white/10';
 
 /** Dialog för att skapa eller redigera en kandidatprofil (namn, CV, video, bild). */
 export function CandidateProfileEditor({ open, onOpenChange, profile, saving, onSave }: Props) {
@@ -85,13 +86,12 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
             </Label>
             <Input
               value={label}
-              maxLength={MAX_LABEL}
               placeholder="T.ex. Lagermedarbetare"
               onChange={(e) => setLabel(e.target.value)}
               className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
             />
             <p className="text-xs text-white">
-              Namnet är bara till för dig, så att du snabbt hittar rätt profil när du söker jobb. {label.length}/{MAX_LABEL}
+              Namnet är bara till för dig, så att du snabbt hittar rätt profil när du söker jobb.
             </p>
           </div>
 
@@ -106,6 +106,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               uploadType="document"
               acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt']}
               maxFileSize={50 * 1024 * 1024}
+              dropzoneClassName={DROPZONE}
               onFileUploaded={(url, fileName) => { setCvUrl(url); setCvFilename(fileName); }}
               onFileRemoved={() => { setCvUrl(null); setCvFilename(null); }}
             />,
@@ -122,6 +123,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               uploadType="video"
               acceptedFileTypes={['video/*']}
               maxFileSize={50 * 1024 * 1024}
+              dropzoneClassName={DROPZONE}
               onFileUploaded={(url) => setVideoUrl(url)}
               onFileRemoved={() => setVideoUrl(null)}
             />,
@@ -138,6 +140,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               uploadType="image"
               acceptedFileTypes={['image/*']}
               maxFileSize={50 * 1024 * 1024}
+              dropzoneClassName={DROPZONE}
               onFileUploaded={(url) => setImageUrl(url)}
               onFileRemoved={() => setImageUrl(null)}
             />,

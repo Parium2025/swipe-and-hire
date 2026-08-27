@@ -22,6 +22,8 @@ interface FileUploadProps {
   questionType?: string;
   mediaType?: MediaType; // Används för att bestämma bucket via mediaManager
   uploadType?: 'image' | 'video' | 'document' | 'all'; // Typ av uppladdning för att visa rätt text
+  /** Ersätter standardstilen (streckad ram) för dropzonen när ytan ska matcha omgivande kort. */
+  dropzoneClassName?: string;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -32,7 +34,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   maxFileSize = 50 * 1024 * 1024, // 50MB default
   questionType,
   mediaType = 'cv', // Default till CV för job-applications bucket
-  uploadType = 'all' // Default visar alla filtyper
+  uploadType = 'all', // Default visar alla filtyper
+  dropzoneClassName,
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -352,11 +355,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
       
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-3 sm:p-4 text-center cursor-pointer transition-all duration-300 ${
+        className={`${dropzoneClassName ?? `border-2 border-dashed rounded-lg p-3 sm:p-4 ${
           isDragActive
             ? 'border-primary bg-primary/5'
-              : 'border-white/20 md:hover:border-white/40 md:hover:bg-white/10 bg-white/5 backdrop-blur-sm'
-        } ${uploading ? 'pointer-events-none' : ''}`}
+            : 'border-white/20 md:hover:border-white/40 md:hover:bg-white/10 bg-white/5 backdrop-blur-sm'
+        }`} text-center cursor-pointer transition-all duration-300 ${uploading ? 'pointer-events-none' : ''}`}
         onClick={(e) => {
           e.preventDefault();
           open(); // Explicitly open file dialog
