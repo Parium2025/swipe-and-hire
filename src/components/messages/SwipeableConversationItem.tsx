@@ -272,7 +272,17 @@ export function SwipeableConversationItem({
     const committed =
       offset <= -DELETE_THRESHOLD ||
       (offset >= UNREAD_THRESHOLD && !!onMarkUnread && canMarkUnread);
-    animateBack(committed);
+
+    if (committed) {
+      animateBack(true);
+    } else if (offset <= -8) {
+      // Släppt tidigt åt vänster: visa ändå hela rörelsen (peek) — lugnt och proffsigt.
+      animatePeek('delete');
+    } else if (offset >= 8 && onMarkUnread && canMarkUnread) {
+      animatePeek('unread');
+    } else {
+      animateBack(false);
+    }
 
     if (offset <= -DELETE_THRESHOLD) {
       setShowConfirm(true);
