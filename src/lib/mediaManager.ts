@@ -316,6 +316,30 @@ export interface ImageTransformOptions {
   resize?: 'cover' | 'contain' | 'fill';
 }
 
+/**
+ * Objekt som storage svarat 404 på (t.ex. posterbilder för äldre videor som
+ * laddades upp innan poster-generering fanns). Utan detta minne försöker varje
+ * synligt kort om var 30:e sekund i all evighet och spammar konsolen.
+ * Nyckeln rensas när mediat laddas upp på nytt (clearMissingMedia).
+ */
+const missingMediaObjects = new Set<string>();
+const missingKey = (bucket: string, path: string) => `${bucket}/${path}`;
+
+export function isKnownMissingMedia(storagePath: string, mediaType: MediaType): boolean {
+  if (!storagePath) return false;
+  return missingMediaObjects.has(missingKey(MEDIA_CONFIG[mediaType].bucket, storagePath));
+}
+
+export function clearMissingMedia(storagePath?: string | null) {
+  if (!storagePath) {
+    missingMediaObjects.clear();
+    return;
+  }
+  for (const key of Array.from(missingMediaObjects)) {
+    if (key.endsWith(`/${storagePath}`)) missingMediaObjects.delete(key);
+  }
+}
+
 export async function getMediaUrl(
   storagePath: string,
   mediaType: MediaType,
@@ -375,7 +399,15 @@ export async function getMediaUrl(
     .createSignedUrl(cleanPath, expiresInSeconds, t ? { transform: t } : undefined);
   
   if (error) {
-    console.error(`Error creating signed URL for ${mediaType}:`, error);
+    // 404 = objektet finns inte (t.ex. poster för en äldre video). Det är ett
+    // permanent, förväntat utfall – markera det och håll konsolen ren.
+    const status = (error as { statusCode?: string | number; status?: number }).statusCode;
+    const isMissing = String(status) === '404' || /not found/i.test(error.message ?? '');
+    if (isMissing) {
+      missingMediaObjects.add(missingKey(config.bucket, cleanPath));
+    } else {
+      console.error(`Error creating signed URL for ${mediaType}:`, error);
+    }
 
     // OBS: den gamla publika bucketen 'profile-media' finns inte längre.
     // Tidigare fallback hit gav en URL som alltid 404:ade, vilket renderade
