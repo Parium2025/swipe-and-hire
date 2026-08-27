@@ -79,8 +79,21 @@ export const SwipeEmptyState = memo(function SwipeEmptyState({
             transition={{ duration: 0.24, ease, delay: 0.05 }}
             className="text-center text-[15px] font-medium text-white sm:text-base"
           >
-            Inga fler jobb just nu
+            {activeFilterCount > 0
+              ? 'Inga jobb matchar dina filter just nu'
+              : 'Inga jobb just nu'}
           </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24, ease, delay: 0.1 }}
+            className="mt-2 text-center text-[13px] text-white sm:text-sm"
+          >
+            {activeFilterCount > 0
+              ? 'Justera filtren och fortsätt leta.'
+              : 'Fortsätt leta – nya jobb dyker upp hela tiden.'}
+          </motion.p>
+
         </motion.div>
 
         {canUndo && onUndo && (
