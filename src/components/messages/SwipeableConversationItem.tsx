@@ -207,9 +207,12 @@ export function SwipeableConversationItem({
   }, [conversationName]);
 
   const beginDrag = useCallback((clientX: number, clientY: number) => {
+    gestureIdRef.current += 1; // ogiltigförklarar timers från ev. pågående animation
+    if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     startXRef.current = clientX;
     startYRef.current = clientY;
     currentXRef.current = 0;
+    pendingXRef.current = 0;
     isSwipingRef.current = false;
     directionLockedRef.current = null;
     lockOffsetRef.current = 0;
