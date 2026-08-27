@@ -354,7 +354,16 @@ const PREF_BY_NOTIFICATION_TYPE: Record<string, NotificationType> = {
 };
 
 function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' } = {}) {
-  const { notifications, unreadCount: serverUnread, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const {
+    notifications,
+    unreadCount: serverUnread,
+    markAsRead,
+    markAllAsRead,
+    clearAll,
+    hasMore,
+    isLoadingMore,
+    loadMore,
+  } = useNotifications();
   const { isEnabled } = useNotificationPreferences();
   const archived = useSyncExternalStore(toastArchive.subscribe, toastArchive.getSnapshot, toastArchive.getSnapshot);
 
@@ -411,10 +420,12 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
     });
   }, [visibleNotifications, visibleArchived]);
 
-  const unreadCount = useMemo(
-    () => merged.filter((entry) => !(entry.n as { is_read?: boolean }).is_read).length,
-    [merged],
-  );
+  const unreadCount = useMemo(() => {
+    const loadedUnread = merged.filter((entry) => !(entry.n as { is_read?: boolean }).is_read).length;
+    // Serversiffran vet om olästa som ligger utanför de laddade sidorna;
+    // den lokala siffran fångar toaster som bara finns på den här enheten.
+    return Math.max(loadedUnread, serverUnread);
+  }, [merged, serverUnread]);
 
   // Vid "rensa"/"markera alla" hinner lokal och server-state gå isär i några
   // frames — utan spärren blinkar badgen till en felaktig siffra innan den
@@ -536,7 +547,16 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
           </div>
 
           {/* Notification list */}
-          <div className="overflow-y-auto flex-1 p-3" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div
+            className="overflow-y-auto flex-1 p-3"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+            onScroll={(e) => {
+              if (!hasMore || isLoadingMore) return;
+              const el = e.currentTarget;
+              // Ladda nästa sida strax innan botten så att scrollen aldrig tar stopp.
+              if (el.scrollHeight - el.scrollTop - el.clientHeight < 240) void loadMore();
+            }}
+          >
             {merged.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-white">
                 <Bell className="h-8 w-8 mb-3 text-white" />
@@ -560,6 +580,11 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                   />
                 ))}
 
+                {isLoadingMore && (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  </div>
+                )}
               </div>
             )}
           </div>
