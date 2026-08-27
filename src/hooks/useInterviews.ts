@@ -233,37 +233,9 @@ export const useCandidateInterviews = () => {
     queryKey: ['candidate-interviews', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-
-      const { data, error } = await supabase
-        .from('interviews')
-        .select(`
-          *,
-          job_postings(
-            title,
-            employer_id,
-            workplace_name
-          )
-        `)
-        .eq('applicant_id', user.id)
-        .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
-        .in('status', ['pending', 'confirmed'])
-        .order('scheduled_at', { ascending: true });
-
-      if (error) throw error;
-
-      // Spara till localStorage
-      try {
-        const cacheKey = `job_seeker_interviews_${user.id}`;
-        safeSetItem(cacheKey, JSON.stringify({
-          items: data || [],
-          timestamp: Date.now(),
-        }));
-      } catch {
-        // Ignorera storage-fel
-      }
-
-      return data || [];
+      return fetchCandidateInterviewsForUser(user.id);
     },
+
     enabled: !!user?.id,
     retry: 0,
     staleTime: 0, // Always consider stale so invalidateQueries triggers refetch
