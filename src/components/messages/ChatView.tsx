@@ -86,7 +86,7 @@ export function ChatView({
   const { getReactionsForMessage, toggleReaction } = useMessageReactions(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
-  const { setMuted, isUpdating: isUpdatingMute } = useMuteConversation();
+  const { setMuted } = useMuteConversation();
   const { deleteConversation, isDeleting } = useDeleteConversation();
   const { blockConversation, isBlocking } = useBlockConversation();
   const [confirmAction, setConfirmAction] = useState<'delete' | 'block' | null>(null);
