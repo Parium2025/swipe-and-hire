@@ -106,6 +106,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               uploadType="document"
               acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt']}
               maxFileSize={50 * 1024 * 1024}
+              dropzoneClassName={DROPZONE}
               onFileUploaded={(url, fileName) => { setCvUrl(url); setCvFilename(fileName); }}
               onFileRemoved={() => { setCvUrl(null); setCvFilename(null); }}
             />,
@@ -122,6 +123,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               uploadType="video"
               acceptedFileTypes={['video/*']}
               maxFileSize={50 * 1024 * 1024}
+              dropzoneClassName={DROPZONE}
               onFileUploaded={(url) => setVideoUrl(url)}
               onFileRemoved={() => setVideoUrl(null)}
             />,
@@ -138,6 +140,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               uploadType="image"
               acceptedFileTypes={['image/*']}
               maxFileSize={50 * 1024 * 1024}
+              dropzoneClassName={DROPZONE}
               onFileUploaded={(url) => setImageUrl(url)}
               onFileRemoved={() => setImageUrl(null)}
             />,
