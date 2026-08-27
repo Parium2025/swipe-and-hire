@@ -699,6 +699,21 @@ export function useConversations() {
           );
         }
       )
+      // ➕ Nya konversationer: eftersom meddelandekanalen nu är filtrerad på
+      //    kända id:n måste vi fånga när användaren läggs till i en ny chatt,
+      //    annars syns första meddelandet inte förrän nästa omhämtning.
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'conversation_members',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+        }
+      )
       .subscribe();
 
 
@@ -707,7 +722,8 @@ export function useConversations() {
       if (maxWaitRef.current) clearTimeout(maxWaitRef.current);
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient]);
+  }, [user, queryClient, conversationIdsKey]);
+
 
   // Total unread count across all conversations
   const totalUnreadCount = conversationsQuery.data?.reduce((sum, c) => sum + c.unread_count, 0) || 0;
