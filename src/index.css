@@ -2303,6 +2303,43 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   [data-sonner-toast].parium-toast-repeat { animation: none; }
 }
 
+/* Notisernas in-/utgång: iOS-kurvan. In = mjuk landning med tyngd,
+   ut = kort och bestämd så att den känns direkt när man trycker bort den. */
+[data-sonner-toast] {
+  transition-property: transform, opacity, height, box-shadow !important;
+  transition-duration: 520ms !important;
+  transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1) !important;
+  will-change: transform, opacity;
+}
+[data-sonner-toast][data-removed="true"] {
+  transition-duration: 220ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1) !important;
+}
+/* Tryck: kortet sjunker in en aning innan det försvinner — taktil respons. */
+[data-sonner-toast]:active {
+  transform: scale(0.975) !important;
+  transition-duration: 90ms !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toast],
+  [data-sonner-toast][data-removed="true"] { transition-duration: 120ms !important; }
+  [data-sonner-toast]:active { transform: none !important; }
+}
+
+/* Klockans räknare: landar med en kort fjäder i stället för att bara dyka upp. */
+@keyframes parium-badge-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  55% { transform: scale(1.14); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.parium-badge-pop {
+  animation: parium-badge-pop 420ms cubic-bezier(0.32, 1.5, 0.42, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .parium-badge-pop { animation: none; }
+}
+
+
 /* Tab-panelspöken (Safari/iOS): dolda jobb-paneler får aldrig behålla
    komposit-lager, transforms eller backdrop-filter — annars blixtrar den
    gamla fliken till innan den nya målas. */
