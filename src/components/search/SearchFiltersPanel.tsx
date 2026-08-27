@@ -276,7 +276,11 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
         </div>
 
         {/* Collapsible Filter Section */}
-        <div className={`space-y-3 md:space-y-4 overflow-hidden transition-all duration-300 ${filtersExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        {/* max-h måste rymma extra fältet "Roll" + valda roll-badges som
+            tillkommer när ett yrkesområde valts — annars klipps panelen
+            (och sortering/rensa blir oåtkomliga) på mobil. */}
+        <div className={`space-y-3 md:space-y-4 overflow-hidden transition-all duration-300 ${filtersExpanded ? 'max-h-[2400px] opacity-100' : 'max-h-0 opacity-0'}`}>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {/* Location Filter */}
             <div className="space-y-2">

@@ -41,6 +41,15 @@ export const SwipeEndSection = memo(forwardRef<HTMLDivElement, SwipeEndSectionPr
           >
             Inga fler jobb just nu
           </motion.p>
+          <motion.p
+            initial={false}
+            animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+            transition={{ duration: 0.24, ease, delay: isVisible ? 0.1 : 0 }}
+            className="mt-2 text-center text-[13px] text-white sm:text-sm"
+          >
+            Fortsätt leta – nya jobb dyker upp hela tiden.
+          </motion.p>
+
         </motion.div>
       </div>
     );
