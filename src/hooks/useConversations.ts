@@ -612,6 +612,10 @@ export function useConversations() {
         (payload) => {
           const msg = payload.new as IncomingRealtimeMessage;
           if (!msg?.conversation_id) return;
+          // Klientspärr när kanalen gick ofiltrerad (>100 konversationer).
+          if (!messageFilter && knownIds.size > 0 && !knownIds.has(msg.conversation_id)) return;
+
+
 
           // 1) Snabbaste vägen: patcha listan i minnet (ingen nätverksrundtur).
           //    Vid bulkutskick (tusentals meddelanden) blir detta O(1) per event
