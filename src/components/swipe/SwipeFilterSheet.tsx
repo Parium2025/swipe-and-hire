@@ -364,6 +364,77 @@ export function SwipeFilterSheet({
                 </DropdownMenu>
               </div>
 
+              {/* Lön */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-white inline-flex items-center gap-2 pl-1">
+                  <Wallet className="h-3.5 w-3.5" />
+                  Lön
+                </Label>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <button className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 text-left touch-manipulation">
+                      <Wallet className="h-4 w-4 text-white flex-shrink-0" />
+                      <span className="text-[15px] text-white flex-1 truncate">
+                        {SALARY_OPTIONS.find(o => o.value === salaryRange)?.label ?? 'Alla löner'}
+                      </span>
+                      {salaryRange ? (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSalaryRangeChange(''); }}
+                          className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 cursor-pointer"
+                          aria-label="Rensa lönefilter"
+                        >
+                          <X className="h-4 w-4 text-white" />
+                        </span>
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-white" />
+                      )}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-60 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
+                    {SALARY_OPTIONS.map((opt, i) => (
+                      <div key={opt.value || 'all'}>
+                        <DropdownMenuItem
+                          onClick={() => onSalaryRangeChange(opt.value)}
+                          className="cursor-pointer active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 text-[15px] leading-tight"
+                        >
+                          <span>{opt.label}</span>
+                          {salaryRange === opt.value && <Check className="h-4 w-4" />}
+                        </DropdownMenuItem>
+                        {i < SALARY_OPTIONS.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
+                      </div>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Tidsfilter */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-white inline-flex items-center gap-2 pl-1">
+                  <Timer className="h-3.5 w-3.5" />
+                  Publicerat
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {TIME_FILTER_OPTIONS.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      onClick={() => onTimeFilterChange(value)}
+                      className={`h-10 px-4 text-sm rounded-full border transition-all duration-200 active:scale-[0.97] touch-manipulation ${
+                        timeFilter === value
+                          ? 'bg-white/20 border-white/40 text-white font-medium'
+                          : 'bg-white/5 border-white/15 text-white/70'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+
+
               {/* Sort */}
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium text-white inline-flex items-center gap-2 pl-1">
