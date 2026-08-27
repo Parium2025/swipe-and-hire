@@ -195,7 +195,10 @@ export function SwipeableConversationItem({
     if (!isSwipingRef.current) return;
 
     const offset = currentXRef.current;
-    animateBack();
+    const committed =
+      offset <= -DELETE_THRESHOLD ||
+      (offset >= UNREAD_THRESHOLD && !!onMarkUnread && canMarkUnread);
+    animateBack(committed);
 
     if (offset <= -DELETE_THRESHOLD) {
       setShowConfirm(true);
