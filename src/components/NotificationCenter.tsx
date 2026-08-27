@@ -628,7 +628,8 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => { setPendingClear(true); clearAll(); toastArchive.clear(); }}
-              className="btn-dialog-action flex-1 flex items-center justify-center rounded-full bg-destructive/80 border-destructive/50 text-white text-sm transition-all duration-300 md:hover:bg-destructive md:hover:text-white"
+              variant="destructiveSoft"
+              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
             >
               Ta bort
             </AlertDialogAction>
