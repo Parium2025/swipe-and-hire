@@ -400,6 +400,7 @@ export type Database = {
       }
       candidate_profiles: {
         Row: {
+          cover_image_url: string | null
           created_at: string
           cv_filename: string | null
           cv_url: string | null
@@ -413,6 +414,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          cover_image_url?: string | null
           created_at?: string
           cv_filename?: string | null
           cv_url?: string | null
@@ -426,6 +428,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          cover_image_url?: string | null
           created_at?: string
           cv_filename?: string | null
           cv_url?: string | null

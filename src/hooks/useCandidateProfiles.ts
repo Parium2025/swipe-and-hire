@@ -11,6 +11,7 @@ export interface CandidateProfile {
   cv_filename: string | null;
   video_url: string | null;
   profile_image_url: string | null;
+  cover_image_url: string | null;
   is_default: boolean;
   sort_order: number;
   created_at: string;
@@ -23,6 +24,7 @@ export interface CandidateProfileInput {
   cv_filename?: string | null;
   video_url?: string | null;
   profile_image_url?: string | null;
+  cover_image_url?: string | null;
   is_default?: boolean;
 }
 
@@ -90,6 +92,7 @@ export function useCandidateProfiles(userId?: string) {
         cv_filename: input.cv_filename ?? null,
         video_url: input.video_url ?? null,
         profile_image_url: input.profile_image_url ?? null,
+        cover_image_url: input.cover_image_url ?? null,
         is_default: makeDefault,
         // Undvik kollisioner efter borttagning: alltid högsta sort_order + 1.
         sort_order: profiles.reduce((max, p) => Math.max(max, p.sort_order ?? 0), -1) + 1,
