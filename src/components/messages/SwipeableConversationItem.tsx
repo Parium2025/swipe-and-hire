@@ -220,7 +220,11 @@ export function SwipeableConversationItem({
     isSwipingRef.current = false;
     directionLockedRef.current = null;
     lockOffsetRef.current = 0;
+    velocityRef.current = 0;
+    lastXRef.current = clientX;
+    lastTRef.current = performance.now();
     if (contentRef.current) contentRef.current.style.transition = '';
+
   }, []);
 
   const moveDrag = useCallback((clientX: number, clientY: number) => {
