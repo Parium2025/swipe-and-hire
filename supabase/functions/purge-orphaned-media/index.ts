@@ -142,6 +142,13 @@ async function sweepBucket(
   dryRun: boolean,
 ) {
   const referenced = await collectReferencedPaths(admin, config.sources)
+
+  // 🎬 Posterbilder ligger bredvid videon (`<samma-namn>-poster.jpg`) och finns
+  // aldrig i databasen. Utan detta skydd raderas de och listorna tappar sin
+  // stillbild. Skydda dem så länge grundfilen är refererad.
+  for (const path of Array.from(referenced)) {
+    referenced.add(`${path.replace(/\.[^./]+$/, '')}-poster.jpg`)
+  }
   const allFiles = await listAllFilesRecursive(admin, config.bucket, '')
 
   const cutoff = Date.now() - MIN_AGE_DAYS * 24 * 60 * 60 * 1000
