@@ -69,6 +69,7 @@ const setLocalCache = (companyId: string, data: CompanyReviewsData) => {
  */
 export function useCompanyReviewsCache(companyId: string | null) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data, isLoading, refetch } = useQuery<CompanyReviewsData>({
     queryKey: ['company-reviews-cached', companyId],
