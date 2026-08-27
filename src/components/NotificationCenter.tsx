@@ -280,8 +280,8 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-xl cursor-pointer ${
-        item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/10 bg-white/5'
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer ${
+        item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/5'
       }`}
     >
       <span className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
