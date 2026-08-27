@@ -41,7 +41,8 @@ export function setToastArchiveUser(userId: string | null): void {
   if (currentUserId === userId) return;
   currentUserId = userId;
   items = load();
-  listeners.forEach((l) => l());
+  // Notifiera asynkront — funktionen kan anropas under render.
+  queueMicrotask(() => listeners.forEach((l) => l()));
 }
 
 function load(): ArchivedToast[] {
