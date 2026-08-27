@@ -61,7 +61,7 @@ function load(): ArchivedToast[] {
 
 function persist() {
   try {
-    localStorage.setItem(KEY, JSON.stringify(items.slice(0, MAX)));
+    localStorage.setItem(storageKey(), JSON.stringify(items.slice(0, MAX)));
   } catch {}
   listeners.forEach((l) => l());
 }
