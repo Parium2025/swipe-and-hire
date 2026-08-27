@@ -471,10 +471,13 @@ export default function ProfilePreview() {
                 </h3>
                 <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-3">
                   {/* Anställningsstatus */}
-                  <div className="space-y-0.5">
-                    <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Anställningsstatus?</p>
-                    <p className="text-[11px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_type)}</p>
-                  </div>
+                  {data.employment_type && (
+                    <div className="space-y-0.5">
+                      <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Anställningsstatus?</p>
+                      <p className="text-[11px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_type)}</p>
+                    </div>
+                  )}
+
 
                   {/* Arbetstid - visa bara om inte arbetssökande */}
                   {data.employment_type !== 'arbetssokande' && data.work_schedule && (
