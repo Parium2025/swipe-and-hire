@@ -320,15 +320,25 @@ export function useConversations() {
     queryFn: async () => {
       if (!user) return [];
 
-      // First get all conversation IDs where user is a member
-      const { data: memberships, error: memberError } = await supabase
-        .from('conversation_members')
-        .select('conversation_id, last_read_at, muted_at, manually_unread')
-        .eq('user_id', user.id);
+      // 🚨 Tidigare hämtades ALLA medlemsrader först och därefter
+      // `conversations` med `.in(<alla id>)`. PostgREST kapar tyst vid 1000
+      // rader — en arbetsgivare med >1000 chattar tappade konversationer, och
+      // medlemsuppslaget (2+ rader per chatt) kapades redan runt 500 chattar
+      // vilket gav "Okänd användare". Nu styr `conversations` urvalet:
+      // RLS begränsar redan till chattar användaren är medlem i, så vi kan
+      // sortera nyast först och ta ett hårt, deterministiskt tak.
+      const { data: conversations, error: convError } = await supabase
+        .from('conversations')
+        .select(`
+          *,
+          job:job_id (title)
+        `)
+        .order('last_message_at', { ascending: false, nullsFirst: false })
+        .limit(CONVERSATIONS_LIMIT);
 
-      if (memberError) throw memberError;
+      if (convError) throw convError;
 
-      if (!memberships || memberships.length === 0) {
+      if (!conversations || conversations.length === 0) {
         // Avoid flash-to-empty on transient backend hiccups.
         const previous = queryClient.getQueryData<Conversation[]>(['conversations', user.id]);
         if (previous && previous.length > 0) return previous;
@@ -339,24 +349,31 @@ export function useConversations() {
         return [];
       }
 
-      const conversationIds = memberships.map(m => m.conversation_id);
+      const conversationIds = conversations.map((c) => c.id);
+
+      // Egna medlemsrader (läsmarkering, tystning) — chunkat så URL:en aldrig
+      // blir för lång och radtaket aldrig nås.
+      const memberships: Array<{
+        conversation_id: string;
+        last_read_at: string | null;
+        muted_at?: string | null;
+        manually_unread?: boolean | null;
+      }> = [];
+      for (const idChunk of chunk(conversationIds, ID_CHUNK)) {
+        const { data, error: memberError } = await supabase
+          .from('conversation_members')
+          .select('conversation_id, last_read_at, muted_at, manually_unread')
+          .eq('user_id', user.id)
+          .in('conversation_id', idChunk);
+        if (memberError) throw memberError;
+        memberships.push(...((data || []) as typeof memberships));
+      }
+
       const mutedIds = new Set(
-        memberships.filter((m) => (m as { muted_at?: string | null }).muted_at).map((m) => m.conversation_id),
+        memberships.filter((m) => m.muted_at).map((m) => m.conversation_id),
       );
 
 
-      // Fetch conversations with job info
-      const { data: conversations, error: convError } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          job:job_id (title)
-        `)
-        .in('id', conversationIds)
-        .order('last_message_at', { ascending: false, nullsFirst: false });
-
-      if (convError) throw convError;
-      if (!conversations) return [];
 
       // Gather last-known-good identities from cache + current query data for merge/recovery.
       // Deduplicate by conversation ID (prefer query data over stale cache).
