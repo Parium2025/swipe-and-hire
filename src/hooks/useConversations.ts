@@ -307,7 +307,17 @@ export function applyIncomingMessageToConversations(
   return true;
 }
 
+/**
+ * Hårt tak för hur många konversationer inkorgen laddar i ett svep.
+ * Nyast först — äldre chattar nås via sökfältet. Skyddar både PostgREST:s
+ * 1000-radersgräns och renderingen i listan.
+ */
+const CONVERSATIONS_LIMIT = 300;
+/** Max antal id:n per `in()`-filter så URL:en aldrig blir för lång. */
+const ID_CHUNK = 100;
+
 export function useConversations() {
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
