@@ -90,9 +90,10 @@ async function flushToServer(key: string) {
     const userId = auth?.user?.id;
     if (!userId) return; // utloggad → behåll lokalt
 
-    // Sista skyddet mot dubbletter: finns redan en identisk notis på kontot
-    // (t.ex. skapad från en annan flik eller enhet) hoppar vi över inserten
-    // och städar bara bort den lokala kopian.
+    // Sista skyddet mot dubbletter: finns redan en identisk *oläst* notis på
+    // kontot (t.ex. skapad från en annan flik eller enhet) hoppar vi över
+    // inserten. Är den redan läst/borttagen är detta en helt ny händelse och
+    // ska ge en ny notis — annars skulle badgen tyst försvinna.
     const since = new Date(Date.now() - 120_000).toISOString();
     const { data: existing } = await supabase
       .from("notifications")
@@ -100,8 +101,10 @@ async function flushToServer(key: string) {
       .eq("user_id", userId)
       .eq("type", `toast_${entry.kind}`)
       .eq("title", entry.title)
+      .eq("is_read", false)
       .gte("created_at", since)
       .limit(1);
+
 
     if (!existing || existing.length === 0) {
       const { error } = await supabase.from("notifications").insert({
