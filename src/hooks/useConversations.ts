@@ -840,7 +840,11 @@ export function useConversationMessages(conversationId: string | null) {
   const queryClient = useQueryClient();
   const [hasMore, setHasMore] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  // Synkron spärr: scroll-eventet kan trigga flera anrop innan React
+  // hunnit rendera om med loadingOlder=true.
+  const loadingOlderRef = useRef(false);
   const prevConversationIdRef = useRef(conversationId);
+
 
   // Reset hasMore synchronously when conversation changes (before render)
   if (conversationId !== prevConversationIdRef.current) {
