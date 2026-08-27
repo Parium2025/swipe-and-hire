@@ -111,12 +111,20 @@ const MyApplications = () => {
   const queryClient = useQueryClient();
   const [applicationToRemove, setApplicationToRemove] = useState<{ id: string; title: string } | null>(null);
 
-  // Delayed fade-in (employer-side parity)
-  const [showContent, setShowContent] = useState(false);
+  // Delayed fade-in (employer-side parity).
+  // 🚀 Kallstart: om datan redan ligger i React Query-cachen (förvärmning via
+  // useJobSeekerPagePrewarm / sidomenyns prefetch) hoppar vi över fördröjningen
+  // helt — inget skelett hinner ritas och därmed ingen "blixt" vid växlingen.
+  const [showContent, setShowContent] = useState(() => {
+    if (!user?.id) return false;
+    const cached = queryClient.getQueryData<unknown[]>(['my-applications', user.id]);
+    return Array.isArray(cached);
+  });
   useEffect(() => {
+    if (showContent) return;
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [showContent]);
   
   // Get candidate's interviews
   const { interviews: allInterviews, isLoading: interviewsLoading } = useCandidateInterviews();
@@ -131,6 +139,7 @@ const MyApplications = () => {
 
   // Use cached applications hook for instant load + realtime sync
   const { applications, isLoading, error, hideApplication } = useMyApplicationsCache();
+
 
   // Tab state (persisted in URL like SavedJobs)
   type TabValue = 'active' | 'expired';
@@ -202,9 +211,13 @@ const MyApplications = () => {
   };
 
 
-  if (!showContent || isLoading) {
+  // Vänta även in intervjuerna vid kallstart. Annars ritas ansökningarna först
+  // och intervjusektionen puttas in ovanför en bråkdel av en sekund senare —
+  // det är hoppet som upplevs som en "blixt".
+  if (!showContent || isLoading || interviewsLoading) {
     return <MyApplicationsSkeleton activeTab={activeTab} />;
   }
+
 
 
   if (error) {

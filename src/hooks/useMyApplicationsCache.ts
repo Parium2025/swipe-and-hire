@@ -127,9 +127,12 @@ export function useMyApplicationsCache() {
     },
     enabled: !!user,
     staleTime: 0,
-    gcTime: 5 * 60 * 1000, // 5 minutes — prevents stale data persisting forever
+    gcTime: 30 * 60 * 1000, // Behåll cachen längre — färre kallstarter
     refetchOnMount: 'always', // Always refetch when component mounts
-    structuralSharing: false, // Ensure new data triggers re-render
+    // structuralSharing (default true): oförändrade rader behåller samma
+    // objektidentitet, så bakgrundsuppdateringen efter mount inte ritar om
+    // varje kort (det var det som blixtrade till vid kallstart).
+
     placeholderData: () => {
       if (!user) return undefined;
       return readCache(user.id) ?? undefined;

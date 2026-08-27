@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchSavedJobsForUser } from '@/hooks/useSavedJobsCache';
 import { fetchMyApplicationsForUser } from '@/hooks/useMyApplicationsCache';
+import { fetchCandidateInterviewsForUser } from '@/hooks/useInterviews';
 
 /**
  * Hover/touchstart-baserad route-prefetch för sidebar-länkar.
@@ -46,6 +47,13 @@ export function useSidebarRoutePrefetch() {
         break;
       }
       case '/my-applications': {
+        if (!queryClient.getQueryData(['candidate-interviews', user.id])) {
+          queryClient.prefetchQuery({
+            queryKey: ['candidate-interviews', user.id],
+            queryFn: () => fetchCandidateInterviewsForUser(user.id),
+            staleTime: 60_000,
+          }).catch(() => { /* sidan hämtar själv */ });
+        }
         if (queryClient.getQueryData(['my-applications', user.id])) break;
         queryClient.prefetchQuery({
           queryKey: ['my-applications', user.id],
@@ -56,6 +64,7 @@ export function useSidebarRoutePrefetch() {
         });
         break;
       }
+
       case '/search-jobs': {
         // Sökresultat hämtas via egen hook med filter, men vi kan varma
         // upp grundlistan av aktiva jobb.
