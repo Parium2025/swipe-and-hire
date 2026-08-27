@@ -179,9 +179,9 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             <button
               onClick={onOpenSaveDialog}
               title="Spara sökningen och få notis när nya jobb matchar"
-              className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm font-medium text-white rounded-full bg-[hsl(var(--primary-glow)/0.25)] border border-[hsl(var(--primary-glow)/0.55)] hover:bg-[hsl(var(--primary-glow)/0.35)] active:scale-[0.97] transition-all duration-200 touch-manipulation shadow-[0_0_0_1px_hsl(var(--primary-glow)/0.15),0_4px_16px_hsl(var(--primary-glow)/0.25)]"
+              className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
             >
-              <Heart className="h-3.5 w-3.5 fill-rose-500 text-rose-500" />
+              <Heart className="h-3.5 w-3.5 text-white" />
               Spara sökning
             </button>
           )}
@@ -294,7 +294,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
         {/* max-h måste rymma extra fältet "Roll" + valda roll-badges som
             tillkommer när ett yrkesområde valts — annars klipps panelen
             (och sortering/rensa blir oåtkomliga) på mobil. */}
-        <div className={`space-y-3 md:space-y-4 overflow-hidden transition-all duration-300 ${filtersExpanded ? 'max-h-[2400px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className={`space-y-3 md:space-y-4 transition-opacity duration-300 ${filtersExpanded ? 'max-h-none opacity-100' : 'max-h-0 overflow-hidden opacity-0'}`}>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {/* Location Filter */}

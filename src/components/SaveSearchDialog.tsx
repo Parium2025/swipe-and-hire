@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Heart, Bell, Loader2 } from 'lucide-react';
+import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SearchCriteria } from '@/hooks/useSavedSearches';
 
 interface SaveSearchDialogProps {
@@ -70,7 +71,10 @@ export function SaveSearchDialog({
   if (criteria.search_query) criteriaSummary.push(`"${criteria.search_query}"`);
   if (criteria.city) criteriaSummary.push(criteria.city);
   if (criteria.county) criteriaSummary.push(criteria.county);
-  if (criteria.category) criteriaSummary.push(criteria.category);
+  if (criteria.category) {
+    const cat = OCCUPATION_CATEGORIES.find((c) => c.value === criteria.category);
+    criteriaSummary.push(cat?.label ?? criteria.category);
+  }
   if (criteria.employment_types?.length) {
     criteriaSummary.push(criteria.employment_types.join(', '));
   }
@@ -82,7 +86,7 @@ export function SaveSearchDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-card-parium backdrop-blur-xl border-white/20">
+      <DialogContent className="sm:max-w-[425px] bg-card-parium border-0 overflow-hidden">
         <DialogHeader className="items-center text-center">
           <DialogTitle className="flex items-center justify-center gap-2 text-white">
             <Heart className="h-5 w-5 text-white" />
@@ -103,7 +107,7 @@ export function SaveSearchDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="T.ex. Utvecklarjobb i Stockholm"
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/50"
+              className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 focus:outline-none focus-visible:outline-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && name.trim()) {
                   handleSave();
@@ -128,7 +132,7 @@ export function SaveSearchDialog({
             </div>
           )}
 
-          <div className="flex flex-col items-center gap-1 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
+          <div className="flex flex-col items-center gap-1 p-3 rounded-lg bg-white/5 text-center">
             <Bell className="h-5 w-5 text-white shrink-0" />
             <p className="font-medium text-sm text-white">Realtidsnotiser</p>
             <p className="text-sm text-white">Du får en notis direkt när nya jobb publiceras som stämmer med din sökning.</p>
@@ -139,7 +143,7 @@ export function SaveSearchDialog({
           <Button 
             onClick={handleSave}
             disabled={!name.trim() || isSaving}
-            variant="glassBlue"
+            variant="glass"
             className="w-full h-12 text-sm"
           >
             {isSaving ? (
@@ -152,9 +156,9 @@ export function SaveSearchDialog({
             )}
           </Button>
           <Button 
-            variant="ghost" 
+            variant="glass" 
             onClick={() => onOpenChange(false)}
-            className="w-full rounded-full text-white/70 hover:text-white hover:bg-white/10"
+            className="w-full h-12 text-sm"
           >
             Avbryt
           </Button>
