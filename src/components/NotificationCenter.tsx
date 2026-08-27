@@ -182,15 +182,13 @@ function NotificationItem({
       whileTap={{ scale: 0.98 }}
       onClick={() => {
         if (!notification.is_read) onRead(notification.id);
-        if (route) { onNavigate(route); return; }
-        if (canExpand) setExpanded(v => !v);
+        if (route) onNavigate(route);
       }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           if (!notification.is_read) onRead(notification.id);
-          if (route) { onNavigate(route); return; }
-          if (canExpand) setExpanded(v => !v);
+          if (route) onNavigate(route);
         }
       }}
       className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer ${
