@@ -145,62 +145,6 @@ export function SwipeableConversationItem({
   }, []);
 
 
-  /**
-   * "Peek": även en kort svepning som släpps innan tröskeln spelar upp HELA
-   * rörelsen — kortet glider ut och visar pillret fullt, pausar ett ögonblick
-   * och glider sedan tillbaka med den tunga iOS-kurvan. Det ger en lugn,
-   * proffsig känsla istället för en snabb, hackig tillbakasnärt.
-   */
-  const animatePeek = useCallback((direction: 'delete' | 'unread') => {
-    const gestureId = gestureIdRef.current;
-    const easing = 'cubic-bezier(0.32, 0.72, 0, 1)';
-    if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
-
-    const content = contentRef.current;
-    const pill = direction === 'delete' ? deleteRef.current : unreadRef.current;
-    const peekX = direction === 'delete' ? -(DELETE_THRESHOLD + 10) : UNREAD_THRESHOLD + 10;
-    setRevealedSide(direction);
-
-    // Fas 1: glid ut och visa hela pillret.
-    if (content) {
-      content.style.transition = `transform 280ms ${easing}`;
-      content.style.transform = `translate3d(${peekX}px,0,0)`;
-    }
-    if (pill) {
-      pill.style.transition = `opacity 200ms ease-out, transform 280ms ${easing}`;
-      pill.style.opacity = '1';
-      pill.style.transform = 'scale(1)';
-    }
-
-    // Fas 2: kort paus, sedan mjuk hemglidning + uttoning.
-    window.setTimeout(() => {
-      if (gestureId !== gestureIdRef.current) return;
-      const c = contentRef.current;
-      if (c) {
-        c.style.transition = `transform 360ms ${easing}`;
-        c.style.transform = 'translate3d(0,0,0)';
-        window.setTimeout(() => {
-          if (gestureId !== gestureIdRef.current) return;
-          if (contentRef.current) contentRef.current.style.transition = '';
-        }, 380);
-      }
-      [deleteRef.current, unreadRef.current].forEach((el) => {
-        if (!el) return;
-        el.style.transition = `opacity 220ms ease-out 80ms, transform 220ms ${easing} 80ms`;
-        el.style.opacity = '0';
-        el.style.transform = 'scale(0.82)';
-        window.setTimeout(() => {
-          if (gestureId !== gestureIdRef.current) return;
-          if (el) el.style.transition = '';
-        }, 320);
-      });
-      window.setTimeout(() => {
-        if (gestureId === gestureIdRef.current) setRevealedSide(null);
-      }, 380);
-      pendingXRef.current = 0;
-      currentXRef.current = 0;
-    }, 320);
-  }, []);
 
   useEffect(() => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
