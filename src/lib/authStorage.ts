@@ -113,8 +113,47 @@ export const setRememberMe = (value: boolean): void => {
     Array.from(memoryMirror.keys())
       .filter((k) => k.startsWith(SNAPSHOT_PREFIX))
       .forEach((k) => memoryMirror.delete(k));
+    removeLocal(SNAPSHOT_OWNER_KEY);
   }
 };
+
+/**
+ * Anropas vid explicit inloggning (SIGNED_IN). Kontot som just loggade in tar
+ * över snapshoten, så att gamla flikar med andra konton inte kan skriva över
+ * den vid tokenrefresh.
+ */
+export const claimAuthSnapshotOwnership = (userId: string): void => {
+  if (!userId) return;
+  const previousOwner = readLocal(SNAPSHOT_OWNER_KEY);
+  if (previousOwner && previousOwner !== userId) {
+    // Byte av konto: släng gamla kontots snapshot direkt.
+    try {
+      const toRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(SNAPSHOT_PREFIX)) toRemove.push(k);
+      }
+      toRemove.forEach((k) => removeLocal(k));
+    } catch {}
+    Array.from(memoryMirror.keys())
+      .filter((k) => k.startsWith(SNAPSHOT_PREFIX))
+      .forEach((k) => memoryMirror.delete(k));
+  }
+  writeLocal(SNAPSHOT_OWNER_KEY, userId);
+
+  // Skriv om snapshoten för den aktuella fliken direkt.
+  if (shouldRememberUser()) {
+    try {
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const k = sessionStorage.key(i);
+        if (!k || !isAuthStorageKey(k)) continue;
+        const v = sessionStorage.getItem(k);
+        if (v) writeLocal(snapshotKey(k), v);
+      }
+    } catch {}
+  }
+};
+
 
 
 const getLastActivityTimestamp = (): number => {
