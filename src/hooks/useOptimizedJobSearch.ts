@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { getTimeRemaining } from '@/lib/date';
 import { detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
