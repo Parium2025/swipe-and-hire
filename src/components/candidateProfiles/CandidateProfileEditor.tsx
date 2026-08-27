@@ -144,9 +144,10 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
           )}
         </div>
 
-        <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Avbryt</Button>
+        <DialogFooter className="flex-col items-stretch gap-2 sm:flex-col sm:space-x-0">
           <Button
+            variant="glass"
+            className="w-full h-12 text-sm"
             disabled={!labelFilled || saving}
             onClick={() => onSave({
               label,
