@@ -179,9 +179,9 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             <button
               onClick={onOpenSaveDialog}
               title="Spara sökningen och få notis när nya jobb matchar"
-              className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm font-medium text-white rounded-full bg-[hsl(var(--primary-glow)/0.25)] border border-[hsl(var(--primary-glow)/0.55)] hover:bg-[hsl(var(--primary-glow)/0.35)] active:scale-[0.97] transition-all duration-200 touch-manipulation shadow-[0_0_0_1px_hsl(var(--primary-glow)/0.15),0_4px_16px_hsl(var(--primary-glow)/0.25)]"
+              className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
             >
-              <Heart className="h-3.5 w-3.5 fill-rose-500 text-rose-500" />
+              <Heart className="h-3.5 w-3.5 text-white" />
               Spara sökning
             </button>
           )}
