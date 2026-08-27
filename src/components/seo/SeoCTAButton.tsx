@@ -81,7 +81,7 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
         style={{ WebkitTapHighlightColor: 'transparent' }}
         {...rest}
       >
-        {label}
+        {resolvedLabel}
         {showArrow && <ArrowRight className="h-4 w-4" />}
       </button>
     );
