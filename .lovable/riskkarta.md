@@ -56,12 +56,12 @@ Status per område. Skala:
 ## Topp 5 att stänga före lansering
 
 1. **Push på iOS/web** — avgör om notiser räknas som en funktion vi säljer.
-3. **Stripe + juridik** — policy, DPA, registerförteckning (GDPR art. 30).
-4. **Kapacitetströsklar** — Cloud-plan och sändningstak innan trafik.
-5. **Riktigt lasttest** — ett skarpt test mot söket och kandidatlistorna.
+2. **Stripe + juridik** — policy, DPA, registerförteckning (GDPR art. 30).
+3. **Kapacitetströsklar** — Cloud-plan och sändningstak innan trafik.
+4. **Riktigt lasttest** — ett skarpt test mot söket och kandidatlistorna.
 
 ## Kvar på jobbsökarsidan (ej granskat än)
 
 - Onboarding-flödet för ny jobbsökare (första inloggning → första ansökan).
-- Ansökningsflödet i sig (frågor, snapshot, kvot, bekräftelse).
+- Ansökningsflödet: granskat (snapshot, dubbelspärr, kvot serverside, bekräftelse) — kvarstår skarpt test med riktig användare.
 - Min profil, Ekonomi/Prenumeration och Support på jobbsökarsidan.
