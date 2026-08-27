@@ -45,6 +45,12 @@ const BUCKETS: BucketConfig[] = [
     bucket: 'job-applications',
     sources: [
       { table: 'profiles', columns: ['profile_image_url', 'video_url', 'cover_image_url', 'cv_url'] },
+      // 🔒 Kandidatprofiler (max 3 per jobbsökare) lagrar CV, video och bild i
+      // samma bucket. Utan denna källa raderas de efter 7 dagar.
+      {
+        table: 'candidate_profiles',
+        columns: ['cv_url', 'video_url', 'profile_image_url'],
+      },
       {
         table: 'job_applications',
         columns: ['cv_url', 'profile_image_snapshot_url', 'video_snapshot_url'],
@@ -136,6 +142,13 @@ async function sweepBucket(
   dryRun: boolean,
 ) {
   const referenced = await collectReferencedPaths(admin, config.sources)
+
+  // 🎬 Posterbilder ligger bredvid videon (`<samma-namn>-poster.jpg`) och finns
+  // aldrig i databasen. Utan detta skydd raderas de och listorna tappar sin
+  // stillbild. Skydda dem så länge grundfilen är refererad.
+  for (const path of Array.from(referenced)) {
+    referenced.add(`${path.replace(/\.[^./]+$/, '')}-poster.jpg`)
+  }
   const allFiles = await listAllFilesRecursive(admin, config.bucket, '')
 
   const cutoff = Date.now() - MIN_AGE_DAYS * 24 * 60 * 60 * 1000
