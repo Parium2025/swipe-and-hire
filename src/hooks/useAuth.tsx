@@ -10,7 +10,7 @@ import { getMediaUrl } from '@/lib/mediaManager';
 import { clearMediaUrlCache, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
-import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage } from '@/lib/authStorage';
+import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
