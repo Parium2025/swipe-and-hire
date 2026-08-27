@@ -179,8 +179,8 @@ function NotificationItem({
 
   const titleRef = useRef<HTMLSpanElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
-  const titleTruncated = useTruncation(titleRef);
-  const bodyTruncated = useTruncation(bodyRef);
+  const titleTruncated = useTruncation(titleRef, notification.title);
+  const bodyTruncated = useTruncation(bodyRef, notification.body);
   const [expanded, setExpanded] = useState(false);
   const canExpand = titleTruncated || bodyTruncated || expanded;
   const reportable = isReportable(notificationLooksError(notification.type, notification.title, notification.body), notification.title, notification.body) && !route;
@@ -286,8 +286,8 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
 
   const titleRef = useRef<HTMLSpanElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
-  const titleTruncated = useTruncation(titleRef);
-  const bodyTruncated = useTruncation(bodyRef);
+  const titleTruncated = useTruncation(titleRef, item.title);
+  const bodyTruncated = useTruncation(bodyRef, item.body);
   const [expanded, setExpanded] = useState(false);
   const canExpand = titleTruncated || bodyTruncated || expanded;
   const route = item.route ?? resolveToastRoute(item.title, item.body);
