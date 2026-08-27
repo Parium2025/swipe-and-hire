@@ -473,7 +473,14 @@ export function useConversations() {
       let summaries: any[] = [];
       try {
         const { data: summariesData, error: summariesError } = await supabase
-          .rpc('get_conversation_summaries', { p_user_id: user.id });
+          .rpc('get_conversation_summaries', {
+            p_user_id: user.id,
+            // Begränsa till de konversationer vi faktiskt visar — annars kan
+            // RPC:ns 1000-radersgräns kapa bort förhandsvisningar för
+            // användare med väldigt många chattar.
+            p_conversation_ids: conversationIds,
+          });
+
         if (!summariesError && summariesData) {
           summaries = summariesData;
         }
