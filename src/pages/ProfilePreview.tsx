@@ -885,7 +885,7 @@ export default function ProfilePreview() {
                   {/* Innehåll med exakt samma preview-struktur som mobilvyn */}
                   <div 
                     className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar"
-                    style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', overscrollBehaviorX: 'none' }}
+                    style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
                   >
                     <div className="h-full p-4">
                       <DesktopListView />
