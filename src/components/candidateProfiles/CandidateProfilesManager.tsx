@@ -10,6 +10,7 @@ import { Users, Plus, Star, Pencil, Trash2, FileText, Video, Image as ImageIcon,
 import { useToast } from '@/hooks/use-toast';
 import { useCandidateProfiles, MAX_CANDIDATE_PROFILES, type CandidateProfile, type CandidateProfileInput } from '@/hooks/useCandidateProfiles';
 import CandidateProfileEditor from './CandidateProfileEditor';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface Props {
   userId?: string;
