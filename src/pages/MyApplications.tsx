@@ -211,9 +211,13 @@ const MyApplications = () => {
   };
 
 
-  if (!showContent || isLoading) {
+  // Vänta även in intervjuerna vid kallstart. Annars ritas ansökningarna först
+  // och intervjusektionen puttas in ovanför en bråkdel av en sekund senare —
+  // det är hoppet som upplevs som en "blixt".
+  if (!showContent || isLoading || interviewsLoading) {
     return <MyApplicationsSkeleton activeTab={activeTab} />;
   }
+
 
 
   if (error) {
