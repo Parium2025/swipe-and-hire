@@ -299,7 +299,7 @@ export function SwipeableConversationItem({
     // Blockera klicket som annars öppnar konversationen direkt efter dragningen.
     suppressClickRef.current = true;
     window.setTimeout(() => { suppressClickRef.current = false; }, 250);
-  }, [animateBack, onMarkUnread, canMarkUnread]);
+  }, [animateBack, animatePeek, onMarkUnread, canMarkUnread]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     beginDrag(e.touches[0].clientX, e.touches[0].clientY);
