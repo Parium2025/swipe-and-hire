@@ -217,6 +217,19 @@ export const useSavedSearches = () => {
           fetchSavedSearches();
         }
       )
+      // Nya jobb ska ge omedelbar matchning i UI:t — cron-jobbet (var 5:e min)
+      // uppdaterar räknaren i DB, men vi räknar om direkt när ett jobb publiceras.
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'job_postings',
+        },
+        () => {
+          fetchSavedSearches();
+        }
+      )
       .subscribe();
 
     return () => {
