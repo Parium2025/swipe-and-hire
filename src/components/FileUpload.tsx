@@ -22,6 +22,8 @@ interface FileUploadProps {
   questionType?: string;
   mediaType?: MediaType; // Används för att bestämma bucket via mediaManager
   uploadType?: 'image' | 'video' | 'document' | 'all'; // Typ av uppladdning för att visa rätt text
+  /** Ersätter standardstilen (streckad ram) för dropzonen när ytan ska matcha omgivande kort. */
+  dropzoneClassName?: string;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -32,7 +34,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   maxFileSize = 50 * 1024 * 1024, // 50MB default
   questionType,
   mediaType = 'cv', // Default till CV för job-applications bucket
-  uploadType = 'all' // Default visar alla filtyper
+  uploadType = 'all', // Default visar alla filtyper
+  dropzoneClassName,
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
