@@ -41,6 +41,11 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
     ref
   ) => {
     const navigate = useNavigate();
+    // Redan inloggad? Då är "Skapa konto" fel budskap — skicka in i appen istället
+    // för att bounca användaren via inloggningssidan.
+    const { user } = useAuth();
+    const isAuthed = !!user;
+    const resolvedLabel = isAuthed ? 'Öppna Parium' : label;
     const sizing =
       size === 'lg'
         ? 'min-h-[52px] px-8 text-base sm:text-lg'
