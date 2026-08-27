@@ -55,6 +55,9 @@ export function SwipeableConversationItem({
   const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   const lockOffsetRef = useRef(0);
   const suppressClickRef = useRef(false);
+  // Ökas vid varje ny gest så att timers från en pågående animation
+  // aldrig skriver över en ny dragning.
+  const gestureIdRef = useRef(0);
   const [showConfirm, setShowConfirm] = useState(false);
   const [revealedSide, setRevealedSide] = useState<'delete' | 'unread' | null>(null);
 
