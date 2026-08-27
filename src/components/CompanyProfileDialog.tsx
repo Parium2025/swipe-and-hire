@@ -70,6 +70,7 @@ interface CompanyReview {
 
 export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyProfileDialogProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [newComment, setNewComment] = React.useState("");
   const [newRating, setNewRating] = React.useState(0);
@@ -78,8 +79,8 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = React.useState(false);
 
-  // Use cached reviews for instant load
-  const { reviews: cachedReviews, avgRating, reviewCount, refetch: refetchReviews } = useCompanyReviewsCache(open ? companyId : null);
+  // Use cached reviews for instant load (endast för inloggade)
+  const { reviews: cachedReviews, avgRating, reviewCount, refetch: refetchReviews } = useCompanyReviewsCache(open && user ? companyId : null);
 
   // Use React Query for company profile with prefetched data
   const { data: company, isLoading: loading } = useQuery<CompanyProfile | null>({
