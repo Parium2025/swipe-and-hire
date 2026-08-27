@@ -808,12 +808,29 @@ export function useConversations() {
     } catch {}
   }, [totalUnreadCount, conversationsQuery.data, conversationsQuery.isFetching]);
 
+  // Ladda nästa fönster (300 till). Anropas när listan scrollas mot slutet.
+  const refetchConversations = conversationsQuery.refetch;
+  const loadMoreConversations = useCallback(async () => {
+    if (!user || loadingMoreConversations || !hasMoreConversations) return;
+    setLoadingMoreConversations(true);
+    listLimitRef.current += CONVERSATIONS_PAGE_SIZE;
+    try {
+      await refetchConversations();
+    } finally {
+      setLoadingMoreConversations(false);
+    }
+  }, [user, loadingMoreConversations, hasMoreConversations, refetchConversations]);
+
   return {
     conversations: conversationsQuery.data || [],
     isLoading: conversationsQuery.isLoading,
     totalUnreadCount,
     refetch: conversationsQuery.refetch,
+    hasMoreConversations,
+    loadingMoreConversations,
+    loadMoreConversations,
   };
+
 }
 
 const MESSAGES_PAGE_SIZE = 200;
