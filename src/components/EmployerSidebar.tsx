@@ -280,17 +280,21 @@ export function EmployerSidebar() {
   const handleNavigation = (href: string) => {
     if (!checkBeforeNavigation(href)) return;
 
-    // Mobil: stäng sidobaren FÖRST så att slide-out-animationen hinner starta
-    // innan React börjar montera den nya sidan. Identiskt mönster som
-    // jobbsökarens AppSidebar — ger märkbart mjukare övergångar.
+    // Mobil: stäng sidobaren FÖRST och byt route först när slide-out-animationen
+    // är helt klar — annars byts innehållet bakom drawern halvvägs in i
+    // rörelsen, vilket syns som en "blixt".
     if (isMobile) {
       setOpenMobile(false);
-      startTransition(() => {
-        navigate(href);
+      navTimerRef.current?.();
+      navTimerRef.current = navigateAfterSidebarClose(() => {
+        startTransition(() => {
+          navigate(href);
+        });
       });
     } else {
       navigate(href);
     }
+
     // Notera: window.scrollTo är borttagen — appens scroll sker i en inre
     // <main>-container, så fönster-scroll gör ingen nytta utan bara onödigt
     // arbete på huvudtråden.
