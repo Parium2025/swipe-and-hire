@@ -24,8 +24,15 @@ export interface SwipeFilterState {
   onLocationChange: (location: string) => void;
   selectedCategory: string;
   onCategoryChange: (value: string) => void;
+  selectedSubcategories: string[];
+  onSubcategoriesChange: (value: string[]) => void;
   selectedEmploymentTypes: string[];
   onEmploymentTypesChange: (value: string[]) => void;
+  salaryRange: string;
+  onSalaryRangeChange: (value: string) => void;
+  timeFilter: 'all' | '12h' | '24h' | '3d' | '7d';
+  onTimeFilterChange: (value: 'all' | '12h' | '24h' | '3d' | '7d') => void;
+
   sortBy: 'newest' | 'oldest' | 'most-views';
   onSortChange: (value: 'newest' | 'oldest' | 'most-views') => void;
   onClearAll: () => void;
@@ -613,8 +620,15 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       onLocationChange={filterState.onLocationChange}
       selectedCategory={filterState.selectedCategory}
       onCategoryChange={filterState.onCategoryChange}
+      selectedSubcategories={filterState.selectedSubcategories}
+      onSubcategoriesChange={filterState.onSubcategoriesChange}
       selectedEmploymentTypes={filterState.selectedEmploymentTypes}
       onEmploymentTypesChange={filterState.onEmploymentTypesChange}
+      salaryRange={filterState.salaryRange}
+      onSalaryRangeChange={filterState.onSalaryRangeChange}
+      timeFilter={filterState.timeFilter}
+      onTimeFilterChange={filterState.onTimeFilterChange}
+
       sortBy={filterState.sortBy}
       onSortChange={filterState.onSortChange}
       onClearAll={filterState.onClearAll}

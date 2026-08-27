@@ -1,12 +1,14 @@
 import { useState, useLayoutEffect, useRef, useCallback, type MouseEvent, type PointerEvent, type TouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { X, Search, MapPin, Briefcase, Clock, ArrowUpDown, Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { X, Search, MapPin, Briefcase, Clock, ArrowUpDown, Check, ChevronDown, SlidersHorizontal, Users, Wallet, Timer } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import LocationSearchInput from '@/components/LocationSearchInput';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
+import { SALARY_OPTIONS, TIME_FILTER_OPTIONS, type TimeFilterValue } from '@/lib/salaryRanges';
 
 interface SwipeFilterSheetProps {
   open: boolean;
@@ -18,8 +20,14 @@ interface SwipeFilterSheetProps {
   onLocationChange: (location: string) => void;
   selectedCategory: string;
   onCategoryChange: (value: string) => void;
+  selectedSubcategories: string[];
+  onSubcategoriesChange: (value: string[]) => void;
   selectedEmploymentTypes: string[];
   onEmploymentTypesChange: (value: string[]) => void;
+  salaryRange: string;
+  onSalaryRangeChange: (value: string) => void;
+  timeFilter: TimeFilterValue;
+  onTimeFilterChange: (value: TimeFilterValue) => void;
   sortBy: 'newest' | 'oldest' | 'most-views';
   onSortChange: (value: 'newest' | 'oldest' | 'most-views') => void;
   onClearAll: () => void;
@@ -36,6 +44,7 @@ const sortLabels: Record<string, string> = {
   'most-views': 'Mest visade',
 };
 
+
 export function SwipeFilterSheet({
   open,
   onClose,
@@ -45,8 +54,15 @@ export function SwipeFilterSheet({
   onLocationChange,
   selectedCategory,
   onCategoryChange,
+  selectedSubcategories,
+  onSubcategoriesChange,
   selectedEmploymentTypes,
   onEmploymentTypesChange,
+  salaryRange,
+  onSalaryRangeChange,
+  timeFilter,
+  onTimeFilterChange,
+
   sortBy,
   onSortChange,
   onClearAll,
@@ -302,6 +318,78 @@ export function SwipeFilterSheet({
                 </DropdownMenu>
               </div>
 
+              {/* Roll (underkategori) */}
+              {selectedCategory && selectedCategory !== 'all-categories' && (
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium text-white inline-flex items-center gap-2 pl-1">
+                    <Users className="h-3.5 w-3.5" />
+                    Roll
+                  </Label>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <button className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 text-left touch-manipulation">
+                        <Users className="h-4 w-4 text-white flex-shrink-0" />
+                        <span className="text-[15px] text-white flex-1 truncate">
+                          {selectedSubcategories.length === 0
+                            ? 'Alla roller'
+                            : selectedSubcategories.length === 1
+                            ? selectedSubcategories[0]
+                            : `${selectedSubcategories.length} roller valda`}
+                        </span>
+                        <ChevronDown className="h-4 w-4 text-white" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-60 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
+                      <DropdownMenuItem onClick={() => onSubcategoriesChange([])} className="cursor-pointer active:bg-white/10 text-white font-medium touch-manipulation py-3 text-[15px] leading-tight">
+                        Alla roller
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-white/20" />
+                      {(OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories ?? []).map((subcat, i, arr) => (
+                        <div key={subcat}>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              onSubcategoriesChange(
+                                selectedSubcategories.includes(subcat)
+                                  ? selectedSubcategories.filter(s => s !== subcat)
+                                  : [...selectedSubcategories, subcat]
+                              );
+                            }}
+                            className="cursor-pointer active:bg-white/10 text-white flex items-center justify-between gap-2 min-w-0 touch-manipulation py-3 text-[15px] leading-tight"
+                          >
+                            <span className="min-w-0 line-clamp-2 break-words">{subcat}</span>
+                            {selectedSubcategories.includes(subcat) && <Check className="h-4 w-4" />}
+                          </DropdownMenuItem>
+                          {i < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
+                        </div>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {selectedSubcategories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {selectedSubcategories.map((subcat) => (
+                        <Badge
+                          key={subcat}
+                          variant="secondary"
+                          className="bg-white/10 text-white flex items-center gap-1 cursor-pointer"
+                        >
+                          {subcat}
+                          <X
+                            className="h-3 w-3"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSubcategoriesChange(selectedSubcategories.filter(s => s !== subcat));
+                            }}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+
+
               {/* Employment type */}
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium text-white inline-flex items-center gap-2 pl-1">
@@ -347,6 +435,77 @@ export function SwipeFilterSheet({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+
+              {/* Lön */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-white inline-flex items-center gap-2 pl-1">
+                  <Wallet className="h-3.5 w-3.5" />
+                  Lön
+                </Label>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <button className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 text-left touch-manipulation">
+                      <Wallet className="h-4 w-4 text-white flex-shrink-0" />
+                      <span className="text-[15px] text-white flex-1 truncate">
+                        {SALARY_OPTIONS.find(o => o.value === salaryRange)?.label ?? 'Alla löner'}
+                      </span>
+                      {salaryRange ? (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSalaryRangeChange(''); }}
+                          className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 cursor-pointer"
+                          aria-label="Rensa lönefilter"
+                        >
+                          <X className="h-4 w-4 text-white" />
+                        </span>
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-white" />
+                      )}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-60 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
+                    {SALARY_OPTIONS.map((opt, i) => (
+                      <div key={opt.value || 'all'}>
+                        <DropdownMenuItem
+                          onClick={() => onSalaryRangeChange(opt.value)}
+                          className="cursor-pointer active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-3 text-[15px] leading-tight"
+                        >
+                          <span>{opt.label}</span>
+                          {salaryRange === opt.value && <Check className="h-4 w-4" />}
+                        </DropdownMenuItem>
+                        {i < SALARY_OPTIONS.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
+                      </div>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Tidsfilter */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-white inline-flex items-center gap-2 pl-1">
+                  <Timer className="h-3.5 w-3.5" />
+                  Publicerat
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {TIME_FILTER_OPTIONS.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      onClick={() => onTimeFilterChange(value)}
+                      className={`h-10 px-4 text-sm rounded-full border transition-all duration-200 active:scale-[0.97] touch-manipulation ${
+                        timeFilter === value
+                          ? 'bg-white/20 border-white/40 text-white font-medium'
+                          : 'bg-white/5 border-white/15 text-white/70'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+
 
               {/* Sort */}
               <div className="space-y-1.5">
