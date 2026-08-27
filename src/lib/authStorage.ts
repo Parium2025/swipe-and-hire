@@ -18,6 +18,14 @@ const LAST_ACTIVITY_KEY = 'parium-last-activity';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const SNAPSHOT_PREFIX = 'parium-auth-snapshot:';
+/**
+ * Ägaren av "Håll mig inloggad"-snapshoten = user id för det konto som senast
+ * loggade in explicit. Utan detta kunde en gammal flik med ETT ANNAT konto
+ * skriva över snapshoten vid sin bakgrunds-tokenrefresh, så att nästa
+ * webbläsarstart hydrerade fel konto (t.ex. arbetsgivare i stället för
+ * jobbsökare).
+ */
+const SNAPSHOT_OWNER_KEY = 'parium-auth-snapshot-owner';
 
 const SUPABASE_AUTH_KEY_PATTERN = /sb-[a-z0-9]+-auth-token/;
 
@@ -26,6 +34,17 @@ const isAuthStorageKey = (key: string): boolean => {
 };
 
 const snapshotKey = (key: string) => `${SNAPSHOT_PREFIX}${key}`;
+
+/** Plockar ut user id ur ett serialiserat GoTrue-sessionsvärde. */
+const extractUserId = (value: string): string | null => {
+  try {
+    const parsed = JSON.parse(value);
+    return parsed?.user?.id ?? parsed?.currentSession?.user?.id ?? null;
+  } catch {
+    return null;
+  }
+};
+
 
 /**
  * Module-level flag shared with useInactivityTimeout.
@@ -94,8 +113,47 @@ export const setRememberMe = (value: boolean): void => {
     Array.from(memoryMirror.keys())
       .filter((k) => k.startsWith(SNAPSHOT_PREFIX))
       .forEach((k) => memoryMirror.delete(k));
+    removeLocal(SNAPSHOT_OWNER_KEY);
   }
 };
+
+/**
+ * Anropas vid explicit inloggning (SIGNED_IN). Kontot som just loggade in tar
+ * över snapshoten, så att gamla flikar med andra konton inte kan skriva över
+ * den vid tokenrefresh.
+ */
+export const claimAuthSnapshotOwnership = (userId: string): void => {
+  if (!userId) return;
+  const previousOwner = readLocal(SNAPSHOT_OWNER_KEY);
+  if (previousOwner && previousOwner !== userId) {
+    // Byte av konto: släng gamla kontots snapshot direkt.
+    try {
+      const toRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(SNAPSHOT_PREFIX)) toRemove.push(k);
+      }
+      toRemove.forEach((k) => removeLocal(k));
+    } catch {}
+    Array.from(memoryMirror.keys())
+      .filter((k) => k.startsWith(SNAPSHOT_PREFIX))
+      .forEach((k) => memoryMirror.delete(k));
+  }
+  writeLocal(SNAPSHOT_OWNER_KEY, userId);
+
+  // Skriv om snapshoten för den aktuella fliken direkt.
+  if (shouldRememberUser()) {
+    try {
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const k = sessionStorage.key(i);
+        if (!k || !isAuthStorageKey(k)) continue;
+        const v = sessionStorage.getItem(k);
+        if (v) writeLocal(snapshotKey(k), v);
+      }
+    } catch {}
+  }
+};
+
 
 
 const getLastActivityTimestamp = (): number => {
@@ -285,10 +343,18 @@ export class AuthStorageAdapter implements Storage {
         console.warn('Failed to write auth key to sessionStorage:', ssError);
       }
 
-      // Snapshot in localStorage under renamed key — only if Remember Me is on.
+      // Snapshot in localStorage under renamed key — only if Remember Me is on
+      // AND denna session äger snapshoten. En gammal flik med ett annat konto
+      // får aldrig skriva över det senast inloggade kontots snapshot.
       if (shouldRememberUser()) {
-        writeLocal(snapshotKey(key), value);
+        const owner = readLocal(SNAPSHOT_OWNER_KEY);
+        const sessionUserId = extractUserId(value);
+        if (!owner || !sessionUserId || owner === sessionUserId) {
+          writeLocal(snapshotKey(key), value);
+          if (sessionUserId && !owner) writeLocal(SNAPSHOT_OWNER_KEY, sessionUserId);
+        }
       }
+
 
       updateLastActivity();
     } else {
@@ -306,9 +372,11 @@ export class AuthStorageAdapter implements Storage {
     // the snapshot on their next token refresh (since they continue running).
     if (isAuthStorageKey(key)) {
       removeLocal(snapshotKey(key));
+      removeLocal(SNAPSHOT_OWNER_KEY);
       // Belt-and-suspenders: also remove any leftover legacy entry.
       removeLocal(key);
     }
+
 
   }
 
@@ -343,6 +411,8 @@ export class AuthStorageAdapter implements Storage {
       }
     } catch {}
     localKeysToRemove.forEach((key) => removeLocal(key));
+    removeLocal(SNAPSHOT_OWNER_KEY);
+
 
     // Spegeln (används när localStorage är blockerat) måste också rensas.
     Array.from(memoryMirror.keys())
