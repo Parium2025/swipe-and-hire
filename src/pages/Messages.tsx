@@ -120,6 +120,23 @@ export default function Messages() {
   const tabSwipeStartX = useRef<number | null>(null);
   const isMobile = useIsMobile();
 
+  // Oändlig scroll i konversationslistan — hämtar nästa fönster i god tid
+  // innan användaren når botten (rootMargin), så listan känns obruten.
+  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = loadMoreSentinelRef.current;
+    if (!el || !hasMoreConversations) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) void loadMoreConversations();
+      },
+      { rootMargin: '600px 0px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMoreConversations, loadMoreConversations, loadingMoreConversations]);
+
+
   // Handle deep-link: /messages?conversation=<id>
   useEffect(() => {
     const conversationParam = searchParams.get('conversation');
