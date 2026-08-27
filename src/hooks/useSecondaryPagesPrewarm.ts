@@ -41,19 +41,31 @@ export function useSecondaryPagesPrewarm() {
       prewarmEmployerSettings(userId);
 
       // ── Statistik: fyll cachen om den är tom/utgången ──
-      try {
-        const days = readPersistedEmployerAnalyticsFilter();
-        const key = getEmployerAnalyticsCacheKey('overview', userId, days);
-        if (readEmployerAnalyticsCacheEntry(key)) return;
+      // Sidan har tre datakällor (översikt, avancerat, team). Tidigare värmdes
+      // bara översikten, så /reports visade fortfarande spinner i de två andra
+      // korten vid kallstart. Nu värms alla tre — sekventiellt så vi aldrig
+      // konkurrerar med kandidat-/annonsförvärmningen.
+      const days = readPersistedEmployerAnalyticsFilter();
+      const params: { p_user_id: string; p_days_back?: number } = { p_user_id: userId };
+      if (days !== null) params.p_days_back = days;
 
-        const params: { p_user_id: string; p_days_back?: number } = { p_user_id: userId };
-        if (days !== null) params.p_days_back = days;
+      const warmAnalytics = async (
+        kind: 'overview' | 'advanced' | 'team',
+        rpc: string,
+      ) => {
+        try {
+          const key = getEmployerAnalyticsCacheKey(kind, userId, days);
+          if (readEmployerAnalyticsCacheEntry(key)) return;
+          const { data, error } = await supabase.rpc(rpc as never, params as never);
+          if (!error && data) writeEmployerAnalyticsCache(key, data);
+        } catch {
+          // Tyst — sidan hämtar själv vid behov.
+        }
+      };
 
-        const { data, error } = await supabase.rpc('get_employer_analytics_v2', params);
-        if (!error && data) writeEmployerAnalyticsCache(key, data);
-      } catch {
-        // Tyst — sidan hämtar själv vid behov.
-      }
+      await warmAnalytics('overview', 'get_employer_analytics_v2');
+      await warmAnalytics('advanced', 'get_employer_advanced_analytics');
+      await warmAnalytics('team', 'get_employer_team_insights');
     };
 
     type IdleWindow = Window & {
