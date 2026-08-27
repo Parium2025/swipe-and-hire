@@ -372,9 +372,11 @@ export class AuthStorageAdapter implements Storage {
     // the snapshot on their next token refresh (since they continue running).
     if (isAuthStorageKey(key)) {
       removeLocal(snapshotKey(key));
+      removeLocal(SNAPSHOT_OWNER_KEY);
       // Belt-and-suspenders: also remove any leftover legacy entry.
       removeLocal(key);
     }
+
 
   }
 
