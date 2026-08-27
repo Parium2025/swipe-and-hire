@@ -183,20 +183,31 @@ const handler = async (req: Request): Promise<Response> => {
           messageContent = defaultTemplate.content.replace(/\{job_title\}/g, job.title);
         }
 
+        let failedForJob = 0;
+
         for (const applicant of uniqueApplicants) {
           let conversationId: string | null = null;
 
-          const { data: existingConversation, error: existingConversationError } = await supabase
+          // Viktigt: matcha konversationen på BÅDE jobb och kandidat.
+          // (Tidigare matchades bara candidate_id, vilket kraschade maybeSingle()
+          //  så fort kandidaten hade fler än en konversation → ingen återkoppling.)
+          const { data: existingConversations, error: existingConversationError } = await supabase
             .from("conversations")
-            .select("id")
+            .select("id, created_at")
             .eq("candidate_id", applicant.applicant_id)
-            .not("candidate_id", "is", null)
-            .maybeSingle();
+            .eq("job_id", job.id)
+            .order("created_at", { ascending: true })
+            .limit(1);
+
+          const existingConversation = existingConversations?.[0] ?? null;
 
           if (existingConversationError) {
             console.error(`Error finding conversation for candidate ${applicant.applicant_id}:`, existingConversationError);
+            failedForJob++;
             continue;
           }
+
+
 
           if (existingConversation?.id) {
             conversationId = existingConversation.id;
