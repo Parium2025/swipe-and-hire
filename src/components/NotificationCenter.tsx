@@ -47,6 +47,23 @@ function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>) {
   return truncated;
 }
 
+/**
+ * Visar hela texten i en tooltip när notistexten är klippt. Tooltip renderas bara
+ * när texten faktiskt inte får plats, så inget "tomt" hover-brus uppstår.
+ */
+function ClampTooltip({ show, text, children }: { show: boolean; text: string; children: React.ReactNode }) {
+  if (!show) return <>{children}</>;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side="bottom" align="start" className="max-w-[280px] whitespace-pre-wrap break-words text-xs leading-snug">
+        {text}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+
 // Notiser saknar ofta en explicit route i metadata (t.ex. chattnotiser som bara
 // bär conversation_id). Här härleds målet så att varje notis alltid går att klicka på.
 function resolveRoute(type: string, metadata?: Record<string, unknown> | null): string | undefined {
@@ -197,21 +214,31 @@ function NotificationItem({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
-          <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{notification.title}</span>
+          <ClampTooltip show={titleTruncated && !expanded} text={notification.title}>
+            <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{notification.title}</span>
+          </ClampTooltip>
           {!notification.is_read && (
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
         {notification.body && (
-          <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
+          <ClampTooltip show={bodyTruncated && !expanded} text={notification.body}>
+            <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{notification.body}</p>
+          </ClampTooltip>
         )}
+
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
-          {!route && canExpand && (
-            <span className="text-xs font-medium text-white/80 underline underline-offset-2">
+          {canExpand && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+              className="text-xs font-medium text-white/80 underline underline-offset-2"
+            >
               {expanded ? 'Visa mindre' : 'Visa mer'}
-            </span>
+            </button>
           )}
+
           {reportable && (
             <button
               type="button"
@@ -290,7 +317,9 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
-          <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
+          <ClampTooltip show={titleTruncated && !expanded} text={item.title}>
+            <span ref={titleRef} className={`text-sm font-medium text-white break-words leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
+          </ClampTooltip>
           {item.count > 1 && (
             <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
               {item.count}×
@@ -300,14 +329,24 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
             <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
-        {item.body && <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>}
+        {item.body && (
+          <ClampTooltip show={bodyTruncated && !expanded} text={item.body}>
+            <p ref={bodyRef} className={`text-xs text-white mt-3 break-words ${expanded ? '' : 'line-clamp-2'}`}>{item.body}</p>
+          </ClampTooltip>
+        )}
+
         <div className="flex items-center gap-3 mt-4">
           <span className="text-[10px] text-white">{timeAgo}</span>
-          {!route && canExpand && (
-            <span className="text-xs font-medium text-white/80 underline underline-offset-2">
+          {canExpand && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+              className="text-xs font-medium text-white/80 underline underline-offset-2"
+            >
               {expanded ? 'Visa mindre' : 'Visa mer'}
-            </span>
+            </button>
           )}
+
           {reportable && (
             <button
               type="button"
