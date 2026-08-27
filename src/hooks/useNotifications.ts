@@ -141,7 +141,7 @@ export function useNotifications() {
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
-        .or(`created_at.lt.${last.created_at},and(created_at.eq.${last.created_at},id.lt.${last.id})`);
+        .or(`created_at.lt."${last.created_at}",and(created_at.eq."${last.created_at}",id.lt.${last.id})`);
       if (excluded.length) query = query.not('type', 'in', `(${excluded.join(',')})`);
 
       const { data, error } = await query
