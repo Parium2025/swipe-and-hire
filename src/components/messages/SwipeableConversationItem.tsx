@@ -161,6 +161,13 @@ export function SwipeableConversationItem({
       Math.min(absDelta, threshold) +
       (MAX_TRANSLATE - threshold) * (1 - Math.exp(-over / (MAX_TRANSLATE - threshold)));
 
+    // Haptik exakt när tröskeln passeras — som iOS Mail. Endast vid övergången.
+    const passed = absDelta >= threshold;
+    if (passed !== thresholdPassedRef.current) {
+      thresholdPassedRef.current = passed;
+      if (passed) { try { navigator.vibrate?.(6); } catch { /* ignoreras */ } }
+    }
+
     const x = swipingRight ? resisted : -resisted;
     currentXRef.current = x;
     setX(x);
@@ -175,11 +182,11 @@ export function SwipeableConversationItem({
     if (offset <= -DELETE_THRESHOLD) {
       setShowConfirm(true);
     } else if (offset >= UNREAD_THRESHOLD && onMarkUnread && canMarkUnread) {
-      try { navigator.vibrate?.(8); } catch { /* ignoreras */ }
-      // Låt tillbakafjädringen hinna starta innan listan uppdateras — annars
-      // klipper omrenderingen animationen och det ser ryckigt ut.
-      window.setTimeout(() => onMarkUnread(), 220);
+      // Kör i samma frame som fingret släpps. Tillbakafjädringen sker via
+      // inline-transform på contentRef och påverkas inte av omrenderingen.
+      onMarkUnread();
     }
+    thresholdPassedRef.current = false;
 
     isSwipingRef.current = false;
     directionLockedRef.current = null;
