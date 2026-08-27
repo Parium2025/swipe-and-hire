@@ -65,7 +65,7 @@ export function CandidateProfilesManager({ userId }: Props) {
           <Users className="h-4 w-4 text-white" />
           <Label className="text-base font-medium text-white">Mina profiler</Label>
         </div>
-        <span className="text-xs text-white/60">{profiles.length}/{MAX_CANDIDATE_PROFILES}</span>
+        <span className="text-xs text-white">{profiles.length + 1}/{MAX_CANDIDATE_PROFILES}</span>
       </div>
 
       <p className="text-sm text-white">
