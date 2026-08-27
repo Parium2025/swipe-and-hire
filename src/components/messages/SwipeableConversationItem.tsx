@@ -96,10 +96,8 @@ export function SwipeableConversationItem({
    * det tonar bort — istället för att snärta tillbaka direkt.
    */
   const animateBack = useCallback((committed = false) => {
-    const contentMs = committed ? 460 : 280;
-    const easing = committed
-      ? 'cubic-bezier(0.32, 0.72, 0, 1)'   // iOS "sheet"-kurva
-      : 'cubic-bezier(0.25, 1, 0.4, 1)';
+    const contentMs = committed ? 340 : 240;
+    const easing = 'cubic-bezier(0.32, 0.72, 0, 1)'; // iOS "sheet"-kurva
 
     const content = contentRef.current;
     if (content) {
@@ -111,21 +109,22 @@ export function SwipeableConversationItem({
     }
     [deleteRef.current, unreadRef.current].forEach((el) => {
       if (!el) return;
-      const fadeMs = committed ? 320 : 200;
-      const delay = committed ? 120 : 0;
+      const fadeMs = committed ? 220 : 170;
+      const delay = committed ? 60 : 0;
       el.style.transition = `opacity ${fadeMs}ms ease-out ${delay}ms, transform ${fadeMs}ms ${easing} ${delay}ms`;
       el.style.opacity = '0';
-      el.style.transform = 'scale(0.6)';
+      el.style.transform = 'scale(0.82)';
       window.setTimeout(() => {
         if (el) el.style.transition = '';
       }, fadeMs + delay + 20);
     });
     // Behåll pillret monterat tills det tonat klart.
     if (committed) {
-      window.setTimeout(() => setRevealedSide(null), 460);
+      window.setTimeout(() => setRevealedSide(null), 340);
     } else {
       setRevealedSide(null);
     }
+
     pendingXRef.current = 0;
     currentXRef.current = 0;
   }, []);
