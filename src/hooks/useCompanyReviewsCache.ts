@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
+import { useAuth } from '@/hooks/useAuth';
 import { useCallback, useEffect } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 
@@ -68,6 +69,7 @@ const setLocalCache = (companyId: string, data: CompanyReviewsData) => {
  */
 export function useCompanyReviewsCache(companyId: string | null) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data, isLoading, refetch } = useQuery<CompanyReviewsData>({
     queryKey: ['company-reviews-cached', companyId],
@@ -123,7 +125,7 @@ export function useCompanyReviewsCache(companyId: string | null) {
 
       return result;
     },
-    enabled: !!companyId,
+    enabled: !!companyId && !!user,
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 10 * 60 * 1000, // 10 minutes
     // Initialize with localStorage cache for instant load
@@ -166,6 +168,7 @@ export function useCompanyReviewsCache(companyId: string | null) {
 
   // Prefetch reviews for a company (call when hovering over company card)
   const prefetchReviews = useCallback((targetCompanyId: string) => {
+    if (!user?.id) return Promise.resolve();
     queryClient.prefetchQuery({
       queryKey: ['company-reviews-cached', targetCompanyId],
       queryFn: async () => {
@@ -215,7 +218,7 @@ export function useCompanyReviewsCache(companyId: string | null) {
       },
       staleTime: 30 * 1000,
     });
-  }, [queryClient]);
+  }, [queryClient, user?.id]);
 
   return {
     reviews: data?.reviews || [],
@@ -233,9 +236,10 @@ export function useCompanyReviewsCache(companyId: string | null) {
  */
 export function useBatchPrefetchReviews() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useCallback(async (companyIds: string[]) => {
-    if (companyIds.length === 0) return;
+    if (!user?.id || companyIds.length === 0) return;
 
     // Only prefetch for companies not already cached
     const uncachedIds = companyIds.filter(id => {
@@ -301,7 +305,7 @@ export function useBatchPrefetchReviews() {
       queryClient.setQueryData(['company-reviews-cached', companyId], result);
       setLocalCache(companyId, result);
     });
-  }, [queryClient]);
+  }, [queryClient, user?.id]);
 }
 
 /**

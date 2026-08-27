@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { getTimeRemaining } from '@/lib/date';
 import { detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
@@ -1005,7 +1006,7 @@ const isRealtimeJobVisible = (job?: RealtimeJobPosting | null) => {
 };
 
 
-function useCompanyReviews(employerIds: string[]) {
+function useCompanyReviews(employerIds: string[], isEnabled: boolean) {
   return useQuery({
     queryKey: ['company-reviews-batch', employerIds],
     queryFn: async (): Promise<JobReviewMap> => {
@@ -1044,6 +1045,7 @@ function useCompanyReviews(employerIds: string[]) {
 export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   const { enabled = true, employerIds: employerIdsFilter, createdAfter, pageSize = 100, sort = 'newest' } = options;
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const {
@@ -1192,7 +1194,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   // 🔥 SCALE: useLiveJobBranding togs bort — RPC:n search_jobs returnerar redan
   // workplace_name + company_logo_url + alla branding-fält. Realtime-listenern
   // nedan håller datan färsk om en arbetsgivare byter logo eller namn.
-  const { data: reviewsData = {} } = useCompanyReviews(employerIds);
+  const { data: reviewsData = {} } = useCompanyReviews(employerIds, !!user);
 
   const enrichedJobs = useMemo(() => {
     const jobs = rawJobs
