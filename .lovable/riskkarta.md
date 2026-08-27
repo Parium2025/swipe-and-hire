@@ -30,7 +30,7 @@ Status per område. Skala:
 | Mina ansökningar | V | Kallstart utan blink, RLS verifierad. |
 | Chatt | V | Infinite scroll, avatarer via säker RPC, swipe-gester. |
 | Notiser | V | Keyset-paginering, korrekt olästräknare, tooltips. |
-| Profil (CV/bild/video) | V | Scopade drafts, filnamn, negativ mediecache. |
+| Profil (CV/bild/video) | V | Scopade drafts, filnamn, negativ mediecache. Städsvepet skyddar nu kandidatprofiler + videoposters (bugg fixad 2026-08-27). |
 | Dataexport & radering (GDPR) | V | Kandidatprofiler nu med i export. |
 | Notisinställningar (push/mail/in-app) | V | Alla tre kanaler respekterar inställningar. |
 | Flera kandidatprofiler (max 3) | Ö | Planerad, ej byggd klart. |
