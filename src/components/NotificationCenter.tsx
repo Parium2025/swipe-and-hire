@@ -631,6 +631,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
               variant="destructiveSoft"
               className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
             >
+              <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
