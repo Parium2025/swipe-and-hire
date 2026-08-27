@@ -1,0 +1,2 @@
+REVOKE SELECT ON public.company_reviews FROM authenticated;
+GRANT SELECT (id, company_id, rating, comment, is_anonymous, public_author_id, created_at, updated_at) ON public.company_reviews TO authenticated;
