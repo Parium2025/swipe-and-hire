@@ -896,7 +896,7 @@ export function useConversationMessages(conversationId: string | null) {
 
   // Load older messages (prepend to existing)
   const fetchOlderMessages = useCallback(async () => {
-    if (!conversationId || loadingOlder || !hasMore) return;
+    if (!conversationId || loadingOlderRef.current || !hasMore) return;
 
     const currentMessages = queryClient.getQueryData<ConversationMessage[]>(
       ['conversation-messages', conversationId]
@@ -904,50 +904,61 @@ export function useConversationMessages(conversationId: string | null) {
     if (!currentMessages || currentMessages.length === 0) return;
 
     const oldestTimestamp = currentMessages[0].created_at;
+    loadingOlderRef.current = true;
     setLoadingOlder(true);
 
     try {
+      // `lte` + dedupe istället för `lt`: meddelanden som delar exakt samma
+      // tidsstämpel vid sidgränsen får aldrig försvinna ur tråden.
       const { data: olderMessages, error } = await supabase
         .from('conversation_messages')
         .select('*')
         .eq('conversation_id', conversationId)
-        .lt('created_at', oldestTimestamp)
+        .lte('created_at', oldestTimestamp)
         .order('created_at', { ascending: false })
-        .limit(MESSAGES_PAGE_SIZE);
+        .limit(MESSAGES_PAGE_SIZE + 1);
 
       if (error) throw error;
 
-      if (!olderMessages || olderMessages.length === 0) {
+      const existingIds = new Set(currentMessages.map((m) => m.id));
+      const fresh = (olderMessages || []).filter((m) => !existingIds.has(m.id));
+
+      if (fresh.length === 0) {
         setHasMore(false);
         return;
       }
 
-      setHasMore(olderMessages.length >= MESSAGES_PAGE_SIZE);
+      setHasMore((olderMessages?.length || 0) >= MESSAGES_PAGE_SIZE + 1);
 
       // Reverse to chronological order
-      olderMessages.reverse();
+      fresh.reverse();
 
       // Fetch sender profiles for older messages
-      const newSenderIds = [...new Set(olderMessages.map(m => m.sender_id))];
+      const newSenderIds = [...new Set(fresh.map(m => m.sender_id))];
       const profileMap = await fetchCachedProfiles(newSenderIds);
 
-      const enrichedOlder = olderMessages.map(msg => ({
+      const enrichedOlder = fresh.map(msg => ({
         ...msg,
         sender_profile: profileMap.get(msg.sender_id),
       })) as ConversationMessage[];
 
-      // Prepend older messages to cache
+      // Prepend older messages to cache (dubblettskydd även mot realtime)
       queryClient.setQueryData<ConversationMessage[]>(
         ['conversation-messages', conversationId],
-        (old) => [...enrichedOlder, ...(old || [])]
+        (old) => {
+          const seen = new Set((old || []).map((m) => m.id));
+          return [...enrichedOlder.filter((m) => !seen.has(m.id)), ...(old || [])];
+        }
       );
     } catch (error) {
       console.error('Failed to load older messages:', error);
       toast.error('Kunde inte ladda äldre meddelanden');
     } finally {
+      loadingOlderRef.current = false;
       setLoadingOlder(false);
     }
-  }, [conversationId, loadingOlder, hasMore, queryClient]);
+  }, [conversationId, hasMore, queryClient]);
+
 
   // Subscribe to realtime messages for this conversation - instant cache update
   useEffect(() => {
