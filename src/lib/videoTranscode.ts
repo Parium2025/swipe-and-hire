@@ -686,8 +686,8 @@ async function runTranscode(
   /* --- ljud: kopiera AAC rakt av (ingen kvalitetsförlust) ---------------- */
   if (audioTrack && audioSamples.length > 0) {
     const description = getAudioDescription(mp4boxFile, audioTrack.id);
-    const meta = description
-      ? { decoderConfig: { codec: 'mp4a.40.2', description } }
+    const meta: EncodedAudioChunkMetadata | undefined = description
+      ? ({ decoderConfig: { codec: 'mp4a.40.2', description } } as unknown as EncodedAudioChunkMetadata)
       : undefined;
     for (const sample of audioSamples) {
       muxer.addAudioChunkRaw(
