@@ -18,6 +18,14 @@ const LAST_ACTIVITY_KEY = 'parium-last-activity';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const SNAPSHOT_PREFIX = 'parium-auth-snapshot:';
+/**
+ * Ägaren av "Håll mig inloggad"-snapshoten = user id för det konto som senast
+ * loggade in explicit. Utan detta kunde en gammal flik med ETT ANNAT konto
+ * skriva över snapshoten vid sin bakgrunds-tokenrefresh, så att nästa
+ * webbläsarstart hydrerade fel konto (t.ex. arbetsgivare i stället för
+ * jobbsökare).
+ */
+const SNAPSHOT_OWNER_KEY = 'parium-auth-snapshot-owner';
 
 const SUPABASE_AUTH_KEY_PATTERN = /sb-[a-z0-9]+-auth-token/;
 
@@ -26,6 +34,17 @@ const isAuthStorageKey = (key: string): boolean => {
 };
 
 const snapshotKey = (key: string) => `${SNAPSHOT_PREFIX}${key}`;
+
+/** Plockar ut user id ur ett serialiserat GoTrue-sessionsvärde. */
+const extractUserId = (value: string): string | null => {
+  try {
+    const parsed = JSON.parse(value);
+    return parsed?.user?.id ?? parsed?.currentSession?.user?.id ?? null;
+  } catch {
+    return null;
+  }
+};
+
 
 /**
  * Module-level flag shared with useInactivityTimeout.
