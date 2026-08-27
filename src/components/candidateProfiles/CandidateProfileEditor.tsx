@@ -10,7 +10,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { FileText, Camera, Video, Play, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useMediaUrl } from '@/lib/mediaManager';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { uploadMedia } from '@/lib/mediaManager';
 import { useVideoPoster } from '@/hooks/useVideoPoster';
 import { looksLikeVideoFile } from '@/lib/videoInput';
