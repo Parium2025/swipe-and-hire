@@ -145,16 +145,18 @@ export function CandidateProfilesManager({ userId }: Props) {
         ))}
       </div>
 
-      {/* Samma struktur som flikarna "Under granskning"/"Utgångna" – ingen fokusram, normal knappstorlek. */}
+      {/* Exakt samma knappstruktur som den inaktiva fliken "Utgångna". */}
       <div className="flex justify-center">
         <button
           type="button"
           disabled={!canCreateMore}
           onClick={openNew}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white bg-white/5 border border-white/10 md:hover:bg-white/10 transition-all duration-200 touch-manipulation outline-none focus:outline-none focus-visible:outline-none disabled:opacity-50"
+          className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation bg-white/5 text-white border border-white/10 md:hover:bg-white/10 disabled:opacity-50"
         >
-          <Plus className="h-4 w-4" />
-          <span>{canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
+          <span className="inline-flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            <span>{canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
+          </span>
         </button>
       </div>
 
