@@ -476,14 +476,15 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
         aria-label="Notifikationer"
       >
         <Bell className="h-5 w-5" />
-        {unreadCount > 0 && (
+        {displayCount > 0 && (
           <span
-            key={unreadCount}
+            key={popKey}
             className="parium-badge-pop absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[10px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 tabular-nums"
           >
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {displayCount > 9 ? '9+' : displayCount}
           </span>
         )}
+
       </button>
 
       <AnimatePresence>
