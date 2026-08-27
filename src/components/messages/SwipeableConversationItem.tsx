@@ -12,10 +12,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 
-const DELETE_THRESHOLD = 80;
-const MAX_TRANSLATE = 100;
-const UNREAD_THRESHOLD = 80;
-const DIRECTION_LOCK_PX = 8;
+const DELETE_THRESHOLD = 64;
+const MAX_TRANSLATE = 96;
+const UNREAD_THRESHOLD = 64;
+const DIRECTION_LOCK_PX = 6;
+
 
 interface SwipeableConversationItemProps {
   children: React.ReactNode;
@@ -67,19 +68,22 @@ export function SwipeableConversationItem({
 
     const del = deleteRef.current;
     if (del) {
-      const p = Math.min(Math.max(-x, 0) / DELETE_THRESHOLD, 1);
+      // Snabbare intoning: pillret är helt synligt redan innan tröskeln,
+      // så det känns som att det ligger under kortet i stället för att tona in.
+      const p = Math.min(Math.max(-x, 0) / (DELETE_THRESHOLD * 0.6), 1);
       del.style.opacity = `${p}`;
-      del.style.transform = `scale(${0.6 + p * 0.4})`;
+      del.style.transform = `scale(${0.82 + p * 0.18})`;
       if (p > 0.02 && revealedSide !== 'delete') setRevealedSide('delete');
     }
     const un = unreadRef.current;
     if (un) {
-      const p = Math.min(Math.max(x, 0) / UNREAD_THRESHOLD, 1);
+      const p = Math.min(Math.max(x, 0) / (UNREAD_THRESHOLD * 0.6), 1);
       un.style.opacity = `${p}`;
-      un.style.transform = `scale(${0.6 + p * 0.4})`;
+      un.style.transform = `scale(${0.82 + p * 0.18})`;
       if (p > 0.02 && revealedSide !== 'unread') setRevealedSide('unread');
     }
   }, [revealedSide]);
+
 
   const setX = useCallback((x: number) => {
     pendingXRef.current = x;
@@ -92,10 +96,8 @@ export function SwipeableConversationItem({
    * det tonar bort — istället för att snärta tillbaka direkt.
    */
   const animateBack = useCallback((committed = false) => {
-    const contentMs = committed ? 460 : 280;
-    const easing = committed
-      ? 'cubic-bezier(0.32, 0.72, 0, 1)'   // iOS "sheet"-kurva
-      : 'cubic-bezier(0.25, 1, 0.4, 1)';
+    const contentMs = committed ? 340 : 240;
+    const easing = 'cubic-bezier(0.32, 0.72, 0, 1)'; // iOS "sheet"-kurva
 
     const content = contentRef.current;
     if (content) {
@@ -107,21 +109,22 @@ export function SwipeableConversationItem({
     }
     [deleteRef.current, unreadRef.current].forEach((el) => {
       if (!el) return;
-      const fadeMs = committed ? 320 : 200;
-      const delay = committed ? 120 : 0;
+      const fadeMs = committed ? 220 : 170;
+      const delay = committed ? 60 : 0;
       el.style.transition = `opacity ${fadeMs}ms ease-out ${delay}ms, transform ${fadeMs}ms ${easing} ${delay}ms`;
       el.style.opacity = '0';
-      el.style.transform = 'scale(0.6)';
+      el.style.transform = 'scale(0.82)';
       window.setTimeout(() => {
         if (el) el.style.transition = '';
       }, fadeMs + delay + 20);
     });
     // Behåll pillret monterat tills det tonat klart.
     if (committed) {
-      window.setTimeout(() => setRevealedSide(null), 460);
+      window.setTimeout(() => setRevealedSide(null), 340);
     } else {
       setRevealedSide(null);
     }
+
     pendingXRef.current = 0;
     currentXRef.current = 0;
   }, []);
@@ -273,7 +276,7 @@ export function SwipeableConversationItem({
           <div className={cn("absolute inset-y-0 left-0 z-0 flex items-center pl-3", revealedSide === 'unread' ? 'visible' : 'invisible')}>
             <div
               ref={unreadRef}
-              style={{ opacity: 0, transform: 'scale(0.6)', willChange: 'transform, opacity' }}
+              style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
             >
               <button
                 className="rounded-full flex items-center gap-1 px-3 py-2 bg-blue-500/20 border border-blue-500/40 text-white font-medium text-xs"
@@ -295,7 +298,7 @@ export function SwipeableConversationItem({
         <div className={cn("absolute inset-y-0 right-0 z-0 flex items-center pr-3", revealedSide === 'delete' ? 'visible' : 'invisible')}>
           <div
             ref={deleteRef}
-            style={{ opacity: 0, transform: 'scale(0.6)', willChange: 'transform, opacity' }}
+            style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
           >
             <button
               className="rounded-full flex items-center gap-1 px-3 py-2 bg-destructive/20 border border-destructive/40 text-white font-medium text-xs"

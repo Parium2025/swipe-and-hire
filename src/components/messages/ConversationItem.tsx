@@ -96,10 +96,12 @@ export function ConversationItem({
           fallbackClassName="bg-white/10"
         />
         {conversation.unread_count > 0 && (
-          <div className="absolute -top-1 -left-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
-            {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
-          </div>
+          <span
+            aria-label="Olästa meddelanden"
+            className="absolute -top-0.5 -left-0.5 h-[11px] w-[11px] rounded-full bg-red-500 ring-2 ring-[hsl(var(--background))]"
+          />
         )}
+
       </div>
 
       {/* Content */}

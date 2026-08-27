@@ -413,6 +413,29 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
     [merged],
   );
 
+  // Vid "rensa"/"markera alla" hinner lokal och server-state gå isär i några
+  // frames — utan spärren blinkar badgen till en felaktig siffra innan den
+  // landar på noll.
+  const [pendingClear, setPendingClear] = useState(false);
+  const displayCount = pendingClear ? 0 : unreadCount;
+  const prevCountRef = useRef(displayCount);
+  const [popKey, setPopKey] = useState(0);
+
+  useEffect(() => {
+    // Poppa bara när siffran ökar. Vid minskning byts talet utan animation.
+    if (displayCount > prevCountRef.current) setPopKey((k) => k + 1);
+    prevCountRef.current = displayCount;
+  }, [displayCount]);
+
+  useEffect(() => {
+    if (!pendingClear) return;
+    if (unreadCount === 0) { setPendingClear(false); return; }
+    const t = window.setTimeout(() => setPendingClear(false), 4000);
+    return () => window.clearTimeout(t);
+  }, [pendingClear, unreadCount]);
+
+
+
 
 
   const navigate = useNavigate();
@@ -453,14 +476,15 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
         aria-label="Notifikationer"
       >
         <Bell className="h-5 w-5" />
-        {unreadCount > 0 && (
+        {displayCount > 0 && (
           <span
-            key={unreadCount}
+            key={popKey}
             className="parium-badge-pop absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[10px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 tabular-nums"
           >
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {displayCount > 9 ? '9+' : displayCount}
           </span>
         )}
+
       </button>
 
       <AnimatePresence>
@@ -486,7 +510,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => { markAllAsRead(); toastArchive.markAllAsRead(); }}
+                      onClick={() => { setPendingClear(true); markAllAsRead(); toastArchive.markAllAsRead(); }}
                       className="flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-medium text-white hover:bg-white/10 transition-colors"
                     >
                       Markera alla som lästa
@@ -501,7 +525,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => { clearAll(); toastArchive.clear(); }}
+                      onClick={() => { setPendingClear(true); clearAll(); toastArchive.clear(); }}
                       className="flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
