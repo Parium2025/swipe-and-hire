@@ -48,7 +48,7 @@ Status per område. Skala:
 | Mobil/responsivt (≤1180px) | V | Nav overflow-guard, TruncatedText, safe-area. |
 | Betalning (Stripe) | Ö | Backend förberedd, ej aktiverad. Juridik måste uppdateras först. |
 | Kapacitet / kostnadstak | Ö | Se pre-launch-checklistan: Cloud-uppgradering (e-post går via Lovables app-mejl, ingen extern leverantör). |
-| Felövervakning i prod | A | app_exceptions loggar, men ingen larmkanal till dig. |
+| Felövervakning i prod | V | app-exception-watchdog var 15:e min → mejl till admin vid kritiska fel. |
 | Lasttest i verklig miljö | Ö | Allt är simulerat/analyserat, inget riktigt lasttest kört. |
 
 ---
@@ -56,14 +56,12 @@ Status per område. Skala:
 ## Topp 5 att stänga före lansering
 
 1. **Push på iOS/web** — avgör om notiser räknas som en funktion vi säljer.
-2. **Larmkanal för fel** — app_exceptions → mail/Slack när något smäller i prod.
-3. **Stripe + juridik** — policy, DPA, registerförteckning (GDPR art. 30).
-4. **Kapacitetströsklar** — Cloud-plan och sändningstak innan trafik.
-5. **Riktigt lasttest** — ett skarpt test mot söket och kandidatlistorna.
+2. **Stripe + juridik** — policy, DPA, registerförteckning (GDPR art. 30).
+3. **Kapacitetströsklar** — Cloud-plan och sändningstak innan trafik.
+4. **Riktigt lasttest** — ett skarpt test mot söket och kandidatlistorna.
 
 ## Kvar på jobbsökarsidan (ej granskat än)
 
 - Onboarding-flödet för ny jobbsökare (första inloggning → första ansökan).
-- Ansökningsflödet i sig (frågor, snapshot, kvot, bekräftelse).
-- Landing/SEO-sidor sett från inloggad jobbsökare.
+- Ansökningsflödet: granskat (snapshot, dubbelspärr, kvot serverside, bekräftelse) — kvarstår skarpt test med riktig användare.
 - Min profil, Ekonomi/Prenumeration och Support på jobbsökarsidan.

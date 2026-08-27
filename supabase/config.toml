@@ -95,3 +95,5 @@ project_id = "jrjaegapuujushsiofoi"
     verify_jwt = false
   [functions.news-health-watchdog]
     verify_jwt = false
+  [functions.app-exception-watchdog]
+    verify_jwt = false

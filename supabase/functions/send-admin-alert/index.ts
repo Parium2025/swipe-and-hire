@@ -16,7 +16,7 @@ const ADMIN_EMAIL = Deno.env.get("ADMIN_ALERT_EMAIL") || "pariumab@hotmail.com";
 const MAX_ALERTS_PER_DAY = 20;
 
 interface AlertPayload {
-  type: 'rss_source_failure' | 'system_critical' | 'storage_warning' | 'news_watchdog';
+  type: 'rss_source_failure' | 'system_critical' | 'storage_warning' | 'news_watchdog' | 'cron_watchdog' | 'app_exception';
   source_name?: string;
   consecutive_failures?: number;
   error_message?: string;
@@ -126,6 +126,40 @@ serve(async (req) => {
         alertKey = `news-watchdog-${payload.details?.feed || 'all'}-${payload.details?.code || 'check'}`;
         cooldownMinutes = 720; // 12 h per problemtyp och feed
         idempotencyKey = `news-watchdog-${new Date().toISOString().slice(0, 10)}-${payload.details?.feed || 'all'}-${payload.details?.code || 'check'}`;
+        break;
+
+      case 'cron_watchdog':
+        templateData = {
+          alert_title: payload.details?.message || 'Schemalagt jobb behöver kontrolleras',
+          alert_emoji: payload.details?.severity === 'critical' ? '🚨' : '⚠️',
+          severity: payload.details?.severity === 'critical' ? 'critical' : 'warning',
+          timestamp,
+          summary: payload.details?.summary || 'Watchdoggen hittade ett problem i de schemalagda jobben.',
+          fields: Object.entries(payload.details || {})
+            .filter(([k]) => !['message', 'summary', 'severity'].includes(k))
+            .map(([k, v]) => ({ label: k, value: typeof v === 'string' ? v : JSON.stringify(v) })),
+          error_message: payload.error_message || '',
+        };
+        alertKey = `cron-watchdog-${payload.details?.code || 'check'}-${payload.details?.jobname || 'all'}`.slice(0, 200);
+        cooldownMinutes = 360; // 6 h per problemtyp och jobb
+        idempotencyKey = `cron-watchdog-${new Date().toISOString().slice(0, 13)}-${payload.details?.code || 'check'}-${payload.details?.jobname || 'all'}`;
+        break;
+
+      case 'app_exception':
+        templateData = {
+          alert_title: payload.details?.message || 'Appfel i produktion',
+          alert_emoji: '🚨',
+          severity: 'critical',
+          timestamp,
+          summary: payload.details?.summary || 'Riktiga användare får fel i appen just nu.',
+          fields: Object.entries(payload.details || {})
+            .filter(([k]) => !['message', 'summary'].includes(k))
+            .map(([k, v]) => ({ label: k, value: typeof v === 'string' ? v : JSON.stringify(v) })),
+          error_message: payload.error_message || '',
+        };
+        alertKey = `app-exception-${payload.details?.fingerprint || 'unknown'}`.slice(0, 200);
+        cooldownMinutes = 180; // 3 h per unikt fel
+        idempotencyKey = `app-exception-${payload.details?.fingerprint || 'unknown'}-${new Date().toISOString().slice(0, 13)}`;
         break;
 
       default:

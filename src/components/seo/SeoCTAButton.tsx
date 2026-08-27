@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SeoCTAButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
@@ -40,6 +41,11 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
     ref
   ) => {
     const navigate = useNavigate();
+    // Redan inloggad? Då är "Skapa konto" fel budskap — skicka in i appen istället
+    // för att bounca användaren via inloggningssidan.
+    const { user } = useAuth();
+    const isAuthed = !!user;
+    const resolvedLabel = isAuthed ? 'Öppna Parium' : label;
     const sizing =
       size === 'lg'
         ? 'min-h-[52px] px-8 text-base sm:text-lg'
@@ -58,7 +64,8 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
           // Snabbare svar än onClick (mobile premium-ergonomi)
           if (rest.disabled) return;
           e.preventDefault();
-          if (onClick) onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
+          if (isAuthed) navigate('/dashboard');
+          else if (onClick) onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
           else navigate(to, navState ? { state: navState } : undefined);
         }}
         onClick={(e) => e.preventDefault()}
@@ -74,7 +81,7 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
         style={{ WebkitTapHighlightColor: 'transparent' }}
         {...rest}
       >
-        {label}
+        {resolvedLabel}
         {showArrow && <ArrowRight className="h-4 w-4" />}
       </button>
     );
