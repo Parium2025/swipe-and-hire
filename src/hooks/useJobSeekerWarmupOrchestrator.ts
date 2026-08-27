@@ -28,4 +28,6 @@ export function useJobSeekerWarmupOrchestrator() {
   useJobSeekerMediaWarmup();
   useJobSearchProgressivePagination();
   useNotificationsPreload();
+  // 4. Kallstart för Sparade jobb / Mina ansökningar — samma nycklar som sidorna.
+  useJobSeekerPagePrewarm();
 }
