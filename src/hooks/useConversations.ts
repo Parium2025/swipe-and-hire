@@ -849,8 +849,10 @@ export function useConversationMessages(conversationId: string | null) {
   // Reset hasMore synchronously when conversation changes (before render)
   if (conversationId !== prevConversationIdRef.current) {
     prevConversationIdRef.current = conversationId;
+    loadingOlderRef.current = false;
     setHasMore(false);
   }
+
 
   const messagesQuery = useQuery({
     queryKey: ['conversation-messages', conversationId],
