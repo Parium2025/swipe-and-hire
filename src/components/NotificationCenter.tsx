@@ -510,7 +510,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => { markAllAsRead(); toastArchive.markAllAsRead(); }}
+                      onClick={() => { setPendingClear(true); markAllAsRead(); toastArchive.markAllAsRead(); }}
                       className="flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-medium text-white hover:bg-white/10 transition-colors"
                     >
                       Markera alla som lästa
