@@ -411,6 +411,8 @@ export class AuthStorageAdapter implements Storage {
       }
     } catch {}
     localKeysToRemove.forEach((key) => removeLocal(key));
+    removeLocal(SNAPSHOT_OWNER_KEY);
+
 
     // Spegeln (används när localStorage är blockerat) måste också rensas.
     Array.from(memoryMirror.keys())
