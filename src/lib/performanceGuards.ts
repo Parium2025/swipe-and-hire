@@ -117,6 +117,12 @@ export async function fetchCachedProfiles(userIds: string[]): Promise<Map<string
 
   if (missing.length === 0) return result;
 
+  const store = (profile: unknown) => {
+    if (!isProfileLite(profile)) return;
+    result.set(profile.user_id, profile);
+    writePersistentCache(`parium_profile_lite_v1_${profile.user_id}`, profile);
+  };
+
   const { data, error } = await rateLimited('profiles-batch-read', 100, async () => supabase
     .from('profiles')
     .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
@@ -124,14 +130,22 @@ export async function fetchCachedProfiles(userIds: string[]): Promise<Map<string
 
   if (error) throw error;
 
-  (data || []).forEach((profile) => {
-    if (!isProfileLite(profile)) return;
-    result.set(profile.user_id, profile);
-    writePersistentCache(`parium_profile_lite_v1_${profile.user_id}`, profile);
-  });
+  (data || []).forEach(store);
+
+  // Chattmotparter är inte längre läsbara rad-för-rad i `profiles` (känsliga
+  // fält som telefon och "Om mig" ska aldrig kunna hämtas via chatten).
+  // Visningsfälten hämtas i stället via en låst databasfunktion.
+  const stillMissing = missing.filter((id) => !result.has(id));
+  if (stillMissing.length > 0) {
+    const { data: chatData, error: chatError } = await supabase
+      .rpc('get_chat_member_profiles', { _user_ids: stillMissing });
+    if (chatError) throw chatError;
+    (chatData || []).forEach(store);
+  }
 
   return result;
 }
+
 
 export async function fetchCachedProfile(userId: string): Promise<ProfileLite | null> {
   const profiles = await fetchCachedProfiles([userId]);

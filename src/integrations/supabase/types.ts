@@ -3994,6 +3994,18 @@ export type Database = {
         }[]
       }
       get_application_quota: { Args: { p_user_id: string }; Returns: Json }
+      get_chat_member_profiles: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          company_logo_url: string
+          company_name: string
+          first_name: string
+          last_name: string
+          profile_image_url: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }[]
+      }
       get_consented_profile_for_employer: {
         Args: { p_employer_id: string; p_profile_id: string }
         Returns: {
