@@ -56,28 +56,26 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
         return;
       }
       
-      if (status === 'denied') {
-        if (!gpsPromptDismissedUntilReload) {
-          setVisible(true);
-          gpsPromptHasBeenShown = true;
-        }
-        return;
-      }
-      
-      if (status === 'prompt' && !gpsPromptDismissedUntilReload) {
+      if (gpsPromptDismissedUntilReload) return;
+
+      if (status === 'denied' || status === 'prompt') {
         timeoutId = setTimeout(() => {
+          // Vädret hann landa under väntetiden → ingen varning behövs.
+          if (weatherAvailableRef.current) return;
           checkGpsPermission().then(currentStatus => {
-            if (currentStatus === 'prompt') {
-              setVisible(true);
-              gpsPromptHasBeenShown = true;
-            } else if (currentStatus === 'granted') {
+            if (currentStatus === 'granted') {
               setGpsStatus('granted');
               setVisible(false);
               gpsPromptDismissedUntilReload = false;
+              return;
             }
+            setGpsStatus(currentStatus);
+            setVisible(true);
+            gpsPromptHasBeenShown = true;
           });
         }, GPS_PROMPT_DELAY_MS);
       }
+
     };
     
     const setupPermissionListener = async () => {
