@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
+import type { Conversation } from './useConversations';
 
 /**
  * Tysta / avtysta en enskild konversation.
@@ -9,6 +10,9 @@ import { useAuth } from './useAuth';
  * Tystad = inga notiser (klocka/push) skapas för nya meddelanden i just den
  * konversationen. Meddelandena landar fortfarande i inkorgen och syns när
  * användaren själv går in i chatten — precis som Slack.
+ *
+ * Känslan är optimistisk: ikon, haptik och notis sker i samma frame som
+ * trycket. Servern hinner ikapp i bakgrunden; vid fel rullas allt tillbaka.
  */
 export function useMuteConversation() {
   const { user } = useAuth();
@@ -27,8 +31,17 @@ export function useMuteConversation() {
       if (error) throw error;
       return { conversationId, muted };
     },
-    onSuccess: ({ muted, conversationId }) => {
-      void queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    onMutate: async ({ conversationId, muted }) => {
+      const key = ['conversations', user?.id];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Conversation[]>(key);
+
+      queryClient.setQueryData<Conversation[]>(key, (prev) =>
+        prev?.map((c) => (c.id === conversationId ? { ...c, is_muted: muted } : c))
+      );
+
+      // Direkt återkoppling — inte efter serversvaret.
+      try { navigator.vibrate?.(muted ? 8 : 6); } catch { /* ignoreras */ }
       toast.success(muted ? 'Konversationen är tystad' : 'Notiser påslagna igen', {
         description: muted
           ? 'Du får inga notiser härifrån. Meddelanden syns fortfarande i chatten.'
@@ -36,10 +49,18 @@ export function useMuteConversation() {
         // Klick på notisen tar dig direkt till konversationen.
         route: `/messages?conversation=${conversationId}`,
       } as Parameters<typeof toast.success>[1]);
+
+      return { previous };
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _vars, context) => {
       console.error('Failed to toggle conversation mute:', error);
+      if (context?.previous) {
+        queryClient.setQueryData(['conversations', user?.id], context.previous);
+      }
       toast.error('Kunde inte ändra notisinställningen');
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: ['conversations', user?.id] });
     },
   });
 
