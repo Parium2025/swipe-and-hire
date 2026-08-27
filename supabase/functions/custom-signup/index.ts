@@ -262,7 +262,8 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ 
       success: true, 
       message: "Konto skapat! Kolla din e-post för att bekräfta ditt konto.",
-      user: user.user,
+      // Exponera bara id — inte hela auth-objektet med metadata.
+      user: { id: user.user.id },
       needsConfirmation: true
     }), {
       status: 200,
