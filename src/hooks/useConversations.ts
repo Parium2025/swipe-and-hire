@@ -310,11 +310,10 @@ export function applyIncomingMessageToConversations(
 }
 
 /**
- * Hårt tak för hur många konversationer inkorgen laddar i ett svep.
- * Nyast först — äldre chattar nås via sökfältet. Skyddar både PostgREST:s
- * 1000-radersgräns och renderingen i listan.
+ * Hur många konversationer som laddas per svep. Inget hårt tak längre —
+ * listan växer med 300 åt gången när användaren scrollar mot slutet.
  */
-const CONVERSATIONS_LIMIT = 300;
+const CONVERSATIONS_PAGE_SIZE = 300;
 /** Max antal id:n per `in()`-filter så URL:en aldrig blir för lång. */
 const ID_CHUNK = 100;
 
@@ -325,6 +324,13 @@ export function useConversations() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxWaitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const identityRecoveryTriggeredRef = useRef(false);
+
+  // Växande fönster: queryKey hålls oförändrad (['conversations', userId])
+  // eftersom hela appen skriver direkt mot den nyckeln. Gränsen läses via ref
+  // så att queryFn alltid ser aktuellt värde.
+  const listLimitRef = useRef(CONVERSATIONS_PAGE_SIZE);
+  const [hasMoreConversations, setHasMoreConversations] = useState(false);
+  const [loadingMoreConversations, setLoadingMoreConversations] = useState(false);
 
   // Fetch all conversations for current user
   const conversationsQuery = useQuery({
@@ -338,7 +344,8 @@ export function useConversations() {
       // medlemsuppslaget (2+ rader per chatt) kapades redan runt 500 chattar
       // vilket gav "Okänd användare". Nu styr `conversations` urvalet:
       // RLS begränsar redan till chattar användaren är medlem i, så vi kan
-      // sortera nyast först och ta ett hårt, deterministiskt tak.
+      // sortera nyast först och hämta ett växande fönster.
+      const limit = listLimitRef.current;
       const { data: conversations, error: convError } = await supabase
         .from('conversations')
         .select(`
@@ -346,7 +353,10 @@ export function useConversations() {
           job:job_id (title)
         `)
         .order('last_message_at', { ascending: false, nullsFirst: false })
-        .limit(CONVERSATIONS_LIMIT);
+        .limit(limit);
+
+      setHasMoreConversations((conversations?.length ?? 0) >= limit);
+
 
       if (convError) throw convError;
 
