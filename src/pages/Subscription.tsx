@@ -97,12 +97,13 @@ const Subscription = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [currentPlan] = useState<'basic' | 'premium'>('basic');
+  // Verklig premiumstatus från databasen — inte ett hårdkodat värde.
+  const { isPremium } = useIsPremium();
+  const currentPlan: 'basic' | 'premium' = isPremium ? 'premium' : 'basic';
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('premium');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  const isPremium = currentPlan === 'premium';
   const nextBillingDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toLocaleDateString('sv-SE', {
     year: 'numeric',
     month: 'long',
