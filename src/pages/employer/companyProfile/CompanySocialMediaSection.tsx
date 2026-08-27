@@ -73,7 +73,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
     if (!newSocialLink.platform || !newSocialLink.url.trim()) {
       toast({
         title: "Ofullständig information",
-        description: "Välj en plattform och ange en URL",
+        description: "Välj en plattform och ange en URL.",
         variant: "destructive"
       });
       return;

@@ -1377,13 +1377,13 @@ const Profile = () => {
       
       toast({
         title: "Media markerad för borttagning",
-        description: "Tryck på 'Spara ändringar' för att slutföra"
+        description: "Tryck på 'Spara ändringar' för att slutföra."
       });
     } catch (error) {
       console.error('Error in deleteProfileMedia:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte förbereda borttagning",
+        description: "Kunde inte förbereda borttagning.",
         variant: "destructive"
       });
     }
@@ -1417,7 +1417,7 @@ const Profile = () => {
     
     toast({
       title: "Återställd!",
-      description: "Din profilvideo har återställts"
+      description: "Din profilvideo har återställts."
     });
   };
 
@@ -1451,13 +1451,13 @@ const Profile = () => {
       
       toast({
         title: "Cover-bild markerad för borttagning",
-        description: "Tryck på 'Spara ändringar' för att slutföra"
+        description: "Tryck på 'Spara ändringar' för att slutföra."
       });
     } catch (error) {
       console.error('Error in deleteCoverImage:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte förbereda borttagning",
+        description: "Kunde inte förbereda borttagning.",
         variant: "destructive"
       });
     }
@@ -1488,7 +1488,7 @@ const Profile = () => {
     
     toast({
       title: "Återställd!",
-      description: "Din cover-bild har återställts"
+      description: "Din cover-bild har återställts."
     });
   };
 
@@ -1515,7 +1515,7 @@ const Profile = () => {
         console.error('Error loading profile image for editing:', error);
         toast({
           title: "Fel",
-          description: "Kunde inte ladda bilden för redigering",
+          description: "Kunde inte ladda bilden för redigering.",
           variant: "destructive"
         });
       }
@@ -1592,7 +1592,7 @@ const Profile = () => {
 
       toast({
         title: "CV borttaget",
-        description: "Ditt CV har tagits bort från din profil"
+        description: "Ditt CV har tagits bort från din profil."
       });
 
       // Refresh profile to update state
@@ -1601,7 +1601,7 @@ const Profile = () => {
       console.error('Error deleting CV:', error);
       toast({
         title: "Kunde inte ta bort CV",
-        description: "Ett fel uppstod vid borttagning av CV",
+        description: "Ett fel uppstod vid borttagning av CV.",
         variant: "destructive"
       });
     }
@@ -1647,7 +1647,7 @@ const Profile = () => {
 
       toast({
         title: "Ändringar köade ✓",
-        description: "Sparas automatiskt när du är online igen",
+        description: "Sparas automatiskt när du är online igen.",
         duration: 4000,
       });
       return;
@@ -1811,7 +1811,7 @@ const Profile = () => {
         
         toast({
           title: "Profil uppdaterad",
-          description: "Dina ändringar har sparats",
+          description: "Dina ändringar har sparats.",
           duration: 2000,
           route: '/profile'
         });

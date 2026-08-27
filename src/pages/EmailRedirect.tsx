@@ -58,14 +58,14 @@ const EmailRedirect = () => {
       setCopySuccess(true);
       toast({
         title: "Länk kopierad!",
-        description: "Öppna nu Safari och klistra in länken",
+        description: "Öppna nu Safari och klistra in länken.",
       });
       setTimeout(() => setCopySuccess(false), 3000);
     } catch (err) {
       console.error('Failed to copy: ', err);
       toast({
         title: "Kunde inte kopiera",
-        description: "Kopiera länken manuellt från adressfältet",
+        description: "Kopiera länken manuellt från adressfältet.",
         variant: "destructive"
       });
     }

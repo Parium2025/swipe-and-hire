@@ -865,7 +865,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         console.error('Error loading profile image for editing:', error);
         toast({
           title: "Fel",
-          description: "Kunde inte ladda bilden för redigering",
+          description: "Kunde inte ladda bilden för redigering.",
           variant: "destructive"
         });
       }
@@ -1025,12 +1025,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     if (isVideoWithCover) {
       toast({
         title: "Video borttagen",
-        description: "Din cover-bild är nu din profilbild"
+        description: "Din cover-bild är nu din profilbild."
       });
     } else {
       toast({
         title: "Media borttagen",
-        description: "Din profilvideo har tagits bort"
+        description: "Din profilvideo har tagits bort."
       });
     }
 
@@ -1065,7 +1065,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     toast({
       title: "Återställd!",
-      description: "Din profilvideo har återställts"
+      description: "Din profilvideo har återställts."
     });
   };
 
@@ -1085,7 +1085,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     toast({
       title: "Cover-bild borttagen", 
-      description: "Din cover-bild har tagits bort"
+      description: "Din cover-bild har tagits bort."
     });
   };
 
@@ -1108,7 +1108,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     toast({
       title: "Återställd!",
-      description: "Din cover-bild har återställts"
+      description: "Din cover-bild har återställts."
     });
   };
 

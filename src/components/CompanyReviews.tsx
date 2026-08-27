@@ -72,7 +72,7 @@ const CompanyReviews = () => {
         console.error('Error fetching company data:', error);
         toast({
           title: "Fel",
-          description: "Kunde inte hämta företagsinformation",
+          description: "Kunde inte hämta företagsinformation.",
           variant: "destructive"
         });
         return null;

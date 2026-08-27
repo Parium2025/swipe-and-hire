@@ -148,7 +148,7 @@ const SupportAdmin = () => {
       console.error('Error updating status:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte uppdatera status",
+        description: "Kunde inte uppdatera status.",
         variant: "destructive"
       });
     }
@@ -177,7 +177,7 @@ const SupportAdmin = () => {
 
       toast({
         title: "Svar skickat",
-        description: "Ditt svar har skickats till kunden"
+        description: "Ditt svar har skickats till kunden."
       });
 
       setReplyMessage('');
@@ -186,7 +186,7 @@ const SupportAdmin = () => {
       console.error('Error sending reply:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte skicka svar",
+        description: "Kunde inte skicka svar.",
         variant: "destructive"
       });
     } finally {

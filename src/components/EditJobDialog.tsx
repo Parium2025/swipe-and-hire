@@ -1622,7 +1622,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
           console.error('Error updating question template:', error);
           toast({
             title: "Kunde inte uppdatera mall",
-            description: "Frågan är uppdaterad men mallen kunde inte synkroniseras",
+            description: "Frågan är uppdaterad men mallen kunde inte synkroniseras.",
             variant: "destructive",
           });
         }
@@ -1655,7 +1655,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
           console.error('Error updating question template:', error);
           toast({
             title: "Kunde inte uppdatera mall",
-            description: "Frågan är uppdaterad men mallen kunde inte synkroniseras",
+            description: "Frågan är uppdaterad men mallen kunde inte synkroniseras.",
             variant: "destructive",
           });
         }

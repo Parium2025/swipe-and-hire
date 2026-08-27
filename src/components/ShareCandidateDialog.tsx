@@ -94,7 +94,7 @@ export function ShareCandidateDialog({
             Dela kandidat
           </DialogTitle>
           <DialogDescription className="text-white/60">
-            Dela {candidateName} med en kollega
+            Dela {candidateName} med en kollega.
           </DialogDescription>
         </DialogHeader>
 

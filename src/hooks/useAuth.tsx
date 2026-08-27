@@ -1088,7 +1088,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Registrering lyckad!",
-        description: "Kontrollera din e-post för att aktivera ditt konto",
+        description: "Kontrollera din e-post för att aktivera ditt konto.",
         duration: 10000
       });
 
@@ -1361,14 +1361,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "SMS skickad",
-        description: "Kontrollera din telefon för verifieringskod"
+        description: "Kontrollera din telefon för verifieringskod."
       });
 
       return { data };
     } catch (error) {
       toast({
         title: "SMS-fel",
-        description: "Kunde inte skicka SMS",
+        description: "Kunde inte skicka SMS.",
         variant: "destructive"
       });
       return { error };
@@ -1394,14 +1394,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Inloggad!",
-        description: "Du är nu inloggad via telefon"
+        description: "Du är nu inloggad via telefon."
       });
 
       return { data };
     } catch (error) {
       toast({
         title: "Verifieringsfel",
-        description: "Fel kod eller utgången kod",
+        description: "Fel kod eller utgången kod.",
         variant: "destructive"
       });
       return { error };
@@ -1742,7 +1742,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Ny bekräftelselänk skickad!",
-        description: "Kolla din e-post för den nya bekräftelselänken",
+        description: "Kolla din e-post för den nya bekräftelselänken.",
         duration: 8000
       });
 

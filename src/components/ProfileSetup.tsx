@@ -134,7 +134,7 @@ const ProfileSetup = () => {
         enqueueProfileUpdate(updates);
         toast({
           title: "Profil köad ✓",
-          description: "Sparas automatiskt när du är online igen"
+          description: "Sparas automatiskt när du är online igen."
         });
         setLoading(false);
         return;
@@ -166,7 +166,7 @@ const ProfileSetup = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-foreground">Skapa din profil</CardTitle>
           <CardDescription className="text-muted-foreground">
-            Fyll i din profilinformation för att komma igång
+            Fyll i din profilinformation för att komma igång.
           </CardDescription>
         </CardHeader>
         <CardContent>

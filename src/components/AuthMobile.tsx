@@ -371,7 +371,7 @@ const AuthMobile = ({
           if (!jobSeekerData.firstName.trim()) {
             toast({
               title: "Förnamn krävs",
-              description: "Vänligen ange ditt förnamn",
+              description: "Vänligen ange ditt förnamn.",
               variant: "destructive"
             });
             setLoading(false);
@@ -381,7 +381,7 @@ const AuthMobile = ({
           if (!jobSeekerData.lastName.trim()) {
             toast({
               title: "Efternamn krävs",
-              description: "Vänligen ange ditt efternamn",
+              description: "Vänligen ange ditt efternamn.",
               variant: "destructive"
             });
             setLoading(false);
@@ -391,7 +391,7 @@ const AuthMobile = ({
           if (!jobSeekerData.phone.trim()) {
             toast({
               title: "Telefonnummer krävs",
-              description: "Vänligen ange ditt telefonnummer",
+              description: "Vänligen ange ditt telefonnummer.",
               variant: "destructive"
             });
             setLoading(false);
@@ -404,7 +404,7 @@ const AuthMobile = ({
           if (!employerData.firstName.trim()) {
             toast({
               title: "Förnamn krävs",
-              description: "Vänligen ange ditt förnamn",
+              description: "Vänligen ange ditt förnamn.",
               variant: "destructive"
             });
             setLoading(false);
@@ -414,7 +414,7 @@ const AuthMobile = ({
           if (!employerData.lastName.trim()) {
             toast({
               title: "Efternamn krävs",
-              description: "Vänligen ange ditt efternamn",
+              description: "Vänligen ange ditt efternamn.",
               variant: "destructive"
             });
             setLoading(false);
@@ -444,7 +444,7 @@ const AuthMobile = ({
           if (!employerData.employeeCount) {
             toast({
               title: "Anställda krävs",
-              description: "Vänligen välj antal anställda",
+              description: "Vänligen välj antal anställda.",
               variant: "destructive"
             });
             setLoading(false);
@@ -454,7 +454,7 @@ const AuthMobile = ({
           if (!employerData.address.trim()) {
             toast({
               title: "Adress krävs",
-              description: "Vänligen ange företagets adress",
+              description: "Vänligen ange företagets adress.",
               variant: "destructive"
             });
             setLoading(false);
@@ -464,7 +464,7 @@ const AuthMobile = ({
           if (!employerData.website.trim()) {
             toast({
               title: "Webbplats krävs", 
-              description: "Vänligen ange företagets webbplats",
+              description: "Vänligen ange företagets webbplats.",
               variant: "destructive"
             });
             setLoading(false);
@@ -475,7 +475,7 @@ const AuthMobile = ({
         if (!currentEmail.trim()) {
           toast({
             title: "E-post krävs",
-            description: "Vänligen ange din e-postadress",
+            description: "Vänligen ange din e-postadress.",
             variant: "destructive"
           });
           setLoading(false);
@@ -485,7 +485,7 @@ const AuthMobile = ({
         if (!currentPassword.trim()) {
           toast({
             title: "Lösenord krävs",
-            description: "Vänligen ange ett lösenord",
+            description: "Vänligen ange ett lösenord.",
             variant: "destructive"
           });
           setLoading(false);
@@ -496,7 +496,7 @@ const AuthMobile = ({
         if (currentPassword.length < 7) {
           toast({
             title: "För kort lösenord",
-            description: "Lösenordet måste vara minst 7 tecken",
+            description: "Lösenordet måste vara minst 7 tecken.",
             variant: "destructive"
           });
           setLoading(false);
@@ -508,7 +508,7 @@ const AuthMobile = ({
         if (currentPassword !== currentConfirmPassword) {
           toast({
             title: "Lösenorden matchar inte",
-            description: "Vänligen kontrollera att lösenorden är identiska",
+            description: "Vänligen kontrollera att lösenorden är identiska.",
             variant: "destructive"
           });
           setLoading(false);
@@ -587,7 +587,7 @@ const AuthMobile = ({
      if (!currentData.email) {
        toast({
          title: "E-post krävs",
-         description: "Ange din e-postadress först",
+         description: "Ange din e-postadress först.",
          variant: "destructive"
        });
        return;

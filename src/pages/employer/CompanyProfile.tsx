@@ -521,7 +521,7 @@ const CompanyProfile = () => {
 
       toast({
         title: "Företagsprofil uppdaterad",
-        description: "Din företagsprofil har uppdaterats"
+        description: "Din företagsprofil har uppdaterats."
       });
     } catch (error) {
       toast({

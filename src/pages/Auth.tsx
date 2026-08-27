@@ -392,7 +392,7 @@ const Auth = () => {
     if (newPassword !== confirmPassword) {
       toast({
         title: "Lösenorden matchar inte",
-        description: "Kontrollera att båda lösenorden är identiska",
+        description: "Kontrollera att båda lösenorden är identiska.",
         variant: "destructive"
       });
       return;
@@ -401,7 +401,7 @@ const Auth = () => {
     if (newPassword.length < 7) {
       toast({
         title: "Lösenordet är för kort",
-        description: "Lösenordet måste vara minst 7 tecken",
+        description: "Lösenordet måste vara minst 7 tecken.",
         variant: "destructive"
       });
       return;
@@ -496,7 +496,7 @@ const Auth = () => {
       if (msg.includes('different from') || msg.includes('same as') || msg.includes('should be different')) {
         toast({
           title: "Samma lösenord",
-          description: "Det nya lösenordet måste vara annorlunda än ditt nuvarande lösenord",
+          description: "Det nya lösenordet måste vara annorlunda än ditt nuvarande lösenord.",
           variant: "destructive"
         });
         return; // Stanna kvar på formuläret så användaren kan försöka igen

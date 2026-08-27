@@ -70,7 +70,7 @@ export function MediaMigrationControl() {
       <CardHeader>
         <CardTitle>Media-migrering</CardTitle>
         <CardDescription>
-          Migrera befintlig media till rätt buckets med konsekvent storage paths
+          Migrera befintlig media till rätt buckets med konsekvent storage paths.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

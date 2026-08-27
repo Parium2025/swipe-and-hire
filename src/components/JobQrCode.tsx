@@ -98,7 +98,7 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
           <DialogHeader>
             <DialogTitle className="text-white text-center">Dela jobbannons</DialogTitle>
             <DialogDescription className="text-white text-center text-sm">
-              Skanna QR-koden för att öppna annonsen
+              Skanna QR-koden för att öppna annonsen.
             </DialogDescription>
           </DialogHeader>
           

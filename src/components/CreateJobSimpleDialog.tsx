@@ -507,7 +507,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
         >
           <DialogHeader className="sr-only">
             <DialogTitle className="sr-only">Skapa jobb</DialogTitle>
-            <DialogDescription className="sr-only">Välj mall eller ange titel</DialogDescription>
+            <DialogDescription className="sr-only">Välj mall eller ange titel.</DialogDescription>
           </DialogHeader>
           <AnimatedBackground showBubbles={false} />
 
