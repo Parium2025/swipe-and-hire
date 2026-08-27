@@ -279,7 +279,7 @@ export function SwipeableConversationItem({
                 className="rounded-full flex items-center gap-1 px-3 py-2 bg-blue-500/20 border border-blue-500/40 text-white font-medium text-xs"
                 onClick={(e) => {
                   e.stopPropagation();
-                  animateBack();
+                  animateBack(true);
                   onMarkUnread?.();
                 }}
                 tabIndex={-1}
