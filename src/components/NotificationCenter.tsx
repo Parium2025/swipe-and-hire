@@ -53,14 +53,27 @@ function useTruncation<T extends HTMLElement>(ref: React.RefObject<T | null>, te
 }
 
 /**
- * Visar hela texten i en tooltip när notistexten är klippt. Tooltip renderas bara
- * när texten faktiskt inte får plats, så inget "tomt" hover-brus uppstår.
+ * Visar hela texten i en tooltip när notistexten är klippt.
+ * Trunkeringen mäts i samma ögonblick som muspekaren når texten – då är layouten
+ * garanterat stabil, vilket gör detektionen 100 % tillförlitlig (till skillnad från
+ * att mäta vid montering, där panelens öppningsanimation kan ge fel värde).
  */
-function ClampTooltip({ show, text, children }: { show: boolean; text: string; children: React.ReactNode }) {
-  if (!show) return <>{children}</>;
+function ClampTooltip({ text, children }: { text: string; children: React.ReactNode }) {
+  const ref = useRef<HTMLElement>(null);
+  const [open, setOpen] = useState(false);
+
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
+    <Tooltip
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) { setOpen(false); return; }
+        const el = ref.current;
+        const clipped = !!el && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1);
+        setOpen(clipped);
+      }}
+      disableHoverableContent
+    >
+      <TooltipTrigger asChild ref={ref as React.Ref<HTMLElement>}>{children}</TooltipTrigger>
       <TooltipContent side="bottom" align="start" className="max-w-[280px] whitespace-pre-wrap break-words text-xs leading-snug">
         {text}
       </TooltipContent>
