@@ -12,6 +12,7 @@ import {
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface LandingNavLink {
   label: string;
@@ -26,6 +27,8 @@ interface LandingNavProps {
 const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  // Är man redan inloggad ska knappen leda in i appen, inte till inloggning.
+  const { user } = useAuth();
   const pillScrollerRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
   // Döljer "Meny"-knappen medan man scrollar; den fadar in igen när scrollen stannar.
@@ -369,7 +372,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
             {/* Logga in — alltid längst till höger */}
             <div className="shrink-0 ml-auto">
               <Button
-                onClick={onLoginClick}
+                onClick={() => (user ? navigate('/dashboard') : onLoginClick())}
                 size="sm"
                 className={`group relative h-11 overflow-hidden rounded-full border px-7 text-[15px] font-medium text-white transition-all duration-300 hover:border-white/80 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] ${
                   isLightSection ? 'border-primary/10 bg-background/80 text-primary' : 'border-white bg-white/[0.045]'
@@ -377,7 +380,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               >
                 <span className="pointer-events-none absolute -inset-3 hidden rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:block [@media(hover:hover)]:group-hover:opacity-100" />
                 <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-65 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100" />
-                <span className="relative z-10">Logga in</span>
+                <span className="relative z-10">{user ? 'Öppna Parium' : 'Logga in'}</span>
               </Button>
             </div>
           </div>
