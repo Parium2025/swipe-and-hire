@@ -87,7 +87,11 @@ export function CandidateProfilesManager({ userId }: Props) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="break-words text-sm font-medium text-white">{p.label}</span>
+                  <TruncatedText
+                    text={p.label}
+                    className="max-w-full truncate text-sm font-medium text-white"
+                  />
+
                   {p.is_default && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] text-white">
                       <Star className="h-3 w-3 fill-current" /> Standard
