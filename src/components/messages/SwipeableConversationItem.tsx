@@ -245,18 +245,10 @@ export function SwipeableConversationItem({
     const commitUnread = (offset >= UNREAD_THRESHOLD || flickRight) && canUnread;
     const commitDelete = offset <= -DELETE_THRESHOLD || flickLeft;
 
-    if (commitDelete || commitUnread) {
-      // Samma lugna rörelse oavsett om man drog hela vägen eller flickade:
-      // kortet glider ut, visar pillret helt, pausar och glider hem.
-      animatePeek(commitDelete ? 'delete' : 'unread');
-    } else if (offset <= -8) {
-      // Släppt tidigt åt vänster: visa ändå hela rörelsen (peek) — lugnt och proffsigt.
-      animatePeek('delete');
-    } else if (offset >= 8 && canUnread) {
-      animatePeek('unread');
-    } else {
-      animateBack(false);
-    }
+    // Direkt respons som iOS Mail: kortet snappar tillbaka omedelbart —
+    // ingen lång "peek"-sekvens som får gesten att kännas trög.
+    animateBack(commitDelete || commitUnread);
+
 
     if (commitDelete) {
       setShowConfirm(true);
