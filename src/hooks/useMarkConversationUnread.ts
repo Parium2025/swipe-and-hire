@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase }
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { getIsOnline } from '@/lib/connectivityManager';
 import type { Conversation } from '@/hooks/useConversations';
