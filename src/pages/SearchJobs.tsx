@@ -453,8 +453,9 @@ const SearchJobs = memo(() => {
 
   // Prefetch reviews AND profiles when jobs load — DEFERRED tills efter mount
   // så det inte konkurrerar med sidebar-stängningsanimationen om main-tråden.
+  // Recensioner hämtas bara för inloggade användare.
   useEffect(() => {
-    if (companyIds.length === 0) return;
+    if (companyIds.length === 0 || !user) return;
     let cancelled = false;
     const run = () => {
       if (cancelled) return;
@@ -467,7 +468,7 @@ const SearchJobs = memo(() => {
     }
     const t = setTimeout(run, 250);
     return () => { cancelled = true; clearTimeout(t); };
-  }, [companyIds, prefetchReviews, prefetchProfiles]);
+  }, [companyIds, prefetchReviews, prefetchProfiles, user]);
 
   // Förladdda samma bildvariant som både korten och JobView använder.
   // Detta tar bort "höger-till-vänster"-laddningen som uppstod när korten visade
