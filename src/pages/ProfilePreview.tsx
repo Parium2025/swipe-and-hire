@@ -44,6 +44,29 @@ interface ProfileViewData {
   cover_image_url?: string;
 }
 
+// Exakt ålder – tar hänsyn till om födelsedagen passerat i år.
+const calcAge = (birthDate?: string | null): number | undefined => {
+  if (!birthDate) return undefined;
+  const born = new Date(birthDate);
+  if (Number.isNaN(born.getTime())) return undefined;
+  const today = new Date();
+  let age = today.getFullYear() - born.getFullYear();
+  const monthDiff = today.getMonth() - born.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < born.getDate())) age -= 1;
+  return age >= 0 && age < 130 ? age : undefined;
+};
+
+// Visar ort + hemort utan dubblett ("Vega, Vega").
+const formatResidence = (location?: string | null, homeLocation?: string | null): string => {
+  const primary = (location || '').trim();
+  const secondary = (homeLocation || '').trim();
+  if (!primary) return secondary;
+  if (!secondary) return primary;
+  if (primary.toLowerCase() === secondary.toLowerCase()) return primary;
+  if (primary.toLowerCase().includes(secondary.toLowerCase())) return primary;
+  return `${primary}, ${secondary}`;
+};
+
 export default function ProfilePreview() {
   const { profile, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl } = useAuth();
   const [consentedData, setConsentedData] = useState<ProfileViewData | null>(null);
@@ -84,7 +107,7 @@ export default function ProfilePreview() {
           user_id: profile.user_id,
           first_name: profile.first_name || '',
           last_name: profile.last_name || '',
-          age: profile.birth_date ? new Date().getFullYear() - new Date(profile.birth_date).getFullYear() : undefined,
+          age: calcAge(profile.birth_date),
           bio: profile.bio || '',
           location: profile.location || profile.home_location || '',
           phone: profile.phone || '',
@@ -145,10 +168,13 @@ export default function ProfilePreview() {
   }, [preloadedVideoUrl, profile?.video_url]);
 
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
-    if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
+    // Hooks måste alltid köras i samma ordning – aldrig efter en villkorlig return.
     const { toast } = useToast();
     const device = useDevice();
     const isMobile = device === 'mobile';
+
+    if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
+
 
     // Ordräknare för bio
     const countWords = (text: string) => {
@@ -266,7 +292,7 @@ export default function ProfilePreview() {
                     <p>{data.age} år</p>
                   )}
                   {data.location && (
-                    <p>Bor i {data.location}{profile?.home_location ? `, ${profile.home_location}` : ''}</p>
+                    <p>Bor i {formatResidence(data.location, profile?.home_location)}</p>
                   )}
                 </div>
                 
@@ -351,7 +377,7 @@ export default function ProfilePreview() {
           </div>
 
           {/* Scrollbart innehåll - exakt samma struktur som Min Profil */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain custom-scrollbar p-2 space-y-2" style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}>
             
             {/* PERSONLIG INFORMATION */}
             {isConsented && (
@@ -413,10 +439,8 @@ export default function ProfilePreview() {
                   {data.location && (
                     <div>
                       <p className="text-xs text-white">Ort:</p>
-                      <p className="text-[11px] text-white">{data.location}</p>
-                      {profile?.home_location && (
-                        <p className="text-[11px] text-white">{profile.home_location}</p>
-                      )}
+                      <p className="text-[11px] text-white break-words">{formatResidence(data.location, profile?.home_location)}</p>
+
                     </div>
                   )}
                 </div>
@@ -447,10 +471,13 @@ export default function ProfilePreview() {
                 </h3>
                 <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-3">
                   {/* Anställningsstatus */}
-                  <div className="space-y-0.5">
-                    <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Anställningsstatus?</p>
-                    <p className="text-[11px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_type)}</p>
-                  </div>
+                  {data.employment_type && (
+                    <div className="space-y-0.5">
+                      <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Anställningsstatus?</p>
+                      <p className="text-[11px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_type)}</p>
+                    </div>
+                  )}
+
 
                   {/* Arbetstid - visa bara om inte arbetssökande */}
                   {data.employment_type !== 'arbetssokande' && data.work_schedule && (
@@ -661,7 +688,7 @@ export default function ProfilePreview() {
                   <p className="text-sm text-white">{consentedData.age} år</p>
                 )}
                 {consentedData?.location && (
-                  <p className="text-sm text-white">Bor i {consentedData.location}{profile?.home_location ? `, ${profile.home_location}` : ''}</p>
+                  <p className="text-sm text-white">Bor i {formatResidence(consentedData.location, profile?.home_location)}</p>
                 )}
               </div>
             </div>
@@ -712,10 +739,7 @@ export default function ProfilePreview() {
               {consentedData?.location && (
                 <div className="flex flex-col items-start gap-0.5 min-w-0">
                   <p className="text-[10px] sm:text-xs text-white font-medium">Ort:</p>
-                  <p className="text-white text-[9px] sm:text-[10px] break-words">{consentedData.location}</p>
-                  {profile?.home_location && (
-                    <p className="text-white text-[9px] sm:text-[10px] break-words">{profile.home_location}</p>
-                  )}
+                  <p className="text-white text-[9px] sm:text-[10px] break-words">{formatResidence(consentedData.location, profile?.home_location)}</p>
                 </div>
               )}
             </CardContent>
@@ -741,7 +765,7 @@ export default function ProfilePreview() {
                     </p>
                   </div>
                 )}
-                {consentedData?.work_schedule && (
+                {consentedData?.employment_type !== 'arbetssokande' && consentedData?.work_schedule && (
                   <div className="flex flex-col items-start gap-0.5 min-w-0">
                     <p className="text-[10px] sm:text-xs text-white font-medium break-words">Hur mycket jobbar du idag?</p>
                     <p className="text-white text-[9px] sm:text-[10px] break-words">Svar: {getWorkingHoursLabel(consentedData.work_schedule)}</p>
@@ -837,15 +861,16 @@ export default function ProfilePreview() {
                 {/* iPhone notch */}
                 <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-1.5 w-10 rounded-full bg-black border border-gray-800"></div>
 
-                {/* Innehåll med Parium bakgrund */}
+                {/* Innehåll med Parium bakgrund – ramen scrollar aldrig själv (all scroll sker i detaljvyn) */}
                 <div 
-                  className="absolute inset-0 rounded-[2rem] overflow-y-auto overflow-x-hidden custom-scrollbar"
-                  style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', touchAction: 'pan-y', overscrollBehaviorX: 'none' }}
+                  className="absolute inset-0 rounded-[2rem] overflow-hidden"
+                  style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', overscrollBehavior: 'contain' }}
                 >
                   <div className="h-full p-0">
                     <ProfileView data={consentedData} isConsented={true} />
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
