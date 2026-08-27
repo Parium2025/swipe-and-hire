@@ -576,10 +576,28 @@ export function useConversations() {
 
   // Avatar prefetch is handled inside queryFn — no duplicate useEffect needed
 
+  // Stabil nyckel av användarens konversations-id:n. Används för att sätta ett
+  // SERVER-SIDE filter på meddelandekanalen — utan det skulle varje
+  // conversation_messages-INSERT i hela plattformen skickas till varje ansluten
+  // klient (RLS utvärderas per prenumerant → O(klienter × meddelanden)).
+  const conversationIdsKey = useMemo(() => {
+    const ids = (conversationsQuery.data || []).map((c) => c.id);
+    return Array.from(new Set(ids)).sort().join(',');
+  }, [conversationsQuery.data]);
+
   // Subscribe to realtime updates for new messages
   // Debounced to prevent refetch storms at scale (1M+ users)
   useEffect(() => {
     if (!user) return;
+
+    const idList = conversationIdsKey ? conversationIdsKey.split(',') : [];
+    const knownIds = new Set(idList);
+    // Postgres-filter har en längdgräns; över 100 id:n faller vi tillbaka på
+    // ofiltrerad kanal + klientfiltrering (extremfall).
+    const messageFilter =
+      idList.length > 0 && idList.length <= 100
+        ? `conversation_id=in.(${idList.join(',')})`
+        : undefined;
 
     const channel = createRealtimeChannel('conversations-realtime')
       .on(
@@ -588,7 +606,9 @@ export function useConversations() {
           event: 'INSERT',
           schema: 'public',
           table: 'conversation_messages',
+          ...(messageFilter ? { filter: messageFilter } : {}),
         },
+
         (payload) => {
           const msg = payload.new as IncomingRealtimeMessage;
           if (!msg?.conversation_id) return;
