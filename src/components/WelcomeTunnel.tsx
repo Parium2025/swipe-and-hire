@@ -1787,7 +1787,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 />
                 <div className="flex items-center justify-between mt-1.5 gap-3">
                   <span className="text-xs text-white break-words">
-                    Du kan alltid ändra texten senare under Min profil
+                    Du kan alltid ändra texten senare under Min profil.
                   </span>
                   <span className={`text-sm shrink-0 ${countWords(formData.bio) > 250 ? 'text-red-300' : 'text-white'}`}>
                     {countWords(formData.bio)}/250 ord

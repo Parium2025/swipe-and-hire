@@ -537,7 +537,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
         >
           {currentApps.length === 0 ? (
             <div className="text-center py-12 text-sm text-white h-full min-h-[40vh] flex items-center justify-center">
-              Inga kandidater i detta steg
+              Inga kandidater i detta steg.
             </div>
           ) : (
             <div className="flex flex-col gap-2">

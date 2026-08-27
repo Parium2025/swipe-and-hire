@@ -228,7 +228,7 @@ const MyApplications = () => {
     return (
        <div className="responsive-container-wide">
         <div className="text-center py-12 text-red-400">
-          Något gick fel vid hämtning av ansökningar
+          Något gick fel vid hämtning av ansökningar.
         </div>
       </div>
     );

@@ -38,7 +38,7 @@ export const CandidateSummarySection = ({
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-white" />
           <span className="text-sm text-white">
-            Kandidaten har inte laddat upp något CV
+            Kandidaten har inte laddat upp något CV.
           </span>
         </div>
       </div>
