@@ -284,7 +284,7 @@ const CandidatesContent = () => {
 
         {error ? (
           <div className="text-center py-12 text-destructive">
-            Något gick fel vid hämtning av kandidater
+            Något gick fel vid hämtning av kandidater.
           </div>
         ) : safeApplications.length === 0 && isLoading ? (
           <Card className="bg-white/5 border-white/10 hover:border-white/50">

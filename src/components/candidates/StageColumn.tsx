@@ -267,7 +267,7 @@ export const StageColumn = ({
 
           {candidates.length === 0 && !isOver && !isLoadingMore && (
             <div className="text-center py-8 text-xs text-white">
-              Inga kandidater i detta steg
+              Inga kandidater i detta steg.
             </div>
           )}
         </div>

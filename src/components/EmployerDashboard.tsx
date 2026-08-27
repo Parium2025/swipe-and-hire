@@ -739,7 +739,7 @@ const EmployerDashboard = memo(() => {
       {searchTerm && (
         <div className="text-sm text-white mb-4">
           {tabFilteredJobs.length === 0 ? (
-            <span>Inga annonser stämde med din sökning</span>
+            <span>Inga annonser stämde med din sökning.</span>
           ) : (
             <span>
               Visar {tabFilteredJobs.length} av {jobs.length} annonser
@@ -753,7 +753,7 @@ const EmployerDashboard = memo(() => {
         {tabFilteredJobs.length === 0 ? (
           searchTerm.trim() ? (
             <div className="text-center text-white py-12 font-medium text-sm">
-              Inga annonser stämde med din sökning
+              Inga annonser stämde med din sökning.
             </div>
           ) : activeTab === 'active' ? (
             <EmptyJobsCta hasPreviousJobs={hasPreviousJobs} />
@@ -840,7 +840,7 @@ const EmployerDashboard = memo(() => {
         ) : tabFilteredJobs.length === 0 ? (
           searchTerm.trim() ? (
             <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
-              <span>Inga annonser stämde med din sökning</span>
+              <span>Inga annonser stämde med din sökning.</span>
             </div>
           ) : activeTab === 'active' ? (
             <EmptyJobsCta compact hasPreviousJobs={hasPreviousJobs} />

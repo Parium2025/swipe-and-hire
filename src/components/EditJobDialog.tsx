@@ -2097,7 +2097,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                               
                               {occupationSearchTerm.trim().length > 0 && occupationSearchTerm.trim().length < 2 && (
                                 <div className="py-3 px-3 text-center text-white not-italic text-sm">
-                                  Skriv minst 2 bokstäver för att söka
+                                  Skriv minst 2 bokstäver för att söka.
                                 </div>
                               )}
                             </div>
@@ -2598,7 +2598,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                             
                             {customQuestions.length === 0 ? (
                               <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
-                                Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
+                                Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på.
                               </div>
                             ) : (
                               <DndContext
