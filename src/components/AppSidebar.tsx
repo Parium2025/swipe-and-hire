@@ -1,5 +1,7 @@
-import React, { useEffect, useState, memo, useMemo, useCallback, startTransition } from "react";
+import React, { useEffect, useState, memo, useMemo, useCallback, useRef, startTransition } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
