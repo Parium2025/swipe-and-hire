@@ -394,6 +394,41 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, safeSavedJobs, queryClient]);
 
+  // ── Realtime: egna rader i saved_jobs / swipe_actions (kryss-enhet-sync) ──
+  // Utan detta uppdateras inte antalet "Sparade Jobb (n)" om användaren sparar
+  // eller skippar ett jobb på en annan enhet/flik medan sidan är öppen.
+  useEffect(() => {
+    if (!user?.id) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleRefresh = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
+      }, 150);
+    };
+
+    const channel = createRealtimeChannel(`saved-jobs-rows-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
+        scheduleRefresh
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'swipe_actions', filter: `user_id=eq.${user.id}` },
+        scheduleRefresh
+      )
+      .subscribe();
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
+
+
+
   // ── Optimistic remove (used when user confirms unsave) ──
   const removeSavedJobLocally = useCallback((jobId: string) => {
     if (!user?.id) return;
