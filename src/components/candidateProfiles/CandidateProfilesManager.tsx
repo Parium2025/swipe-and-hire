@@ -142,10 +142,10 @@ export function CandidateProfilesManager({ userId }: Props) {
 
       <Button
         type="button"
-        variant="outline"
+        variant="glass"
         disabled={!canCreateMore}
         onClick={openNew}
-        className="w-full border-white/20 bg-white/5 text-white md:hover:bg-white/10"
+        className="w-full h-12 text-sm"
       >
         <Plus className="mr-2 h-4 w-4" />
         {canCreateMore ? 'Ny profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}
