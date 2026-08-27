@@ -127,6 +127,7 @@ const useEmployerStatsLiveSync = (userId: string | undefined) => {
 export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'personal') => {
   const { user, profile } = useAuth();
   const orgId = profile?.organization_id || null;
+  useEmployerStatsLiveSync(user?.id);
 
   return useQuery<EmployerJobsCounts>({
     queryKey: ['employer-jobs-counts', scope, orgId, user?.id],
