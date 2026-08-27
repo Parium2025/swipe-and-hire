@@ -620,8 +620,15 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       onLocationChange={filterState.onLocationChange}
       selectedCategory={filterState.selectedCategory}
       onCategoryChange={filterState.onCategoryChange}
+      selectedSubcategories={filterState.selectedSubcategories}
+      onSubcategoriesChange={filterState.onSubcategoriesChange}
       selectedEmploymentTypes={filterState.selectedEmploymentTypes}
       onEmploymentTypesChange={filterState.onEmploymentTypesChange}
+      salaryRange={filterState.salaryRange}
+      onSalaryRangeChange={filterState.onSalaryRangeChange}
+      timeFilter={filterState.timeFilter}
+      onTimeFilterChange={filterState.onTimeFilterChange}
+
       sortBy={filterState.sortBy}
       onSortChange={filterState.onSortChange}
       onClearAll={filterState.onClearAll}
