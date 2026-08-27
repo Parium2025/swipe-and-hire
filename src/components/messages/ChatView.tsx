@@ -741,9 +741,12 @@ export function ChatView({
             {displayName === 'Okänd användare' ? (
               <Skeleton className="h-4 w-28 bg-white/10 rounded inline-block" />
             ) : (
-              <span className="block w-full min-w-0 truncate font-semibold text-pure-white">
-                {displayName}
-              </span>
+              <TruncatedText
+                text={displayName}
+                lines={1}
+                side="bottom"
+                className="font-semibold text-pure-white"
+              />
             )}
           </h2>
           {conversation.is_group && (
@@ -751,17 +754,18 @@ export function ChatView({
               {conversation.members.length} medlemmar
             </p>
           )}
-          {snapshot?.job_title ? (
+          {(snapshot?.job_title || conversation.job?.title) && (
             <div className="text-pure-white text-xs flex min-w-0 items-center gap-1">
               <Briefcase className="h-3 w-3 shrink-0" />
-              <span className="block min-w-0 flex-1 truncate">{snapshot.job_title}</span>
-            </div>
-          ) : conversation.job && (
-            <div className="text-pure-white text-xs flex min-w-0 items-center gap-1">
-              <Briefcase className="h-3 w-3 shrink-0" />
-              <span className="block min-w-0 flex-1 truncate">{conversation.job.title}</span>
+              <TruncatedText
+                text={(snapshot?.job_title || conversation.job?.title) as string}
+                lines={1}
+                side="bottom"
+                className="min-w-0 flex-1"
+              />
             </div>
           )}
+
         </div>
 
         {/* Tysta konversationen */}
