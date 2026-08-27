@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Heart, Bell, Loader2 } from 'lucide-react';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { SearchCriteria } from '@/hooks/useSavedSearches';
 
 interface SaveSearchDialogProps {
@@ -35,9 +36,12 @@ export function SaveSearchDialog({
     const parts: string[] = [];
     if (criteria.search_query) parts.push(criteria.search_query);
     if (criteria.city) parts.push(criteria.city);
-    if (criteria.category) parts.push(criteria.category);
+    if (criteria.category) {
+      const cat = OCCUPATION_CATEGORIES.find((c) => c.value === criteria.category);
+      parts.push(cat?.label ?? criteria.category);
+    }
     if (criteria.employment_types?.length) {
-      parts.push(criteria.employment_types.join(', '));
+      parts.push(criteria.employment_types.map(getEmploymentTypeLabel).join(', '));
     }
     return parts.length > 0 ? parts.slice(0, 2).join(' - ') : 'Min sökning';
   };
@@ -76,7 +80,7 @@ export function SaveSearchDialog({
     criteriaSummary.push(cat?.label ?? criteria.category);
   }
   if (criteria.employment_types?.length) {
-    criteriaSummary.push(criteria.employment_types.join(', '));
+    criteriaSummary.push(criteria.employment_types.map(getEmploymentTypeLabel).join(', '));
   }
   if (criteria.salary_min || criteria.salary_max) {
     const min = criteria.salary_min ? `${criteria.salary_min.toLocaleString()} kr` : '';
@@ -139,7 +143,7 @@ export function SaveSearchDialog({
           </div>
         </div>
 
-        <DialogFooter className="flex-col gap-2 sm:flex-col">
+        <DialogFooter className="flex-col items-stretch gap-2 sm:flex-col sm:space-x-0">
           <Button 
             onClick={handleSave}
             disabled={!name.trim() || isSaving}
