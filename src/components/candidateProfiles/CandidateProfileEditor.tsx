@@ -159,6 +159,9 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
           >
             {saving ? 'Sparar…' : 'Spara profil'}
           </Button>
+          <Button variant="glass" className="w-full h-12 text-sm" onClick={() => onOpenChange(false)}>
+            Avbryt
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
