@@ -154,7 +154,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
       duration={4200}
       closeButton
       visibleToasts={3}
-      offset={isCompact ? 16 : 20}
+      // Håll notisen tydligt under statusfältet/dynamic island — annars ser den
+      // ut att sitta fast i notchen och känns "osäker" när den landar.
+      offset={
+        isCompact
+          ? "calc(env(safe-area-inset-top, 0px) + 14px)"
+          : "calc(env(safe-area-inset-top, 0px) + 20px)"
+      }
       // Fäll ut stapeln på desktop så att ingen notis göms bakom en annan.
       expand={!isCompact}
       gap={isCompact ? 10 : 12}
