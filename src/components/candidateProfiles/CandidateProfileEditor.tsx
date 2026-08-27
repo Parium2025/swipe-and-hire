@@ -86,13 +86,12 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
             </Label>
             <Input
               value={label}
-              maxLength={MAX_LABEL}
               placeholder="T.ex. Lagermedarbetare"
               onChange={(e) => setLabel(e.target.value)}
               className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
             />
             <p className="text-xs text-white">
-              Namnet är bara till för dig, så att du snabbt hittar rätt profil när du söker jobb. {label.length}/{MAX_LABEL}
+              Namnet är bara till för dig, så att du snabbt hittar rätt profil när du söker jobb.
             </p>
           </div>
 
