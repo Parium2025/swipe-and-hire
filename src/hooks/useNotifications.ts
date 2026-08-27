@@ -19,6 +19,10 @@ export interface AppNotification {
 
 const CACHE_KEY = 'parium_notifications_cache';
 
+// Hur många notiser som hämtas per sida. Fler laddas automatiskt när
+// användaren scrollar ner i klockan.
+const PAGE_SIZE = 200;
+
 // Chattmeddelanden räknas redan i sidomenyns chattbadge — de ska aldrig
 // dyka upp i klockan/notiscentret.
 const HIDDEN_TYPES = new Set(['message', 'new_message', 'chat_message']);
@@ -65,7 +69,13 @@ export function useNotifications() {
   // Typer där användaren själv stängt av in-app-notiser. Raden finns kvar i
   // databasen (push/mejl styrs separat), men klockan ska hållas tyst.
   const mutedTypesRef = useRef<Set<string>>(new Set());
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadingMoreRef = useRef(false);
+  const notificationsRef = useRef<AppNotification[]>([]);
   const broadcastRef = useRef<RealtimeChannel | null>(null);
+
+  useEffect(() => { notificationsRef.current = notifications; }, [notifications]);
 
   const loadMutedTypes = useCallback(async () => {
     if (!user) return;
@@ -82,26 +92,80 @@ export function useNotifications() {
     if (!user) return;
     try {
       await loadMutedTypes();
-      const { data, error } = await supabase
+      const excluded = Array.from(
+        new Set([...mutedTypesRef.current, ...HIDDEN_TYPES])
+      );
+      let query = supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        // Klockan visar en lista, inte ett arkiv. Utan tak skulle ett konto med
-        // tiotusentals notiser hämta allt vid varje mount och fliksbyte.
-        .limit(200);
+        .eq('user_id', user.id);
+      if (excluded.length) query = query.not('type', 'in', `(${excluded.join(',')})`);
+
+      const [{ data, error }, countRes] = await Promise.all([
+        query.order('created_at', { ascending: false }).order('id', { ascending: false }).limit(PAGE_SIZE),
+        (() => {
+          let c = supabase
+            .from('notifications')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('is_read', false);
+          if (excluded.length) c = c.not('type', 'in', `(${excluded.join(',')})`);
+          return c;
+        })(),
+      ]);
 
       if (error) throw error;
-      const items = ((data || []) as AppNotification[]).filter(
-        (n) => !mutedTypesRef.current.has(n.type) && !isHiddenType(n.type)
-      );
+      const items = (data || []) as AppNotification[];
       setNotifications(items);
-      setUnreadCount(items.filter(n => !n.is_read).length);
+      // Räknaren kommer från servern — den får aldrig begränsas av hur många
+      // sidor som råkar vara laddade i klockan.
+      setUnreadCount(countRes.count ?? items.filter(n => !n.is_read).length);
+      setHasMore(items.length === PAGE_SIZE);
       setCache(user.id, items);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     }
   }, [user, loadMutedTypes]);
+
+  // Oändlig scroll: hämta nästa sida med keyset-paginering (created_at + id),
+  // vilket håller sig snabbt även vid tiotusentals notiser.
+  const loadMore = useCallback(async () => {
+    if (!user || loadingMoreRef.current) return;
+    const last = notificationsRef.current[notificationsRef.current.length - 1];
+    if (!last) return;
+    loadingMoreRef.current = true;
+    setIsLoadingMore(true);
+    try {
+      const excluded = Array.from(new Set([...mutedTypesRef.current, ...HIDDEN_TYPES]));
+      let query = supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .or(`created_at.lt."${last.created_at}",and(created_at.eq."${last.created_at}",id.lt.${last.id})`);
+      if (excluded.length) query = query.not('type', 'in', `(${excluded.join(',')})`);
+
+      const { data, error } = await query
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(PAGE_SIZE);
+      if (error) throw error;
+
+      const page = (data || []) as AppNotification[];
+      setNotifications(prev => {
+        const seen = new Set(prev.map(n => n.id));
+        const merged = [...prev, ...page.filter(n => !seen.has(n.id))];
+        setCache(user.id, merged.slice(0, PAGE_SIZE));
+        return merged;
+      });
+      setHasMore(page.length === PAGE_SIZE);
+    } catch (err) {
+      console.error('Failed to load more notifications:', err);
+    } finally {
+      loadingMoreRef.current = false;
+      setIsLoadingMore(false);
+    }
+  }, [user]);
+
 
 
   // Fetch on mount
@@ -269,6 +333,9 @@ export function useNotifications() {
 
   return {
     notifications,
+    hasMore,
+    isLoadingMore,
+    loadMore,
     unreadCount,
     markAsRead,
     markAllAsRead,
