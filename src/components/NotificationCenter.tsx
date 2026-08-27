@@ -185,10 +185,10 @@ function NotificationItem({
           if (canExpand) setExpanded(v => !v);
         }
       }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors rounded-xl cursor-pointer ${
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer ${
         notification.is_read 
           ? 'opacity-60 hover:bg-white/5' 
-          : 'hover:bg-white/10 bg-white/5'
+          : 'hover:bg-white/5'
       }`}
     >
       <div className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 ${colorClass}`}>
