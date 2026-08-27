@@ -45,6 +45,12 @@ export function useMarkConversationUnread() {
         return next;
       });
 
+      // Direkt återkoppling i samma frame som fingret släpps.
+      try { navigator.vibrate?.(8); } catch { /* ignoreras */ }
+      toast.success('Markerad som oläst', {
+        route: `/messages?conversation=${conversationId}`,
+      } as Parameters<typeof toast.success>[1]);
+
       if (!getIsOnline()) return;
 
       setIsMarking(true);
