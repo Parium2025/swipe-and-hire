@@ -1006,7 +1006,7 @@ const isRealtimeJobVisible = (job?: RealtimeJobPosting | null) => {
 };
 
 
-function useCompanyReviews(employerIds: string[]) {
+function useCompanyReviews(employerIds: string[], isEnabled: boolean) {
   return useQuery({
     queryKey: ['company-reviews-batch', employerIds],
     queryFn: async (): Promise<JobReviewMap> => {
