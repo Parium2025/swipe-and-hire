@@ -584,7 +584,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isRecoveringSessionRef.current = false;
           isSigningOutRef.current = false;
           endSignOutTracking();
+          // Detta konto äger nu "Håll mig inloggad"-snapshoten. Förhindrar att
+          // en äldre flik med ett annat konto återställs vid nästa uppstart.
+          try { claimAuthSnapshotOwnership(newUserId); } catch {}
         }
+
 
 
         if (event !== 'INITIAL_SESSION') {
