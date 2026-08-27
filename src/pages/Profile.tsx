@@ -50,8 +50,11 @@ import CandidateProfilesManager from '@/components/candidateProfiles/CandidatePr
 
 import { fetchPriority } from '@/lib/fetchPriority';
 
-// Draft key for localStorage
-const PROFILE_DRAFT_KEY = 'parium_draft_profile';
+// Draft key for localStorage — kontospecifik så att två konton (arbetsgivare/jobbsökare)
+// på samma enhet aldrig kan skriva över varandras osparade profilutkast.
+const PROFILE_DRAFT_KEY_BASE = 'parium_draft_profile';
+const draftKeyFor = (userId?: string | null) =>
+  userId ? `${PROFILE_DRAFT_KEY_BASE}:${userId}` : PROFILE_DRAFT_KEY_BASE;
 
 interface ProfileDraftData {
   firstName?: string;
@@ -99,12 +102,14 @@ const isProfileDraftData = (value: unknown): value is ProfileDraftData => {
     (draft.savedAt === undefined || typeof draft.savedAt === 'number');
 };
 
-const readProfileDraft = () => safeReadJsonCache<ProfileDraftData>(PROFILE_DRAFT_KEY, isProfileDraftData);
+const readProfileDraft = (userId?: string | null) =>
+  safeReadJsonCache<ProfileDraftData>(draftKeyFor(userId), isProfileDraftData);
 
-// Clear draft
-export const clearProfileDraft = () => {
+// Clear draft (både kontospecifik och äldre delad nyckel)
+export const clearProfileDraft = (userId?: string | null) => {
   try {
-    localStorage.removeItem(PROFILE_DRAFT_KEY);
+    localStorage.removeItem(draftKeyFor(userId));
+    localStorage.removeItem(PROFILE_DRAFT_KEY_BASE);
   } catch (e) {
     console.warn('Failed to clear profile draft');
   }
@@ -386,7 +391,7 @@ const Profile = () => {
   
   // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
   // This prevents DB sync from overwriting local changes when screenshot tools or tab switches cause remounts
-  const LOCAL_MEDIA_KEY = 'parium_local_media_state';
+  const LOCAL_MEDIA_KEY = `parium_local_media_state${user?.id ? `:${user.id}` : ''}`;
   
   interface LocalMediaState {
     profileImageUrl: string;
@@ -517,7 +522,7 @@ const Profile = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(profile?.profile_image_url || '');
   const [videoUrl, setVideoUrl] = useState(profile?.video_url || '');
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
-  const [cvFileName, setCvFileName] = useState((profile as any)?.cv_filename || '');
+  const [cvFileName, setCvFileName] = useState(((profile as any)?.cv_filename || (profile as any)?.profile_file_name || ''));
   
   // 🎯 Generera signed URLs (hooks måste alltid anropas, inte villkorligt)
   // Om profilbilden har markerats för borttagning ska vi INTE falla tillbaka till värdet från databasen
@@ -599,7 +604,7 @@ const Profile = () => {
         coverFileName: '',
       };
 
-      const draftData = isDiscardingChangesRef.current ? null : readProfileDraft();
+      const draftData = isDiscardingChangesRef.current ? null : readProfileDraft(user?.id);
       const draftValue = (key: keyof ProfileDraftData, fallback: string) => {
         const value = draftData?.[key];
         return typeof value === 'string' && value !== fallback ? value : fallback;
@@ -650,11 +655,8 @@ const Profile = () => {
         setCvUrl(values.cvUrl);
       }
       // Only extract from URL if no filename in DB (for old records)
-      if ((profile as any)?.cv_filename) {
-        setCvFileName((profile as any).cv_filename);
-      } else {
-        setCvFileName('');
-      }
+      const dbCvFileName = (profile as any)?.cv_filename || (profile as any)?.profile_file_name || '';
+      setCvFileName(dbCvFileName);
       
       // Restore employer fields from draft if different
       setCompanyName(draftValue('companyName', values.companyName));
@@ -738,7 +740,7 @@ const Profile = () => {
     const hasContent = firstName || lastName || bio || userLocation || postalCode || phone || birthDate;
     
     if (hasContent) {
-      const saved = safeSetItem(PROFILE_DRAFT_KEY, JSON.stringify({
+      const saved = safeSetItem(draftKeyFor(user?.id), JSON.stringify({
           firstName,
           lastName,
           bio,
@@ -792,7 +794,7 @@ const Profile = () => {
       isDiscardingChangesRef.current = true;
       // IMPORTANT: user chose to discard changes -> clear all local drafts first,
       // before React effects can write the old unsaved state back to storage.
-      clearProfileDraft();
+      clearProfileDraft(user?.id);
       setLocalMediaState(null);
 
       resetProfileFormToValues(originalValues);
@@ -800,7 +802,7 @@ const Profile = () => {
       setDeletedCoverImage(null);
       setHasUnsavedChanges(false);
       window.setTimeout(() => {
-        clearProfileDraft();
+        clearProfileDraft(user?.id);
         setLocalMediaState(null);
         isDiscardingChangesRef.current = false;
         setHasUnsavedChanges(false);
@@ -1800,7 +1802,7 @@ const Profile = () => {
         setOriginalValues(newOriginalValues);
         setHasUnsavedChanges(false);
         setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
-        clearProfileDraft(); // 🔒 Clear localStorage draft after successful save
+        clearProfileDraft(user?.id); // 🔒 Clear localStorage draft after successful save
         console.log('💾 Profile draft cleared after save');
         
         // Clear undo states after successful save

@@ -28,7 +28,13 @@ function readCache(userId: string): NotificationPreference[] | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY + userId);
     if (!raw) return null;
-    return JSON.parse(raw).items;
+    const parsed = JSON.parse(raw) as { items?: unknown };
+    if (!Array.isArray(parsed?.items)) return null;
+    const items = parsed.items.filter(
+      (i): i is NotificationPreference =>
+        !!i && typeof i === 'object' && typeof (i as any).notification_type === 'string',
+    );
+    return items;
   } catch {
     return null;
   }
@@ -172,6 +178,9 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
       if (context?.previous) {
         queryClient.setQueryData(['notification-preferences', user?.id], context.previous);
       }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['notification-preferences', user?.id] });
     },
   });
 

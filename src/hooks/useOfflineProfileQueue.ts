@@ -189,6 +189,7 @@ export function useOfflineProfileQueue(userId: string | undefined) {
         synced++;
         // Clear profile draft
         try {
+          localStorage.removeItem(`parium_draft_profile:${item.userId}`);
           localStorage.removeItem('parium_draft_profile');
         } catch { /* ignore */ }
       } else {
