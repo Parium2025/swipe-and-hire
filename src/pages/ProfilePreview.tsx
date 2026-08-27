@@ -107,7 +107,7 @@ export default function ProfilePreview() {
           user_id: profile.user_id,
           first_name: profile.first_name || '',
           last_name: profile.last_name || '',
-          age: profile.birth_date ? new Date().getFullYear() - new Date(profile.birth_date).getFullYear() : undefined,
+          age: calcAge(profile.birth_date),
           bio: profile.bio || '',
           location: profile.location || profile.home_location || '',
           phone: profile.phone || '',
@@ -292,7 +292,7 @@ export default function ProfilePreview() {
                     <p>{data.age} år</p>
                   )}
                   {data.location && (
-                    <p>Bor i {data.location}{profile?.home_location ? `, ${profile.home_location}` : ''}</p>
+                    <p>Bor i {formatResidence(data.location, profile?.home_location)}</p>
                   )}
                 </div>
                 
@@ -687,7 +687,7 @@ export default function ProfilePreview() {
                   <p className="text-sm text-white">{consentedData.age} år</p>
                 )}
                 {consentedData?.location && (
-                  <p className="text-sm text-white">Bor i {consentedData.location}{profile?.home_location ? `, ${profile.home_location}` : ''}</p>
+                  <p className="text-sm text-white">Bor i {formatResidence(consentedData.location, profile?.home_location)}</p>
                 )}
               </div>
             </div>
@@ -738,10 +738,7 @@ export default function ProfilePreview() {
               {consentedData?.location && (
                 <div className="flex flex-col items-start gap-0.5 min-w-0">
                   <p className="text-[10px] sm:text-xs text-white font-medium">Ort:</p>
-                  <p className="text-white text-[9px] sm:text-[10px] break-words">{consentedData.location}</p>
-                  {profile?.home_location && (
-                    <p className="text-white text-[9px] sm:text-[10px] break-words">{profile.home_location}</p>
-                  )}
+                  <p className="text-white text-[9px] sm:text-[10px] break-words">{formatResidence(consentedData.location, profile?.home_location)}</p>
                 </div>
               )}
             </CardContent>
