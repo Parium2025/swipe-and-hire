@@ -107,6 +107,7 @@ const ensureLiveChannel = (userId: string) => {
     .channel(`employer-stats-live-${userId}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, notifyLiveListeners)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, notifyLiveListeners)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'job_views' }, notifyLiveListeners)
     .subscribe();
 };
 
