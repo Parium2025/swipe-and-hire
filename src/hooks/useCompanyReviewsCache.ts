@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
+import { useAuth } from '@/hooks/useAuth';
 import { useCallback, useEffect } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 
