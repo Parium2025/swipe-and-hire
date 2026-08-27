@@ -388,6 +388,7 @@ export function SwipeableConversationItem({
         onTouchMove={handleTouchMove}
         onTouchEnd={endDrag}
         onMouseDown={handleMouseDown}
+        onMouseEnter={handleMouseEnter}
         onClickCapture={handleClickCapture}
         onTouchCancel={() => animateBack(false)}
       >
