@@ -1045,6 +1045,7 @@ function useCompanyReviews(employerIds: string[]) {
 export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   const { enabled = true, employerIds: employerIdsFilter, createdAfter, pageSize = 100, sort = 'newest' } = options;
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const {
