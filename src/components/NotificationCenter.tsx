@@ -543,7 +543,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => { setPendingClear(true); clearAll(); toastArchive.clear(); }}
+                      onClick={() => setConfirmClearOpen(true)}
                       className="flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
