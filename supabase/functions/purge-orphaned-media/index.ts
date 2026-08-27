@@ -45,6 +45,12 @@ const BUCKETS: BucketConfig[] = [
     bucket: 'job-applications',
     sources: [
       { table: 'profiles', columns: ['profile_image_url', 'video_url', 'cover_image_url', 'cv_url'] },
+      // 🔒 Kandidatprofiler (max 3 per jobbsökare) lagrar CV, video och bild i
+      // samma bucket. Utan denna källa raderas de efter 7 dagar.
+      {
+        table: 'candidate_profiles',
+        columns: ['cv_url', 'video_url', 'profile_image_url'],
+      },
       {
         table: 'job_applications',
         columns: ['cv_url', 'profile_image_snapshot_url', 'video_snapshot_url'],
