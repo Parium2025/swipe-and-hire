@@ -84,9 +84,6 @@ function writeCache<T>(prefix: string, userId: string, scope: string, orgId: str
  * Utgångna annonser byter status via tid, inte via ett DB-event — därför
  * kompletterar vi med en tyst refetch var 60:e sekund och vid fönsterfokus.
  */
-let liveSyncRefs = 0;
-let liveSyncChannel: ReturnType<typeof supabase.channel> | null = null;
-
 const useEmployerStatsLiveSync = (userId: string | undefined) => {
   const queryClient = useQueryClient();
 
@@ -102,20 +99,12 @@ const useEmployerStatsLiveSync = (userId: string | undefined) => {
       }, 300);
     };
 
-    liveSyncRefs += 1;
-    if (!liveSyncChannel) {
-      liveSyncChannel = supabase
-        .channel(`employer-stats-live-${userId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, invalidate)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_views' }, invalidate)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, invalidate)
-        .subscribe();
-    } else {
-      liveSyncChannel
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, invalidate)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_views' }, invalidate)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, invalidate);
-    }
+    const channel = supabase
+      .channel(`employer-stats-live-${userId}-${Math.random().toString(36).slice(2)}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, invalidate)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_views' }, invalidate)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, invalidate)
+      .subscribe();
 
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') invalidate();
@@ -125,12 +114,7 @@ const useEmployerStatsLiveSync = (userId: string | undefined) => {
     return () => {
       if (timer) clearTimeout(timer);
       document.removeEventListener('visibilitychange', handleVisibility);
-      liveSyncRefs -= 1;
-      if (liveSyncRefs <= 0 && liveSyncChannel) {
-        supabase.removeChannel(liveSyncChannel);
-        liveSyncChannel = null;
-        liveSyncRefs = 0;
-      }
+      supabase.removeChannel(channel);
     };
   }, [userId, queryClient]);
 };
