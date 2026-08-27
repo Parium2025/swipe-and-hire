@@ -1301,6 +1301,33 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     };
   }, [queryClient, realtimeJobIdsKey]);
 
+  // 🆕 Nya annonser: id-filtrerade kanalen ovan kan per definition inte se rader
+  // som ännu inte finns i resultatet. En separat INSERT-lyssnare håller
+  // "Aktiva jobb" / "Unika företag" / "Nya denna vecka" live utan omladdning.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const channel = createRealtimeChannel('optimized-search-new-jobs')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'job_postings' },
+        (payload) => {
+          if (!isRealtimeJobVisible(payload.new as RealtimeJobPosting)) return;
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
+          }, 400);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+
+
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) abortControllerRef.current.abort();
