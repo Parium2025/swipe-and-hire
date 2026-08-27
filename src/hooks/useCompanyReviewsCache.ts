@@ -125,7 +125,7 @@ export function useCompanyReviewsCache(companyId: string | null) {
 
       return result;
     },
-    enabled: !!companyId,
+    enabled: !!companyId && !!user,
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 10 * 60 * 1000, // 10 minutes
     // Initialize with localStorage cache for instant load
