@@ -80,7 +80,7 @@ export function useCandidateProfiles(userId?: string) {
 
   const createProfile = useCallback(async (input: CandidateProfileInput) => {
     if (!userId) return { error: 'Inte inloggad' } as const;
-    if (profiles.length >= MAX_CANDIDATE_PROFILES) {
+    if (profiles.length >= MAX_EXTRA_CANDIDATE_PROFILES) {
       return { error: `Du kan ha max ${MAX_CANDIDATE_PROFILES} profiler` } as const;
     }
     const makeDefault = input.is_default || profiles.length === 0;
