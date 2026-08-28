@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+/** Totalt antal profiler inklusive grundprofilen. */
 export const MAX_CANDIDATE_PROFILES = 3;
+/** Antal extra profiler utöver grundprofilen som kan sparas. */
+export const MAX_EXTRA_CANDIDATE_PROFILES = MAX_CANDIDATE_PROFILES - 1;
 
 export interface CandidateProfile {
   id: string;
@@ -155,6 +158,6 @@ export function useCandidateProfiles(userId?: string) {
     updateProfile,
     deleteProfile,
     setDefaultProfile,
-    canCreateMore: profiles.length < MAX_CANDIDATE_PROFILES,
+    canCreateMore: profiles.length < MAX_EXTRA_CANDIDATE_PROFILES,
   };
 }
