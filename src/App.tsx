@@ -36,6 +36,7 @@ import NotFound from "./pages/NotFound";
 import ValjPlan from "./pages/ValjPlan";
 import Unsubscribe from "./pages/Unsubscribe";
 import TeamInvite from "./pages/TeamInvite";
+import OAuthConsent from "./pages/OAuthConsent";
 
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
 // imported module" errors from freezing the app on a dark Suspense fallback.
