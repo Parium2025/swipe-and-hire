@@ -46,18 +46,13 @@
           "type": "object",
           "properties": {
             "query": {
-              "description": "Fritext som matchas mot annonsens titel eller yrke.",
               "type": "string"
             },
             "city": {
-              "description": "Ort eller kommun att filtrera på.",
               "type": "string"
             },
             "limit": {
-              "description": "Max antal träffar, 1–50. Standard 10.",
-              "type": "integer",
-              "minimum": -9007199254740991,
-              "maximum": 9007199254740991
+              "type": "number"
             }
           }
         },
@@ -77,8 +72,7 @@
           "type": "object",
           "properties": {
             "job_id": {
-              "type": "string",
-              "description": "Annonsens id (uuid)."
+              "type": "string"
             }
           },
           "required": [
@@ -101,14 +95,10 @@
           "type": "object",
           "properties": {
             "only_active": {
-              "description": "Visa endast aktiva annonser. Standard false.",
               "type": "boolean"
             },
             "limit": {
-              "description": "Max antal annonser, 1–100. Standard 20.",
-              "type": "integer",
-              "minimum": -9007199254740991,
-              "maximum": 9007199254740991
+              "type": "number"
             }
           }
         },
@@ -128,18 +118,13 @@
           "type": "object",
           "properties": {
             "job_id": {
-              "type": "string",
-              "description": "Annonsens id (uuid)."
+              "type": "string"
             },
             "status": {
-              "description": "Filtrera på status, till exempel pending eller interview.",
               "type": "string"
             },
             "limit": {
-              "description": "Max antal ansökningar, 1–100. Standard 25.",
-              "type": "integer",
-              "minimum": -9007199254740991,
-              "maximum": 9007199254740991
+              "type": "number"
             }
           },
           "required": [
@@ -162,10 +147,7 @@
           "type": "object",
           "properties": {
             "limit": {
-              "description": "Max antal ansökningar, 1–100. Standard 25.",
-              "type": "integer",
-              "minimum": -9007199254740991,
-              "maximum": 9007199254740991
+              "type": "number"
             }
           }
         },
