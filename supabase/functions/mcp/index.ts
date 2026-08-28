@@ -202,7 +202,7 @@ var list_job_applications_default = defineTool5({
     const take = Math.min(100, Math.max(1, Math.trunc(limit ?? 25)));
     const supabase = supabaseForUser(ctx);
     let request = supabase.from("job_applications").select(
-      "id, job_id, status, first_name, last_name, location, occupation:employment_status, availability, work_schedule, applied_at, viewed_at"
+      "id, job_id, status, first_name, last_name, location, employment_status, availability, work_schedule, applied_at, viewed_at"
     ).eq("job_id", job_id).order("applied_at", { ascending: false }).limit(take);
     if (status?.trim()) request = request.eq("status", status.trim());
     const { data, error } = await request;
