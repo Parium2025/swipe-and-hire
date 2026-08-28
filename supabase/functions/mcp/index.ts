@@ -81,7 +81,7 @@ var whoami_default = defineTool({
 
 // src/lib/mcp/tools/search-jobs.ts
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.28.0";
-import { z } from "npm:zod@^4.5.1";
+import { z } from "npm:zod@^3.25.76";
 var JOB_FIELDS = "id, title, occupation, category, employment_type, location, workplace_city, workplace_municipality, workplace_county, work_location_type, remote_work_possible, salary_min, salary_max, salary_type, published_at, expires_at";
 var search_jobs_default = defineTool2({
   name: "search_jobs",
@@ -123,7 +123,7 @@ var search_jobs_default = defineTool2({
 
 // src/lib/mcp/tools/get-job.ts
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.28.0";
-import { z as z2 } from "npm:zod@^4.5.1";
+import { z as z2 } from "npm:zod@^3.25.76";
 var get_job_default = defineTool3({
   name: "get_job",
   title: "H\xE4mta jobbannons",
@@ -153,7 +153,7 @@ var get_job_default = defineTool3({
 
 // src/lib/mcp/tools/list-my-job-postings.ts
 import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.28.0";
-import { z as z3 } from "npm:zod@^4.5.1";
+import { z as z3 } from "npm:zod@^3.25.76";
 var list_my_job_postings_default = defineTool4({
   name: "list_my_job_postings",
   title: "Mina jobbannonser",
@@ -184,7 +184,7 @@ var list_my_job_postings_default = defineTool4({
 
 // src/lib/mcp/tools/list-job-applications.ts
 import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.28.0";
-import { z as z4 } from "npm:zod@^4.5.1";
+import { z as z4 } from "npm:zod@^3.25.76";
 var list_job_applications_default = defineTool5({
   name: "list_job_applications",
   title: "Ans\xF6kningar till en annons",
@@ -216,7 +216,7 @@ var list_job_applications_default = defineTool5({
 
 // src/lib/mcp/tools/list-my-applications.ts
 import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.28.0";
-import { z as z5 } from "npm:zod@^4.5.1";
+import { z as z5 } from "npm:zod@^3.25.76";
 var list_my_applications_default = defineTool6({
   name: "list_my_applications",
   title: "Mina ans\xF6kningar",

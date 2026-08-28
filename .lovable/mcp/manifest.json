@@ -42,19 +42,23 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "query": {
-              "type": "string"
+              "type": "string",
+              "description": "Fritext som matchas mot annonsens titel eller yrke."
             },
             "city": {
-              "type": "string"
+              "type": "string",
+              "description": "Ort eller kommun att filtrera på."
             },
             "limit": {
-              "type": "number"
+              "type": "integer",
+              "description": "Max antal träffar, 1–50. Standard 10."
             }
-          }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       },
@@ -68,16 +72,18 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "job_id": {
-              "type": "string"
+              "type": "string",
+              "description": "Annonsens id (uuid)."
             }
           },
           "required": [
             "job_id"
-          ]
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       },
@@ -91,16 +97,19 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "only_active": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Visa endast aktiva annonser. Standard false."
             },
             "limit": {
-              "type": "number"
+              "type": "integer",
+              "description": "Max antal annonser, 1–100. Standard 20."
             }
-          }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       },
@@ -114,22 +123,26 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "job_id": {
-              "type": "string"
+              "type": "string",
+              "description": "Annonsens id (uuid)."
             },
             "status": {
-              "type": "string"
+              "type": "string",
+              "description": "Filtrera på status, till exempel pending eller interview."
             },
             "limit": {
-              "type": "number"
+              "type": "integer",
+              "description": "Max antal ansökningar, 1–100. Standard 25."
             }
           },
           "required": [
             "job_id"
-          ]
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       },
@@ -143,13 +156,15 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "limit": {
-              "type": "number"
+              "type": "integer",
+              "description": "Max antal ansökningar, 1–100. Standard 25."
             }
-          }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       }
