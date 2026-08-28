@@ -673,6 +673,12 @@ const Auth = () => {
   if (user && profile && !loading && confirmationStatus === 'none' && recoveryStatus === 'none' && !isPasswordReset) {
     const role = (profile as any)?.role;
     if (role) {
+      // Samtyckesflödet för agentanslutningar (MCP) skickar hit med ?next=
+      // Endast relativa, samma-origin-sökvägar tillåts.
+      const nextParam = searchParams.get('next');
+      if (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) {
+        return <Navigate to={nextParam} replace />;
+      }
       // Om användaren kom hit via en prisknapp ("Bli Premium") — skicka vidare till checkout
       const pendingPlan = typeof window !== 'undefined' ? sessionStorage.getItem('parium-pending-plan') : null;
       if (pendingPlan) {

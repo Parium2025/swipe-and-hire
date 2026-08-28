@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 /**
  * Generates /version.json at build time with a unique build signature.
@@ -48,6 +49,8 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     versionJsonPlugin(),
+    mcpPlugin(),
+
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
