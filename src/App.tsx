@@ -228,6 +228,7 @@ const AnimatedRoutes = () => {
           <Route path="/integritetspolicy" element={<IntegrityPolicyPage />} />
           <Route path="/dpa" element={<DpaPage />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/valj-plan" element={<ValjPlan />} />
           <Route path="/home" element={<Index />} />
