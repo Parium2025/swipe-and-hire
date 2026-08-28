@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "sdk_version": "0.28.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://jrjaegapuujushsiofoi.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "parium-ab",
+      "version": "0.1.0",
+      "title": "parium-ab"
+    },
+    "tools": [
+      {
+        "name": "whoami",
+        "title": "Vem är inloggad",
+        "description": "Hämtar den inloggade användarens Parium-profil (namn, roll, ort, företag).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_jobs",
+        "title": "Sök jobb",
+        "description": "Söker bland aktiva jobbannonser på Parium efter titel, yrke eller ort.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "description": "Fritext som matchas mot annonsens titel eller yrke.",
+              "type": "string"
+            },
+            "city": {
+              "description": "Ort eller kommun att filtrera på.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Max antal träffar, 1–50. Standard 10.",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_job",
+        "title": "Hämta jobbannons",
+        "description": "Hämtar detaljer om en jobbannons på Parium via dess id.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "job_id": {
+              "type": "string",
+              "description": "Annonsens id (uuid)."
+            }
+          },
+          "required": [
+            "job_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_job_postings",
+        "title": "Mina jobbannonser",
+        "description": "Listar den inloggade arbetsgivarens egna jobbannonser med antal ansökningar och visningar.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "only_active": {
+              "description": "Visa endast aktiva annonser. Standard false.",
+              "type": "boolean"
+            },
+            "limit": {
+              "description": "Max antal annonser, 1–100. Standard 20.",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_job_applications",
+        "title": "Ansökningar till en annons",
+        "description": "Listar ansökningar till en av arbetsgivarens egna jobbannonser.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "job_id": {
+              "type": "string",
+              "description": "Annonsens id (uuid)."
+            },
+            "status": {
+              "description": "Filtrera på status, till exempel pending eller interview.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Max antal ansökningar, 1–100. Standard 25.",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "job_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_applications",
+        "title": "Mina ansökningar",
+        "description": "Listar den inloggade jobbsökarens egna ansökningar och deras status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Max antal ansökningar, 1–100. Standard 25.",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
