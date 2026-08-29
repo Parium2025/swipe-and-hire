@@ -193,11 +193,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const updateLocation = useCallback(async (newLat: number, newLon: number, knownCity: string | null, source: 'gps' | 'ip' | 'fallback' | 'background') => {
     // City is resolved server-side by the edge function (fetchCurrentWeather returns cachedCity).
     // We pass knownCity as a hint; fetchWeatherOnly will use the server-cached city if knownCity is empty.
+    const normalizedSource = source === 'background' ? 'gps' : source;
     const city = knownCity || '';
-    const newLocation: CachedLocation = { lat: newLat, lon: newLon, city, source: source === 'background' ? 'gps' : source, timestamp: Date.now() };
+    const newLocation: CachedLocation = { lat: newLat, lon: newLon, city, source: normalizedSource, timestamp: Date.now() };
     setCachedLocation(newLocation);
     locationRef.current = newLocation;
-    await fetchWeatherOnly(newLat, newLon, city);
+    await fetchWeatherOnly(newLat, newLon, city, normalizedSource);
   }, [fetchWeatherOnly]);
 
   // Handler for background location updates (from native app)
