@@ -118,7 +118,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     setWeather(prev => ({ ...prev, ...data }));
   }, []);
 
-  const fetchWeatherOnly = useCallback(async (lat: number, lon: number, city: string, showLoading = false) => {
+  const fetchWeatherOnly = useCallback(async (
+    lat: number,
+    lon: number,
+    city: string,
+    source: 'gps' | 'ip' | 'fallback',
+    showLoading = false
+  ) => {
     const seq = ++requestSeqRef.current;
     try {
       if (showLoading) updateWeather({ isLoading: true });
@@ -147,6 +153,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         emoji: info.emoji,
         city: resolvedCity,
         isNight,
+        source,
       };
       
       // Never persist a neutral fallback reading — it would keep the UI empty
@@ -175,9 +182,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           city: stale.city || city,
           isLoading: false,
           error: null,
+          source: stale.source ?? source,
         });
       } else {
-        updateWeather(safeFallback(city));
+        updateWeather(safeFallback(city, source));
       }
     }
   }, [safeFallback, updateWeather]);
