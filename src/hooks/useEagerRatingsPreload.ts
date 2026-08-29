@@ -13,6 +13,7 @@ import {
   LEGACY_LOCATION_CACHE_KEY,
   WEATHER_CACHE_PREFIX,
   LEGACY_WEATHER_CACHE_KEY,
+  getCachedWeather,
 } from '@/lib/weatherApi';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
@@ -142,7 +143,12 @@ export const clearAllAppCaches = () => {
   // Weather cache is cleared SYNCHRONOUSLY on every call — it's a single
   // localStorage removal with zero perf impact, and it guarantees no stale
   // weather effects flash on the next login before the deferred clear runs.
-  try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
+  try {
+    localStorage.removeItem(LEGACY_WEATHER_CACHE_KEY);
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith(WEATHER_CACHE_PREFIX))
+      .forEach((key) => localStorage.removeItem(key));
+  } catch { /* ignore */ }
 
   // On /auth route OR while the auth transition-gate is active, defer the rest
   // so logout click → /auth navigation is never blocked by localStorage sweeps.
@@ -167,11 +173,10 @@ export const clearAllAppCaches = () => {
  */
 const isWeatherCacheValid = (): boolean => {
   try {
-    const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+    const cached = getCachedWeather();
     if (!cached) return false;
-    
-    const parsed = JSON.parse(cached);
-    const age = Date.now() - parsed.timestamp;
+
+    const age = Date.now() - cached.timestamp;
     return age < WEATHER_CACHE_MAX_AGE;
   } catch {
     return false;
