@@ -30,6 +30,7 @@ const STALE_PREFIXES = [
   'applications_snapshot_',
   'candidate-profile-',
   'eager_preload_',
+  'parium-jobseeker-stats',
 ];
 
 const computeBuildSig = (): string => {
