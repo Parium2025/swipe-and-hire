@@ -53,7 +53,7 @@ const JobSeekerHome = memo(() => {
     enabled: true,
     backgroundLocationEnabled,
   });
-  const showWeatherEffects = !weather.isLoading && !weather.error;
+  const showWeatherEffects = hasConfirmedWeather(weather);
   
   // Emoji logic
   const displayEmoji = useMemo(() => {
