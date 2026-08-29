@@ -516,7 +516,6 @@ export const useJobSeekerBackgroundSync = () => {
       if (newJobsTimer) clearTimeout(newJobsTimer);
       supabase.removeChannel(savedJobsChannel);
       supabase.removeChannel(applicationsChannel);
-      supabase.removeChannel(messagesChannel);
       supabase.removeChannel(newJobsChannel);
       supabase.removeChannel(employerProfilesChannel);
       supabase.removeChannel(interviewsChannel);
