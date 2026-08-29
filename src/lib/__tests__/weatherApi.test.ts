@@ -83,8 +83,13 @@ describe('hasConfirmedWeather', () => {
 });
 
 describe('weather cache helpers', () => {
+  // The weather cache is user-bound (parium_weather_data:v2:<userId>); the old
+  // global key is never read.
+  const KEY = 'parium_weather_data:v2:user-a';
+
   beforeEach(() => {
     localStorage.clear();
+    setWeatherCacheUser('user-a');
   });
 
   const sample = {
@@ -104,17 +109,17 @@ describe('weather cache helpers', () => {
 
     // Simulate 6 minutes passing (TTL is 5 minutes)
     const stale = { ...sample, timestamp: Date.now() - 6 * 60 * 1000 };
-    localStorage.setItem('parium_weather_data', JSON.stringify(stale));
+    localStorage.setItem(KEY, JSON.stringify(stale));
     expect(getCachedWeather()).toBeNull();
   });
 
   it('getStaleCachedWeather accepts older entries up to 24 hours', () => {
     const stale = { ...sample, timestamp: Date.now() - 6 * 60 * 1000 };
-    localStorage.setItem('parium_weather_data', JSON.stringify(stale));
+    localStorage.setItem(KEY, JSON.stringify(stale));
     expect(getStaleCachedWeather()?.city).toBe('Stockholm');
 
     const ancient = { ...sample, timestamp: Date.now() - 25 * 60 * 60 * 1000 };
-    localStorage.setItem('parium_weather_data', JSON.stringify(ancient));
+    localStorage.setItem(KEY, JSON.stringify(ancient));
     expect(getStaleCachedWeather()).toBeNull();
   });
 });
