@@ -25,9 +25,14 @@ vi.mock('@/lib/connectivityManager', () => ({
   onConnectivityChange: () => () => {},
 }));
 
+interface MockChannel {
+  on: () => MockChannel;
+  subscribe: () => MockChannel;
+}
+
 vi.mock('@/lib/realtimeChannel', () => ({
   createRealtimeChannel: () => {
-    const channel: any = {
+    const channel: MockChannel = {
       on: () => channel,
       subscribe: () => channel,
     };
@@ -36,11 +41,11 @@ vi.mock('@/lib/realtimeChannel', () => ({
 }));
 
 vi.mock('@/integrations/supabase/client', () => {
-  const builder: any = {
+  const builder = {
     select: () => builder,
     eq: () => builder,
-    maybeSingle: async () => ({ data: null, error: null }),
-    upsert: async () => ({ error: null }),
+    maybeSingle: async () => ({ data: null as null, error: null as null }),
+    upsert: async () => ({ error: null as null }),
   };
   return {
     supabase: {

@@ -29,11 +29,19 @@ const h = vi.hoisted(() => ({
 // ---------------------------------------------------------------------------
 // Narrow dependency mocks — record realtime, stub everything else
 // ---------------------------------------------------------------------------
+interface MockChannel {
+  on: (
+    event: string,
+    opts?: { schema?: string; table?: string; filter?: string }
+  ) => MockChannel;
+  subscribe: () => MockChannel;
+}
+
 vi.mock('@/lib/realtimeChannel', () => ({
   createRealtimeChannel: (name: string) => {
     h.channelNames.push(name);
-    const channel: any = {
-      on: (event: string, opts: any) => {
+    const channel: MockChannel = {
+      on: (event, opts) => {
         h.registrations.push({
           channel: name,
           event,
@@ -50,17 +58,25 @@ vi.mock('@/lib/realtimeChannel', () => ({
 }));
 
 vi.mock('@/integrations/supabase/client', () => {
-  const makeQuery = (listResult: any) => {
-    const q: any = {};
-    q.select = () => q;
-    q.eq = () => q;
-    q.neq = () => q;
-    q.in = () => q;
-    q.order = () => q;
-    q.limit = () => q;
-    q.maybeSingle = () => Promise.resolve({ data: null, error: null });
-    q.single = () => Promise.resolve({ data: null, error: null });
-    q.then = (onF: any, onR: any) => Promise.resolve(listResult).then(onF, onR);
+  interface ListResult {
+    data: unknown;
+    error: null | { message: string };
+  }
+  const makeQuery = (listResult: ListResult) => {
+    const q = {
+      select: () => q,
+      eq: () => q,
+      neq: () => q,
+      in: () => q,
+      order: () => q,
+      limit: () => q,
+      maybeSingle: () => Promise.resolve({ data: null, error: null }),
+      single: () => Promise.resolve({ data: null, error: null }),
+      then: (
+        onF?: ((value: ListResult) => unknown) | null,
+        onR?: ((reason: unknown) => unknown) | null
+      ) => Promise.resolve(listResult).then(onF ?? undefined, onR ?? undefined),
+    };
     return q;
   };
 
