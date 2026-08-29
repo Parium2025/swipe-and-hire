@@ -139,12 +139,14 @@ describe('useNotesSync — notes data cache isolation', () => {
     expect(localStorage.getItem(`${LEGACY_KEY}_user-b`)).toBeNull();
   });
 
-  it('positive control: authenticated user hydrates and persists own scoped cache', async () => {
+  it('positive control: authenticated user hydrates own scoped cache instantly on first render', () => {
     localStorage.setItem(`${LEGACY_KEY}_user-a`, 'A CONTENT');
     mockUser = { id: 'user-a' };
 
     const { result } = renderNotes();
-    await waitFor(() => expect(result.current.content).toBe('A CONTENT'));
+    // Instant hydration: correct content must be present on the very first render,
+    // with no waitFor/effect flushing — otherwise the notes UI flashes empty.
+    expect(result.current.content).toBe('A CONTENT');
 
     act(() => {
       result.current.handleChange('A EDIT');
