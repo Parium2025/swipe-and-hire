@@ -54,6 +54,11 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
     onSwipeRight: goPrev,
   });
 
+  const openTipSource = () => {
+    const url = tipsItems[currentIndex]?.source_url;
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
@@ -84,12 +89,6 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
   }
 
   const currentTip = tipsItems[currentIndex];
-
-  // Samma säkra åtgärd för klick och Enter/Space
-  const openTipSource = useCallback(() => {
-    const url = tipsItems[currentIndex]?.source_url;
-    if (url) window.open(url, '_blank', 'noopener,noreferrer');
-  }, [tipsItems, currentIndex]);
 
   return (
     <Card 
