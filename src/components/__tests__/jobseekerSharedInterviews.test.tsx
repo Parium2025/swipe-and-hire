@@ -12,7 +12,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const USER_ID = 'shared-interviews-user-1';
 
-let realUseCandidateInterviews: typeof import('@/hooks/useInterviews').useCandidateInterviews;
+// var krävs: mock-fabriken körs när modulen importeras, före vanliga
+// let/const-deklarationer hunnit initieras.
+// eslint-disable-next-line no-var
+var realUseCandidateInterviews: typeof import('@/hooks/useInterviews').useCandidateInterviews;
 const candidateInterviewsSpy = vi.fn();
 vi.mock('@/hooks/useInterviews', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/hooks/useInterviews')>();
