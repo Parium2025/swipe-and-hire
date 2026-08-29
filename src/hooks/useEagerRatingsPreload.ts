@@ -8,6 +8,7 @@ import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
 import { warmTeamAvatars } from '@/lib/warmTeamAvatars';
 import { JOBSEEKER_STATS_CACHE_PREFIX, LEGACY_JOBSEEKER_STATS_KEY } from '@/lib/jobseekerStatsCache';
+import { LOCATION_CACHE_PREFIX, LEGACY_LOCATION_CACHE_KEY } from '@/lib/weatherApi';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
@@ -85,6 +86,7 @@ const clearAllAppCachesSync = () => {
     INTERVIEWS_CACHE_KEY,
     JOB_TEMPLATES_CACHE_KEY,
     JOBSEEKER_STATS_CACHE_PREFIX,
+    LOCATION_CACHE_PREFIX,
   ];
   
   const exactKeysToRemove = [
@@ -94,6 +96,7 @@ const clearAllAppCachesSync = () => {
     'parium_company_logo_url',
     'parium_cached_profile',
     LEGACY_JOBSEEKER_STATS_KEY,
+    LEGACY_LOCATION_CACHE_KEY,
   ];
   
   try {

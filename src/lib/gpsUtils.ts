@@ -56,6 +56,23 @@ export interface GpsFix {
 export const isMobileWeb = (): boolean =>
   typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+/** Browser geolocation PERMISSION_DENIED code. */
+export const PERMISSION_DENIED_CODE = 1;
+
+// Set by the last position attempt. Used to avoid a pointless high-accuracy
+// retry (and its console noise) when the user has denied location access.
+let lastAttemptDenied = false;
+
+/** True when the most recent position attempt failed due to denied permission. */
+export const wasLastPositionDenied = (): boolean => lastAttemptDenied;
+
+const isDeniedError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false;
+  const err = error as { code?: number; message?: string };
+  if (err.code === PERMISSION_DENIED_CODE) return true;
+  return typeof err.message === 'string' && /denied|not authorized|permission/i.test(err.message);
+};
+
 export const getCurrentPosition = async (options?: { 
   timeout?: number; 
   enableHighAccuracy?: boolean; 
@@ -73,6 +90,7 @@ export const getCurrentPosition = async (options?: {
         enableHighAccuracy,
         maximumAge,
       });
+      lastAttemptDenied = false;
       return {
         lat: position.coords.latitude,
         lon: position.coords.longitude,
@@ -84,12 +102,18 @@ export const getCurrentPosition = async (options?: {
     if (navigator.geolocation) {
       return new Promise((resolve) => {
         navigator.geolocation.getCurrentPosition(
-          (position) => resolve({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-            accuracy: position.coords.accuracy ?? Number.POSITIVE_INFINITY,
-          }),
-          () => resolve(null),
+          (position) => {
+            lastAttemptDenied = false;
+            resolve({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude,
+              accuracy: position.coords.accuracy ?? Number.POSITIVE_INFINITY,
+            });
+          },
+          (error) => {
+            lastAttemptDenied = isDeniedError(error);
+            resolve(null);
+          },
           { timeout, enableHighAccuracy, maximumAge }
         );
       });
@@ -97,6 +121,7 @@ export const getCurrentPosition = async (options?: {
     
     return null;
   } catch (error) {
+    lastAttemptDenied = isDeniedError(error);
     console.warn('GPS error:', error);
     return null;
   }
@@ -126,6 +151,10 @@ export const getAccuratePosition = async (options?: {
 
   const first = await getCurrentPosition({ timeout, enableHighAccuracy: fastHighAccuracy, maximumAge });
   if (first && first.accuracy <= COARSE_FIX_ACCURACY_M) return first;
+
+  // Permission denied → a second attempt can only fail the same way. Skip it so
+  // we don't double the prompts, timeouts and console noise.
+  if (!first && lastAttemptDenied) return null;
 
   console.warn(
     `📍 Coarse position (${first ? Math.round(first.accuracy) + 'm' : 'none'}) — retrying with high accuracy`,

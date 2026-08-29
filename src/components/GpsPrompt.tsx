@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, X, AlertCircle } from 'lucide-react';
 import { checkGpsPermission, requestGpsPermission, isNativeApp } from '@/lib/gpsUtils';
 import GpsHelpModal from '@/components/GpsHelpModal';
+import { notePermissionGranted } from '@/lib/gpsCoordinator';
 
 // Vänta 10s innan GPS-ikonen visas — så att vädret (som oftast kommer inom
 // 2–3s) hinner landa först. När vädret finns tillgängligt returnerar
@@ -86,6 +87,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
           handleChange = () => {
             const newState = permissionStatus?.state;
             if (newState === 'granted') {
+              notePermissionGranted();
               gpsPromptDismissedUntilReload = false;
               setGpsStatus('granted');
               setVisible(false);
@@ -132,6 +134,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
       const granted = await requestGpsPermission();
       if (granted) {
         console.log('Native GPS enabled successfully');
+        notePermissionGranted();
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();
@@ -147,6 +150,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
     navigator.geolocation.getCurrentPosition(
       () => {
         console.log('GPS enabled successfully');
+        notePermissionGranted();
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();

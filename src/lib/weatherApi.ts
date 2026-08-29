@@ -45,20 +45,46 @@ export const hasConfirmedWeather = (
 
 // ─── Cache keys & TTLs ──────────────────────────────────
 
-const LOCATION_CACHE_KEY = 'parium_weather_location';
+/**
+ * Location is user-bound: a shared device must never let the next account read
+ * the previous account's position. The legacy global key is deleted (never
+ * migrated) the first time we touch the cache.
+ */
+export const LOCATION_CACHE_PREFIX = 'parium_weather_location:v2:';
+export const LEGACY_LOCATION_CACHE_KEY = 'parium_weather_location';
 const WEATHER_CACHE_KEY = 'parium_weather_data';
 const LOCATION_CACHE_MAX_AGE = 3 * 60 * 1000; // 3 minutes
 const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000;  // 5 minutes
 
 // ─── Cache helpers ───────────────────────────────────────
 
+let currentWeatherCacheUserId: string | null = null;
+
+/** Binds the weather/location cache to the signed-in user (null when signed out). */
+export const setWeatherCacheUser = (userId: string | null | undefined) => {
+  currentWeatherCacheUserId = userId || null;
+};
+
+export const getWeatherCacheUser = (): string | null => currentWeatherCacheUserId;
+
+const locationKeyFor = (userId: string) => `${LOCATION_CACHE_PREFIX}${userId}`;
+
+const dropLegacyLocationKey = () => {
+  try { localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY); } catch { /* ignore */ }
+};
+
 export const getCachedLocation = (): CachedLocation | null => {
+  // Never migrate the old global value — just remove it.
+  dropLegacyLocationKey();
+  const userId = currentWeatherCacheUserId;
+  if (!userId) return null;
+  const key = locationKeyFor(userId);
   try {
-    const cached = localStorage.getItem(LOCATION_CACHE_KEY);
+    const cached = localStorage.getItem(key);
     if (!cached) return null;
     const data = JSON.parse(cached);
     if (!data || typeof data !== 'object' || typeof data.timestamp !== 'number') {
-      try { localStorage.removeItem(LOCATION_CACHE_KEY); } catch { /* ignore */ }
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
       return null;
     }
     if (Date.now() - data.timestamp > LOCATION_CACHE_MAX_AGE) {
@@ -67,15 +93,18 @@ export const getCachedLocation = (): CachedLocation | null => {
     }
     return data;
   } catch {
-    try { localStorage.removeItem(LOCATION_CACHE_KEY); } catch { /* ignore */ }
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
     return null;
   }
 };
 
 export const setCachedLocation = (location: Omit<CachedLocation, 'timestamp'>) => {
+  dropLegacyLocationKey();
+  const userId = currentWeatherCacheUserId;
+  if (!userId) return;
   try {
     const data: CachedLocation = { ...location, timestamp: Date.now() };
-    localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(data));
+    localStorage.setItem(locationKeyFor(userId), JSON.stringify(data));
   } catch { /* Silent fail */ }
 };
 
@@ -132,7 +161,10 @@ try { localStorage.removeItem('parium_weather_manual_location'); } catch { /* ig
 
 export const clearWeatherCache = () => {
   try {
-    localStorage.removeItem(LOCATION_CACHE_KEY);
+    localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY);
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith(LOCATION_CACHE_PREFIX))
+      .forEach((key) => localStorage.removeItem(key));
     localStorage.removeItem(WEATHER_CACHE_KEY);
     console.log('Weather cache cleared');
   } catch { /* Silent fail */ }
