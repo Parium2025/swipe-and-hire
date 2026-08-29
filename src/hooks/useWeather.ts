@@ -374,12 +374,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
             city: stale.city,
             isLoading: false,
             error: null,
+            source: stale.source,
           });
         } else {
           // No cache at all — gracefully hide the weather row, but keep
           // the greeting and clock. The fallback city hint is preserved so a
           // name can still be shown if the consumer wants it.
-          updateWeather(safeFallback(fallbackCity || ''));
+          updateWeather(safeFallback(fallbackCity || '', 'fallback'));
         }
       }
     }
