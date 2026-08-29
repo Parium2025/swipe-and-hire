@@ -7,15 +7,21 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-import { render, cleanup } from '@testing-library/react';
+import { render, cleanup, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const USER_ID = 'shared-interviews-user-1';
 
+let realUseCandidateInterviews: typeof import('@/hooks/useInterviews').useCandidateInterviews;
 const candidateInterviewsSpy = vi.fn();
-vi.mock('@/hooks/useInterviews', () => ({
-  useCandidateInterviews: () => candidateInterviewsSpy(),
-}));
+vi.mock('@/hooks/useInterviews', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/hooks/useInterviews')>();
+  realUseCandidateInterviews = actual.useCandidateInterviews;
+  return {
+    ...actual,
+    useCandidateInterviews: () => candidateInterviewsSpy(),
+  };
+});
 
 vi.mock('@/hooks/use-mobile', () => ({
   useIsMobile: () => false,
@@ -61,9 +67,29 @@ vi.mock('@/lib/realtimeChannel', () => ({
   },
 }));
 
+interface InterviewsQueryBuilder {
+  select: () => InterviewsQueryBuilder;
+  eq: () => InterviewsQueryBuilder;
+  gte: () => InterviewsQueryBuilder;
+  in: () => InterviewsQueryBuilder;
+  order: () => Promise<{ data: unknown[]; error: null }>;
+}
+
+const makeInterviewsQueryBuilder = (): InterviewsQueryBuilder => {
+  const builder: InterviewsQueryBuilder = {
+    select: () => builder,
+    eq: () => builder,
+    gte: () => builder,
+    in: () => builder,
+    order: () => Promise.resolve({ data: [], error: null }),
+  };
+  return builder;
+};
+
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     rpc: vi.fn(async () => ({ data: { unique_viewers_30d: 0, total_views: 0, last_viewed_at: null }, error: null })),
+    from: () => makeInterviewsQueryBuilder(),
     removeChannel: vi.fn(),
   },
 }));
