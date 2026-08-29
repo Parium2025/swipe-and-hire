@@ -254,7 +254,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           Date.now() - cachedFix.timestamp < 30 * 60 * 1000
         ) {
           console.log('📍 Ignoring coarse fix — keeping recent precise location');
-          await fetchWeatherOnly(cachedFix.lat, cachedFix.lon, cachedFix.city);
+          await fetchWeatherOnly(cachedFix.lat, cachedFix.lon, cachedFix.city, 'gps');
           return;
         }
 
