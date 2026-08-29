@@ -133,7 +133,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
           if (!hasLocalEditsRef.current) {
             const newContent = (payload.new as any)?.content ?? '';
             setContent(newContent);
-            if (typeof window !== 'undefined') {
+            if (typeof window !== 'undefined' && cacheKey) {
               safeSetItem(cacheKey, newContent);
             }
           }
