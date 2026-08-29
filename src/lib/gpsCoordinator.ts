@@ -1,4 +1,7 @@
 import { getAccuratePosition, wasLastPositionDenied, type GpsFix } from '@/lib/gpsUtils';
+import { isPositionResolutionActive, setPositionResolutionActive } from '@/lib/gpsActivity';
+
+export { isPositionResolutionActive, setPositionResolutionActive };
 
 /**
  * Process-wide coordinator for GPS resolution.
@@ -16,6 +19,7 @@ const DENY_BLOCK_MS = 10 * 60 * 1000;
 let inFlight: Promise<GpsFix | null> | null = null;
 let deniedUntil = 0;
 
+
 export interface ResolvePositionOptions {
   timeout?: number;
   maximumAge?: number;
@@ -25,6 +29,7 @@ export interface ResolvePositionOptions {
 export const resolvePosition = async (
   options: ResolvePositionOptions = {},
 ): Promise<GpsFix | null> => {
+  if (!isPositionResolutionActive()) return null;
   if (Date.now() < deniedUntil) return null;
 
   if (inFlight) return inFlight;
@@ -56,4 +61,5 @@ export const isPositionBlocked = () => Date.now() < deniedUntil;
 export const resetGpsCoordinator = () => {
   inFlight = null;
   deniedUntil = 0;
+  setPositionResolutionActive(true);
 };

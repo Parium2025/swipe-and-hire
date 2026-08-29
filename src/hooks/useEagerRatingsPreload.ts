@@ -8,11 +8,16 @@ import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
 import { warmTeamAvatars } from '@/lib/warmTeamAvatars';
 import { JOBSEEKER_STATS_CACHE_PREFIX, LEGACY_JOBSEEKER_STATS_KEY } from '@/lib/jobseekerStatsCache';
-import { LOCATION_CACHE_PREFIX, LEGACY_LOCATION_CACHE_KEY } from '@/lib/weatherApi';
+import {
+  LOCATION_CACHE_PREFIX,
+  LEGACY_LOCATION_CACHE_KEY,
+  WEATHER_CACHE_PREFIX,
+  LEGACY_WEATHER_CACHE_KEY,
+  getCachedWeather,
+} from '@/lib/weatherApi';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
-const WEATHER_CACHE_KEY = 'parium_weather_data';
 const APPLICATIONS_SNAPSHOT_PREFIX = 'applications_snapshot_';
 const JOBS_CACHE_KEY = 'jobs_snapshot_';
 const CONVERSATIONS_CACHE_KEY = 'conversations_snapshot_';
@@ -87,10 +92,11 @@ const clearAllAppCachesSync = () => {
     JOB_TEMPLATES_CACHE_KEY,
     JOBSEEKER_STATS_CACHE_PREFIX,
     LOCATION_CACHE_PREFIX,
+    WEATHER_CACHE_PREFIX,
   ];
   
   const exactKeysToRemove = [
-    WEATHER_CACHE_KEY,
+    LEGACY_WEATHER_CACHE_KEY,
     'parium_company_data_cache_v2',
     'parium_company_data_cache_v3',
     'parium_company_logo_url',
@@ -137,7 +143,12 @@ export const clearAllAppCaches = () => {
   // Weather cache is cleared SYNCHRONOUSLY on every call — it's a single
   // localStorage removal with zero perf impact, and it guarantees no stale
   // weather effects flash on the next login before the deferred clear runs.
-  try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
+  try {
+    localStorage.removeItem(LEGACY_WEATHER_CACHE_KEY);
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith(WEATHER_CACHE_PREFIX))
+      .forEach((key) => localStorage.removeItem(key));
+  } catch { /* ignore */ }
 
   // On /auth route OR while the auth transition-gate is active, defer the rest
   // so logout click → /auth navigation is never blocked by localStorage sweeps.
@@ -162,11 +173,10 @@ export const clearAllAppCaches = () => {
  */
 const isWeatherCacheValid = (): boolean => {
   try {
-    const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+    const cached = getCachedWeather();
     if (!cached) return false;
-    
-    const parsed = JSON.parse(cached);
-    const age = Date.now() - parsed.timestamp;
+
+    const age = Date.now() - cached.timestamp;
     return age < WEATHER_CACHE_MAX_AGE;
   } catch {
     return false;
