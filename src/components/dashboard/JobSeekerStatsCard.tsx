@@ -14,9 +14,13 @@ import type { StatData } from './StatsCarousel';
 interface JobSeekerStatsCardProps {
   isPaused: boolean;
   setIsPaused: (v: boolean) => void;
+  /** Kanoniskt antal live-intervjuer från den delade useCandidateInterviews-källan. */
+  liveInterviewsCount?: number;
+  /** True när den delade intervjudatan har laddats klart. */
+  interviewsLoaded?: boolean;
 }
 
-export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStatsCardProps) => {
+export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsCount, interviewsLoaded }: JobSeekerStatsCardProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readCachedStats(user?.id), [user?.id]);
