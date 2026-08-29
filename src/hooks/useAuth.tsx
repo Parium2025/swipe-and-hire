@@ -170,11 +170,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  // Location cache is user-bound: never let the next account on a shared device
-  // read the previous account's position.
-  useEffect(() => {
-    setWeatherCacheUser(user?.id ?? null);
-  }, [user?.id]);
+  // Location/weather cache is user-bound: never let the next account on a
+  // shared device read the previous account's position. Bound synchronously
+  // during render (module state only, no storage or React mutation) so child
+  // state initializers never read another account's cache.
+  setWeatherCacheUser(user?.id ?? null);
   const CACHED_PROFILE_KEY = 'parium_cached_profile';
   const [profile, setProfile] = useState<Profile | null>(() => {
     try {

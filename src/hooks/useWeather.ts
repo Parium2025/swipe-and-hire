@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useBackgroundLocation } from './useBackgroundLocation';
 import { isNativeApp, isMobileWeb, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
-import { resolvePosition } from '@/lib/gpsCoordinator';
+import { resolvePosition, setPositionResolutionActive } from '@/lib/gpsCoordinator';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { isSlowConnection } from '@/hooks/useNetworkAwareFetch';
 import {
@@ -63,6 +63,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const enabled = options.enabled ?? true;
   const backgroundLocationEnabled = options.backgroundLocationEnabled ?? false;
   const active = options.active ?? true;
+
+  // Register page-awareness in the coordinator before anything else runs, so
+  // global preloads stay silent while this consumer is hidden.
+  useEffect(() => {
+    setPositionResolutionActive(active);
+    return () => { setPositionResolutionActive(true); };
+  }, [active]);
 
   const locationRef = useRef<CachedLocation | null>(null);
   const initializedRef = useRef(false);

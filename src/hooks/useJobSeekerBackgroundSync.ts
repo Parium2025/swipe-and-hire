@@ -6,6 +6,7 @@ import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { preloadWeatherLocation } from './useWeather';
+import { getCachedWeather } from '@/lib/weatherApi';
 import { MY_APPLICATIONS_SELECT } from './myApplicationsShared';
 import { fetchAllPages } from '@/lib/fetchAllPages';
 
@@ -15,7 +16,6 @@ const MY_APPLICATIONS_CACHE_KEY = 'job_seeker_applications_';
 const MESSAGES_CACHE_KEY = 'job_seeker_messages_';
 const AVAILABLE_JOBS_CACHE_KEY = 'job_seeker_available_jobs_';
 const CANDIDATE_INTERVIEWS_CACHE_KEY = 'job_seeker_interviews_';
-const WEATHER_CACHE_KEY = 'parium_weather_data';
 const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min (optimal for weather)
 // Ingen CACHE_MAX_AGE - vi förlitar oss på realtime subscriptions istället för TTL
 
@@ -61,11 +61,10 @@ export const useJobSeekerBackgroundSync = () => {
   // 🌤️ Validera väder-cache
   const isWeatherCacheValid = useCallback((): boolean => {
     try {
-      const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+      const cached = getCachedWeather();
       if (!cached) return false;
-      
-      const parsed = JSON.parse(cached);
-      const age = Date.now() - parsed.timestamp;
+
+      const age = Date.now() - cached.timestamp;
       return age < WEATHER_CACHE_MAX_AGE;
     } catch {
       return false;

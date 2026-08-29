@@ -15,6 +15,12 @@ const DENY_BLOCK_MS = 10 * 60 * 1000;
 
 let inFlight: Promise<GpsFix | null> | null = null;
 let deniedUntil = 0;
+/**
+ * Page-awareness: while the only weather consumer is hidden (Home kept alive
+ * under another route) no consumer — including global preloads — may touch the
+ * GPS. Defaults to true so login prewarm and the employer flow are unaffected.
+ */
+let positionResolutionActive = true;
 
 export interface ResolvePositionOptions {
   timeout?: number;
@@ -25,6 +31,7 @@ export interface ResolvePositionOptions {
 export const resolvePosition = async (
   options: ResolvePositionOptions = {},
 ): Promise<GpsFix | null> => {
+  if (!positionResolutionActive) return null;
   if (Date.now() < deniedUntil) return null;
 
   if (inFlight) return inFlight;
@@ -44,6 +51,14 @@ export const resolvePosition = async (
   return inFlight;
 };
 
+/** Registers whether position resolution is currently allowed. */
+export const setPositionResolutionActive = (active: boolean) => {
+  positionResolutionActive = active;
+};
+
+/** True when position resolution is currently allowed. */
+export const isPositionResolutionActive = () => positionResolutionActive;
+
 /** Called when the browser reports that location permission became granted. */
 export const notePermissionGranted = () => {
   deniedUntil = 0;
@@ -56,4 +71,5 @@ export const isPositionBlocked = () => Date.now() < deniedUntil;
 export const resetGpsCoordinator = () => {
   inFlight = null;
   deniedUntil = 0;
+  positionResolutionActive = true;
 };
