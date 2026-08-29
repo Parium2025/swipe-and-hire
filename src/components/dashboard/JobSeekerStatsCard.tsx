@@ -1,5 +1,4 @@
 import { memo, useMemo, useEffect } from 'react';
-import { safeSetItem } from '@/lib/safeStorage';
 import { Send, Calendar, Heart, MessageSquare, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,24 +7,9 @@ import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatsCarousel } from './StatsCarousel';
 import { useProfileViewStats } from '@/hooks/useProfileViewStats';
+import { readCachedStats, writeCachedStat } from '@/lib/jobseekerStatsCache';
+import { fetchJobseekerDashboardStats } from '@/lib/jobseekerDashboardStats';
 import type { StatData } from './StatsCarousel';
-
-const STATS_CACHE_KEY = 'parium-jobseeker-stats';
-
-const readCachedStats = (): Record<string, number> => {
-  try {
-    const raw = localStorage.getItem(STATS_CACHE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch { return {}; }
-};
-
-const writeCachedStats = (key: string, value: number) => {
-  try {
-    const current = readCachedStats();
-    current[key] = value;
-    safeSetItem(STATS_CACHE_KEY, JSON.stringify(current));
-  } catch {}
-};
 
 interface JobSeekerStatsCardProps {
   isPaused: boolean;
