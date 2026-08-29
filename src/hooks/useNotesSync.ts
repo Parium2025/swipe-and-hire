@@ -177,6 +177,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   const handleChange = useCallback(
     (next: string) => {
+      // No authenticated user → no cache key → ignore edits entirely.
+      if (!cacheKey) return;
       hasLocalEditsRef.current = true;
       setSaveFailed(false);
       setContent(next);
