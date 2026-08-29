@@ -315,7 +315,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }
 
     if (mountedRef.current) {
-      updateWeather(safeFallback(fallbackCity || ''));
+      updateWeather(safeFallback(fallbackCity || '', 'fallback'));
     }
   }, [fallbackCity, fetchWeatherOnly, safeFallback, updateLocation, updateWeather]);
 
