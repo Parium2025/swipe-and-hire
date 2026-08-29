@@ -35,6 +35,11 @@ interface WeatherData {
   city: string;
   isLoading: boolean;
   error: string | null;
+  /**
+   * Only 'gps' is treated as a confirmed, user-approved location. IP and
+   * fallback readings must not render as weather.
+   */
+  source?: 'gps' | 'ip' | 'fallback';
 }
 
 interface UseWeatherOptions {
