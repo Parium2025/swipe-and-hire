@@ -161,7 +161,10 @@ try { localStorage.removeItem('parium_weather_manual_location'); } catch { /* ig
 
 export const clearWeatherCache = () => {
   try {
-    localStorage.removeItem(LOCATION_CACHE_KEY);
+    localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY);
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith(LOCATION_CACHE_PREFIX))
+      .forEach((key) => localStorage.removeItem(key));
     localStorage.removeItem(WEATHER_CACHE_KEY);
     console.log('Weather cache cleared');
   } catch { /* Silent fail */ }
