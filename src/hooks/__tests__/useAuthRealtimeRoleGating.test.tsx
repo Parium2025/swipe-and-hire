@@ -1,13 +1,10 @@
 /**
- * RED: AuthProvider realtime role gating.
+ * Regression: AuthProvider realtime role gating.
  *
  * Employer-only realtime channels (auth-job-count, auth-employer-applications,
  * auth-reviews, auth-my-candidates) must only be registered for users whose
  * resolved role is "employer". Jobseekers must only get their user-scoped
  * channels (auth-saved-jobs, auth-applications).
- *
- * Current production behavior registers ALL channels unconditionally, so the
- * jobseeker assertions below are expected to FAIL (RED).
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, waitFor, cleanup } from '@testing-library/react';

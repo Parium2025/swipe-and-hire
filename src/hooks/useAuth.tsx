@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { toast } from '@/hooks/use-toast';
@@ -2300,12 +2300,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    const isEmployer = userRole?.role === 'employer';
+
     // 🔥 SCALED: Filtrera per användare istället för att lyssna globalt på job_postings.
     // Tidigare fick varje inloggad användare events för ALLA jobb i hela databasen,
     // vilket triggade refresh för 1000 användare vid varje jobbändring (kvadratisk skalning).
     // Nu lyssnar varje användare endast på sina egna jobb (employer_id=eq.user.id).
     // Counts/stats visar ändå bara egna data, så ingen UI-skillnad.
     // Debounce: max 1 refresh per 3s vid burst.
+    // Employer-only: jobbsökare har inga egna jobbannonser att räkna.
     let jobRefreshTimer: ReturnType<typeof setTimeout> | null = null;
     const scheduleJobRefresh = () => {
       if (jobRefreshTimer) return;
@@ -2316,15 +2319,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }, 3000);
     };
 
-    const jobChannel = createRealtimeChannel(`auth-job-count-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'job_postings', filter: `employer_id=eq.${user.id}` },
-        () => {
-          scheduleJobRefresh();
-        }
-      )
-      .subscribe((status) => handleChannelStatus('job', status));
+    let jobChannel: RealtimeChannel | null = null;
+    if (isEmployer) {
+      jobChannel = createRealtimeChannel(`auth-job-count-${user.id}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'job_postings', filter: `employer_id=eq.${user.id}` },
+          () => {
+            scheduleJobRefresh();
+          }
+        )
+        .subscribe((status) => handleChannelStatus('job', status));
+    }
 
     const savedChannel = createRealtimeChannel(`auth-saved-jobs-${user.id}`)
       .on(
@@ -2364,6 +2370,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // utan att veta vilka jobb som tillhör user → realtime-RLS hindrar ej tomma payloads,
     // men `refreshEmployerStats` läser via RPC som ändå filtrerar på user. Debounce
     // skär 95% av onödiga RPC-anrop vid hög aktivitet på plattformen.
+    // Employer-only: används för arbetsgivarens kandidatbadge.
     let employerAppsTimer: ReturnType<typeof setTimeout> | null = null;
     const scheduleEmployerAppsRefresh = () => {
       if (employerAppsTimer) return;
@@ -2373,15 +2380,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }, 5000);
     };
 
-    const employerApplicationsChannel = createRealtimeChannel(`auth-employer-applications-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'job_applications' },
-        () => {
-          scheduleEmployerAppsRefresh();
-        }
-      )
-      .subscribe((status) => handleChannelStatus('employerApps', status));
+    let employerApplicationsChannel: RealtimeChannel | null = null;
+    if (isEmployer) {
+      employerApplicationsChannel = createRealtimeChannel(`auth-employer-applications-${user.id}`)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'job_applications' },
+          () => {
+            scheduleEmployerAppsRefresh();
+          }
+        )
+        .subscribe((status) => handleChannelStatus('employerApps', status));
+    }
 
     // 🔥 SCALED: Den globala message-realtimen är BORTTAGEN.
     // Tidigare lyssnade varje inloggad användare på ALLA conversation_messages-INSERTs
@@ -2400,51 +2410,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     //  Det räcker för att hålla badge-fallback-värdet i sessionStorage färskt.
 
     // Real-time för company reviews (uppdaterar recensionsräknare för arbetsgivare)
-    const reviewsChannel = createRealtimeChannel(`auth-reviews-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${user.id}` },
-        () => {
-          refreshEmployerStats();
-        }
-      )
-      .subscribe((status) => handleChannelStatus('reviews', status));
+    // Employer-only: recensionsräknare visas i arbetsgivargränssnittet.
+    let reviewsChannel: RealtimeChannel | null = null;
+    if (isEmployer) {
+      reviewsChannel = createRealtimeChannel(`auth-reviews-${user.id}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${user.id}` },
+          () => {
+            refreshEmployerStats();
+          }
+        )
+        .subscribe((status) => handleChannelStatus('reviews', status));
+    }
 
     // Real-time för my_candidates (uppdaterar "Mina kandidater" räknare i sidebaren)
-    const myCandidatesChannel = createRealtimeChannel(`auth-my-candidates-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'my_candidates', filter: `recruiter_id=eq.${user.id}` },
-        () => {
-          refreshEmployerStats();
-        }
-      )
-      .subscribe((status) => handleChannelStatus('myCandidates', status));
+    // Employer-only: "Mina kandidater" finns endast för arbetsgivare.
+    let myCandidatesChannel: RealtimeChannel | null = null;
+    if (isEmployer) {
+      myCandidatesChannel = createRealtimeChannel(`auth-my-candidates-${user.id}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'my_candidates', filter: `recruiter_id=eq.${user.id}` },
+          () => {
+            refreshEmployerStats();
+          }
+        )
+        .subscribe((status) => handleChannelStatus('myCandidates', status));
+    }
 
     return () => {
       // Clear all pending timeouts
       connectionTimeouts.forEach((timeout) => clearTimeout(timeout));
       connectionTimeouts.clear();
-      
+
       // Stop reconnection polling
       if (reconnectionPollInterval) {
         clearInterval(reconnectionPollInterval);
         reconnectionPollInterval = null;
       }
 
-      // Clear debounce timers
+      // Clear debounce timers (only created when employer)
       if (jobRefreshTimer) clearTimeout(jobRefreshTimer);
       if (employerAppsTimer) clearTimeout(employerAppsTimer);
-      
-      supabase.removeChannel(jobChannel);
+
+      // Remove only channels that were actually created
+      if (jobChannel) supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
       supabase.removeChannel(applicationsChannel);
-      supabase.removeChannel(employerApplicationsChannel);
+      if (employerApplicationsChannel) supabase.removeChannel(employerApplicationsChannel);
       // (messagesChannel borttagen — se kommentar ovan om skalningsoptimering)
-      supabase.removeChannel(reviewsChannel);
-      supabase.removeChannel(myCandidatesChannel);
+      if (reviewsChannel) supabase.removeChannel(reviewsChannel);
+      if (myCandidatesChannel) supabase.removeChannel(myCandidatesChannel);
     };
-  }, [user, refreshSidebarCounts, refreshEmployerStats]);
+  }, [user, userRole?.role, refreshSidebarCounts, refreshEmployerStats]);
 
   const value: AuthContextType = {
     user,
