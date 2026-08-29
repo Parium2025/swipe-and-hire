@@ -1,5 +1,5 @@
 /**
- * RED: Jobbsökarens Home-kort ska vara tangentbordsåtkomliga.
+ * GREEN: Jobbsökarens Home-kort ska vara tangentbordsåtkomliga.
  * - Karriärtips med source_url ska exponera länksemantik, vara fokuserbara
  *   och reagera på Enter/Space med samma säkra window.open som klick.
  * - Karriärtips utan source_url ska förbli icke-interaktiva (inget tabbstopp/länkroll).
