@@ -33,15 +33,11 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const contentRef = useRef('');
   const isSavingRef = useRef(false);
 
-  const cacheKey = user?.id ? `${cachePrefix}_${user.id}` : cachePrefix;
+  // No authenticated user → no cache key at all. The legacy unscoped
+  // `cachePrefix` key is never read or written.
+  const cacheKey = user?.id ? `${cachePrefix}_${user.id}` : null;
 
-  const [content, setContent] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    if (user?.id) {
-      return localStorage.getItem(`${cachePrefix}_${user.id}`) || '';
-    }
-    return localStorage.getItem(cachePrefix) || '';
-  });
+  const [content, setContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -49,14 +45,35 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // Keep ref in sync for beforeunload
   useEffect(() => { contentRef.current = content; }, [content]);
 
-  // When user becomes available, load their specific cache
+  // Account transition (null->uid, A->B, uid->null): reset all account-local
+  // state and hydrate ONLY the new user's scoped cache.
+  const previousUserIdRef = useRef<string | null | undefined>(undefined);
   useEffect(() => {
-    if (typeof window === 'undefined' || !user?.id) return;
+    const userId = user?.id ?? null;
+    if (previousUserIdRef.current === userId) return;
+    previousUserIdRef.current = userId;
+
+    hasLocalEditsRef.current = false;
+    serverContentRef.current = '';
+    setSaveFailed(false);
+    setLastSaved(null);
+
+    const next = (typeof window !== 'undefined' && cacheKey)
+      ? (localStorage.getItem(cacheKey) ?? '')
+      : '';
+    contentRef.current = next;
+    setContent(next);
+  }, [cacheKey, user?.id]);
+
+  // Keep the authenticated user's scoped cache hydrated on key changes
+  useEffect(() => {
+    if (typeof window === 'undefined' || !user?.id || !cacheKey) return;
     const cached = localStorage.getItem(cacheKey);
     if (cached !== null && !hasLocalEditsRef.current) {
       setContent(cached);
     }
   }, [cacheKey, user?.id]);
+
 
   // Cross-tab sync via localStorage events
   useEffect(() => {
