@@ -1,6 +1,6 @@
 /**
- * RED-test: bakgrundsförvärmningen av kandidatintervjuer måste använda den
- * kanoniska hämtaren fetchCandidateInterviewsForUser (samma sex-timmars
+ * Regressionstest: bakgrundsförvärmningen av kandidatintervjuer måste använda
+ * den kanoniska hämtaren fetchCandidateInterviewsForUser (samma sex-timmars
  * "pågående"-fönster som useCandidateInterviews) i stället för en egen
  * supabase.from('interviews')-query.
  */
