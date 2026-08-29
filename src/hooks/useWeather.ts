@@ -391,8 +391,6 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           updateWeather(safeFallback(fallbackCity || '', 'fallback'));
         }
       }
-    }
-
     } else if (!isOffline) {
       // Re-activated (user came back to this page): only refresh when the
       // cached reading is older than the visibility threshold.
