@@ -291,7 +291,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     if (ipLocation && mountedRef.current) {
       if (cached && cached.source === 'gps') {
         console.log('⚠️ Ignoring IP location (might be datacenter), using GPS cache');
-        await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+        await fetchWeatherOnly(cached.lat, cached.lon, cached.city, 'gps');
         return;
       }
       
