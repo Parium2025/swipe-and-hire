@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,19 +6,36 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Video, Building2, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
-import { useCandidateInterviews } from '@/hooks/useInterviews';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 import {
   formatInterviewDate,
   formatInterviewTimeWithZone,
   getTimeUntil,
   isInterviewUrgent,
-  isInterviewOver,
   getMeetingUrl,
 } from '@/lib/interviewTime';
 import { GRADIENTS } from './dashboardConstants';
 
 type LocationType = 'video' | 'office' | 'phone';
+
+/** Minsta formen kortet behöver — den delade live-listan ägs av DashboardGrid. */
+export interface DashboardInterview {
+  id: string;
+  scheduled_at: string;
+  duration_minutes: number | null;
+  location_type: LocationType;
+  location_details: string | null;
+  job_postings?: {
+    title?: string | null;
+    workplace_name?: string | null;
+  } | null;
+}
+
+interface JobSeekerInterviewsCardProps {
+  /** Redan live-filtrerade intervjuer (isInterviewOver applicerad av grid:et). */
+  interviews: DashboardInterview[];
+  isLoading: boolean;
+}
 
 const getLocationIcon = (type: LocationType) => {
   switch (type) {
@@ -38,15 +55,11 @@ const getLocationLabel = (type: LocationType) => {
   }
 };
 
-export const JobSeekerInterviewsCard = memo(() => {
-  const { interviews, isLoading } = useCandidateInterviews();
+export const JobSeekerInterviewsCard = memo(({ interviews, isLoading }: JobSeekerInterviewsCardProps) => {
   const navigate = useNavigate();
   const now = useMinuteTick();
 
-  const liveInterviews = useMemo(
-    () => (interviews as any[]).filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
-    [interviews, now],
-  );
+  const liveInterviews = interviews;
   const upcomingInterviews = liveInterviews.slice(0, 5);
   const hasMore = liveInterviews.length > 5;
 

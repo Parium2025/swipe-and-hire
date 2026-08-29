@@ -14,9 +14,13 @@ import type { StatData } from './StatsCarousel';
 interface JobSeekerStatsCardProps {
   isPaused: boolean;
   setIsPaused: (v: boolean) => void;
+  /** Kanoniskt antal live-intervjuer från den delade useCandidateInterviews-källan. */
+  liveInterviewsCount?: number;
+  /** True när den delade intervjudatan har laddats klart. */
+  interviewsLoaded?: boolean;
 }
 
-export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStatsCardProps) => {
+export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsCount, interviewsLoaded }: JobSeekerStatsCardProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readCachedStats(user?.id), [user?.id]);
@@ -34,7 +38,8 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     queryFn: async () => {
       const stats = await fetchJobseekerDashboardStats(user!.id, supabase);
       writeCachedStat(user!.id, 'applications', stats.applications);
-      writeCachedStat(user!.id, 'interviews', stats.interviews);
+      // Intervjuräknaren cachas INTE här — det kanoniska live-antalet från
+      // useCandidateInterviews (delad datakälla) skrivs via effekten nedan.
       writeCachedStat(user!.id, 'saved', stats.saved_jobs);
       writeCachedStat(user!.id, 'messages', stats.unread_messages);
       return stats;
@@ -47,7 +52,15 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   });
 
   const applicationsCount = dashStats?.applications ?? cachedStats['applications'] ?? 0;
-  const interviewsCount = dashStats?.interviews ?? cachedStats['interviews'] ?? 0;
+  // Intervjuräknaren kommer från den delade live-listan (samma källa som
+  // intervjukortet), med cachat värde som fallback före första laddningen.
+  const interviewsCount = liveInterviewsCount ?? cachedStats['interviews'] ?? 0;
+  // Cacha det kanoniska live-antalet först när datan faktiskt laddats.
+  useEffect(() => {
+    if (interviewsLoaded && liveInterviewsCount !== undefined) {
+      writeCachedStat(user?.id, 'interviews', liveInterviewsCount);
+    }
+  }, [interviewsLoaded, liveInterviewsCount, user?.id]);
   const savedJobsCount = dashStats?.saved_jobs ?? cachedStats['saved'] ?? 0;
   // Olästa meddelanden kommer från den enda globala chattkanalen
   // (ConversationsProvider). Kortet prenumererar därför INTE själv på
@@ -75,9 +88,9 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
         invalidateStats
       )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'interviews', filter: `applicant_id=eq.${user.id}` },
-        invalidateStats
-      )
+      // Intervjuer har INGEN egen lyssnare här — den delade
+      // useCandidateInterviews-prenumerationen i grid:et uppdaterar redan
+      // den kanoniska live-listan som detta kort räknar på.
       .on('postgres_changes', { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
         invalidateStats
       )

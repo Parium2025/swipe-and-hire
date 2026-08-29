@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -6,6 +6,10 @@ import { CareerTipsCard } from '@/components/dashboard/CareerTipsCard';
 import { JobSeekerStatsCard } from '@/components/dashboard/JobSeekerStatsCard';
 import { JobSeekerNotesCard } from '@/components/dashboard/JobSeekerNotesCard';
 import { JobSeekerInterviewsCard } from '@/components/dashboard/JobSeekerInterviewsCard';
+import type { DashboardInterview } from '@/components/dashboard/JobSeekerInterviewsCard';
+import { useCandidateInterviews } from '@/hooks/useInterviews';
+import { useMinuteTick } from '@/hooks/useMinuteTick';
+import { isInterviewOver } from '@/lib/interviewTime';
 
 /** Wraps carousel cards so their pause-state doesn't re-render siblings */
 const TipsCardWrapper = memo(() => {
@@ -14,9 +18,21 @@ const TipsCardWrapper = memo(() => {
 });
 TipsCardWrapper.displayName = 'TipsCardWrapper';
 
-const StatsCardWrapper = memo(() => {
+interface SharedInterviewStatsProps {
+  liveInterviewsCount: number;
+  interviewsLoaded: boolean;
+}
+
+const StatsCardWrapper = memo(({ liveInterviewsCount, interviewsLoaded }: SharedInterviewStatsProps) => {
   const [isPaused, setIsPaused] = useState(false);
-  return <JobSeekerStatsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
+  return (
+    <JobSeekerStatsCard
+      isPaused={isPaused}
+      setIsPaused={setIsPaused}
+      liveInterviewsCount={liveInterviewsCount}
+      interviewsLoaded={interviewsLoaded}
+    />
+  );
 });
 StatsCardWrapper.displayName = 'StatsCardWrapper';
 
@@ -24,10 +40,20 @@ StatsCardWrapper.displayName = 'StatsCardWrapper';
 export const JobSeekerDashboardGrid = memo(() => {
   const isMobile = useIsMobile();
 
+  // EN delad datakälla för kandidatens intervjuer — statistikkortet och
+  // intervjukortet räknar exakt samma live-lista, så en pågående intervju
+  // syns lika i båda.
+  const { interviews, isLoading: interviewsLoading } = useCandidateInterviews();
+  const now = useMinuteTick();
+  const liveInterviews = useMemo(
+    () => (interviews as DashboardInterview[]).filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
+    [interviews, now],
+  );
+
   const mobileOrder = (
     <>
-      <StatsCardWrapper />
-      <JobSeekerInterviewsCard />
+      <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={!interviewsLoading} />
+      <JobSeekerInterviewsCard interviews={liveInterviews} isLoading={interviewsLoading} />
       <TipsCardWrapper />
       <JobSeekerNotesCard />
     </>
@@ -36,9 +62,9 @@ export const JobSeekerDashboardGrid = memo(() => {
   const desktopOrder = (
     <>
       <TipsCardWrapper />
-      <StatsCardWrapper />
+      <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={!interviewsLoading} />
       <JobSeekerNotesCard />
-      <JobSeekerInterviewsCard />
+      <JobSeekerInterviewsCard interviews={liveInterviews} isLoading={interviewsLoading} />
     </>
   );
 
