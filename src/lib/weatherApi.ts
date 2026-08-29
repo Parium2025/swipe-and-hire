@@ -69,9 +69,14 @@ export const setWeatherCacheUser = (userId: string | null | undefined) => {
 export const getWeatherCacheUser = (): string | null => currentWeatherCacheUserId;
 
 const locationKeyFor = (userId: string) => `${LOCATION_CACHE_PREFIX}${userId}`;
+const weatherKeyFor = (userId: string) => `${WEATHER_CACHE_PREFIX}${userId}`;
 
 const dropLegacyLocationKey = () => {
   try { localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY); } catch { /* ignore */ }
+};
+
+const dropLegacyWeatherKey = () => {
+  try { localStorage.removeItem(LEGACY_WEATHER_CACHE_KEY); } catch { /* ignore */ }
 };
 
 export const getCachedLocation = (): CachedLocation | null => {
