@@ -142,12 +142,24 @@ describe('Jobbsökarens delade intervjudatakälla', () => {
     cleanup();
   });
 
-  it('DashboardGrid monterar exakt en candidate-interviews-datakälla', () => {
-    candidateInterviewsSpy.mockReturnValue({ interviews: [], isLoading: false });
+  it('DashboardGrid monterar exakt en candidate-interviews-datakälla', async () => {
+    // Låt hooken gå mot den riktiga implementationen så vi kan inspektera
+    // React Query-cachen: grid:et ska skapa exakt EN candidate-interviews-
+    // query med exakt EN prenumerant.
+    candidateInterviewsSpy.mockImplementation(() => realUseCandidateInterviews());
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-    render(<JobSeekerDashboardGrid />);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <JobSeekerDashboardGrid />
+      </QueryClientProvider>,
+    );
 
-    expect(candidateInterviewsSpy).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      const queries = queryClient.getQueryCache().findAll({ queryKey: ['candidate-interviews'] });
+      expect(queries).toHaveLength(1);
+      expect(queries[0].observers).toHaveLength(1);
+    });
   });
 
   it('statistikräknaren och intervjukortet håller ihop under en pågående intervju', () => {
