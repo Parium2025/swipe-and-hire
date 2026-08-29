@@ -428,10 +428,10 @@ export const useJobSeekerBackgroundSync = () => {
     // 6+ cache-invalidations + 2 preloads per event. Vid 500 sökare online och 50
     // jobb-uppdateringar/h = ~150 000 onödiga refetches/dag.
     //
-    // UPDATE/DELETE (t.ex. company_logo ändras via DB-trigger) propageras nu via:
-    //  1. employerProfilesChannel nedan (lyssnar på profiles UPDATE → branding)
-    //  2. naturlig refetch via React Query staleTime
-    //
+    // UPDATE/DELETE (t.ex. company_logo ändras via DB-trigger) propageras via:
+    //  DB-triggern sync_company_name_to_jobs som uppdaterar job_postings,
+    //  sedan plockar befintliga ID-scopade job_postings-prenumerationer upp
+    //  ändringen för relevanta jobbsökarskärmar.
     // Debounce: max 1 invalidation per 5s vid burst (när många nya jobb postas samtidigt).
     let newJobsTimer: ReturnType<typeof setTimeout> | null = null;
     const scheduleNewJobsRefresh = () => {
