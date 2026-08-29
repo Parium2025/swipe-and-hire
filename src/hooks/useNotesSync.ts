@@ -108,7 +108,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Sync server value into cache
   useEffect(() => {
-    if (typeof window === 'undefined' || !user?.id) return;
+    if (typeof window === 'undefined' || !user?.id || !cacheKey) return;
     if (!noteData) return;
     const serverContent = noteData.content ?? '';
     safeSetItem(cacheKey, serverContent);
