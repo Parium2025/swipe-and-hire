@@ -1,5 +1,5 @@
 /**
- * RED-test: JobSeekerStatsCard får inte skriva hookens fallback-nolla till
+ * Regressionstest: JobSeekerStatsCard får inte skriva hookens fallback-nolla till
  * den user-scopade statistikkachen innan ett lyckat profilvisningssvar,
  * eller efter ett RPC-fel. En lyckad nolla ska däremot skrivas.
  */
