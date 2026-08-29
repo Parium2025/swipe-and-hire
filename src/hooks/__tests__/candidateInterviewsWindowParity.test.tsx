@@ -119,19 +119,8 @@ describe('background preload of candidate interviews uses the canonical fetcher'
 
     expect(fetchCandidateInterviewsForUser).toHaveBeenCalledWith(USER_ID);
     expect(queryClient.getQueryData(['candidate-interviews', USER_ID])).toEqual(canonicalInterviews);
-  });
 
-  it('kör ingen egen supabase.from("interviews")-query', async () => {
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <Probe />
-      </QueryClientProvider>,
-    );
-
-    await new Promise((r) => setTimeout(r, 100));
-
+    // Ingen egen interviews-query — annars kan tidsfönstret divergera.
     const interviewQueries = fromSpy.mock.calls.filter(([table]) => table === 'interviews');
     expect(interviewQueries).toHaveLength(0);
   });
