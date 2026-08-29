@@ -35,6 +35,11 @@ interface WeatherData {
   city: string;
   isLoading: boolean;
   error: string | null;
+  /**
+   * Only 'gps' is treated as a confirmed, user-approved location. IP and
+   * fallback readings must not render as weather.
+   */
+  source?: 'gps' | 'ip' | 'fallback';
 }
 
 interface UseWeatherOptions {
@@ -64,7 +69,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const requestSeqRef = useRef(0);
   const [retryTick, setRetryTick] = useState(0);
 
-  const safeFallback = useCallback((city = ''): WeatherData => ({
+  const safeFallback = useCallback((city = '', source?: 'gps' | 'ip' | 'fallback'): WeatherData => ({
     temperature: 0,
     feelsLike: 0,
     temperatureAvailable: false,
@@ -74,10 +79,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     city,
     isLoading: false,
     error: 'unavailable',
+    source,
   }), []);
 
   const [weather, setWeather] = useState<WeatherData>(() => {
     const cached = getCachedWeather();
+    const cachedLocation = getCachedLocation();
     if (cached) {
       return {
         temperature: cached.temperature,
@@ -89,6 +96,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         city: cached.city,
         isLoading: false,
         error: null,
+        source: cached.source ?? cachedLocation?.source,
       };
     }
     return {
@@ -101,6 +109,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       city: '',
       isLoading: true,
       error: null,
+      source: cachedLocation?.source,
     };
   });
 
@@ -109,7 +118,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     setWeather(prev => ({ ...prev, ...data }));
   }, []);
 
-  const fetchWeatherOnly = useCallback(async (lat: number, lon: number, city: string, showLoading = false) => {
+  const fetchWeatherOnly = useCallback(async (
+    lat: number,
+    lon: number,
+    city: string,
+    source: 'gps' | 'ip' | 'fallback',
+    showLoading = false
+  ) => {
     const seq = ++requestSeqRef.current;
     try {
       if (showLoading) updateWeather({ isLoading: true });
@@ -138,6 +153,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         emoji: info.emoji,
         city: resolvedCity,
         isNight,
+        source,
       };
       
       // Never persist a neutral fallback reading — it would keep the UI empty
@@ -166,9 +182,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           city: stale.city || city,
           isLoading: false,
           error: null,
+          source: stale.source ?? source,
         });
       } else {
-        updateWeather(safeFallback(city));
+        updateWeather(safeFallback(city, source));
       }
     }
   }, [safeFallback, updateWeather]);
@@ -176,11 +193,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const updateLocation = useCallback(async (newLat: number, newLon: number, knownCity: string | null, source: 'gps' | 'ip' | 'fallback' | 'background') => {
     // City is resolved server-side by the edge function (fetchCurrentWeather returns cachedCity).
     // We pass knownCity as a hint; fetchWeatherOnly will use the server-cached city if knownCity is empty.
+    const normalizedSource = source === 'background' ? 'gps' : source;
     const city = knownCity || '';
-    const newLocation: CachedLocation = { lat: newLat, lon: newLon, city, source: source === 'background' ? 'gps' : source, timestamp: Date.now() };
+    const newLocation: CachedLocation = { lat: newLat, lon: newLon, city, source: normalizedSource, timestamp: Date.now() };
     setCachedLocation(newLocation);
     locationRef.current = newLocation;
-    await fetchWeatherOnly(newLat, newLon, city);
+    await fetchWeatherOnly(newLat, newLon, city, normalizedSource);
   }, [fetchWeatherOnly]);
 
   // Handler for background location updates (from native app)
@@ -236,7 +254,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           Date.now() - cachedFix.timestamp < 30 * 60 * 1000
         ) {
           console.log('📍 Ignoring coarse fix — keeping recent precise location');
-          await fetchWeatherOnly(cachedFix.lat, cachedFix.lon, cachedFix.city);
+          await fetchWeatherOnly(cachedFix.lat, cachedFix.lon, cachedFix.city, 'gps');
           return;
         }
 
@@ -258,7 +276,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       const cacheAge = Date.now() - cached.timestamp;
       if (cacheAge < 10 * 60 * 1000) {
         console.log('Using recent GPS cache instead of IP fallback');
-        await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+        await fetchWeatherOnly(cached.lat, cached.lon, cached.city, 'gps');
         return;
       }
     }
@@ -273,7 +291,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     if (ipLocation && mountedRef.current) {
       if (cached && cached.source === 'gps') {
         console.log('⚠️ Ignoring IP location (might be datacenter), using GPS cache');
-        await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+        await fetchWeatherOnly(cached.lat, cached.lon, cached.city, 'gps');
         return;
       }
       
@@ -284,7 +302,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     if (cached && mountedRef.current) {
       console.log('Using cached location as fallback');
-      await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+      await fetchWeatherOnly(cached.lat, cached.lon, cached.city, cached.source ?? 'fallback');
       return;
     }
 
@@ -297,7 +315,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }
 
     if (mountedRef.current) {
-      updateWeather(safeFallback(fallbackCity || ''));
+      updateWeather(safeFallback(fallbackCity || '', 'fallback'));
     }
   }, [fallbackCity, fetchWeatherOnly, safeFallback, updateLocation, updateWeather]);
 
@@ -356,12 +374,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
             city: stale.city,
             isLoading: false,
             error: null,
+            source: stale.source,
           });
         } else {
           // No cache at all — gracefully hide the weather row, but keep
           // the greeting and clock. The fallback city hint is preserved so a
           // name can still be shown if the consumer wants it.
-          updateWeather(safeFallback(fallbackCity || ''));
+          updateWeather(safeFallback(fallbackCity || '', 'fallback'));
         }
       }
     }
@@ -542,6 +561,7 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
         emoji: info.emoji,
         city: resolvedCity,
         isNight,
+        source: location.source,
       });
     } catch (err) {
       console.warn('Weather preload fetch failed:', err);
