@@ -464,37 +464,6 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
-    // Realtime för profiles - om arbetsgivaren ändrar namn/logo i sin profil
-    // triggas DB-funktionen sync_company_name_to_jobs som uppdaterar job_postings,
-    // men vi lyssnar även här direkt för att vara dubbelt säkra.
-    const employerProfilesChannel = createRealtimeChannel('job-seeker-employer-profiles')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-        },
-        (payload: any) => {
-          const newRow = payload?.new ?? {};
-          const oldRow = payload?.old ?? {};
-          const brandingChanged =
-            newRow.company_name !== oldRow.company_name ||
-            newRow.company_logo_url !== oldRow.company_logo_url;
-          if (!brandingChanged) return;
-
-          localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
-          preloadAvailableJobs();
-          preloadMyApplications(user.id);
-          queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
-          queryClient.invalidateQueries({ queryKey: ['jobs'] });
-          queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-          queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
-          queryClient.invalidateQueries({ queryKey: ['job-details'] });
-        }
-      )
-      .subscribe();
 
     // Realtime för intervjuer (bokade intervjuer för kandidaten)
     const interviewsChannel = createRealtimeChannel(`job-seeker-interviews-${user.id}`)
