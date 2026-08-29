@@ -12,15 +12,26 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const registrations: Array<{ table?: string; filter?: string }> = [];
+interface Registration {
+  table?: string;
+  filter?: string;
+}
+
+interface MockChannel {
+  name: string;
+  on: (event: string, opts: Record<string, unknown>) => MockChannel;
+  subscribe: () => MockChannel;
+}
+
+const registrations: Registration[] = [];
 const removedChannels: string[] = [];
 
 vi.mock('@/lib/realtimeChannel', () => ({
-  createRealtimeChannel: (name: string) => {
-    const channel: any = {
+  createRealtimeChannel: (name: string): MockChannel => {
+    const channel: MockChannel = {
       name,
-      on: (_event: string, opts: any) => {
-        registrations.push({ table: opts?.table, filter: opts?.filter });
+      on: (_event: string, opts: Record<string, unknown>) => {
+        registrations.push({ table: String(opts?.table ?? ''), filter: String(opts?.filter ?? '') });
         return channel;
       },
       subscribe: () => channel,
@@ -31,7 +42,7 @@ vi.mock('@/lib/realtimeChannel', () => ({
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
-    removeChannel: vi.fn((channel: any) => {
+    removeChannel: vi.fn((channel: MockChannel) => {
       removedChannels.push(channel?.name);
     }),
     from: vi.fn(() => ({
@@ -73,8 +84,16 @@ describe('useJobSeekerBackgroundSync realtime fan-out', () => {
     registrations.length = 0;
     removedChannels.length = 0;
     // requestIdleCallback används av schedulePreload — gör den till no-op.
-    (window as any).requestIdleCallback = () => 1;
-    (window as any).cancelIdleCallback = () => undefined;
+    Object.defineProperty(window, 'requestIdleCallback', {
+      value: () => 1,
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(window, 'cancelIdleCallback', {
+      value: () => undefined,
+      writable: true,
+      configurable: true,
+    });
   });
 
   afterEach(() => {
