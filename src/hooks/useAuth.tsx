@@ -12,6 +12,7 @@ import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
 import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
+import { setWeatherCacheUser } from '@/lib/weatherApi';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 import { authSplashEvents, cacheAuthRoleForEmail, getCachedAuthRoleForEmail, normalizeAuthSplashRole } from '@/lib/authSplashEvents';
@@ -169,6 +170,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  // Location cache is user-bound: never let the next account on a shared device
+  // read the previous account's position.
+  useEffect(() => {
+    setWeatherCacheUser(user?.id ?? null);
+  }, [user?.id]);
   const CACHED_PROFILE_KEY = 'parium_cached_profile';
   const [profile, setProfile] = useState<Profile | null>(() => {
     try {

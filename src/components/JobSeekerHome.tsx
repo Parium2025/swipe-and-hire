@@ -1,4 +1,5 @@
 import { memo, useMemo, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useWeather } from '@/hooks/useWeather';
 import { useGreeting } from '@/hooks/useGreeting';
@@ -29,6 +30,7 @@ DateTimeDisplay.displayName = 'DateTimeDisplay';
 
 const JobSeekerHome = memo(() => {
   const { profile } = useAuth();
+  const { pathname } = useLocation();
   
   const [showContent, setShowContent] = useState(false);
 
@@ -48,10 +50,15 @@ const JobSeekerHome = memo(() => {
     (profile as { background_location_enabled?: boolean | null } | null | undefined)?.background_location_enabled
   );
 
+  // Home stays mounted via KeepAlive when the user navigates away. Pause all
+  // GPS work while it is hidden — the rendered weather row is untouched.
+  const isHomeVisible = pathname === '/home' || pathname === '/index' || pathname === '/';
+
   const weather = useWeather({
     fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
     enabled: true,
     backgroundLocationEnabled,
+    active: isHomeVisible,
   });
   const showWeatherEffects = hasConfirmedWeather(weather);
   
