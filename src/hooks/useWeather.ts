@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useBackgroundLocation } from './useBackgroundLocation';
 import { isNativeApp, isMobileWeb, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
-import { resolvePosition, setPositionResolutionActive } from '@/lib/gpsCoordinator';
+import { resolvePosition } from '@/lib/gpsCoordinator';
+import { setPositionResolutionActive } from '@/lib/gpsActivity';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { isSlowConnection } from '@/hooks/useNetworkAwareFetch';
 import {
