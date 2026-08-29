@@ -464,7 +464,6 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
-
     // Realtime för intervjuer (bokade intervjuer för kandidaten)
     const interviewsChannel = createRealtimeChannel(`job-seeker-interviews-${user.id}`)
       .on(
