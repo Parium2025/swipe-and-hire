@@ -25,16 +25,23 @@ export interface CachedWeather {
   emoji: string;
   city: string;
   isNight: boolean;
+  /**
+   * Only GPS-sourced readings are considered "confirmed". IP and fallback
+   * city readings (e.g. Helsingborg from a datacenter IP) must not be shown as
+   * the user's actual weather.
+   */
+  source?: 'gps' | 'ip' | 'fallback';
   timestamp: number;
 }
 
 /**
- * Returns true when both a confirmed city and a real temperature reading are
- * available. Use this anywhere in the UI before rendering "City, X°".
+ * Returns true only when the weather comes from an actual GPS fix and has a
+ * real temperature reading. IP-derived or fallback-city readings must stay
+ * hidden so users never see a default city like "Helsingborg".
  */
 export const hasConfirmedWeather = (
-  w: { city?: string; temperatureAvailable?: boolean } | null | undefined
-): boolean => Boolean(w && w.city && w.temperatureAvailable);
+  w: { city?: string; temperatureAvailable?: boolean; source?: 'gps' | 'ip' | 'fallback' } | null | undefined
+): boolean => Boolean(w && w.city && w.temperatureAvailable && w.source === 'gps');
 
 // ─── Cache keys & TTLs ──────────────────────────────────
 
