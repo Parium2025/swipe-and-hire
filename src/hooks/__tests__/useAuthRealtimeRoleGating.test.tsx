@@ -279,4 +279,25 @@ describe('AuthProvider realtime role gating', () => {
     expect(h.channelNames).toContain(`auth-reviews-${h.userId}`);
     expect(h.channelNames).toContain(`auth-my-candidates-${h.userId}`);
   });
+
+  it('jobseeker: auth-applications has exactly one job_applications registration, user-filtered', async () => {
+    // job_applications is REPLICA IDENTITY FULL, so the single applicant-filtered
+    // registration already covers DELETE payloads. A second unfiltered global
+    // DELETE registration is redundant 250k-user fanout and must not exist.
+    h.currentRole = 'job_seeker';
+    h.userId = 'jobseeker-1';
+    await renderAuthProvider();
+
+    const appRegs = h.registrations.filter(
+      (r) => r.channel === `auth-applications-${h.userId}` && r.table === 'job_applications'
+    );
+
+    // Exactly one registration total on the channel for job_applications
+    expect(appRegs).toHaveLength(1);
+
+    // Every registration must carry the applicant filter — no unfiltered global fanout
+    for (const reg of appRegs) {
+      expect(reg.filter).toBe(`applicant_id=eq.${h.userId}`);
+    }
+  });
 });
