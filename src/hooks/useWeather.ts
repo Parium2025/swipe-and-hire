@@ -302,7 +302,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     if (cached && mountedRef.current) {
       console.log('Using cached location as fallback');
-      await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+      await fetchWeatherOnly(cached.lat, cached.lon, cached.city, cached.source ?? 'fallback');
       return;
     }
 
