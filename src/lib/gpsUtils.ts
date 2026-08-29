@@ -152,6 +152,10 @@ export const getAccuratePosition = async (options?: {
   const first = await getCurrentPosition({ timeout, enableHighAccuracy: fastHighAccuracy, maximumAge });
   if (first && first.accuracy <= COARSE_FIX_ACCURACY_M) return first;
 
+  // Permission denied → a second attempt can only fail the same way. Skip it so
+  // we don't double the prompts, timeouts and console noise.
+  if (!first && lastAttemptDenied) return null;
+
   console.warn(
     `📍 Coarse position (${first ? Math.round(first.accuracy) + 'm' : 'none'}) — retrying with high accuracy`,
   );
