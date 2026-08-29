@@ -20,9 +20,14 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readCachedStats(user?.id), [user?.id]);
-  const { stats: viewStats } = useProfileViewStats();
+  const { stats: viewStats, isSuccess: viewStatsLoaded } = useProfileViewStats();
   const profileViewsCount = viewStats.unique_viewers_30d;
-  useEffect(() => { writeCachedStat(user?.id, 'profile_views', profileViewsCount); }, [profileViewsCount, user?.id]);
+  // Skriv bara till cachen efter ett lyckat profilvisningssvar — aldrig
+  // fallback-nollan vid initial laddning eller efter ett RPC-fel. En äkta
+  // lyckad nolla skrivs fortfarande.
+  useEffect(() => {
+    if (viewStatsLoaded) writeCachedStat(user?.id, 'profile_views', profileViewsCount);
+  }, [profileViewsCount, user?.id, viewStatsLoaded]);
 
   const { data: dashStats, isSuccess } = useQuery({
     queryKey: ['jobseeker-dashboard-stats', user?.id],

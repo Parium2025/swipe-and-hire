@@ -1,5 +1,5 @@
 /**
- * RED-test: useProfileViewStats får inte omvandla ett RPC-fel till ett
+ * Regressionstest: useProfileViewStats får inte omvandla ett RPC-fel till ett
  * "lyckat" nollsvar. Vid fel ska querytillståndet vara error och tidigare
  * lyckad data ska finnas kvar. Vid lyckat svar ska värdet exponeras —
  * även en legitim nolla.
