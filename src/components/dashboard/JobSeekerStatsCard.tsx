@@ -1,5 +1,4 @@
 import { memo, useMemo, useEffect } from 'react';
-import { safeSetItem } from '@/lib/safeStorage';
 import { Send, Calendar, Heart, MessageSquare, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,24 +7,9 @@ import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatsCarousel } from './StatsCarousel';
 import { useProfileViewStats } from '@/hooks/useProfileViewStats';
+import { readCachedStats, writeCachedStat } from '@/lib/jobseekerStatsCache';
+import { fetchJobseekerDashboardStats } from '@/lib/jobseekerDashboardStats';
 import type { StatData } from './StatsCarousel';
-
-const STATS_CACHE_KEY = 'parium-jobseeker-stats';
-
-const readCachedStats = (): Record<string, number> => {
-  try {
-    const raw = localStorage.getItem(STATS_CACHE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch { return {}; }
-};
-
-const writeCachedStats = (key: string, value: number) => {
-  try {
-    const current = readCachedStats();
-    current[key] = value;
-    safeSetItem(STATS_CACHE_KEY, JSON.stringify(current));
-  } catch {}
-};
 
 interface JobSeekerStatsCardProps {
   isPaused: boolean;
@@ -35,30 +19,26 @@ interface JobSeekerStatsCardProps {
 export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStatsCardProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const cachedStats = useMemo(() => readCachedStats(), []);
+  const cachedStats = useMemo(() => readCachedStats(user?.id), [user?.id]);
   const { stats: viewStats } = useProfileViewStats();
   const profileViewsCount = viewStats.unique_viewers_30d;
-  useEffect(() => { writeCachedStats('profile_views', profileViewsCount); }, [profileViewsCount]);
+  useEffect(() => { writeCachedStat(user?.id, 'profile_views', profileViewsCount); }, [profileViewsCount, user?.id]);
 
   const { data: dashStats, isSuccess } = useQuery({
     queryKey: ['jobseeker-dashboard-stats', user?.id],
     queryFn: async () => {
-      if (!user?.id) return { applications: 0, interviews: 0, saved_jobs: 0, unread_messages: 0 };
-      const { data, error } = await supabase.rpc('get_jobseeker_dashboard_stats', {
-        p_user_id: user.id,
-      });
-      if (error) return { applications: 0, interviews: 0, saved_jobs: 0, unread_messages: 0 };
-      const stats = data as { applications: number; interviews: number; saved_jobs: number; unread_messages: number };
-      writeCachedStats('applications', stats.applications);
-      writeCachedStats('interviews', stats.interviews);
-      writeCachedStats('saved', stats.saved_jobs);
-      writeCachedStats('messages', stats.unread_messages);
+      const stats = await fetchJobseekerDashboardStats(user!.id, supabase);
+      writeCachedStat(user!.id, 'applications', stats.applications);
+      writeCachedStat(user!.id, 'interviews', stats.interviews);
+      writeCachedStat(user!.id, 'saved', stats.saved_jobs);
+      writeCachedStat(user!.id, 'messages', stats.unread_messages);
       return stats;
     },
     enabled: !!user?.id,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
     refetchOnMount: true,
+    retry: 1,
   });
 
   const applicationsCount = dashStats?.applications ?? cachedStats['applications'] ?? 0;
@@ -71,7 +51,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const conversationsCtx = useConversationsContext();
   const unreadMessagesCount =
     conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cachedStats['messages'] ?? 0;
-  useEffect(() => { writeCachedStats('messages', unreadMessagesCount); }, [unreadMessagesCount]);
+  useEffect(() => { writeCachedStat(user?.id, 'messages', unreadMessagesCount); }, [unreadMessagesCount, user?.id]);
 
   // Single consolidated realtime channel – alla lyssnare är användarfiltrerade
   // på servern, och händelser koalesceras så en burst ger EN omhämtning.
