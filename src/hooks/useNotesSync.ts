@@ -37,10 +37,15 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // `cachePrefix` key is never read or written.
   const cacheKey = user?.id ? `${cachePrefix}_${user.id}` : null;
 
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(() => {
+    if (typeof window === 'undefined' || !user?.id) return '';
+    const key = `${cachePrefix}_${user.id}`;
+    return localStorage.getItem(key) ?? '';
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
 
   // Keep ref in sync for beforeunload
   useEffect(() => { contentRef.current = content; }, [content]);
