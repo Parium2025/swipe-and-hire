@@ -18,7 +18,7 @@ export interface RpcClient {
   rpc(
     fn: string,
     params: Record<string, unknown>
-  ): Promise<{ data: unknown; error: unknown }>;
+  ): PromiseLike<{ data: unknown; error: unknown }>;
 }
 
 export async function fetchJobseekerDashboardStats(

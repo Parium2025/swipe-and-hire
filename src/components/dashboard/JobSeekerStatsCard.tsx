@@ -51,7 +51,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const conversationsCtx = useConversationsContext();
   const unreadMessagesCount =
     conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cachedStats['messages'] ?? 0;
-  useEffect(() => { writeCachedStats('messages', unreadMessagesCount); }, [unreadMessagesCount]);
+  useEffect(() => { writeCachedStat(user?.id, 'messages', unreadMessagesCount); }, [unreadMessagesCount, user?.id]);
 
   // Single consolidated realtime channel – alla lyssnare är användarfiltrerade
   // på servern, och händelser koalesceras så en burst ger EN omhämtning.
