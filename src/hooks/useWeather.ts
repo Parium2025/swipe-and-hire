@@ -276,7 +276,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       const cacheAge = Date.now() - cached.timestamp;
       if (cacheAge < 10 * 60 * 1000) {
         console.log('Using recent GPS cache instead of IP fallback');
-        await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+        await fetchWeatherOnly(cached.lat, cached.lon, cached.city, 'gps');
         return;
       }
     }
