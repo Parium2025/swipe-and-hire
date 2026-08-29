@@ -4,8 +4,8 @@
  * useConversations är den kanoniska vägen för meddelande-realtime.
  *
  * Önskat beteende (GREEN): 0 st conversation_messages-registreringar,
- * medan användarfiltrerade saved_jobs / job_applications / interviews
- * fortfarande registreras.
+ * medan användarfiltrerade saved_jobs / job_applications
+ * fortfarande registreras och interviews ägs av useCandidateInterviews.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
@@ -100,7 +100,7 @@ describe('useJobSeekerBackgroundSync realtime fan-out', () => {
     vi.clearAllMocks();
   });
 
-  it('registrerar ZERO conversation_messages-prenumerationer men behåller saved_jobs, job_applications och interviews', async () => {
+  it('registrerar ZERO conversation_messages-prenumerationer men behåller saved_jobs och job_applications utan interviews', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
@@ -132,8 +132,9 @@ describe('useJobSeekerBackgroundSync realtime fan-out', () => {
     expect(savedJobsRegs[0].filter).toBe('user_id=eq.job-seeker-user-123');
     expect(applicationsRegs).toHaveLength(1);
     expect(applicationsRegs[0].filter).toBe('applicant_id=eq.job-seeker-user-123');
-    expect(interviewsRegs).toHaveLength(1);
-    expect(interviewsRegs[0].filter).toBe('applicant_id=eq.job-seeker-user-123');
+    // Kanonisk realtime-ägare för intervjuer är useCandidateInterviews
+    // (src/hooks/useInterviews.ts) — ingen intervju-subscription här.
+    expect(interviewsRegs).toHaveLength(0);
   });
 
   it('registrerar ZERO profiles-prenumerationer men behåller exakt en job_postings-kanal', async () => {
