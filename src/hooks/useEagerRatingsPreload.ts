@@ -93,6 +93,8 @@ const clearAllAppCachesSync = () => {
     JOBSEEKER_STATS_CACHE_PREFIX,
     LOCATION_CACHE_PREFIX,
     WEATHER_CACHE_PREFIX,
+    // Täcker både exakt legacy-nyckel och alla jobseeker_notes_cache_<uid>
+    'jobseeker_notes_cache',
   ];
   
   const exactKeysToRemove = [

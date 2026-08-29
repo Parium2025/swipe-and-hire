@@ -1,5 +1,5 @@
 /**
- * TDD RED — jobseeker notes DATA cache isolation.
+ * TDD Regression — jobseeker notes DATA cache isolation.
  *
  * Behavior contract (data layer only, no UI involvement):
  *  - No legacy unscoped `jobseeker_notes_cache` reads or writes, ever.
