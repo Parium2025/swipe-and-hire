@@ -143,10 +143,26 @@ describe('useNotesSync — notes data cache isolation', () => {
     localStorage.setItem(`${LEGACY_KEY}_user-a`, 'A CONTENT');
     mockUser = { id: 'user-a' };
 
-    const { result } = renderNotes();
-    // Instant hydration: correct content must be present on the very first render,
-    // with no waitFor/effect flushing — otherwise the notes UI flashes empty.
-    expect(result.current.content).toBe('A CONTENT');
+    // Capture content DURING each render — result.current is read only after
+    // renderHook has flushed effects, so it cannot prove instant hydration.
+    const renderHistory: string[] = [];
+    const { result } = renderHook(
+      () => {
+        const hookResult = useNotesSync({
+          table: 'jobseeker_notes',
+          ownerColumn: 'user_id',
+          cachePrefix: LEGACY_KEY,
+          queryKey: 'jobseeker-note',
+        });
+        renderHistory.push(hookResult.content);
+        return hookResult;
+      },
+      { wrapper }
+    );
+
+    // The very first render must already show the scoped cache content,
+    // otherwise the notes UI flashes empty before effects run.
+    expect(renderHistory[0]).toBe('A CONTENT');
 
     act(() => {
       result.current.handleChange('A EDIT');
