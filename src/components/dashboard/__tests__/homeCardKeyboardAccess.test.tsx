@@ -100,6 +100,48 @@ describe('Home-kort tangentbordsåtkomst', () => {
       expect(openSpy).toHaveBeenCalledWith('https://example.com/cv-tips', '_blank', 'noopener,noreferrer');
     });
 
+    it('övergång loading -> laddad data kastar inget hook-ordningsfel och länken blir tillgänglig', () => {
+      // Regression: openTipSource får inte vara en hook efter tidiga returns,
+      // för då renderar loading->loaded fler hooks än första renderingen.
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      tipsMock.mockReturnValue({ data: undefined, isLoading: true, error: null });
+      const utils = render(
+        <MemoryRouter>
+          <CareerTipsCard isPaused={true} setIsPaused={() => {}} />
+        </MemoryRouter>,
+      );
+
+      tipsMock.mockReturnValue({
+        data: [
+          {
+            id: 'tip-3',
+            title: 'Fem frågor du alltid ska ställa på intervjun',
+            summary: 'Bra tips',
+            source: 'Arbetsförmedlingen',
+            source_url: 'https://example.com/intervjufragor',
+            published_at: null,
+          },
+        ],
+        isLoading: false,
+        error: null,
+      });
+
+      expect(() => utils.rerender(
+        <MemoryRouter>
+          <CareerTipsCard isPaused={true} setIsPaused={() => {}} />
+        </MemoryRouter>,
+      )).not.toThrow();
+
+      const hookOrderErrors = consoleErrorSpy.mock.calls.filter((args) =>
+        args.some((a) => typeof a === 'string' && /Rendered more hooks|hook order|order of Hooks/i.test(a)),
+      );
+      expect(hookOrderErrors).toHaveLength(0);
+      consoleErrorSpy.mockRestore();
+
+      const link = screen.getByRole('link', { name: /Fem frågor du alltid ska ställa på intervjun/i });
+      expect(link).toHaveAttribute('tabIndex', '0');
+    });
+
     it('tip utan source_url förblir icke-interaktivt (ingen länkroll eller tabbstopp)', () => {
       renderCareerTips([
         {
