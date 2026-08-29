@@ -85,6 +85,12 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
 
   const currentTip = tipsItems[currentIndex];
 
+  // Samma säkra åtgärd för klick och Enter/Space
+  const openTipSource = useCallback(() => {
+    const url = tipsItems[currentIndex]?.source_url;
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+  }, [tipsItems, currentIndex]);
+
   return (
     <Card 
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height touch-pan-y`}
@@ -119,7 +125,18 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
+                {...(currentTip.source_url ? {
+                  role: 'link',
+                  tabIndex: 0,
+                  'aria-label': `Öppna nyheten "${currentTip.title}" i en ny flik`,
+                  onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      if (e.key === ' ') e.preventDefault();
+                      openTipSource();
+                    }
+                  },
+                } : {})}
+                onClick={() => currentTip.source_url && openTipSource()}
                 className={`w-full flex flex-col overflow-hidden ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
               >
                 <TruncatedText
