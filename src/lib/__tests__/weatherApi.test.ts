@@ -70,10 +70,13 @@ describe('parseWeatherResponse', () => {
 });
 
 describe('hasConfirmedWeather', () => {
-  it('returns true only when both city and temperatureAvailable are set', () => {
-    expect(hasConfirmedWeather({ city: 'Stockholm', temperatureAvailable: true })).toBe(true);
-    expect(hasConfirmedWeather({ city: 'Stockholm', temperatureAvailable: false })).toBe(false);
-    expect(hasConfirmedWeather({ city: '', temperatureAvailable: true })).toBe(false);
+  it('returns true only for GPS-sourced weather with a city and real temperature', () => {
+    expect(hasConfirmedWeather({ city: 'Stockholm', temperatureAvailable: true, source: 'gps' })).toBe(true);
+    expect(hasConfirmedWeather({ city: 'Stockholm', temperatureAvailable: true, source: 'ip' })).toBe(false);
+    expect(hasConfirmedWeather({ city: 'Stockholm', temperatureAvailable: true, source: 'fallback' })).toBe(false);
+    expect(hasConfirmedWeather({ city: 'Stockholm', temperatureAvailable: false, source: 'gps' })).toBe(false);
+    expect(hasConfirmedWeather({ city: '', temperatureAvailable: true, source: 'gps' })).toBe(false);
+    expect(hasConfirmedWeather({ city: 'Stockholm', temperatureAvailable: true })).toBe(false);
     expect(hasConfirmedWeather(null)).toBe(false);
     expect(hasConfirmedWeather(undefined)).toBe(false);
   });
