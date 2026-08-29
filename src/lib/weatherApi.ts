@@ -52,7 +52,8 @@ export const hasConfirmedWeather = (
  */
 export const LOCATION_CACHE_PREFIX = 'parium_weather_location:v2:';
 export const LEGACY_LOCATION_CACHE_KEY = 'parium_weather_location';
-const WEATHER_CACHE_KEY = 'parium_weather_data';
+export const WEATHER_CACHE_PREFIX = 'parium_weather_data:v2:';
+export const LEGACY_WEATHER_CACHE_KEY = 'parium_weather_data';
 const LOCATION_CACHE_MAX_AGE = 3 * 60 * 1000; // 3 minutes
 const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000;  // 5 minutes
 
