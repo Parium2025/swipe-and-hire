@@ -69,7 +69,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const requestSeqRef = useRef(0);
   const [retryTick, setRetryTick] = useState(0);
 
-  const safeFallback = useCallback((city = ''): WeatherData => ({
+  const safeFallback = useCallback((city = '', source?: 'gps' | 'ip' | 'fallback'): WeatherData => ({
     temperature: 0,
     feelsLike: 0,
     temperatureAvailable: false,
@@ -79,10 +79,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     city,
     isLoading: false,
     error: 'unavailable',
+    source,
   }), []);
 
   const [weather, setWeather] = useState<WeatherData>(() => {
     const cached = getCachedWeather();
+    const cachedLocation = getCachedLocation();
     if (cached) {
       return {
         temperature: cached.temperature,
@@ -94,6 +96,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         city: cached.city,
         isLoading: false,
         error: null,
+        source: cached.source ?? cachedLocation?.source,
       };
     }
     return {
@@ -106,6 +109,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       city: '',
       isLoading: true,
       error: null,
+      source: cachedLocation?.source,
     };
   });
 
