@@ -29,11 +29,19 @@ const h = vi.hoisted(() => ({
 // ---------------------------------------------------------------------------
 // Narrow dependency mocks — record realtime, stub everything else
 // ---------------------------------------------------------------------------
+interface MockChannel {
+  on: (
+    event: string,
+    opts?: { schema?: string; table?: string; filter?: string }
+  ) => MockChannel;
+  subscribe: () => MockChannel;
+}
+
 vi.mock('@/lib/realtimeChannel', () => ({
   createRealtimeChannel: (name: string) => {
     h.channelNames.push(name);
-    const channel: any = {
-      on: (event: string, opts: any) => {
+    const channel: MockChannel = {
+      on: (event, opts) => {
         h.registrations.push({
           channel: name,
           event,
@@ -50,17 +58,25 @@ vi.mock('@/lib/realtimeChannel', () => ({
 }));
 
 vi.mock('@/integrations/supabase/client', () => {
-  const makeQuery = (listResult: any) => {
-    const q: any = {};
-    q.select = () => q;
-    q.eq = () => q;
-    q.neq = () => q;
-    q.in = () => q;
-    q.order = () => q;
-    q.limit = () => q;
-    q.maybeSingle = () => Promise.resolve({ data: null, error: null });
-    q.single = () => Promise.resolve({ data: null, error: null });
-    q.then = (onF: any, onR: any) => Promise.resolve(listResult).then(onF, onR);
+  interface ListResult {
+    data: unknown;
+    error: null | { message: string };
+  }
+  const makeQuery = (listResult: ListResult) => {
+    const q = {
+      select: () => q,
+      eq: () => q,
+      neq: () => q,
+      in: () => q,
+      order: () => q,
+      limit: () => q,
+      maybeSingle: () => Promise.resolve({ data: null, error: null }),
+      single: () => Promise.resolve({ data: null, error: null }),
+      then: (
+        onF?: ((value: ListResult) => unknown) | null,
+        onR?: ((reason: unknown) => unknown) | null
+      ) => Promise.resolve(listResult).then(onF ?? undefined, onR ?? undefined),
+    };
     return q;
   };
 
@@ -262,5 +278,26 @@ describe('AuthProvider realtime role gating', () => {
     expect(h.channelNames).toContain(`auth-employer-applications-${h.userId}`);
     expect(h.channelNames).toContain(`auth-reviews-${h.userId}`);
     expect(h.channelNames).toContain(`auth-my-candidates-${h.userId}`);
+  });
+
+  it('jobseeker: auth-applications has exactly one job_applications registration, user-filtered', async () => {
+    // job_applications is REPLICA IDENTITY FULL, so the single applicant-filtered
+    // registration already covers DELETE payloads. A second unfiltered global
+    // DELETE registration is redundant 250k-user fanout and must not exist.
+    h.currentRole = 'job_seeker';
+    h.userId = 'jobseeker-1';
+    await renderAuthProvider();
+
+    const appRegs = h.registrations.filter(
+      (r) => r.channel === `auth-applications-${h.userId}` && r.table === 'job_applications'
+    );
+
+    // Exactly one registration total on the channel for job_applications
+    expect(appRegs).toHaveLength(1);
+
+    // Every registration must carry the applicant filter — no unfiltered global fanout
+    for (const reg of appRegs) {
+      expect(reg.filter).toBe(`applicant_id=eq.${h.userId}`);
+    }
   });
 });
