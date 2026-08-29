@@ -1,5 +1,5 @@
 /**
- * TDD RED — logout cleanup must remove notes caches.
+ * TDD Regression — logout cleanup must remove notes caches.
  *
  * clearAllAppCaches() is the single central logout cleanup. It must remove
  * both the exact legacy `jobseeker_notes_cache` key and every user-scoped
