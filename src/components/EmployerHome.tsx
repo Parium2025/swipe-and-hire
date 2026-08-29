@@ -140,7 +140,7 @@ const EmployerHome = memo(() => {
     backgroundLocationEnabled,
   });
 
-  const showWeatherEffects = !weather.isLoading && !weather.error;
+  const showWeatherEffects = hasConfirmedWeather(weather);
   
   // Emoji logic based on time of day and weather
   const displayEmoji = useMemo(() => {
