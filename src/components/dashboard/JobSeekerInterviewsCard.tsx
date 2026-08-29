@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Video, Building2 } from 'lucide-react';
+import { Calendar, Video, Building2, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
@@ -18,12 +18,13 @@ import {
 } from '@/lib/interviewTime';
 import { GRADIENTS } from './dashboardConstants';
 
-type LocationType = 'video' | 'office';
+type LocationType = 'video' | 'office' | 'phone';
 
 const getLocationIcon = (type: LocationType) => {
   switch (type) {
     case 'video': return Video;
     case 'office': return Building2;
+    case 'phone': return Phone;
     default: return Calendar;
   }
 };
@@ -32,6 +33,7 @@ const getLocationLabel = (type: LocationType) => {
   switch (type) {
     case 'video': return 'Video';
     case 'office': return 'Kontor';
+    case 'phone': return 'Telefon';
     default: return '';
   }
 };
@@ -101,22 +103,35 @@ export const JobSeekerInterviewsCard = memo(() => {
                 const timeUntil = getTimeUntil(interview.scheduled_at, now);
                 const isUrgent = isInterviewUrgent(interview.scheduled_at, now);
                 const meetingUrl = getMeetingUrl(interview.location_details);
-                
+
                 const companyName = interview.job_postings?.workplace_name?.trim() || 'Okänt företag';
-                
+                const jobTitle = interview.job_postings?.title || 'Intervju';
+
+                // En och samma aktiveringsfunktion för klick och Enter/Space
+                const activateInterview = () => {
+                  if (interview.location_type === 'video' && meetingUrl) {
+                    window.open(meetingUrl, '_blank', 'noopener,noreferrer');
+                  } else {
+                    navigate('/my-applications');
+                  }
+                };
+
                 return (
                   <motion.div
                     key={interview.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
-                    onClick={() => {
-                      if (interview.location_type === 'video' && meetingUrl) {
-                        window.open(meetingUrl, '_blank', 'noopener,noreferrer');
-                      } else {
-                        navigate('/my-applications');
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Öppna intervju för ${jobTitle} hos ${companyName}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        if (e.key === ' ') e.preventDefault();
+                        activateInterview();
                       }
                     }}
+                    onClick={activateInterview}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
