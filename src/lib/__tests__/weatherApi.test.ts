@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { parseWeatherResponse, hasConfirmedWeather, setCachedWeather, getCachedWeather, getStaleCachedWeather } from '../weatherApi';
+import { parseWeatherResponse, hasConfirmedWeather, setCachedWeather, getCachedWeather, getStaleCachedWeather, setWeatherCacheUser } from '../weatherApi';
 
 // ─── Mock localStorage ──────────────────────────────────────────────
 const localStorageMap = new Map<string, string>();
