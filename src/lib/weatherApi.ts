@@ -114,7 +114,10 @@ export const setCachedLocation = (location: Omit<CachedLocation, 'timestamp'>) =
   } catch { /* Silent fail */ }
 };
 
-const readCachedWeather = (maxAgeMs: number): CachedWeather | null => {
+/** Entries older than this are useless even offline and are deleted on read. */
+const STALE_WEATHER_CACHE_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+
+const readCachedWeather = (maxAgeMs: number, removeExpired: boolean): CachedWeather | null => {
   // Never migrate the old global value — just remove it.
   dropLegacyWeatherKey();
   const userId = currentWeatherCacheUserId;
@@ -129,7 +132,12 @@ const readCachedWeather = (maxAgeMs: number): CachedWeather | null => {
       return null;
     }
     if (Date.now() - data.timestamp > maxAgeMs) {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      // The fresh read must NOT destroy a still-usable stale entry — the
+      // offline fallback (getStaleCachedWeather) depends on it. Only the
+      // stale read removes entries past the 24h hard limit.
+      if (removeExpired) {
+        try { localStorage.removeItem(key); } catch { /* ignore */ }
+      }
       return null;
     }
     return data;
@@ -140,15 +148,15 @@ const readCachedWeather = (maxAgeMs: number): CachedWeather | null => {
 };
 
 export const getCachedWeather = (): CachedWeather | null =>
-  readCachedWeather(WEATHER_CACHE_MAX_AGE);
+  readCachedWeather(WEATHER_CACHE_MAX_AGE, false);
 
 /**
  * Same as getCachedWeather but accepts entries up to 24 hours old.
  * Used when the device is offline: a slightly stale reading is better than
- * removing the weather row entirely.
+ * removing the weather row entirely. Entries beyond 24h are deleted here.
  */
 export const getStaleCachedWeather = (): CachedWeather | null =>
-  readCachedWeather(24 * 60 * 60 * 1000);
+  readCachedWeather(STALE_WEATHER_CACHE_MAX_AGE, true);
 
 export const setCachedWeather = (weather: Omit<CachedWeather, 'timestamp'>) => {
   dropLegacyWeatherKey();
