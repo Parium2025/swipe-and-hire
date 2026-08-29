@@ -83,6 +83,7 @@ const clearAllAppCachesSync = () => {
     CONVERSATIONS_CACHE_KEY,
     INTERVIEWS_CACHE_KEY,
     JOB_TEMPLATES_CACHE_KEY,
+    JOBSEEKER_STATS_CACHE_PREFIX,
   ];
   
   const exactKeysToRemove = [
@@ -91,6 +92,7 @@ const clearAllAppCachesSync = () => {
     'parium_company_data_cache_v3',
     'parium_company_logo_url',
     'parium_cached_profile',
+    LEGACY_JOBSEEKER_STATS_KEY,
   ];
   
   try {
