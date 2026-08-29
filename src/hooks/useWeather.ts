@@ -561,6 +561,7 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
         emoji: info.emoji,
         city: resolvedCity,
         isNight,
+        source: location.source,
       });
     } catch (err) {
       console.warn('Weather preload fetch failed:', err);
