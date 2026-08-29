@@ -464,7 +464,6 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
-
     // Realtime för intervjuer (bokade intervjuer för kandidaten)
     const interviewsChannel = createRealtimeChannel(`job-seeker-interviews-${user.id}`)
       .on(
@@ -486,7 +485,6 @@ export const useJobSeekerBackgroundSync = () => {
       supabase.removeChannel(savedJobsChannel);
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(newJobsChannel);
-      
       supabase.removeChannel(interviewsChannel);
     };
   }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, preloadCandidateInterviews, queryClient]);
