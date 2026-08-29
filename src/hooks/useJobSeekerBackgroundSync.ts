@@ -428,10 +428,10 @@ export const useJobSeekerBackgroundSync = () => {
     // 6+ cache-invalidations + 2 preloads per event. Vid 500 sökare online och 50
     // jobb-uppdateringar/h = ~150 000 onödiga refetches/dag.
     //
-    // UPDATE/DELETE (t.ex. company_logo ändras via DB-trigger) propageras nu via:
-    //  1. employerProfilesChannel nedan (lyssnar på profiles UPDATE → branding)
-    //  2. naturlig refetch via React Query staleTime
-    //
+    // UPDATE/DELETE (t.ex. company_logo ändras via DB-trigger) propageras via:
+    //  DB-triggern sync_company_name_to_jobs som uppdaterar job_postings,
+    //  sedan plockar befintliga ID-scopade job_postings-prenumerationer upp
+    //  ändringen för relevanta jobbsökarskärmar.
     // Debounce: max 1 invalidation per 5s vid burst (när många nya jobb postas samtidigt).
     let newJobsTimer: ReturnType<typeof setTimeout> | null = null;
     const scheduleNewJobsRefresh = () => {
@@ -464,37 +464,6 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
-    // Realtime för profiles - om arbetsgivaren ändrar namn/logo i sin profil
-    // triggas DB-funktionen sync_company_name_to_jobs som uppdaterar job_postings,
-    // men vi lyssnar även här direkt för att vara dubbelt säkra.
-    const employerProfilesChannel = createRealtimeChannel('job-seeker-employer-profiles')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-        },
-        (payload: any) => {
-          const newRow = payload?.new ?? {};
-          const oldRow = payload?.old ?? {};
-          const brandingChanged =
-            newRow.company_name !== oldRow.company_name ||
-            newRow.company_logo_url !== oldRow.company_logo_url;
-          if (!brandingChanged) return;
-
-          localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
-          preloadAvailableJobs();
-          preloadMyApplications(user.id);
-          queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
-          queryClient.invalidateQueries({ queryKey: ['jobs'] });
-          queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-          queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
-          queryClient.invalidateQueries({ queryKey: ['job-details'] });
-        }
-      )
-      .subscribe();
 
     // Realtime för intervjuer (bokade intervjuer för kandidaten)
     const interviewsChannel = createRealtimeChannel(`job-seeker-interviews-${user.id}`)
@@ -517,7 +486,7 @@ export const useJobSeekerBackgroundSync = () => {
       supabase.removeChannel(savedJobsChannel);
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(newJobsChannel);
-      supabase.removeChannel(employerProfilesChannel);
+      
       supabase.removeChannel(interviewsChannel);
     };
   }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, preloadCandidateInterviews, queryClient]);
