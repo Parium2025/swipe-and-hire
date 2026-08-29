@@ -29,10 +29,8 @@ vi.mock('@/hooks/useCareerTips', () => ({
   useCareerTips: () => tipsMock(),
 }));
 
-const interviewsMock = vi.fn();
-vi.mock('@/hooks/useInterviews', () => ({
-  useCandidateInterviews: () => interviewsMock(),
-}));
+// Intervjukortet får sin delade live-lista via props från DashboardGrid —
+// ingen hook-mock behövs längre.
 
 import { MemoryRouter } from 'react-router-dom';
 import { CareerTipsCard } from '../CareerTipsCard';
@@ -51,11 +49,10 @@ const renderCareerTips = (tips: unknown[]) => {
 
 const future = () => new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
-const renderInterviews = (interviews: unknown[]) => {
-  interviewsMock.mockReturnValue({ interviews, isLoading: false });
+const renderInterviews = (interviews: React.ComponentProps<typeof JobSeekerInterviewsCard>['interviews']) => {
   return render(
     <MemoryRouter>
-      <JobSeekerInterviewsCard />
+      <JobSeekerInterviewsCard interviews={interviews} isLoading={false} />
     </MemoryRouter>,
   );
 };
