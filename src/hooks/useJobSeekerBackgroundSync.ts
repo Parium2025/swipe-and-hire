@@ -9,6 +9,7 @@ import { preloadWeatherLocation } from './useWeather';
 import { getCachedWeather } from '@/lib/weatherApi';
 import { MY_APPLICATIONS_SELECT } from './myApplicationsShared';
 import { fetchAllPages } from '@/lib/fetchAllPages';
+import { fetchCandidateInterviewsForUser } from './useInterviews';
 
 
 const SAVED_JOBS_CACHE_KEY = 'job_seeker_saved_jobs_';
@@ -252,31 +253,14 @@ export const useJobSeekerBackgroundSync = () => {
       }
     }
 
-    // STEG 2: Hämta färsk data från servern (i bakgrunden)
-    const { data, error } = await supabase
-      .from('interviews')
-      .select(`
-        *,
-        job_postings(
-          title,
-          employer_id,
-          workplace_name
-        )
-      `)
-      .eq('applicant_id', userId)
-      .gte('scheduled_at', new Date().toISOString())
-      .in('status', ['pending', 'confirmed'])
-      .order('scheduled_at', { ascending: true });
-
-    if (!error && data) {
-      // Spara till localStorage
-      safeSetItem(cacheKey, JSON.stringify({
-        items: data,
-        timestamp: Date.now(),
-      }));
-      
-      // Uppdatera React Query cache med färsk data
+    // STEG 2: Hämta färsk data via den kanoniska hämtaren (samma sex-timmars
+    // "pågående"-fönster som useCandidateInterviews). Den skriver själv samma
+    // user-scopade localStorage-cache. Vid fel behålls cachen orörd.
+    try {
+      const data = await fetchCandidateInterviewsForUser(userId);
       queryClient.setQueryData(['candidate-interviews', userId], data);
+    } catch (err) {
+      console.warn('[JobSeekerBackgroundSync] Intervju-preload misslyckades:', err);
     }
   }, [queryClient]);
 
@@ -464,30 +448,16 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
-    // Realtime för intervjuer (bokade intervjuer för kandidaten)
-    const interviewsChannel = createRealtimeChannel(`job-seeker-interviews-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'interviews',
-          filter: `applicant_id=eq.${user.id}`
-        },
-        () => {
-          preloadCandidateInterviews(user.id);
-        }
-      )
-      .subscribe();
+    // Intervjuer: ingen duplicerad kanal här — useCandidateInterviews
+    // (candidate-interviews-ui-<uid>) är den enda realtime-ägaren.
 
     return () => {
       if (newJobsTimer) clearTimeout(newJobsTimer);
       supabase.removeChannel(savedJobsChannel);
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(newJobsChannel);
-      supabase.removeChannel(interviewsChannel);
     };
-  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, preloadCandidateInterviews, queryClient]);
+  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, queryClient]);
 };
 
 export default useJobSeekerBackgroundSync;
