@@ -4,7 +4,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 const resolvePosition = vi.fn(async () => null);
 
 vi.mock('@/lib/gpsCoordinator', () => ({
-  resolvePosition: (...args: unknown[]) => resolvePosition(...args),
+  resolvePosition: () => resolvePosition(),
   notePermissionGranted: vi.fn(),
   isPositionBlocked: () => false,
   resetGpsCoordinator: vi.fn(),

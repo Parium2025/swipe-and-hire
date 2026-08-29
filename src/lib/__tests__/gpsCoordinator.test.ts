@@ -4,7 +4,7 @@ const getAccuratePosition = vi.fn();
 const wasLastPositionDenied = vi.fn(() => false);
 
 vi.mock('@/lib/gpsUtils', () => ({
-  getAccuratePosition: (...args: unknown[]) => getAccuratePosition(...args),
+  getAccuratePosition: () => getAccuratePosition(),
   wasLastPositionDenied: () => wasLastPositionDenied(),
 }));
 
