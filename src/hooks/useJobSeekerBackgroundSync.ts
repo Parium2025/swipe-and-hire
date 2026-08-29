@@ -422,21 +422,6 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
-    // Realtime för meddelanden
-    const messagesChannel = createRealtimeChannel(`job-seeker-messages-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'conversation_messages',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
-        }
-      )
-      .subscribe();
-
     // Realtime för jobb - 🔥 SCALED: Lyssnar BARA på INSERT (nya jobb).
     // Tidigare lyssnade vi på * (alla events) globalt, vilket gjorde att VARJE
     // jobbsökare fick events när VARJE jobb i hela databasen ändrades — och triggade
