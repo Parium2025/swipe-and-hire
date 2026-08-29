@@ -8,10 +8,13 @@ import { fetchJobseekerDashboardStats } from '@/lib/jobseekerDashboardStats';
  * "lyckat" svar med falska nollor.
  */
 
+const USER_ID = 'user-abc';
+
 const SERVER_STATS = {
-  applications_count: 7,
-  saved_jobs_count: 3,
-  profile_views: 12,
+  applications: 7,
+  interviews: 2,
+  saved_jobs: 3,
+  unread_messages: 5,
 };
 
 describe('fetchJobseekerDashboardStats', () => {
@@ -20,7 +23,7 @@ describe('fetchJobseekerDashboardStats', () => {
       rpc: async () => ({ data: null, error: new Error('RPC failed') }),
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await expect(fetchJobseekerDashboardStats(fakeClient as any)).rejects.toThrow('RPC failed');
+    await expect(fetchJobseekerDashboardStats(USER_ID, fakeClient as any)).rejects.toThrow('RPC failed');
   });
 
   it('returnerar serverns statistik oförändrad vid lyckad RPC', async () => {
@@ -28,20 +31,22 @@ describe('fetchJobseekerDashboardStats', () => {
       rpc: async () => ({ data: SERVER_STATS, error: null }),
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await fetchJobseekerDashboardStats(fakeClient as any);
+    const result = await fetchJobseekerDashboardStats(USER_ID, fakeClient as any);
     expect(result).toEqual(SERVER_STATS);
   });
 
-  it('anropar rätt RPC', async () => {
-    const calls: string[] = [];
+  it('anropar rätt RPC med user-id som parameter', async () => {
+    const calls: Array<{ fn: string; params: unknown }> = [];
     const fakeClient = {
-      rpc: async (fn: string) => {
-        calls.push(fn);
+      rpc: async (fn: string, params: unknown) => {
+        calls.push({ fn, params });
         return { data: SERVER_STATS, error: null };
       },
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await fetchJobseekerDashboardStats(fakeClient as any);
-    expect(calls).toEqual(['get_jobseeker_dashboard_stats']);
+    await fetchJobseekerDashboardStats(USER_ID, fakeClient as any);
+    expect(calls).toEqual([
+      { fn: 'get_jobseeker_dashboard_stats', params: { p_user_id: USER_ID } },
+    ]);
   });
 });
