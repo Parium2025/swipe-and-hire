@@ -19,30 +19,26 @@ interface JobSeekerStatsCardProps {
 export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStatsCardProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const cachedStats = useMemo(() => readCachedStats(), []);
+  const cachedStats = useMemo(() => readCachedStats(user?.id), [user?.id]);
   const { stats: viewStats } = useProfileViewStats();
   const profileViewsCount = viewStats.unique_viewers_30d;
-  useEffect(() => { writeCachedStats('profile_views', profileViewsCount); }, [profileViewsCount]);
+  useEffect(() => { writeCachedStat(user?.id, 'profile_views', profileViewsCount); }, [profileViewsCount, user?.id]);
 
   const { data: dashStats, isSuccess } = useQuery({
     queryKey: ['jobseeker-dashboard-stats', user?.id],
     queryFn: async () => {
-      if (!user?.id) return { applications: 0, interviews: 0, saved_jobs: 0, unread_messages: 0 };
-      const { data, error } = await supabase.rpc('get_jobseeker_dashboard_stats', {
-        p_user_id: user.id,
-      });
-      if (error) return { applications: 0, interviews: 0, saved_jobs: 0, unread_messages: 0 };
-      const stats = data as { applications: number; interviews: number; saved_jobs: number; unread_messages: number };
-      writeCachedStats('applications', stats.applications);
-      writeCachedStats('interviews', stats.interviews);
-      writeCachedStats('saved', stats.saved_jobs);
-      writeCachedStats('messages', stats.unread_messages);
+      const stats = await fetchJobseekerDashboardStats(user!.id, supabase);
+      writeCachedStat(user!.id, 'applications', stats.applications);
+      writeCachedStat(user!.id, 'interviews', stats.interviews);
+      writeCachedStat(user!.id, 'saved', stats.saved_jobs);
+      writeCachedStat(user!.id, 'messages', stats.unread_messages);
       return stats;
     },
     enabled: !!user?.id,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
     refetchOnMount: true,
+    retry: 1,
   });
 
   const applicationsCount = dashStats?.applications ?? cachedStats['applications'] ?? 0;
