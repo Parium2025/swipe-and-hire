@@ -135,4 +135,29 @@ describe('useJobSeekerBackgroundSync realtime fan-out', () => {
     expect(interviewsRegs).toHaveLength(1);
     expect(interviewsRegs[0].filter).toBe('applicant_id=eq.job-seeker-user-123');
   });
+
+  it('registrerar ZERO profiles-prenumerationer men behåller exakt en job_postings-kanal', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Probe />
+      </QueryClientProvider>,
+    );
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    const profilesRegs = registrations.filter((r) => r.table === 'profiles');
+    const jobPostingsRegs = registrations.filter((r) => r.table === 'job_postings');
+
+    // Profiler uppdateras via kanoniska job_postings-prenumerationer och
+    // DB-triggers — ingen direkt profiles-subscription ska finnas här.
+    expect(profilesRegs).toHaveLength(0);
+
+    // Positivt skydd: INSERT-prenumerationen på nya jobb ska finnas kvar.
+    expect(jobPostingsRegs).toHaveLength(1);
+    expect(jobPostingsRegs[0].filter).toBe('');
+  });
 });
