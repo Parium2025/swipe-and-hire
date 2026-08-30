@@ -2,6 +2,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
+import { assertLoadTestTargetAllowed } from './load-test-safety';
 
 type ScenarioName = 'search' | 'match' | 'chat';
 type Outcome = 'ok' | 'error' | 'skipped';
@@ -34,7 +35,7 @@ const env = (name: string, fallback = '') => process.env[name] || envFile[name] 
 
 const SUPABASE_URL = env('VITE_SUPABASE_URL') || env('SUPABASE_URL');
 const SUPABASE_ANON_KEY = env('VITE_SUPABASE_PUBLISHABLE_KEY') || env('VITE_SUPABASE_ANON_KEY') || env('SUPABASE_ANON_KEY');
-const TARGET_URL = env('PARIUM_LOAD_TEST_TARGET', 'https://www.parium.se');
+const EXPECTED_SUPABASE_URL = env('PARIUM_LOAD_TEST_EXPECTED_SUPABASE_URL');
 const ALLOW_PRODUCTION = env('PARIUM_LOAD_TEST_ALLOW_PRODUCTION') === 'true';
 const ENABLE_WRITES = env('PARIUM_LOAD_TEST_ENABLE_WRITES') === 'true';
 const VIRTUAL_USERS = toInt(env('PARIUM_LOAD_TEST_USERS_COUNT', '100'), 100);
@@ -50,6 +51,7 @@ const cities = ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Västerås', '']
 const categories = ['Försäljning', 'IT', 'Administration', 'Transport', ''];
 const sortModes = ['newest', 'oldest', 'most-views'];
 
+let TARGET_ORIGIN = '';
 const samples: Sample[] = [];
 const startedAt = new Date();
 
@@ -60,10 +62,11 @@ main().catch((error) => {
 });
 
 async function main() {
-  validateConfig();
+  const target = validateConfig();
 
   console.log('Parium load test');
-  console.log(`Target: ${TARGET_URL}`);
+  console.log(`Target (actual Supabase origin): ${target.origin}`);
+  console.log(`Environment: ${target.isProduction ? 'PRODUCTION (explicitly allowed)' : 'non-production'}`);
   console.log(`Virtual users: ${VIRTUAL_USERS}`);
   console.log(`Duration: ${DURATION_SECONDS}s, ramp: ${RAMP_SECONDS}s`);
   console.log(`Authenticated users configured: ${AUTH_USERS.length}`);
@@ -262,7 +265,7 @@ function buildReport() {
     startedAt: startedAt.toISOString(),
     finishedAt: finishedAt.toISOString(),
     durationSeconds: Math.round(durationMs / 1000),
-    targetUrl: TARGET_URL,
+    targetUrl: TARGET_ORIGIN,
     virtualUsers: VIRTUAL_USERS,
     authenticatedUsers: AUTH_USERS.length,
     writesEnabled: ENABLE_WRITES,
@@ -341,12 +344,17 @@ function validateConfig() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error('Missing VITE_SUPABASE_URL/SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY/SUPABASE_ANON_KEY');
   }
-  if (VIRTUAL_USERS > 50 && TARGET_URL.includes('parium.se') && !ALLOW_PRODUCTION) {
-    throw new Error('Refusing to run high-load production test. Set PARIUM_LOAD_TEST_ALLOW_PRODUCTION=true when you intentionally want to test parium.se.');
-  }
+  const target = assertLoadTestTargetAllowed({
+    actualUrl: SUPABASE_URL,
+    expectedUrl: EXPECTED_SUPABASE_URL,
+    allowProduction: ALLOW_PRODUCTION,
+    virtualUsers: VIRTUAL_USERS,
+  });
+  TARGET_ORIGIN = target.origin;
   if (ENABLE_WRITES && AUTH_USERS.length === 0) {
     throw new Error('PARIUM_LOAD_TEST_ENABLE_WRITES=true requires PARIUM_LOAD_TEST_AUTH_USERS.');
   }
+  return target;
 }
 
 function parseUsers(raw: string): LoadUser[] {
