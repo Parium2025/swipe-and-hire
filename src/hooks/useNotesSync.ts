@@ -137,7 +137,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const ackSeqRef = useRef(0);
   const wantedRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const queryMetaRef = useRef<{ epoch: number; user: string | null; ack: number } | null>(null);
+  
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
