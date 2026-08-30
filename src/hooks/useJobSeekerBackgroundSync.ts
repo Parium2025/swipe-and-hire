@@ -135,6 +135,7 @@ export const useJobSeekerBackgroundSync = () => {
       }
     }
 
+    console.log('DBG netstart', ownerId, force);
     const { data, error } = await supabase
       .from('job_postings')
       .select(`
