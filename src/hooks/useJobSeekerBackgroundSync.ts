@@ -127,6 +127,7 @@ export const useJobSeekerBackgroundSync = () => {
 
     if (!force) {
       const cachedItems = readFreshAvailableJobs(ownerId);
+      console.log('DBG cacheCheck', ownerId, JSON.stringify(cachedItems), localStorage.getItem(AVAILABLE_JOBS_CACHE_KEY)?.slice(0,120));
       if (cachedItems) {
         // Färsk cache — ingen onödig read, men React Query MÅSTE hydreras,
         // annars visar Home tom lista trots giltig cache.
