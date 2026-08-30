@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -102,6 +102,23 @@ function writePending(pendingKey: string, userId: string, content: string): bool
   }
 }
 
+/** Pure, side-effect free scoped read used to mask the identity-transition render. */
+function peekScoped(cachePrefix: string, userId: string): string {
+  const raw = storageGet(`${cachePrefix}_${userId}__pending`);
+  if (raw !== null) {
+    try {
+      const parsed = JSON.parse(raw) as PendingEnvelope;
+      if (parsed && parsed.v === PENDING_VERSION && parsed.u === userId && typeof parsed.c === 'string') {
+        return parsed.c;
+      }
+    } catch {
+      /* fall through to the clean snapshot */
+    }
+  }
+  return storageGet(`${cachePrefix}_${userId}`) ?? '';
+}
+
+
 export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseNotesSyncOptions): NotesSyncResult {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -115,19 +132,28 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const cacheKey = userId ? `${cachePrefix}_${userId}` : null;
   const pendingKey = userId ? `${cachePrefix}_${userId}__pending` : null;
 
-  const [content, setContent] = useState(() => {
-    if (!userId) return '';
+  // Content state is bound to the account that produced it, so a transition
+  // render can never expose the previous account's value.
+  const userIdRef = useRef<string | null>(userId);
+  userIdRef.current = userId;
+  const [contentState, setContentState] = useState<{ owner: string | null; value: string }>(() => {
+    if (!userId) return { owner: null, value: '' };
     const pending = readPending(`${cachePrefix}_${userId}__pending`, userId);
     if (pending !== null) {
       hasLocalEditsRef.current = true;
       contentRef.current = pending;
-      return pending;
+      return { owner: userId, value: pending };
     }
     const clean = storageGet(`${cachePrefix}_${userId}`) ?? '';
     contentRef.current = clean;
     serverContentRef.current = clean;
-    return clean;
+    return { owner: userId, value: clean };
   });
+  const setContent = useCallback((next: string) => {
+    setContentState({ owner: userIdRef.current, value: next });
+  }, []);
+  const content = contentState.value;
+
   const [isSaving, setIsSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -157,7 +183,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // Account transition (null->uid, A->B, uid->null): reset all account-local
   // state and hydrate ONLY the new user's pending/clean caches.
   const previousUserIdRef = useRef<string | null | undefined>(undefined);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (previousUserIdRef.current === userId) return;
     const isFirst = previousUserIdRef.current === undefined;
     previousUserIdRef.current = userId;
@@ -188,7 +214,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     }
     contentRef.current = next;
     setContent(next);
-  }, [userId, cachePrefix]);
+  }, [userId, cachePrefix, setContent]);
 
   // Hydrated pending must enter the normal debounced drain on its own — it may
   // never wait for another edit or a connectivity event.
@@ -211,7 +237,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, [cacheKey, userId]);
+  }, [cacheKey, userId, setContent]);
 
   // Fetch existing note. The metadata is bound to THIS request's result, so a
   // late result from another account/request can never describe another one.
@@ -261,7 +287,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       contentRef.current = serverContent;
       setContent(serverContent);
     }
-  }, [serverValueDep, cacheKey, userId]);
+  }, [serverValueDep, cacheKey, userId, setContent]);
 
 
 
@@ -297,7 +323,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, cacheKey, queryClient, table, ownerColumn, queryKey]);
+  }, [userId, cacheKey, queryClient, table, ownerColumn, queryKey, setContent]);
 
   // Save function — always upserts to avoid duplicates
   const saveToDb = useCallback(async (contentToSave: string): Promise<'saved' | 'skipped' | 'failed'> => {
@@ -395,7 +421,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       setSaveFailed(!journaled);
       scheduleSave();
     },
-    [cacheKey, pendingKey, userId, scheduleSave]
+    [cacheKey, pendingKey, userId, scheduleSave, setContent]
   );
 
   // Retry queued save when coming back online
@@ -469,5 +495,18 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [userId, table, ownerColumn]);
 
-  return { content, isSaving, saveFailed, lastSaved, handleChange, noteData: noteData ?? null, isFetched };
+  // Identity guard: until the reset/hydration has bound state to the current
+  // account, the public snapshot must never expose the previous account.
+  const identityMatched = contentState.owner === userId;
+  const visibleContent = identityMatched ? content : userId ? peekScoped(cachePrefix, userId) : '';
+
+  return {
+    content: visibleContent,
+    isSaving: identityMatched ? isSaving : false,
+    saveFailed: identityMatched ? saveFailed : false,
+    lastSaved: identityMatched ? lastSaved : null,
+    handleChange,
+    noteData: identityMatched ? noteData ?? null : null,
+    isFetched: identityMatched ? isFetched : false,
+  };
 }
