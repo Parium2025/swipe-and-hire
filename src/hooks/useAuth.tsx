@@ -22,6 +22,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
+import { resetAccountScopedCaches, getAccountCacheOwner } from '@/lib/accountCacheReset';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -308,6 +309,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
+  // 🔒 EN synkron väg för kontobunden cache-återställning. Används av manuell
+  // utloggning OCH av varje ägarbyte i auth, så att inget preloadat värde från
+  // föregående konto kan renderas för nästa konto.
+  const resetAccountScopedState = useCallback((nextOwnerId: string | null) => {
+    resetAccountScopedCaches(nextOwnerId);
+    setPreloadedAvatarUrl(null);
+    setPreloadedCoverUrl(null);
+    setPreloadedVideoUrl(null);
+    setPreloadedCompanyLogoUrl(null);
+    setPreloadedTotalJobs(0);
+    setPreloadedSavedJobs(0);
+    setPreloadedUniqueCompanies(0);
+    setPreloadedNewThisWeek(0);
+    setPreloadedEmployerMyJobs(0);
+    setPreloadedEmployerActiveJobs(0);
+    setPreloadedEmployerDashboardJobs(0);
+    setPreloadedEmployerTotalViews(0);
+    setPreloadedEmployerTotalApplications(0);
+    setPreloadedEmployerCandidates(0);
+    setPreloadedUnreadMessages(0);
+    setPreloadedJobSeekerUnreadMessages(0);
+    setPreloadedCompanyReviewsCount(0);
+    setPreloadedMyApplications(0);
+    setPreloadedMyCandidates(0);
+  }, []);
+
+  const claimAccountCacheOwnership = useCallback((userId: string | null | undefined) => {
+    if (!userId) return;
+    if (getAccountCacheOwner() === userId) return;
+    resetAccountScopedState(userId);
+  }, [resetAccountScopedState]);
+
   const isManualSignOutRef = useRef(false);
   const isSessionKickRef = useRef(false); // Suppress duplicate toast on session kick
   const isInitializingRef = useRef(true);
@@ -575,6 +608,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        // 🔒 Ägarbyte: rensa föregående kontos cache INNAN nästa konto renderas.
+        claimAccountCacheOwnership(newUserId);
+
         currentUserIdRef.current = newUserId;
         setSession(session);
         setUser(session?.user ?? null);
@@ -655,6 +691,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted || sessionInitialized) return;
       sessionInitialized = true;
       finishInitialization();
+
+      claimAccountCacheOwnership(session?.user?.id ?? null);
 
       currentUserIdRef.current = session?.user?.id ?? null;
       setSession(session);
@@ -1446,6 +1484,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     beginSignOutTracking();
 
     const clearLocalState = () => {
+      resetAccountScopedState(null);
       currentUserIdRef.current = null;
       setUser(null);
       setSession(null);
