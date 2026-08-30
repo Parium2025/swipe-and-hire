@@ -222,16 +222,18 @@ describe('useConversations realtime-filtrering', () => {
     expect(target?.unread_count).toBe(1);
   });
 
-  it('ändrad id-mängd byter kanal en gång; unmount städar kanal och timers', () => {
+  it('ändrad id-mängd byter kanal en gång; unmount städar kanal och timers', async () => {
     const { unmount } = renderWith(1);
     const firstChannel = subscribedChannels[0];
 
-    act(() => {
+    await act(async () => {
       client.setQueryData(['conversations', USER_ID], makeConversations(2));
+      await Promise.resolve();
     });
 
     expect(removedChannels).toEqual([firstChannel]);
     expect(subscribedChannels).toHaveLength(2);
+
 
     const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
     unmount();
