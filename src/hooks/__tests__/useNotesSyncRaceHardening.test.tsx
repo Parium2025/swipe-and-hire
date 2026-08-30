@@ -272,7 +272,7 @@ describe('useNotesSync — race hardening', () => {
   // ── 6. access token / beforeunload ──────────────────────────────────
   it('beforeunload posts with the on_conflict target and survives fetch rejection', async () => {
     mockUser = { id: 'u1' };
-    const fetchSpy = vi.fn(() => Promise.reject(new Error('network')));
+    const fetchSpy = vi.fn((..._args: unknown[]) => Promise.reject(new Error('network')));
     vi.stubGlobal('fetch', fetchSpy);
 
     const { result } = renderNotes();
@@ -290,7 +290,7 @@ describe('useNotesSync — race hardening', () => {
     mockUser = { id: 'u1' };
     const d = deferred<{ error: unknown }>();
     upsertImpl = (() => d.promise) as any;
-    const fetchSpy = vi.fn(() => Promise.resolve(new Response(null)));
+    const fetchSpy = vi.fn((..._args: unknown[]) => Promise.resolve(new Response(null)));
     vi.stubGlobal('fetch', fetchSpy);
 
     const { result } = renderNotes();
@@ -308,7 +308,7 @@ describe('useNotesSync — race hardening', () => {
     mockUser = { id: 'a' };
     const s = deferred<{ data: { session: { access_token: string } | null } }>();
     sessionImpl = () => s.promise;
-    const fetchSpy = vi.fn(() => Promise.resolve(new Response(null)));
+    const fetchSpy = vi.fn((..._args: unknown[]) => Promise.resolve(new Response(null)));
     vi.stubGlobal('fetch', fetchSpy);
 
     const { result, rerender } = renderNotes();
