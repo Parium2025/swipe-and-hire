@@ -2081,7 +2081,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Funktion för att uppdatera employer stats (används av realtime + initial load)
   // OBS: För Dashboard-konsistens hämtar vi organisations-jobb om användaren tillhör en org
   const refreshEmployerStats = useCallback(async () => {
-    if (!user) return;
+    // 🔒 FAIL-CLOSED: employer-only RPC:er får aldrig köras för jobbsökare,
+    // ooupplöst/okänd roll eller en kvarhängande roll från ett annat konto.
+    if (!canRefreshEmployerStats(user, userRole)) return;
+    
     
     try {
       // 🔒 SKALA + SANNING: tidigare laddades hela organisationens annonslista ner
