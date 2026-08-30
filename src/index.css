@@ -2395,3 +2395,17 @@ body[data-jobseeker-home-active="true"] [contenteditable="true"]:focus-visible {
   border-radius: inherit;
   box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.85) !important;
 }
+
+/* Notes-verktygsfältets rot har overflow-hidden, så den yttre fokusringen
+   ovan klipps bort. Knapparna i verktygsfältet får därför en HELT INSET
+   dubbelring (vit 2px + mörk kontrastkant) som aldrig kan klippas.
+   Negativ outline-offset håller även outline innanför kanten (syns i
+   t.ex. Windows High Contrast Mode där box-shadow ignoreras).
+   Endast :focus-visible — normalläget är oförändrat. */
+body[data-jobseeker-home-active="true"] [data-notes-toolbar] button:not(:disabled):focus-visible {
+  outline: 2px solid #FFFFFF !important;
+  outline-offset: -2px !important;
+  box-shadow:
+    inset 0 0 0 2px #FFFFFF,
+    inset 0 0 0 4px rgba(15, 23, 42, 0.85) !important;
+}

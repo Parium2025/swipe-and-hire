@@ -64,6 +64,13 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
     }
   }, [stats.length, currentIndex]);
 
+  // KeepAlive: när Home göms med display:none är blur/focusout inte garanterad.
+  // Nollställ fokuspausen vid inaktivering så rotationen inte fastnar pausad
+  // när användaren kommer tillbaka.
+  useEffect(() => {
+    if (!isActive) setIsFocusPaused(false);
+  }, [isActive]);
+
   const goNext = useCallback(() => { setCurrentIndex(prev => (prev + 1) % stats.length); }, [stats.length]);
   const goPrev = useCallback(() => { setCurrentIndex(prev => (prev - 1 + stats.length) % stats.length); }, [stats.length]);
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: goNext, onSwipeRight: goPrev });
