@@ -63,11 +63,23 @@ export const useJobSeekerBackgroundSync = () => {
   const latestOwnerRef = useRef<string | null>(null);
   const mountedRef = useRef(true);
   const preloadAllDataRef = useRef<((force?: boolean) => Promise<void>) | null>(null);
+  // 🔒 Varje schemalagd idle-/timeout-callback ägs och avbryts vid unmount.
+  // Annars kan en köad callback göra nätverks-reads för en avmonterad hook.
+  const idleHandlesRef = useRef<Set<number>>(new Set());
+  const timeoutHandlesRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   useEffect(() => {
     mountedRef.current = true;
+    const idleHandles = idleHandlesRef.current;
+    const timeoutHandles = timeoutHandlesRef.current;
     return () => {
       mountedRef.current = false;
       pendingPreloadRef.current = null;
+      if (typeof cancelIdleCallback !== 'undefined') {
+        idleHandles.forEach((handle) => cancelIdleCallback(handle));
+      }
+      idleHandles.clear();
+      timeoutHandles.forEach((handle) => clearTimeout(handle));
+      timeoutHandles.clear();
     };
   }, []);
 
@@ -76,9 +88,10 @@ export const useJobSeekerBackgroundSync = () => {
   // warmup för konto B).
   const isJobSeeker = isOwnedJobSeekerRole(user, userRole);
 
-  useEffect(() => {
-    latestOwnerRef.current = user?.id ?? null;
-  }, [user?.id]);
+  // 🔒 Ägaren måste vara synlig SYNKRONT vid render — inte först i en passiv
+  // effekt. Annars finns ett render → effekt-fönster där A:s callback ännu
+  // räknas som ägare efter att B redan renderats.
+  latestOwnerRef.current = user?.id ?? null;
 
   // 🌤️ Validera väder-cache
   const isWeatherCacheValid = useCallback((): boolean => {
@@ -95,13 +108,16 @@ export const useJobSeekerBackgroundSync = () => {
   }, []);
 
   // 🌤️ Preload väder om cache är gammal
-  const preloadWeatherIfStale = useCallback(async () => {
+  const preloadWeatherIfStale = useCallback(async (
+    isStillOwner: () => boolean = () => true,
+  ) => {
     if (isWeatherCacheValid()) {
       return; // Cache är färsk
     }
 
     try {
-      await preloadWeatherLocation();
+      // Kontovakten hindrar att A:s plats/väder skrivs i B:s skopade cache.
+      await preloadWeatherLocation({ isCurrent: isStillOwner });
     } catch (error) {
       console.warn('[JobSeekerSync] Weather preload failed:', error);
     }
@@ -110,7 +126,9 @@ export const useJobSeekerBackgroundSync = () => {
   // 🏢 Läs den cachade annonslistan om den är färsk nog att hoppa över hämtningen.
   // Exception-safe och fail-closed: trasig/blockerad storage eller data som
   // tillhör ett annat konto betyder "inte färsk".
-  const readFreshAvailableJobs = useCallback((ownerId: string | null): unknown[] | null => {
+  const readFreshAvailableJobs = useCallback((
+    ownerId: string | null,
+  ): { items: unknown[]; timestamp: number } | null => {
     try {
       const raw = localStorage.getItem(AVAILABLE_JOBS_CACHE_KEY);
       if (!raw) return null;
@@ -124,7 +142,7 @@ export const useJobSeekerBackgroundSync = () => {
       if (typeof parsed.ownerId !== 'string' || parsed.ownerId !== ownerId) return null;
       const age = Date.now() - parsed.timestamp;
       if (age < 0 || age >= AVAILABLE_JOBS_CACHE_MAX_AGE) return null;
-      return parsed.items;
+      return { items: parsed.items, timestamp: parsed.timestamp };
     } catch {
       return null;
     }
@@ -139,11 +157,17 @@ export const useJobSeekerBackgroundSync = () => {
     const cacheKey = AVAILABLE_JOBS_CACHE_KEY;
 
     if (!force) {
-      const cachedItems = readFreshAvailableJobs(ownerId);
-      if (cachedItems) {
+      const cached = readFreshAvailableJobs(ownerId);
+      if (cached) {
         // Färsk cache — ingen onödig read, men React Query MÅSTE hydreras,
-        // annars visar Home tom lista trots giltig cache.
-        queryClient.setQueryData(['available-jobs'], cachedItems);
+        // annars visar Home tom lista trots giltig cache. Redan befintlig,
+        // nyare data i minnet får dock ALDRIG skrivas över av äldre storage.
+        const state = queryClient.getQueryState(['available-jobs']);
+        const hasInMemory = state?.data !== undefined;
+        const storageIsNewer = hasInMemory && cached.timestamp > (state?.dataUpdatedAt ?? 0);
+        if (!hasInMemory || storageIsNewer) {
+          queryClient.setQueryData(['available-jobs'], cached.items);
+        }
         return;
       }
     }
@@ -194,6 +218,9 @@ export const useJobSeekerBackgroundSync = () => {
   const preloadAllData = useCallback(async (force = false) => {
     if (!user || !isJobSeeker) return;
     const ownerId = user.id;
+    // Fail-closed vid entry: en schemalagd callback som körs efter unmount
+    // eller efter ett kontobyte får inte starta några reads.
+    if (!mountedRef.current || latestOwnerRef.current !== ownerId) return;
 
     // Undvik dubbla preloads (inom 2 sekunder) — men endast för samma ägare.
     const now = Date.now();
@@ -219,8 +246,12 @@ export const useJobSeekerBackgroundSync = () => {
     try {
       await Promise.all([
         preloadAvailableJobs(force, ownerId, isStillOwner),
-        preloadWeatherIfStale(),
+        preloadWeatherIfStale(isStillOwner),
       ]);
+
+      // 🔒 Inaktuell körning (unmount/kontobyte under nätverket) får varken
+      // markera warmup som klar eller flytta fram senaste synk-tidsstämpeln.
+      if (!isStillOwner()) return;
 
       hasPreloadedRef.current = true;
       // Tidsstämpel för senaste warmup-försöket (annonslista + väder).
@@ -245,10 +276,18 @@ export const useJobSeekerBackgroundSync = () => {
   // 🕐 Schemalägg preload via requestIdleCallback så den ALDRIG blockerar animationer
   const schedulePreload = useCallback((force = false) => {
     if (typeof requestIdleCallback !== 'undefined') {
-      requestIdleCallback(() => preloadAllData(force), { timeout: 2000 });
+      const handle = requestIdleCallback(() => {
+        idleHandlesRef.current.delete(handle);
+        void preloadAllData(force);
+      }, { timeout: 2000 });
+      idleHandlesRef.current.add(handle);
     } else {
       // Fallback för Safari: kör efter nuvarande frame + micro-tasks
-      setTimeout(() => preloadAllData(force), 50);
+      const handle = setTimeout(() => {
+        timeoutHandlesRef.current.delete(handle);
+        void preloadAllData(force);
+      }, 50);
+      timeoutHandlesRef.current.add(handle);
     }
   }, [preloadAllData]);
 
