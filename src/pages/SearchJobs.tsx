@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Trash2, AlertTriangle, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -380,6 +380,12 @@ const SearchJobs = memo(() => {
   }, [timeFilter]);
 
   // Use the new optimized job search hook with full-text search
+  // 🔥 SCALE: Search hålls monterad av KeepAlive även när användaren är tillbaka
+  // på Home. Realtime får bara vara aktiv medan Search faktiskt visas.
+  const searchLocation = useLocation();
+  const isSearchRouteActive =
+    searchLocation.pathname === '/search-jobs' || searchLocation.pathname === '/index';
+
   const { jobs: searchJobs, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useOptimizedJobSearch({
     searchQuery: debouncedSearch,
     city: selectedCity,
@@ -392,6 +398,7 @@ const SearchJobs = memo(() => {
     // de sidor som råkar vara laddade.
     sort: sortBy,
     enabled: true,
+    realtimeEnabled: isSearchRouteActive,
   });
 
   // 🔥 Live-sync: platsfiltret speglar sökrutan i realtid.

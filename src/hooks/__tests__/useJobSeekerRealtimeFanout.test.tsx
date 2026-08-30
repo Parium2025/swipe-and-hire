@@ -15,6 +15,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 interface Registration {
   table?: string;
   filter?: string;
+  event?: string;
 }
 
 interface MockChannel {
@@ -31,7 +32,11 @@ vi.mock('@/lib/realtimeChannel', () => ({
     const channel: MockChannel = {
       name,
       on: (_event: string, opts: Record<string, unknown>) => {
-        registrations.push({ table: String(opts?.table ?? ''), filter: String(opts?.filter ?? '') });
+        registrations.push({
+          table: String(opts?.table ?? ''),
+          filter: String(opts?.filter ?? ''),
+          event: String(opts?.event ?? ''),
+        });
         return channel;
       },
       subscribe: () => channel,
@@ -137,7 +142,7 @@ describe('useJobSeekerBackgroundSync realtime fan-out', () => {
     expect(interviewsRegs).toHaveLength(0);
   });
 
-  it('registrerar ZERO profiles-prenumerationer men behåller exakt en job_postings-kanal', async () => {
+  it('registrerar ZERO profiles- och ZERO ofiltrerade job_postings INSERT-prenumerationer', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
@@ -151,14 +156,16 @@ describe('useJobSeekerBackgroundSync realtime fan-out', () => {
     await new Promise((r) => setTimeout(r, 50));
 
     const profilesRegs = registrations.filter((r) => r.table === 'profiles');
-    const jobPostingsRegs = registrations.filter((r) => r.table === 'job_postings');
+    const unfilteredJobPostingInserts = registrations.filter(
+      (r) => r.table === 'job_postings' && r.event === 'INSERT' && !r.filter,
+    );
 
     // Profiler uppdateras via kanoniska job_postings-prenumerationer och
     // DB-triggers — ingen direkt profiles-subscription ska finnas här.
     expect(profilesRegs).toHaveLength(0);
 
-    // Positivt skydd: INSERT-prenumerationen på nya jobb ska finnas kvar.
-    expect(jobPostingsRegs).toHaveLength(1);
-    expect(jobPostingsRegs[0].filter).toBe('');
+    // Home får inte bära någon global, ofiltrerad new-job-listener:
+    // read-amplification per jobbsökare vid varje ny annons.
+    expect(unfilteredJobPostingInserts).toHaveLength(0);
   });
 });

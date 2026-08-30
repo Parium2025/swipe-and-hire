@@ -181,6 +181,12 @@ interface UseOptimizedJobSearchOptions {
   category: string;
   subcategories: string[];
   enabled?: boolean;
+  /**
+   * 🔥 SCALE: Route-scopad realtime. När Search hålls monterad av KeepAlive men
+   * är dold (t.ex. användaren är tillbaka på Home) ska inga job_postings-kanaler
+   * vara aktiva. Default true för bakåtkompatibilitet.
+   */
+  realtimeEnabled?: boolean;
   /** 🔥 SCALE: Filtrera på arbetsgivar-ID i DB istället för i klienten. */
   employerIds?: string[];
   /** 🔥 SCALE: ISO-timestamp; jobb skapade efter denna tid filtreras i DB. */
@@ -1043,7 +1049,7 @@ function useCompanyReviews(employerIds: string[], isEnabled: boolean) {
 }
 
 export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
-  const { enabled = true, employerIds: employerIdsFilter, createdAfter, pageSize = 100, sort = 'newest' } = options;
+  const { enabled = true, realtimeEnabled = true, employerIds: employerIdsFilter, createdAfter, pageSize = 100, sort = 'newest' } = options;
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -1241,6 +1247,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   }, [jobIds]);
 
   useEffect(() => {
+    if (!realtimeEnabled) return;
     if (!realtimeJobIdsKey) return;
     const ids = realtimeJobIdsKey.split(',');
     const filter = `id=in.(${ids.join(',')})`;
@@ -1299,13 +1306,28 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient, realtimeJobIdsKey]);
+  }, [queryClient, realtimeJobIdsKey, realtimeEnabled]);
 
   // 🆕 Nya annonser: id-filtrerade kanalen ovan kan per definition inte se rader
   // som ännu inte finns i resultatet. En separat INSERT-lyssnare håller
   // "Aktiva jobb" / "Unika företag" / "Nya denna vecka" live utan omladdning.
+  // 🔥 SCALE: lyssnaren är route-scopad — den finns bara medan Search visas.
+  // När Search döljs (KeepAlive) avregistreras kanalen helt, och vid
+  // återaktivering görs EN kontrollerad refresh för att hämta ikapp.
+  const wasRealtimeHiddenRef = useRef(false);
   useEffect(() => {
+    if (!realtimeEnabled) {
+      wasRealtimeHiddenRef.current = true;
+      return;
+    }
+
     let timer: ReturnType<typeof setTimeout> | null = null;
+
+    if (wasRealtimeHiddenRef.current) {
+      wasRealtimeHiddenRef.current = false;
+      queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
+    }
+
     const channel = createRealtimeChannel('optimized-search-new-jobs')
       .on(
         'postgres_changes',
@@ -1324,7 +1346,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       if (timer) clearTimeout(timer);
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient, realtimeEnabled]);
 
 
 
