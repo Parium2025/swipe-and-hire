@@ -140,37 +140,47 @@ describe('OfflineIndicator — connectivity ownership', () => {
     expect(queryByText(/Offline/)).toBeNull();
   });
 
-  it('snabb offline→online→offline startar helt ny 10 s-period utan gammalt reconnecting-läge', () => {
+  it('flapping: första perioden når 10 s med reconnecting, kort onlinepaus resettar, ny period kräver helt nya 10 s', () => {
     const { queryByText, getByText } = render(<OfflineIndicator />);
+    // Första offlineperioden når EXAKT 10 s → reconnecting-läget är aktivt
     emitConnectivity(false);
-    act(() => { vi.advanceTimersByTime(9000); });
-    emitConnectivity(true);
-    act(() => { vi.advanceTimersByTime(400); });
-    emitConnectivity(false);
-    // Ny period: reconnecting får inte vara kvar från gamla cykeln
+    act(() => { vi.advanceTimersByTime(9999); });
     expect(queryByText(/Återansluter/)).toBeNull();
+    act(() => { vi.advanceTimersByTime(1); });
+    expect(getByText(/Återansluter/)).toBeTruthy();
+    // Online bara ~100 ms — kortare än 300 ms fade-out, bannern renderas fortfarande
+    emitConnectivity(true);
+    act(() => { vi.advanceTimersByTime(100); });
+    // Offline igen: reconnecting måste vara resettat OMEDELBART i nya perioden
+    emitConnectivity(false);
+    expect(queryByText(/Återansluter/)).toBeNull();
+    // ...och får inte återkomma förrän en HELT NY 10 s-period passerat
     act(() => { vi.advanceTimersByTime(9999); });
     expect(queryByText(/Återansluter/)).toBeNull();
     act(() => { vi.advanceTimersByTime(1); });
     expect(getByText(/Återansluter/)).toBeTruthy();
   });
 
-  it('unmount rensar alla komponentägda timers', () => {
-    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
-    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
-    const { unmount, queryByText } = render(<OfflineIndicator />);
+  it('unmount rensar komponentägda 900 ms/10 s-timers (bevisat via timer-räknare)', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { unmount } = render(<OfflineIndicator />);
     emitConnectivity(false);
+    // Före unmount: komponenten äger exakt två pending timers (900 ms fade-in + 10 s reconnecting)
+    expect(vi.getTimerCount()).toBe(2);
+    // Låt 900 ms-timern gå ut — då återstår bara 10 s-timern
     act(() => { vi.advanceTimersByTime(2000); });
+    expect(vi.getTimerCount()).toBe(1);
     unmount();
+    // Direkt efter unmount: alla komponentägda timers rensade
+    expect(vi.getTimerCount()).toBe(0);
+    // Efterföljande timeradvance får inte trigga state-uppdateringar/varningar
     act(() => { vi.advanceTimersByTime(60000); });
-    expect(queryByText(/Offline/)).toBeNull();
-    expect(queryByText(/Återansluter/)).toBeNull();
-    // Inga timers får ha överlevt: antal clears ska täcka alla komponentägda timers
-    const timeouts = intervalSpy.mock.calls.length;
-    expect(timeouts).toBe(0);
-    expect(clearTimeoutSpy.mock.calls.length + clearIntervalSpy.mock.calls.length)
-      .toBeGreaterThan(0);
-    clearTimeoutSpy.mockRestore();
-    clearIntervalSpy.mockRestore();
+    expect(vi.getTimerCount()).toBe(0);
+    const stateWarnings = errorSpy.mock.calls.filter((args) =>
+      String(args[0]).includes('unmounted component') ||
+      String(args[0]).includes('not wrapped in act')
+    );
+    expect(stateWarnings).toHaveLength(0);
+    errorSpy.mockRestore();
   });
 });
