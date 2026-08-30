@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { assertLoadTestTargetAllowed, normalizeOrigin } from '../../scripts/load-test-safety';
+import { assertLoadTestTargetAllowed, normalizeOrigin, resolveLoadTestConnection } from '../../scripts/load-test-safety';
 
 const PROD = 'https://jrjaegapuujushsiofoi.supabase.co';
 const STAGING = 'https://staging-project.supabase.co';
