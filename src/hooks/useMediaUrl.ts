@@ -200,6 +200,7 @@ function getOrCreateSignedUrlLoad(
   // Upp till 3 försök med kort backoff — täcker tillfälliga nätglapp och
   // token-refresh precis efter inloggning, vilket annars gav en tom avatar.
   const attempts = priority === 'high' ? 3 : 1;
+  const startGeneration = mediaCacheGeneration;
 
   const promise = acquireSignedUrlSlot(priority)
     .then(async () => {
@@ -212,10 +213,11 @@ function getOrCreateSignedUrlLoad(
           signedUrl = null;
         }
         if (signedUrl) {
-          storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now);
+          storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now, startGeneration);
           failedLoads.delete(cacheKey);
           return signedUrl;
         }
+
         if (isKnownMissingMedia(storagePath, mediaType)) break;
         if (attempt < attempts - 1) await sleep(250 * (attempt + 1));
       }
