@@ -91,6 +91,8 @@ export const ExpandedNotesDialog = memo(({
             <div className="flex items-center gap-3">
               {saveIndicator}
               <button
+                type="button"
+                aria-label="Stäng anteckningar"
                 onClick={handleClose}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
               >
