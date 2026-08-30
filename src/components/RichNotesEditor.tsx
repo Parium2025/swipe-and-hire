@@ -29,6 +29,8 @@ interface ToolbarButtonProps {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   isActive?: boolean;
+  /** True för växlar (Fet/Kursiv/...) som ska exponera aria-pressed. */
+  isToggle?: boolean;
   disabled?: boolean;
   compact?: boolean;
   large?: boolean;
@@ -43,6 +45,7 @@ const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
   icon: Icon,
   title,
   isActive = false,
+  isToggle = false,
   disabled = false,
   compact = false,
   large = false,
@@ -53,8 +56,11 @@ const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
 }, ref) => {
   const isShowingPreview = tapToPreview && previewingId === buttonId;
 
-  const handleClick = () => {
-    if (tapToPreview && buttonId && onTapPreview) {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // detail === 0 → tangentbord (Enter/Space) eller programmatiskt klick.
+    // Där finns ingen tap-förhandsvisning: kommandot ska köras direkt en gång.
+    const isPointerTap = event.detail > 0;
+    if (isPointerTap && tapToPreview && buttonId && onTapPreview) {
       if (previewingId === buttonId) {
         // Second tap → activate
         onClick();
@@ -75,12 +81,11 @@ const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
           <button
             ref={ref}
             type="button"
-            tabIndex={-1}
+            aria-label={title}
+            aria-pressed={isToggle ? isActive : undefined}
             onMouseDown={(e) => {
+              // Skydda markeringen i editorn vid muspekare/touch.
               e.preventDefault();
-            }}
-            onFocus={(e) => {
-              e.currentTarget.blur();
             }}
             onClick={handleClick}
             disabled={disabled}
@@ -172,12 +177,12 @@ export const NotesToolbar = ({ editor, className, compact = false, large = false
 
   return (
     <div className={cn("flex items-center flex-nowrap min-w-0 overflow-hidden", compact ? "gap-0" : "gap-0.5 sm:gap-1", className)}>
-      <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} large={large} buttonId="bold" {...tapProps} />
-      <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} large={large} buttonId="italic" {...tapProps} />
-      <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} large={large} buttonId="strike" {...tapProps} />
+      <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} large={large} isToggle buttonId="bold" {...tapProps} />
+      <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} large={large} isToggle buttonId="italic" {...tapProps} />
+      <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} large={large} isToggle buttonId="strike" {...tapProps} />
       <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-px" : "h-4 mx-1")} />
-      <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} large={large} buttonId="bulletList" {...tapProps} />
-      <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} large={large} buttonId="taskList" {...tapProps} />
+      <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} large={large} isToggle buttonId="bulletList" {...tapProps} />
+      <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} large={large} isToggle buttonId="taskList" {...tapProps} />
       {showUndoRedo && !compact && (
         <>
           <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : "h-4 mx-1")} />

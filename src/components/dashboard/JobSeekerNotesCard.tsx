@@ -54,6 +54,8 @@ export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardP
             </div>
             <div className="flex-1 flex items-center justify-center gap-1 min-w-0">
               <button
+                type="button"
+                aria-label="Expandera anteckningar"
                 onClick={() => setIsExpanded(true)}
                 className="p-1 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
               >

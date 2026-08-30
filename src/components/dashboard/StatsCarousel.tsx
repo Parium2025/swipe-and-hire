@@ -1,5 +1,6 @@
 import { memo, useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
@@ -32,9 +33,28 @@ interface StatsCarouselProps {
   isActive?: boolean;
 }
 
+const StatContentWrapper = ({
+  link,
+  className,
+  children,
+}: {
+  link?: string;
+  className: string;
+  children: React.ReactNode;
+}) =>
+  link ? (
+    <Link to={link} className={className}>
+      {children}
+    </Link>
+  ) : (
+    <div className={className}>{children}</div>
+  );
+
 export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false, isActive = true }: StatsCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const navigate = useNavigate();
+  // Tangentbordsfokus i kortet pausar rotationen precis som hover/touch, så
+  // innehållet inte byts under fingrarna på den som tabbar.
+  const [isFocusPaused, setIsFocusPaused] = useState(false);
   const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused, active: isActive });
 
   // Defensive index guard
@@ -50,7 +70,7 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
 
   // Aligned rotation: stats switches on the +5s beat between news/tips switches
   useSynchronizedRotation({
-    enabled: isActive && !isPaused && stats.length > 1,
+    enabled: isActive && !isPaused && !isFocusPaused && stats.length > 1,
     intervalMs: 10000,
     offsetMs: 5000,
     onTick: goNext,
@@ -73,6 +93,11 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
       onTouchMove={swipeHandlers.onTouchMove}
       onTouchEnd={() => { swipeHandlers.onTouchEnd(); resumeWithDelay(); }}
       onTouchCancel={resumeWithDelay}
+      onFocusCapture={() => setIsFocusPaused(true)}
+      onBlurCapture={(e) => {
+        const next = e.relatedTarget as Node | null;
+        if (!next || !e.currentTarget.contains(next)) setIsFocusPaused(false);
+      }}
     >
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
@@ -85,9 +110,12 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
           <span className="text-[10px] text-white uppercase tracking-wider font-medium">MIN STATISTIK</span>
         </div>
 
-        <div
+        {/* Länkad statistik använder native <Link> så tangentbord, Enter,
+            öppna-i-ny-flik och skärmläsare fungerar. Klasserna är identiska
+            med den tidigare div:en — ingen visuell förändring. */}
+        <StatContentWrapper
+          link={currentStat.link}
           className={cn("flex-1 flex flex-col items-center justify-center text-center py-2", currentStat.link && "cursor-pointer")}
-          onClick={() => currentStat.link && navigate(currentStat.link)}
         >
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -108,7 +136,7 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
               )}
             </motion.div>
           </AnimatePresence>
-        </div>
+        </StatContentWrapper>
 
         <DashboardCarouselDots count={stats.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till statistik" alwaysRender />
       </CardContent>
