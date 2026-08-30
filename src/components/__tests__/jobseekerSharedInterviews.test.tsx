@@ -166,7 +166,7 @@ describe('Jobbsökarens delade intervjudatakälla', () => {
   });
 
   it('statistikräknaren och intervjukortet håller ihop under en pågående intervju', () => {
-    candidateInterviewsSpy.mockReturnValue({ interviews: [inProgressInterview()], isLoading: false });
+    candidateInterviewsSpy.mockReturnValue({ interviews: [inProgressInterview()], isLoading: false, isSuccess: true, isError: false });
 
     render(<JobSeekerDashboardGrid />);
 
