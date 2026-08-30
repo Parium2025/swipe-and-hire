@@ -43,7 +43,13 @@ export const JobSeekerDashboardGrid = memo(() => {
   // EN delad datakälla för kandidatens intervjuer — statistikkortet och
   // intervjukortet räknar exakt samma live-lista, så en pågående intervju
   // syns lika i båda.
-  const { interviews, isLoading: interviewsLoading, isSuccess: interviewsSucceeded } = useCandidateInterviews();
+  const {
+    interviews,
+    isLoading: interviewsLoading,
+    isError: interviewsFailed,
+    isFetchedSuccessfully: interviewsSucceeded,
+    refetch: refetchInterviews,
+  } = useCandidateInterviews();
   const now = useMinuteTick();
   const liveInterviews = useMemo(
     () => (interviews as DashboardInterview[]).filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
@@ -53,7 +59,12 @@ export const JobSeekerDashboardGrid = memo(() => {
   const mobileOrder = (
     <>
       <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={interviewsSucceeded} />
-      <JobSeekerInterviewsCard interviews={liveInterviews} isLoading={interviewsLoading} />
+      <JobSeekerInterviewsCard
+        interviews={liveInterviews}
+        isLoading={interviewsLoading}
+        isError={interviewsFailed}
+        onRetry={() => { void refetchInterviews(); }}
+      />
       <TipsCardWrapper />
       <JobSeekerNotesCard />
     </>
@@ -64,7 +75,12 @@ export const JobSeekerDashboardGrid = memo(() => {
       <TipsCardWrapper />
       <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={interviewsSucceeded} />
       <JobSeekerNotesCard />
-      <JobSeekerInterviewsCard interviews={liveInterviews} isLoading={interviewsLoading} />
+      <JobSeekerInterviewsCard
+        interviews={liveInterviews}
+        isLoading={interviewsLoading}
+        isError={interviewsFailed}
+        onRetry={() => { void refetchInterviews(); }}
+      />
     </>
   );
 
