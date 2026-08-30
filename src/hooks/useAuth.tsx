@@ -187,7 +187,25 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
  
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
+  // 🔒 KONTOAUKTORITET (provider-lokal, generationsbaserad): byts SYNKRONT vid
+  // varje accepterad kontoövergång — före React committar — så att ett svar som
+  // startades av föregående konto/session aldrig kan skriva i det nya. Ogiltig-
+  // förklaras vid unmount, vilket också stoppar svar från en avmonterad provider
+  // när en ny provider med samma id monterats.
+  const accountAuthorityRef = useRef(createAccountAuthority(null));
+  const setUser = useCallback((nextUser: User | null) => {
+    const nextOwnerId = nextUser?.id ?? null;
+    if (accountAuthorityRef.current.current.ownerId !== nextOwnerId) {
+      accountAuthorityRef.current.advance(nextOwnerId);
+    }
+    setUserState(nextUser);
+  }, []);
+  useEffect(() => {
+    const authority = accountAuthorityRef.current;
+    return () => authority.invalidate();
+  }, []);
+
   const [session, setSession] = useState<Session | null>(null);
   // Location/weather cache is user-bound: never let the next account on a
   // shared device read the previous account's position. Bound synchronously
