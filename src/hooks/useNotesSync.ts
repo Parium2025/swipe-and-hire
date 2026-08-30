@@ -317,7 +317,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // session transitions and must each get their own request/metadata, even
   // inside staleTime. Invalidations using the [queryKey, user] prefix match all
   // session keys.
-  const sessionEpoch = isCurrentConfig(committedConfig) ? committedConfig.epoch : null;
+  // Only the committed session may fetch: during a transition render the
+  // committed config still describes the previous scope, so no request is
+  // started until the layout transition has installed the new session.
+  const sessionEpoch =
+    isCurrentConfig(committedConfig) && committedConfig.cacheKey === cacheKey
+      ? committedConfig.epoch
+      : null;
   const { data: queryPayload, isFetched, isSuccess } = useQuery({
     queryKey: [queryKey, userId, cachePrefix, sessionEpoch],
 
