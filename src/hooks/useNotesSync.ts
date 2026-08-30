@@ -429,12 +429,12 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       hasLocalEditsRef.current = true;
       localRevRef.current += 1; // same text re-typed is still a newer revision
       contentRef.current = next; // synchronous latest-content authority
-      setContent(next);
+      commitContent(userId, epochRef.current, next);
       const journaled = writePending(pendingKey, userId, next);
       setSaveFailed(!journaled);
       scheduleSave();
     },
-    [cacheKey, pendingKey, userId, scheduleSave, setContent]
+    [cacheKey, pendingKey, userId, scheduleSave, commitContent]
   );
 
   // Retry queued save when coming back online
