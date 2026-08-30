@@ -47,9 +47,13 @@ export const JobSeekerDashboardGrid = memo(() => {
     interviews,
     isLoading: interviewsLoading,
     isError: interviewsFailed,
-    isFetchedSuccessfully: interviewsSucceeded,
+    isSuccess: interviewsQuerySuccess,
+    isPlaceholderData: interviewsArePlaceholder,
     refetch: refetchInterviews,
   } = useCandidateInterviews();
+  // Placeholder-data ger status success — bara ett verkligt nätverkssvar får
+  // auktorisera intervjustatistiken.
+  const interviewsSucceeded = Boolean(interviewsQuerySuccess) && !interviewsArePlaceholder;
   const now = useMinuteTick();
   const liveInterviews = useMemo(
     () => (interviews as DashboardInterview[]).filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
