@@ -170,7 +170,6 @@ describe('useNotesSync — session epoch and cache scope', () => {
     const { result, rerender } = renderNotes(OLD_PREFIX);
     await waitFor(() => expect(result.current.content).toBe('OLD SCOPE JOURNAL'));
     const oldScopeHandle = result.current.handleChange;
-    const oldScopeWakes = [...connectivityListeners];
 
     // Same user, new scope.
     rerender({ prefix: NEW_PREFIX });
