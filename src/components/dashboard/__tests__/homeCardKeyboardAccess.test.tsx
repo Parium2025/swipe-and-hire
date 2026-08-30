@@ -421,9 +421,9 @@ describe('Home-kort tangentbordsåtkomst', () => {
       await waitFor(() => {
         expect(screen.queryByRole('button', { name: 'Stäng anteckningar' })).toBeNull();
       });
-      // Fokusåterställning till expandknappen är ett Radix/webbläsarbeteende
-      // som jsdom inte återger trovärdigt — verifieras i live-browser.
-      expect(expand).toBeInTheDocument();
+      // Fokus ska tillbaka till exakt expandknappen (se notesFocusRestoration).
+      await act(async () => { await new Promise((r) => setTimeout(r, 60)); });
+      expect(document.activeElement).toBe(expand);
     });
   });
 });

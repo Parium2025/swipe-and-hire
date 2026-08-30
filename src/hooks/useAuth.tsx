@@ -197,9 +197,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const accountAuthorityRef = useRef(createAccountAuthority(null));
   const setUser = useCallback((nextUser: User | null) => {
     const nextOwnerId = nextUser?.id ?? null;
-    if (accountAuthorityRef.current.current.ownerId !== nextOwnerId) {
-      accountAuthorityRef.current.advance(nextOwnerId);
-    }
+    // VARJE accepterad övergång ger en ny generation — även när samma konto får
+    // en ny session/auth-händelse utan mellanliggande utloggning. Annars förblir
+    // ett svar från den föregående sessionen "aktuellt" och kan skriva.
+    accountAuthorityRef.current.advance(nextOwnerId);
     setUserState(nextUser);
   }, []);
   useEffect(() => {

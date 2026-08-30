@@ -250,4 +250,93 @@ describe('useJobSeekerBackgroundSync — hydrering, ägarbunden dedupe och koale
 
     expect(jobReads()).toBe(1);
   });
+
+  it('ägarlös (legacy) cache hydrerar inte — den måste ägar-taggas om via nätverket', async () => {
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({ items: [{ id: 'legacy' }], timestamp: Date.now() }),
+    );
+
+    renderProbe();
+    await settle();
+
+    expect(jobReads()).toBe(1);
+    expect(queryClient.getQueryData(['available-jobs'])).toEqual([
+      { id: 'job-net', title: 'Från nätet' },
+    ]);
+    const rewritten = JSON.parse(localStorage.getItem(CACHE_KEY) ?? '{}');
+    expect(rewritten.ownerId).toBe('js-1');
+  });
+
+  it('null/ogiltig ownerId hydrerar inte', async () => {
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({ items: [{ id: 'null-owner' }], timestamp: Date.now(), ownerId: null }),
+    );
+
+    renderProbe();
+    await settle();
+
+    expect(jobReads()).toBe(1);
+    expect(queryClient.getQueryData(['available-jobs'])).toEqual([
+      { id: 'job-net', title: 'Från nätet' },
+    ]);
+  });
+
+  it('A → B medan A:s nätverk är i flykt: B:s icke-forcerade warmup tappas inte', async () => {
+    const deferred = makeDeferred<void>();
+    h.deferredJobs = deferred;
+    h.jobRows = [{ id: 'A-payload' }];
+
+    const { rerender } = renderProbe();
+    await settle(40); // A:s read pågår
+
+    expect(jobReads()).toBe(1);
+
+    // Kontobyte medan A fortfarande väntar på svar.
+    h.user = { id: 'js-2' };
+    h.role = { role: 'job_seeker', user_id: 'js-2' };
+    await act(async () => {
+      rerender();
+    });
+    await settle(40);
+
+    // A:s svar landar nu; B:s warmup ska köras exakt en gång efteråt.
+    h.deferredJobs = null;
+    h.jobRows = [{ id: 'B-payload' }];
+    await act(async () => {
+      deferred.resolve();
+      await new Promise((r) => setTimeout(r, 300));
+    });
+
+    expect(jobReads()).toBe(2);
+    expect(queryClient.getQueryData(['available-jobs'])).toEqual([{ id: 'B-payload' }]);
+    const stored = JSON.parse(localStorage.getItem(CACHE_KEY) ?? '{}');
+    expect(stored.ownerId).toBe('js-2');
+    expect(stored.items).toEqual([{ id: 'B-payload' }]);
+  });
+
+  it('unmount under pågående A-svar ger ingen uppföljning och inga skrivningar', async () => {
+    const deferred = makeDeferred<void>();
+    h.deferredJobs = deferred;
+
+    const { rerender } = renderProbe();
+    await settle(40);
+
+    h.user = { id: 'js-2' };
+    h.role = { role: 'job_seeker', user_id: 'js-2' };
+    await act(async () => {
+      rerender();
+    });
+    await settle(20);
+
+    cleanup();
+    h.deferredJobs = null;
+    await act(async () => {
+      deferred.resolve();
+      await new Promise((r) => setTimeout(r, 250));
+    });
+
+    expect(jobReads()).toBe(1);
+  });
 });

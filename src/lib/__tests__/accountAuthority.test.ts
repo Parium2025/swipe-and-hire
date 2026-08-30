@@ -74,4 +74,17 @@ describe('createAccountAuthority', () => {
     expect(authority.isCurrent(null)).toBe(false);
     expect(authority.isCurrent(undefined)).toBe(false);
   });
+
+  it('invalidate är terminal: en sen advance kan inte återuppliva auktoriteten', () => {
+    const authority = createAccountAuthority();
+    authority.advance('A');
+    authority.invalidate();
+
+    // En sen callback från den avmonterade providern försöker ta över igen.
+    const resurrected = authority.advance('A');
+
+    expect(authority.isCurrent(resurrected)).toBe(false);
+    expect(authority.isCurrent(resurrected, 'A')).toBe(false);
+    expect(authority.isCurrent(authority.current)).toBe(false);
+  });
 });
