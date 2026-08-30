@@ -12,9 +12,9 @@ import { useMinuteTick } from '@/hooks/useMinuteTick';
 import { isInterviewOver } from '@/lib/interviewTime';
 
 /** Wraps carousel cards so their pause-state doesn't re-render siblings */
-const TipsCardWrapper = memo(() => {
+const TipsCardWrapper = memo(({ isActive = true }: { isActive?: boolean }) => {
   const [isPaused, setIsPaused] = useState(false);
-  return <CareerTipsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
+  return <CareerTipsCard isPaused={isPaused} setIsPaused={setIsPaused} isActive={isActive} />;
 });
 TipsCardWrapper.displayName = 'TipsCardWrapper';
 
@@ -23,7 +23,7 @@ interface SharedInterviewStatsProps {
   interviewsLoaded: boolean;
 }
 
-const StatsCardWrapper = memo(({ liveInterviewsCount, interviewsLoaded }: SharedInterviewStatsProps) => {
+const StatsCardWrapper = memo(({ liveInterviewsCount, interviewsLoaded, isActive = true }: SharedInterviewStatsProps & { isActive?: boolean }) => {
   const [isPaused, setIsPaused] = useState(false);
   return (
     <JobSeekerStatsCard
@@ -31,6 +31,7 @@ const StatsCardWrapper = memo(({ liveInterviewsCount, interviewsLoaded }: Shared
       setIsPaused={setIsPaused}
       liveInterviewsCount={liveInterviewsCount}
       interviewsLoaded={interviewsLoaded}
+      isActive={isActive}
     />
   );
 });
@@ -67,7 +68,7 @@ export const JobSeekerDashboardGrid = memo(({ isActive = true }: JobSeekerDashbo
 
   const mobileOrder = (
     <>
-      <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={interviewsSucceeded} />
+      <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={interviewsSucceeded} isActive={isActive} />
       <JobSeekerInterviewsCard
         interviews={liveInterviews}
         isLoading={interviewsLoading}
@@ -75,16 +76,16 @@ export const JobSeekerDashboardGrid = memo(({ isActive = true }: JobSeekerDashbo
         onRetry={() => { void refetchInterviews(); }}
         now={now}
       />
-      <TipsCardWrapper />
-      <JobSeekerNotesCard />
+      <TipsCardWrapper isActive={isActive} />
+      <JobSeekerNotesCard isActive={isActive} />
     </>
   );
 
   const desktopOrder = (
     <>
-      <TipsCardWrapper />
-      <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={interviewsSucceeded} />
-      <JobSeekerNotesCard />
+      <TipsCardWrapper isActive={isActive} />
+      <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={interviewsSucceeded} isActive={isActive} />
+      <JobSeekerNotesCard isActive={isActive} />
       <JobSeekerInterviewsCard
         interviews={liveInterviews}
         isLoading={interviewsLoading}

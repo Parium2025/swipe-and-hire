@@ -28,12 +28,14 @@ interface StatsCarouselProps {
   dataReady?: boolean;
   /** Cached stats exist (enables emptyHint display as fallback) */
   hasCachedData?: boolean;
+  /** Home synlig? Dold Home pausar rotationen utan att ändra visat kort. */
+  isActive?: boolean;
 }
 
-export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false }: StatsCarouselProps) => {
+export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false, isActive = true }: StatsCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const navigate = useNavigate();
-  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
+  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused, active: isActive });
 
   // Defensive index guard
   useEffect(() => {
@@ -48,7 +50,7 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
 
   // Aligned rotation: stats switches on the +5s beat between news/tips switches
   useSynchronizedRotation({
-    enabled: !isPaused && stats.length > 1,
+    enabled: isActive && !isPaused && stats.length > 1,
     intervalMs: 10000,
     offsetMs: 5000,
     onTick: goNext,
