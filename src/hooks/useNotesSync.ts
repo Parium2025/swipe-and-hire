@@ -207,10 +207,11 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => window.removeEventListener('storage', onStorage);
   }, [cacheKey, userId]);
 
-  // Fetch existing note
-  const { data: noteData, isFetched, isSuccess } = useQuery({
+  // Fetch existing note. The metadata is bound to THIS request's result, so a
+  // late result from another account/request can never describe another one.
+  const { data: queryPayload, isFetched, isSuccess } = useQuery({
     queryKey: [queryKey, userId],
-    queryFn: async () => {
+    queryFn: async (): Promise<NoteQueryPayload> => {
       const capturedEpoch = epochRef.current;
       const capturedUser = userId;
       const capturedAck = ackSeqRef.current;
@@ -220,29 +221,34 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         .eq(ownerColumn, userId!)
         .maybeSingle();
       if (error) throw error;
-      queryMetaRef.current = { epoch: capturedEpoch, user: capturedUser, ack: capturedAck };
-      return data as { id: string; content: string | null } | null;
+      return {
+        meta: { epoch: capturedEpoch, user: capturedUser, ack: capturedAck },
+        row: (data as { id: string; content: string | null } | null) ?? null,
+      };
     },
     enabled: !!userId,
     staleTime: 30000,
     refetchOnMount: true,
   });
 
+  const noteData = queryPayload?.row ?? null;
+
   // Sync server value into clean cache — ONLY on a successful query.
   useEffect(() => {
     if (!userId || !cacheKey) return;
-    if (!isSuccess) return; // query errors are never a "successful empty note"
-    const meta = queryMetaRef.current;
+    if (!isSuccess || !queryPayload) return; // query errors are never a "successful empty note"
+    const meta = queryPayload.meta;
     // A read that started before the last acknowledged local save is stale.
-    if (!meta || meta.epoch !== epochRef.current || meta.user !== userId || meta.ack !== ackSeqRef.current) return;
-    const serverContent = noteData?.content ?? '';
+    if (meta.epoch !== epochRef.current || meta.user !== userId || meta.ack !== ackSeqRef.current) return;
+    const serverContent = queryPayload.row?.content ?? '';
     serverContentRef.current = serverContent;
     if (!hasLocalEditsRef.current) {
       storageSet(cacheKey, serverContent);
       contentRef.current = serverContent;
       setContent(serverContent);
     }
-  }, [noteData, isSuccess, cacheKey, userId]);
+  }, [queryPayload, isSuccess, cacheKey, userId]);
+
 
   // Realtime sync — listen for changes from other devices
   useEffect(() => {
