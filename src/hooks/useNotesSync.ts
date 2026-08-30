@@ -264,14 +264,16 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     }
     contentRef.current = next;
     setContentState({ owner: userId, value: next });
-  }, [userId, cachePrefix]);
+  }, [userId, cachePrefix, installSaveConfig]);
 
   // Hydrated pending must enter the normal debounced drain on its own — it may
   // never wait for another edit or a connectivity event.
   useEffect(() => {
     if (!userId) return;
-    if (hasLocalEditsRef.current) scheduleSaveRef.current();
-  }, [userId]);
+    const cfg = saveConfigRef.current;
+    if (!isCurrentConfig(cfg)) return;
+    if (hasLocalEditsRef.current) scheduleSaveRef.current(cfg);
+  }, [userId, isCurrentConfig]);
 
   // Cross-tab sync via localStorage events (clean snapshot only, never while dirty)
   useEffect(() => {
