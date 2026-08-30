@@ -19,7 +19,9 @@ vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     rpc: (...args: unknown[]) => rpcSpy(...args),
     removeChannel: vi.fn(),
-    from: vi.fn(),
+    from: () => {
+      throw new Error('network down');
+    },
   },
 }));
 
@@ -62,12 +64,6 @@ vi.mock('@/components/dashboard/StatsCarousel', () => ({
   },
 }));
 
-const fetchCandidateInterviewsForUser = vi.fn();
-
-vi.mock('@/lib/candidateInterviewsFetcher', () => ({
-  fetchCandidateInterviewsForUser: (...args: unknown[]) => fetchCandidateInterviewsForUser(...args),
-}));
-
 import { JobSeekerStatsCard } from '@/components/dashboard/JobSeekerStatsCard';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
 
@@ -89,7 +85,6 @@ const statByLabel = (label: string) => latest().find((s) => s.label === label);
 describe('Home-statistik: källspecifik readiness', () => {
   beforeEach(() => {
     rpcSpy.mockReset();
-    fetchCandidateInterviewsForUser.mockReset();
     renderedStats.length = 0;
     localStorage.clear();
   });
@@ -177,7 +172,6 @@ describe('Home-statistik: källspecifik readiness', () => {
   });
 
   it('useCandidateInterviews skiljer ett misslyckat anrop från ett tomt lyckat svar', async () => {
-    fetchCandidateInterviewsForUser.mockRejectedValue(new Error('network down'));
     const client = createClient();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
