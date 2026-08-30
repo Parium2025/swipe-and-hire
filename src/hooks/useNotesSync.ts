@@ -213,14 +213,17 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     []
   );
 
+  /** The committed scope identity — mutated only in the layout transition. */
+  const committedScopeRef = useRef<string>(scopeIdentity(cachePrefix, userId));
 
   /** Commit a content value only when its source still owns the committed
    *  identity AND epoch. Every caller passes the owner/epoch it captured. */
   const commitContent = useCallback((owner: string | null, epoch: number, next: string) => {
     if (owner !== committedUserRef.current) return;
     if (epoch !== epochRef.current) return;
-    setContentState({ owner, value: next });
+    setContentState({ owner, scope: committedScopeRef.current, value: next });
   }, []);
+
   const wantedRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
