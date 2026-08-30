@@ -526,7 +526,19 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
  * Preload location AND weather data for instant display.
  * Call this during login to have everything ready before user reaches home page.
  */
-export const preloadWeatherLocation = async (): Promise<CachedLocation | null> => {
+export interface PreloadWeatherOptions {
+  /**
+   * Valfri kontovakt. Returnerar false så snart anropande ägare/montering inte
+   * längre är aktuell — då skrivs INGEN plats/väder i den kontoskopade cachen.
+   * Anropare utan vakt behåller nuvarande beteende.
+   */
+  isCurrent?: () => boolean;
+}
+
+export const preloadWeatherLocation = async (
+  options?: PreloadWeatherOptions,
+): Promise<CachedLocation | null> => {
+  const isCurrent = options?.isCurrent ?? (() => true);
   const existingWeather = getCachedWeather();
   const existingLocation = getCachedLocation();
   
@@ -545,6 +557,8 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
     maximumAge: 30 * 60 * 1000,
   });
 
+  if (!isCurrent()) return null;
+
   if (gpsResult) {
     // City will be resolved server-side when we fetch weather below
     location = { ...gpsResult, city: '', source: 'gps', timestamp: Date.now() };
@@ -554,6 +568,7 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
   if (!location) {
     const ipLocation = (await getServerSideIPLocation().catch(() => null))
       ?? (await getLocationByIP().catch(() => null));
+    if (!isCurrent()) return null;
     if (ipLocation) {
       location = { ...ipLocation, source: 'ip', timestamp: Date.now() };
       setCachedLocation(location);
@@ -567,6 +582,7 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
   if (location) {
     try {
       const result = await fetchCurrentWeather(location.lat, location.lon);
+      if (!isCurrent()) return null;
       const { temperature, feelsLike, temperatureAvailable, weatherCode, isNight, cachedCity } = result;
       // Use server-provided city, update location cache with resolved city
       const resolvedCity = cachedCity || location.city || '';
