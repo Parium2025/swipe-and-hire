@@ -177,7 +177,7 @@ describe('Notes-verktygsfältets tillgänglighet', () => {
     // Dubbelring helt innanför knappen: vit 2px + mörk kontrastkant.
     expect(block).toContain('outline: 2px solid #FFFFFF');
     expect(block).toMatch(/outline-offset:\s*-/);
-    const shadows = block.match(/inset 0 0 0 \d+px [^,;)]+/g) ?? [];
+    const shadows = block.match(/inset 0 0 0 \d+px (?:#[0-9A-Fa-f]{3,8}|rgba?\([^)]*\))/g) ?? [];
     expect(shadows.length).toBeGreaterThanOrEqual(2);
     expect(shadows.some((s) => s.includes('#FFFFFF'))).toBe(true);
     expect(shadows.some((s) => s.includes('15, 23, 42'))).toBe(true);
