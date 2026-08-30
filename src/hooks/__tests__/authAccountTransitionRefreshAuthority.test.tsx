@@ -252,7 +252,8 @@ vi.mock('@/lib/companyLogoUrl', () => ({
   resolveCompanyLogoUrl: vi.fn(() => null),
 }));
 
-import { AuthProvider, isOwnedJobSeekerRole } from '@/hooks/useAuth';
+import { AuthProvider } from '@/hooks/useAuth';
+import { isOwnedJobSeekerRole } from '@/lib/roleOwnership';
 
 const SAVED_KEY = 'parium_saved_jobs';
 const APPS_KEY = 'parium_my_applications';

@@ -49,7 +49,7 @@ let activeAccountAuthority: string | null = null;
 
 // Kontobundna rollkontroller bor i @/lib/roleOwnership och re-exporteras här
 // för bakåtkompatibilitet med befintliga konsumenter/tester.
-export { canRefreshEmployerStats, isOwnedJobSeekerRole } from '@/lib/roleOwnership';
+export { canRefreshEmployerStats } from '@/lib/roleOwnership';
 
 interface Organization {
   id: string;
@@ -2304,6 +2304,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 0);
   }, [user, userRole?.role, loading]);
 
+  // Kontobunden jobbsökarroll — beräknas i render så lyssnareffekten bara
+  // behöver ett stabilt booleskt beroende.
+  const hasOwnedJobSeekerRole = isOwnedJobSeekerRole(user, userRole);
+
   // Realtime-prenumerationer för räknare med tyst felhantering
   useEffect(() => {
     if (!user) return;
@@ -2416,7 +2420,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // En burst från båda lyssnarna koalesceras till EN uppdatering.
     // Fail-closed: rollen måste ägas av exakt den inloggade användaren, annars
     // kan A:s kvarhängande roll kortvarigt skapa lyssnare för B.
-    const isJobSeeker = isOwnedJobSeekerRole(user, userRole);
+    const isJobSeeker = hasOwnedJobSeekerRole;
     const listenerUserId = user.id;
     let jobSeekerCountsTimer: ReturnType<typeof setTimeout> | null = null;
     let jobSeekerListenersActive = isJobSeeker;
@@ -2567,7 +2571,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (reviewsChannel) supabase.removeChannel(reviewsChannel);
       if (myCandidatesChannel) supabase.removeChannel(myCandidatesChannel);
     };
-  }, [user, userRole?.role, userRole?.user_id, refreshSidebarCounts, refreshEmployerStats, queryClient]);
+  }, [user, userRole?.role, hasOwnedJobSeekerRole, refreshSidebarCounts, refreshEmployerStats, queryClient]);
 
 
   const value: AuthContextType = {
