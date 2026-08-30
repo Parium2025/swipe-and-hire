@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect, useLayoutEffect, useRef, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { canRefreshEmployerStats, isOwnedJobSeekerRole } from '@/lib/roleOwnership';
+import { createAccountAuthority } from '@/lib/accountAuthority';
 import { User, Session, RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
@@ -41,11 +42,12 @@ interface UserRoleData {
  * att rollen är exakt det kanoniska employer-värdet. Okänd/ooupplöst nekas.
  */
 /**
- * Modulglobal kontoauktoritet: vilket konto som just nu äger AuthProvider.
- * Används för att stoppa redan startade async-refreshar från ett tidigare
- * konto innan de hinner skriva kontobundna siffror i ett nytt konto.
+ * Kontoauktoriteten är provider-lokal och generationsbaserad
+ * (@/lib/accountAuthority). En modulglobal user-id-sträng kunde inte skilja på
+ * A → utloggning → samma A eller på en avmonterad provider vars svar landar
+ * efter att en ny provider med samma id monterats.
  */
-let activeAccountAuthority: string | null = null;
+
 
 // Kontobundna rollkontroller bor i @/lib/roleOwnership och re-exporteras här
 // för bakåtkompatibilitet med befintliga konsumenter/tester.
@@ -186,7 +188,25 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
  
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
+  // 🔒 KONTOAUKTORITET (provider-lokal, generationsbaserad): byts SYNKRONT vid
+  // varje accepterad kontoövergång — före React committar — så att ett svar som
+  // startades av föregående konto/session aldrig kan skriva i det nya. Ogiltig-
+  // förklaras vid unmount, vilket också stoppar svar från en avmonterad provider
+  // när en ny provider med samma id monterats.
+  const accountAuthorityRef = useRef(createAccountAuthority(null));
+  const setUser = useCallback((nextUser: User | null) => {
+    const nextOwnerId = nextUser?.id ?? null;
+    if (accountAuthorityRef.current.current.ownerId !== nextOwnerId) {
+      accountAuthorityRef.current.advance(nextOwnerId);
+    }
+    setUserState(nextUser);
+  }, []);
+  useEffect(() => {
+    const authority = accountAuthorityRef.current;
+    return () => authority.invalidate();
+  }, []);
+
   const [session, setSession] = useState<Session | null>(null);
   // Location/weather cache is user-bound: never let the next account on a
   // shared device read the previous account's position. Bound synchronously
@@ -211,15 +231,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
 
-  // 🔒 KONTOAUKTORITET: sätts synkront före övriga effekter i samma commit, så
-  // att refreshar som startades av ett tidigare konto kan känna igen att de
-  // inte längre äger vyn.
-  useLayoutEffect(() => {
-    activeAccountAuthority = user?.id ?? null;
-    return () => {
-      if (activeAccountAuthority === (user?.id ?? null)) activeAccountAuthority = null;
-    };
-  }, [user?.id]);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
@@ -2024,7 +2035,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // detta konto fortfarande äger vyn. Ett svar som landar efter A→B eller
     // efter utloggning skulle annars skriva A:s siffror i B:s gränssnitt.
     const startUserId = user?.id ?? null;
-    const stillOwner = () => activeAccountAuthority === startUserId;
+    // Exakt token-identitet (ägare + generation), inte bara user-id-likhet.
+    const authority = accountAuthorityRef.current;
+    const token = authority.current;
+    const stillOwner = () => authority.isCurrent(token, startUserId);
     try {
       // 🔒 SKALA: tidigare laddades ALLA aktiva annonser ner till webbläsaren och
       // räknades i JS. PostgREST kapar svaret vid 1 000 rader, så siffrorna frös
