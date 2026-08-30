@@ -32,8 +32,9 @@ vi.mock('@/lib/connectivityManager', () => ({
   forceConnectivityCheck: () => forceCheckSpy(),
 }));
 
+let mockDraftTime: string | null = null;
 vi.mock('@/lib/draftUtils', () => ({
-  getLatestDraftTime: () => null,
+  getLatestDraftTime: () => mockDraftTime,
 }));
 
 import { OfflineIndicator } from '../OfflineIndicator';
@@ -45,11 +46,14 @@ const emitConnectivity = (online: boolean) => {
   });
 };
 
-const intervalSpy = vi.spyOn(globalThis, 'setInterval');
+let intervalSpy: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
   vi.useFakeTimers();
+  // Spionera EFTER att fake timers ersatt globala setInterval, annars ser spionen inget.
+  intervalSpy = vi.spyOn(globalThis, 'setInterval');
   mockOnline = true;
+  mockDraftTime = null;
   connectivityListeners = [];
   forceCheckSpy.mockClear();
   intervalSpy.mockClear();
