@@ -34,6 +34,21 @@ interface UserRoleData {
   is_active: boolean;
 }
 
+/**
+ * Fail-closed behörighetskontroll för employer-only RPC:er.
+ * Kräver inloggad användare, en roll som tillhör exakt samma användare och
+ * att rollen är exakt det kanoniska employer-värdet. Okänd/ooupplöst nekas.
+ */
+export const canRefreshEmployerStats = (
+  currentUser: { id: string } | null | undefined,
+  role: { user_id?: string; role?: UserRole | string } | null | undefined
+): boolean => {
+  if (!currentUser?.id) return false;
+  if (!role) return false;
+  if (role.user_id !== currentUser.id) return false;
+  return role.role === 'employer';
+};
+
 interface Organization {
   id: string;
   name: string;
