@@ -37,6 +37,14 @@ interface PendingEnvelope {
 
 const SAVE_DEBOUNCE_MS = 1200;
 
+/** Immutable account-bound configuration captured at commit time. */
+interface SaveConfig {
+  owner: string;
+  epoch: number;
+  cacheKey: string;
+  pendingKey: string;
+}
+
 /** Query result plus the metadata of the exact request that produced it. */
 interface NoteQueryPayload {
   meta: { epoch: number; user: string | null; ack: number };
