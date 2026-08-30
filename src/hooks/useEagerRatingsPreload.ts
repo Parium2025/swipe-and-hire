@@ -95,6 +95,9 @@ const clearAllAppCachesSync = () => {
     WEATHER_CACHE_PREFIX,
     // Täcker både exakt legacy-nyckel och alla jobseeker_notes_cache_<uid>
     'jobseeker_notes_cache',
+    // Privata intervjupayloads (mötesplats/länkar) och signerade media-URL:er
+    'job_seeker_interviews_',
+    'media_url_',
   ];
   
   const exactKeysToRemove = [
