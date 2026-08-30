@@ -3,7 +3,15 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { ExpandedNotesDialog } from '@/components/dashboard/ExpandedNotesDialog';
 
 vi.mock('@/components/RichNotesEditor', () => ({
-  RichNotesEditor: ({ value, onChange, placeholder }: any) => (
+  RichNotesEditor: ({
+    value,
+    onChange,
+    placeholder,
+  }: {
+    value: string;
+    onChange: (val: string) => void;
+    placeholder?: string;
+  }) => (
     <textarea
       data-testid="rich-editor"
       value={value}
