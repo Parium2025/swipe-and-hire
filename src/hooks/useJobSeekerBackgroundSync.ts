@@ -406,58 +406,20 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
-    // Realtime för jobb - 🔥 SCALED: Lyssnar BARA på INSERT (nya jobb).
-    // Tidigare lyssnade vi på * (alla events) globalt, vilket gjorde att VARJE
-    // jobbsökare fick events när VARJE jobb i hela databasen ändrades — och triggade
-    // 6+ cache-invalidations + 2 preloads per event. Vid 500 sökare online och 50
-    // jobb-uppdateringar/h = ~150 000 onödiga refetches/dag.
-    //
-    // UPDATE/DELETE (t.ex. company_logo ändras via DB-trigger) propageras via:
-    //  DB-triggern sync_company_name_to_jobs som uppdaterar job_postings,
-    //  sedan plockar befintliga ID-scopade job_postings-prenumerationer upp
-    //  ändringen för relevanta jobbsökarskärmar.
-    // Debounce: max 1 invalidation per 5s vid burst (när många nya jobb postas samtidigt).
-    let newJobsTimer: ReturnType<typeof setTimeout> | null = null;
-    const scheduleNewJobsRefresh = () => {
-      if (newJobsTimer) return;
-      newJobsTimer = setTimeout(() => {
-        newJobsTimer = null;
-        localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
-        preloadAvailableJobs();
-        preloadMyApplications(user.id);
-        queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
-        queryClient.invalidateQueries({ queryKey: ['jobs'] });
-        queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-        queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-        queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
-        queryClient.invalidateQueries({ queryKey: ['job-details'] });
-      }, 5000);
-    };
-
-    const newJobsChannel = createRealtimeChannel('job-seeker-new-jobs')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'job_postings',
-        },
-        () => {
-          scheduleNewJobsRefresh();
-        }
-      )
-      .subscribe();
+    // 🔥 SCALE: ingen global new-job-listener här. En ofiltrerad job_postings
+    // INSERT-kanal per jobbsökare gav read-amplification (breda listor +
+    // flera invalidations för VARJE ny annons, för VARJE inloggad sökare).
+    // Nya annonser hämtas i stället via initial/focus-preload av available jobs
+    // och via Search-sidans route-scopade realtime när Search faktiskt visas.
 
     // Intervjuer: ingen duplicerad kanal här — useCandidateInterviews
     // (candidate-interviews-ui-<uid>) är den enda realtime-ägaren.
 
     return () => {
-      if (newJobsTimer) clearTimeout(newJobsTimer);
       supabase.removeChannel(savedJobsChannel);
       supabase.removeChannel(applicationsChannel);
-      supabase.removeChannel(newJobsChannel);
     };
-  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, queryClient]);
+  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications]);
 };
 
 export default useJobSeekerBackgroundSync;
