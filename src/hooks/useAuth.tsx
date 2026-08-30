@@ -2389,26 +2389,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .subscribe((status) => handleChannelStatus('job', status));
     }
 
-    const savedChannel = createRealtimeChannel(`auth-saved-jobs-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
-        () => {
-          refreshSidebarCounts();
-        }
-      )
-      .subscribe((status) => handleChannelStatus('saved', status));
+    // 🔒 ÄGARSKAP: AuthProvider är ENDA globala ägaren av jobbsökarens
+    // användarfiltrerade saved_jobs/job_applications-realtime. Tabellerna har
+    // REPLICA IDENTITY FULL, så filtret gäller även DELETE. Varken
+    // useJobSeekerBackgroundSync eller JobSeekerStatsCard får duplicera dem.
+    // En burst från båda lyssnarna koalesceras till EN uppdatering.
+    const isJobSeeker = userRole?.role === 'job_seeker';
+    const listenerUserId = user.id;
+    let jobSeekerCountsTimer: ReturnType<typeof setTimeout> | null = null;
+    let jobSeekerListenersActive = isJobSeeker;
+    const scheduleJobSeekerRefresh = () => {
+      // Konto-/rollbunden: en callback från ett tidigare konto är inert.
+      if (!jobSeekerListenersActive) return;
+      if (jobSeekerCountsTimer) return;
+      jobSeekerCountsTimer = setTimeout(() => {
+        jobSeekerCountsTimer = null;
+        if (!jobSeekerListenersActive) return;
+        refreshSidebarCounts();
+        queryClient.invalidateQueries({
+          queryKey: ['jobseeker-dashboard-stats', listenerUserId],
+        });
+      }, 1200);
+    };
 
-    // Real-time för ansökningar (uppdaterar jobbsökarens räknare)
-    const applicationsChannel = createRealtimeChannel(`auth-applications-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
-        () => {
-          refreshSidebarCounts();
-        }
-      )
-      .subscribe((status) => handleChannelStatus('applications', status));
+    let savedChannel: RealtimeChannel | null = null;
+    let applicationsChannel: RealtimeChannel | null = null;
+    if (isJobSeeker) {
+      savedChannel = createRealtimeChannel(`auth-saved-jobs-${user.id}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
+          () => {
+            scheduleJobSeekerRefresh();
+          }
+        )
+        .subscribe((status) => handleChannelStatus('saved', status));
+
+      // Real-time för ansökningar (uppdaterar jobbsökarens räknare)
+      applicationsChannel = createRealtimeChannel(`auth-applications-${user.id}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
+          () => {
+            scheduleJobSeekerRefresh();
+          }
+        )
+        .subscribe((status) => handleChannelStatus('applications', status));
+    }
+
 
 
     // Real-time för alla job_applications (uppdaterar employer kandidat-badge)
