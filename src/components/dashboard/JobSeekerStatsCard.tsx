@@ -80,40 +80,30 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsC
     conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cachedStats['messages'] ?? 0;
   useEffect(() => { writeCachedStat(user?.id, 'messages', unreadMessagesCount); }, [unreadMessagesCount, user?.id]);
 
-  // Single consolidated realtime channel – alla lyssnare är användarfiltrerade
-  // på servern, och händelser koalesceras så en burst ger EN omhämtning.
+  // 🔒 ÄGARSKAP: kortet prenumererar INTE själv på saved_jobs/job_applications.
+  // AuthProvider äger de användarfiltrerade lyssnarna globalt och invaliderar
+  // exakt ['jobseeker-dashboard-stats', user.id]. Kortet reagerar bara på
+  // tabbfokus när Home faktiskt är aktivt.
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || !isActive) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
     const invalidateStats = () => {
       if (timer) return;
       timer = setTimeout(() => {
         timer = null;
-        queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats'] });
+        queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats', user.id] });
       }, 1200);
     };
-    const statsChannel = createRealtimeChannel(`jobseeker-stats-${user.id}`)
-      // job_applications har REPLICA IDENTITY FULL → filtret gäller även DELETE.
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
-        invalidateStats
-      )
-      // Intervjuer har INGEN egen lyssnare här — den delade
-      // useCandidateInterviews-prenumerationen i grid:et uppdaterar redan
-      // den kanoniska live-listan som detta kort räknar på.
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
-        invalidateStats
-      )
-      .subscribe();
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') invalidateStats();
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => {
       if (timer) clearTimeout(timer);
-      supabase.removeChannel(statsChannel);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [user?.id, queryClient]);
+  }, [user?.id, isActive, queryClient]);
+
 
   const statsArray: StatData[] = useMemo(() => [
     { icon: Send, label: 'Skickade ansökningar', value: applicationsCount, description: 'Dina jobbansökningar', link: '/my-applications', emptyHint: 'Börja söka jobb!' },
