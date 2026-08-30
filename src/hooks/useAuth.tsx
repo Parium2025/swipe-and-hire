@@ -34,6 +34,21 @@ interface UserRoleData {
   is_active: boolean;
 }
 
+/**
+ * Fail-closed behörighetskontroll för employer-only RPC:er.
+ * Kräver inloggad användare, en roll som tillhör exakt samma användare och
+ * att rollen är exakt det kanoniska employer-värdet. Okänd/ooupplöst nekas.
+ */
+export const canRefreshEmployerStats = (
+  currentUser: { id: string } | null | undefined,
+  role: { user_id?: string; role?: UserRole | string } | null | undefined
+): boolean => {
+  if (!currentUser?.id) return false;
+  if (!role) return false;
+  if (role.user_id !== currentUser.id) return false;
+  return role.role === 'employer';
+};
+
 interface Organization {
   id: string;
   name: string;
@@ -2081,7 +2096,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Funktion för att uppdatera employer stats (används av realtime + initial load)
   // OBS: För Dashboard-konsistens hämtar vi organisations-jobb om användaren tillhör en org
   const refreshEmployerStats = useCallback(async () => {
-    if (!user) return;
+    // 🔒 FAIL-CLOSED: employer-only RPC:er får aldrig köras för jobbsökare,
+    // ooupplöst/okänd roll eller en kvarhängande roll från ett annat konto.
+    if (!canRefreshEmployerStats(user, userRole)) return;
+    
     
     try {
       // 🔒 SKALA + SANNING: tidigare laddades hela organisationens annonslista ner
@@ -2169,7 +2187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
-  }, [user]);
+  }, [user, userRole?.user_id, userRole?.role]);
 
   // Ladda räknare vid inloggning
   useEffect(() => {
