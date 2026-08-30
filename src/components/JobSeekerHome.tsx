@@ -6,6 +6,7 @@ import { useGreeting } from '@/hooks/useGreeting';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 
 import { hasConfirmedWeather } from '@/lib/weatherApi';
+import { isHomeActivePath } from '@/lib/homeRoute';
 import { formatLocalDateTime } from '@/lib/localTime';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
@@ -13,9 +14,10 @@ import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
 
 
-const DateTimeDisplay = memo(() => {
-  // Delad minuttick i stället för 10s-timer: synkad, pausad när fliken är dold.
-  const tick = useMinuteTick();
+const DateTimeDisplay = memo(({ active = true }: { active?: boolean }) => {
+  // Delad minuttick i stället för 10s-timer: synkad, pausad när fliken är dold
+  // och när Home hålls monterad men inte visas.
+  const tick = useMinuteTick(active);
   const dateTime = useMemo(() => formatLocalDateTime(), [tick]);
 
   return (
@@ -41,7 +43,8 @@ const JobSeekerHome = memo(() => {
 
   const firstName = profile?.first_name || 'du';
   
-  const { text: greetingText, isEvening, isDaytime } = useGreeting();
+  const isHomeActive = isHomeActivePath(pathname);
+  const { text: greetingText, isEvening, isDaytime } = useGreeting(isHomeActive);
   
   // Fetch weather independently of GPS permission. If GPS is denied, useWeather
   // still falls back to IP/server/profile city; blocking the hook here makes the
@@ -52,13 +55,13 @@ const JobSeekerHome = memo(() => {
 
   // Home stays mounted via KeepAlive when the user navigates away. Pause all
   // GPS work while it is hidden — the rendered weather row is untouched.
-  const isHomeVisible = pathname === '/home' || pathname === '/index' || pathname === '/';
+  // /index tillhör Search — endast /home räknas som Home-aktiv.
 
   const weather = useWeather({
     fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
     enabled: true,
     backgroundLocationEnabled,
-    active: isHomeVisible,
+    active: isHomeActive,
   });
   const showWeatherEffects = hasConfirmedWeather(weather);
   
@@ -107,7 +110,7 @@ const JobSeekerHome = memo(() => {
   return (
     <>
       <GpsPrompt weatherAvailable={hasConfirmedWeather(weather)} />
-      {showWeatherEffects && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
+      {showWeatherEffects && isHomeActive && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
       <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 relative z-10 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* Personal greeting */}
         <motion.div
@@ -121,7 +124,7 @@ const JobSeekerHome = memo(() => {
               {greetingText}, {firstName} 👋
             </h1>
           </div>
-          <DateTimeDisplay />
+          <DateTimeDisplay active={isHomeActive} />
           {hasConfirmedWeather(weather) ? (
             <motion.p
               className="text-white text-base"
@@ -140,7 +143,7 @@ const JobSeekerHome = memo(() => {
         </motion.div>
 
         {/* Dashboard Grid */}
-        <JobSeekerDashboardGrid />
+        <JobSeekerDashboardGrid isActive={isHomeActive} />
 
       </div>
     </>

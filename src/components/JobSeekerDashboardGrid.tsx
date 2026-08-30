@@ -37,7 +37,12 @@ const StatsCardWrapper = memo(({ liveInterviewsCount, interviewsLoaded }: Shared
 StatsCardWrapper.displayName = 'StatsCardWrapper';
 
 // Main Dashboard Grid for Job Seekers
-export const JobSeekerDashboardGrid = memo(() => {
+interface JobSeekerDashboardGridProps {
+  /** Home är dold (KeepAlive) → pausa visuella klockor. Data lämnas orörd. */
+  isActive?: boolean;
+}
+
+export const JobSeekerDashboardGrid = memo(({ isActive = true }: JobSeekerDashboardGridProps) => {
   const isMobile = useIsMobile();
 
   // EN delad datakälla för kandidatens intervjuer — statistikkortet och
@@ -54,7 +59,7 @@ export const JobSeekerDashboardGrid = memo(() => {
   // Placeholder-data ger status success — bara ett verkligt nätverkssvar får
   // auktorisera intervjustatistiken.
   const interviewsSucceeded = Boolean(interviewsQuerySuccess) && !interviewsArePlaceholder;
-  const now = useMinuteTick();
+  const now = useMinuteTick(isActive);
   const liveInterviews = useMemo(
     () => (interviews as DashboardInterview[]).filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
     [interviews, now],
@@ -68,6 +73,7 @@ export const JobSeekerDashboardGrid = memo(() => {
         isLoading={interviewsLoading}
         isError={interviewsFailed}
         onRetry={() => { void refetchInterviews(); }}
+        now={now}
       />
       <TipsCardWrapper />
       <JobSeekerNotesCard />
@@ -84,6 +90,7 @@ export const JobSeekerDashboardGrid = memo(() => {
         isLoading={interviewsLoading}
         isError={interviewsFailed}
         onRetry={() => { void refetchInterviews(); }}
+        now={now}
       />
     </>
   );

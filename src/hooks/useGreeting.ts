@@ -24,7 +24,7 @@ const computeGreeting = (): Greeting => {
  * paused while the tab is hidden and recomputed instantly when it returns
  * (so an app left open overnight never shows a stale "God kväll").
  */
-export const useGreeting = (): Greeting => {
-  const tick = useMinuteTick();
+export const useGreeting = (enabled = true): Greeting => {
+  const tick = useMinuteTick(enabled);
   return useMemo(() => computeGreeting(), [tick]);
 };
