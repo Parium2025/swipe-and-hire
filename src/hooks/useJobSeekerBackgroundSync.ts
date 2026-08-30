@@ -127,7 +127,6 @@ export const useJobSeekerBackgroundSync = () => {
 
     if (!force) {
       const cachedItems = readFreshAvailableJobs(ownerId);
-      console.log('DBG cacheCheck', ownerId, JSON.stringify(cachedItems), localStorage.getItem(AVAILABLE_JOBS_CACHE_KEY)?.slice(0,120));
       if (cachedItems) {
         // Färsk cache — ingen onödig read, men React Query MÅSTE hydreras,
         // annars visar Home tom lista trots giltig cache.
@@ -177,7 +176,6 @@ export const useJobSeekerBackgroundSync = () => {
   // 🚀 HUVUDFUNKTION: warmup av lediga jobb + väder
   // Uses requestIdleCallback to avoid blocking CSS transitions (sidebar, navigation)
   const preloadAllData = useCallback(async (force = false) => {
-    console.log('DBG preloadAllData', user?.id, isJobSeeker);
     if (!user || !isJobSeeker) return;
     const ownerId = user.id;
 

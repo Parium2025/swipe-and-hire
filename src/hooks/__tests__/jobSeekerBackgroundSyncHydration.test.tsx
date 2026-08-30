@@ -180,7 +180,7 @@ describe('useJobSeekerBackgroundSync — hydrering, ägarbunden dedupe och koale
     h.role = { role: 'job_seeker', user_id: 'js-2' };
     await act(async () => {
       rerender();
-      await new Promise((r) => setTimeout(r, 120));
+      await new Promise((r) => setTimeout(r, 300));
     });
 
     expect(jobReads()).toBe(2);
