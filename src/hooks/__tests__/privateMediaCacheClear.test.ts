@@ -63,6 +63,8 @@ describe('clearPrivateMediaCache', () => {
   it('an in-flight load started before the clear cannot repopulate the cache', async () => {
     h.mode = 'deferred';
     const pending = prefetchMediaUrl('avatars/user-a.png', 'profile-image');
+    // Låt requesten faktiskt starta innan cachen rensas.
+    await vi.waitFor(() => expect(h.resolveNext).not.toBeNull());
 
     clearPrivateMediaCache();
 
