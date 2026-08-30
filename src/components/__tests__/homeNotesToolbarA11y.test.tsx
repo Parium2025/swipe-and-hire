@@ -11,6 +11,9 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 
 const touchCapable = { value: false };
 vi.mock('@/hooks/useInputCapability', () => ({
@@ -145,5 +148,41 @@ describe('Notes-verktygsfältets tillgänglighet', () => {
     render(<NotesToolbar editor={createFakeEditor()} large />);
     fireEvent.click(screen.getByRole('button', { name: 'Punktlista' }), { detail: 1 });
     expect(commands.filter((c) => c === 'toggleBulletList')).toHaveLength(1);
+  });
+
+  it('toolbar-roten är stabilt markerad med data-notes-toolbar utan layoutändring', () => {
+    const { container } = render(<NotesToolbar editor={createFakeEditor()} large />);
+    const root = container.querySelector('[data-notes-toolbar]');
+
+    expect(root).not.toBeNull();
+    // Markören ska sitta på själva toolbar-roten som innehåller knapparna …
+    expect(root).toContainElement(screen.getByRole('button', { name: 'Fet' }));
+    // … och layoutklasserna (inkl. overflow-hidden som klipper yttre ringar)
+    // ska vara oförändrade.
+    for (const cls of ['flex', 'items-center', 'overflow-hidden']) {
+      expect(root!.className).toContain(cls);
+    }
+  });
+
+  it('Home-scopad :focus-visible-regel för toolbar-knappar är HELT INSET (kan inte klippas av overflow-hidden)', () => {
+    const css = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
+
+    // Regeln måste vara scopad till Home-markören OCH toolbar-markören.
+    const selectorRe =
+      /body\[data-jobseeker-home-active="true"\]\s+\[data-notes-toolbar\]\s+button[^{]*:focus-visible[^{]*\{/;
+    const match = css.match(selectorRe);
+    expect(match).not.toBeNull();
+
+    const block = css.slice(match!.index, css.indexOf('}', match!.index!));
+    // Dubbelring helt innanför knappen: vit 2px + mörk kontrastkant.
+    expect(block).toContain('outline: 2px solid #FFFFFF');
+    expect(block).toMatch(/outline-offset:\s*-/);
+    const shadows = block.match(/inset 0 0 0 \d+px [^,;)]+/g) ?? [];
+    expect(shadows.length).toBeGreaterThanOrEqual(2);
+    expect(shadows.some((s) => s.includes('#FFFFFF'))).toBe(true);
+    expect(shadows.some((s) => s.includes('15, 23, 42'))).toBe(true);
+
+    // Den globala yttre ringen för övriga Home-element ska finnas kvar.
+    expect(css).toContain('box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.85)');
   });
 });

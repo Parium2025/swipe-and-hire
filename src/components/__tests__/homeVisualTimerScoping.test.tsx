@@ -7,7 +7,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ profile: { first_name: 'Alice', location: 'Stockholm' }, user: { id: 'u1' } }),
@@ -54,10 +54,12 @@ describe('Home visuella timers är route-scopade', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     intervalSpy = vi.spyOn(globalThis, 'setInterval');
+    weatherState.weatherCode = 61;
   });
 
   afterEach(() => {
     intervalSpy.mockRestore();
+    weatherState.weatherCode = 61;
     vi.useRealTimers();
   });
 
@@ -130,6 +132,31 @@ describe('Home visuella timers är route-scopade', () => {
     expect(document.body.getAttribute('data-jobseeker-home-active')).toBeNull();
   });
 
+  it('body-markören följer route-byten inom samma mount: /home → /index → /home', async () => {
+    // KeepAlive håller Home monterad vid navigering — markören måste tas bort
+    // och återkomma utan att komponenten avmonteras.
+    let navigate: (path: string) => void = () => {};
+    const Navigator = () => {
+      navigate = useNavigate();
+      return null;
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/home']}>
+        <JobSeekerHome />
+        <Navigator />
+      </MemoryRouter>,
+    );
+    await act(async () => { vi.advanceTimersByTime(200); });
+    expect(document.body.getAttribute('data-jobseeker-home-active')).toBe('true');
+
+    await act(async () => { navigate('/index'); });
+    expect(document.body.getAttribute('data-jobseeker-home-active')).toBeNull();
+
+    await act(async () => { navigate('/home'); });
+    expect(document.body.getAttribute('data-jobseeker-home-active')).toBe('true');
+  });
+
   it('WMO 56/57/66/67 (underkyld duggregn/regn) renderar regn-emoji', async () => {
     for (const code of [56, 57, 66, 67]) {
       weatherState.weatherCode = code;
@@ -142,7 +169,6 @@ describe('Home visuella timers är route-scopade', () => {
       expect(screen.getByText('🌧️')).toBeInTheDocument();
       utils.unmount();
     }
-    weatherState.weatherCode = 61;
   });
 
   it('hälsning och väderrad bryter långa strängar istället för att spilla ut', async () => {
