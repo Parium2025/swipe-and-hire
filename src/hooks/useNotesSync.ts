@@ -232,35 +232,22 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     };
   }, []);
 
-  // Account transition (null->uid, A->B, uid->null): reset all account-local
-  // state and hydrate ONLY the new user's pending/clean caches.
-  const previousUserIdRef = useRef<string | null | undefined>(undefined);
-  /** Builds the immutable config for the identity/epoch that is now committed. */
-  const installSaveConfig = useCallback(
-    (owner: string | null) => {
-      saveConfigRef.current = owner
-        ? {
-            owner,
-            epoch: epochRef.current,
-            cacheKey: `${cachePrefix}_${owner}`,
-            pendingKey: `${cachePrefix}_${owner}__pending`,
-          }
-        : null;
-    },
-    [cachePrefix]
-  );
+  // Session transition (null->uid, A->B, uid->null, A->logout->A, or the SAME
+  // user under a new cache scope): reset all session-local state and hydrate
+  // ONLY the new scope's pending/clean caches.
+  const previousScopeRef = useRef<string | undefined>(undefined);
   useLayoutEffect(() => {
-    if (previousUserIdRef.current === userId) return;
-    const isFirst = previousUserIdRef.current === undefined;
-    previousUserIdRef.current = userId;
-    if (isFirst) {
-      installSaveConfig(userId); // lazy initializer already hydrated the content
-      return;
-    }
+    const scope = scopeIdentity(cachePrefix, userId);
+    if (previousScopeRef.current === scope) return;
+    const isFirst = previousScopeRef.current === undefined;
+    previousScopeRef.current = scope;
+    if (isFirst) return; // lazy initializers already hydrated content + config
 
     epochRef.current += 1;
     committedUserRef.current = userId;
-    installSaveConfig(userId);
+    const cfg = makeSaveConfig(userId, cachePrefix, epochRef.current);
+    saveConfigRef.current = cfg;
+    setCommittedConfig(cfg);
     localRevRef.current += 1;
     ackSeqRef.current += 1;
     accessTokenRef.current = null;
@@ -285,16 +272,15 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     }
     contentRef.current = next;
     setContentState({ owner: userId, value: next });
-  }, [userId, cachePrefix, installSaveConfig]);
+  }, [userId, cachePrefix]);
 
   // Hydrated pending must enter the normal debounced drain on its own — it may
   // never wait for another edit or a connectivity event.
   useEffect(() => {
-    if (!userId) return;
-    const cfg = saveConfigRef.current;
-    if (!isCurrentConfig(cfg)) return;
-    if (hasLocalEditsRef.current) scheduleSaveRef.current(cfg);
-  }, [userId, isCurrentConfig]);
+    if (!isCurrentConfig(committedConfig)) return;
+    if (hasLocalEditsRef.current) scheduleSaveRef.current(committedConfig);
+  }, [committedConfig, isCurrentConfig]);
+
 
   // Cross-tab sync via localStorage events (clean snapshot only, never while dirty)
   useEffect(() => {
