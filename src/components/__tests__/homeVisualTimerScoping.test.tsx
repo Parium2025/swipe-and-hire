@@ -22,6 +22,8 @@ vi.mock('@/hooks/useWeather', () => ({
     weatherCode: 61,
     isLoading: false,
     error: null,
+    temperatureAvailable: true,
+    source: 'gps',
   }),
 }));
 
