@@ -1,7 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth, isOwnedJobSeekerRole } from './useAuth';
+import { useAuth } from './useAuth';
+import { isOwnedJobSeekerRole } from '@/lib/roleOwnership';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { preloadWeatherLocation } from './useWeather';

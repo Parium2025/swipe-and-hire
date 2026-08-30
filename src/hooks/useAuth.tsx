@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useLayoutEffect, useRef, ReactNode, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
+import { canRefreshEmployerStats, isOwnedJobSeekerRole } from '@/lib/roleOwnership';
 import { User, Session, RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
@@ -46,30 +47,9 @@ interface UserRoleData {
  */
 let activeAccountAuthority: string | null = null;
 
-/**
- * Fail-closed: rollen måste tillhöra exakt den inloggade användaren och vara
- * den kanoniska jobbsökarrollen. En kvarhängande roll från konto A får aldrig
- * skapa lyssnare för konto B.
- */
-export const isOwnedJobSeekerRole = (
-  currentUser: { id: string } | null | undefined,
-  role: { user_id?: string; role?: UserRole | string } | null | undefined
-): boolean => {
-  if (!currentUser?.id) return false;
-  if (!role) return false;
-  if (role.user_id !== currentUser.id) return false;
-  return role.role === 'job_seeker';
-};
-
-export const canRefreshEmployerStats = (
-  currentUser: { id: string } | null | undefined,
-  role: { user_id?: string; role?: UserRole | string } | null | undefined
-): boolean => {
-  if (!currentUser?.id) return false;
-  if (!role) return false;
-  if (role.user_id !== currentUser.id) return false;
-  return role.role === 'employer';
-};
+// Kontobundna rollkontroller bor i @/lib/roleOwnership och re-exporteras här
+// för bakåtkompatibilitet med befintliga konsumenter/tester.
+export { canRefreshEmployerStats, isOwnedJobSeekerRole } from '@/lib/roleOwnership';
 
 interface Organization {
   id: string;
