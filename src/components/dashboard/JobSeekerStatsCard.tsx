@@ -87,16 +87,26 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsC
   // annars aldrig uppdateras när Home göms och visas igen (och ett realtime-
   // event missats under tiden). Endast en äkta false → true triggar — ref-
   // guarden hindrar dubbelhämtning vid initial mount med isActive=true.
+  // 🔒 ÄGARBYTE: byts kontot medan Home är aktivt kan den nya ägarens nyckel
+  // redan ha en varm (inaktuell) cache — staleTime Infinity skulle då aldrig
+  // hämta om. Endast exakt den aktuella ägarens nyckel invalideras.
   const wasActiveRef = useRef(isActive);
+  const lastOwnerRef = useRef<string | undefined>(user?.id);
   useEffect(() => {
     const wasActive = wasActiveRef.current;
+    const previousOwner = lastOwnerRef.current;
     wasActiveRef.current = isActive;
-    if (!user?.id || !isActive || wasActive) return;
+    lastOwnerRef.current = user?.id;
+    if (!user?.id || !isActive) return;
+    const reactivated = !wasActive;
+    const ownerChanged = previousOwner !== user.id;
+    if (!reactivated && !ownerChanged) return;
     queryClient.invalidateQueries({
       queryKey: ['jobseeker-dashboard-stats', user.id],
       exact: true,
     });
   }, [isActive, user?.id, queryClient]);
+
 
   useEffect(() => {
     if (!user?.id || !isActive) return;
