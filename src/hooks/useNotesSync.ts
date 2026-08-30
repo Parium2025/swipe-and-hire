@@ -497,16 +497,20 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     [userId, isCurrentConfig, scheduleSave, commitContent]
   );
 
-  // Retry queued save when coming back online
+  // Retry queued save when coming back online. The wake is bound to the config
+  // committed at subscription time and becomes inert after a transition.
   useEffect(() => {
     if (!userId) return;
+    const cfg = saveConfigRef.current;
+    if (!cfg || cfg.owner !== userId) return;
     const unsub = onConnectivityChange((online) => {
+      if (!isCurrentConfig(cfg)) return;
       if (online && hasLocalEditsRef.current) {
-        void drainRef.current();
+        void runDrainRef.current(cfg);
       }
     });
     return unsub;
-  }, [userId]);
+  }, [userId, isCurrentConfig]);
 
   // Keep a ref to the latest access token for beforeunload
   const accessTokenRef = useRef<string | null>(null);
