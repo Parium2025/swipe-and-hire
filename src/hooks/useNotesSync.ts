@@ -336,7 +336,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, cacheKey, queryClient, table, ownerColumn, queryKey, setContent]);
+  }, [userId, cacheKey, queryClient, table, ownerColumn, queryKey, commitContent]);
 
   // Save function — always upserts to avoid duplicates
   const saveToDb = useCallback(async (contentToSave: string): Promise<'saved' | 'skipped' | 'failed'> => {
