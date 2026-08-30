@@ -109,12 +109,24 @@ function renderWithHistory() {
   return { ...utils, history };
 }
 
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+/** Releases any save still parked inside the mocked upsert so no test can hang. */
+function releaseInFlightSave() {
+  const resolve = upsertResolve;
+  upsertResolve = null;
+  resolve?.();
+}
+
 describe('useNotesSync — identity transition leakage', () => {
   beforeEach(() => {
     localStorage.clear();
     mockUser = null;
     upsertResolve = null;
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    releaseInFlightSave();
   });
 
   it('never exposes A content/status to B during an A -> B switch', async () => {
@@ -124,11 +136,30 @@ describe('useNotesSync — identity transition leakage', () => {
     const { result, rerender, history } = renderWithHistory();
     await waitFor(() => expect(result.current.content).toBe('A SERVER'));
 
-    // Dirty in-flight A save so status flags are set at transition time.
+    // 1) A completed save → real, non-null lastSaved evidence.
+    act(() => {
+      result.current.handleChange('A SAVED EDIT');
+    });
+    await act(async () => {
+      await sleep(SAVE_DEBOUNCE_MS + 200);
+    });
+    await waitFor(() => expect(upsertResolve).not.toBeNull());
+    await act(async () => {
+      releaseInFlightSave();
+      await sleep(0);
+    });
+    await waitFor(() => expect(result.current.lastSaved).not.toBeNull());
+
+    // 2) A second edit parked in an in-flight save → isSaving is genuinely true.
     act(() => {
       result.current.handleChange('A PENDING EDIT');
     });
-    await waitFor(() => expect(result.current.saveFailed || !result.current.saveFailed).toBe(true));
+    await act(async () => {
+      await sleep(SAVE_DEBOUNCE_MS + 200);
+    });
+    await waitFor(() => expect(result.current.isSaving).toBe(true));
+    expect(result.current.lastSaved).not.toBeNull();
+    expect(result.current.content).toBe('A PENDING EDIT');
 
     history.length = 0;
     mockUser = { id: 'b' };
@@ -136,7 +167,9 @@ describe('useNotesSync — identity transition leakage', () => {
 
     await waitFor(() => expect(result.current.content).toBe('B SERVER'));
 
-    for (const snap of history.filter((s) => s.user === 'b')) {
+    const bSnapshots = history.filter((s) => s.user === 'b');
+    expect(bSnapshots.length).toBeGreaterThan(0);
+    for (const snap of bSnapshots) {
       expect(snap.content).not.toContain('A ');
       expect(snap.noteId).not.toBe('row-a');
       expect(snap.isSaving).toBe(false);
@@ -155,12 +188,18 @@ describe('useNotesSync — identity transition leakage', () => {
     act(() => {
       result.current.handleChange('A PENDING EDIT');
     });
+    await act(async () => {
+      await sleep(SAVE_DEBOUNCE_MS + 200);
+    });
+    await waitFor(() => expect(result.current.isSaving).toBe(true));
 
     history.length = 0;
     mockUser = null;
     rerender();
 
-    for (const snap of history.filter((s) => s.user === null)) {
+    const nullSnapshots = history.filter((s) => s.user === null);
+    expect(nullSnapshots.length).toBeGreaterThan(0);
+    for (const snap of nullSnapshots) {
       expect(snap.content).toBe('');
       expect(snap.noteId).toBeNull();
       expect(snap.isSaving).toBe(false);
