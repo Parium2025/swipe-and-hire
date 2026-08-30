@@ -194,20 +194,23 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const ackSeqRef = useRef(0);
 
   /**
-   * Immutable, account-bound save configuration. It is installed ONLY in the
-   * commit phase (layout effect), never during render, and every scheduled
-   * operation carries the exact object it was created with. A timer or wake
-   * created under A therefore stays A-scoped and can never execute with B's
-   * owner/keys.
+   * Immutable session configuration (owner + cache scope + epoch). It is
+   * installed ONLY in the commit phase (layout effect), never during render,
+   * and every scheduled operation and exposed callback carries the exact
+   * object it was created with. A timer, wake or handle created in one session
+   * therefore stays bound to that session and can never execute with another
+   * owner/scope/epoch.
    */
-  const saveConfigRef = useRef<SaveConfig | null>(null);
+  const saveConfigRef = useRef<SaveConfig | null>(makeSaveConfig(userId, cachePrefix, 0));
+  const [committedConfig, setCommittedConfig] = useState<SaveConfig | null>(() => saveConfigRef.current);
 
-  /** True only when `cfg` still describes the committed identity and epoch. */
+  /** True only when `cfg` still describes the committed session. */
   const isCurrentConfig = useCallback(
     (cfg: SaveConfig | null): cfg is SaveConfig =>
       !!cfg && cfg.owner === committedUserRef.current && cfg.epoch === epochRef.current,
     []
   );
+
 
   /** Commit a content value only when its source still owns the committed
    *  identity AND epoch. Every caller passes the owner/epoch it captured. */
