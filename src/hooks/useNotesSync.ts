@@ -37,6 +37,12 @@ interface PendingEnvelope {
 
 const SAVE_DEBOUNCE_MS = 1200;
 
+/** Query result plus the metadata of the exact request that produced it. */
+interface NoteQueryPayload {
+  meta: { epoch: number; user: string | null; ack: number };
+  row: { id: string; content: string | null } | null;
+}
+
 // ---- exception-safe storage primitives (private/incognito browsers) ----
 function storageGet(key: string): string | null {
   try {
