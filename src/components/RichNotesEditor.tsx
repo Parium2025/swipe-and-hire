@@ -176,7 +176,9 @@ export const NotesToolbar = ({ editor, className, compact = false, large = false
   if (!editor) return null;
 
   return (
-    <div className={cn("flex items-center flex-nowrap min-w-0 overflow-hidden", compact ? "gap-0" : "gap-0.5 sm:gap-1", className)}>
+    // data-notes-toolbar: stabil markör för Home-scopad inset-fokusring i
+    // index.css (overflow-hidden här klipper annars den yttre fokusringen).
+    <div data-notes-toolbar className={cn("flex items-center flex-nowrap min-w-0 overflow-hidden", compact ? "gap-0" : "gap-0.5 sm:gap-1", className)}>
       <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} large={large} isToggle buttonId="bold" {...tapProps} />
       <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} large={large} isToggle buttonId="italic" {...tapProps} />
       <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} large={large} isToggle buttonId="strike" {...tapProps} />
