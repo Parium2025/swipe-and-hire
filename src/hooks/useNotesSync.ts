@@ -496,10 +496,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   const handleChange = useCallback(
     (next: string) => {
-      // Ownership is verified BEFORE any shared ref, status, storage or timer
-      // is touched: a handle retained from another account is fully inert.
-      const cfg = saveConfigRef.current;
-      if (!userId || !isCurrentConfig(cfg) || cfg.owner !== userId) return;
+      // The handle is BOUND to the session config it was created with — it can
+      // never pick up a newer one. A handle retained from a previous session
+      // (other account, other cache scope, or the same account after a
+      // logout/login) is therefore fully inert: no ref, status, storage,
+      // timer or DB write is touched.
+      const cfg = committedConfig;
+      if (!isCurrentConfig(cfg)) return;
       hasLocalEditsRef.current = true;
       localRevRef.current += 1; // same text re-typed is still a newer revision
       contentRef.current = next; // synchronous latest-content authority
@@ -508,15 +511,14 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       setSaveFailed(!journaled);
       scheduleSave(cfg);
     },
-    [userId, isCurrentConfig, scheduleSave, commitContent]
+    [committedConfig, isCurrentConfig, scheduleSave, commitContent]
   );
 
   // Retry queued save when coming back online. The wake is bound to the config
   // committed at subscription time and becomes inert after a transition.
   useEffect(() => {
-    if (!userId) return;
-    const cfg = saveConfigRef.current;
-    if (!cfg || cfg.owner !== userId) return;
+    const cfg = committedConfig;
+    if (!isCurrentConfig(cfg)) return;
     const unsub = onConnectivityChange((online) => {
       if (!isCurrentConfig(cfg)) return;
       if (online && hasLocalEditsRef.current) {
@@ -524,7 +526,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       }
     });
     return unsub;
-  }, [userId, isCurrentConfig]);
+  }, [committedConfig, isCurrentConfig]);
+
 
   // Keep a ref to the latest access token for beforeunload
   const accessTokenRef = useRef<string | null>(null);
