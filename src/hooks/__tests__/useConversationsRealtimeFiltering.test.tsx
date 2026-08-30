@@ -231,6 +231,7 @@ describe('useConversations realtime-filtrering', () => {
       await Promise.resolve();
     });
 
+    console.log('DBG', subscribedChannels, removedChannels, messageBindings().length);
     expect(removedChannels).toEqual([firstChannel]);
     expect(subscribedChannels).toHaveLength(2);
 
