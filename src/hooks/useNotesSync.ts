@@ -590,9 +590,12 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   }, [userId, table, ownerColumn]);
 
   // Identity guard: until the reset/hydration has bound state to the current
-  // account, the public snapshot must never expose the previous account.
-  const identityMatched = contentState.owner === userId;
+  // session (owner + cache scope), the public snapshot must never expose the
+  // previous session.
+  const identityMatched =
+    contentState.owner === userId && contentState.scope === scopeIdentity(cachePrefix, userId);
   const visibleContent = identityMatched ? content : userId ? peekScoped(cachePrefix, userId) : '';
+
 
   return {
     content: visibleContent,
