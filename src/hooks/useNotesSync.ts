@@ -128,9 +128,16 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Every async completion is scoped to this epoch. Account change bumps it.
   const epochRef = useRef(0);
-  const inFlightRef = useRef(false);
+  /** Epoch that currently owns an in-flight save (null = idle). Per-epoch so a
+   *  stale account's save can never block or acknowledge the next account's. */
+  const inFlightEpochRef = useRef<number | null>(null);
+  /** Monotonic local revision — every edit (even same text) is a new revision. */
+  const localRevRef = useRef(0);
+  /** Monotonic count of acknowledged saves — used to reject stale query results. */
+  const ackSeqRef = useRef(0);
   const wantedRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queryMetaRef = useRef<{ epoch: number; user: string | null; ack: number } | null>(null);
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
@@ -151,6 +158,9 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (isFirst) return; // lazy initializer already hydrated
 
     epochRef.current += 1;
+    localRevRef.current += 1;
+    ackSeqRef.current += 1;
+    accessTokenRef.current = null;
     wantedRef.current = false;
     if (debounceRef.current) { clearTimeout(debounceRef.current); debounceRef.current = null; }
     hasLocalEditsRef.current = false;
@@ -194,12 +204,16 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const { data: noteData, isFetched, isSuccess } = useQuery({
     queryKey: [queryKey, userId],
     queryFn: async () => {
+      const capturedEpoch = epochRef.current;
+      const capturedUser = userId;
+      const capturedAck = ackSeqRef.current;
       const { data, error } = await (supabase
         .from(table) as any)
         .select('id, content')
         .eq(ownerColumn, userId!)
         .maybeSingle();
       if (error) throw error;
+      queryMetaRef.current = { epoch: capturedEpoch, user: capturedUser, ack: capturedAck };
       return data as { id: string; content: string | null } | null;
     },
     enabled: !!userId,
@@ -211,6 +225,9 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   useEffect(() => {
     if (!userId || !cacheKey) return;
     if (!isSuccess) return; // query errors are never a "successful empty note"
+    const meta = queryMetaRef.current;
+    // A read that started before the last acknowledged local save is stale.
+    if (!meta || meta.epoch !== epochRef.current || meta.user !== userId || meta.ack !== ackSeqRef.current) return;
     const serverContent = noteData?.content ?? '';
     serverContentRef.current = serverContent;
     if (!hasLocalEditsRef.current) {
@@ -223,6 +240,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // Realtime sync — listen for changes from other devices
   useEffect(() => {
     if (!userId) return;
+    const subEpoch = epochRef.current;
+    const subUser = userId;
     const channel = createRealtimeChannel(`${table}-${userId}`)
       .on(
         'postgres_changes',
@@ -233,6 +252,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
           filter: `${ownerColumn}=eq.${userId}`,
         },
         (payload) => {
+          // Late callback from a previous account/session must be discarded.
+          if (epochRef.current !== subEpoch || subUser !== userId) return;
           if (!hasLocalEditsRef.current) {
             const newContent = (payload.new as any)?.content ?? '';
             serverContentRef.current = newContent;
@@ -278,41 +299,48 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
    */
   const drainRef = useRef<() => Promise<void>>(async () => {});
   drainRef.current = async () => {
-    if (inFlightRef.current) { wantedRef.current = true; return; }
+    const myEpoch = epochRef.current;
+    if (inFlightEpochRef.current === myEpoch) { wantedRef.current = true; return; }
     if (!userId || !cacheKey || !pendingKey) return;
     if (!hasLocalEditsRef.current || !getIsOnline()) return;
 
-    const myEpoch = epochRef.current;
-    inFlightRef.current = true;
+    inFlightEpochRef.current = myEpoch;
     setIsSaving(true);
     try {
       for (;;) {
         wantedRef.current = false;
+        if (epochRef.current !== myEpoch) return;
         if (!hasLocalEditsRef.current || !getIsOnline()) break;
         const latest = contentRef.current;
+        const revAtSave = localRevRef.current;
         const result = await saveToDb(latest);
         if (epochRef.current !== myEpoch || !mountedRef.current) return; // account switched / unmounted
         if (result === 'saved') {
-          // Clean snapshot first, pending journal removed only after ack.
+          // Clean snapshot first; journal removed only on exact revision match.
           const cleanOk = storageSet(cacheKey, latest);
+          if (!cleanOk) { setSaveFailed(true); break; } // retain pending + dirty, no retry spin
           serverContentRef.current = latest;
-          if (contentRef.current === latest) {
-            hasLocalEditsRef.current = false;
-            if (cleanOk) storageRemove(pendingKey);
-          }
-          setSaveFailed(false);
-          setLastSaved(new Date());
+          ackSeqRef.current += 1;
           queryClient.invalidateQueries({ queryKey: [queryKey, userId] });
+          if (localRevRef.current === revAtSave) {
+            const removed = storageRemove(pendingKey);
+            if (!removed) { setSaveFailed(true); break; }
+            hasLocalEditsRef.current = false;
+            setSaveFailed(false);
+            setLastSaved(new Date());
+            break;
+          }
+          setLastSaved(new Date());
+          continue; // a newer revision exists — save it before acknowledging
         } else if (result === 'failed') {
           setSaveFailed(true); // pending journal retained
           break;
         } else {
           break; // skipped (offline / no user)
         }
-        if (!wantedRef.current && (!hasLocalEditsRef.current || contentRef.current === latest)) break;
       }
     } finally {
-      inFlightRef.current = false;
+      if (inFlightEpochRef.current === myEpoch) inFlightEpochRef.current = null;
       if (epochRef.current === myEpoch && mountedRef.current) setIsSaving(false);
     }
   };
@@ -330,6 +358,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       // No authenticated user → no cache key → ignore edits entirely.
       if (!cacheKey || !pendingKey || !userId) return;
       hasLocalEditsRef.current = true;
+      localRevRef.current += 1; // same text re-typed is still a newer revision
       contentRef.current = next; // synchronous latest-content authority
       setContent(next);
       const journaled = writePending(pendingKey, userId, next);
@@ -353,16 +382,24 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // Keep a ref to the latest access token for beforeunload
   const accessTokenRef = useRef<string | null>(null);
   useEffect(() => {
+    accessTokenRef.current = null; // never carry a previous account's token
     if (!userId) return;
+    const myEpoch = epochRef.current;
+    const myUser = userId;
     const sync = async () => {
       const { data } = await supabase.auth.getSession();
+      if (epochRef.current !== myEpoch || myUser !== userId) return;
       accessTokenRef.current = data.session?.access_token ?? null;
     };
-    sync();
+    void sync();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (epochRef.current !== myEpoch || myUser !== userId) return;
       accessTokenRef.current = session?.access_token ?? null;
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      accessTokenRef.current = null;
+      subscription.unsubscribe();
+    };
   }, [userId]);
 
   // beforeunload — flush unsaved changes via PostgREST upsert.
@@ -371,11 +408,11 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (!userId) return;
     const handleBeforeUnload = () => {
       if (!hasLocalEditsRef.current) return;
-      if (inFlightRef.current) return;
+      if (inFlightEpochRef.current === epochRef.current) return;
       const token = accessTokenRef.current;
       if (!token) return;
       const body = JSON.stringify({ [ownerColumn]: userId, content: contentRef.current });
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}`;
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}?on_conflict=${ownerColumn}`;
 
       const headers = {
         'Content-Type': 'application/json',
@@ -385,11 +422,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       };
 
       try {
-        fetch(url, {
+        void fetch(url, {
           method: 'POST',
           headers,
           body,
           keepalive: true,
+        }).catch(() => {
+          // pending journal already holds the latest content as fallback
         });
       } catch {
         // pending journal already holds the latest content as fallback
