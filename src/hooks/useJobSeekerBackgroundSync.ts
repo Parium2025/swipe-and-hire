@@ -176,6 +176,7 @@ export const useJobSeekerBackgroundSync = () => {
   // 🚀 HUVUDFUNKTION: warmup av lediga jobb + väder
   // Uses requestIdleCallback to avoid blocking CSS transitions (sidebar, navigation)
   const preloadAllData = useCallback(async (force = false) => {
+    console.log('DBG preloadAllData', user?.id, isJobSeeker);
     if (!user || !isJobSeeker) return;
     const ownerId = user.id;
 
