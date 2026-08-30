@@ -143,7 +143,9 @@ describe('useNotesSync — notes data cache isolation', () => {
 
     // B has no cache of its own → must be empty, never A's content
     await waitFor(() => expect(result.current.content).toBe(''));
-    expect(localStorage.getItem(`${LEGACY_KEY}_user-b`)).toBeNull();
+    // B may only ever hold its own clean server snapshot (empty), never A's edit.
+    expect(localStorage.getItem(`${LEGACY_KEY}_user-b`) ?? '').toBe('');
+    expect(localStorage.getItem(`${LEGACY_KEY}_user-b__pending`)).toBeNull();
   });
 
   it('positive control: authenticated user hydrates own scoped cache instantly on first render', () => {
