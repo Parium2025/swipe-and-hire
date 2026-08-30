@@ -281,17 +281,26 @@ describe('Home-kort tangentbordsåtkomst', () => {
         renderStats(statsWithLink);
         const link = screen.getByRole('link', { name: /Skickade ansökningar/i });
 
+        // Aktivt index läses av karusellprickarna (AnimatePresence-utgången
+        // hinner inte fullfölja under fejkade timers).
+        const activeDot = () =>
+          screen
+            .getAllByRole('button', { name: /Gå till statistik/i })
+            .findIndex((dot) => dot.className.includes('bg-white') && !dot.className.includes('bg-white/30'));
+
+        expect(activeDot()).toBe(0);
+
         fireEvent.focusIn(link);
         act(() => { vi.advanceTimersByTime(30_000); });
         // Rotationen står stilla medan fokus ligger kvar i kortet
-        expect(screen.getByRole('link', { name: /Skickade ansökningar/i })).toBeInTheDocument();
+        expect(activeDot()).toBe(0);
 
         const outside = document.createElement('button');
         document.body.appendChild(outside);
         fireEvent.focusOut(link, { relatedTarget: outside });
         act(() => { vi.advanceTimersByTime(30_000); });
 
-        expect(screen.getByRole('link', { name: /Sparade jobb/i })).toBeInTheDocument();
+        expect(activeDot()).toBe(1);
         outside.remove();
       } finally {
         vi.useRealTimers();
