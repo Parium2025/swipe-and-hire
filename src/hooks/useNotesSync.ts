@@ -533,39 +533,44 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   }, [committedConfig, isCurrentConfig]);
 
 
-  // Keep a ref to the latest access token for beforeunload
+  // Keep a ref to the latest access token for beforeunload. Bound to the
+  // COMMITTED session config (owner + cache scope + epoch), so a scope change
+  // for the same user re-arms the token instead of leaving it cleared.
   const accessTokenRef = useRef<string | null>(null);
   useEffect(() => {
-    accessTokenRef.current = null; // never carry a previous account's token
-    if (!userId) return;
-    const myEpoch = epochRef.current;
-    const myUser = userId;
+    accessTokenRef.current = null; // never carry a previous session's token
+    const cfg = committedConfig;
+    if (!isCurrentConfig(cfg)) return;
     const sync = async () => {
       const { data } = await supabase.auth.getSession();
-      if (epochRef.current !== myEpoch || myUser !== userId) return;
+      if (!isCurrentConfig(cfg)) return;
       accessTokenRef.current = data.session?.access_token ?? null;
     };
     void sync();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (epochRef.current !== myEpoch || myUser !== userId) return;
+      // A callback retained from a previous session/scope is inert.
+      if (!isCurrentConfig(cfg)) return;
       accessTokenRef.current = session?.access_token ?? null;
     });
     return () => {
       accessTokenRef.current = null;
       subscription.unsubscribe();
     };
-  }, [userId]);
+  }, [committedConfig, isCurrentConfig]);
 
   // beforeunload — flush unsaved changes via PostgREST upsert.
-  // Never competes with an in-flight save; the pending journal stays as fallback.
+  // Bound to the current immutable config; a listener retained from a previous
+  // session/scope is inert and can never send the old owner or old content.
   useEffect(() => {
-    if (!userId) return;
+    const cfg = committedConfig;
+    if (!isCurrentConfig(cfg)) return;
     const handleBeforeUnload = () => {
+      if (!isCurrentConfig(cfg)) return;
       if (!hasLocalEditsRef.current) return;
       if (inFlightEpochRef.current === epochRef.current) return;
       const token = accessTokenRef.current;
       if (!token) return;
-      const body = JSON.stringify({ [ownerColumn]: userId, content: contentRef.current });
+      const body = JSON.stringify({ [ownerColumn]: cfg.owner, content: contentRef.current });
       const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}?on_conflict=${ownerColumn}`;
 
       const headers = {
@@ -591,7 +596,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [userId, table, ownerColumn]);
+  }, [committedConfig, isCurrentConfig, table, ownerColumn]);
+
 
   // Identity guard: until the reset/hydration has bound state to the current
   // session (owner + cache scope), the public snapshot must never expose the
