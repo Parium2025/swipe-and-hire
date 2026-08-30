@@ -252,7 +252,7 @@ vi.mock('@/lib/companyLogoUrl', () => ({
   resolveCompanyLogoUrl: vi.fn(() => null),
 }));
 
-import { AuthProvider } from '@/hooks/useAuth';
+import { AuthProvider, isOwnedJobSeekerRole } from '@/hooks/useAuth';
 
 const SAVED_KEY = 'parium_saved_jobs';
 const APPS_KEY = 'parium_my_applications';
@@ -300,26 +300,20 @@ describe('AuthProvider — kontobunden roll och refresh-auktoritet', () => {
 
   afterEach(() => cleanup());
 
-  it('P1-1: kvarhängande A-roll för aktuell användare B ger noll jobbsökarlyssnare', async () => {
-    h.userId = 'jobseeker-2';
-    h.roleUserId = 'jobseeker-1'; // roll som fortfarande tillhör konto A
-
-    renderAuth(newClient());
-    await waitFor(() => expect(h.roleFetched).toBe(true), { timeout: 5000 });
-    await settle();
-
-    expect(h.registrations.filter((r) => r.table === 'saved_jobs')).toHaveLength(0);
-    expect(h.registrations.filter((r) => r.table === 'job_applications')).toHaveLength(0);
-    expect(h.channelNames).not.toContain('auth-saved-jobs-jobseeker-2');
-  });
-
-  it('P1-1: egen job_seeker-roll ger lyssnarna som vanligt', async () => {
-    h.roleUserId = 'jobseeker-1';
-    renderAuth(newClient());
-    await waitFor(() => expect(h.channelNames).toContain('auth-saved-jobs-jobseeker-1'), {
-      timeout: 5000,
-    });
-    expect(jobseekerRegs('jobseeker-1')).toHaveLength(2);
+  it('P1-1: rollgrinden är fail-closed för kvarhängande/okänd/ofullständig roll', () => {
+    const userB = { id: 'jobseeker-2' };
+    // Kvarhängande roll från konto A medan B är inloggad
+    expect(isOwnedJobSeekerRole(userB, { user_id: 'jobseeker-1', role: 'job_seeker' })).toBe(false);
+    // Oupplöst/saknad roll
+    expect(isOwnedJobSeekerRole(userB, null)).toBe(false);
+    expect(isOwnedJobSeekerRole(userB, undefined)).toBe(false);
+    // Roll utan ägare eller med fel roll
+    expect(isOwnedJobSeekerRole(userB, { role: 'job_seeker' })).toBe(false);
+    expect(isOwnedJobSeekerRole(userB, { user_id: 'jobseeker-2', role: 'employer' })).toBe(false);
+    // Ingen inloggad användare
+    expect(isOwnedJobSeekerRole(null, { user_id: 'jobseeker-2', role: 'job_seeker' })).toBe(false);
+    // Endast exakt ägd job_seeker-roll passerar
+    expect(isOwnedJobSeekerRole(userB, { user_id: 'jobseeker-2', role: 'job_seeker' })).toBe(true);
   });
 
   it('P1-2: in-flight A-refresh skriver inte A:s kontosiffror efter byte till B', async () => {
