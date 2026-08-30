@@ -167,6 +167,22 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   /** Monotonic count of acknowledged saves — used to reject stale query results. */
   const ackSeqRef = useRef(0);
 
+  /**
+   * Immutable, account-bound save configuration. It is installed ONLY in the
+   * commit phase (layout effect), never during render, and every scheduled
+   * operation carries the exact object it was created with. A timer or wake
+   * created under A therefore stays A-scoped and can never execute with B's
+   * owner/keys.
+   */
+  const saveConfigRef = useRef<SaveConfig | null>(null);
+
+  /** True only when `cfg` still describes the committed identity and epoch. */
+  const isCurrentConfig = useCallback(
+    (cfg: SaveConfig | null): cfg is SaveConfig =>
+      !!cfg && cfg.owner === committedUserRef.current && cfg.epoch === epochRef.current,
+    []
+  );
+
   /** Commit a content value only when its source still owns the committed
    *  identity AND epoch. Every caller passes the owner/epoch it captured. */
   const commitContent = useCallback((owner: string | null, epoch: number, next: string) => {
