@@ -312,20 +312,30 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Fetch existing note. The metadata is bound to THIS request's result, so a
   // late result from another account/request can never describe another one.
-  // The cache scope is part of the query identity: a same-user cachePrefix
-  // change is a real scope transition and must get its own request/metadata.
-  // Invalidations using the [queryKey, user] prefix still match.
+  // The query identity is the COMMITTED SESSION (owner + cache scope + epoch):
+  // a same-user cachePrefix change AND an A->logout->A re-login are real
+  // session transitions and must each get their own request/metadata, even
+  // inside staleTime. Invalidations using the [queryKey, user] prefix match all
+  // session keys.
+  // Only the committed session may fetch: during a transition render the
+  // committed config still describes the previous scope, so no request is
+  // started until the layout transition has installed the new session.
+  const sessionEpoch =
+    isCurrentConfig(committedConfig) && committedConfig.cacheKey === cacheKey
+      ? committedConfig.epoch
+      : null;
   const { data: queryPayload, isFetched, isSuccess } = useQuery({
-    queryKey: [queryKey, userId, cachePrefix],
+    queryKey: [queryKey, userId, cachePrefix, sessionEpoch],
 
     queryFn: async (): Promise<NoteQueryPayload> => {
-      const capturedEpoch = epochRef.current;
-      const capturedUser = userId;
+      const cfg = committedConfig!;
+      const capturedEpoch = cfg.epoch;
+      const capturedUser = cfg.owner;
       const capturedAck = ackSeqRef.current;
       const { data, error } = await (supabase
         .from(table) as any)
         .select('id, content')
-        .eq(ownerColumn, userId!)
+        .eq(ownerColumn, capturedUser)
         .maybeSingle();
       if (error) throw error;
       return {
@@ -333,10 +343,11 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         row: (data as { id: string; content: string | null } | null) ?? null,
       };
     },
-    enabled: !!userId,
+    enabled: !!userId && sessionEpoch !== null,
     staleTime: 30000,
     refetchOnMount: true,
   });
+
 
   const noteData = queryPayload?.row ?? null;
 
