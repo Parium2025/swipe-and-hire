@@ -184,6 +184,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     setContent(next);
   }, [userId, cachePrefix]);
 
+  // Hydrated pending must enter the normal debounced drain on its own — it may
+  // never wait for another edit or a connectivity event.
+  useEffect(() => {
+    if (!userId) return;
+    if (hasLocalEditsRef.current) scheduleSaveRef.current();
+  }, [userId]);
+
   // Cross-tab sync via localStorage events (clean snapshot only, never while dirty)
   useEffect(() => {
     if (typeof window === 'undefined' || !userId || !cacheKey) return;
@@ -345,6 +352,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     }
   };
 
+  const scheduleSaveRef = useRef<() => void>(() => {});
   const scheduleSave = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -352,6 +360,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       void drainRef.current();
     }, SAVE_DEBOUNCE_MS);
   }, []);
+  scheduleSaveRef.current = scheduleSave;
 
   const handleChange = useCallback(
     (next: string) => {
