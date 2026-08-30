@@ -205,18 +205,29 @@ export async function reportAppException(failure: AppFailure, ownerUserId: strin
     },
   };
 
-  await supabase.rpc('record_app_exception' as never, {
-    _owner_user_id: ownerUserId,
-    _environment: payload.environment,
-    _kind: payload.kind,
-    _severity: payload.severity,
-    _title: payload.title,
-    _message: payload.message,
-    _route: payload.route,
-    _source: payload.source,
-    _stacktrace: payload.stacktrace,
-    _http_status: payload.http_status,
-    _fingerprint: payload.fingerprint,
-    _metadata: payload.metadata,
-  } as never);
+  try {
+    const { error } = await supabase.rpc('record_app_exception' as never, {
+      _owner_user_id: ownerUserId,
+      _environment: payload.environment,
+      _kind: payload.kind,
+      _severity: payload.severity,
+      _title: payload.title,
+      _message: payload.message,
+      _route: payload.route,
+      _source: payload.source,
+      _stacktrace: payload.stacktrace,
+      _http_status: payload.http_status,
+      _fingerprint: payload.fingerprint,
+      _metadata: payload.metadata,
+    } as never);
+    if (error) throw error;
+    exceptionConsecutiveFailures = 0;
+  } catch (error) {
+    exceptionConsecutiveFailures += 1;
+    if (exceptionConsecutiveFailures >= EXCEPTION_BREAKER_FAILURES) {
+      exceptionBreakerUntil = Date.now() + EXCEPTION_BREAKER_COOLDOWN_MS;
+      exceptionConsecutiveFailures = 0;
+    }
+    throw error;
+  }
 }
