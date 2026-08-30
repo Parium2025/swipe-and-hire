@@ -73,8 +73,12 @@ describe('preloadWeatherLocation — kontovakt före cache-skrivningar', () => {
     localStorage.clear();
     h.gps = null;
     h.weather = null;
+    h.serverIp = null;
+    h.cachedLocation = null;
+    h.cachedWeather = null;
     h.setLocation.mockClear();
     h.setWeather.mockClear();
+    h.ipFallbackCalled.mockClear();
   });
 
   it('A:s plats/väder skrivs inte när ägaren bytts innan GPS-svaret landar', async () => {
