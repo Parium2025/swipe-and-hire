@@ -1247,6 +1247,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   }, [jobIds]);
 
   useEffect(() => {
+    if (!realtimeEnabled) return;
     if (!realtimeJobIdsKey) return;
     const ids = realtimeJobIdsKey.split(',');
     const filter = `id=in.(${ids.join(',')})`;
