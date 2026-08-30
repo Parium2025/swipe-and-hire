@@ -1,4 +1,4 @@
-import { memo, useState, useCallback, useMemo } from 'react';
+import { memo, useState, useCallback, useMemo, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileText, Maximize2 } from 'lucide-react';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
@@ -14,7 +14,12 @@ function countWordsAndChars(html: string) {
   return { words, chars };
 }
 
-export const JobSeekerNotesCard = memo(() => {
+interface JobSeekerNotesCardProps {
+  /** Home synlig? Dold Home stänger endast det expanderade fönstret. */
+  isActive?: boolean;
+}
+
+export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardProps) => {
   const { content, isSaving, saveFailed, lastSaved, handleChange } = useNotesSync({
     table: 'jobseeker_notes',
     ownerColumn: 'user_id',
@@ -24,6 +29,12 @@ export const JobSeekerNotesCard = memo(() => {
 
   const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Dold Home får inte lämna kvar en body-portal ovanpå en annan route.
+  // Anteckningarnas innehåll, editor och sparande förblir monterade.
+  useEffect(() => {
+    if (!isActive) setIsExpanded(false);
+  }, [isActive]);
 
   const handleEditorReady = useCallback((editor: Editor) => { setNotesEditor(editor); }, []);
 

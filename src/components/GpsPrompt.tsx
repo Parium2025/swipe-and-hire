@@ -23,9 +23,11 @@ let gpsPromptHasBeenShown = false;
 interface GpsPromptProps {
   onEnableGps?: () => void;
   weatherAvailable?: boolean;
+  /** Home synlig? Dold Home (KeepAlive) stänger av all GPS-logik och UI. */
+  active?: boolean;
 }
 
-const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProps) => {
+const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }: GpsPromptProps) => {
 
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -44,12 +46,21 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
 
 
   useEffect(() => {
+    if (!active) {
+      setVisible(false);
+      setExpanded(false);
+      setShowHelpModal(false);
+      return;
+    }
+
+    let cancelled = false;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let permissionStatus: PermissionStatus | null = null;
     let handleChange: (() => void) | null = null;
     
     const checkPermission = async () => {
       const status = await checkGpsPermission();
+      if (cancelled) return;
       setGpsStatus(status);
       
       if (status === 'granted') {
@@ -64,6 +75,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
           // Vädret hann landa under väntetiden → ingen varning behövs.
           if (weatherAvailableRef.current) return;
           checkGpsPermission().then(currentStatus => {
+            if (cancelled) return;
             if (currentStatus === 'granted') {
               setGpsStatus('granted');
               setVisible(false);
@@ -82,9 +94,12 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
     const setupPermissionListener = async () => {
       if ('permissions' in navigator && !isNativeApp()) {
         try {
-          permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+          const queried = await navigator.permissions.query({ name: 'geolocation' });
+          if (cancelled) return;
+          permissionStatus = queried;
           
           handleChange = () => {
+            if (cancelled) return;
             const newState = permissionStatus?.state;
             if (newState === 'granted') {
               notePermissionGranted();
@@ -110,12 +125,13 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
     setupPermissionListener();
     
     return () => {
+      cancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
       if (permissionStatus && handleChange) {
         permissionStatus.removeEventListener('change', handleChange);
       }
     };
-  }, []);
+  }, [active]);
 
   const handleDismiss = () => {
     gpsPromptDismissedUntilReload = true;
@@ -165,6 +181,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
     );
   };
 
+  if (!active) return null;
   if (gpsStatus === 'granted') return null;
   if (weatherAvailable) return null;
 

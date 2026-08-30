@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef } from 'react';
 interface UseCardInteractionPauseOptions {
   setIsPaused: (value: boolean) => void;
   touchResumeDelayMs?: number;
+  /** Home dold (KeepAlive) → avbryt väntande timers. Data lämnas orörd. */
+  active?: boolean;
   /** Safety cap: auto-resume after this many ms even if no touchEnd/Cancel fired */
   maxPauseMs?: number;
 }
@@ -11,6 +13,7 @@ export function useCardInteractionPause({
   setIsPaused,
   touchResumeDelayMs = 3000,
   maxPauseMs = 8000,
+  active = true,
 }: UseCardInteractionPauseOptions) {
   const resumeTimeoutRef = useRef<number | null>(null);
   const safetyTimeoutRef = useRef<number | null>(null);
@@ -54,6 +57,13 @@ export function useCardInteractionPause({
       resumeTimeoutRef.current = null;
     }, touchResumeDelayMs);
   }, [clearResumeTimeout, clearSafetyTimeout, setIsPaused, touchResumeDelayMs]);
+
+  useEffect(() => {
+    if (!active) {
+      clearResumeTimeout();
+      clearSafetyTimeout();
+    }
+  }, [active, clearResumeTimeout, clearSafetyTimeout]);
 
   useEffect(() => {
     return () => { clearResumeTimeout(); clearSafetyTimeout(); };

@@ -18,9 +18,11 @@ interface JobSeekerStatsCardProps {
   liveInterviewsCount?: number;
   /** True när den delade intervjudatan har laddats klart. */
   interviewsLoaded?: boolean;
+  /** Home synlig? Dold Home pausar rotationen. */
+  isActive?: boolean;
 }
 
-export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsCount, interviewsLoaded }: JobSeekerStatsCardProps) => {
+export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsCount, interviewsLoaded, isActive = true }: JobSeekerStatsCardProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readCachedStats(user?.id), [user?.id]);
@@ -123,6 +125,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsC
 
   return (
     <StatsCarousel
+      isActive={isActive}
       stats={statsArray}
       isPaused={isPaused}
       setIsPaused={setIsPaused}

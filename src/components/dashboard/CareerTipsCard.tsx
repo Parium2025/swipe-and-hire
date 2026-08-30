@@ -14,12 +14,14 @@ import { DashboardCarouselDots } from './DashboardCarouselDots';
 interface CareerTipsCardProps {
   isPaused: boolean;
   setIsPaused: (v: boolean) => void;
+  /** Home synlig? Dold Home pausar rotationen utan att ändra visat kort. */
+  isActive?: boolean;
 }
 
-export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardProps) => {
+export const CareerTipsCard = memo(({ isPaused, setIsPaused, isActive = true }: CareerTipsCardProps) => {
   const { data: tips, isLoading, error } = useCareerTips();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
+  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused, active: isActive });
   
   const tipsItems = tips?.slice(0, 4) || [];
 
@@ -43,7 +45,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
   }, [tipsItems.length]);
 
   useSynchronizedRotation({
-    enabled: tipsItems.length > 1 && !isPaused,
+    enabled: isActive && tipsItems.length > 1 && !isPaused,
     intervalMs: 10000,
     offsetMs: 0,
     onTick: goNext,
