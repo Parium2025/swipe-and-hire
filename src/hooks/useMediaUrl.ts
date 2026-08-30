@@ -212,6 +212,9 @@ function getOrCreateSignedUrlLoad(
         } catch {
           signedUrl = null;
         }
+        // Kontobyte/utloggning skedde medan requesten var i luften → svaret
+        // tillhör föregående konto och får aldrig nå någon caller.
+        if (startGeneration !== mediaCacheGeneration) return null;
         if (signedUrl) {
           storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now, startGeneration);
           failedLoads.delete(cacheKey);
@@ -221,6 +224,8 @@ function getOrCreateSignedUrlLoad(
         if (isKnownMissingMedia(storagePath, mediaType)) break;
         if (attempt < attempts - 1) await sleep(250 * (attempt + 1));
       }
+      // Skriv inte negativ cache för en generation som redan rensats.
+      if (startGeneration !== mediaCacheGeneration) return null;
       failedLoads.set(cacheKey, Date.now());
       return null;
     })
