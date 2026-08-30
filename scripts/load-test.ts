@@ -2,7 +2,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
-import { assertLoadTestTargetAllowed } from './load-test-safety';
+import { assertLoadTestTargetAllowed, resolveLoadTestConnection } from './load-test-safety';
 
 type ScenarioName = 'search' | 'match' | 'chat';
 type Outcome = 'ok' | 'error' | 'skipped';
