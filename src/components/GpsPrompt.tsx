@@ -133,6 +133,15 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
     };
   }, [active]);
 
+  // Generation-guard: asynkrona fortsättningar (native-dialog, geolocation-
+  // callbacks) får inte mutera state efter att Home dolts (KeepAlive).
+  const activeRef = useRef(active);
+  activeRef.current = active;
+  const generationRef = useRef(0);
+  useEffect(() => {
+    if (!active) generationRef.current += 1;
+  }, [active]);
+
   const handleDismiss = () => {
     gpsPromptDismissedUntilReload = true;
     setVisible(false);
@@ -143,11 +152,14 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
       setShowHelpModal(true);
       return;
     }
-    
+
     handleDismiss();
-    
+    const generation = generationRef.current;
+    const isStale = () => generationRef.current !== generation || !activeRef.current;
+
     if (isNativeApp()) {
       const granted = await requestGpsPermission();
+      if (isStale()) return;
       if (granted) {
         console.log('Native GPS enabled successfully');
         notePermissionGranted();
@@ -165,6 +177,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
     
     navigator.geolocation.getCurrentPosition(
       () => {
+        if (isStale()) return;
         console.log('GPS enabled successfully');
         notePermissionGranted();
         gpsPromptDismissedUntilReload = false;
@@ -172,6 +185,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
         onEnableGps?.();
       },
       (error) => {
+        if (isStale()) return;
         console.log('GPS permission denied:', error.message);
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('denied');
