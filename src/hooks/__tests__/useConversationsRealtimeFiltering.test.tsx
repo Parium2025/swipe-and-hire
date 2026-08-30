@@ -224,6 +224,10 @@ describe('useConversations realtime-filtrering', () => {
 
   it('ändrad id-mängd byter kanal en gång; unmount städar kanal och timers', async () => {
     const { unmount } = renderWith(1);
+    // Låt den initiala queryFn hinna settla innan id-mängden ändras.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
     const firstChannel = subscribedChannels[0];
 
     await act(async () => {
@@ -231,7 +235,6 @@ describe('useConversations realtime-filtrering', () => {
       await Promise.resolve();
     });
 
-    console.log('DBG', subscribedChannels, removedChannels, messageBindings().length);
     expect(removedChannels).toEqual([firstChannel]);
     expect(subscribedChannels).toHaveLength(2);
 
