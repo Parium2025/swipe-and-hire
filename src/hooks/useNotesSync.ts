@@ -134,8 +134,6 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Content state is bound to the account that produced it, so a transition
   // render can never expose the previous account's value.
-  const userIdRef = useRef<string | null>(userId);
-  userIdRef.current = userId;
   const [contentState, setContentState] = useState<{ owner: string | null; value: string }>(() => {
     if (!userId) return { owner: null, value: '' };
     const pending = readPending(`${cachePrefix}_${userId}__pending`, userId);
@@ -149,9 +147,6 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     serverContentRef.current = clean;
     return { owner: userId, value: clean };
   });
-  const setContent = useCallback((next: string) => {
-    setContentState({ owner: userIdRef.current, value: next });
-  }, []);
   const content = contentState.value;
 
   const [isSaving, setIsSaving] = useState(false);
@@ -160,6 +155,10 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Every async completion is scoped to this epoch. Account change bumps it.
   const epochRef = useRef(0);
+  /** Committed identity authority. NEVER mutated during render — only in the
+   *  committed layout transition effect below. A value produced under another
+   *  account can therefore never be relabelled as the current one. */
+  const committedUserRef = useRef<string | null>(userId);
   /** Epoch that currently owns an in-flight save (null = idle). Per-epoch so a
    *  stale account's save can never block or acknowledge the next account's. */
   const inFlightEpochRef = useRef<number | null>(null);
@@ -167,6 +166,14 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const localRevRef = useRef(0);
   /** Monotonic count of acknowledged saves — used to reject stale query results. */
   const ackSeqRef = useRef(0);
+
+  /** Commit a content value only when its source still owns the committed
+   *  identity AND epoch. Every caller passes the owner/epoch it captured. */
+  const commitContent = useCallback((owner: string | null, epoch: number, next: string) => {
+    if (owner !== committedUserRef.current) return;
+    if (epoch !== epochRef.current) return;
+    setContentState({ owner, value: next });
+  }, []);
   const wantedRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
