@@ -177,6 +177,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
     
     navigator.geolocation.getCurrentPosition(
       () => {
+        if (isStale()) return;
         console.log('GPS enabled successfully');
         notePermissionGranted();
         gpsPromptDismissedUntilReload = false;
@@ -184,6 +185,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
         onEnableGps?.();
       },
       (error) => {
+        if (isStale()) return;
         console.log('GPS permission denied:', error.message);
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('denied');
