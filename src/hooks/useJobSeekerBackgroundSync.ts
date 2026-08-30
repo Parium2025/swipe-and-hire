@@ -56,16 +56,18 @@ export const useJobSeekerBackgroundSync = () => {
   // 🔒 Dedupe är ägarbunden OCH provider-lokal: A:s warmup får aldrig kväva
   // B:s första warmup vid ett kontobyte inom 2 sekunder.
   const lastPreloadRef = useRef<{ ownerId: string | null; ts: number }>({ ownerId: null, ts: 0 });
-  // En explicit forcerad preload som kommer medan en körning pågår tappas inte —
-  // den koalesceras till EN uppföljning efter den pågående körningen.
-  const pendingForcedRef = useRef(false);
+  // En preload som kommer medan en körning pågår tappas inte — den koalesceras
+  // till EN uppföljning (senaste ägaren vinner) efter den pågående körningen.
+  const pendingPreloadRef = useRef<{ ownerId: string; force: boolean } | null>(null);
+  const inFlightOwnerRef = useRef<string | null>(null);
+  const latestOwnerRef = useRef<string | null>(null);
   const mountedRef = useRef(true);
   const preloadAllDataRef = useRef<((force?: boolean) => Promise<void>) | null>(null);
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      pendingForcedRef.current = false;
+      pendingPreloadRef.current = null;
     };
   }, []);
 
@@ -73,6 +75,10 @@ export const useJobSeekerBackgroundSync = () => {
   // inloggade användaren (en kvarhängande roll från konto A får inte köra
   // warmup för konto B).
   const isJobSeeker = isOwnedJobSeekerRole(user, userRole);
+
+  useEffect(() => {
+    latestOwnerRef.current = user?.id ?? null;
+  }, [user?.id]);
 
   // 🌤️ Validera väder-cache
   const isWeatherCacheValid = useCallback((): boolean => {
@@ -112,7 +118,10 @@ export const useJobSeekerBackgroundSync = () => {
       if (!parsed || !Array.isArray(parsed.items) || typeof parsed.timestamp !== 'number') {
         return null;
       }
-      if (typeof parsed.ownerId === 'string' && parsed.ownerId !== ownerId) return null;
+      // Fail-closed: cachen måste vara ägar-taggad med exakt den inloggade
+      // användaren. Ägarlösa (legacy), null eller felaktiga poster hydrerar inte
+      // — de leder till EN säker nätverkshämtning som skriver om posten ägar-taggad.
+      if (typeof parsed.ownerId !== 'string' || parsed.ownerId !== ownerId) return null;
       const age = Date.now() - parsed.timestamp;
       if (age < 0 || age >= AVAILABLE_JOBS_CACHE_MAX_AGE) return null;
       return parsed.items;
@@ -122,7 +131,11 @@ export const useJobSeekerBackgroundSync = () => {
   }, []);
 
   // 🏢 Preload lediga jobb (enda datalistan denna hook äger)
-  const preloadAvailableJobs = useCallback(async (force = false, ownerId: string | null = null) => {
+  const preloadAvailableJobs = useCallback(async (
+    force = false,
+    ownerId: string | null = null,
+    isStillOwner: () => boolean = () => true,
+  ) => {
     const cacheKey = AVAILABLE_JOBS_CACHE_KEY;
 
     if (!force) {
@@ -161,6 +174,9 @@ export const useJobSeekerBackgroundSync = () => {
       .order('created_at', { ascending: false })
       .limit(100);
 
+    // 🔒 Ett svar som startades av föregående konto får aldrig skriva i det nya.
+    if (!isStillOwner()) return;
+
     if (!error && data) {
       safeSetItem(cacheKey, JSON.stringify({
         items: data,
@@ -187,17 +203,22 @@ export const useJobSeekerBackgroundSync = () => {
     }
 
     if (isPreloadingRef.current) {
-      // Single-flight: forcerade triggers koalesceras till en uppföljning.
-      if (force) pendingForcedRef.current = true;
+      // Single-flight: forcerade triggers OCH en ny ägares första warmup
+      // koalesceras till EN uppföljning (senaste ägaren vinner).
+      if (force || inFlightOwnerRef.current !== ownerId) {
+        pendingPreloadRef.current = { ownerId, force };
+      }
       return;
     }
 
     isPreloadingRef.current = true;
+    inFlightOwnerRef.current = ownerId;
     lastPreloadRef.current = { ownerId, ts: now };
+    const isStillOwner = () => mountedRef.current && latestOwnerRef.current === ownerId;
 
     try {
       await Promise.all([
-        preloadAvailableJobs(force, ownerId),
+        preloadAvailableJobs(force, ownerId, isStillOwner),
         preloadWeatherIfStale(),
       ]);
 
@@ -210,11 +231,11 @@ export const useJobSeekerBackgroundSync = () => {
       console.warn('[JobSeekerSync] Preload failed:', error);
     } finally {
       isPreloadingRef.current = false;
-      if (pendingForcedRef.current) {
-        pendingForcedRef.current = false;
-        if (mountedRef.current) {
-          await preloadAllDataRef.current?.(true);
-        }
+      inFlightOwnerRef.current = null;
+      const pending = pendingPreloadRef.current;
+      pendingPreloadRef.current = null;
+      if (pending && mountedRef.current && latestOwnerRef.current === pending.ownerId) {
+        await preloadAllDataRef.current?.(pending.force);
       }
     }
   }, [user, isJobSeeker, preloadAvailableJobs, preloadWeatherIfStale]);

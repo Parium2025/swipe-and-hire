@@ -23,7 +23,7 @@ export interface AccountAuthority {
   readonly current: AccountAuthorityToken;
   /** Byter till ny ägare och returnerar den nya, unika token. */
   advance(ownerId: string | null): AccountAuthorityToken;
-  /** Gör alla utestående tokens ogiltiga (unmount/cleanup). */
+  /** Gör alla utestående tokens ogiltiga (unmount/cleanup). Terminalt. */
   invalidate(): void;
   /** True endast för exakt aktuell, giltig token (och rätt ägare om angiven). */
   isCurrent(token: AccountAuthorityToken | null | undefined, expectedOwnerId?: string | null): boolean;
@@ -34,22 +34,26 @@ const nextGeneration = () => (generationCounter += 1);
 
 export function createAccountAuthority(ownerId: string | null = null): AccountAuthority {
   let current: AccountAuthorityToken = Object.freeze({ ownerId, generation: nextGeneration() });
-  let valid = true;
+  let destroyed = false;
 
   return {
     get current() {
       return current;
     },
     advance(nextOwnerId: string | null) {
+      // Terminalt efter invalidate: en sen callback från en avmonterad provider
+      // får aldrig återuppliva auktoriteten. Den får en token som aldrig är aktuell.
+      if (destroyed) {
+        return Object.freeze({ ownerId: nextOwnerId, generation: nextGeneration() });
+      }
       current = Object.freeze({ ownerId: nextOwnerId, generation: nextGeneration() });
-      valid = true;
       return current;
     },
     invalidate() {
-      valid = false;
+      destroyed = true;
     },
     isCurrent(token, expectedOwnerId) {
-      if (!valid || !token) return false;
+      if (destroyed || !token) return false;
       if (token !== current) return false;
       if (expectedOwnerId !== undefined && token.ownerId !== expectedOwnerId) return false;
       return true;
