@@ -39,6 +39,28 @@ interface UserRoleData {
  * Kräver inloggad användare, en roll som tillhör exakt samma användare och
  * att rollen är exakt det kanoniska employer-värdet. Okänd/ooupplöst nekas.
  */
+/**
+ * Modulglobal kontoauktoritet: vilket konto som just nu äger AuthProvider.
+ * Används för att stoppa redan startade async-refreshar från ett tidigare
+ * konto innan de hinner skriva kontobundna siffror i ett nytt konto.
+ */
+let activeAccountAuthority: string | null = null;
+
+/**
+ * Fail-closed: rollen måste tillhöra exakt den inloggade användaren och vara
+ * den kanoniska jobbsökarrollen. En kvarhängande roll från konto A får aldrig
+ * skapa lyssnare för konto B.
+ */
+export const isOwnedJobSeekerRole = (
+  currentUser: { id: string } | null | undefined,
+  role: { user_id?: string; role?: UserRole | string } | null | undefined
+): boolean => {
+  if (!currentUser?.id) return false;
+  if (!role) return false;
+  if (role.user_id !== currentUser.id) return false;
+  return role.role === 'job_seeker';
+};
+
 export const canRefreshEmployerStats = (
   currentUser: { id: string } | null | undefined,
   role: { user_id?: string; role?: UserRole | string } | null | undefined
@@ -208,6 +230,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
+
+  // 🔒 KONTOAUKTORITET: sätts synkront före övriga effekter i samma commit, så
+  // att refreshar som startades av ett tidigare konto kan känna igen att de
+  // inte längre äger vyn.
+  useLayoutEffect(() => {
+    activeAccountAuthority = user?.id ?? null;
+    return () => {
+      if (activeAccountAuthority === (user?.id ?? null)) activeAccountAuthority = null;
+    };
+  }, [user?.id]);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
