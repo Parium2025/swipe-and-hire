@@ -25,8 +25,12 @@ const makeDeferred = <T,>(): Deferred<T> => {
 const h = vi.hoisted(() => ({
   gps: null as Deferred<{ lat: number; lon: number } | null> | null,
   weather: null as Deferred<unknown> | null,
+  serverIp: null as Deferred<{ lat: number; lon: number; city?: string } | null> | null,
+  cachedLocation: null as { lat: number; lon: number; city: string; source: string; timestamp: number } | null,
+  cachedWeather: null as { temperature: number; timestamp: number } | null,
   setLocation: vi.fn(),
   setWeather: vi.fn(),
+  ipFallbackCalled: vi.fn(() => Promise.resolve(null as { lat: number; lon: number } | null)),
 }));
 
 vi.mock('@/hooks/useBackgroundLocation', () => ({ useBackgroundLocation: () => ({}) }));
@@ -40,12 +44,12 @@ vi.mock('@/lib/weatherApi', async () => {
   const actual = await vi.importActual<typeof import('@/lib/weatherApi')>('@/lib/weatherApi');
   return {
     ...actual,
-    getCachedLocation: () => null,
-    getCachedWeather: () => null,
+    getCachedLocation: () => h.cachedLocation,
+    getCachedWeather: () => h.cachedWeather,
     setCachedLocation: (...args: unknown[]) => h.setLocation(...args),
     setCachedWeather: (...args: unknown[]) => h.setWeather(...args),
-    getServerSideIPLocation: async () => null,
-    getLocationByIP: async () => null,
+    getServerSideIPLocation: async () => (h.serverIp ? await h.serverIp.promise : null),
+    getLocationByIP: () => h.ipFallbackCalled(),
     fetchCurrentWeather: async () => {
       if (h.weather) await h.weather.promise;
       return {
