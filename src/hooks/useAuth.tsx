@@ -41,11 +41,12 @@ interface UserRoleData {
  * att rollen är exakt det kanoniska employer-värdet. Okänd/ooupplöst nekas.
  */
 /**
- * Modulglobal kontoauktoritet: vilket konto som just nu äger AuthProvider.
- * Används för att stoppa redan startade async-refreshar från ett tidigare
- * konto innan de hinner skriva kontobundna siffror i ett nytt konto.
+ * Kontoauktoriteten är provider-lokal och generationsbaserad
+ * (@/lib/accountAuthority). En modulglobal user-id-sträng kunde inte skilja på
+ * A → utloggning → samma A eller på en avmonterad provider vars svar landar
+ * efter att en ny provider med samma id monterats.
  */
-let activeAccountAuthority: string | null = null;
+
 
 // Kontobundna rollkontroller bor i @/lib/roleOwnership och re-exporteras här
 // för bakåtkompatibilitet med befintliga konsumenter/tester.
