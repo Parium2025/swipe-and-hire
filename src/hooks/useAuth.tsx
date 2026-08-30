@@ -2531,16 +2531,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (jobRefreshTimer) clearTimeout(jobRefreshTimer);
       if (employerAppsTimer) clearTimeout(employerAppsTimer);
 
+      // Jobbsökarlyssnare: gör kvarvarande callbacks inerta och stoppa timern
+      jobSeekerListenersActive = false;
+      if (jobSeekerCountsTimer) clearTimeout(jobSeekerCountsTimer);
+
       // Remove only channels that were actually created
       if (jobChannel) supabase.removeChannel(jobChannel);
-      supabase.removeChannel(savedChannel);
-      supabase.removeChannel(applicationsChannel);
+      if (savedChannel) supabase.removeChannel(savedChannel);
+      if (applicationsChannel) supabase.removeChannel(applicationsChannel);
       if (employerApplicationsChannel) supabase.removeChannel(employerApplicationsChannel);
       // (messagesChannel borttagen — se kommentar ovan om skalningsoptimering)
       if (reviewsChannel) supabase.removeChannel(reviewsChannel);
       if (myCandidatesChannel) supabase.removeChannel(myCandidatesChannel);
     };
-  }, [user, userRole?.role, refreshSidebarCounts, refreshEmployerStats]);
+  }, [user, userRole?.role, refreshSidebarCounts, refreshEmployerStats, queryClient]);
+
 
   const value: AuthContextType = {
     user,
