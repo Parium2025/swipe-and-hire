@@ -105,7 +105,7 @@ describe('useJobSeekerBackgroundSync realtime fan-out', () => {
     vi.clearAllMocks();
   });
 
-  it('registrerar ZERO conversation_messages-prenumerationer men behåller saved_jobs och job_applications utan interviews', async () => {
+  it('registrerar ZERO realtime för conversation_messages, saved_jobs, job_applications och interviews', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
@@ -133,10 +133,10 @@ describe('useJobSeekerBackgroundSync realtime fan-out', () => {
     expect(conversationMessageRegs).toHaveLength(0);
 
     // De användarfiltrerade kanalerna ska fortfarande finnas kvar.
-    expect(savedJobsRegs).toHaveLength(1);
-    expect(savedJobsRegs[0].filter).toBe('user_id=eq.job-seeker-user-123');
-    expect(applicationsRegs).toHaveLength(1);
-    expect(applicationsRegs[0].filter).toBe('applicant_id=eq.job-seeker-user-123');
+    // Ägarskap: AuthProvider äger de användarfiltrerade saved/app-lyssnarna
+    // globalt. BackgroundSync får inte duplicera dem.
+    expect(savedJobsRegs).toHaveLength(0);
+    expect(applicationsRegs).toHaveLength(0);
     // Kanonisk realtime-ägare för intervjuer är useCandidateInterviews
     // (src/hooks/useInterviews.ts) — ingen intervju-subscription här.
     expect(interviewsRegs).toHaveLength(0);

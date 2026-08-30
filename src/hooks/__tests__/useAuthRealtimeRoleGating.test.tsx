@@ -283,6 +283,10 @@ describe('AuthProvider realtime role gating', () => {
     expect(h.channelNames).toContain(`auth-employer-applications-${h.userId}`);
     expect(h.channelNames).toContain(`auth-reviews-${h.userId}`);
     expect(h.channelNames).toContain(`auth-my-candidates-${h.userId}`);
+
+    // Jobbsökarens saved/app-kanaler ägs bara av job_seeker-rollen.
+    expect(h.channelNames).not.toContain(`auth-saved-jobs-${h.userId}`);
+    expect(h.channelNames).not.toContain(`auth-applications-${h.userId}`);
   });
 
   it('jobseeker: auth-applications has exactly one job_applications registration, user-filtered', async () => {
