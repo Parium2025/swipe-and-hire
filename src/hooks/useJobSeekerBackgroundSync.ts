@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
+import { useAuth, isOwnedJobSeekerRole } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { preloadWeatherLocation } from './useWeather';
@@ -9,6 +9,10 @@ import { getCachedWeather } from '@/lib/weatherApi';
 
 const AVAILABLE_JOBS_CACHE_KEY = 'job_seeker_available_jobs_';
 const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min (optimal for weather)
+// 🔒 SKALA: warmup av annonslistan får inte köras vid varje tabbfokus. Med
+// 250 000 klienter blir varje fokusvåg en herd mot job_postings. Cachen anses
+// färsk i 5 minuter; endast en explicit trigger (login/manuell) forcerar.
+const AVAILABLE_JOBS_CACHE_MAX_AGE = 5 * 60 * 1000;
 
 /**
  * 🚀 JOB SEEKER BACKGROUND SYNC ENGINE (warmup only)
@@ -50,8 +54,10 @@ export const useJobSeekerBackgroundSync = () => {
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
 
-  // Endast för jobbsökare
-  const isJobSeeker = userRole?.role === 'job_seeker';
+  // Endast för jobbsökare — och endast när rollen bevisligen tillhör exakt den
+  // inloggade användaren (en kvarhängande roll från konto A får inte köra
+  // warmup för konto B).
+  const isJobSeeker = isOwnedJobSeekerRole(user, userRole);
 
   // 🌤️ Validera väder-cache
   const isWeatherCacheValid = useCallback((): boolean => {
@@ -79,9 +85,30 @@ export const useJobSeekerBackgroundSync = () => {
     }
   }, [isWeatherCacheValid]);
 
+  // 🏢 Är den cachade annonslistan färsk nog att hoppa över hämtningen?
+  // Exception-safe: trasig/blockerad storage betyder "inte färsk".
+  const isAvailableJobsCacheFresh = useCallback((): boolean => {
+    try {
+      const raw = localStorage.getItem(AVAILABLE_JOBS_CACHE_KEY);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw) as { items?: unknown; timestamp?: unknown };
+      if (!parsed || !Array.isArray(parsed.items) || typeof parsed.timestamp !== 'number') {
+        return false;
+      }
+      const age = Date.now() - parsed.timestamp;
+      return age >= 0 && age < AVAILABLE_JOBS_CACHE_MAX_AGE;
+    } catch {
+      return false;
+    }
+  }, []);
+
   // 🏢 Preload lediga jobb (enda datalistan denna hook äger)
-  const preloadAvailableJobs = useCallback(async () => {
+  const preloadAvailableJobs = useCallback(async (force = false) => {
     const cacheKey = AVAILABLE_JOBS_CACHE_KEY;
+
+    if (!force && isAvailableJobsCacheFresh()) {
+      return; // Färsk cache — ingen onödig read.
+    }
 
     const { data, error } = await supabase
       .from('job_postings')
@@ -118,7 +145,7 @@ export const useJobSeekerBackgroundSync = () => {
       // Uppdatera React Query cache
       queryClient.setQueryData(['available-jobs'], data);
     }
-  }, [queryClient]);
+  }, [queryClient, isAvailableJobsCacheFresh]);
 
   // 🚀 HUVUDFUNKTION: warmup av lediga jobb + väder
   // Uses requestIdleCallback to avoid blocking CSS transitions (sidebar, navigation)
@@ -138,11 +165,14 @@ export const useJobSeekerBackgroundSync = () => {
 
     try {
       await Promise.all([
-        preloadAvailableJobs(),
+        preloadAvailableJobs(force),
         preloadWeatherIfStale(),
       ]);
 
       hasPreloadedRef.current = true;
+      // Tidsstämpel för senaste warmup-försöket (annonslista + väder).
+      // Det är INTE en full datasynk — saved/apps/meddelanden/intervjuer ägs
+      // av sina egna hookar.
       updateLastSyncTime();
     } catch (error) {
       console.warn('[JobSeekerSync] Preload failed:', error);
@@ -182,10 +212,11 @@ export const useJobSeekerBackgroundSync = () => {
     schedulePreload();
 
     // Tab-focus: sync when user returns, but deferred
+    // Tabbfokus forcerar INTE längre: cache-färskheten avgör om en read behövs.
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         hasPreloadedRef.current = false;
-        schedulePreload(true);
+        schedulePreload();
       }
     };
 
