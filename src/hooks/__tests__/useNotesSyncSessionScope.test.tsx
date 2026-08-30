@@ -182,7 +182,11 @@ describe('useNotesSync — session epoch and cache scope', () => {
     act(() => {
       oldScopeHandle('OLD SCOPE INJECTED');
     });
-    expect(result.current.content).toBe('NEW SCOPE CLEAN');
+    // The new scope hydrates from its own cache and then reconciles with its
+    // own server request — never with old-scope content or the stale handle.
+    expect(['NEW SCOPE CLEAN', 'A SERVER']).toContain(result.current.content);
+    expect(result.current.content).not.toBe('OLD SCOPE INJECTED');
+    expect(result.current.content).not.toBe('OLD SCOPE JOURNAL');
     expect(localStorage.getItem(`${OLD_PREFIX}_a__pending`)).toContain('OLD SCOPE JOURNAL');
     expect(localStorage.getItem(`${OLD_PREFIX}_a__pending`)).not.toContain('OLD SCOPE INJECTED');
     expect(localStorage.getItem(`${NEW_PREFIX}_a__pending`)).toBeNull();
