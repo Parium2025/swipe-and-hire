@@ -312,8 +312,12 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Fetch existing note. The metadata is bound to THIS request's result, so a
   // late result from another account/request can never describe another one.
+  // The cache scope is part of the query identity: a same-user cachePrefix
+  // change is a real scope transition and must get its own request/metadata.
+  // Invalidations using the [queryKey, user] prefix still match.
   const { data: queryPayload, isFetched, isSuccess } = useQuery({
-    queryKey: [queryKey, userId],
+    queryKey: [queryKey, userId, cachePrefix],
+
     queryFn: async (): Promise<NoteQueryPayload> => {
       const capturedEpoch = epochRef.current;
       const capturedUser = userId;
