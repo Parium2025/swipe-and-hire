@@ -1,14 +1,12 @@
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { WifiOff, Loader2, Check } from 'lucide-react';
+import { WifiOff, Loader2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { getLatestDraftTime } from '@/lib/draftUtils';
-import { forceConnectivityCheck } from '@/lib/connectivityManager';
 
 export const OfflineIndicator = () => {
   const isOnline = useOnlineStatus();
   const [showReconnecting, setShowReconnecting] = useState(false);
-  const [secondsOffline, setSecondsOffline] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const [draftTime, setDraftTime] = useState<string | null>(null);
@@ -46,7 +44,6 @@ export const OfflineIndicator = () => {
       // Vänta på animation innan vi tar bort från DOM
       const timer = setTimeout(() => {
         setShouldRender(false);
-        setSecondsOffline(0);
         setShowReconnecting(false);
         setDraftTime(null);
       }, 300);
@@ -62,24 +59,17 @@ export const OfflineIndicator = () => {
     };
   }, [isOnline]);
 
-  // Räkna sekunder offline och visa "Återansluter..." efter 10 sekunder
+  // Ren UI-timer: visa "Återansluter..." efter 10 sekunder offline.
+  // connectivityManager äger ensam nätverkskontrollerna — komponenten
+  // triggar aldrig några egna nätverksanrop.
   useEffect(() => {
     if (!isOnline) {
-      void forceConnectivityCheck();
-
-      const timer = setInterval(() => {
-        void forceConnectivityCheck();
-
-        setSecondsOffline(prev => {
-          const newVal = prev + 1;
-          if (newVal >= 10) {
-            setShowReconnecting(true);
-          }
-          return newVal;
-        });
-      }, 1000);
-      
-      return () => clearInterval(timer);
+      // Varje ny offlineperiod börjar om utan gammalt reconnecting-läge
+      setShowReconnecting(false);
+      const timer = setTimeout(() => {
+        setShowReconnecting(true);
+      }, 10000);
+      return () => clearTimeout(timer);
     }
   }, [isOnline]);
 
