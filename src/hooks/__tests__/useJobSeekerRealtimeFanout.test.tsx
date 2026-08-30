@@ -32,7 +32,11 @@ vi.mock('@/lib/realtimeChannel', () => ({
     const channel: MockChannel = {
       name,
       on: (_event: string, opts: Record<string, unknown>) => {
-        registrations.push({ table: String(opts?.table ?? ''), filter: String(opts?.filter ?? '') });
+        registrations.push({
+          table: String(opts?.table ?? ''),
+          filter: String(opts?.filter ?? ''),
+          event: String(opts?.event ?? ''),
+        });
         return channel;
       },
       subscribe: () => channel,
