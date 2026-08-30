@@ -136,4 +136,52 @@ describe('preloadWeatherLocation — kontovakt före cache-skrivningar', () => {
     expect(h.setLocation).toHaveBeenCalled();
     expect(h.setWeather).toHaveBeenCalledTimes(1);
   });
+
+  it('RED: befintlig cache med framtida tidsstämplar får INTE returnera direkt — guarded refresh krävs', async () => {
+    const future = Date.now() + 60_000;
+    h.cachedLocation = { lat: 59.33, lon: 18.07, city: 'Stockholm', source: 'gps', timestamp: future };
+    h.cachedWeather = { temperature: 5, timestamp: future };
+    h.gps = makeDeferred<{ lat: number; lon: number } | null>();
+
+    const run = preloadWeatherLocation({ isCurrent: () => true });
+    await tick();
+
+    // Framtida tidsstämplar är ogiltiga — funktionen ska ha gått vidare till refresh
+    expect(h.gps).not.toBeNull();
+    h.gps.resolve(null);
+    await run;
+    await tick();
+
+    // Refresh måste ha skett (väder hämtas på nytt) trots "färsk" cache
+    expect(h.setWeather).toHaveBeenCalled();
+  });
+
+  it('RED: giltiga (icke-framtida) färska tidsstämplar returnerar fortfarande direkt', async () => {
+    const now = Date.now();
+    h.cachedLocation = { lat: 59.33, lon: 18.07, city: 'Stockholm', source: 'gps', timestamp: now - 1000 };
+    h.cachedWeather = { temperature: 5, timestamp: now - 1000 };
+
+    const result = await preloadWeatherLocation({ isCurrent: () => true });
+
+    expect(result?.city).toBe('Stockholm');
+    expect(h.setLocation).not.toHaveBeenCalled();
+    expect(h.setWeather).not.toHaveBeenCalled();
+  });
+
+  it('RED: ägarbyte efter första IP-awaitet stoppar det andra nätverksanropet och alla skrivningar', async () => {
+    let current = 'A';
+    h.serverIp = makeDeferred<{ lat: number; lon: number; city?: string } | null>();
+
+    const run = preloadWeatherLocation({ isCurrent: () => current === 'A' });
+    await tick();
+
+    current = 'B'; // kontobyte medan server-side IP är i flykt
+    h.serverIp.resolve(null);
+    await run;
+    await tick();
+
+    expect(h.ipFallbackCalled).not.toHaveBeenCalled();
+    expect(h.setLocation).not.toHaveBeenCalled();
+    expect(h.setWeather).not.toHaveBeenCalled();
+  });
 });
