@@ -221,8 +221,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       }
     }
     contentRef.current = next;
-    setContent(next);
-  }, [userId, cachePrefix, setContent]);
+    setContentState({ owner: userId, value: next });
+  }, [userId, cachePrefix]);
 
   // Hydrated pending must enter the normal debounced drain on its own — it may
   // never wait for another edit or a connectivity event.
@@ -234,18 +234,23 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // Cross-tab sync via localStorage events (clean snapshot only, never while dirty)
   useEffect(() => {
     if (typeof window === 'undefined' || !userId || !cacheKey) return;
+    // The owner/epoch this listener belongs to. A late event delivered after an
+    // account transition is rejected instead of relabelled.
+    const subUser = userId;
+    const subEpoch = epochRef.current;
     const onStorage = (e: StorageEvent) => {
+      if (subUser !== committedUserRef.current || subEpoch !== epochRef.current) return;
       if (e.key === cacheKey && typeof e.newValue === 'string') {
         if (!hasLocalEditsRef.current) {
           contentRef.current = e.newValue;
           serverContentRef.current = e.newValue;
-          setContent(e.newValue);
+          commitContent(subUser, subEpoch, e.newValue);
         }
       }
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, [cacheKey, userId, setContent]);
+  }, [cacheKey, userId, commitContent]);
 
   // Fetch existing note. The metadata is bound to THIS request's result, so a
   // late result from another account/request can never describe another one.
