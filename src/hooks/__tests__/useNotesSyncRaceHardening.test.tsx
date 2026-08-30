@@ -192,7 +192,6 @@ describe('useNotesSync — race hardening', () => {
       if (k === pendingKey('u1')) order.push('pending-removed');
       realRem(k);
     });
-    remSpy.mockRestore();
 
     const { result } = renderNotes();
     act(() => { result.current.handleChange('X'); });
