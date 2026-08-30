@@ -59,7 +59,7 @@ const getLocationLabel = (type: LocationType) => {
   }
 };
 
-export const JobSeekerInterviewsCard = memo(({ interviews, isLoading }: JobSeekerInterviewsCardProps) => {
+export const JobSeekerInterviewsCard = memo(({ interviews, isLoading, isError = false, onRetry }: JobSeekerInterviewsCardProps) => {
   const navigate = useNavigate();
   const now = useMinuteTick();
 
