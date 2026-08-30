@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useLayoutEffect, useRef, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { canRefreshEmployerStats, isOwnedJobSeekerRole } from '@/lib/roleOwnership';
 import { createAccountAuthority } from '@/lib/accountAuthority';
