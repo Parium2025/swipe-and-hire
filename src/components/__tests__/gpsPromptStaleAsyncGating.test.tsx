@@ -93,6 +93,8 @@ describe('GpsPrompt: asynkrona fortsättningar efter inaktivering är döda', ()
     await act(async () => { await Promise.resolve(); await Promise.resolve(); });
     expect(checkGpsPermission).toHaveBeenCalledTimes(1);
     await act(async () => { vi.advanceTimersByTime(11_000); await Promise.resolve(); await Promise.resolve(); });
+    const miniAgain = screen.queryByRole('button', { name: 'Visa platsinformation' });
+    if (miniAgain) fireEvent.click(miniAgain);
     expect(document.body.textContent).toContain('Aktivera plats');
   });
 
@@ -119,6 +121,8 @@ describe('GpsPrompt: asynkrona fortsättningar efter inaktivering är döda', ()
     await act(async () => { await Promise.resolve(); await Promise.resolve(); });
     expect(checkGpsPermission).toHaveBeenCalledTimes(1);
     await act(async () => { vi.advanceTimersByTime(11_000); await Promise.resolve(); await Promise.resolve(); });
+    const miniAgain = screen.queryByRole('button', { name: 'Visa platsinformation' });
+    if (miniAgain) fireEvent.click(miniAgain);
     expect(document.body.textContent).toContain('Aktivera plats');
   });
 
@@ -146,6 +150,8 @@ describe('GpsPrompt: asynkrona fortsättningar efter inaktivering är döda', ()
     await act(async () => { await Promise.resolve(); await Promise.resolve(); });
     await act(async () => { vi.advanceTimersByTime(11_000); await Promise.resolve(); await Promise.resolve(); });
     expect(screen.queryByTestId('gps-help')).toBeNull();
+    const miniAgain = screen.queryByRole('button', { name: 'Visa platsinformation' });
+    if (miniAgain) fireEvent.click(miniAgain);
     expect(document.body.textContent).toContain('Aktivera plats');
     expect(document.body.textContent).not.toContain('Plats är blockerad');
   });
