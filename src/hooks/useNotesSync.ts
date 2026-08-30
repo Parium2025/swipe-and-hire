@@ -126,6 +126,24 @@ function peekScoped(cachePrefix: string, userId: string): string {
   return storageGet(`${cachePrefix}_${userId}`) ?? '';
 }
 
+/** Immutable config for one committed (owner + cache scope + epoch) session. */
+function makeSaveConfig(owner: string | null, cachePrefix: string, epoch: number): SaveConfig | null {
+  return owner
+    ? {
+        owner,
+        epoch,
+        cacheKey: `${cachePrefix}_${owner}`,
+        pendingKey: `${cachePrefix}_${owner}__pending`,
+      }
+    : null;
+}
+
+/** Scope identity: owner AND cache scope. A change in either is a transition. */
+function scopeIdentity(cachePrefix: string, userId: string | null): string {
+  return `${cachePrefix}\u0000${userId ?? ''}`;
+}
+
+
 
 export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseNotesSyncOptions): NotesSyncResult {
   const { user } = useAuth();
