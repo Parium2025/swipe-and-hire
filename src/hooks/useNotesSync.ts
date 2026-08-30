@@ -102,6 +102,23 @@ function writePending(pendingKey: string, userId: string, content: string): bool
   }
 }
 
+/** Pure, side-effect free scoped read used to mask the identity-transition render. */
+function peekScoped(cachePrefix: string, userId: string): string {
+  const raw = storageGet(`${cachePrefix}_${userId}__pending`);
+  if (raw !== null) {
+    try {
+      const parsed = JSON.parse(raw) as PendingEnvelope;
+      if (parsed && parsed.v === PENDING_VERSION && parsed.u === userId && typeof parsed.c === 'string') {
+        return parsed.c;
+      }
+    } catch {
+      /* fall through to the clean snapshot */
+    }
+  }
+  return storageGet(`${cachePrefix}_${userId}`) ?? '';
+}
+
+
 export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseNotesSyncOptions): NotesSyncResult {
   const { user } = useAuth();
   const queryClient = useQueryClient();
