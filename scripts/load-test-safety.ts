@@ -80,3 +80,25 @@ export function assertLoadTestTargetAllowed(input: LoadTestTargetCheck): LoadTes
 
   return { origin: actualOrigin, isProduction: production };
 }
+
+export type LoadTestEnv = Record<string, string | undefined>;
+
+/**
+ * Resolves which Supabase URL/anon key the load test will actually use.
+ * Explicit runtime variables (SUPABASE_URL / SUPABASE_ANON_KEY) always win
+ * over the VITE_* build-time fallbacks, so a staging run following the docs
+ * cannot silently inherit production VITE_ values from .env.
+ */
+export function resolveLoadTestConnection(environment: LoadTestEnv): { url: string; anonKey: string } {
+  const pick = (...names: string[]): string => {
+    for (const name of names) {
+      const value = (environment[name] ?? '').trim();
+      if (value) return value;
+    }
+    return '';
+  };
+  return {
+    url: pick('SUPABASE_URL', 'VITE_SUPABASE_URL'),
+    anonKey: pick('SUPABASE_ANON_KEY', 'VITE_SUPABASE_PUBLISHABLE_KEY', 'VITE_SUPABASE_ANON_KEY'),
+  };
+}

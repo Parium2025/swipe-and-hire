@@ -2,7 +2,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
-import { assertLoadTestTargetAllowed } from './load-test-safety';
+import { assertLoadTestTargetAllowed, resolveLoadTestConnection } from './load-test-safety';
 
 type ScenarioName = 'search' | 'match' | 'chat';
 type Outcome = 'ok' | 'error' | 'skipped';
@@ -33,8 +33,11 @@ type VirtualUserContext = {
 const envFile = readEnvFile('.env');
 const env = (name: string, fallback = '') => process.env[name] || envFile[name] || fallback;
 
-const SUPABASE_URL = env('VITE_SUPABASE_URL') || env('SUPABASE_URL');
-const SUPABASE_ANON_KEY = env('VITE_SUPABASE_PUBLISHABLE_KEY') || env('VITE_SUPABASE_ANON_KEY') || env('SUPABASE_ANON_KEY');
+// Explicit SUPABASE_URL / SUPABASE_ANON_KEY always win over VITE_* fallbacks,
+// so staging runs cannot silently inherit production VITE_ values from .env.
+const connection = resolveLoadTestConnection({ ...envFile, ...process.env });
+const SUPABASE_URL = connection.url;
+const SUPABASE_ANON_KEY = connection.anonKey;
 const EXPECTED_SUPABASE_URL = env('PARIUM_LOAD_TEST_EXPECTED_SUPABASE_URL');
 const ALLOW_PRODUCTION = env('PARIUM_LOAD_TEST_ALLOW_PRODUCTION') === 'true';
 const ENABLE_WRITES = env('PARIUM_LOAD_TEST_ENABLE_WRITES') === 'true';
