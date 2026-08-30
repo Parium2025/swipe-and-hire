@@ -118,8 +118,8 @@ describe('useNotesSync — identity transition leakage', () => {
   });
 
   it('never exposes A content/status to B during an A -> B switch', async () => {
-    localStorage.setItem(`${PREFIX}_user-a`, 'A CONTENT');
-    mockUser = { id: 'user-a' };
+    localStorage.setItem(`${PREFIX}_a`, 'A CONTENT');
+    mockUser = { id: 'a' };
 
     const { result, rerender, history } = renderWithHistory();
     await waitFor(() => expect(result.current.content).toBe('A SERVER'));
@@ -131,14 +131,14 @@ describe('useNotesSync — identity transition leakage', () => {
     await waitFor(() => expect(result.current.saveFailed || !result.current.saveFailed).toBe(true));
 
     history.length = 0;
-    mockUser = { id: 'user-b' };
+    mockUser = { id: 'b' };
     rerender();
 
     await waitFor(() => expect(result.current.content).toBe('B SERVER'));
 
-    for (const snap of history.filter((s) => s.user === 'user-b')) {
+    for (const snap of history.filter((s) => s.user === 'b')) {
       expect(snap.content).not.toContain('A ');
-      expect(snap.noteId).not.toBe('row-user-a');
+      expect(snap.noteId).not.toBe('row-a');
       expect(snap.isSaving).toBe(false);
       expect(snap.saveFailed).toBe(false);
       expect(snap.lastSaved).toBeNull();
@@ -146,8 +146,8 @@ describe('useNotesSync — identity transition leakage', () => {
   });
 
   it('never exposes A content/status after logout (A -> null)', async () => {
-    localStorage.setItem(`${PREFIX}_user-a`, 'A CONTENT');
-    mockUser = { id: 'user-a' };
+    localStorage.setItem(`${PREFIX}_a`, 'A CONTENT');
+    mockUser = { id: 'a' };
 
     const { result, rerender, history } = renderWithHistory();
     await waitFor(() => expect(result.current.content).toBe('A SERVER'));
