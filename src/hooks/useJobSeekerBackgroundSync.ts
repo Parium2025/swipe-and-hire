@@ -135,7 +135,7 @@ export const useJobSeekerBackgroundSync = () => {
       }
     }
 
-    console.log('DBG netstart', ownerId, force);
+    console.log('DBG netstart', ownerId, force, Date.now()%100000);
     const { data, error } = await supabase
       .from('job_postings')
       .select(`
@@ -248,6 +248,7 @@ export const useJobSeekerBackgroundSync = () => {
   // 🖱️ AKTIVITETS-TRIGGERS (OPTIMERAD FÖR TOUCH/SVAGT INTERNET)
   useEffect(() => {
     if (!user || !isJobSeeker) return;
+    console.log('DBG trigger-effect', user.id, Date.now()%100000);
 
     // 🚀 Deferred: Preload data when browser is idle (not during initial paint)
     schedulePreload();
