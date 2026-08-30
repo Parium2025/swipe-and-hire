@@ -214,14 +214,32 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // Account transition (null->uid, A->B, uid->null): reset all account-local
   // state and hydrate ONLY the new user's pending/clean caches.
   const previousUserIdRef = useRef<string | null | undefined>(undefined);
+  /** Builds the immutable config for the identity/epoch that is now committed. */
+  const installSaveConfig = useCallback(
+    (owner: string | null) => {
+      saveConfigRef.current = owner
+        ? {
+            owner,
+            epoch: epochRef.current,
+            cacheKey: `${cachePrefix}_${owner}`,
+            pendingKey: `${cachePrefix}_${owner}__pending`,
+          }
+        : null;
+    },
+    [cachePrefix]
+  );
   useLayoutEffect(() => {
     if (previousUserIdRef.current === userId) return;
     const isFirst = previousUserIdRef.current === undefined;
     previousUserIdRef.current = userId;
-    if (isFirst) return; // lazy initializer already hydrated
+    if (isFirst) {
+      installSaveConfig(userId); // lazy initializer already hydrated the content
+      return;
+    }
 
     epochRef.current += 1;
     committedUserRef.current = userId;
+    installSaveConfig(userId);
     localRevRef.current += 1;
     ackSeqRef.current += 1;
     accessTokenRef.current = null;
