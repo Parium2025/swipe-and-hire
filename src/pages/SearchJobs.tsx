@@ -380,6 +380,12 @@ const SearchJobs = memo(() => {
   }, [timeFilter]);
 
   // Use the new optimized job search hook with full-text search
+  // 🔥 SCALE: Search hålls monterad av KeepAlive även när användaren är tillbaka
+  // på Home. Realtime får bara vara aktiv medan Search faktiskt visas.
+  const searchLocation = useLocation();
+  const isSearchRouteActive =
+    searchLocation.pathname === '/search-jobs' || searchLocation.pathname === '/index';
+
   const { jobs: searchJobs, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useOptimizedJobSearch({
     searchQuery: debouncedSearch,
     city: selectedCity,
@@ -392,6 +398,7 @@ const SearchJobs = memo(() => {
     // de sidor som råkar vara laddade.
     sort: sortBy,
     enabled: true,
+    realtimeEnabled: isSearchRouteActive,
   });
 
   // 🔥 Live-sync: platsfiltret speglar sökrutan i realtid.
