@@ -181,6 +181,12 @@ interface UseOptimizedJobSearchOptions {
   category: string;
   subcategories: string[];
   enabled?: boolean;
+  /**
+   * 🔥 SCALE: Route-scopad realtime. När Search hålls monterad av KeepAlive men
+   * är dold (t.ex. användaren är tillbaka på Home) ska inga job_postings-kanaler
+   * vara aktiva. Default true för bakåtkompatibilitet.
+   */
+  realtimeEnabled?: boolean;
   /** 🔥 SCALE: Filtrera på arbetsgivar-ID i DB istället för i klienten. */
   employerIds?: string[];
   /** 🔥 SCALE: ISO-timestamp; jobb skapade efter denna tid filtreras i DB. */
