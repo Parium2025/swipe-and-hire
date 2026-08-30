@@ -29,7 +29,7 @@ vi.mock('@/lib/connectivityManager', () => ({
       connectivityListeners = connectivityListeners.filter((l) => l !== listener);
     };
   },
-  forceConnectivityCheck: (...args: unknown[]) => forceCheckSpy(...args),
+  forceConnectivityCheck: () => forceCheckSpy(),
 }));
 
 vi.mock('@/lib/draftUtils', () => ({
