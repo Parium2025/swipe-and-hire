@@ -225,7 +225,12 @@ const renderAuthProvider = async () => {
   // Wait until the realtime effect for the signed-in user has run
   await waitFor(
     () => {
-      expect(h.channelNames).toContain(`auth-saved-jobs-${h.userId}`);
+      // Jobbsökare får saved/apps-kanaler; arbetsgivare får sina egna.
+      expect(h.channelNames).toContain(
+        h.currentRole === 'employer'
+          ? `auth-reviews-${h.userId}`
+          : `auth-saved-jobs-${h.userId}`
+      );
     },
     { timeout: 5000 }
   );
