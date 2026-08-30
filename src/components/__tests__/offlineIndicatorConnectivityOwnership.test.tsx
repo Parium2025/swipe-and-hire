@@ -60,6 +60,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  intervalSpy.mockRestore();
   cleanup();
   vi.useRealTimers();
 });
@@ -106,9 +107,8 @@ describe('OfflineIndicator — connectivity ownership', () => {
     expect(container.querySelector('.animate-spin')).toBeTruthy();
   });
 
-  it('visar draft-suffix i återanslutningsläget', async () => {
-    const draftUtils = await import('@/lib/draftUtils');
-    vi.mocked(draftUtils.getLatestDraftTime).mockReturnValueOnce('14:32');
+  it('visar draft-suffix i återanslutningsläget', () => {
+    mockDraftTime = '14:32';
     const { getByText } = render(<OfflineIndicator />);
     emitConnectivity(false);
     act(() => { vi.advanceTimersByTime(10000); });
