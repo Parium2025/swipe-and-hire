@@ -214,7 +214,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     }
     contentRef.current = next;
     setContent(next);
-  }, [userId, cachePrefix]);
+  }, [userId, cachePrefix, setContent]);
 
   // Hydrated pending must enter the normal debounced drain on its own — it may
   // never wait for another edit or a connectivity event.
@@ -237,7 +237,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, [cacheKey, userId]);
+  }, [cacheKey, userId, setContent]);
 
   // Fetch existing note. The metadata is bound to THIS request's result, so a
   // late result from another account/request can never describe another one.
@@ -287,7 +287,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       contentRef.current = serverContent;
       setContent(serverContent);
     }
-  }, [serverValueDep, cacheKey, userId]);
+  }, [serverValueDep, cacheKey, userId, setContent]);
 
 
 
@@ -323,7 +323,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, cacheKey, queryClient, table, ownerColumn, queryKey]);
+  }, [userId, cacheKey, queryClient, table, ownerColumn, queryKey, setContent]);
 
   // Save function — always upserts to avoid duplicates
   const saveToDb = useCallback(async (contentToSave: string): Promise<'saved' | 'skipped' | 'failed'> => {
@@ -421,7 +421,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       setSaveFailed(!journaled);
       scheduleSave();
     },
-    [cacheKey, pendingKey, userId, scheduleSave]
+    [cacheKey, pendingKey, userId, scheduleSave, setContent]
   );
 
   // Retry queued save when coming back online
