@@ -2187,7 +2187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
-  }, [user]);
+  }, [user, userRole?.user_id, userRole?.role]);
 
   // Ladda räknare vid inloggning
   useEffect(() => {
